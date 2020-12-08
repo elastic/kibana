@@ -19,14 +19,29 @@
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
-import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
+
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
 import { validateTypes, validateObjects } from './utils';
 
-export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
+interface RouteDependencies {
+  config: SavedObjectConfig;
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerExportRoute = (
+  router: IRouter,
+  { config, coreUsageData }: RouteDependencies
+) => {
   const { maxImportExportSize } = config;
+
+  const referenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
 
   router.post(
     {
@@ -34,6 +49,9 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          hasReference: schema.maybe(
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+          ),
           objects: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -51,7 +69,14 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
+      const {
+        type,
+        hasReference,
+        objects,
+        search,
+        excludeExportDetails,
+        includeReferencesDeep,
+      } = req.body;
       const types = typeof type === 'string' ? [type] : type;
 
       // need to access the registry for type validation, can't use the schema for this
@@ -79,9 +104,16 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
         }
       }
 
+      const { headers } = req;
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient
+        .incrementSavedObjectsExport({ headers, types, supportedTypes })
+        .catch(() => {});
+
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         types,
+        hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
         search,
         objects,
         exportSizeLimit: maxImportExportSize,

@@ -161,6 +161,14 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     </UtilityBarFlexGroup>
   );
 
+  const handleSelectAllAlertsClick = useCallback(() => {
+    if (!showClearSelection) {
+      selectAll();
+    } else {
+      clearSelection();
+    }
+  }, [clearSelection, selectAll, showClearSelection]);
+
   return (
     <>
       <UtilityBar>
@@ -195,14 +203,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 </UtilityBarAction>
 
                 <UtilityBarAction
+                  aria-label="selectAllAlerts"
+                  dataTestSubj="selectAllAlertsButton"
                   iconType={showClearSelection ? 'cross' : 'pagesSelect'}
-                  onClick={() => {
-                    if (!showClearSelection) {
-                      selectAll();
-                    } else {
-                      clearSelection();
-                    }
-                  }}
+                  onClick={handleSelectAllAlertsClick}
                 >
                   {showClearSelection
                     ? i18n.CLEAR_SELECTION

@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './junit_reporter';
-
-export * from './report_path';
+export * from './utils';

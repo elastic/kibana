@@ -6,7 +6,7 @@
 
 import createContainer from 'constate';
 import { useState, useContext } from 'react';
-import { useThrottle } from 'react-use';
+import useThrottle from 'react-use/lib/useThrottle';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';

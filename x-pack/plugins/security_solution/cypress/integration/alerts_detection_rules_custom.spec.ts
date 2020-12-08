@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newRule, existingRule, indexPatterns, editedRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
@@ -38,6 +39,7 @@ import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
   SEVERITY_DROPDOWN,
+  TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
 } from '../screens/create_new_rule';
 import {
@@ -49,6 +51,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -103,11 +106,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newRule.referenceUrls.join('');
 const expectedFalsePositives = newRule.falsePositivesExamples.join('');
 const expectedTags = newRule.tags.join('');
-const expectedMitre = newRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =
@@ -174,9 +173,13 @@ describe('Custom detection rules creation', () => {
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', newRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
@@ -219,7 +222,7 @@ describe('Custom detection rules deletion and edition', () => {
     goToManageAlertsDetectionRules();
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('custom_rules');
   });
 
@@ -322,6 +325,7 @@ describe('Custom detection rules deletion and edition', () => {
       cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
 
       goToAboutStepTab();
+      cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(editedRule);
       saveEditedRule();
 

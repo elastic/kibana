@@ -23,7 +23,7 @@ import {
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
-import { ConnectorTypes, ESCaseConnector } from '../../../common/api';
+import { ConnectorTypes, ESCaseConnector, CommentType, CaseStatuses } from '../../../common/api';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {
@@ -57,7 +57,7 @@ describe('Utils', () => {
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -80,7 +80,7 @@ describe('Utils', () => {
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -106,7 +106,7 @@ describe('Utils', () => {
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -117,6 +117,7 @@ describe('Utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -126,6 +127,7 @@ describe('Utils', () => {
       const res = transformNewComment(comment);
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         pushed_at: null,
@@ -138,6 +140,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -145,6 +148,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         pushed_at: null,
@@ -157,6 +161,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -167,6 +172,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         pushed_at: null,
@@ -241,6 +247,7 @@ describe('Utils', () => {
         },
         2,
         2,
+        2,
         extraCaseData
       );
       expect(res).toEqual({
@@ -253,6 +260,7 @@ describe('Utils', () => {
         ),
         count_open_cases: 2,
         count_closed_cases: 2,
+        count_in_progress_cases: 2,
       });
     });
   });
@@ -283,7 +291,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -322,7 +330,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -368,7 +376,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -478,7 +486,7 @@ describe('Utils', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: '2019-11-25T21:54:48.952Z',
         updated_by: {

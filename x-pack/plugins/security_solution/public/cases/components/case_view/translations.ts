@@ -128,14 +128,6 @@ export const COMMENT = i18n.translate('xpack.securitySolution.case.caseView.comm
   defaultMessage: 'comment',
 });
 
-export const CASE_OPENED = i18n.translate('xpack.securitySolution.case.caseView.caseOpened', {
-  defaultMessage: 'Case opened',
-});
-
-export const CASE_CLOSED = i18n.translate('xpack.securitySolution.case.caseView.caseClosed', {
-  defaultMessage: 'Case closed',
-});
-
 export const CASE_REFRESH = i18n.translate('xpack.securitySolution.case.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
@@ -151,10 +143,6 @@ export const EMAIL_BODY = (caseUrl: string) =>
     values: { caseUrl },
     defaultMessage: 'Case reference: {caseUrl}',
   });
-
-export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
-  defaultMessage: 'Unknown',
-});
 
 export const CHANGED_CONNECTOR_FIELD = i18n.translate(
   'xpack.securitySolution.case.caseView.fieldChanged',

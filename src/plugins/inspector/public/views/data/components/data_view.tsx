@@ -35,32 +35,36 @@ import { Adapters } from '../../../../common';
 import {
   TabularLoaderOptions,
   TabularData,
-  TabularCallback,
+  TabularHolder,
 } from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
+import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
 
 interface DataViewComponentState {
   tabularData: TabularData | null;
   tabularOptions: TabularLoaderOptions;
   adapters: Adapters;
-  tabularPromise: TabularCallback | null;
+  tabularPromise: Promise<TabularHolder> | null;
 }
 
 interface DataViewComponentProps extends InspectorViewProps {
-  uiSettings: IUiSettingsClient;
+  kibana: KibanaReactContextValue<{ uiSettings: IUiSettingsClient }>;
 }
 
-export class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
+class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
   static propTypes = {
-    uiSettings: PropTypes.object.isRequired,
     adapters: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
+    kibana: PropTypes.object,
   };
 
   state = {} as DataViewComponentState;
   _isMounted = false;
 
-  static getDerivedStateFromProps(nextProps: InspectorViewProps, state: DataViewComponentState) {
+  static getDerivedStateFromProps(
+    nextProps: DataViewComponentProps,
+    state: DataViewComponentState
+  ) {
     if (state && nextProps.adapters === state.adapters) {
       return null;
     }
@@ -69,7 +73,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
       adapters: nextProps.adapters,
       tabularData: null,
       tabularOptions: {},
-      tabularPromise: nextProps.adapters.data.getTabular(),
+      tabularPromise: nextProps.adapters.data!.getTabular(),
     };
   }
 
@@ -78,7 +82,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
       this.setState({
         tabularData: null,
         tabularOptions: {},
-        tabularPromise: this.props.adapters.data.getTabular(),
+        tabularPromise: this.props.adapters.data!.getTabular(),
       });
     }
   };
@@ -87,7 +91,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
     const { tabularPromise } = this.state;
 
     if (tabularPromise) {
-      const tabularData: TabularData = await tabularPromise;
+      const tabularData: TabularHolder = await tabularPromise;
 
       if (this._isMounted) {
         this.setState({
@@ -101,13 +105,13 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.adapters.data.on('change', this.onUpdateData);
+    this.props.adapters.data!.on('change', this.onUpdateData);
     this.finishLoadingData();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.adapters.data.removeListener('change', this.onUpdateData);
+    this.props.adapters.data!.removeListener('change', this.onUpdateData);
   }
 
   componentDidUpdate() {
@@ -172,8 +176,12 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
         data={this.state.tabularData}
         isFormatted={this.state.tabularOptions.returnsFormattedValues}
         exportTitle={this.props.title}
-        uiSettings={this.props.uiSettings}
+        uiSettings={this.props.kibana.services.uiSettings}
       />
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export default withKibana(DataViewComponent);

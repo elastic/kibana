@@ -22,10 +22,12 @@ import {
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
 
+import { Job, JobStats } from '../../common/types/anomaly_detection_jobs';
+
 /**
  * Routes for the anomaly detectors
  */
-export function jobRoutes({ router, mlLicense }: RouteInitialization) {
+export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
@@ -44,9 +46,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ response, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getJobs();
+        const { body } = await mlClient.getJobs<{ jobs: Job[] }>();
         return response.ok({
           body,
         });
@@ -75,10 +77,10 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await client.asInternalUser.ml.getJobs({ job_id: jobId });
+        const { body } = await mlClient.getJobs<{ jobs: Job[] }>({ job_id: jobId });
         return response.ok({
           body,
         });
@@ -106,9 +108,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getJobStats();
+        const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>();
         return response.ok({
           body,
         });
@@ -137,10 +139,10 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await client.asInternalUser.ml.getJobStats({ job_id: jobId });
+        const { body } = await mlClient.getJobStats({ job_id: jobId });
         return response.ok({
           body,
         });
@@ -173,13 +175,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await client.asInternalUser.ml.putJob({
+        const { body } = await mlClient.putJob({
           job_id: jobId,
           body: request.body,
         });
+
         return response.ok({
           body,
         });
@@ -210,10 +213,10 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canUpdateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await client.asInternalUser.ml.updateJob({
+        const { body } = await mlClient.updateJob({
           job_id: jobId,
           body: request.body,
         });
@@ -245,10 +248,10 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canOpenJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await client.asInternalUser.ml.openJob({ job_id: jobId });
+        const { body } = await mlClient.openJob({ job_id: jobId });
         return response.ok({
           body,
         });
@@ -277,7 +280,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCloseJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const options: RequestParams.MlCloseJob = {
           job_id: request.params.jobId,
@@ -286,7 +289,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         if (force !== undefined) {
           options.force = force;
         }
-        const { body } = await client.asInternalUser.ml.closeJob(options);
+        const { body } = await mlClient.closeJob(options);
         return response.ok({
           body,
         });
@@ -315,7 +318,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const options: RequestParams.MlDeleteJob = {
           job_id: request.params.jobId,
@@ -325,7 +328,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         if (force !== undefined) {
           options.force = force;
         }
-        const { body } = await client.asInternalUser.ml.deleteJob(options);
+        const { body } = await mlClient.deleteJob(options);
         return response.ok({
           body,
         });
@@ -352,9 +355,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.validateDetector({ body: request.body });
+        const { body } = await mlClient.validateDetector({ body: request.body });
         return response.ok({
           body,
         });
@@ -385,11 +388,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canForecastJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const jobId = request.params.jobId;
         const duration = request.body.duration;
-        const { body } = await client.asInternalUser.ml.forecast({
+        const { body } = await mlClient.forecast({
           job_id: jobId,
           duration,
         });
@@ -426,9 +429,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getRecords({
+        const { body } = await mlClient.getRecords({
           job_id: request.params.jobId,
           body: request.body,
         });
@@ -465,9 +468,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getBuckets({
+        const { body } = await mlClient.getBuckets({
           job_id: request.params.jobId,
           timestamp: request.params.timestamp,
           body: request.body,
@@ -505,9 +508,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getOverallBuckets({
+        const { body } = await mlClient.getOverallBuckets({
           job_id: request.params.jobId,
           top_n: request.body.topN,
           bucket_span: request.body.bucketSpan,
@@ -542,9 +545,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getCategories({
+        const { body } = await mlClient.getCategories({
           job_id: request.params.jobId,
           category_id: request.params.categoryId,
         });
@@ -576,9 +579,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getModelSnapshots({
+        const { body } = await mlClient.getModelSnapshots({
           job_id: request.params.jobId,
         });
         return response.ok({
@@ -609,9 +612,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getModelSnapshots({
+        const { body } = await mlClient.getModelSnapshots({
           job_id: request.params.jobId,
           snapshot_id: request.params.snapshotId,
         });
@@ -645,9 +648,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.updateModelSnapshot({
+        const { body } = await mlClient.updateModelSnapshot({
           job_id: request.params.jobId,
           snapshot_id: request.params.snapshotId,
           body: request.body,
@@ -680,9 +683,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.deleteModelSnapshot({
+        const { body } = await mlClient.deleteModelSnapshot({
           job_id: request.params.jobId,
           snapshot_id: request.params.snapshotId,
         });

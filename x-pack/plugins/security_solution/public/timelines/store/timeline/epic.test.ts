@@ -8,12 +8,13 @@ import { Filter, esFilters } from '../../../../../../../src/plugins/data/public'
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel } from './model';
+import { TimelineModel, TimelineTabs } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const timelineModel: TimelineModel = {
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -89,6 +90,7 @@ describe('Epic Timeline', () => {
         description: '',
         eventIdToNoteIds: {},
         eventType: 'all',
+        expandedEvent: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -133,7 +135,6 @@ describe('Epic Timeline', () => {
             serializedQuery:
               '{"bool":{"should":[{"match_phrase":{"endgame.user_name":"zeus"}}],"minimum_should_match":1}}',
           },
-          filterQueryDraft: { kind: 'kuery', expression: 'endgame.user_name : "zeus" ' },
         },
         loadingEventIds: [],
         title: 'saved',
@@ -150,7 +151,6 @@ describe('Epic Timeline', () => {
         showCheckboxes: false,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
         status: TimelineStatus.active,
-        width: 1100,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',

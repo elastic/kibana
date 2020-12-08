@@ -6,10 +6,11 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { licensingMock } from '../../../../licensing/public/mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
 
-import { API_BASE_PATH } from '../../../common/constants';
 import {
   DELETE_PHASE_POLICY,
   NEW_SNAPSHOT_POLICY_NAME,
@@ -19,6 +20,8 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
+  POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
+  getDefaultHotPhasePolicy,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -30,10 +33,79 @@ describe('<EditPolicy />', () => {
     server.restore();
   });
 
+  describe('serialization', () => {
+    /**
+     * We assume that policies that populate this form are loaded directly from ES and so
+     * are valid according to ES. There may be settings in the policy created through the ILM
+     * API that the UI does not cater for, like the unfollow action. We do not want to overwrite
+     * the configuration for these actions in the UI.
+     */
+    it('preserves policy settings it did not configure', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+
+      // Set max docs to test whether we keep the unknown fields in that object after serializing
+      await actions.hot.setMaxDocs('1000');
+      // Remove the delete phase to ensure that we also correctly remove data
+      await actions.delete.enable(false);
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        foo: 'bar', // Made up value
+        name: 'my_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_docs: 1000,
+                max_size: '50gb',
+                unknown_setting: 123, // Made up setting that should stay preserved
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
+          },
+          warm: {
+            actions: {
+              my_unfollow_action: {}, // Made up action
+              set_priority: {
+                priority: 22,
+                unknown_setting: true,
+              },
+            },
+            min_age: '0ms',
+          },
+        },
+      });
+    });
+  });
+
   describe('hot phase', () => {
     describe('serialization', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
@@ -51,7 +123,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
-        await actions.hot.setForcemergeSegments('123');
+        await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
         await actions.hot.setIndexPriority('123');
 
@@ -84,6 +156,19 @@ describe('<EditPolicy />', () => {
         `);
       });
 
+      test('setting searchable snapshot', async () => {
+        const { actions } = testBed;
+
+        await actions.hot.setSearchableSnapshot('my-repo');
+
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
+          'my-repo'
+        );
+      });
+
       test('disabling rollover', async () => {
         const { actions } = testBed;
         await actions.hot.toggleRollover(true);
@@ -100,6 +185,26 @@ describe('<EditPolicy />', () => {
             },
           }
         `);
+      });
+
+      test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
+        const { actions } = testBed;
+
+        await actions.warm.enable(true);
+        await actions.cold.enable(true);
+
+        expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
+        expect(actions.warm.shrinkExists()).toBeTruthy();
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.cold.freezeExists()).toBeTruthy();
+
+        await actions.hot.setSearchableSnapshot('my-repo');
+
+        expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
+        expect(actions.warm.shrinkExists()).toBeFalsy();
+        // searchable snapshot in cold is still visible
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.cold.freezeExists()).toBeFalsy();
       });
     });
   });
@@ -136,7 +241,6 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0ms",
           }
         `);
       });
@@ -144,14 +248,12 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.setMinAgeValue('123');
-        await actions.warm.setMinAgeUnits('d');
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
         await actions.warm.setShrink('123');
         await actions.warm.toggleForceMerge(true);
-        await actions.warm.setForcemergeSegments('123');
+        await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
@@ -193,22 +295,23 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "123d",
               },
             },
           }
         `);
       });
 
-      test('setting warm phase on rollover to "true"', async () => {
+      test('setting warm phase on rollover to "false"', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.warmPhaseOnRollover(true);
+        await actions.warm.warmPhaseOnRollover(false);
+        await actions.warm.setMinAgeValue('123');
+        await actions.warm.setMinAgeUnits('d');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
           .min_age;
-        expect(warmPhaseMinAge).toBe(undefined);
+        expect(warmPhaseMinAge).toBe('123d');
       });
     });
 
@@ -293,7 +396,7 @@ describe('<EditPolicy />', () => {
         `);
       });
 
-      test('setting all values', async () => {
+      test('setting all values, excluding searchable snapshot', async () => {
         const { actions } = testBed;
 
         await actions.cold.enable(true);
@@ -344,6 +447,19 @@ describe('<EditPolicy />', () => {
           }
         `);
       });
+
+      // Setting searchable snapshot field disables setting replicas so we test this separately
+      test('setting searchable snapshot', async () => {
+        const { actions } = testBed;
+        await actions.cold.enable(true);
+        await actions.cold.setSearchableSnapshot('my-repo');
+        await actions.savePolicy();
+        const latestRequest2 = server.requests[server.requests.length - 1];
+        const entirePolicy2 = JSON.parse(JSON.parse(latestRequest2.requestBody).body);
+        expect(entirePolicy2.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+          'my-repo'
+        );
+      });
     });
   });
 
@@ -367,7 +483,6 @@ describe('<EditPolicy />', () => {
       expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
         {
           label: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
-          value: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
         },
       ]);
     });
@@ -412,7 +527,7 @@ describe('<EditPolicy />', () => {
     test('wait for snapshot field should delete action if field is empty', async () => {
       const { actions } = testBed;
 
-      actions.setWaitForSnapshotPolicy('');
+      await actions.setWaitForSnapshotPolicy('');
       await actions.savePolicy();
 
       const expected = {
@@ -533,6 +648,7 @@ describe('<EditPolicy />', () => {
         `);
       });
     });
+
     describe('node attr and none', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION]);
@@ -557,6 +673,75 @@ describe('<EditPolicy />', () => {
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+      });
+    });
+  });
+
+  describe('searchable snapshot', () => {
+    describe('on cloud', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+        await act(async () => {
+          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+        const { actions } = testBed;
+        await actions.cold.enable(true);
+        await actions.cold.toggleSearchableSnapshot(true);
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+          'found-snapshots'
+        );
+      });
+    });
+    describe('on non-enterprise license', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+        await act(async () => {
+          testBed = await setup({
+            appServicesContext: {
+              license: licensingMock.createLicense({ license: { type: 'basic' } }),
+            },
+          });
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+      test('disable setting searchable snapshots', async () => {
+        const { actions } = testBed;
+
+        expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+        expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+
+        await actions.cold.enable(true);
+
+        // Still hidden in hot
+        expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
       });
     });
   });

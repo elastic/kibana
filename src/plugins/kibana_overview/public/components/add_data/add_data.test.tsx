@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { AddData } from './add_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 const mockFeatures = [
@@ -54,6 +54,10 @@ const mockFeatures = [
     title: 'Upload a file',
   },
 ];
+
+jest.mock('../../lib/ui_metric', () => ({
+  trackUiMetric: jest.fn(),
+}));
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 

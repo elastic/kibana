@@ -132,7 +132,7 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<managing-fields, Index Patterns>>
+a| <<index-patterns, Index Patterns>>
 |Create and manage the index patterns that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>

@@ -11,6 +11,7 @@ export {
   useForm,
   useFormData,
   Form,
+  FormHook,
   UseField,
   FieldConfig,
   OnFormUpdateArg,
@@ -18,6 +19,7 @@ export {
   getFieldValidityAndErrorMessage,
   useFormContext,
   FormSchema,
+  ValidationConfig,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
@@ -27,7 +29,11 @@ export {
   NumericField,
   SelectField,
   SuperSelectField,
+  ComboBoxField,
+  TextField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
+
+export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';
 
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 

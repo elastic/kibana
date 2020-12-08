@@ -19,10 +19,9 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
   const { visualizationState } = props;
 
-  return (
-    activeVisualization &&
-    visualizationState && <LayerPanels {...props} activeVisualization={activeVisualization} />
-  );
+  return activeVisualization && visualizationState ? (
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
+  ) : null;
 });
 
 function LayerPanels(
@@ -95,7 +94,7 @@ function LayerPanels(
           {...props}
           key={layerId}
           layerId={layerId}
-          dataTestSubj={`lns-layerPanel-${index}`}
+          index={index}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}

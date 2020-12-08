@@ -61,7 +61,6 @@ describe('callMsearch', () => {
         },
         Object {
           "querystring": Object {
-            "ignore_throttled": true,
             "ignore_unavailable": true,
             "max_concurrent_shard_requests": undefined,
           },

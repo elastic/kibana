@@ -1,0 +1,19 @@
+.documentsSearchExperience {
+  .sui-results-container {
+    flex-grow: 1;
+    padding: 0;
+  }
+
+  .documentsSearchExperience__sidebar {
+    flex-grow: 1;
+    min-width: $euiSize * 19;
+  }
+
+  .documentsSearchExperience__content {
+    flex-grow: 4;
+  }
+
+  .documentsSearchExperience__pagingInfo {
+    flex-grow: 0;
+  }
+}

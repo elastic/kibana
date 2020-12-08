@@ -18,7 +18,7 @@
  */
 
 import { createUrlTracker, IUrlTracker } from './url_tracker';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createMemoryHistory, History } from 'history';
 
 describe('urlTracker', () => {

@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiBadge,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
@@ -16,7 +16,7 @@ import {
   EuiSelectableTemplateSitewideOption,
   EuiText,
 } from '@elastic/eui';
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
@@ -25,12 +25,20 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
+import {
+  GlobalSearchPluginStart,
+  GlobalSearchResult,
+  GlobalSearchFindParams,
+} from '../../../global_search/public';
+import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+import { parseSearchParams } from '../search_syntax';
+import './search_bar.scss';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   darkMode: boolean;
 }
@@ -64,19 +72,19 @@ const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
 
 const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta } = result;
+  // only displaying icons for applications
+  const useIcon = type === 'application';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
     url,
     type,
+    icon: { type: useIcon && icon ? icon : 'empty' },
+    'data-test-subj': `nav-search-option`,
   };
 
-  if (icon) {
-    option.icon = { type: icon };
-  }
-
   if (type === 'application') {
-    option.meta = [{ text: meta?.categoryLabel as string }];
+    option.meta = [{ text: (meta?.categoryLabel as string) ?? '' }];
   } else {
     option.meta = [{ text: cleanMeta(type) }];
   }
@@ -86,6 +94,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
 
 export function SearchBar({
   globalSearch,
+  taggingApi,
   navigateToUrl,
   trackUiMetric,
   basePathUrl,
@@ -119,8 +128,24 @@ export function SearchBar({
       }
 
       let arr: GlobalSearchResult[] = [];
-      if (searchValue.length !== 0) trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
-      searchSubscription.current = globalSearch(searchValue, {}).subscribe({
+      if (searchValue.length !== 0) {
+        trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+      }
+
+      const rawParams = parseSearchParams(searchValue);
+      const tagIds =
+        taggingApi && rawParams.filters.tags
+          ? rawParams.filters.tags.map(
+              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? '__unknown__'
+            )
+          : undefined;
+      const searchParams: GlobalSearchFindParams = {
+        term: rawParams.term,
+        types: rawParams.filters.types,
+        tags: tagIds,
+      };
+
+      searchSubscription.current = globalSearch(searchParams, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
             arr = [...results, ...arr].sort(sortByScore);
@@ -197,7 +222,7 @@ export function SearchBar({
   };
 
   const emptyMessage = (
-    <EuiSelectableMessage style={{ minHeight: 300 }}>
+    <EuiSelectableMessage style={{ minHeight: 300 }} data-test-subj="nav-search-no-results">
       <EuiImage
         alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
           defaultMessage: 'Illustration of black hole',
@@ -228,6 +253,7 @@ export function SearchBar({
 
   return (
     <EuiSelectableTemplateSitewide
+      isPreFiltered
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
@@ -245,9 +271,10 @@ export function SearchBar({
       searchProps={{
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
-        'data-test-subj': 'header-search',
+        'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
+        className: 'kbnSearchBar',
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
@@ -256,53 +283,73 @@ export function SearchBar({
         },
       }}
       popoverProps={{
+        'data-test-subj': 'nav-search-popover',
+        panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
       }}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
       popoverFooter={
-        <EuiText color="subdued" size="xs">
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="s"
-            responsive={false}
-            wrap
-          >
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
-              defaultMessage="{shortcutDescription}{commandDescription}"
-              values={{
-                shortcutDescription: (
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
-                      defaultMessage="Shortcut"
-                    />
-                  </EuiFlexItem>
-                ),
-                commandDescription: (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>
-                      {isMac ? (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                          defaultMessage="Command + /"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                          defaultMessage="Control + /"
-                        />
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ),
-              }}
-            />
-          </EuiFlexGroup>
-        </EuiText>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          wrap
+        >
+          <EuiFlexItem>
+            <EuiText color="subdued" size="xs">
+              <p>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
+                  defaultMessage="Filter by"
+                />
+                &nbsp;
+                <EuiCode>type:</EuiCode>&nbsp;
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
+                  defaultMessage="or"
+                />
+                &nbsp;
+                <EuiCode>tag:</EuiCode>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="xs">
+              <p>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
+                  defaultMessage="{shortcutDescription} {commandDescription}"
+                  values={{
+                    shortcutDescription: (
+                      <FormattedMessage
+                        id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
+                        defaultMessage="Shortcut"
+                      />
+                    ),
+                    commandDescription: (
+                      <EuiCode>
+                        {isMac ? (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
+                            defaultMessage="Command + /"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
+                            defaultMessage="Control + /"
+                          />
+                        )}
+                      </EuiCode>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     />
   );

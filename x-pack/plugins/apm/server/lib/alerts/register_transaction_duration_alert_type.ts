@@ -7,22 +7,22 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { getDurationFormatter } from '../../../common/utils/formatters';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { APMConfig } from '../..';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  TRANSACTION_DURATION,
   SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getDurationFormatter } from '../../../common/utils/formatters';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -75,6 +75,7 @@ export function registerTransactionDurationAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -112,16 +113,14 @@ export function registerTransactionDurationAlertType({
             environments: {
               terms: {
                 field: SERVICE_ENVIRONMENT,
+                size: maxServiceEnvironments,
               },
             },
           },
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
+      const response = await alertingEsClient(services, searchParams);
 
       if (!response.aggregations) {
         return;

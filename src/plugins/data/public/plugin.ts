@@ -41,16 +41,13 @@ import {
   UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
-  setFieldFormats,
   setIndexPatterns,
   setNotifications,
   setOverlays,
-  setQueryService,
   setSearchService,
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -71,7 +68,8 @@ import {
 } from './actions';
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoad } from './index_patterns/expressions';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -94,6 +92,7 @@ export class DataPublicPlugin
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
+  private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -105,12 +104,13 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
-    expressions.registerFunction(indexPatternLoad);
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+
+    this.usageCollection = usageCollection;
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -136,12 +136,13 @@ export class DataPublicPlugin
     );
 
     const searchService = this.searchService.setup(core, {
+      bfetch,
       usageCollection,
       expressions,
     });
 
     return {
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -158,7 +159,6 @@ export class DataPublicPlugin
     setUiSettings(uiSettings);
 
     const fieldFormats = this.fieldFormatsService.start();
-    setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -182,7 +182,6 @@ export class DataPublicPlugin
       savedObjectsClient: savedObjects.client,
       uiSettings,
     });
-    setQueryService(query);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
@@ -208,12 +207,16 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
+      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
+        this.usageCollection,
+        'data_plugin'
+      ),
     });
 
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };

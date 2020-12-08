@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { useThrottle } from 'react-use';
+import useThrottle from 'react-use/lib/useThrottle';
 
 import { RendererFunction } from '../../../utils/typed_react';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';

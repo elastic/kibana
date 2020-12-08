@@ -24,7 +24,6 @@ import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
-import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from '../field_name/field_name';
 
@@ -32,7 +31,6 @@ export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
-  displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
   isColumnActive: boolean;
@@ -48,7 +46,6 @@ export function DocViewTableRow({
   field,
   fieldMapping,
   fieldType,
-  displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
   isCollapsed,
@@ -67,6 +64,30 @@ export function DocViewTableRow({
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
+      <td className="kbnDocViewer__field">
+        <FieldName
+          fieldName={field}
+          fieldType={fieldType}
+          fieldMapping={fieldMapping}
+          scripted={Boolean(fieldMapping?.scripted)}
+        />
+      </td>
+      <td>
+        {isCollapsible && (
+          <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
+        )}
+        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+        <div
+          className={valueClassName}
+          data-test-subj={`tableDocViewRow-${field}-value`}
+          /*
+           * Justification for dangerouslySetInnerHTML:
+           * We just use values encoded by our field formatters
+           */
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: value as string }}
+        />
+      </td>
       {typeof onFilter === 'function' && (
         <td className="kbnDocViewer__buttons">
           <DocViewTableRowBtnFilterAdd
@@ -87,31 +108,6 @@ export function DocViewTableRow({
           />
         </td>
       )}
-      <td className="kbnDocViewer__field">
-        <FieldName
-          fieldName={field}
-          fieldType={fieldType}
-          fieldIconProps={{ fill: 'none', color: 'gray' }}
-          scripted={Boolean(fieldMapping?.scripted)}
-        />
-      </td>
-      <td>
-        {isCollapsible && (
-          <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
-        )}
-        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-        {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          /*
-           * Justification for dangerouslySetInnerHTML:
-           * We just use values encoded by our field formatters
-           */
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: value as string }}
-        />
-      </td>
     </tr>
   );
 }

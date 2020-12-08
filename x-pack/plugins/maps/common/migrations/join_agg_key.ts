@@ -82,7 +82,7 @@ export function migrateJoinAggKey({
         _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
-            aggFieldName: aggDescriptor.field,
+            aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
             indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
             termFieldName: _.get(joinDescriptor, 'right.term', ''),
           });

@@ -366,6 +366,7 @@ Array [
             "environments": Object {
               "terms": Object {
                 "field": "service.environment",
+                "size": 100,
               },
             },
           },

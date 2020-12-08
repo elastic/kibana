@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.toggleFilterEnabled('ip');
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await PageObjects.visualize.clickNewVisualization();
-      await PageObjects.visualize.waitForVisualizationSelectPage();
+      await PageObjects.visualize.waitForGroupsSelectPage();
       await PageObjects.visualize.clickVisType('lens');
       const timeRange = await PageObjects.timePicker.getTimeConfig();
       expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
@@ -68,10 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('keeps selected index pattern after refresh', async () => {
-      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await PageObjects.lens.switchDataPanelIndexPattern('log*');
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
     });
 
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {

@@ -38,8 +38,9 @@ export function saveDashboard(
 ): Promise<string> {
   const savedDashboard = dashboardStateManager.savedDashboard;
   const appState = dashboardStateManager.appState;
+  const hasTaggingCapabilities = dashboardStateManager.hasTaggingCapabilities;
 
-  updateSavedDashboard(savedDashboard, appState, timeFilter, toJson);
+  updateSavedDashboard(savedDashboard, appState, timeFilter, hasTaggingCapabilities, toJson);
 
   return savedDashboard.save(saveOptions).then((id: string) => {
     if (id) {

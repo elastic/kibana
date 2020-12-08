@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const THREATS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.threatsDescription',
+  {
+    defaultMessage: 'threats',
+  }
+);
+
 export const TACTIC = i18n.translate(
   'xpack.securitySolution.detectionEngine.mitreAttack.tacticsDescription',
   {
@@ -16,27 +23,55 @@ export const TACTIC = i18n.translate(
 export const TECHNIQUE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mitreAttack.techniquesDescription',
   {
-    defaultMessage: 'techniques',
+    defaultMessage: 'technique',
   }
 );
 
-export const ADD_MITRE_ATTACK = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mitreAttack.addTitle',
+export const SUBTECHNIQUE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.subtechniquesDescription',
   {
-    defaultMessage: 'Add MITRE ATT&CK\\u2122 threat',
+    defaultMessage: 'subtechnique',
   }
 );
 
-export const TECHNIQUES_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
+export const ADD_MITRE_TACTIC = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.addTacticTitle',
   {
-    defaultMessage: 'Select techniques ...',
+    defaultMessage: 'Add tactic',
+  }
+);
+
+export const ADD_MITRE_TECHNIQUE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.addTechniqueTitle',
+  {
+    defaultMessage: 'Add technique',
+  }
+);
+
+export const ADD_MITRE_SUBTECHNIQUE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.addSubtechniqueTitle',
+  {
+    defaultMessage: 'Add subtechnique',
   }
 );
 
 export const TACTIC_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.mitreAttack.tacticPlaceHolderDescription',
   {
-    defaultMessage: 'Select tactic ...',
+    defaultMessage: 'Select a tactic ...',
+  }
+);
+
+export const TECHNIQUE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.techniquePlaceHolderDescription',
+  {
+    defaultMessage: 'Select a technique ...',
+  }
+);
+
+export const SUBTECHNIQUE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.subtechniquePlaceHolderDescription',
+  {
+    defaultMessage: 'Select a subtechnique ...',
   }
 );

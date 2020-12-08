@@ -9,7 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 import {
   CommentResponse,
   ServiceConnectorCaseResponse,
-  Status,
+  CaseStatuses,
   UserAction,
   UserActionField,
   CaseResponse,
@@ -17,7 +17,8 @@ import {
   CaseUserActionsResponse,
   CasesResponse,
   CasesFindResponse,
-} from '../../../../case/common/api/cases';
+  CommentType,
+} from '../../../../case/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
@@ -42,6 +43,7 @@ export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
   comment: 'Solve this fast!',
+  type: CommentType.user,
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -67,7 +69,7 @@ export const basicCase: Case = {
   },
   description: 'Security banana Issue',
   externalService: null,
-  status: 'open',
+  status: CaseStatuses.open,
   tags,
   title: 'Another horrible breach!!',
   totalComment: 1,
@@ -96,8 +98,9 @@ export const basicCaseCommentPatch = {
 };
 
 export const casesStatus: CasesStatus = {
-  countClosedCases: 130,
   countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const basicPush = {
@@ -201,7 +204,7 @@ export const basicCommentSnake: CommentResponse = {
 
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
-  status: 'open' as Status,
+  status: CaseStatuses.open,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
@@ -220,6 +223,7 @@ export const basicCaseSnake: CaseResponse = {
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
+  count_in_progress_cases: 40,
   count_open_cases: 20,
 };
 
@@ -323,5 +327,5 @@ export const basicCaseClosed: Case = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,
-  status: 'closed',
+  status: CaseStatuses.closed,
 };

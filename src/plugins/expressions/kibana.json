@@ -6,7 +6,6 @@
   "extraPublicDirs": ["common", "common/fonts"],
   "requiredBundles": [
     "kibanaUtils",
-    "inspector",
-    "data"
+    "inspector"
   ]
 }

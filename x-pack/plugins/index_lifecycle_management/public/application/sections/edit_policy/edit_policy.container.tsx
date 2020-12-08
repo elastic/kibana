@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
+import { useKibana, attemptToURIDecode } from '../../../shared_imports';
+
 import { useLoadPoliciesList } from '../../services/api';
+import { getPolicyByName } from '../../lib/policies';
+import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
+import { EditPolicyContextProvider } from './edit_policy_context';
 
 interface RouterProps {
   policyName: string;
@@ -33,7 +40,15 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   getUrlForApp,
   history,
 }) => {
+  const {
+    services: { breadcrumbService, license },
+  } = useKibana();
   const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs('editPolicy');
+  }, [breadcrumbService]);
+
   if (isLoading) {
     return (
       <EuiEmptyPrompt
@@ -76,12 +91,22 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
+  const existingPolicy = getPolicyByName(policies, attemptToURIDecode(policyName));
+
   return (
-    <PresentationComponent
-      policies={policies}
-      history={history}
-      getUrlForApp={getUrlForApp}
-      policyName={policyName}
-    />
+    <EditPolicyContextProvider
+      value={{
+        isNewPolicy: !existingPolicy?.policy,
+        policyName: attemptToURIDecode(policyName),
+        policy: existingPolicy?.policy ?? defaultPolicy,
+        existingPolicies: policies,
+        getUrlForApp,
+        license: {
+          canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
+        },
+      }}
+    >
+      <PresentationComponent history={history} />
+    </EditPolicyContextProvider>
   );
 };

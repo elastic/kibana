@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './discover_field.scss';
+
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UiCounterMetricType } from '@kbn/analytics';
+import classNames from 'classnames';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
-import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
-import './discover_field.scss';
 
 export interface DiscoverFieldProps {
+  /**
+   * Determines whether add/remove button is displayed not only when focused
+   */
+  alwaysShowActionButton?: boolean;
   /**
    * The displayed field
    */
@@ -58,12 +64,15 @@ export interface DiscoverFieldProps {
    */
   selected?: boolean;
   /**
-   * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
    */
-  useShortDots?: boolean;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverField({
+  alwaysShowActionButton = false,
   field,
   indexPattern,
   onAddField,
@@ -71,7 +80,7 @@ export function DiscoverField({
   onAddFilter,
   getDetails,
   selected,
-  useShortDots,
+  trackUiMetric,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -110,16 +119,17 @@ export function DiscoverField({
     <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
   );
 
+  const title =
+    field.displayName !== field.name ? `${field.name} (${field.displayName} )` : field.displayName;
+
   const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="dscSidebarField__name"
-    >
-      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+    <span data-test-subj={`field-${field.name}`} title={title} className="dscSidebarField__name">
+      {wrapOnDot(field.displayName)}
     </span>
   );
-
+  const actionBtnClassName = classNames('dscSidebarItem__action', {
+    ['dscSidebarItem__mobile']: alwaysShowActionButton,
+  });
   let actionButton;
   if (field.name !== '_source' && !selected) {
     actionButton = (
@@ -131,7 +141,7 @@ export function DiscoverField({
       >
         <EuiButtonIcon
           iconType="plusInCircleFilled"
-          className="dscSidebarItem__action"
+          className={actionBtnClassName}
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
@@ -156,7 +166,7 @@ export function DiscoverField({
         <EuiButtonIcon
           color="danger"
           iconType="cross"
-          className="dscSidebarItem__action"
+          className={actionBtnClassName}
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
@@ -187,7 +197,6 @@ export function DiscoverField({
 
   return (
     <EuiPopover
-      ownFocus
       display="block"
       button={
         <FieldButton
@@ -220,6 +229,7 @@ export function DiscoverField({
           field={field}
           details={getDetails(field)}
           onAddFilter={onAddFilter}
+          trackUiMetric={trackUiMetric}
         />
       )}
     </EuiPopover>

@@ -24,6 +24,8 @@ test('skips non string parameters', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {
       foo: 'test',
     },
@@ -54,6 +56,8 @@ test('missing parameters get emptied out', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -77,6 +81,8 @@ test('context parameters are passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -99,6 +105,8 @@ test('state parameters are passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -121,6 +129,8 @@ test('alertId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -143,6 +153,8 @@ test('alertName is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -165,6 +177,8 @@ test('tags is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -186,6 +200,8 @@ test('undefined tags is passed to templates', () => {
     alertName: 'alert-name',
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -208,6 +224,8 @@ test('empty tags is passed to templates', () => {
     tags: [],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -230,6 +248,8 @@ test('spaceId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -252,6 +272,8 @@ test('alertInstanceId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -259,6 +281,79 @@ test('alertInstanceId is passed to templates', () => {
       "message": "Value \\"2\\" exists",
     }
   `);
+});
+
+test('alertActionGroup is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{alertActionGroup}}" exists',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
+    alertParams: {},
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"action-group\\" exists",
+    }
+  `);
+});
+
+test('alertActionGroupName is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{alertActionGroupName}}" exists',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
+    alertParams: {},
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"Action Group\\" exists",
+    }
+  `);
+});
+
+test('date is passed to templates', () => {
+  const actionParams = {
+    message: '{{date}}',
+  };
+  const dateBefore = Date.now();
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
+    alertParams: {},
+  });
+  const dateAfter = Date.now();
+  const dateVariable = new Date(`${result.message}`).valueOf();
+
+  expect(dateVariable).toBeGreaterThanOrEqual(dateBefore);
+  expect(dateVariable).toBeLessThanOrEqual(dateAfter);
 });
 
 test('works recursively', () => {
@@ -276,6 +371,8 @@ test('works recursively', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -302,6 +399,8 @@ test('works recursively with arrays', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`

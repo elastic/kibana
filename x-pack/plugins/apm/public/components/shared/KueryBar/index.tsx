@@ -14,9 +14,9 @@ import {
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
@@ -65,7 +65,7 @@ export function KueryBar() {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPattern(processorEvent);
+  const { indexPattern } = useDynamicIndexPatternFetcher(processorEvent);
 
   const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
     defaultMessage: `Search {event, select,
@@ -79,13 +79,6 @@ export function KueryBar() {
       event: processorEvent,
     },
   });
-
-  // The bar should be disabled when viewing the service map
-  const disabled = /\/(service-map)$/.test(location.pathname);
-  const disabledPlaceholder = i18n.translate(
-    'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available here' }
-  );
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
@@ -111,6 +104,7 @@ export function KueryBar() {
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          useTimeRange: true,
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
@@ -152,13 +146,12 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
-        disabled={disabled}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
-        placeholder={disabled ? disabledPlaceholder : placeholder}
+        placeholder={placeholder}
       />
     </Container>
   );

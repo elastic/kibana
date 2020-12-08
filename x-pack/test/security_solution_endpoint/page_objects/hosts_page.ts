@@ -121,6 +121,8 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       for (let i = 0; i < NodeSubmenuItems.length; i++) {
         await (await testSubjects.findAll('resolver:map:node-submenu-item'))[i].click();
         const Events = await testSubjects.findAll('resolver:map:node-submenu-item');
+        // this sleep is for the AMP enabled run
+        await pageObjects.common.sleep(300);
         const EventName = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();

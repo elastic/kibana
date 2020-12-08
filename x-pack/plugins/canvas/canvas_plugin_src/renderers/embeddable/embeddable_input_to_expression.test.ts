@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
   embeddableInputToExpression,
   inputToExpressionTypeMap,
@@ -21,7 +22,11 @@ describe('input to expression', () => {
     const mockReturn = 'expression';
     inputToExpressionTypeMap[newType] = jest.fn().mockReturnValue(mockReturn);
 
-    const expression = embeddableInputToExpression(input, newType);
+    const expression = embeddableInputToExpression(
+      input,
+      newType,
+      chartPluginMock.createPaletteRegistry()
+    );
 
     expect(expression).toBe(mockReturn);
   });

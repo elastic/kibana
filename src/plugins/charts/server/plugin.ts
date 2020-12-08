@@ -20,10 +20,17 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
-import { COLOR_MAPPING_SETTING } from '../common';
+import { COLOR_MAPPING_SETTING, palette, systemPalette } from '../common';
+import { ExpressionsServerSetup } from '../../expressions/server';
+
+interface SetupDependencies {
+  expressions: ExpressionsServerSetup;
+}
 
 export class ChartsServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, dependencies: SetupDependencies) {
+    dependencies.expressions.registerFunction(palette);
+    dependencies.expressions.registerFunction(systemPalette);
     core.uiSettings.register({
       [COLOR_MAPPING_SETTING]: {
         name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {
@@ -34,8 +41,18 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         }),
         type: 'json',
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
-          defaultMessage: 'Maps values to specified colors within visualizations',
+          defaultMessage:
+            'Maps values to specific colors in <strong>Visualize</strong> charts and <strong>TSVB</strong>. This setting does not apply to <strong>Lens.</strong>',
         }),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
+            {
+              defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
         category: ['visualization'],
         schema: schema.string(),
       },

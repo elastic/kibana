@@ -195,6 +195,18 @@ describe('Execution', () => {
       expect(typeof result).toBe('object');
     });
 
+    test('context.getKibanaRequest is a function if provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+        kibanaRequest: {},
+      })) as any;
+      expect(typeof result).toBe('function');
+    });
+
+    test('context.getKibanaRequest is undefined if not provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      expect(typeof result).toBe('undefined');
+    });
+
     test('unknown context key is undefined', async () => {
       const { result } = (await run('introspectContext key="foo"')) as any;
       expect(typeof result).toBe('undefined');

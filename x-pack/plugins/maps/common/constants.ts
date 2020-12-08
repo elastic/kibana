@@ -60,15 +60,11 @@ export enum LAYER_TYPE {
   TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
 }
 
-export enum SORT_ORDER {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 export enum SOURCE_TYPES {
   EMS_TMS = 'EMS_TMS',
   EMS_FILE = 'EMS_FILE',
   ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
@@ -235,6 +231,11 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
   MVT = 'MVT',
+}
+
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
 }
 
 export enum MVT_FIELD_TYPE {

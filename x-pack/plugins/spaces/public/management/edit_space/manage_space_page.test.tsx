@@ -7,8 +7,9 @@
 import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { wait } from '@testing-library/react';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
@@ -69,7 +70,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await wait(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('textarea[name="description"]');
@@ -128,9 +132,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await wait(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    });
 
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
     expect(onLoadSpace).toHaveBeenCalledWith({
       ...spaceToUpdate,
     });
@@ -179,10 +185,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Error loading available features',
+    await wait(() => {
+      wrapper.update();
+      expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Error loading available features',
+      });
     });
   });
 
@@ -216,9 +223,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await wait(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -277,9 +285,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await wait(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -325,11 +334,5 @@ async function clickSaveButton(wrapper: ReactWrapper<any, any>) {
 
   await Promise.resolve();
 
-  wrapper.update();
-}
-
-async function waitForDataLoad(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
   wrapper.update();
 }

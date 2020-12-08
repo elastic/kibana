@@ -19,9 +19,7 @@ export type MutationTimelineResolver = AppResolverOf<
   MutationResolvers.PersistTimelineResolver<QueryTimelineResolver>
 >;
 
-export type MutationDeleteTimelineResolver = AppResolverOf<
-  MutationResolvers.DeleteTimelineResolver
->;
+export type MutationDeleteTimelineResolver = AppResolverOf<MutationResolvers.DeleteTimelineResolver>;
 
 export type MutationFavoriteResolver = AppResolverOf<MutationResolvers.PersistFavoriteResolver>;
 

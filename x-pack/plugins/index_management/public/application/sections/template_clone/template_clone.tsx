@@ -27,7 +27,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = attemptToURIDecode(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

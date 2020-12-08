@@ -22,15 +22,15 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggMax';
+export const aggMaxFnName = 'aggMax';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MAX>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggMaxFnName, Input, AggArgs, Output>;
 
 export const aggMax = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggMaxFnName,
   help: i18n.translate('data.search.aggs.function.metrics.max.help', {
     defaultMessage: 'Generates a serialized agg config for a Max agg',
   }),

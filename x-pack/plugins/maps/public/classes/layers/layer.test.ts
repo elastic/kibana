@@ -74,6 +74,8 @@ describe('cloneDescriptor', () => {
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
               type: 'joinSource',
+              applyGlobalQuery: true,
+              applyGlobalTime: true,
             },
           },
         ],

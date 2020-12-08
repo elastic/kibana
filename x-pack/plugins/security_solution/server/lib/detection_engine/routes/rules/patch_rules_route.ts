@@ -83,6 +83,8 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         threat_query: threatQuery,
         threat_mapping: threatMapping,
         threat_language: threatLanguage,
+        concurrent_searches: concurrentSearches,
+        items_per_search: itemsPerSearch,
         timestamp_override: timestampOverride,
         throttle,
         references,
@@ -104,7 +106,12 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         if (type) {
           // reject an unauthorized "promotion" to ML
           throwHttpError(await mlAuthz.validateRuleType(type));
@@ -156,6 +163,8 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           threatQuery,
           threatMapping,
           threatLanguage,
+          concurrentSearches,
+          itemsPerSearch,
           timestampOverride,
           references,
           note,

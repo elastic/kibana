@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/ingest_manager/server';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/fleet/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,

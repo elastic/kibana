@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { HashedItemStore } from './hashed_item_store';
 
 describe('hashedItemStore', () => {

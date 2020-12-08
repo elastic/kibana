@@ -10,12 +10,13 @@ import React from 'react';
 
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import { GraphOverlay } from '.';
 
 jest.mock('../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel.savedObjectId),
+  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
 }));
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
@@ -39,12 +40,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -64,12 +60,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -87,12 +78,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is false and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -112,12 +98,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 

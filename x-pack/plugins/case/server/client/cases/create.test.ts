@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorTypes, CasePostRequest } from '../../../common/api';
+import { ConnectorTypes, CasePostRequest, CaseStatuses } from '../../../common/api';
 
 import {
   createMockSavedObjectsRepository,
@@ -60,7 +60,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -126,7 +126,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -169,7 +169,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -180,7 +180,7 @@ describe('create', () => {
 
   describe('unhappy path', () => {
     test('it throws when missing title', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         description: 'This is a brand new case of a bad meanie defacing data',
         tags: ['defacement'],
@@ -199,11 +199,15 @@ describe('create', () => {
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when missing description', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         title: 'a title',
         tags: ['defacement'],
@@ -222,11 +226,15 @@ describe('create', () => {
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when missing tags', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -245,11 +253,15 @@ describe('create', () => {
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when missing connector ', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -263,11 +275,15 @@ describe('create', () => {
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when connector missing the right fields', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -287,16 +303,20 @@ describe('create', () => {
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws if you passing status for a new case', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const postCase = {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
         tags: ['defacement'],
-        status: 'closed',
+        status: CaseStatuses.closed,
         connector: {
           id: 'none',
           name: 'none',
@@ -309,7 +329,11 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.create({ theCase: postCase }).catch((e) => expect(e).not.toBeNull());
+      caseClient.client.create({ theCase: postCase }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(400);
+      });
     });
 
     it(`Returns an error if postNewCase throws`, async () => {
@@ -329,7 +353,11 @@ describe('create', () => {
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
 
-      caseClient.client.create({ theCase: postCase }).catch((e) => expect(e).not.toBeNull());
+      caseClient.client.create({ theCase: postCase }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(400);
+      });
     });
   });
 });

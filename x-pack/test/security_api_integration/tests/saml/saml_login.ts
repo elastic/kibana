@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_realm).to.eql({ name: 'saml1', type: 'saml' });
-    expect(apiResponse.body.authentication_provider).to.eql('saml');
+    expect(apiResponse.body.authentication_provider).to.eql({ type: 'saml', name: 'saml' });
     expect(apiResponse.body.authentication_type).to.be('token');
   }
 
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
       // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
@@ -582,12 +582,12 @@ export default function ({ getService }: FtrProviderContext) {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('legacyEs').deleteByQuery({
+        const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          q: 'doc_type:token',
+          body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -666,12 +666,12 @@ export default function ({ getService }: FtrProviderContext) {
         [
           'when access token document is missing',
           async () => {
-            const esResponse = await getService('legacyEs').deleteByQuery({
+            const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
-              q: 'doc_type:token',
+              body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse).to.have.property('deleted').greaterThan(0);
+            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

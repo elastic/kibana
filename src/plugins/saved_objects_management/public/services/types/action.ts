@@ -18,7 +18,12 @@
  */
 
 import { ReactNode } from 'react';
+import { Capabilities } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '.';
+
+interface ActionContext {
+  capabilities: Capabilities;
+}
 
 export abstract class SavedObjectsManagementAction {
   public abstract render: () => ReactNode;
@@ -37,7 +42,12 @@ export abstract class SavedObjectsManagementAction {
 
   private callbacks: Function[] = [];
 
+  protected actionContext: ActionContext | null = null;
   protected record: SavedObjectsManagementRecord | null = null;
+
+  public setActionContext(actionContext: ActionContext) {
+    this.actionContext = actionContext;
+  }
 
   public registerOnFinishCallback(callback: Function) {
     this.callbacks.push(callback);

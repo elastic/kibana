@@ -21,7 +21,7 @@ export function RumHome() {
     <CsmSharedContextProvider>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="l">
+          <EuiTitle>
             <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
           </EuiTitle>
         </EuiFlexItem>

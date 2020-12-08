@@ -246,14 +246,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getAllFieldNames() {
       const sidebar = await testSubjects.find('discover-sidebar');
       const $ = await sidebar.parseDomContent();
-      return $('.dscSidebar__item[attr-field]')
+      return $('.dscSidebarField__name')
         .toArray()
-        .map((field) => $(field).find('span.eui-textTruncate').text());
-    }
-
-    public async getSidebarWidth() {
-      const sidebar = await testSubjects.find('discover-sidebar');
-      return await sidebar.getAttribute('clientWidth');
+        .map((field) => $(field).text());
     }
 
     public async hasNoResults() {
@@ -284,6 +279,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemRemove(field: string) {
+      if (!(await testSubjects.exists('fieldList-selected'))) {
+        return;
+      }
       const selectedList = await testSubjects.find('fieldList-selected');
       if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
         await this.clickFieldListItemToggle(field);
@@ -349,7 +347,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
-      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
+      await testSubjects.missingOrFail('filterSelectionPanel');
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {

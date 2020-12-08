@@ -43,6 +43,7 @@ export abstract class Embeddable<
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
+  public fatalError?: Error;
 
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
@@ -88,9 +89,12 @@ export abstract class Embeddable<
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
-      .subscribe((title) => {
-        this.renderComplete.setTitle(title);
-      });
+      .subscribe(
+        (title) => {
+          this.renderComplete.setTitle(title);
+        },
+        () => {}
+      );
   }
 
   public getIsContainer(): this is IContainer {
@@ -191,6 +195,11 @@ export abstract class Embeddable<
       this.output = newOutput;
       this.output$.next(this.output);
     }
+  }
+
+  protected onFatalError(e: Error) {
+    this.fatalError = e;
+    this.output$.error(e);
   }
 
   private onResetInput(newInput: TEmbeddableInput) {

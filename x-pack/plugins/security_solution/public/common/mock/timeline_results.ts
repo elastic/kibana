@@ -12,8 +12,9 @@ import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '..
 import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import { TimelineModel, TimelineTabs } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;
@@ -2053,6 +2054,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
 ];
 
 export const mockTimelineModel: TimelineModel = {
+  activeTab: TimelineTabs.query,
   columns: [
     {
       columnHeaderType: 'not-filtered',
@@ -2100,6 +2102,7 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
+  expandedEvent: {},
   filters: [
     {
       $state: {
@@ -2128,7 +2131,6 @@ export const mockTimelineModel: TimelineModel = {
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,
-    filterQueryDraft: null,
   },
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
@@ -2150,7 +2152,6 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
-  width: 1100,
 };
 
 export const mockTimelineResult: TimelineResult = {
@@ -2192,6 +2193,7 @@ export const mockTimelineApolloResult = {
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
+    activeTab: TimelineTabs.query,
     columns: [
       { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
@@ -2220,6 +2222,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
+    expandedEvent: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2235,7 +2238,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     kqlMode: 'filter',
     kqlQuery: {
       filterQuery: { kuery: { expression: '', kind: 'kuery' }, serializedQuery: '' },
-      filterQueryDraft: { expression: '', kind: 'kuery' },
     },
     loadingEventIds: [],
     noteIds: [],
@@ -2252,7 +2254,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
-    width: 1100,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

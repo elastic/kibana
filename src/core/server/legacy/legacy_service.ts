@@ -144,8 +144,8 @@ export class LegacyService implements CoreService {
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevClusterMaster) {
-      await this.createClusterManager(this.legacyRawConfig!);
+    if (this.coreContext.env.isDevCliParent) {
+      await this.setupCliDevMode(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
         this.settings!,
@@ -170,7 +170,7 @@ export class LegacyService implements CoreService {
     }
   }
 
-  private async createClusterManager(config: LegacyConfig) {
+  private async setupCliDevMode(config: LegacyConfig) {
     const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest([this.devConfig$, this.httpConfig$]).pipe(
           first(),
@@ -182,8 +182,8 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClusterManager } = require('./cluster_manager');
-    return new ClusterManager(
+    const { CliDevMode } = require('./cli_dev_mode');
+    CliDevMode.fromCoreServices(
       this.coreContext.env.cliArgs,
       config,
       await basePathProxy$.toPromise()
@@ -251,6 +251,7 @@ export class LegacyService implements CoreService {
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      i18n: setupDeps.core.i18n,
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
@@ -308,14 +309,6 @@ export class LegacyService implements CoreService {
       },
       logger: this.coreContext.logger,
     });
-
-    // The kbnWorkerType check is necessary to prevent the repl
-    // from being started multiple times in different processes.
-    // We only want one REPL.
-    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./cli').startRepl(kbnServer);
-    }
 
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
 

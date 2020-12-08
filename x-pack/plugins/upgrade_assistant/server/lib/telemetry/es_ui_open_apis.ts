@@ -23,11 +23,9 @@ async function incrementUIOpenOptionCounter({
 }: IncrementUIOpenDependencies) {
   const internalRepository = savedObjects.createInternalRepository();
 
-  await internalRepository.incrementCounter(
-    UPGRADE_ASSISTANT_TYPE,
-    UPGRADE_ASSISTANT_DOC_ID,
-    `ui_open.${uiOpenOptionCounter}`
-  );
+  await internalRepository.incrementCounter(UPGRADE_ASSISTANT_TYPE, UPGRADE_ASSISTANT_DOC_ID, [
+    `ui_open.${uiOpenOptionCounter}`,
+  ]);
 }
 
 type UpsertUIOpenOptionDependencies = UIOpen & { savedObjects: SavedObjectsServiceStart };

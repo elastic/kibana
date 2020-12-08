@@ -18,7 +18,10 @@ describe('Enterprise Search Config Data API', () => {
   let mockRouter: MockRouter;
 
   beforeEach(() => {
-    mockRouter = new MockRouter({ method: 'get' });
+    mockRouter = new MockRouter({
+      method: 'get',
+      path: '/api/enterprise_search/config_data',
+    });
 
     registerConfigDataRoute({
       ...mockDependencies,

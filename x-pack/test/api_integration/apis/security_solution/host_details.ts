@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { hostDetails },
         } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsQueries.details,

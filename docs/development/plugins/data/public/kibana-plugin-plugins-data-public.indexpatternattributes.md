@@ -14,6 +14,7 @@ export interface IndexPatternAttributes
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [fieldAttrs](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldattrs.md) | <code>string</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternattributes.intervalname.md) | <code>string</code> |  |

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountHook } from 'test_utils/enzyme_helpers';
+import { mountHook } from '@kbn/test/jest';
 
 import { useLogViewConfiguration } from './log_view_configuration';
 

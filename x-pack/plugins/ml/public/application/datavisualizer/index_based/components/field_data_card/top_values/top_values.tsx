@@ -45,7 +45,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
 
   return (
-    <Fragment>
+    <div data-test-subj="mlFieldDataCardTopValues">
       {topValues.map((value: any) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
           <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
@@ -55,7 +55,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlFieldDataCardTopValueBar">
             <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
@@ -79,6 +79,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
           </EuiText>
         </Fragment>
       )}
-    </Fragment>
+    </div>
   );
 };

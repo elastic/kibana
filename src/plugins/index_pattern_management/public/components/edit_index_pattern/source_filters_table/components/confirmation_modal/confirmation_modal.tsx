@@ -42,7 +42,7 @@ export const DeleteFilterConfirmationModal = ({
         title={
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
-            defaultMessage="Delete source filter '{value}'?"
+            defaultMessage="Delete field filter '{value}'?"
             values={{
               value: filterToDeleteValue,
             }}

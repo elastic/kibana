@@ -8,14 +8,23 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
-import { CloudSetup } from '../../cloud/public';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
 
-export interface PluginsDependencies {
+import { CloudSetup } from '../../cloud/public';
+import { LicensingPluginStart, ILicense } from '../../licensing/public';
+
+import { BreadcrumbService } from './application/services/breadcrumbs';
+
+export interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
-  cloud?: CloudSetup;
   indexManagement?: IndexManagementPluginSetup;
+  share: SharePluginSetup;
+  cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+}
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
 }
 
 export interface ClientConfigType {
@@ -25,5 +34,7 @@ export interface ClientConfigType {
 }
 
 export interface AppServicesContext {
+  breadcrumbService: BreadcrumbService;
+  license: ILicense;
   cloud?: CloudSetup;
 }

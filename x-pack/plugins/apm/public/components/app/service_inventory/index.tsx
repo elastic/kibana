@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPage,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { NoServicesMessage } from './no_services_message';
-import { ServiceList } from './ServiceList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { MLCallout } from './ServiceList/MLCallout';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
 import { Correlations } from '../Correlations';
+import { NoServicesMessage } from './no_services_message';
+import { ServiceList } from './ServiceList';
+import { MLCallout } from './ServiceList/MLCallout';
+import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
 
 const initialData = {
   items: [],
@@ -31,17 +37,15 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-export function ServiceInventory() {
+function useServicesFetcher() {
+  const { urlParams, uiFilters } = useUrlParams();
   const { core } = useApmPluginContext();
-  const {
-    urlParams: { start, end },
-    uiFilters,
-  } = useUrlParams();
+  const { start, end } = urlParams;
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/services',
+          endpoint: 'GET /api/apm/services',
           params: {
             query: { start, end, uiFilters: JSON.stringify(uiFilters) },
           },
@@ -86,6 +90,13 @@ export function ServiceInventory() {
     }
   }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
+  return { servicesData: data, servicesStatus: status };
+}
+
+export function ServiceInventory() {
+  const { core } = useApmPluginContext();
+  const { servicesData, servicesStatus } = useServicesFetcher();
+
   // The page is called "service inventory" to avoid confusion with the
   // "service overview", but this is tracked in some dashboards because it's the
   // initial landing page for APM, so it stays as "services_overview" (plural.)
@@ -93,7 +104,9 @@ export function ServiceInventory() {
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
       projection: Projection.services,
@@ -102,9 +115,9 @@ export function ServiceInventory() {
   );
 
   const {
-    data: anomalyDetectionJobsData,
-    status: anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobs();
+    anomalyDetectionJobsData,
+    anomalyDetectionJobsStatus,
+  } = useAnomalyDetectionJobsFetcher();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',
@@ -121,37 +134,39 @@ export function ServiceInventory() {
 
   return (
     <>
-      <EuiSpacer />
-
-      <Correlations />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiFlexGroup direction="column">
-            {displayMlCallout ? (
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <Correlations />
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiFlexGroup direction="column">
+              {displayMlCallout ? (
+                <EuiFlexItem>
+                  <MLCallout
+                    onDismiss={() => setUserHasDismissedCallout(true)}
+                  />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem>
-                <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+                <EuiPanel>
+                  <ServiceList
+                    items={servicesData.items}
+                    noItemsMessage={
+                      <NoServicesMessage
+                        historicalDataFound={servicesData.hasHistoricalData}
+                        status={servicesStatus}
+                      />
+                    }
+                  />
+                </EuiPanel>
               </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiPanel>
-                <ServiceList
-                  items={data.items}
-                  noItemsMessage={
-                    <NoServicesMessage
-                      historicalDataFound={data.hasHistoricalData}
-                      status={status}
-                    />
-                  }
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

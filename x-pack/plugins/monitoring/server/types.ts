@@ -6,7 +6,6 @@
 import { Observable } from 'rxjs';
 import { IRouter, ILegacyClusterClient, Logger } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
 import {
@@ -35,7 +34,6 @@ export interface MonitoringElasticsearchConfig {
 
 export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
@@ -74,12 +72,15 @@ export interface LegacyShimDependencies {
 
 export interface IBulkUploader {
   getKibanaStats: () => any;
+  stop: () => void;
 }
 
 export interface LegacyRequest {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: unknown;
+  payload: {
+    [key: string]: any;
+  };
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
@@ -103,6 +104,83 @@ export interface LegacyRequest {
           name: string
         ) => {
           callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
+        };
+      };
+    };
+  };
+}
+
+export interface ElasticsearchResponse {
+  hits?: {
+    hits: ElasticsearchResponseHit[];
+    total: {
+      value: number;
+    };
+  };
+}
+
+export interface ElasticsearchResponseHit {
+  _source: ElasticsearchSource;
+  inner_hits: {
+    [field: string]: {
+      hits: {
+        hits: ElasticsearchResponseHit[];
+        total: {
+          value: number;
+        };
+      };
+    };
+  };
+}
+
+export interface ElasticsearchSource {
+  timestamp: string;
+  beats_stats?: {
+    timestamp?: string;
+    beat?: {
+      uuid?: string;
+      name?: string;
+      type?: string;
+      version?: string;
+      host?: string;
+    };
+    metrics?: {
+      beat?: {
+        memstats?: {
+          memory_alloc?: number;
+        };
+        info?: {
+          uptime?: {
+            ms?: number;
+          };
+        };
+        handles?: {
+          limit?: {
+            hard?: number;
+            soft?: number;
+          };
+        };
+      };
+      libbeat?: {
+        config?: {
+          reloads?: number;
+        };
+        output?: {
+          type?: string;
+          write?: {
+            bytes?: number;
+            errors?: number;
+          };
+          read?: {
+            errors?: number;
+          };
+        };
+        pipeline?: {
+          events?: {
+            total?: number;
+            published?: number;
+            dropped?: number;
+          };
         };
       };
     };

@@ -149,16 +149,19 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     };
   })
-  .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => {
-    const timerange: TimeRange = {
-      kind: 'absolute',
-      fromStr: undefined,
-      toStr: undefined,
-      from,
-      to,
-    };
-    return updateInputTimerange(id, timerange, state);
-  })
+  .case(
+    setAbsoluteRangeDatePicker,
+    (state, { id, from, to, fromStr = undefined, toStr = undefined }) => {
+      const timerange: TimeRange = {
+        kind: 'absolute',
+        fromStr,
+        toStr,
+        from,
+        to,
+      };
+      return updateInputTimerange(id, timerange, state);
+    }
+  )
   .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => {
     const timerange: TimeRange = {
       kind: 'relative',

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { Relationships, RelationshipsProps } from './relationships';
 

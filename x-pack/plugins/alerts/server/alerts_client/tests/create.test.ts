@@ -14,7 +14,16 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
+
+jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+  SavedObjectsUtils: {
+    generateId: () => 'mock-saved-object-id',
+  },
+}));
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -22,6 +31,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -34,16 +44,17 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -185,6 +196,62 @@ describe('create()', () => {
     });
   });
 
+  describe('auditLogger', () => {
+    test('logs audit event when creating an alert', async () => {
+      const data = getMockData({
+        enabled: false,
+        actions: [],
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: data,
+        references: [],
+      });
+      await alertsClient.create({ data });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_create',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to create an alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        alertsClient.create({
+          data: getMockData({
+            enabled: false,
+            actions: [],
+          }),
+        })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_create',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: 'mock-saved-object-id',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
+  });
+
   test('creates an alert', async () => {
     const data = getMockData();
     const createdAttributes = {
@@ -197,6 +264,7 @@ describe('create()', () => {
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
       mutedInstanceIds: [],
       actions: [
@@ -331,20 +399,22 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "references": Array [
-                                                                                                                      Object {
-                                                                                                                        "id": "1",
-                                                                                                                        "name": "action_0",
-                                                                                                                        "type": "action",
-                                                                                                                      },
-                                                                                                                    ],
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "id": "mock-saved-object-id",
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+      }
+    `);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
@@ -377,9 +447,7 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
@@ -419,6 +487,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -556,6 +625,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -632,6 +702,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -681,6 +752,7 @@ describe('create()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -698,9 +770,7 @@ describe('create()', () => {
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
     alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -711,7 +781,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error and invalidates API key when create saved object fails', async () => {
+  test('throws error and add API key to invalidatePendingApiKey SO when create saved object fails', async () => {
     const data = getMockData();
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -731,11 +801,25 @@ describe('create()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    const createdAt = new Date().toISOString();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt,
+      },
+      references: [],
+    });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
+      apiKeyId: '123',
+      createdAt,
+    });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
@@ -958,6 +1042,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
@@ -974,6 +1059,7 @@ describe('create()', () => {
         },
       },
       {
+        id: 'mock-saved-object-id',
         references: [
           {
             id: '1',
@@ -1079,6 +1165,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
@@ -1095,6 +1182,7 @@ describe('create()', () => {
         },
       },
       {
+        id: 'mock-saved-object-id',
         references: [
           {
             id: '1',

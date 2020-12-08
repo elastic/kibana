@@ -34,13 +34,13 @@ import {
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
-  initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initSourceRoute } from './routes/source';
 import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
+import { initProcessListRoute } from './routes/process_list';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -73,7 +73,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
-  initLogEntriesItemRoute(libs);
   initMetricExplorerRoute(libs);
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
@@ -82,4 +81,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogSourceStatusRoutes(libs);
   initAlertPreviewRoute(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
+  initProcessListRoute(libs);
 };

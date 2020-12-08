@@ -10,7 +10,6 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import 'react-vis/dist/style.css';
 import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
 import {
   KibanaContextProvider,
@@ -21,8 +20,8 @@ import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
@@ -66,21 +65,23 @@ function CsmApp() {
 }
 
 export function CsmAppRoot({
+  appMountParameters,
   core,
   deps,
-  history,
   config,
   corePlugins: { embeddable },
 }: {
+  appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
 }) {
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = deps;
   const apmPluginContextValue = {
+    appMountParameters,
     config,
     core,
     plugins,
@@ -109,10 +110,12 @@ export function CsmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
+  appMountParameters: AppMountParameters,
   config: ConfigSchema,
   corePlugins: ApmPluginStartDeps
 ) => {
+  const { element } = appMountParameters;
+
   createCallApmApi(core.http);
 
   // Automatically creates static index pattern and stores as saved object
@@ -123,9 +126,9 @@ export const renderApp = (
 
   ReactDOM.render(
     <CsmAppRoot
+      appMountParameters={appMountParameters}
       core={core}
       deps={deps}
-      history={history}
       config={config}
       corePlugins={corePlugins}
     />,

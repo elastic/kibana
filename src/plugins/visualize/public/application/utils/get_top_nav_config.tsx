@@ -80,6 +80,7 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
+    savedObjectsTagging,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -306,6 +307,11 @@ export const getTopNavConfig = (
                 embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
+
+                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
+                  savedVis.setTags(selectedTags);
+                }
+
                 const saveOptions = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
@@ -320,10 +326,30 @@ export const getTopNavConfig = (
                 return response;
               };
 
+              let selectedTags: string[] = [];
+              let options: React.ReactNode | undefined;
+
+              if (
+                savedVis &&
+                savedObjectsTagging &&
+                savedObjectsTagging.ui.hasTagDecoration(savedVis)
+              ) {
+                selectedTags = savedVis.getTags();
+                options = (
+                  <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+                    initialSelection={selectedTags}
+                    onTagsSelected={(newSelection) => {
+                      selectedTags = newSelection;
+                    }}
+                  />
+                );
+              }
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
+                  options={options}
                   getAppNameFromId={stateTransfer.getAppNameFromId}
                   objectType={'visualization'}
                   onClose={() => {}}

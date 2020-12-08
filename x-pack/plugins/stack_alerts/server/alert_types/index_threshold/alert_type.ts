@@ -5,23 +5,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType, AlertExecutorOptions } from '../../types';
+import { Logger } from 'src/core/server';
+import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { TimeSeriesQuery } from './lib/time_series_query';
-import { Service } from '../../types';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import {
+  CoreQueryParamsSchemaProperties,
+  TimeSeriesQuery,
+} from '../../../../triggers_actions_ui/server';
 
 export const ID = '.index-threshold';
 
-import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
+enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'notBetween',
+}
+
+const humanReadableComparators = new Map<string, string>([
+  [Comparator.LT, 'less than'],
+  [Comparator.LT_OR_EQ, 'less than or equal to'],
+  [Comparator.GT_OR_EQ, 'greater than or equal to'],
+  [Comparator.GT, 'greater than'],
+  [Comparator.BETWEEN, 'between'],
+  [Comparator.NOT_BETWEEN, 'not between'],
+]);
+
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
-export function getAlertType(service: Service): AlertType<Params, {}, {}, ActionContext> {
-  const { logger } = service;
-
+export function getAlertType(
+  logger: Logger,
+  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
+): AlertType<Params, {}, {}, ActionContext> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -83,6 +104,13 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
     }
   );
 
+  const actionVariableContextConditionsLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
+    {
+      defaultMessage: 'A string describing the threshold comparator and threshold',
+    }
+  );
+
   const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
     (propKey: string) => {
       return {
@@ -107,6 +135,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+        { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
@@ -144,7 +173,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
       interval: undefined,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await service.indexThreshold.timeSeriesQuery({
+    const result = await (await data).timeSeriesQuery({
       logger,
       callCluster,
       query: queryParams,
@@ -160,10 +189,16 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
 
       if (!met) continue;
 
+      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
+      const humanFn = `${agg} is ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold.join(' and ')}`;
+
       const baseContext: BaseActionContext = {
         date,
         group: instanceId,
         value,
+        conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
@@ -186,12 +221,13 @@ type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 function getComparatorFns(): Map<string, ComparatorFn> {
   const fns: Record<string, ComparatorFn> = {
-    '<': (value: number, threshold: number[]) => value < threshold[0],
-    '<=': (value: number, threshold: number[]) => value <= threshold[0],
-    '>=': (value: number, threshold: number[]) => value >= threshold[0],
-    '>': (value: number, threshold: number[]) => value > threshold[0],
-    between: (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
-    notBetween: (value: number, threshold: number[]) =>
+    [Comparator.LT]: (value: number, threshold: number[]) => value < threshold[0],
+    [Comparator.LT_OR_EQ]: (value: number, threshold: number[]) => value <= threshold[0],
+    [Comparator.GT_OR_EQ]: (value: number, threshold: number[]) => value >= threshold[0],
+    [Comparator.GT]: (value: number, threshold: number[]) => value > threshold[0],
+    [Comparator.BETWEEN]: (value: number, threshold: number[]) =>
+      value >= threshold[0] && value <= threshold[1],
+    [Comparator.NOT_BETWEEN]: (value: number, threshold: number[]) =>
       value < threshold[0] || value > threshold[1],
   };
 
@@ -201,4 +237,10 @@ function getComparatorFns(): Map<string, ComparatorFn> {
   }
 
   return result;
+}
+
+function getHumanReadableComparator(comparator: string) {
+  return humanReadableComparators.has(comparator)
+    ? humanReadableComparators.get(comparator)
+    : comparator;
 }

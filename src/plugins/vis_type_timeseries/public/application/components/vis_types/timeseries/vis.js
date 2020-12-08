@@ -34,24 +34,19 @@ import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
-export class TimeseriesVisualization extends Component {
+class TimeseriesVisualization extends Component {
   static propTypes = {
     model: PropTypes.object,
     onBrush: PropTypes.func,
     visData: PropTypes.object,
-    dateFormat: PropTypes.string,
     getConfig: PropTypes.func,
   };
 
+  scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+  dateFormat = this.props.getConfig('dateFormat');
+
   xAxisFormatter = (interval) => (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
-
-    if (!scaledDataFormat || !dateFormat) {
-      return val;
-    }
-
-    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
-
+    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };
 
@@ -161,6 +156,10 @@ export class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
+    const allSeriesHaveSameFormatters = seriesModel.every(
+      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
+    );
+
     this.showToastNotification = null;
 
     seriesModel.forEach((seriesGroup) => {
@@ -211,7 +210,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: series.length === 1 ? undefined : (val) => val,
+          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
@@ -241,3 +240,7 @@ export class TimeseriesVisualization extends Component {
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimeseriesVisualization as default };

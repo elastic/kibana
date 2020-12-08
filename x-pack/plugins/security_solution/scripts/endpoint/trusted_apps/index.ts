@@ -34,7 +34,10 @@ ${separator}`);
 export const run: (options?: RunOptions) => Promise<ExceptionListItemSchema[]> = async ({
   count = 10,
 }: RunOptions = {}) => {
-  const kbnClient = new KbnClient(logger, { url: 'http://elastic:changeme@localhost:5601' });
+  const kbnClient = new KbnClient({
+    log: logger,
+    url: 'http://elastic:changeme@localhost:5601',
+  });
 
   // touch the Trusted Apps List so it can be created
   await kbnClient.request({

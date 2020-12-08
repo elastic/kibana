@@ -33,14 +33,20 @@ import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
+  setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+} from '../../../common/store/inputs/actions';
+import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  TimelineModel,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -58,6 +64,10 @@ import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { sourcererActions } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -252,6 +262,14 @@ export const defaultTimelineToTimelineModel = (
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    dateRange:
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+        ? {
+            start: DEFAULT_FROM_MOMENT.toISOString(),
+            end: DEFAULT_TO_MOMENT.toISOString(),
+          }
+        : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
@@ -294,6 +312,7 @@ export const formatTimelineResultToModel = (
 };
 
 export interface QueryTimelineById<TCache> {
+  activeTimelineTab?: TimelineTabs;
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
@@ -312,6 +331,7 @@ export interface QueryTimelineById<TCache> {
 }
 
 export const queryTimelineById = <TCache>({
+  activeTimelineTab = TimelineTabs.query,
   apolloClient,
   duplicate = false,
   graphEventId = '',
@@ -340,6 +360,7 @@ export const queryTimelineById = <TCache>({
           duplicate,
           timelineType
         );
+
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
@@ -354,8 +375,10 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              activeTab: activeTimelineTab,
               graphEventId,
               show: openTimeline,
+              dateRange: { start: from, end: to },
             },
             to,
           })();
@@ -384,7 +407,22 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
       eventType: timeline.eventType,
     })
   );
-  dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  if (
+    timeline.status === TimelineStatus.immutable &&
+    timeline.timelineType === TimelineType.template
+  ) {
+    dispatch(
+      dispatchSetRelativeRangeDatePicker({
+        id: 'timeline',
+        fromStr: 'now-24h',
+        toStr: 'now',
+        from: DEFAULT_FROM_MOMENT.toISOString(),
+        to: DEFAULT_TO_MOMENT.toISOString(),
+      })
+    );
+  } else {
+    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  }
   dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
@@ -392,15 +430,6 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery != null &&
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
-    dispatch(
-      dispatchSetKqlFilterQueryDraft({
-        id,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-        },
-      })
-    );
     dispatch(
       dispatchApplyKqlFilterQuery({
         id,
@@ -416,8 +445,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   }
 
   if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const getNewNoteId = (): string => uuid.v4();
-    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    const newNote = createNote({ newNote: ruleNote });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }

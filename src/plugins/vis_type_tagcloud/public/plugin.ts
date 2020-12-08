@@ -38,7 +38,7 @@ export interface TagCloudPluginSetupDependencies {
 
 /** @internal */
 export interface TagCloudVisDependencies {
-  colors: ChartsPluginSetup['colors'];
+  colors: ChartsPluginSetup['legacyColors'];
 }
 
 /** @internal */
@@ -59,7 +59,7 @@ export class TagCloudPlugin implements Plugin<void, void> {
     { expressions, visualizations, charts }: TagCloudPluginSetupDependencies
   ) {
     const visualizationDependencies: TagCloudVisDependencies = {
-      colors: charts.colors,
+      colors: charts.legacyColors,
     };
     expressions.registerFunction(createTagCloudFn);
     expressions.registerRenderer(getTagCloudVisRenderer(visualizationDependencies));

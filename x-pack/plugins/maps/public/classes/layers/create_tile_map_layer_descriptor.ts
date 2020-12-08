@@ -103,7 +103,7 @@ export function createTileMapLayerDescriptor({
 
   const metricSourceKey = getSourceAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field,
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
   });
   const metricStyleField = {
     name: metricSourceKey,
@@ -113,16 +113,16 @@ export function createTileMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
         field: metricStyleField,
         color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
         fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions)
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
             .fieldMetaOptions,
           isEnabled: false,
         },
@@ -139,11 +139,11 @@ export function createTileMapLayerDescriptor({
     styleProperties[VECTOR_STYLES.ICON_SIZE] = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
         maxSize: 18,
         field: metricStyleField,
         fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions)
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions)
             .fieldMetaOptions,
           isEnabled: false,
         },

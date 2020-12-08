@@ -30,6 +30,7 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
+import { getFieldByNameFactory } from '../../../pure_helpers';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -96,6 +97,9 @@ describe('ranges', () => {
           title: 'my_index_pattern',
           hasRestrictions: false,
           fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+          getFieldByName: getFieldByNameFactory([
+            { name: sourceField, type: 'number', displayName: sourceField },
+          ]),
         },
       },
       existingFields: {},
@@ -280,7 +284,11 @@ describe('ranges', () => {
           />
         );
 
+        // There's a useEffect in the component that updates the value on bootstrap
+        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
           instance.find(EuiRange).prop('onChange')!(
             {
               currentTarget: {
@@ -289,26 +297,27 @@ describe('ranges', () => {
             } as React.ChangeEvent<HTMLInputElement>,
             true
           );
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      maxBars: MAX_HISTOGRAM_VALUE,
-                    },
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    ...state.layers.first.columns.col1.params,
+                    maxBars: MAX_HISTOGRAM_VALUE,
                   },
                 },
               },
             },
-          });
+          },
         });
       });
 
@@ -326,59 +335,65 @@ describe('ranges', () => {
           />
         );
 
+        // There's a useEffect in the component that updates the value on bootstrap
+        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           // minus button
           instance
             .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
-                    },
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    ...state.layers.first.columns.col1.params,
+                    maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
                   },
                 },
               },
             },
-          });
+          },
+        });
 
+        act(() => {
           // plus button
           instance
             .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      maxBars: GRANULARITY_DEFAULT_VALUE,
-                    },
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    ...state.layers.first.columns.col1.params,
+                    maxBars: GRANULARITY_DEFAULT_VALUE,
                   },
                 },
               },
             },
-          });
+          },
         });
+        // });
       });
     });
 
@@ -743,6 +758,52 @@ describe('ranges', () => {
         expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
           /^Bytes format:/
         );
+      });
+
+      it('should not update the state on mount', () => {
+        const setStateSpy = jest.fn();
+
+        mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+        expect(setStateSpy.mock.calls.length).toBe(0);
+      });
+
+      it('should not reset formatters when switching between custom ranges and auto histogram', () => {
+        const setStateSpy = jest.fn();
+        // now set a format on the range operation
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+          id: 'custom',
+          params: { decimals: 3 },
+        };
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act closures are made to make it work properly the update flush
+        act(() => {
+          instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        expect(setStateSpy.mock.calls[1][0].layers.first.columns.col1.params.format).toEqual({
+          id: 'custom',
+          params: { decimals: 3 },
+        });
       });
     });
   });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from '../../../../test_utils';
+import { getRandomString } from '@kbn/test/jest';
 import { RepositoryType } from '../../common/types';
 const defaultSettings: any = { chunkSize: '10mb', location: '/tmp/es-backups' };
 

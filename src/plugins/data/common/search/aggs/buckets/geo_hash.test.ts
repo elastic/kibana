@@ -87,6 +87,42 @@ describe('Geohash Agg', () => {
     });
   });
 
+  test('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs();
+    expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "autoPrecision": Array [
+            true,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "location",
+          ],
+          "id": Array [
+            "geohash_grid",
+          ],
+          "isFilteredByCollar": Array [
+            true,
+          ],
+          "precision": Array [
+            2,
+          ],
+          "schema": Array [
+            "segment",
+          ],
+          "useGeocentroid": Array [
+            true,
+          ],
+        },
+        "function": "aggGeoHash",
+        "type": "function",
+      }
+    `);
+  });
+
   describe('getRequestAggs', () => {
     describe('initial aggregation creation', () => {
       let aggConfigs: IAggConfigs;

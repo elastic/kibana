@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
@@ -24,9 +27,8 @@ import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
-import { ExecutionContextSearch } from '../execution';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -48,7 +50,7 @@ export type ExpressionsServiceSetup = Pick<
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: ExecutionContextSearch;
+  searchContext?: SerializableState;
 
   variables?: Record<string, any>;
 
@@ -58,6 +60,13 @@ export interface ExpressionExecutionParams {
    * function are saved and are available for introspection.
    */
   debug?: boolean;
+
+  /**
+   * Makes a `KibanaRequest` object available to expression functions. Useful for
+   * functions which are running on the server and need to perform operations that
+   * are scoped to a specific user.
+   */
+  kibanaRequest?: KibanaRequest;
 
   searchSessionId?: string;
 
@@ -171,7 +180,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
+export class ExpressionsService implements PersistableStateService<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -311,16 +320,6 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly migrate = (state: SerializableState, version: string) => {
     return this.executor.migrate(state, version);
-  };
-
-  /**
-   * Migrates expression to the latest version
-   * @param state expression AST to update
-   * @param version the version of kibana in which expression was created
-   * @returns migrated expression AST
-   */
-  public readonly migrateToLatest = (state: unknown, version: string) => {
-    return this.executor.migrateToLatest(state, version);
   };
 
   /**

@@ -21,15 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 
-const fnName = 'aggCount';
+export const aggCountFnName = 'aggCount';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.COUNT>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggCountFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggCount = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggCountFnName,
   help: i18n.translate('data.search.aggs.function.metrics.count.help', {
     defaultMessage: 'Generates a serialized agg config for a Count agg',
   }),

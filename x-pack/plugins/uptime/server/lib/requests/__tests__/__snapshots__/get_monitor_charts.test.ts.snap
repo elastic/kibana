@@ -2,7 +2,6 @@
 
 exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters 1`] = `
 Array [
-  "search",
   Object {
     "body": Object {
       "aggs": Object {
@@ -25,9 +24,6 @@ Array [
           "auto_date_histogram": Object {
             "buckets": 25,
             "field": "@timestamp",
-          },
-          "date_histogram": Object {
-            "fixed_interval": "36000ms",
           },
         },
       },

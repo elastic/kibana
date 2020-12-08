@@ -88,6 +88,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
     },
     uiSettings: {
@@ -412,6 +413,25 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
@@ -472,12 +492,7 @@ export default async function ({ readConfigFile }) {
 
         logstash_read_user: {
           elasticsearch: {
-            indices: [
-              {
-                names: ['.logstash*'],
-                privileges: ['read'],
-              },
-            ],
+            cluster: ['manage_logstash_pipelines'],
           },
         },
 

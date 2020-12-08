@@ -17,18 +17,15 @@
  * under the License.
  */
 
+import { TabularDataRow } from '../../../common/adapters';
+
+type DataViewColumnRender = (value: string, _item: TabularDataRow) => string;
+
 export interface DataViewColumn {
   name: string;
   field: string;
-  sortable: (item: DataViewRow) => string | number;
+  sortable: (item: TabularDataRow) => string | number;
   render: DataViewColumnRender;
 }
 
-type DataViewColumnRender = (value: string, _item: DataViewRow) => string;
-
-export interface DataViewRow {
-  [fields: string]: {
-    formatted: string;
-    raw: any;
-  };
-}
+export type DataViewRow = TabularDataRow;

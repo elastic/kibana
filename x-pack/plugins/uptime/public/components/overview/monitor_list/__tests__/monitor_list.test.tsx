@@ -17,6 +17,9 @@ import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 import moment from 'moment';
+import { IHttpFetchError } from '../../../../../../../../src/core/public';
+import { mockMoment } from '../../../../lib/helper/test_helpers';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -57,7 +60,7 @@ const testFooPings: Ping[] = [
 const testFooSummary: MonitorSummary = {
   monitor_id: 'foo',
   state: {
-    monitor: {},
+    monitor: { type: 'http' },
     summaryPings: testFooPings,
     summary: {
       up: 1,
@@ -92,7 +95,7 @@ const testBarPings: Ping[] = [
 const testBarSummary: MonitorSummary = {
   monitor_id: 'bar',
   state: {
-    monitor: {},
+    monitor: { type: 'http' },
     summaryPings: testBarPings,
     summary: {
       up: 2,
@@ -105,6 +108,10 @@ const testBarSummary: MonitorSummary = {
 
 describe('MonitorList component', () => {
   let localStorageMock: any;
+
+  beforeAll(() => {
+    mockMoment();
+  });
 
   const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
     if (timestamp) {
@@ -134,7 +141,6 @@ describe('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    //  @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
   });
 
@@ -171,14 +177,16 @@ describe('MonitorList component', () => {
 
   it('renders the monitor list', () => {
     const component = renderWithRouter(
-      <MonitorListComponent
-        monitorList={{
-          list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
-          loading: false,
-        }}
-        pageSize={10}
-        setPageSize={jest.fn()}
-      />
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListComponent
+          monitorList={{
+            list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+            loading: false,
+          }}
+          pageSize={10}
+          setPageSize={jest.fn()}
+        />
+      </EuiThemeProvider>
     );
 
     expect(component).toMatchSnapshot();
@@ -187,7 +195,11 @@ describe('MonitorList component', () => {
   it('renders error list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: getMonitorList(), error: new Error('foo message'), loading: false }}
+        monitorList={{
+          list: getMonitorList(),
+          error: new Error('foo message') as IHttpFetchError,
+          loading: false,
+        }}
         pageSize={10}
         setPageSize={jest.fn()}
       />

@@ -71,6 +71,7 @@ export class CalculationVars extends Component {
               metric={this.props.model}
               value={row.field}
               includeSiblings={this.props.includeSiblings}
+              exclude={this.props.exclude}
             />
           </EuiFlexItem>
           <EuiFlexItem>

@@ -64,17 +64,25 @@ import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
 
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
+  CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
 
-export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
+export {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+};
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -284,6 +292,8 @@ export {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -292,6 +302,7 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
@@ -334,6 +345,8 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
+export { I18nServiceSetup } from './i18n';
+
 export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
@@ -347,6 +360,7 @@ export {
   MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
 } from './types';
 
@@ -388,6 +402,9 @@ export interface RequestHandlerContext {
     elasticsearch: {
       client: IScopedClusterClient;
       legacy: {
+        /*
+         * @deprecated Use {@link IScopedClusterClient}.
+         */
         client: ILegacyScopedClusterClient;
       };
     };
@@ -418,6 +435,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     /** {@link HttpResources} */
     resources: HttpResources;
   };
+  /** {@link I18nServiceSetup} */
+  i18n: I18nServiceSetup;
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
   /** {@link MetricsServiceSetup} */

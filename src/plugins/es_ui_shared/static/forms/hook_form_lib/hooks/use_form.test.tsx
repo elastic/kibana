@@ -255,9 +255,9 @@ describe('useForm() hook', () => {
         setInputValue('usernameField', 'John');
       });
 
-      [{ data, isValid }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-        OnUpdateHandler
-      >;
+      [{ data, isValid }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
 
       expect(data.internal).toEqual({ user: { name: 'John' } });
       // Transform name to uppercase as decalred in our serializer func
@@ -305,9 +305,9 @@ describe('useForm() hook', () => {
 
       expect(onFormData.mock.calls.length).toBe(1);
 
-      const [{ data }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-        OnUpdateHandler
-      >;
+      const [{ data }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
 
       expect(data.internal).toEqual({
         title: defaultValue.title,

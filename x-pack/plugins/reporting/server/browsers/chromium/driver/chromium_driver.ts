@@ -158,7 +158,7 @@ export class HeadlessChromiumDriver {
   ): Promise<ElementHandle<Element>> {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
-    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
+    const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
     logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
@@ -333,17 +333,32 @@ export class HeadlessChromiumDriver {
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
     const { hostname, protocol, port, pathname } = parseUrl(url);
 
-    if (pathname === undefined) {
-      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
-      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
-      // situation where it's undefined but here's an explicit Error if we do.
-      throw new Error(`pathname is undefined, don't know how to proceed`);
-    }
+    // `port` is null in URLs that don't explicitly state it,
+    // however we can derive the port from the protocol (http/https)
+    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    const derivedPort = (() => {
+      if (port) {
+        return port;
+      }
+
+      if (protocol === 'http:') {
+        return '80';
+      }
+
+      if (protocol === 'https:') {
+        return '443';
+      }
+
+      return null;
+    })();
+
+    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
+    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
 
     return (
       hostname === conditions.hostname &&
       protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
       pathname.startsWith(`${conditions.basePath}/`)
     );
   }

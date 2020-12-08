@@ -44,11 +44,14 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   return usageCollection.makeUsageCollector<AlertsUsage>({
     type: 'alerts',
-    isReady: () => true,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
@@ -129,7 +132,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 export function registerAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   const collector = createAlertsUsageCollector(usageCollection, taskManager);
   usageCollection.registerCollector(collector);

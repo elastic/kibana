@@ -22,6 +22,10 @@ export interface Document {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
     filters: PersistableFilter[];
   };
   references: SavedObjectReference[];

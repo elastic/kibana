@@ -19,16 +19,13 @@
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
 import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import {
-  ROLL_INDICES_START,
-  ROLL_TOTAL_INDICES_INTERVAL,
-  registerApplicationUsageCollector,
-} from './telemetry_application_usage_collector';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
+import { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
@@ -40,11 +37,11 @@ describe('telemetry_application_usage', () => {
 
   const logger = loggingSystemMock.createLogger();
 
-  let collector: CollectorOptions;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 

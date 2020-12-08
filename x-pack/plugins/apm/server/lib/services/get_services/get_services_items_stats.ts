@@ -37,7 +37,8 @@ import {
 function getDateHistogramOpts(start: number, end: number) {
   return {
     field: '@timestamp',
-    fixed_interval: getBucketSize(start, end, 20).intervalString,
+    fixed_interval: getBucketSize({ start, end, numBuckets: 20 })
+      .intervalString,
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
   };
@@ -337,7 +338,8 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { apmEventClient } = setup;
+  const { apmEventClient, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       body: {
@@ -352,6 +354,7 @@ export const getEnvironments = async ({
               environments: {
                 terms: {
                   field: SERVICE_ENVIRONMENT,
+                  size: maxServiceEnvironments,
                 },
               },
             },

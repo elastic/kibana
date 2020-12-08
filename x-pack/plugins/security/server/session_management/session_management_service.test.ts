@@ -14,7 +14,7 @@ import {
 import { Session } from './session';
 import { SessionIndex } from './session_index';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import {
   coreMock,
   elasticsearchServiceMock,

@@ -5,18 +5,20 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ConfigType } from '../';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
-interface ICheckAccess {
+interface CheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
+  spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }
-export interface IAccess {
+export interface Access {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
@@ -38,20 +40,53 @@ const DENY_ALL_PLUGINS = {
 export const checkAccess = async ({
   config,
   security,
+  spaces,
   request,
   log,
-}: ICheckAccess): Promise<IAccess> => {
+}: CheckAccess): Promise<Access> => {
+  const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
+
+  // We can only retrieve the active space when either:
+  // 1) security is enabled, and the request has already been authenticated
+  // 2) security is disabled
+  const attemptSpaceRetrieval = !isRbacEnabled || request.auth.isAuthenticated;
+
+  // If we can't retrieve the current space, then assume the feature is available
+  let allowedAtSpace = false;
+
+  if (!spaces) {
+    allowedAtSpace = true;
+  }
+
+  if (spaces && attemptSpaceRetrieval) {
+    try {
+      const space = await spaces.spacesService.getActiveSpace(request);
+      allowedAtSpace = !space.disabledFeatures?.includes('enterpriseSearch');
+    } catch (err) {
+      if (err?.output?.statusCode === 403) {
+        allowedAtSpace = false;
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  // Hide the plugin if turned off in the current space.
+  if (!allowedAtSpace) {
+    return DENY_ALL_PLUGINS;
+  }
+
   // If security has been disabled, always show the plugin
-  if (!security?.authz.mode.useRbacForRequest(request)) {
+  if (!isRbacEnabled) {
     return ALLOW_ALL_PLUGINS;
   }
 
   // If the user is a "superuser" or has the base Kibana all privilege globally, always show the plugin
   const isSuperUser = async (): Promise<boolean> => {
     try {
-      const { hasAllRequested } = await security.authz
+      const { hasAllRequested } = await security!.authz
         .checkPrivilegesWithRequest(request)
-        .globally({ kibana: security.authz.actions.ui.get('enterpriseSearch', 'all') });
+        .globally({ kibana: security!.authz.actions.ui.get('enterpriseSearch', 'all') });
       return hasAllRequested;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {

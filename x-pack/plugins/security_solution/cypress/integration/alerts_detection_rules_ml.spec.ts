@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
@@ -23,6 +24,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
@@ -66,11 +68,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = machineLearningRule.referenceUrls.join('');
 const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
 const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = machineLearningRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
 const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
 
 describe('Detection rules, machine learning', () => {
@@ -122,9 +120,13 @@ describe('Detection rules, machine learning', () => {
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(DEFINITION_DETAILS).within(() => {

@@ -17,9 +17,9 @@ export class ConfigurationSourcesAdapter implements SourcesAdapter {
   private readonly configuration: ConfigurationAdapter<ConfigurationWithSources>;
 
   constructor(
-    configuration: ConfigurationAdapter<
-      ConfigurationWithSources
-    > = new InmemoryConfigurationAdapter({ sources: {} })
+    configuration: ConfigurationAdapter<ConfigurationWithSources> = new InmemoryConfigurationAdapter(
+      { sources: {} }
+    )
   ) {
     this.configuration = configuration;
   }

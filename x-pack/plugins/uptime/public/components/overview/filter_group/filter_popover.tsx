@@ -54,6 +54,7 @@ export const FilterPopover = ({
     const mItems = selectedItems.concat(allItems ?? []);
     const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
     setItems(newItems);
+    setTempSelectedItems(selectedItems);
   }, [allItems, selectedItems]);
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export const FilterPopover = ({
             isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
-            numActiveFilters={tempSelectedItems.length}
+            numActiveFilters={isOpen ? tempSelectedItems.length : selectedItems.length}
             onClick={() => {
               setIsOpen(!isOpen);
               onFilterFieldChange(fieldName, tempSelectedItems);
@@ -100,6 +101,12 @@ export const FilterPopover = ({
           incremental={true}
           disabled={items.length === 0}
           onSearch={(query) => setSearchQuery(query)}
+          aria-label={i18n.translate('xpack.uptime.filterPopout.searchMessage.ariaLabel', {
+            defaultMessage: 'Search for {title}',
+            values: {
+              title: title.toLowerCase(),
+            },
+          })}
           placeholder={
             loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
@@ -108,7 +115,7 @@ export const FilterPopover = ({
               : i18n.translate('xpack.uptime.filterPopout.searchMessage', {
                   defaultMessage: 'Search {title}',
                   values: {
-                    title,
+                    title: title.toLowerCase(),
                   },
                 })
           }

@@ -14,6 +14,7 @@ import { filters } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
+import { savedObjectsApiProvider } from './saved_objects';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
@@ -627,6 +628,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     calculateModelMemoryLimit$({
+      datafeedConfig,
       analysisConfig,
       indexPattern,
       query,
@@ -634,6 +636,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
     }: {
+      datafeedConfig?: Datafeed;
       analysisConfig: AnalysisConfig;
       indexPattern: string;
       query: any;
@@ -642,6 +645,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       latestMs: number;
     }) {
       const body = JSON.stringify({
+        datafeedConfig,
         analysisConfig,
         indexPattern,
         query,
@@ -765,5 +769,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
+    savedObjects: savedObjectsApiProvider(httpService),
   };
 }

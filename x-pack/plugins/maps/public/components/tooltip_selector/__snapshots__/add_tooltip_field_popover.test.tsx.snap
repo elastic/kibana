@@ -26,6 +26,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   panelPaddingSize="none"
 >
   <EuiSelectable
+    isPreFiltered={false}
     onChange={[Function]}
     options={
       Array [
@@ -96,6 +97,7 @@ exports[`Should render 1`] = `
   panelPaddingSize="none"
 >
   <EuiSelectable
+    isPreFiltered={false}
     onChange={[Function]}
     options={
       Array [

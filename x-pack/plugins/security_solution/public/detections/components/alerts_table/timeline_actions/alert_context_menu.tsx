@@ -21,7 +21,6 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -75,11 +74,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       '',
     [ecsRowData]
   );
-  const ruleIndices = useMemo(
-    (): string[] =>
-      (ecsRowData.signal?.rule && ecsRowData.signal.rule.index) ?? DEFAULT_INDEX_PATTERN,
-    [ecsRowData]
-  );
+  const ruleIndices = useMemo((): string[] => {
+    if (
+      ecsRowData.signal?.rule &&
+      ecsRowData.signal.rule.index &&
+      ecsRowData.signal.rule.index.length > 0
+    ) {
+      return ecsRowData.signal.rule.index;
+    } else {
+      return DEFAULT_INDEX_PATTERN;
+    }
+  }, [ecsRowData]);
 
   const { addWarning } = useAppToasts();
 
@@ -203,6 +208,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const openAlertActionComponent = (
     <EuiContextMenuItem
       key="open-alert"
@@ -235,6 +241,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const closeAlertActionComponent = (
     <EuiContextMenuItem
       key="close-alert"
@@ -267,6 +274,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inProgressAlertActionComponent = (
     <EuiContextMenuItem
       key="in-progress-alert"
@@ -296,6 +304,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('endpoint');
   }, [closePopover]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addEndpointExceptionComponent = (
     <EuiContextMenuItem
       key="add-endpoint-exception-menu-item"
@@ -317,9 +326,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const areExceptionsAllowed = useMemo((): boolean => {
     const ruleTypes = getOr([], 'signal.rule.type', ecsRowData);
     const [ruleType] = ruleTypes as Type[];
-    return !isMlRule(ruleType) && !isThresholdRule(ruleType);
+    return !isThresholdRule(ruleType);
   }, [ecsRowData]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
       key="add-exception-menu-item"
@@ -329,7 +339,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       onClick={handleAddExceptionClick}
       disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
     >
-      <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>
+      <EuiText data-test-subj="addExceptionButton" size="m">
+        {i18n.ACTION_ADD_EXCEPTION}
+      </EuiText>
     </EuiContextMenuItem>
   );
 

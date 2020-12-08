@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
 
+import { ExceptionListItemSchema } from '../../../../lists/common';
+import { buildExceptionFilter } from '../../../common/detection_engine/get_query_filter';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
+import { SearchResponse } from '../types';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
-type MlAnomalySearch = <T>(searchParams: RequestParams.Search) => Promise<SearchResponse<T>>;
+type MlAnomalySearch = <T>(
+  searchParams: RequestParams.Search,
+  jobIds: string[]
+) => Promise<SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
   threshold: number;
   earliestMs: number;
   latestMs: number;
+  exceptionItems: ExceptionListItemSchema[];
   maxRecords?: number;
 }
 
@@ -27,29 +33,43 @@ export const getAnomalies = async (
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
 
-  return mlAnomalySearch({
-    size: params.maxRecords || 100,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: false,
+  return mlAnomalySearch(
+    {
+      size: params.maxRecords || 100,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: false,
+                },
               },
-            },
-            {
-              bool: {
-                must: boolCriteria,
+              {
+                bool: {
+                  must: boolCriteria,
+                },
               },
-            },
-          ],
+            ],
+            must_not: buildExceptionFilter({
+              lists: params.exceptionItems,
+              config: {
+                allowLeadingWildcards: true,
+                queryStringOptions: { analyze_wildcard: true },
+                ignoreFilterIfFieldNotInIndex: false,
+                dateFormatTZ: 'Zulu',
+              },
+              excludeExceptions: true,
+              chunkSize: 1024,
+            })?.query,
+          },
         },
+        sort: [{ record_score: { order: 'desc' } }],
       },
-      sort: [{ record_score: { order: 'desc' } }],
     },
-  });
+    params.jobIds
+  );
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {

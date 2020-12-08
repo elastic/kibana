@@ -12,7 +12,7 @@ import {
   mockSupportedTriggers,
   mockActionFactories,
 } from '../../../components/action_wizard/test_data';
-import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
@@ -20,6 +20,10 @@ import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
 import { toastDrilldownsCRUDError } from '../../hooks/i18n';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
 
 const storage = new Storage(new StubBrowserStorage());
 const toasts = coreMock.createStart().notifications.toasts;

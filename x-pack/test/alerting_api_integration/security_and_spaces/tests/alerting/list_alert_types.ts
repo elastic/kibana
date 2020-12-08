@@ -15,7 +15,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const expectedNoOpType = {
-    actionGroups: [{ id: 'default', name: 'Default' }],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'recovered', name: 'Recovered' },
+    ],
     defaultActionGroupId: 'default',
     id: 'test.noop',
     name: 'Test: Noop',
@@ -25,10 +28,21 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsFixture',
+    recoveryActionGroup: {
+      id: 'recovered',
+      name: 'Recovered',
+    },
   };
 
   const expectedRestrictedNoOpType = {
-    actionGroups: [{ id: 'default', name: 'Default' }],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'restrictedRecovered', name: 'Restricted Recovery' },
+    ],
+    recoveryActionGroup: {
+      id: 'restrictedRecovered',
+      name: 'Restricted Recovery',
+    },
     defaultActionGroupId: 'default',
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',

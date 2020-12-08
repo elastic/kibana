@@ -20,7 +20,7 @@
 import moment from 'moment';
 import React from 'react';
 import { Overview } from './overview';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
@@ -34,6 +34,10 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+}));
+
+jest.mock('../../lib/ui_metric', () => ({
+  trackUiMetric: jest.fn(),
 }));
 
 afterAll(() => jest.clearAllMocks());

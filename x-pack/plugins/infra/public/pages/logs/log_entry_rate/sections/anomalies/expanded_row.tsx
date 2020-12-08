@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryAnomaly } from '../../../../../../common/http_api';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
@@ -51,9 +51,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     <>
       <ExpandedContentWrapper direction="column">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{examplesTitle}</h3>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <LogEntryExampleMessages
             isLoading={isLoadingLogEntryExamples}
             hasFailedLoading={hasFailedLoadingLogEntryExamples}
@@ -84,8 +86,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
-                title={`${numeral(anomaly.typical).format('0.00a')} ${i18n.translate(
+                titleSize="xs"
+                title={`${numeral(anomaly.typical).format('0.[00]a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
                   {
                     defaultMessage: '{typicalCount, plural, one {message} other {messages}}',
@@ -102,8 +104,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
-                title={`${numeral(anomaly.actual).format('0.00a')} ${i18n.translate(
+                titleSize="xs"
+                title={`${numeral(anomaly.actual).format('0.[00]a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
                   {
                     defaultMessage: '{actualCount, plural, one {message} other {messages}}',

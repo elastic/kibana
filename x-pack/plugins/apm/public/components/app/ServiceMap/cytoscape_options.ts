@@ -15,7 +15,7 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { defaultIcon, iconForNode } from './icons';
 
 export const popoverWidth = 280;
@@ -129,7 +129,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
             ? theme.eui.euiColorPrimaryText
-            : theme.eui.textColors.text,
+            : theme.eui.euiTextColor,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
@@ -252,7 +252,6 @@ center,
 ${theme.eui.euiColorLightShade}`,
   backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
   cursor: `${status === FETCH_STATUS.LOADING ? 'wait' : 'grab'}`,
-  margin: `-${theme.eui.gutterTypes.gutterLarge}`,
   marginTop: 0,
 });
 

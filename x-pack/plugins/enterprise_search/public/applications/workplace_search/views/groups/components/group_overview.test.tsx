@@ -21,7 +21,7 @@ import {
 import { ContentSection } from '../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 
 import { EuiFieldText } from '@elastic/eui';
 

@@ -6,8 +6,8 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
-import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
 import LRU from 'lru-cache';

@@ -27,7 +27,7 @@ import type { Config } from '@jest/types';
 import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../mocha/xml';
-import { getUniqueJunitReportPath } from './report_path';
+import { getUniqueJunitReportPath } from '../report_path';
 
 interface ReporterOptions {
   reportName?: string;
