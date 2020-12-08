@@ -29,7 +29,7 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { FieldLoadingError, DescribedFormField, LearnMoreLink } from '../../../index';
+import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../index';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
@@ -297,7 +297,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   };
 
   return (
-    <DescribedFormField
+    <DescribedFormRow
       data-test-subj={`searchableSnapshotField-${phase}`}
       switchProps={{
         checked: isFieldToggleChecked,
@@ -327,12 +327,12 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               }}
             />
           </EuiTextColor>
-          {renderInfoCallout()}
         </>
       }
+      fieldNotices={renderInfoCallout()}
       fullWidth
     >
       {isDisabled ? <div /> : renderField}
-    </DescribedFormField>
+    </DescribedFormRow>
   );
 };
