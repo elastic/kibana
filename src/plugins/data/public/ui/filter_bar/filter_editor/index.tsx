@@ -287,7 +287,6 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
-          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
