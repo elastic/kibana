@@ -37,8 +37,8 @@ describe('Export rules', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     const jsonRule = JSON.parse(JSON.stringify(rule));
-    cy.wait('@export').then((xhr) => {
-      cy.wrap(xhr.responseBody).should('eql', expectedExportedRule(jsonRule));
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response!.body).should('eql', expectedExportedRule(jsonRule));
     });
   });
 });

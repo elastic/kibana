@@ -35,8 +35,8 @@ describe('Export timelines', () => {
     const jsonTemplate = JSON.parse(JSON.stringify(template));
     exportTimeline(jsonTemplate.savedObjectId);
 
-    cy.wait('@export').then((response) => {
-      cy.wrap(response.xhr.responseText).should(
+    cy.wait('@export').then(({ response: exportResponse }) => {
+      cy.wrap(JSON.parse(exportResponse!.body as string).templateTimelineId).should(
         'eql',
         expectedExportedTimelineTemplate(jsonTemplate)
       );
