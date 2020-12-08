@@ -65,8 +65,9 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
 
 export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
   cases: snakeCases.cases.map((snakeCase) => convertToCamelCase<CaseResponse, Case>(snakeCase)),
-  countClosedCases: snakeCases.count_closed_cases,
   countOpenCases: snakeCases.count_open_cases,
+  countInProgressCases: snakeCases.count_in_progress_cases,
+  countClosedCases: snakeCases.count_closed_cases,
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,

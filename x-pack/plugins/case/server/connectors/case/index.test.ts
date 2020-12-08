@@ -9,7 +9,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes, CommentType } from '../../../common/api';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../common/api';
 import {
   createCaseServiceMock,
   createConfigureServiceMock,
@@ -785,7 +785,7 @@ describe('case connector', () => {
           tags: ['case', 'connector'],
           description: 'Yo fields!!',
           external_service: null,
-          status: 'open' as const,
+          status: CaseStatuses.open,
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
@@ -868,7 +868,7 @@ describe('case connector', () => {
             description: 'This is a brand new case of a bad meanie defacing data',
             id: 'mock-id-1',
             external_service: null,
-            status: 'open' as const,
+            status: CaseStatuses.open,
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
@@ -937,7 +937,7 @@ describe('case connector', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open' as const,
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: null,
           updated_by: null,

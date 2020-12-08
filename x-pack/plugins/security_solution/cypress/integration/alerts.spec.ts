@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  NUMBER_OF_ALERTS,
+  ALERTS,
+  ALERTS_COUNT,
   SELECTED_ALERTS,
   SHOWING_ALERTS,
-  ALERTS,
   TAKE_ACTION_POPOVER_BTN,
 } from '../screens/alerts';
 
@@ -25,6 +25,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -38,6 +39,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
@@ -45,7 +47,7 @@ describe('Alerts', () => {
       waitForAlertsPanelToBeLoaded();
       waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           cy.get(SHOWING_ALERTS).should('have.text', `Showing ${numberOfAlerts} alerts`);
@@ -64,10 +66,7 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(NUMBER_OF_ALERTS).should(
-            'have.text',
-            expectedNumberOfAlertsAfterClosing.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlertsAfterClosing.toString());
 
           cy.get(SHOWING_ALERTS).should(
             'have.text',
@@ -77,7 +76,7 @@ describe('Alerts', () => {
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeClosed.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${numberOfAlertsToBeClosed.toString()} alerts`
@@ -98,7 +97,7 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfClosedAlertsAfterOpened = 2;
-          cy.get(NUMBER_OF_ALERTS).should(
+          cy.get(ALERTS_COUNT).should(
             'have.text',
             expectedNumberOfClosedAlertsAfterOpened.toString()
           );
@@ -128,7 +127,7 @@ describe('Alerts', () => {
     it('Closes one alert when more than one opened alerts are selected', () => {
       waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           const numberOfAlertsToBeClosed = 1;
@@ -144,7 +143,7 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${expectedNumberOfAlerts.toString()} alerts`
@@ -153,7 +152,7 @@ describe('Alerts', () => {
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeClosed.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${numberOfAlertsToBeClosed.toString()} alert`
@@ -170,6 +169,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('closed_alerts');
     });
 
@@ -178,7 +178,7 @@ describe('Alerts', () => {
       goToClosedAlerts();
       waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           const numberOfAlertsToBeOpened = 1;
@@ -195,7 +195,7 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${expectedNumberOfAlerts.toString()} alerts`
@@ -204,7 +204,7 @@ describe('Alerts', () => {
           goToOpenedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeOpened.toString());
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeOpened.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${numberOfAlertsToBeOpened.toString()} alert`
@@ -221,6 +221,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
@@ -228,7 +229,7 @@ describe('Alerts', () => {
       waitForAlerts();
       waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           const numberOfAlertsToBeMarkedInProgress = 1;
@@ -244,7 +245,7 @@ describe('Alerts', () => {
           waitForAlertsToBeLoaded();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
-          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${expectedNumberOfAlerts.toString()} alerts`
@@ -253,10 +254,7 @@ describe('Alerts', () => {
           goToInProgressAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS).should(
-            'have.text',
-            numberOfAlertsToBeMarkedInProgress.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeMarkedInProgress.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`

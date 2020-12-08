@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -11,88 +11,63 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertInstanceState,
   LegacyAlert,
   LegacyAlertNodesChangedList,
-  CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
+import { ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-
-const WATCH_NAME = 'elasticsearch_nodes';
+import { SanitizedAlert } from '../../../alerts/common';
 
 export class NodesChangedAlert extends BaseAlert {
-  public type = ALERT_NODES_CHANGED;
-  public label = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label;
-  public description = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].description;
-  public isLegacy = true;
-
-  protected actionVariables = [
-    {
-      name: 'added',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.added', {
-        defaultMessage: 'The list of nodes added to the cluster.',
-      }),
-    },
-    {
-      name: 'removed',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.removed', {
-        defaultMessage: 'The list of nodes removed from the cluster.',
-      }),
-    },
-    {
-      name: 'restarted',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.nodesChanged.actionVariables.restarted',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_NODES_CHANGED,
+      name: LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label,
+      legacy: {
+        watchName: 'elasticsearch_nodes',
+        changeDataValues: { shouldFire: true },
+      },
+      actionVariables: [
         {
-          defaultMessage: 'The list of nodes restarted in the cluster.',
-        }
-      ),
-    },
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
-  ];
-
-  private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList | undefined {
-    return legacyAlert.nodes;
+          name: 'added',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.added',
+            {
+              defaultMessage: 'The list of nodes added to the cluster.',
+            }
+          ),
+        },
+        {
+          name: 'removed',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.removed',
+            {
+              defaultMessage: 'The list of nodes removed from the cluster.',
+            }
+          ),
+        },
+        {
+          name: 'restarted',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.nodesChanged.actionVariables.restarted',
+            {
+              defaultMessage: 'The list of nodes restarted in the cluster.',
+            }
+          ),
+        },
+        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+      ],
+    });
   }
 
-  protected async fetchData(
-    params: CommonAlertParams,
-    callCluster: any,
-    clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      WATCH_NAME,
-      this.config.ui.max_bucket_size
-    );
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      accum.push({
-        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: true, // This alert always has a resolved timestamp
-        severity: mapLegacySeverity(legacyAlert.metadata.severity),
-        meta: legacyAlert,
-      });
-      return accum;
-    }, []);
+  private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList {
+    return legacyAlert.nodes || { added: {}, removed: {}, restarted: {} };
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const legacyAlert = item.meta as LegacyAlert;
-    const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
+    const states = this.getNodeStates(legacyAlert);
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.resolvedMessage', {
@@ -151,39 +126,12 @@ export class NodesChangedAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    alertState: AlertState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
-      return;
-    }
-    const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.nodesChanged.resolved.internalShortMessage',
-          {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.nodesChanged.resolved.internalFullMessage',
-          {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    if (alertState.ui.isFiring) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.shortAction', {
         defaultMessage: 'Verify that you added, removed, or restarted nodes.',
       });
@@ -191,7 +139,7 @@ export class NodesChangedAlert extends BaseAlert {
         defaultMessage: 'View nodes',
       });
       const action = `[${fullActionText}](elasticsearch/nodes)`;
-      const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
+      const states = this.getNodeStates(legacyAlert);
       const added = Object.values(states.added).join(',');
       const removed = Object.values(states.removed).join(',');
       const restarted = Object.values(states.restarted).join(',');

@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepEqual from 'fast-deep-equal';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
-import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -30,12 +25,11 @@ export const useInitSourcerer = (
     () => sourcererSelectors.configIndexPatternsSelector(),
     []
   );
-  const ConfigIndexPatterns = useSelector(getConfigIndexPatternsSelector, isEqual);
+  const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const activeTimeline = useSelector<State, TimelineModel>(
-    (state) => getTimelineSelector(state, TimelineId.active),
-    isEqual
+  const activeTimeline = useDeepEqualSelector((state) =>
+    getTimelineSelector(state, TimelineId.active)
   );
 
   useIndexFields(scopeId);
@@ -82,9 +76,6 @@ export const useInitSourcerer = (
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const SourcererScope = useSelector<State, ManageScope>(
-    (state) => sourcererScopeSelector(state, scope),
-    deepEqual
-  );
+  const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
   return SourcererScope;
 };

@@ -27,6 +27,7 @@ import { intervalOptions, autoInterval, isAutoInterval } from './_interval_optio
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggDateHistogramFnName } from './date_histogram_fn';
 import { ExtendedBounds } from './lib/extended_bounds';
 import { TimeBuckets } from './lib/time_buckets';
 
@@ -87,6 +88,7 @@ export const getDateHistogramBucketAgg = ({
 }: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
+    expressionName: aggDateHistogramFnName,
     title: i18n.translate('data.search.aggs.buckets.dateHistogramTitle', {
       defaultMessage: 'Date Histogram',
     }),

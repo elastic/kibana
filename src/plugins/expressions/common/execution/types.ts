@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
 import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
@@ -58,6 +61,13 @@ export interface ExecutionContext<
    * Search context in which expression should operate.
    */
   getSearchSessionId: () => string | undefined;
+
+  /**
+   * Getter to retrieve the `KibanaRequest` object inside an expression function.
+   * Useful for functions which are running on the server and need to perform
+   * operations that are scoped to a specific user.
+   */
+  getKibanaRequest?: () => KibanaRequest;
 
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`

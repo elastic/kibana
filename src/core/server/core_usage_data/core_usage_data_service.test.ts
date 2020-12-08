@@ -34,6 +34,9 @@ import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.
 
 import { CoreUsageDataService } from './core_usage_data_service';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {
   const getTestScheduler = () =>
@@ -63,11 +66,67 @@ describe('CoreUsageDataService', () => {
     service = new CoreUsageDataService(coreContext);
   });
 
+  describe('setup', () => {
+    it('creates internal repository', async () => {
+      const metrics = metricsServiceMock.createInternalSetupContract();
+      const savedObjectsStartPromise = Promise.resolve(
+        savedObjectsServiceMock.createStartContract()
+      );
+      service.setup({ metrics, savedObjectsStartPromise });
+
+      const savedObjects = await savedObjectsStartPromise;
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([CORE_USAGE_STATS_TYPE]);
+    });
+
+    describe('#registerType', () => {
+      it('registers core usage stats type', async () => {
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const coreUsageData = service.setup({
+          metrics,
+          savedObjectsStartPromise,
+        });
+        const typeRegistry = typeRegistryMock.create();
+
+        coreUsageData.registerType(typeRegistry);
+        expect(typeRegistry.registerType).toHaveBeenCalledTimes(1);
+        expect(typeRegistry.registerType).toHaveBeenCalledWith({
+          name: CORE_USAGE_STATS_TYPE,
+          hidden: true,
+          namespaceType: 'agnostic',
+          mappings: expect.anything(),
+        });
+      });
+    });
+
+    describe('#getClient', () => {
+      it('returns client', async () => {
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const coreUsageData = service.setup({
+          metrics,
+          savedObjectsStartPromise,
+        });
+
+        const usageStatsClient = coreUsageData.getClient();
+        expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
+      });
+    });
+  });
+
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns core metrics for default config', () => {
+      it('returns core metrics for default config', async () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
-        service.setup({ metrics });
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        service.setup({ metrics, savedObjectsStartPromise });
         const elasticsearch = elasticsearchServiceMock.createStart();
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
@@ -182,8 +241,8 @@ describe('CoreUsageDataService', () => {
                   "truststoreConfigured": false,
                 },
                 "xsrf": Object {
+                  "allowlistConfigured": false,
                   "disableProtection": false,
-                  "whitelistConfigured": false,
                 },
               },
               "logging": Object {
@@ -243,8 +302,11 @@ describe('CoreUsageDataService', () => {
           observables.push(newObservable);
           return newObservable as Observable<any>;
         });
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
 
-        service.setup({ metrics });
+        service.setup({ metrics, savedObjectsStartPromise });
 
         // Use the stopTimer$ to delay calling stop() until the third frame
         const stopTimer$ = cold('---a|');

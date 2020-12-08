@@ -10,6 +10,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -20,14 +21,14 @@ const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_expo
 describe('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
-    cy.server();
-    cy.route(
+    cy.intercept(
       'POST',
-      '**api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson*'
+      '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
   });
 
   after(() => {
+    removeSignalsIndex();
     esArchiverUnload('export_rule');
   });
 
@@ -37,9 +38,9 @@ describe('Export rules', () => {
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     exportFirstRule();
-    cy.wait('@export').then((xhr) => {
+    cy.wait('@export').then(({ response }) => {
       cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {
-        cy.wrap(xhr.responseBody).should('eql', $expectedExportedJson);
+        cy.wrap(response!.body).should('eql', $expectedExportedJson);
       });
     });
   });

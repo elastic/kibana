@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const config = getService('config');
   const log = getService('log');
   const randomness = getService('randomness');
@@ -40,9 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (((await es.search({ index: '.kibana_security_session*' })).hits.total as unknown) as {
-      value: number;
-    }).value;
+    return (await es.search({ index: '.kibana_security_session*' })).body.hits.total
+      .value as number;
   }
 
   async function loginWithSAML(providerName: string) {
@@ -72,11 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Session Idle cleanup', () => {
     beforeEach(async () => {
-      await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
-      await es.indices.delete({
-        index: '.kibana_security_session*',
-        ignore: [404],
-      });
+      await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
     });
 
     it('should properly clean up session expired because of idle timeout', async function () {
@@ -98,9 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
-      // idle timeout, let's wait for 30s to make sure cleanup routine runs when idle timeout
+      // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(30000);
+      await delay(40000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -143,9 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await getNumberOfSessionDocuments()).to.be(4);
 
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
-      // idle timeout, let's wait for 30s to make sure cleanup routine runs when idle timeout
+      // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(30000);
+      await delay(40000);
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);

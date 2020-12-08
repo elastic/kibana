@@ -92,6 +92,19 @@ export const ROLES = {
       ],
     },
   },
+  KIBANA_RBAC_DEFAULT_SPACE_DASHBOARD_WRITE_USER: {
+    name: 'kibana_rbac_default_space_dashboard_write_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            dashboard: ['all'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
   KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER: {
     name: 'kibana_rbac_default_space_visualize_read_user',
     privileges: {
@@ -99,6 +112,19 @@ export const ROLES = {
         {
           feature: {
             visualize: ['read'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_WRITE_USER: {
+    name: 'kibana_rbac_default_space_visualize_write_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            visualize: ['all'],
           },
           spaces: ['default'],
         },
@@ -192,6 +218,16 @@ export const USERS = {
     username: 'a_kibana_rbac_default_space_visualize_read_user',
     password: 'password',
     roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER.name],
+  },
+  DEFAULT_SPACE_DASHBOARD_WRITE_USER: {
+    username: 'a_kibana_rbac_default_space_dashboard_write_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_DASHBOARD_WRITE_USER.name],
+  },
+  DEFAULT_SPACE_VISUALIZE_WRITE_USER: {
+    username: 'a_kibana_rbac_default_space_visualize_write_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_WRITE_USER.name],
   },
   DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER: {
     username: 'a_kibana_rbac_default_space_advanced_settings_read_user',

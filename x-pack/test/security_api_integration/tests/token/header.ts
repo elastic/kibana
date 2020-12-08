@@ -8,10 +8,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   async function createToken() {
-    const { access_token: accessToken } = await (es as any).shield.getAccessToken({
+    const {
+      body: { access_token: accessToken },
+    } = await es.security.getToken({
       body: {
         grant_type: 'password',
         username: 'elastic',

@@ -8,12 +8,12 @@ import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
 
-import { IndexingStatus } from '../schema/types';
+import { IIndexingStatus } from '../../../shared/types';
 import { EngineDetails } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
-  engine: EngineDetails | {};
+  engine: Partial<EngineDetails>;
   engineName: string;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
@@ -25,7 +25,7 @@ interface EngineValues {
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setIndexingStatus(activeReindexJob: IndexingStatus): { activeReindexJob: IndexingStatus };
+  setIndexingStatus(activeReindexJob: IIndexingStatus): { activeReindexJob: IIndexingStatus };
   setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
