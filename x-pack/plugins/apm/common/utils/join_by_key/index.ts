@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UnionToIntersection, ValuesType } from 'utility-types';
-import { isEqual } from 'lodash';
+import { isEqual, pull } from 'lodash';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from
@@ -59,7 +59,7 @@ export function joinByKey(
       item = { ...current };
       prev.push(item);
     } else {
-      item = mergeFn(item, current);
+      pull(prev, item).push(mergeFn(item, current));
     }
 
     return prev;
