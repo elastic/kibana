@@ -76,6 +76,7 @@ def load_assets(path_to_files):
 
 def setup_config():
     # setup the default query type to be Lucene (not KQL)
+    # also set the default index pattern to be network_* using its UUID
     try:
         url = 'http://localhost:9200/.kibana/_update/config:7.5.2'
         session = requests.Session()
@@ -89,7 +90,8 @@ def setup_config():
         data = json.dumps({
             'doc': {
                 'config': {
-                    'search:queryLanguage': 'lucene'
+                    'search:queryLanguage': 'lucene',
+                    'defaultIndex': '361f5c00-b47c-11e9-86a0-cd3d7bf2f81b'
                 }
             },
             'doc_as_upsert': True
