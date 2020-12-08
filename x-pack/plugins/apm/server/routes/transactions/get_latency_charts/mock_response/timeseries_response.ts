@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LatencyChartsResponse } from '..';
+import { LatencyChartsSearchResponse } from '..';
 
 export const timeseriesResponse = ({
   took: 34,
@@ -158,4 +158,4 @@ export const timeseriesResponse = ({
       value: 4241957.611111111,
     },
   },
-} as unknown) as LatencyChartsResponse;
+} as unknown) as LatencyChartsSearchResponse;

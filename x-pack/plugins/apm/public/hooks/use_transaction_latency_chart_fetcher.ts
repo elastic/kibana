@@ -6,12 +6,14 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTransactionCharts } from '../selectors/chart_selectors';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
+import { useTheme } from './use_theme';
 
-export function useTransactionChartsFetcher() {
+export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const theme = useTheme();
   const {
     urlParams: { transactionType, start, end, transactionName },
     uiFilters,
@@ -21,7 +23,8 @@ export function useTransactionChartsFetcher() {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transactions/charts/latency',
           params: {
             path: { serviceName },
             query: {
@@ -39,13 +42,13 @@ export function useTransactionChartsFetcher() {
   );
 
   const memoizedData = useMemo(
-    () => getTransactionCharts({ transactionType }, data),
-    [data, transactionType]
+    () => getLatencyChartSelector({ latencyChart: data, theme }),
+    [data, theme]
   );
 
   return {
-    transactionChartsData: memoizedData,
-    transactionChartsStatus: status,
-    transactionChartsError: error,
+    latencyChartsData: memoizedData,
+    latencyChartsStatus: status,
+    latencyChartsError: error,
   };
 }

@@ -122,13 +122,9 @@ export async function getThroughputCharts({
     intervalString,
   });
 
-  if (!response.aggregations) {
-    return { throughput: [] };
-  }
-
   return {
     throughput: getThroughputBuckets({
-      throughputResultBuckets: response.aggregations.throughput.buckets,
+      throughputResultBuckets: response.aggregations?.throughput.buckets,
       bucketSize,
       durationAsMinutes,
     }),

@@ -20,7 +20,9 @@ import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
 import { convertLatencyBucketsToCoordinates } from './transform';
 
-export type LatencyChartsResponse = PromiseReturnType<typeof searchLatency>;
+export type LatencyChartsSearchResponse = PromiseReturnType<
+  typeof searchLatency
+>;
 
 async function searchLatency({
   serviceName,
@@ -120,7 +122,7 @@ export async function getLatencyCharts({
 
   if (!response.aggregations) {
     return {
-      latency: null,
+      latency: { avg: [], p95: [], p99: [] },
       overallAvgDuration: null,
     };
   }

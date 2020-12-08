@@ -34,10 +34,10 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { AnomalySeries } from '../../../selectors/chart_selectors';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd } from './helper/helper';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 
 interface Props {
   id: string;
@@ -55,7 +55,9 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalySeries?: AnomalySeries;
+  anomalySeries?: ReturnType<
+    typeof getLatencyChartSelector
+  >['anomalyTimeseries'];
 }
 
 export function TimeseriesChart({
