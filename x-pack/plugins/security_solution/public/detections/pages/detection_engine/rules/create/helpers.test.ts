@@ -20,6 +20,7 @@ import {
   ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
+  IMitreEnterpriseAttack,
 } from '../types';
 import {
   getTimeTypeValue,
@@ -29,6 +30,7 @@ import {
   formatActionsStepData,
   formatRule,
   filterRuleFieldsForType,
+  filterEmptyThreats,
 } from './helpers';
 import {
   mockDefineStepRule,
@@ -37,6 +39,7 @@ import {
   mockAboutStepRule,
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
+import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -80,6 +83,24 @@ describe('helpers', () => {
       const result = getTimeTypeValue('random');
 
       expect(result).toEqual({ unit: '', value: 0 });
+    });
+  });
+
+  describe('filterEmptyThreats', () => {
+    let mockThreat: IMitreEnterpriseAttack;
+
+    beforeEach(() => {
+      mockThreat = mockAboutStepRule().threat[0];
+    });
+
+    test('filters out fields with empty tactics', () => {
+      const threat: IMitreEnterpriseAttack[] = [
+        mockThreat,
+        { ...mockThreat, tactic: { ...mockThreat.tactic, name: 'none' } },
+      ];
+      const result = filterEmptyThreats(threat);
+      const expected = [mockThreat];
+      expect(result).toEqual(expected);
     });
   });
 
@@ -385,23 +406,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -472,23 +477,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -512,23 +501,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -538,21 +511,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
         threat: [
-          {
-            framework: 'mockFramework',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
+          ...getThreatMock(),
           {
             framework: 'mockFramework',
             tactic: {
@@ -565,6 +524,50 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
+              },
+            ],
+          },
+        ],
+      };
+      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
+      const expected = {
+        author: ['Elastic'],
+        license: 'Elastic License',
+        description: '24/7',
+        false_positives: ['test'],
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with threats that contains no subtechniques', () => {
+      const mockStepData = {
+        ...mockData,
+        threat: [
+          ...getThreatMock(),
+          {
+            framework: 'mockFramework',
+            tactic: {
+              id: '1234',
+              name: 'tactic1',
+              reference: 'reference1',
+            },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -585,10 +588,13 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
+          ...getThreatMock(),
           {
             framework: 'MITRE ATT&CK',
             tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
-            technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
+            technique: [
+              { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
+            ],
           },
         ],
       };

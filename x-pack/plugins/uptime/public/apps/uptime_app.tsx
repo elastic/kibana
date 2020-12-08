@@ -25,10 +25,7 @@ import {
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
-import {
-  UptimeAlertsContextProvider,
-  UptimeAlertsFlyoutWrapper,
-} from '../components/overview/alerts';
+import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ScopedHistory } from '../../../../../src/core/public';
@@ -110,16 +107,14 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <UptimeAlertsContextProvider>
-                          <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                            <RedirectAppLinks application={core.application}>
-                              <main>
-                                <UptimeAlertsFlyoutWrapper />
-                                <PageRouter />
-                              </main>
-                            </RedirectAppLinks>
-                          </EuiPage>
-                        </UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <RedirectAppLinks application={core.application}>
+                            <main>
+                              <UptimeAlertsFlyoutWrapper />
+                              <PageRouter />
+                            </main>
+                          </RedirectAppLinks>
+                        </EuiPage>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
