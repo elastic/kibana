@@ -53,7 +53,7 @@ export interface IndexPatternsServiceStartDeps {
   logger: Logger;
 }
 
-export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
+export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { expressions }: IndexPatternsServiceSetupDeps
@@ -61,7 +61,7 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    registerRoutes(core.http);
+    registerRoutes(core.http, core.getStartServices);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
   }
