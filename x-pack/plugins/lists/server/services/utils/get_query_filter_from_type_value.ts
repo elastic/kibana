@@ -24,74 +24,135 @@ export const getQueryFilterFromTypeValue = ({
 }): QueryFilterType => {
   const valueFlattened = value.flat(Infinity).filter((singleValue) => singleValue != null);
   if (isEmpty(valueFlattened)) {
-    return [
-      { term: { list_id: listId } },
-      {
-        bool: {
-          minimum_should_match: 1,
-          should: [
-            {
-              match_none: {
-                _name: 'empty',
-              },
-            },
-          ],
-        },
-      },
-    ];
+    return getEmptyQuery({ listId });
   } else if (type === 'text') {
-    const should = value.reduce<unknown[]>((accum, item, index) => {
-      if (Array.isArray(item)) {
-        const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
-        if (itemFlattened.length === 0) {
-          return accum;
-        } else {
-          return [
-            ...accum,
-            ...itemFlattened.map((flatItem, secondIndex) => ({
-              match: {
-                [type]: { _name: `${index}.${secondIndex}`, operator: 'and', query: flatItem },
-              },
-            })),
-          ];
-        }
+    return getTextQuery({ listId, type, value });
+  } else {
+    return getTermsQuery({ listId, type, value });
+  }
+};
+
+/**
+ * Returns an empty named query that should not match anything
+ * @param listId The list id to associate with the empty query
+ */
+export const getEmptyQuery = ({ listId }: { listId: string }): QueryFilterType => [
+  { term: { list_id: listId } },
+  {
+    bool: {
+      minimum_should_match: 1,
+      should: [
+        {
+          match_none: {
+            _name: 'empty',
+          },
+        },
+      ],
+    },
+  },
+];
+
+/**
+ * Returns a terms query against a large value based list. If it detects that an array or item has a "null"
+ * value it will filter that value out. If it has arrays within arrays it will flatten those out as well.
+ * @param value The value which can be unknown
+ * @param type The list type type
+ * @param listId The list id
+ */
+export const getTermsQuery = ({
+  value,
+  type,
+  listId,
+}: {
+  value: unknown[];
+  type: Type;
+  listId: string;
+}): QueryFilterType => {
+  const should = value.reduce<unknown[]>((accum, item, index) => {
+    if (Array.isArray(item)) {
+      const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
+      if (itemFlattened.length === 0) {
+        return accum;
+      } else {
+        return [...accum, { terms: { _name: `${index}.0`, [type]: itemFlattened } }];
+      }
+    } else {
+      if (item == null) {
+        return accum;
+      } else {
+        return [...accum, { term: { [type]: { _name: `${index}.0`, value: item } } }];
+      }
+    }
+  }, []);
+  return getShouldQuery({ listId, should });
+};
+
+/**
+ * Returns a text query against a large value based list. If it detects that an array or item has a "null"
+ * value it will filter that value out. If it has arrays within arrays it will flatten those out as well.
+ * @param value The value which can be unknown
+ * @param type The list type type
+ * @param listId The list id
+ */
+export const getTextQuery = ({
+  value,
+  type,
+  listId,
+}: {
+  value: unknown[];
+  type: Type;
+  listId: string;
+}): QueryFilterType => {
+  const should = value.reduce<unknown[]>((accum, item, index) => {
+    if (Array.isArray(item)) {
+      const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
+      if (itemFlattened.length === 0) {
+        return accum;
+      } else {
+        return [
+          ...accum,
+          ...itemFlattened.map((flatItem, secondIndex) => ({
+            match: {
+              [type]: { _name: `${index}.${secondIndex}`, operator: 'and', query: flatItem },
+            },
+          })),
+        ];
+      }
+    } else {
+      if (item == null) {
+        return accum;
       } else {
         return [
           ...accum,
           { match: { [type]: { _name: `${index}.0`, operator: 'and', query: item } } },
         ];
       }
-    }, []);
-    return [
-      { term: { list_id: listId } },
-      {
-        bool: {
-          minimum_should_match: 1,
-          should,
-        },
+    }
+  }, []);
+
+  return getShouldQuery({ listId, should });
+};
+
+/**
+ * Given an unknown should this constructs a simple bool and terms with the should
+ * clause/query.
+ * @param listId The list id to query against
+ * @param should The unknown should to construct the query against
+ */
+export const getShouldQuery = ({
+  listId,
+  should,
+}: {
+  listId: string;
+  should: unknown;
+}): QueryFilterType => {
+  return [
+    { term: { list_id: listId } },
+    {
+      bool: {
+        minimum_should_match: 1,
+        should,
       },
-    ];
-  } else {
-    const should = value.reduce<unknown[]>((accum, item, index) => {
-      if (Array.isArray(item)) {
-        const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
-        if (itemFlattened.length === 0) {
-          return accum;
-        } else {
-          return [...accum, { terms: { _name: `${index}.0`, [type]: itemFlattened } }];
-        }
-      } else {
-        return [...accum, { term: { [type]: { _name: `${index}.0`, value: item } } }];
-      }
-    }, []);
-    return [
-      { term: { list_id: listId } },
-      {
-        bool: {
-          minimum_should_match: 1,
-          should,
-        },
-      },
-    ];
-  }
+    },
+  ];
 };
