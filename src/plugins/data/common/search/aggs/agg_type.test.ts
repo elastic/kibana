@@ -33,6 +33,7 @@ describe('AggType Class', () => {
       test('assigns the config value to itself', () => {
         const config: AggTypeConfig = {
           name: 'name',
+          expressionName: 'aggName',
           title: 'title',
         };
 
@@ -48,6 +49,7 @@ describe('AggType Class', () => {
           const aggConfig = {} as IAggConfig;
           const config: AggTypeConfig = {
             name: 'name',
+            expressionName: 'aggName',
             title: 'title',
             makeLabel,
           };
@@ -65,6 +67,7 @@ describe('AggType Class', () => {
 
           const aggType = new AggType({
             name: 'name',
+            expressionName: 'aggName',
             title: 'title',
             getResponseAggs: testConfig,
             getRequestAggs: testConfig,
@@ -78,6 +81,7 @@ describe('AggType Class', () => {
           const aggConfig = {} as IAggConfig;
           const aggType = new AggType({
             name: 'name',
+            expressionName: 'aggName',
             title: 'title',
           });
           const responseAggs = aggType.getRequestAggs(aggConfig);
@@ -90,6 +94,7 @@ describe('AggType Class', () => {
         test('defaults to AggParams object with JSON param', () => {
           const aggType = new AggType({
             name: 'smart agg',
+            expressionName: 'aggSmart',
             title: 'title',
           });
 
@@ -102,6 +107,7 @@ describe('AggType Class', () => {
         test('disables json param', () => {
           const aggType = new AggType({
             name: 'name',
+            expressionName: 'aggName',
             title: 'title',
             json: false,
           });
@@ -113,6 +119,7 @@ describe('AggType Class', () => {
         test('can disable customLabel', () => {
           const aggType = new AggType({
             name: 'smart agg',
+            expressionName: 'aggSmart',
             title: 'title',
             customLabels: false,
           });
@@ -127,6 +134,7 @@ describe('AggType Class', () => {
 
           const aggType = new AggType({
             name: 'bucketeer',
+            expressionName: 'aggBucketeer',
             title: 'title',
             params,
           });
@@ -153,6 +161,7 @@ describe('AggType Class', () => {
         } as unknown) as IAggConfig;
         const aggType = new AggType({
           name: 'name',
+          expressionName: 'aggName',
           title: 'title',
         });
         expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`
@@ -168,6 +177,7 @@ describe('AggType Class', () => {
         } as unknown) as IAggConfig;
         const aggType = new AggType({
           name: 'name',
+          expressionName: 'aggName',
           title: 'title',
         });
         expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`Object {}`);
@@ -186,6 +196,7 @@ describe('AggType Class', () => {
         const getSerializedFormat = jest.fn().mockReturnValue({ id: 'hello' });
         const aggType = new AggType({
           name: 'name',
+          expressionName: 'aggName',
           title: 'title',
           getSerializedFormat,
         });

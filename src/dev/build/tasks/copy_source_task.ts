@@ -33,7 +33,6 @@ export const CopySource: Task = {
         '!src/**/{target,__tests__,__snapshots__,__mocks__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',
-        '!src/cli/cluster/**',
         '!src/cli/repl/**',
         '!src/cli/dev.js',
         '!src/functional_test_runner/**',

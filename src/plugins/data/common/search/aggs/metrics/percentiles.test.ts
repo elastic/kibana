@@ -66,4 +66,36 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
 
     expect(ninetyFifthPercentileLabel).toBe('95th percentile of prince');
   });
+
+  it('produces the expected expression ast', () => {
+    const responseAggs: any = getPercentilesMetricAgg().getResponseAggs(
+      aggConfigs.aggs[0] as IPercentileAggConfig
+    );
+    expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "customLabel": Array [
+            "prince",
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "percentiles.95",
+          ],
+          "percents": Array [
+            "[95]",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggPercentiles",
+        "type": "function",
+      }
+    `);
+  });
 });

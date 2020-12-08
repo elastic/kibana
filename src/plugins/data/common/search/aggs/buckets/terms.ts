@@ -28,6 +28,7 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
+import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -75,7 +76,7 @@ export interface AggParamsTerms extends BaseAggParams {
 export const getTermsBucketAgg = () =>
   new BucketAggType({
     name: BUCKET_TYPES.TERMS,
-    expressionName: 'aggTerms',
+    expressionName: aggTermsFnName,
     title: termsTitle,
     makeLabel(agg) {
       const params = agg.params;

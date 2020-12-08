@@ -111,7 +111,7 @@ export const SummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ data, eventId, timelineId, browserFields }) => {
-  const [note, setNote] = useState<string | null>(null);
+  const [investigationGuide, setInvestigationGuide] = useState<string | null>(null);
 
   const ruleIdField = useMemo(() => data.find((d) => d.field === 'signal.rule.id'), [data]);
   const ruleId = getOr(null, 'values.0', ruleIdField);
@@ -151,7 +151,7 @@ export const SummaryViewComponent: React.FC<{
 
   useEffect(() => {
     if (maybeRule != null && maybeRule.note != null) {
-      setNote(maybeRule.note);
+      setInvestigationGuide(maybeRule.note);
     }
   }, [maybeRule]);
 
@@ -164,13 +164,13 @@ export const SummaryViewComponent: React.FC<{
         listItems={summaryList}
         compressed
       />
-      {note != null && (
+      {investigationGuide != null && (
         <>
           <EuiSpacer />
           <EuiDescriptionList data-test-subj="summary-view-guide" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LineClamp content={note} />
+              <LineClamp content={investigationGuide} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>

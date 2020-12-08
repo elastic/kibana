@@ -49,7 +49,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         data-test-subj="removeInclusiveFilterButton"
         disabled={disabled}
         onClick={onClick}
-        iconType={'magnifyWithMinus'}
+        iconType={'minusInCircle'}
         iconSize={'s'}
       />
     </EuiToolTip>

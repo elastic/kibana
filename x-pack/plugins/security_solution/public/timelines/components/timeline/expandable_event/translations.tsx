@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MESSAGE = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.messageTitle',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.copyToClipboardToolTip',
   {
@@ -23,7 +30,7 @@ export const EVENT = i18n.translate(
 export const EVENT_DETAILS_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.placeholder',
   {
-    defaultMessage: 'Select an event to show its details',
+    defaultMessage: 'Select an event to show event details',
   }
 );
 

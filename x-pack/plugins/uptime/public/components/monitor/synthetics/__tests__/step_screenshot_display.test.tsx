@@ -56,7 +56,6 @@ describe('StepScreenshotDisplayProps', () => {
         panelPaddingSize="m"
       >
         <EuiOutsideClickDetector
-          isDisabled={true}
           onOutsideClick={[Function]}
         >
           <div
@@ -129,7 +128,6 @@ describe('StepScreenshotDisplayProps', () => {
         panelPaddingSize="m"
       >
         <EuiOutsideClickDetector
-          isDisabled={true}
           onOutsideClick={[Function]}
         >
           <div

@@ -20,7 +20,16 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreUsageDataService } from './core_usage_data_service';
-import { CoreUsageData, CoreUsageDataStart } from './types';
+import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
+import { CoreUsageData, CoreUsageDataSetup, CoreUsageDataStart } from './types';
+
+const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
+  const setupContract: jest.Mocked<CoreUsageDataSetup> = {
+    registerType: jest.fn(),
+    getClient: jest.fn().mockReturnValue(usageStatsClient),
+  };
+  return setupContract;
+};
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<CoreUsageDataStart> = {
@@ -99,7 +108,7 @@ const createStartContractMock = () => {
             },
             xsrf: {
               disableProtection: false,
-              whitelistConfigured: false,
+              allowlistConfigured: false,
             },
           },
           logging: {
@@ -140,7 +149,7 @@ const createStartContractMock = () => {
 
 const createMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<CoreUsageDataService>> = {
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
   };
@@ -149,5 +158,6 @@ const createMock = () => {
 
 export const coreUsageDataServiceMock = {
   create: createMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

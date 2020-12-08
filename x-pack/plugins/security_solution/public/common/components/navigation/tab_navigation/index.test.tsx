@@ -11,6 +11,7 @@ import { navTabs } from '../../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../../app/types';
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
+import { TimelineTabs } from '../../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';
@@ -70,6 +71,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',
@@ -129,6 +131,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',

@@ -27,9 +27,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
+      await ml.testResources.deleteSavedSearches();
+
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
 
       await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('ml/module_sample_ecommerce');
 
       await ml.testResources.resetKibanaTimeZone();
     });

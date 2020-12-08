@@ -23,7 +23,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggHistogram';
+export const aggHistogramFnName = 'aggHistogram';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.HISTOGRAM>;
@@ -31,10 +31,15 @@ type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.HISTOGRAM>;
 type Arguments = Assign<AggArgs, { extended_bounds?: string }>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggHistogramFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggHistogram = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggHistogramFnName,
   help: i18n.translate('data.search.aggs.function.buckets.histogram.help', {
     defaultMessage: 'Generates a serialized agg config for a Histogram agg',
   }),

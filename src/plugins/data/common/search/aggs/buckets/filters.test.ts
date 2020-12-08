@@ -74,6 +74,33 @@ describe('Filters Agg', () => {
       },
     });
 
+    test('produces the expected expression ast', () => {
+      const aggConfigs = getAggConfigs({
+        filters: [
+          generateFilter('a', 'lucene', 'foo'),
+          generateFilter('b', 'lucene', 'status:200'),
+          generateFilter('c', 'lucene', 'status:[400 TO 499] AND (foo OR bar)'),
+        ],
+      });
+      expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "filters": Array [
+              "[{\\"label\\":\\"a\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"foo\\"}},{\\"label\\":\\"b\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:200\\"}},{\\"label\\":\\"c\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:[400 TO 499] AND (foo OR bar)\\"}}]",
+            ],
+            "id": Array [
+              "test",
+            ],
+          },
+          "function": "aggFilters",
+          "type": "function",
+        }
+      `);
+    });
+
     describe('using Lucene', () => {
       test('works with lucene filters', () => {
         const aggConfigs = getAggConfigs({

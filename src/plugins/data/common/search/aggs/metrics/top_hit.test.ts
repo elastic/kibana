@@ -102,6 +102,42 @@ describe('Top hit metric', () => {
     expect(getTopHitMetricAgg().makeLabel(aggConfig)).toEqual('First bytes');
   });
 
+  it('produces the expected expression ast', () => {
+    init({ fieldName: 'machine.os' });
+    expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "aggregate": Array [
+            "concat",
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "machine.os",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "size": Array [
+            1,
+          ],
+          "sortField": Array [
+            "machine.os",
+          ],
+          "sortOrder": Array [
+            "desc",
+          ],
+        },
+        "function": "aggTopHit",
+        "type": "function",
+      }
+    `);
+  });
+
   it('should request the _source field', () => {
     init({ field: '_source' });
     expect(aggDsl.top_hits._source).toBeTruthy();

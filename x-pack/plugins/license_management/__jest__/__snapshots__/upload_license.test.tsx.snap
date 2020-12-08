@@ -1373,12 +1373,16 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2091,12 +2095,16 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2809,12 +2817,16 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -3527,12 +3539,16 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"

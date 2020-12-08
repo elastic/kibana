@@ -23,7 +23,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggBucketMin';
+export const aggBucketMinFnName = 'aggBucketMin';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MIN_BUCKET>;
@@ -32,10 +32,15 @@ type Arguments = Assign<
   { customBucket?: AggExpressionType; customMetric?: AggExpressionType }
 >;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggBucketMinFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggBucketMin = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggBucketMinFnName,
   help: i18n.translate('data.search.aggs.function.metrics.bucket_min.help', {
     defaultMessage: 'Generates a serialized agg config for a Min Bucket agg',
   }),

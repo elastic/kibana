@@ -4,45 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyout } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
+import { find } from 'lodash/fp';
 
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
-import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
+import {
+  ExpandableEvent,
+  ExpandableEventTitle,
+} from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
-  z-index: 9999;
+  z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
 interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
+
+const emptyExpandedEvent = {};
 
 const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
   timelineId,
-  toggleColumn,
 }) => {
   const dispatch = useDispatch();
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? {}
+    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
   );
+
+  const [loading, detailsData] = useTimelineEventsDetails({
+    docValueFields,
+    indexName: expandedEvent.indexName!,
+    eventId: expandedEvent.eventId!,
+    skip: !expandedEvent.eventId,
+  });
+
+  const ruleId = useMemo(() => {
+    if (detailsData) {
+      const signalField = find({ category: 'signal', field: 'signal.rule.id' }, detailsData) as
+        | TimelineEventsDetailsItem
+        | undefined;
+
+      if (signalField?.originalValue) {
+        return signalField?.originalValue;
+      }
+    }
+    return null;
+  }, [detailsData]);
 
   const handleClearSelection = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
-        event: {},
+        event: emptyExpandedEvent,
       })
     );
   }, [dispatch, timelineId]);
@@ -53,13 +78,18 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
 
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
-      <ExpandableEvent
-        browserFields={browserFields}
-        docValueFields={docValueFields}
-        event={expandedEvent}
-        timelineId={timelineId}
-        toggleColumn={toggleColumn}
-      />
+      <EuiFlyoutHeader hasBorder>
+        <ExpandableEventTitle isAlert={ruleId != null} loading={loading} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <ExpandableEvent
+          browserFields={browserFields}
+          detailsData={detailsData}
+          event={expandedEvent}
+          loading={loading}
+          timelineId={timelineId}
+        />
+      </EuiFlyoutBody>
     </StyledEuiFlyout>
   );
 };
@@ -69,6 +99,5 @@ export const EventDetailsFlyout = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn
+    prevProps.timelineId === nextProps.timelineId
 );

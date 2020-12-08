@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { Forms } from '../../../../../shared_imports';
+import { useAppContext } from '../../../../app_context';
 import {
   MappingsEditor,
   OnUpdateHandler,
@@ -33,6 +34,7 @@ interface Props {
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue = {}, onChange, indexSettings, esDocsBase }) => {
     const [mappings, setMappings] = useState(defaultValue);
+    const { docLinks } = useAppContext();
 
     const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
       ({ isValid, getData, validate }) => {
@@ -107,6 +109,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           value={mappings}
           onChange={onMappingsEditorUpdate}
           indexSettings={indexSettings}
+          docLinks={docLinks}
         />
 
         <EuiSpacer size="m" />

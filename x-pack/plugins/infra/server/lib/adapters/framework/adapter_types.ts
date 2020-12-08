@@ -8,6 +8,10 @@ import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../../../../src/plugins/data/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginSetup } from '../../../../../../plugins/apm/server';
@@ -17,7 +21,8 @@ import { PluginSetupContract as AlertingPluginContract } from '../../../../../al
 import { MlPluginSetup } from '../../../../../ml/server';
 import { JsonArray, JsonValue } from '../../../../common/typed_json';
 
-export interface InfraServerPluginDeps {
+export interface InfraServerPluginSetupDeps {
+  data: DataPluginSetup;
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -26,6 +31,10 @@ export interface InfraServerPluginDeps {
   apm: APMPluginSetup;
   alerts: AlertingPluginContract;
   ml?: MlPluginSetup;
+}
+
+export interface InfraServerPluginStartDeps {
+  data: DataPluginStart;
 }
 
 export interface CallWithRequestParams extends GenericParams {
