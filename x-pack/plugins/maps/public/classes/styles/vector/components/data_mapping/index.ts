@@ -4,15 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-.componentLoader {
-  display: flex;
-  justify-content: center;
-  margin: auto;
-  align-items: center;
-  min-height: 200px;
-  border-radius: 4px;
-
-  .componentLoaderText {
-    margin-left: 10px;
-  }
-}
+export { CategoricalDataMappingPopover } from './categorical_data_mapping_popover';
+export { OrdinalDataMappingPopover } from './ordinal_data_mapping_popover';
