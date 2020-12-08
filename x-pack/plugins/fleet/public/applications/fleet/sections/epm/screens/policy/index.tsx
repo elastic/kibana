@@ -13,5 +13,5 @@ export const Policy = memo(() => {
     params: { packagePolicyId },
   } = useRouteMatch<{ packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm policyId={'jjj'} packagePolicyId={packagePolicyId} />;
+  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
 });

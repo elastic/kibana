@@ -48,17 +48,15 @@ import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
-    params: { policyId, packagePolicyId },
+    params: { packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm policyId={policyId} packagePolicyId={packagePolicyId} />;
+  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
 });
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  /** If not defined, then agent policy id will be retrieved from the given packagePolicyId */
-  policyId: string;
-}>(({ policyId, packagePolicyId }) => {
+}>(({ packagePolicyId }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -85,16 +83,19 @@ export const EditPackagePolicyForm = memo<{
     GetOnePackagePolicyResponse['item']
   >();
 
+  const policyId = agentPolicy?.id ?? '';
+
   // Retrieve agent policy, package, and package policy info
   useEffect(() => {
     const getData = async () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const [{ data: agentPolicyData }, { data: packagePolicyData }] = await Promise.all([
-          sendGetOneAgentPolicy(policyId),
-          sendGetOnePackagePolicy(packagePolicyId),
-        ]);
+        const { data: packagePolicyData } = await sendGetOnePackagePolicy(packagePolicyId);
+        const { data: agentPolicyData } = await sendGetOneAgentPolicy(
+          packagePolicyData?.item.policy_id ?? 'id-missing-in-package-policy'
+        );
+
         if (agentPolicyData?.item) {
           setAgentPolicy(agentPolicyData.item);
         }
