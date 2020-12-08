@@ -106,6 +106,7 @@ const suggestionToOption = (suggestion: SearchSuggestion): EuiSelectableTemplate
     icon: { type: icon },
     suggestion: suggestedSearch,
     meta: [{ text: description }],
+    'data-test-subj': `nav-search-option`,
   };
 };
 
