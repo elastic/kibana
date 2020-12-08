@@ -43,6 +43,7 @@ export const isPanelViewAndParameters: (
       eventCategory: schema.string(),
       eventID: schema.oneOf([schema.string(), schema.literal(undefined), schema.number()]),
       eventTimestamp: schema.string(),
+      winlogRecordID: schema.string(),
     }),
   }),
 ]);
