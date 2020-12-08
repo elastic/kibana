@@ -53,6 +53,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -73,6 +74,7 @@ describe('Detection rules, machine learning', () => {
 
   after(() => {
     deleteRule();
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new ml rule', () => {

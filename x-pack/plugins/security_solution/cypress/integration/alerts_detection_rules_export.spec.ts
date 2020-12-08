@@ -31,6 +31,7 @@ describe('Export rules', () => {
 
   after(() => {
     deleteCustomRule();
+    removeSignalsIndex();
   });
 
   it('Exports a custom rule', () => {
