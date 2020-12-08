@@ -36,6 +36,7 @@ interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
   event: TimelineExpandedEvent;
+  isAlert: boolean;
   loading: boolean;
   timelineId: string;
 }
@@ -78,7 +79,7 @@ export const ExpandableEventTitle = React.memo(
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, event, timelineId, loading, detailsData }) => {
+  ({ browserFields, event, timelineId, isAlert, loading, detailsData }) => {
     const [view, setView] = useState<View>(EventsViewType.summaryView);
 
     const message = useMemo(() => {
@@ -117,6 +118,7 @@ export const ExpandableEvent = React.memo<Props>(
           browserFields={browserFields}
           data={detailsData!}
           id={event.eventId!}
+          isAlert={isAlert}
           onViewSelected={setView}
           timelineId={timelineId}
           view={view}

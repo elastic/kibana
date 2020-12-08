@@ -7,7 +7,6 @@
 import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { find } from 'lodash/fp';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -27,6 +26,7 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   id: string;
+  isAlert: boolean;
   view: EventsViewType;
   onViewSelected: (selected: EventsViewType) => void;
   timelineId: string;
@@ -53,20 +53,8 @@ export const EventDetailsComponent: React.FC<Props> = ({
   view,
   onViewSelected,
   timelineId,
+  isAlert,
 }) => {
-  const ruleId = useMemo(() => {
-    if (data) {
-      const signalField = find({ category: 'signal', field: 'signal.rule.id' }, data) as
-        | TimelineEventsDetailsItem
-        | undefined;
-
-      if (signalField?.originalValue) {
-        return signalField?.originalValue;
-      }
-    }
-    return null;
-  }, [data]);
-
   const handleTabClick = useCallback((e) => onViewSelected(e.id), [onViewSelected]);
 
   const alerts = useMemo(
@@ -91,7 +79,7 @@ export const EventDetailsComponent: React.FC<Props> = ({
   );
   const tabs: EuiTabbedContentTab[] = useMemo(
     () => [
-      ...(ruleId != null ? alerts : []),
+      ...(isAlert ? alerts : []),
       {
         id: EventsViewType.tableView,
         name: i18n.TABLE,
@@ -118,7 +106,7 @@ export const EventDetailsComponent: React.FC<Props> = ({
         ),
       },
     ],
-    [alerts, browserFields, data, id, ruleId, timelineId]
+    [alerts, browserFields, data, id, isAlert, timelineId]
   );
 
   const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);

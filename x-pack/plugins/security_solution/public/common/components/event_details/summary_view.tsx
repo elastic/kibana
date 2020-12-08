@@ -149,7 +149,7 @@ export const SummaryViewComponent: React.FC<{
         listItems={summaryList}
         compressed
       />
-      {investigationGuide != null && (
+      {investigationGuide && (
         <>
           <EuiSpacer />
           <EuiDescriptionList data-test-subj="summary-view-guide" compressed>

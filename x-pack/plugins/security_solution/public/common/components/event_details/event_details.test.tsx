@@ -24,6 +24,7 @@ describe('EventDetails', () => {
     browserFields: mockBrowserFields,
     data: mockDetailItemData,
     id: mockDetailItemDataId,
+    isAlert: false,
     onViewSelected: jest.fn(),
     timelineId: 'test',
     view: EventsViewType.summaryView,
@@ -32,6 +33,7 @@ describe('EventDetails', () => {
   const alertsProps = {
     ...defaultProps,
     data: mockAlertDetailsData as TimelineEventsDetailsItem[],
+    isAlert: true,
   };
 
   const wrapper = mount(

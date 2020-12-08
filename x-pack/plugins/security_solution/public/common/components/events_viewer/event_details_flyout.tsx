@@ -50,17 +50,17 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const ruleId = useMemo(() => {
+  const isAlert = useMemo(() => {
     if (detailsData) {
       const signalField = find({ category: 'signal', field: 'signal.rule.id' }, detailsData) as
         | TimelineEventsDetailsItem
         | undefined;
 
       if (signalField?.originalValue) {
-        return signalField?.originalValue;
+        return true;
       }
     }
-    return null;
+    return false;
   }, [detailsData]);
 
   const handleClearSelection = useCallback(() => {
@@ -79,13 +79,14 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle isAlert={ruleId != null} loading={loading} timelineId={timelineId} />
+        <ExpandableEventTitle isAlert={isAlert} loading={loading} timelineId={timelineId} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
           event={expandedEvent}
+          isAlert={isAlert}
           loading={loading}
           timelineId={timelineId}
         />

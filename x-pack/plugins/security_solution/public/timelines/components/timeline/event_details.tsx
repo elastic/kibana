@@ -55,17 +55,17 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const ruleId = useMemo(() => {
+  const isAlert = useMemo(() => {
     if (detailsData) {
       const signalField = find({ category: 'signal', field: 'signal.rule.id' }, detailsData) as
         | TimelineEventsDetailsItem
         | undefined;
 
       if (signalField?.originalValue) {
-        return signalField?.originalValue;
+        return true;
       }
     }
-    return null;
+    return false;
   }, [detailsData]);
 
   const handleOnEventClosed = useCallback(() => {
@@ -98,7 +98,7 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   return (
     <>
       <ExpandableEventTitle
-        isAlert={ruleId != null}
+        isAlert={isAlert}
         loading={loading}
         timelineId={timelineId}
         onEventDetailsClose={handleOnEventClosed}
@@ -108,6 +108,7 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
         browserFields={browserFields}
         detailsData={detailsData}
         event={expandedEvent}
+        isAlert={isAlert}
         loading={loading}
         timelineId={timelineId}
       />
