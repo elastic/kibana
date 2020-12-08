@@ -19,7 +19,7 @@
 
 import { join } from 'path';
 import {
-  existsMock,
+  accessMock,
   readdirMock,
   renameMock,
   unlinkMock,
@@ -42,16 +42,18 @@ describe('NumericRollingStrategy tasks', () => {
     it('calls `exists` with the correct parameters', async () => {
       await shouldSkipRollout({ logFilePath: 'some-file' });
 
-      expect(existsMock).toHaveBeenCalledTimes(1);
-      expect(existsMock).toHaveBeenCalledWith('some-file');
+      expect(accessMock).toHaveBeenCalledTimes(1);
+      expect(accessMock).toHaveBeenCalledWith('some-file');
     });
     it('returns `true` if the file is current log file does not exist', async () => {
-      existsMock.mockResolvedValue(false);
+      accessMock.mockImplementation(() => {
+        throw new Error('ENOENT');
+      });
 
       expect(await shouldSkipRollout({ logFilePath: 'some-file' })).toEqual(true);
     });
     it('returns `false` if the file is current log file exists', async () => {
-      existsMock.mockResolvedValue(true);
+      accessMock.mockResolvedValue(undefined);
 
       expect(await shouldSkipRollout({ logFilePath: 'some-file' })).toEqual(false);
     });
@@ -128,7 +130,12 @@ describe('NumericRollingStrategy tasks', () => {
 
   describe('getOrderedRolledFiles', () => {
     it('returns the rolled files matching the pattern in order', async () => {
-      readdirMock.mockResolvedValue(['kibana-3.log', 'kibana-1.log', 'kibana-2.log']);
+      readdirMock.mockResolvedValue([
+        'kibana-10.log',
+        'kibana-1.log',
+        'kibana-12.log',
+        'kibana-2.log',
+      ]);
 
       const files = await getOrderedRolledFiles({
         logFileFolder: 'log-folder',
@@ -136,7 +143,7 @@ describe('NumericRollingStrategy tasks', () => {
         pattern: '-%i',
       });
 
-      expect(files).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana-3.log']);
+      expect(files).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana-10.log', 'kibana-12.log']);
     });
 
     it('ignores files that do no match the pattern', async () => {

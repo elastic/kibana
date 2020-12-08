@@ -18,14 +18,19 @@
  */
 
 import { join } from 'path';
+import { readdir, rename, unlink, access } from 'fs/promises';
 import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
-import { readdir, rename, unlink, exists } from '../fs';
 
 export const shouldSkipRollout = async ({ logFilePath }: { logFilePath: string }) => {
   // in case of time-interval triggering policy, we can have an entire
   // interval without any log event. In that case, the log file is not even
   // present, and we should not perform the rollout
-  return !(await exists(logFilePath));
+  try {
+    await access(logFilePath);
+    return false;
+  } catch (e) {
+    return true;
+  }
 };
 
 /**
@@ -59,9 +64,7 @@ export const deleteFiles = async ({
   logFileFolder: string;
   filesToDelete: string[];
 }) => {
-  for (const fileToDelete of filesToDelete) {
-    await unlink(join(logFileFolder, fileToDelete));
-  }
+  await Promise.all(filesToDelete.map((fileToDelete) => unlink(join(logFileFolder, fileToDelete))));
 };
 
 export const rollPreviousFilesInOrder = async ({

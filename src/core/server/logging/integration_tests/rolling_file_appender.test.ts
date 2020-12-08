@@ -18,7 +18,7 @@
  */
 
 import { join } from 'path';
-import { rmdirSync, mkdtempSync, readFileSync, readdirSync } from 'fs';
+import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
@@ -50,17 +50,17 @@ describe('RollingFileAppender', () => {
   let testDir: string;
   let logFile: string;
 
-  const getFileContent = (basename: string) =>
-    readFileSync(join(testDir, basename)).toString('utf-8');
+  const getFileContent = async (basename: string) =>
+    (await readFile(join(testDir, basename))).toString('utf-8');
 
   beforeEach(async () => {
-    testDir = mkdtempSync('rolling-test');
+    testDir = await mkdtemp('rolling-test');
     logFile = join(testDir, 'kibana.log');
   });
 
   afterEach(async () => {
     try {
-      rmdirSync(testDir);
+      await rmdir(testDir);
     } catch (e) {
       /* trap */
     }
@@ -110,12 +110,12 @@ describe('RollingFileAppender', () => {
 
       await flush();
 
-      const files = readdirSync(testDir).sort();
+      const files = await readdir(testDir);
 
-      expect(files).toEqual(['kibana.1.log', 'kibana.2.log', 'kibana.log']);
-      expect(getFileContent('kibana.log')).toEqual(expectedFileContent([7]));
-      expect(getFileContent('kibana.1.log')).toEqual(expectedFileContent([4, 5, 6]));
-      expect(getFileContent('kibana.2.log')).toEqual(expectedFileContent([1, 2, 3]));
+      expect(files.sort()).toEqual(['kibana.1.log', 'kibana.2.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7]));
+      expect(await getFileContent('kibana.1.log')).toEqual(expectedFileContent([4, 5, 6]));
+      expect(await getFileContent('kibana.2.log')).toEqual(expectedFileContent([1, 2, 3]));
     });
 
     it('only keep the correct number of files', async () => {
@@ -157,12 +157,12 @@ describe('RollingFileAppender', () => {
 
       await flush();
 
-      const files = readdirSync(testDir).sort();
+      const files = await readdir(testDir);
 
-      expect(files).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana.log']);
-      expect(getFileContent('kibana.log')).toEqual(expectedFileContent([7, 8]));
-      expect(getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
-      expect(getFileContent('kibana-2.log')).toEqual(expectedFileContent([3, 4]));
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7, 8]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
+      expect(await getFileContent('kibana-2.log')).toEqual(expectedFileContent([3, 4]));
     });
   });
 
@@ -210,11 +210,11 @@ describe('RollingFileAppender', () => {
 
       await flush();
 
-      const files = readdirSync(testDir).sort();
+      const files = await readdir(testDir);
 
-      expect(files).toEqual(['kibana-1.log', 'kibana.log']);
-      expect(getFileContent('kibana.log')).toEqual(expectedFileContent([3, 4]));
-      expect(getFileContent('kibana-1.log')).toEqual(expectedFileContent([1, 2]));
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([3, 4]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([1, 2]));
     });
   });
 });
