@@ -89,7 +89,9 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             .map((step: AlertMessage) => {
               return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
             })}
-          <EuiListGroupItem label={<AlertConfiguration alert={status.alert.alert} compressed />} />
+          <EuiListGroupItem
+            label={<AlertConfiguration alert={status.alert.rawAlert} compressed />}
+          />
         </EuiListGroup>
       </EuiAccordion>
     );

@@ -7,6 +7,7 @@
 import { AlertState } from '../../../common/types/alerts';
 import { AlertSeverity } from '../../../common/enums';
 import { getFiringAlertCount } from './get_firing_alert_count';
+import { AlertExecutionStatusValues } from '../../../../alerts/common';
 
 const ui = {
   isFiring: false,
@@ -23,14 +24,29 @@ describe('getFiringAlertCount', () => {
   it('should count firing states', () => {
     const alerts = [
       {
-        exists: true,
-        enabled: true,
-        alert: {
-          type: '',
-          label: '',
-          paramDetails: {},
-          rawAlert: {} as any,
-          isLegacy: false,
+        rawAlert: {
+          alertTypeId: '',
+          name: '',
+          id: '',
+          enabled: true,
+          tags: [],
+          consumer: '',
+          schedule: { interval: '1m' },
+          actions: [],
+          params: {},
+          createdBy: null,
+          updatedBy: null,
+          createdAt: new Date('2020-12-08'),
+          updatedAt: new Date('2020-12-08'),
+          apiKey: null,
+          apiKeyOwner: null,
+          throttle: null,
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: AlertExecutionStatusValues[0],
+            lastExecutionDate: new Date(),
+          },
         },
         states: [
           {
@@ -77,14 +93,29 @@ describe('getFiringAlertCount', () => {
   it('should use the filter', () => {
     const alerts = [
       {
-        exists: true,
-        enabled: true,
-        alert: {
-          type: '',
-          label: '',
-          paramDetails: {},
-          rawAlert: {} as any,
-          isLegacy: false,
+        rawAlert: {
+          alertTypeId: '',
+          name: '',
+          id: '',
+          enabled: true,
+          tags: [],
+          consumer: '',
+          schedule: { interval: '1m' },
+          actions: [],
+          params: {},
+          createdBy: null,
+          updatedBy: null,
+          createdAt: new Date('2020-12-08'),
+          updatedAt: new Date('2020-12-08'),
+          apiKey: null,
+          apiKeyOwner: null,
+          throttle: null,
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: AlertExecutionStatusValues[0],
+            lastExecutionDate: new Date(),
+          },
         },
         states: [
           {

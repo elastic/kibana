@@ -23,10 +23,6 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const [isMuted, setIsMuted] = React.useState(alert.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  // if (!alert) {
-  //   return null;
-  // }
-
   async function disableAlert() {
     setIsSaving(true);
     try {

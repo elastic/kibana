@@ -53,8 +53,8 @@ function getAllAlerts() {
         params: {},
         createdBy: null,
         updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2020-12-08'),
+        updatedAt: new Date('2020-12-08'),
         apiKey: null,
         apiKeyOwner: null,
         throttle: null,
@@ -62,7 +62,7 @@ function getAllAlerts() {
         mutedInstanceIds: [],
         executionStatus: {
           status: AlertExecutionStatusValues[0],
-          lastExecutionDate: new Date(),
+          lastExecutionDate: new Date('2020-12-08'),
         },
       },
     };
@@ -133,8 +133,8 @@ describe('getAlertPanelsByCategory', () => {
         params: {},
         createdBy: null,
         updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2020-12-08'),
+        updatedAt: new Date('2020-12-08'),
         apiKey: null,
         apiKeyOwner: null,
         throttle: null,
@@ -142,7 +142,7 @@ describe('getAlertPanelsByCategory', () => {
         mutedInstanceIds: [],
         executionStatus: {
           status: AlertExecutionStatusValues[0],
-          lastExecutionDate: new Date(),
+          lastExecutionDate: new Date('2020-12-08'),
         },
       },
     };
