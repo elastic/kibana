@@ -58,7 +58,7 @@ export function getDefaultAsyncGetParams(): Pick<
   'keep_alive' | 'wait_for_completion_timeout'
 > {
   return {
-    keep_alive: '10m', // Extend the TTL for this search request by one minute
+    keep_alive: '1m', // Extend the TTL for this search request by one minute
     wait_for_completion_timeout: '100ms', // Wait up to 100ms for the response to return
   };
 }
