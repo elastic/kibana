@@ -41,6 +41,7 @@ export const alertType: AlertType<AlwaysFiringParams> = {
   name: 'Always firing',
   actionGroups: ACTION_GROUPS,
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  minimumLicenseRequired: 'basic',
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

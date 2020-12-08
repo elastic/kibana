@@ -54,6 +54,7 @@ describe('aggregate()', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
@@ -105,6 +106,7 @@ describe('aggregate()', () => {
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {

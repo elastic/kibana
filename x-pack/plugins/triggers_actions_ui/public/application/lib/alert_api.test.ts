@@ -51,6 +51,7 @@ describe('loadAlertTypes', () => {
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         defaultActionGroupId: 'default',
         authorizedConsumers: {},
+        minimumLicenseRequired: 'basic',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

@@ -40,6 +40,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           name: 'Recovered',
         },
         producer: 'alertsFixture',
+        minimumLicenseRequired: 'basic',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });

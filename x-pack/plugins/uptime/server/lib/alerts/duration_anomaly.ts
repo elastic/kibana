@@ -82,6 +82,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
       context: [],
       state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
     },
+    minimumLicenseRequired: 'basic',
     async executor({ options, uptimeEsClient, savedObjectsClient, dynamicSettings }) {
       const {
         services: { alertInstanceFactory },

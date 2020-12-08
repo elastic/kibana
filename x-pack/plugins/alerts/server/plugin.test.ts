@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertingPlugin, AlertingPluginsSetup, AlertingPluginsStart } from './plugin';
+import {
+  AlertingPlugin,
+  AlertingPluginsSetup,
+  AlertingPluginsStart,
+  PluginSetupContract,
+} from './plugin';
 import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -14,9 +19,16 @@ import { KibanaRequest, CoreSetup } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
 import { AlertsConfig } from './config';
+import { AlertType } from './types';
+import { eventLogMock } from '../../event_log/server/mocks';
+import { actionsMock } from '../../actions/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
+    let plugin: AlertingPlugin;
+    let coreSetup: ReturnType<typeof coreMock.createSetup>;
+    let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
+
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
@@ -27,9 +39,9 @@ describe('Alerting Plugin', () => {
           removalDelay: '5m',
         },
       });
-      const plugin = new AlertingPlugin(context);
+      plugin = new AlertingPlugin(context);
 
-      const coreSetup = coreMock.createSetup();
+      coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
       const statusMock = statusServiceMock.createSetupContract();
       await plugin.setup(
@@ -54,6 +66,56 @@ describe('Alerting Plugin', () => {
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
+    });
+
+    describe('registerType()', () => {
+      let setup: PluginSetupContract;
+      const sampleAlertType: AlertType = {
+        id: 'test',
+        name: 'test',
+        minimumLicenseRequired: 'basic',
+        actionGroups: [],
+        defaultActionGroupId: 'default',
+        producer: 'test',
+        async executor() {},
+      };
+
+      beforeEach(async () => {
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          actions: actionsMock.createSetup(),
+          statusService: statusServiceMock.createSetupContract(),
+        };
+        setup = await plugin.setup(coreSetup, pluginsSetup);
+      });
+
+      it('should throw error when license type is invalid', async () => {
+        expect(() =>
+          setup.registerType({
+            ...sampleAlertType,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            minimumLicenseRequired: 'foo' as any,
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+      });
+
+      it('should not throw when license type is gold', async () => {
+        setup.registerType({
+          ...sampleAlertType,
+          minimumLicenseRequired: 'gold',
+        });
+      });
+
+      it('should not throw when license type is basic', async () => {
+        setup.registerType({
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        });
+      });
     });
   });
 

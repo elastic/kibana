@@ -19,6 +19,7 @@ test('should return passed in params when validation not defined', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       async executor() {},
       producer: 'alerts',
     },
@@ -41,6 +42,7 @@ test('should validate and apply defaults when params is valid', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -71,6 +73,7 @@ test('should validate and throw error when params is invalid', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         validate: {
           params: schema.object({
             param1: schema.string(),

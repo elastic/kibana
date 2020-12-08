@@ -1,0 +1,77 @@
+[[tsvb]]
+=== Add panels with TSVB
+
+With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build
+complex summaries of that data.
+
+. Select *Data*. If you are using *Table*, select *Columns*.
+. From the *Aggregation* drop down, select the aggregation you want to visualize.
++
+If you don’t see any data, change the <<set-time-filter,time filter>>.
++
+To add multiple aggregations, click *+*.
+. From the *Group by* drop down, select how you want to group or split the data.
+. To add another data set, click *+*.
++
+When you have more than one aggregation, the last value is displayed, which is indicated by the eye icon.
+
+[float]
+[[change-the-data-display]]
+==== Change the data display
+
+To find the best way to display your data, *TSVB* supports several types of panels and charts.
+
+To change the *Time Series* chart type:
+
+. Click *Data > Options*.
+. Select the *Chart type*.
+
+To change the panel type, click on the panel options:
+
+[role="screenshot"]
+image::images/tsvb_change_display.gif[TSVB change the panel type]
+
+[float]
+[[custommize-the-data]]
+==== Customize the data
+
+View data in a different <<index-patterns,index pattern>>, and change the data label name and colors. The options available depend on the panel type.
+
+To change the index pattern, click *Panel options*, then enter the new *Index Pattern*.
+
+To override the index pattern for a data set, click *Data > Options*. Select *Yes* to override, then enter the new *Index pattern*.
+
+To change the data labels and colors:
+
+. Click *Data*.
+. Enter the *Label* name, which *TSVB* uses on the legends and data labels.
+. Click the color picker, then select the color for the data.
++
+[role="screenshot"]
+image::images/tsvb_color_picker.png[TSVB color picker]
+
+[float]
+[[add-annotations]]
+==== Add annotations
+
+You can overlay annotation events on top of your *Time Series* charts. The options available depend on the data source.
+
+To begin, click *Annotations*, click *Add data source*, then configure the options.
+
+[role="screenshot"]
+image::images/tsvb_annotations.png[TSVB annotations]
+
+[float]
+[[filter-the-panel]]
+==== Filter the panel
+
+The data that displays on the panel is based on the <<index-patterns,index pattern>> and <<set-time-filter,time filter>>.
+You can filter the data on the panels using the <<lucene-query,Lucene query syntax>>.
+
+Click *Panel options*, then enter the syntax in the *Panel Filter* field.
+
+If you want to ignore filters from all of {kib}, select *Yes* for *Ignore global filter*.
+
+//[float]
+//[[try-it-tsvb]
+//Try it: Build a dashboard with TSVB panels

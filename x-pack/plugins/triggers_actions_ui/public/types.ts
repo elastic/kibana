@@ -6,9 +6,12 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
+import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
   SanitizedAlert as Alert,
   AlertAction,
@@ -125,6 +128,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 export interface ActionVariable {
   name: string;
   description: string;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 type AsActionVariables<Keys extends string> = {
@@ -135,15 +139,19 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType {
-  id: string;
-  name: string;
-  actionGroups: ActionGroup[];
-  recoveryActionGroup: ActionGroup;
+export interface AlertType
+  extends Pick<
+    CommonAlertType,
+    | 'id'
+    | 'name'
+    | 'actionGroups'
+    | 'producer'
+    | 'minimumLicenseRequired'
+    | 'recoveryActionGroup'
+    | 'defaultActionGroupId'
+  > {
   actionVariables: ActionVariables;
-  defaultActionGroupId: ActionGroup['id'];
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
-  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -158,7 +166,7 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   AlertParamsType = unknown,
-  AlertsContextValue = unknown
+  MetaData = Record<string, any>
 > {
   alertParams: AlertParamsType;
   alertInterval: string;
@@ -166,12 +174,14 @@ export interface AlertTypeParamsExpressionProps<
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => void;
   errors: IErrorObject;
-  alertsContext: AlertsContextValue;
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
+  metadata?: MetaData;
+  charts: ChartsPluginSetup;
+  data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
+export interface AlertTypeModel<AlertParamsType = any> {
   id: string;
   name: string | JSX.Element;
   description: string;
@@ -180,9 +190,7 @@ export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any>
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>
-    | React.LazyExoticComponent<
-        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
-      >;
+    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
 }

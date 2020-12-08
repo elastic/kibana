@@ -60,6 +60,7 @@ const alertTypeFromApi = {
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
   producer: ALERTS_FEATURE_ID,
+  minimumLicenseRequired: 'basic',
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },

@@ -68,8 +68,14 @@ export class AggField extends CountAggField {
     return this._getAggType() === AGG_TYPE.TERMS ? TERMS_AGG_SHARD_SIZE : 0;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
-    return this._esDocField ? await this._esDocField.getOrdinalFieldMetaRequest() : null;
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+    return this._esDocField ? await this._esDocField.getExtendedStatsFieldMetaRequest() : null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+    return this._esDocField
+      ? await this._esDocField.getPercentilesFieldMetaRequest(percentiles)
+      : null;
   }
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
