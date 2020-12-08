@@ -31,6 +31,6 @@ export const createNotifications = async ({
       enabled,
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
-      notifyOnlyOnActionGroupChange: false,
+      notifyWhen: null,
     },
   });

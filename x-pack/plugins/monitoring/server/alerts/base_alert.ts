@@ -177,7 +177,7 @@ export class BaseAlert {
         name: this.label,
         alertTypeId: this.type,
         throttle: this.defaultThrottle,
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: null,
         schedule: { interval: this.defaultInterval },
         actions: alertActions,
       },

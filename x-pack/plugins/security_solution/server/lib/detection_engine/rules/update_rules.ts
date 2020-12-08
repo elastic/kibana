@@ -74,7 +74,7 @@ export const updateRules = async ({
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
     throttle: null,
-    notifyOnlyOnActionGroupChange: false,
+    notifyWhen: null,
   };
 
   const update = await alertsClient.update({

@@ -182,6 +182,7 @@ export const internalRuleCreate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
+  notifyWhen: t.null,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
@@ -194,7 +195,7 @@ export const internalRuleUpdate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
-  notifyOnlyOnActionGroupChange: t.boolean,
+  notifyWhen: t.null,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
 

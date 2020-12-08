@@ -105,7 +105,7 @@ const rule: SanitizedAlert = {
   enabled: true,
   actions: [],
   throttle: null,
-  notifyOnlyOnActionGroupChange: false,
+  notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   apiKeyOwner: 'elastic',
