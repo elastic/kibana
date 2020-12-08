@@ -6,6 +6,9 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiBadge,
   EuiButton,
@@ -16,6 +19,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import {
+  CONFIG_INTRO_ALT_TEXT,
+  CONFIG_INTRO_STEPS_TEXT,
+  CONFIG_INTRO_STEP1_HEADING,
+  CONFIG_INTRO_STEP1_TEXT,
+  CONFIG_INTRO_STEP2_HEADING,
+  CONFIG_INTRO_STEP2_TITLE,
+  CONFIG_INTRO_STEP2_TEXT,
+} from './constants';
 
 import connectionIllustration from '../../../../assets/connection_illustration.svg';
 
@@ -48,7 +61,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
         >
           <EuiFlexItem grow={false}>
             <div className="adding-a-source__intro-image">
-              <img src={connectionIllustration} alt="connection illustration" />
+              <img src={connectionIllustration} alt={CONFIG_INTRO_ALT_TEXT} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -56,11 +69,19 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
               <EuiFlexItem>
                 <EuiSpacer size="xl" />
                 <EuiTitle size="l">
-                  <h2>How to add {name}</h2>
+                  <h2>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.steps.title',
+                      {
+                        defaultMessage: 'How to add {name}',
+                        values: { name },
+                      }
+                    )}
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiText color="subdued" grow={false}>
-                  <p>Quick setup, then all of your documents will be searchable.</p>
+                  <p>{CONFIG_INTRO_STEPS_TEXT}</p>
                 </EuiText>
                 <EuiSpacer size="l" />
               </EuiFlexItem>
@@ -69,21 +90,22 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   <EuiFlexItem grow={false}>
                     <div className="adding-a-source__intro-step">
                       <EuiText>
-                        <h4>Step 1</h4>
+                        <h4>{CONFIG_INTRO_STEP1_HEADING}</h4>
                       </EuiText>
                     </div>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="m" grow={false}>
                       <h4>
-                        Configure an OAuth application&nbsp;
-                        <EuiBadge color="#6DCCB1">One-Time Action</EuiBadge>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.title"
+                          defaultMessage="Configure an OAuth application {badge}"
+                          values={{
+                            badge: <EuiBadge color="#6DCCB1">One-Time Action</EuiBadge>,
+                          }}
+                        />
                       </h4>
-                      <p>
-                        Setup a secure OAuth application through the content source that you or your
-                        team will use to connect and synchronize content. You only have to do this
-                        once per content source.
-                      </p>
+                      <p>{CONFIG_INTRO_STEP1_TEXT}</p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -93,17 +115,14 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   <EuiFlexItem grow={false}>
                     <div className="adding-a-source__intro-step">
                       <EuiText>
-                        <h4>Step 2</h4>
+                        <h4>{CONFIG_INTRO_STEP2_HEADING}</h4>
                       </EuiText>
                     </div>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="m" grow={false}>
-                      <h4>Connect the content source</h4>
-                      <p>
-                        Use the new OAuth application to connect any number of instances of the
-                        content source to Workplace Search.
-                      </p>
+                      <h4>{CONFIG_INTRO_STEP2_TITLE}</h4>
+                      <p>{CONFIG_INTRO_STEP2_TEXT}</p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -117,7 +136,13 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                     fill
                     onClick={advanceStep}
                   >
-                    Configure {name}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.configure.button',
+                      {
+                        defaultMessage: 'Configure {name}',
+                        values: { name },
+                      }
+                    )}
                   </EuiButton>
                 </EuiFormRow>
                 <EuiSpacer size="xl" />
