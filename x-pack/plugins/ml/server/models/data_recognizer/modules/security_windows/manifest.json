@@ -1,6 +1,6 @@
 {
   "id": "security_windows",
-  "title": "Security Windows",
+  "title": "Security: Windows",
   "description": "Detects suspicious activity using ECS Windows events. Tested with Winlogbeat and the Elastic agent.",
   "type": "windows data",
   "logoFile": "logo.json",
