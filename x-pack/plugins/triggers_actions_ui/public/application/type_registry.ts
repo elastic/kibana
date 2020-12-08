@@ -57,6 +57,26 @@ export class TypeRegistry<T extends BaseObjectType> {
     return this.objectTypes.get(id)!;
   }
 
+  /**
+   * Deletes an object type in the type registry
+   */
+  public delete(id: string): void {
+    if (!this.has(id)) {
+      throw new Error(
+        i18n.translate(
+          'xpack.triggersActionsUI.typeRegistry.delete.missingActionTypeErrorMessage',
+          {
+            defaultMessage: 'Object type "{id}" is not registered.',
+            values: {
+              id,
+            },
+          }
+        )
+      );
+    }
+    this.objectTypes.delete(id);
+  }
+
   public list() {
     return Array.from(this.objectTypes).map(([id, objectType]) => objectType);
   }
