@@ -371,7 +371,7 @@ describe('Policy serialization', () => {
     expect(originalPolicy).toEqual(originalClone);
   });
 
-  test('serialize a policy using "best_compression" codec for forcemerge', () => {
+  test('serialization adds an empty delete action to delete phase', () => {
     expect(
       serializePolicy(
         {
@@ -430,6 +430,48 @@ describe('Policy serialization', () => {
             set_priority: {
               priority: 50,
             },
+          },
+        },
+      },
+    });
+  });
+
+  test('serialize a policy using "best_compression" codec for forcemerge', () => {
+    expect(
+      serializePolicy({
+        name: 'test',
+        phases: {
+          hot: {
+            ...defaultNewHotPhase,
+          },
+          warm: {
+            ...defaultNewWarmPhase,
+          },
+          cold: {
+            ...defaultNewColdPhase,
+          },
+          delete: { ...defaultNewDeletePhase, phaseEnabled: true },
+        },
+      })
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          actions: {
+            rollover: {
+              max_age: '30d',
+              max_size: '50gb',
+            },
+            set_priority: {
+              priority: 100,
+            },
+          },
+          min_age: '0ms',
+        },
+        delete: {
+          min_age: '0d',
+          actions: {
+            delete: {},
           },
         },
       },
