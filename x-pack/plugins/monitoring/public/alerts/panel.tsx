@@ -28,17 +28,16 @@ import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 interface Props {
   alert: CommonAlertStatus;
   alertState?: CommonAlertState;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
-    alert: { alert },
+    alert: { rawAlert },
     alertState,
-    nextStepsFilter = () => true,
   } = props;
+
   const [showFlyout, setShowFlyout] = React.useState(false);
-  const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
-  const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
+  const [isEnabled, setIsEnabled] = React.useState(rawAlert?.enabled);
+  const [isMuted, setIsMuted] = React.useState(rawAlert?.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
@@ -46,7 +45,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     () =>
       showFlyout &&
       Legacy.shims.triggersActionsUi.getEditAlertFlyout({
-        initialAlert: alert.rawAlert,
+        initialAlert: rawAlert,
         onClose: () => {
           setShowFlyout(false);
           showBottomBar();
@@ -56,14 +55,14 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     [showFlyout]
   );
 
-  if (!alert.rawAlert) {
+  if (!rawAlert) {
     return null;
   }
 
   async function disableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_disable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_disable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
@@ -77,7 +76,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   async function enableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_enable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_enable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
@@ -91,7 +90,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   async function muteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_mute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_mute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
@@ -105,7 +104,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   async function unmuteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${rawAlert.id}/_unmute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
@@ -189,11 +188,9 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const nextStepsUi =
     alertState.state.ui.message.nextSteps && alertState.state.ui.message.nextSteps.length ? (
       <EuiListGroup>
-        {alertState.state.ui.message.nextSteps
-          .filter(nextStepsFilter)
-          .map((step: AlertMessage, index: number) => (
-            <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
-          ))}
+        {alertState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
+          <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
+        ))}
       </EuiListGroup>
     ) : null;
 
