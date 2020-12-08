@@ -60,7 +60,7 @@ describe('markdown vis controller', () => {
       <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
 
-    await wait(() => getByTestId('markdownBody'));
+    await waitFor(() => getByTestId('markdownBody'));
 
     expect(getByText(/testing/i)).toMatchInlineSnapshot(`
       <p>
@@ -82,7 +82,7 @@ describe('markdown vis controller', () => {
       <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
 
-    await wait(() => getByTestId('markdownBody'));
+    await waitFor(() => getByTestId('markdownBody'));
 
     expect(getByText(/initial/i)).toBeInTheDocument();
 
@@ -112,7 +112,7 @@ describe('markdown vis controller', () => {
         <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
-      await wait(() => getByTestId('markdownBody'));
+      await waitFor(() => getByTestId('markdownBody'));
 
       expect(renderComplete).toHaveBeenCalledTimes(1);
     });
@@ -122,7 +122,7 @@ describe('markdown vis controller', () => {
         <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
-      await wait(() => getByTestId('markdownBody'));
+      await waitFor(() => getByTestId('markdownBody'));
 
       expect(renderComplete).toHaveBeenCalledTimes(1);
 
@@ -139,7 +139,7 @@ describe('markdown vis controller', () => {
         <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
-      await wait(() => getByTestId('markdownBody'));
+      await waitFor(() => getByTestId('markdownBody'));
 
       expect(renderComplete).toHaveBeenCalledTimes(1);
 
