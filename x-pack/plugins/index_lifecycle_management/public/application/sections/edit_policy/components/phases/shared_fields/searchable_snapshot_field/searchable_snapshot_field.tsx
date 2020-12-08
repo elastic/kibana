@@ -286,7 +286,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
             {
               defaultMessage:
-                'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
+                'Cannot create a searchable snapshot in cold when it is configured in hot phase.',
             }
           )}
         />
@@ -300,7 +300,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody',
             {
               defaultMessage:
-                'Cannot perform searchable snapshot when rollover is disabled in hot phase.',
+                'Cannot create a searchable snapshot when rollover is disabled in the hot phase.',
             }
           )}
         />
