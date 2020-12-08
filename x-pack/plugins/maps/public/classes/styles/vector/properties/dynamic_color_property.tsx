@@ -145,85 +145,59 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getFieldName();
+    let colorStops: Array<number | string> | null = null;
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
         return null;
       }
-
-      const colorStops: Array<number | string> = this._options.customColorRamp.reduce(
-        (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
-          return [...accumulatedStops, nextStop.stop, nextStop.color];
-        },
-        []
-      );
-      const firstStopValue = colorStops[0] as number;
-      const lessThanFirstStopValue = firstStopValue - 1;
-      return [
-        'step',
-        makeMbClampedNumberExpression({
-          minValue: colorStops[0],
-          maxValue: colorStops[colorStops.length - 2],
-          lookupFunction: this.getMbLookupFunction(),
-          fallback: lessThanFirstStopValue,
-          fieldName: targetName,
-        }),
-        RGBA_0000, // MB will assign the base value to any features that is below the first stop value
-        ...colorStops,
-      ];
-    }
-
-    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
+      colorStops = this._getCustomRampColorStops();
+    } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
         return null;
       }
-
-      const colorStops = getPercentilesMbColorRampStops(
+      colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
         percentilesFieldMeta
       );
-      if (!colorStops) {
+    } else {
+      const rangeFieldMeta = this.getRangeFieldMeta();
+      if (!rangeFieldMeta) {
         return null;
       }
-
-      const lessThanFirstStopValue = percentilesFieldMeta[0].value - 1;
-      return [
-        'step',
-        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
-        RGBA_0000,
-        ...colorStops,
-      ];
+      colorStops = getOrdinalMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        rangeFieldMeta.min,
+        rangeFieldMeta.max
+      );
     }
 
-    const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!rangeFieldMeta) {
-      return null;
-    }
+    return colorStops && colorStops.length >= 2
+      ? [
+          'step',
+          makeMbClampedNumberExpression({
+            minValue: colorStops[0],
+            maxValue: colorStops[colorStops.length - 2],
+            lookupFunction: this.getMbLookupFunction(),
+            fallback: colorStops[0] - 1,
+            fieldName: this.getFieldName(),
+          }),
+          RGBA_0000, // MB will assign the base value to any features that is below the first stop value
+          ...colorStops,
+        ]
+      : null;
+  }
 
-    const colorStops = getOrdinalMbColorRampStops(
-      this._options.color ? this._options.color : null,
-      rangeFieldMeta.min,
-      rangeFieldMeta.max
-    );
-    if (!colorStops) {
-      return null;
-    }
-
-    const lessThanFirstStopValue = rangeFieldMeta.min - 1;
-    return [
-      'step',
-      makeMbClampedNumberExpression({
-        minValue: rangeFieldMeta.min,
-        maxValue: rangeFieldMeta.max,
-        lookupFunction: this.getMbLookupFunction(),
-        fallback: lessThanFirstStopValue,
-        fieldName: targetName,
-      }),
-      RGBA_0000,
-      ...colorStops,
-    ];
+  _getCustomRampColorStops(): Array<number | string> {
+    return this._options.customColorRamp
+      ? this._options.customColorRamp.reduce(
+          (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
+            return [...accumulatedStops, nextStop.stop, nextStop.color];
+          },
+          []
+        )
+      : [];
   }
 
   _getColorPaletteStops() {
@@ -308,12 +282,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: (i: number, isNext: boolean) => string | null = null;
     if (this._options.useCustomColorRamp && this._options.customColorRamp) {
-      colorStops = this._options.customColorRamp.reduce(
-        (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
-          return [...accumulatedStops, nextStop.stop, nextStop.color];
-        },
-        []
-      );
+      colorStops = this._getCustomRampColorStops();
     } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta) {
