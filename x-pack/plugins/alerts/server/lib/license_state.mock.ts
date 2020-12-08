@@ -11,7 +11,9 @@ export const createLicenseStateMock = () => {
     clean: jest.fn(),
     getLicenseInformation: jest.fn(),
     ensureLicenseForAlertType: jest.fn(),
-    isLicenseValidForAlertType: jest.fn(),
+    isLicenseValidForAlertType: jest.fn().mockResolvedValue({
+      isValid: true,
+    }),
     checkLicense: jest.fn().mockResolvedValue({
       state: 'valid',
     }),

@@ -6,7 +6,7 @@
 
 import { updateApiKeyRoute } from './update_api_key';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
 
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('updateApiKeyRoute', () => {
   it('updates api key for an alert', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     updateApiKeyRoute(router, licenseState);

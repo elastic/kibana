@@ -55,6 +55,7 @@ describe('listAlertTypes', () => {
     id: 'alertingAlertType',
     name: 'alertingAlertType',
     producer: 'alerts',
+    enabledInLicense: true,
   };
   const myAppAlertType = {
     actionGroups: [],
@@ -64,6 +65,7 @@ describe('listAlertTypes', () => {
     id: 'myAppAlertType',
     name: 'myAppAlertType',
     producer: 'myApp',
+    enabledInLicense: true,
   };
   const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
 
@@ -103,6 +105,7 @@ describe('listAlertTypes', () => {
         id: 'myType',
         name: 'myType',
         producer: 'myApp',
+        enabledInLicense: true,
       },
       {
         id: 'myOtherType',
@@ -111,6 +114,7 @@ describe('listAlertTypes', () => {
         defaultActionGroupId: 'default',
         recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
+        enabledInLicense: true,
       },
     ]);
     beforeEach(() => {
@@ -129,6 +133,7 @@ describe('listAlertTypes', () => {
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ]);
       authorization.filterByAlertTypeAuthorization.mockResolvedValue(authorizedTypes);

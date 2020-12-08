@@ -540,6 +540,7 @@ describe('AlertsAuthorization', () => {
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
+      enabledInLicense: true,
     };
     const myAppAlertType = {
       actionGroups: [],
@@ -549,6 +550,7 @@ describe('AlertsAuthorization', () => {
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const mySecondAppAlertType = {
       actionGroups: [],
@@ -558,6 +560,7 @@ describe('AlertsAuthorization', () => {
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
@@ -833,6 +836,7 @@ describe('AlertsAuthorization', () => {
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
+      enabledInLicense: true,
     };
     const myAppAlertType = {
       actionGroups: [],
@@ -842,6 +846,7 @@ describe('AlertsAuthorization', () => {
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
@@ -884,6 +889,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
@@ -914,6 +920,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
@@ -984,6 +991,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
@@ -1010,6 +1018,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
@@ -1075,6 +1084,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
@@ -1169,6 +1179,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
@@ -1195,6 +1206,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
@@ -1273,6 +1285,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",

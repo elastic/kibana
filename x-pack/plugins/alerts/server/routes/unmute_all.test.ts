@@ -5,7 +5,7 @@
  */
 import { unmuteAllAlertRoute } from './unmute_all';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 
 describe('unmuteAllAlertRoute', () => {
   it('unmutes an alert', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     unmuteAllAlertRoute(router, licenseState);

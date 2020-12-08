@@ -10,7 +10,6 @@ import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
-import { LicenseType } from '../../licensing/common/types';
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let alertTypeRegistryParams: ConstructorOptions;
 
@@ -354,6 +353,7 @@ describe('list()', () => {
       defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
       producer: 'alerts',
+      minimumLicenseRequired: 'basic',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
@@ -375,6 +375,7 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
+          "enabledInLicense": false,
           "id": "test",
           "name": "Test",
           "producer": "alerts",
@@ -424,29 +425,29 @@ describe('list()', () => {
 
 describe('ensureAlertTypeEnabled', () => {
   let alertTypeRegistry: AlertTypeRegistry;
-  const alertType = {
-    id: 'test',
-    name: 'Test',
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Default',
-      },
-    ],
-    defaultActionGroupId: 'default',
-    executor: jest.fn(),
-    producer: 'alerts',
-    minimumLicenseRequired: 'basic' as LicenseType,
-  };
 
   beforeEach(() => {
     alertTypeRegistry = new AlertTypeRegistry(alertTypeRegistryParams);
-    alertTypeRegistry.register(alertType);
+    alertTypeRegistry.register({
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    });
   });
 
   test('should call ensureLicenseForAlertType on the license state', async () => {
-    alertTypeRegistry.ensureAlertTypeEnabled('foo');
-    expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalledWith(alertType);
+    alertTypeRegistry.ensureAlertTypeEnabled('test');
+    expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalled();
   });
 
   test('should throw when ensureLicenseForAlertType throws', async () => {
@@ -454,7 +455,7 @@ describe('ensureAlertTypeEnabled', () => {
       throw new Error('Fail');
     });
     expect(() =>
-      alertTypeRegistry.ensureAlertTypeEnabled('foo')
+      alertTypeRegistry.ensureAlertTypeEnabled('test')
     ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

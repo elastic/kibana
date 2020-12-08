@@ -62,6 +62,7 @@ describe('find()', () => {
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
+      enabledInLicense: true,
     },
   ]);
   beforeEach(() => {
@@ -119,6 +120,7 @@ describe('find()', () => {
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ])
     );

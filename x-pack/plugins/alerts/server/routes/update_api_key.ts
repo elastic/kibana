@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { handleDisabledApiKeysError } from './lib/error_handler';
@@ -22,7 +22,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) => {
+export const updateApiKeyRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{id}/_update_api_key`,

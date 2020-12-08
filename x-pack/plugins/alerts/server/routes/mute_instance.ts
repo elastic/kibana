@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { renameKeys } from './lib/rename_keys';
@@ -24,7 +24,7 @@ const paramSchema = schema.object({
   alert_instance_id: schema.string(),
 });
 
-export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
+export const muteAlertInstanceRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`,

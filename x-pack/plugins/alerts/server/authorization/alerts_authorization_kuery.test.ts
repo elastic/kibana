@@ -25,6 +25,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
             authorizedConsumers: {
               myApp: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )
@@ -51,6 +52,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myApp: { read: true, all: true },
               myOtherApp: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )
@@ -78,6 +80,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
           {
             actionGroups: [],
@@ -92,6 +95,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
           {
             actionGroups: [],
@@ -106,6 +110,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )

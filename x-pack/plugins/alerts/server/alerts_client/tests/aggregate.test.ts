@@ -58,6 +58,7 @@ describe('aggregate()', () => {
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
+      enabledInLicense: true,
     },
   ]);
   beforeEach(() => {
@@ -109,6 +110,7 @@ describe('aggregate()', () => {
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ])
     );

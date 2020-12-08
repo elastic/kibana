@@ -6,7 +6,7 @@
 
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -72,7 +72,7 @@ describe('createAlertRoute', () => {
   };
 
   it('creates an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     createAlertRoute(router, licenseState);
@@ -131,7 +131,7 @@ describe('createAlertRoute', () => {
   });
 
   it('ensures the license allows creating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     createAlertRoute(router, licenseState);
@@ -148,7 +148,7 @@ describe('createAlertRoute', () => {
   });
 
   it('ensures the license check prevents creating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {

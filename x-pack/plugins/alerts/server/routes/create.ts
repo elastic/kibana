@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
@@ -41,7 +41,7 @@ export const bodySchema = schema.object({
   ),
 });
 
-export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const createAlertRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
       path: `${BASE_ALERT_API_PATH}/alert`,

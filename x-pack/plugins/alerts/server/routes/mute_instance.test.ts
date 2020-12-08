@@ -6,7 +6,7 @@
 
 import { muteAlertInstanceRoute } from './mute_instance';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
 
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('muteAlertInstanceRoute', () => {
   it('mutes an alert instance', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     muteAlertInstanceRoute(router, licenseState);
