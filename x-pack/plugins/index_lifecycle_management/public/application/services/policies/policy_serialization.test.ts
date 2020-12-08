@@ -15,6 +15,9 @@ import {
 } from '../../constants';
 import { DataTierAllocationType } from '../../../../common/types';
 import { coldPhaseInitialization } from './cold_phase';
+import { hotPhaseInitialization } from './hot_phase';
+import { warmPhaseInitialization } from './warm_phase';
+import { deletePhaseInitialization } from './delete_phase';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
@@ -566,6 +569,80 @@ describe('Policy serialization', () => {
             },
           },
         },
+      },
+    });
+  });
+
+  test('de-serialization sets number of replicas in warm phase', () => {
+    expect(
+      deserializePolicy({
+        modified_date: Date.now().toString(),
+        name: 'test',
+        version: 1,
+        policy: {
+          name: 'test',
+          phases: {
+            warm: {
+              actions: {
+                allocate: { include: {}, exclude: {}, number_of_replicas: 0 },
+              },
+            },
+          },
+        },
+      })
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          ...hotPhaseInitialization,
+        },
+        warm: {
+          ...defaultNewWarmPhase,
+          phaseEnabled: true,
+          selectedReplicaCount: '0',
+          warmPhaseOnRollover: false,
+          phaseIndexPriority: '',
+        },
+        cold: {
+          ...coldPhaseInitialization,
+        },
+        delete: { ...deletePhaseInitialization },
+      },
+    });
+  });
+
+  test('de-serialization sets number of replicas in cold phase', () => {
+    expect(
+      deserializePolicy({
+        modified_date: Date.now().toString(),
+        name: 'test',
+        version: 1,
+        policy: {
+          name: 'test',
+          phases: {
+            cold: {
+              actions: {
+                allocate: { include: {}, exclude: {}, number_of_replicas: 0 },
+              },
+            },
+          },
+        },
+      })
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          ...hotPhaseInitialization,
+        },
+        warm: {
+          ...warmPhaseInitialization,
+        },
+        cold: {
+          ...coldPhaseInitialization,
+          phaseEnabled: true,
+          selectedReplicaCount: '0',
+        },
+        delete: { ...deletePhaseInitialization },
       },
     });
   });

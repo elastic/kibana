@@ -53,9 +53,9 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
         Object.entries(allocate.require).forEach((entry) => {
           phase.selectedNodeAttrs = entry.join(':');
         });
-        if (allocate.number_of_replicas) {
-          phase.selectedReplicaCount = allocate.number_of_replicas.toString();
-        }
+      }
+      if (allocate.number_of_replicas !== undefined && allocate.number_of_replicas !== null) {
+        phase.selectedReplicaCount = allocate.number_of_replicas.toString();
       }
     }
 
