@@ -358,7 +358,6 @@
     "@elastic/makelogs": "^6.0.0",
     "@elastic/maki": "6.3.0",
     "@elastic/ui-ace": "0.2.3",
-    "@hapi/hapi": "^18.4.1",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/reporters": "^26.5.2",
     "@kbn/babel-code-parser": "link:packages/kbn-babel-code-parser",
