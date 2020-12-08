@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 interface AdvancedPolicySchemaType {
   key: string;
   first_supported_version: string;
@@ -15,8 +17,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.agent.connection_delay',
     first_supported_version: '7.11',
-    documentation:
-      'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.connection_delay',
+      {
+        defaultMessage:
+          'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
+      }
+    ),
   },
   {
     key: 'linux.advanced.artifacts.global.base_url',
