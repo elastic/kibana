@@ -214,6 +214,50 @@ describe('KibanaMigrator', () => {
           status: 'patched',
         });
       });
+      it('rejects when the migration state machine terminates in a FATAL state', () => {
+        const options = mockV2MigrationOptions();
+        options.client.indices.get.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            {
+              '.my-index_8.2.4_001': {
+                aliases: {
+                  '.my-index': {},
+                  '.my-index_8.2.4': {},
+                },
+                mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+                settings: {},
+              },
+            },
+            { statusCode: 200 }
+          )
+        );
+
+        const migrator = new KibanaMigrator(options);
+        return expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
+          `[Error: Unable to complete saved object migrations for the [.my-index] index. The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
+        );
+      });
+      it('rejects when an unexpected exception occurs in an action', async () => {
+        const options = mockV2MigrationOptions();
+        options.client.tasks.get.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            completed: true,
+            error: { type: 'elatsicsearch_exception', reason: 'task failed with an error' },
+            failures: [],
+            task: { description: 'task description' },
+          })
+        );
+
+        const migrator = new KibanaMigrator(options);
+
+        await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
+          `[Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster]`
+        );
+        expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
+          [Error: Reindex failed with the following error:
+          {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+        `);
+      });
     });
   });
 });

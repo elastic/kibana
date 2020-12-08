@@ -31,7 +31,7 @@ import { Logger, LogMeta } from '../../logging';
 import { SavedObjectsMigrationVersion } from '../types';
 import { AliasAction } from './actions';
 import { ControlState, stateActionMachine } from './state_action_machine';
-import { MigrationResult, MigrationStatus } from '../migrations/core';
+import { MigrationResult } from '../migrations/core';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
 /**
@@ -117,6 +117,8 @@ export type DoneState = PostInitState & {
 export type FatalState = BaseState & {
   /** Migration terminated with a failure */
   readonly controlState: 'FATAL';
+  /** The reason the migration was terminated */
+  readonly reason: string;
 };
 
 export type SetSourceWriteBlockState = PostInitState & {
@@ -268,7 +270,7 @@ function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): b
  * @param indexName A >= v7.11 index name
  */
 function indexVersion(indexName?: string): string | undefined {
-  return (indexName?.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
+  return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
 /**
@@ -328,13 +330,7 @@ const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsCli
     return {
       ...state,
       controlState: 'FATAL',
-      logs: [
-        ...state.logs,
-        {
-          level: 'error',
-          message: `Unable to complete action after ${MAX_RETRY_ATTEMPTS} attempts, terminating.`,
-        },
-      ],
+      reason: `Unable to complete the ${state.controlState} step after ${MAX_RETRY_ATTEMPTS} attempts, terminating.`,
     };
   } else {
     const retryCount = state.retryCount + 1;
@@ -430,17 +426,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP = {
           ...stateP,
           controlState: 'FATAL',
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `The ${
-                stateP.currentAlias
-              } alias is pointing to a newer version of Kibana: v${indexVersion(
-                aliases[stateP.currentAlias]
-              )}`,
-            },
-          ],
+          reason: `The ${
+            stateP.currentAlias
+          } alias is pointing to a newer version of Kibana: v${indexVersion(
+            aliases[stateP.currentAlias]
+          )}`,
         };
       } else if (
         // If the `.kibana` alias exists
@@ -602,16 +592,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `LEGACY_REINDEX failed because the reindex destination index [${stateP.sourceIndex.value}] does not exist.`,
-            },
-          ],
+          reason: `LEGACY_REINDEX failed because the reindex destination index [${stateP.sourceIndex.value}] does not exist.`,
         };
       }
-      return { ...stateP, controlState: 'FATAL' };
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: `LEGACY_REINDEX_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(res)}`,
+      };
     }
   } else if (stateP.controlState === 'LEGACY_DELETE') {
     const res = resW as ResponseType<typeof stateP.controlState>;
@@ -638,13 +626,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `LEGACY_DELETE failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
-            },
-          ],
+          reason: `LEGACY_DELETE failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
         };
       }
     } else {
@@ -691,6 +673,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'FATAL',
+        reason: `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
+          res
+        )}`,
       };
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
@@ -739,6 +724,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'FATAL',
+        reason: `OUTDATED_DOCUMENTS_TRANSFORM: unexpected action response: ${JSON.stringify(res)}`,
       };
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
@@ -850,7 +836,7 @@ export async function migrationStateMachine({
   transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
-}) {
+}): Promise<MigrationResult> {
   const outdatedDocumentsQuery = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
@@ -904,34 +890,46 @@ export async function migrationStateMachine({
     indexLogger.info(`${state.controlState} RESPONSE`, res as LogMeta);
   };
 
-  const finalState = await stateActionMachine<State>(
-    initialState,
-    (state) => next(client, transformRawDocs, state),
-    (state, res) => {
-      logActionResponse(state, res);
-      const newState = model(state, res);
-      logStateTransition(state, newState);
-      return newState;
-    }
-  );
+  try {
+    const finalState = await stateActionMachine<State>(
+      initialState,
+      (state) => next(client, transformRawDocs, state),
+      (state, res) => {
+        logActionResponse(state, res);
+        const newState = model(state, res);
+        logStateTransition(state, newState);
+        return newState;
+      }
+    );
 
-  if (finalState.controlState === 'DONE') {
-    return Option.fold<string, MigrationResult>(
-      () => ({
-        status: 'patched' as const,
-        destIndex: finalState.targetIndex,
-        elapsedMs: 0,
-      }),
-      (sourceIndex) => ({
-        status: 'migrated' as const,
-        destIndex: finalState.targetIndex,
-        sourceIndex,
-        elapsedMs: 0,
-      })
-    )(finalState.sourceIndex);
-  } else {
+    if (finalState.controlState === 'DONE') {
+      return Option.fold<string, MigrationResult>(
+        () => ({
+          status: 'patched' as const,
+          destIndex: finalState.targetIndex,
+          elapsedMs: 0,
+        }),
+        (sourceIndex) => ({
+          status: 'migrated' as const,
+          destIndex: finalState.targetIndex,
+          sourceIndex,
+          elapsedMs: 0,
+        })
+      )(finalState.sourceIndex);
+    } else if (finalState.controlState === 'FATAL') {
+      return Promise.reject(
+        new Error(
+          `Unable to complete saved object migrations for the [${indexPrefix}] index. ` +
+            finalState.reason
+        )
+      );
+    } else {
+      throw new Error('Invalid terminating control state');
+    }
+  } catch (e) {
+    logger.error(e);
     throw new Error(
-      `Unable to complete saved object migrations for the [${finalState.indexPrefix}] index. Please check the health of your Elasticsearch cluster.`
+      `Unable to complete saved object migrations for the [${indexPrefix}] index. Please check the health of your Elasticsearch cluster`
     );
   }
 }

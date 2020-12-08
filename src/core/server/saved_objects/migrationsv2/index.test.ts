@@ -173,9 +173,12 @@ describe('migrations v2', () => {
         const newState = model(
           { ...state, ...{ retryCount: 10, retryDelay: 64000 } },
           Either.left(retryableError)
-        );
+        ) as FatalState;
 
         expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Unable to complete the INIT step after 10 attempts, terminating."`
+        );
       });
     });
 
@@ -256,14 +259,9 @@ describe('migrations v2', () => {
           const newState = model(initState, res) as FatalState;
 
           expect(newState.controlState).toEqual('FATAL');
-          expect(newState.logs).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "level": "error",
-                "message": "The .kibana alias is pointing to a newer version of Kibana: v7.12.0",
-              },
-            ]
-          `);
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
+          );
         });
         test('INIT -> SET_SOURCE_WRITE_BLOCK when .kibana points to an index with an invalid version', () => {
           // If users tamper with our index version naming scheme we can no
@@ -509,14 +507,11 @@ describe('migrations v2', () => {
             type: 'index_not_found_exception',
             index: 'source_index_name',
           });
-          const newState = model(legacyReindexWaitForTaskState, res);
+          const newState = model(legacyReindexWaitForTaskState, res) as FatalState;
           expect(newState.controlState).toEqual('FATAL');
-          expect(newState.logs[0]).toMatchInlineSnapshot(`
-            Object {
-              "level": "error",
-              "message": "LEGACY_REINDEX failed because the reindex destination index [source_index_name] does not exist.",
-            }
-          `);
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"LEGACY_REINDEX failed because the reindex destination index [source_index_name] does not exist."`
+          );
         });
       });
       describe('LEGACY_DELETE', () => {
@@ -563,12 +558,9 @@ describe('migrations v2', () => {
           });
           const newState = model(legacyDeleteState, res);
           expect(newState.controlState).toEqual('FATAL');
-          expect(newState.logs[0]).toMatchInlineSnapshot(`
-            Object {
-              "level": "error",
-              "message": "LEGACY_DELETE failed because the source index [source_index_name] does not exist.",
-            }
-          `);
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"LEGACY_DELETE failed because the source index [source_index_name] does not exist."`
+          );
         });
       });
       describe('SET_SOURCE_WRITE_BLOCK', () => {
@@ -769,12 +761,12 @@ describe('migrations v2', () => {
   describe('next', () => {
     it.todo('when state.retryDelay > 0 delays execution of the next action');
     it('DONE returns null', () => {
-      const state: State = { ...baseState, ...{ controlState: 'DONE' } };
+      const state: State = { ...baseState, ...{ controlState: 'DONE' } } as State;
       const action = next({} as ElasticsearchClient, (() => {}) as any, state);
       expect(action).toEqual(null);
     });
     it('FATAL returns null', () => {
-      const state: State = { ...baseState, ...{ controlState: 'FATAL' } };
+      const state: State = { ...baseState, ...{ controlState: 'FATAL', reason: '' } };
       const action = next({} as ElasticsearchClient, (() => {}) as any, state);
       expect(action).toEqual(null);
     });
