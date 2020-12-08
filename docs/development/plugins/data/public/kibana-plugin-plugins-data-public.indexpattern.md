@@ -62,5 +62,8 @@ export declare class IndexPattern implements IIndexPattern
 |  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-public.indexpattern.isunsupportedtimepattern.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
+|  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-public.indexpattern.setfieldattrs.md) |  |  |
+|  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcount.md) |  |  |
+|  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcustomlabel.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 
