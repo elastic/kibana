@@ -366,7 +366,6 @@ describe('list()', () => {
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
-      minimumLicenseRequired: 'basic',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`

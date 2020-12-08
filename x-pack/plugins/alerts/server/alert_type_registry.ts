@@ -166,6 +166,7 @@ export class AlertTypeRegistry {
           defaultActionGroupId,
           actionVariables,
           producer,
+          minimumLicenseRequired,
           enabledInLicense:
             this.licenseState.isLicenseValidForAlertType(id, name, minimumLicenseRequired!)
               .isValid === true,
