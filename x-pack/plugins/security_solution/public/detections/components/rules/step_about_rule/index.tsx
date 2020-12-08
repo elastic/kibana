@@ -17,7 +17,7 @@ import {
 } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
-import { AddMitreThreat } from '../mitre';
+import { AddMitreAttackThreat } from '../mitre';
 import {
   Field,
   Form,
@@ -230,7 +230,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <UseField
               path="threat"
-              component={AddMitreThreat}
+              component={AddMitreAttackThreat}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,

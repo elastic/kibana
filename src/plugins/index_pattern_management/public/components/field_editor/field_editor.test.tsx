@@ -200,7 +200,7 @@ describe('FieldEditor', () => {
       },
     };
     indexPattern.fieldFormatMap = { test: field };
-    indexPattern.deleteFieldFormat = jest.fn();
+    (indexPattern.deleteFieldFormat as any) = jest.fn();
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
