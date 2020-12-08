@@ -11,7 +11,7 @@ import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../tags';
+import { ITagsCache } from '../services';
 import { getTagsFromReferences, byNameTagSorter } from '../utils';
 
 export interface GetTableColumnDefinitionOptions {
