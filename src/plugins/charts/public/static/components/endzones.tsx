@@ -142,7 +142,7 @@ export const getAdjustedInterval = (
 
 const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {
   defaultMessage:
-    'The selected time range does not include this entire bucket, it may contain partial data.',
+    'The selected time range does not include this entire bucket. It might contain partial data.',
 });
 
 const Prompt = () => (
