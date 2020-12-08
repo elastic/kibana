@@ -129,6 +129,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 export interface ActionVariable {
   name: string;
   description: string;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 type AsActionVariables<Keys extends string> = {
