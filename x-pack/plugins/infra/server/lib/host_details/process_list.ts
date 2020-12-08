@@ -4,61 +4,136 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessListAPIRequest, MetricsAPIRequest } from '../../../common/http_api';
-import { getAllMetricsData } from '../../utils/get_all_metrics_data';
-import { query } from '../metrics';
+import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
+import { CMDLINE_FIELD } from './common';
+
+const TOP_N = 10;
 
 export const getProcessList = async (
-  client: ESSearchClient,
-  { hostTerm, timerange, indexPattern }: ProcessListAPIRequest
+  search: ESSearchClient,
+  { hostTerm, timefield, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
-  const queryBody = {
-    timerange,
-    modules: ['system.cpu', 'system.memory'],
-    groupBy: ['system.process.cmdline'],
-    filters: [{ term: hostTerm }],
-    indexPattern,
-    limit: 9,
-    metrics: [
-      {
-        id: 'cpu',
-        aggregations: {
-          cpu: {
-            avg: {
-              field: 'system.process.cpu.total.norm.pct',
+  const body = {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timefield]: {
+                gte: to - 60 * 1000, // 1 minute
+                lte: to,
+              },
             },
           },
-        },
+          {
+            term: hostTerm,
+          },
+        ],
       },
-      {
-        id: 'memory',
-        aggregations: {
-          memory: {
-            avg: {
-              field: 'system.process.memory.rss.pct',
-            },
+    },
+    aggs: {
+      summaryEvent: {
+        filter: {
+          term: {
+            'event.dataset': 'system.process.summary',
           },
         },
-      },
-      {
-        id: 'meta',
-        aggregations: {
-          meta: {
+        aggs: {
+          summary: {
             top_hits: {
               size: 1,
-              sort: [{ [timerange.field]: { order: 'desc' } }],
-              _source: [
-                'system.process.cpu.start_time',
-                'system.process.state',
-                'process.pid',
-                'user.name',
+              sort: [
+                {
+                  [timefield]: {
+                    order: 'desc',
+                  },
+                },
               ],
+              _source: ['system.process.summary'],
             },
           },
         },
       },
-    ],
-  } as MetricsAPIRequest;
-  return await getAllMetricsData((body: MetricsAPIRequest) => query(client, body), queryBody);
+      processes: {
+        filter: {
+          bool: {
+            must: searchFilter ?? [{ match_all: {} }],
+          },
+        },
+        aggs: {
+          filteredProcs: {
+            terms: {
+              field: CMDLINE_FIELD,
+              size: TOP_N,
+              order: {
+                [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
+              },
+            },
+            aggs: {
+              cpu: {
+                avg: {
+                  field: 'system.process.cpu.total.pct',
+                },
+              },
+              memory: {
+                avg: {
+                  field: 'system.process.memory.rss.pct',
+                },
+              },
+              startTime: {
+                max: {
+                  field: 'system.process.cpu.start_time',
+                },
+              },
+              meta: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      [timefield]: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                  _source: ['system.process.state', 'user.name', 'process.pid'],
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  try {
+    const result = await search<{}, ProcessListAPIQueryAggregation>({
+      body,
+      index: indexPattern,
+    });
+    const { buckets: processListBuckets } = result.aggregations!.processes.filteredProcs;
+    const processList = processListBuckets.map((bucket) => {
+      const meta = bucket.meta.hits.hits[0]._source;
+
+      return {
+        cpu: bucket.cpu.value,
+        memory: bucket.memory.value,
+        startTime: Date.parse(bucket.startTime.value_as_string),
+        pid: meta.process.pid,
+        state: meta.system.process.state,
+        user: meta.user.name,
+        command: bucket.key,
+      };
+    });
+    const {
+      summary,
+    } = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process;
+
+    return {
+      processList,
+      summary,
+    };
+  } catch (e) {
+    throw e;
+  }
 };

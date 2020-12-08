@@ -36,6 +36,10 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
 }));
 
+jest.mock('../../lib/ui_metric', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
 afterAll(() => jest.clearAllMocks());
 
 const mockNewsFetchResult = {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 /**
@@ -29,7 +30,10 @@ export interface TagBulkAction {
   /**
    * Handler to execute this action against the given list of selected tag ids.
    */
-  execute: (tagIds: string[]) => void | Promise<void>;
+  execute: (
+    tagIds: string[],
+    { canceled$ }: { canceled$: Observable<void> }
+  ) => void | Promise<void>;
   /**
    * If true, the list of tags will be reloaded after the action's execution. Defaults to false.
    */

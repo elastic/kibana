@@ -11,7 +11,7 @@ import { TagListComponentProps } from '../../../../../../src/plugins/saved_objec
 import { Tag } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
-import { ITagsCache } from '../../tags';
+import { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {

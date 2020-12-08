@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../../src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
   usageProvider,
 } from '../../../../src/plugins/data/server';
-import { enhancedEsSearchStrategyProvider, eqlSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { getUiSettings } from './ui_settings';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
+import { registerSessionRoutes } from './routes';
+import { backgroundSessionMapping } from './saved_objects';
+import {
+  BackgroundSessionService,
+  enhancedEsSearchStrategyProvider,
+  eqlSearchStrategyProvider,
+} from './search';
+import { getUiSettings } from './ui_settings';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -37,6 +37,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
     core.uiSettings.register(getUiSettings());
+    core.savedObjects.registerType(backgroundSessionMapping);
 
     deps.data.search.registerSearchStrategy(
       ENHANCED_ES_SEARCH_STRATEGY,
@@ -55,8 +56,12 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     deps.data.__enhance({
       search: {
         defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
+        sessionService: new BackgroundSessionService(),
       },
     });
+
+    const router = core.http.createRouter();
+    registerSessionRoutes(router);
   }
 
   public start(core: CoreStart) {}
