@@ -49,7 +49,14 @@ export interface SavedObjectsTaggingApi {
  * @public
  */
 export interface ITagsCache {
+  /**
+   * Return the current state of the cache
+   */
   getState(): Tag[];
+
+  /**
+   * Return an observable that will emit everytime the cache's state mutates.
+   */
   getState$(): Observable<Tag[]>;
 }
 
