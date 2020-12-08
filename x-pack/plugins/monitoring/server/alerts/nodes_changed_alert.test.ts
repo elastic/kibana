@@ -27,7 +27,7 @@ jest.mock('moment', () => {
 jest.mock('../static_globals', () => ({
   Globals: {
     app: {
-      getLogger: jest.fn(),
+      getLogger: () => ({ debug: jest.fn() }),
       config: {
         ui: {
           ccs: { enabled: true },

@@ -20,7 +20,7 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
 jest.mock('../static_globals', () => ({
   Globals: {
     app: {
-      getLogger: jest.fn(),
+      getLogger: () => ({ debug: jest.fn() }),
       url: 'http://localhost:5601',
       config: {
         ui: {

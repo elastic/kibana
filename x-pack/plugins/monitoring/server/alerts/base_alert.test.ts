@@ -8,7 +8,7 @@ import { BaseAlert } from './base_alert';
 jest.mock('../static_globals', () => ({
   Globals: {
     app: {
-      getLogger: jest.fn(),
+      getLogger: () => ({ debug: jest.fn() }),
     },
   },
 }));
