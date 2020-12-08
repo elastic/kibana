@@ -12,7 +12,6 @@ Object {
   "focusConnectorField": false,
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -29,7 +28,6 @@ Object {
   "focusConnectorField": false,
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -46,7 +44,6 @@ Object {
   "focusConnectorField": false,
   "pagination": undefined,
   "search": "monitor.status: down",
-  "selectedPingStatus": "up",
   "statusFilter": "",
 }
 `;
@@ -63,7 +60,6 @@ Object {
   "focusConnectorField": false,
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -80,7 +76,6 @@ Object {
   "focusConnectorField": false,
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
