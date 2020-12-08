@@ -98,7 +98,9 @@ function getStackframeLines(stackframe: StackframeWithLineContext) {
   const line = stackframe.line.context;
   const preLines = stackframe.context?.pre || [];
   const postLines = stackframe.context?.post || [];
-  return [...preLines, line, ...postLines];
+  return [...preLines, line, ...postLines].map(
+    (x) => (x.endsWith('\n') ? x.slice(0, -1) : x) || ' '
+  );
 }
 
 function getStartLineNumber(stackframe: StackframeWithLineContext) {
@@ -138,7 +140,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
             CodeTag={Code}
             customStyle={{ padding: null, overflowX: null }}
           >
-            {line || '\n'}
+            {line}
           </SyntaxHighlighter>
         ))}
       </LineContainer>
