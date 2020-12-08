@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { transparentize } from 'polished';
 
@@ -41,7 +42,9 @@ export const LogColumnHeaders: React.FunctionComponent<{
           } else {
             columnHeader = firstVisiblePosition
               ? localizedDate(firstVisiblePosition.time)
-              : 'Timestamp';
+              : i18n.translate('xpack.infra.logs.stream.timestampColumnTitle', {
+                  defaultMessage: 'Timestamp',
+                });
           }
 
           return (
@@ -60,7 +63,9 @@ export const LogColumnHeaders: React.FunctionComponent<{
           } else if (typeof columnConfiguration.messageColumn.header === 'string') {
             columnHeader = columnConfiguration.messageColumn.header;
           } else {
-            columnHeader = 'Mesage'; // FIXME: localise
+            columnHeader = i18n.translate('xpack.infra.logs.stream.messageColumnTitle', {
+              defaultMessage: 'Message',
+            });
           }
 
           return (
