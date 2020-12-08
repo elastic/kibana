@@ -17,6 +17,15 @@ export interface TransformElasticMSearchToListItemOptions {
   value: unknown[];
 }
 
+/**
+ * Given an ElasticSearch response this will look to see if the named query matches the
+ * index found. The named query will have to be in the format of, "1.0", "1.1", "2.0" where the
+ * major number "1,2,n" will match with the index.
+ * Ref: https://www.elastic.co/guide/en/elasticsearch//reference/7.9/query-dsl-bool-query.html#named-queries
+ * @param response The elastic response
+ * @param type The list type
+ * @param value The values to check against the named queries.
+ */
 export const transformElasticNamedSearchToListItem = ({
   response,
   type,

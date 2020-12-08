@@ -64,7 +64,7 @@ describe('search_list_item_by_values', () => {
             value: '127.0.0.1',
           },
         ],
-        value: '255.255.255',
+        value: '127.0.0.1',
       },
     ]);
   });
