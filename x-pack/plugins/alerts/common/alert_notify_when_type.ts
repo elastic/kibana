@@ -1,0 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+const AlertNotifyWhenTypeValues = ['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'];
+export type AlertNotifyWhenType = typeof AlertNotifyWhenTypeValues[number];
+
+export function validateNotifyWhenType(notifyWhen: string) {
+  if (AlertNotifyWhenTypeValues.includes(notifyWhen)) {
+    return;
+  }
+  return `string is not a valid AlertNotifyWhenType: ${notifyWhen}`;
+}

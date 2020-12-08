@@ -168,7 +168,7 @@ export class TaskRunner {
   ): Promise<AlertTaskState> {
     const {
       throttle,
-      notifyOnlyOnActionGroupChange,
+      notifyWhen,
       muteAll,
       mutedInstanceIds,
       name,
@@ -249,16 +249,17 @@ export class TaskRunner {
 
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
-      const instancesToExecute = notifyOnlyOnActionGroupChange
-        ? Object.entries(
-            instancesWithScheduledActions
-          ).filter(([_, alertInstance]: [string, AlertInstance]) =>
-            alertInstance.actionGroupHasChanged()
-          )
-        : Object.entries(instancesWithScheduledActions).filter(
-            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
-              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
-          );
+      const instancesToExecute =
+        notifyWhen === 'onActionGroupChange'
+          ? Object.entries(
+              instancesWithScheduledActions
+            ).filter(([_, alertInstance]: [string, AlertInstance]) =>
+              alertInstance.actionGroupHasChanged()
+            )
+          : Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
+                !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
+            );
 
       await Promise.all(
         instancesToExecute.map(([id, alertInstance]: [string, AlertInstance]) =>

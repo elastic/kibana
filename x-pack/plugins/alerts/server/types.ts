@@ -28,6 +28,7 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
+  AlertNotifyWhenType,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -152,7 +153,7 @@ export interface RawAlert extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyOnlyOnActionGroupChange: boolean;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -163,7 +164,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
-  | 'notifyOnlyOnActionGroupChange'
+  | 'notifyWhen'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'

@@ -105,7 +105,7 @@ async function update(success: boolean) {
         tags: ['bar'],
         params: { bar: true },
         throttle: '10s',
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: null,
         actions: [],
       },
     });

@@ -80,7 +80,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     apiKey: null,
     apiKeyOwner: null,
     throttle: null,
-    notifyOnlyOnActionGroupChange: false,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {

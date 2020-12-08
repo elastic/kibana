@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeState = Record<string, any>;
@@ -26,8 +27,6 @@ export enum AlertExecutionStatusErrorReasons {
   Execute = 'execute',
   Unknown = 'unknown',
 }
-
-export type AlertNotifyWhenType = 'onActionGroupChange' | 'onActiveAlert' | 'onThrottleInterval';
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;

@@ -68,7 +68,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['d
     consumer: 'bar',
     schedule: { interval: '10s' },
     throttle: null,
-    notifyOnlyOnActionGroupChange: false,
+    notifyWhen: null,
     params: {
       bar: true,
     },
@@ -342,7 +342,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyOnlyOnActionGroupChange": false,
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -391,7 +391,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyOnlyOnActionGroupChange": false,
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -491,6 +491,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notifyWhen: 'onActiveAlert',
         actions: [
           {
             group: 'default',
@@ -590,6 +591,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -629,6 +631,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notifyWhen: 'onActiveAlert',
         actions: [
           {
             group: 'default',
@@ -665,6 +668,7 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -741,6 +745,426 @@ describe('create()', () => {
 
     await alertsClient.create({ data });
     expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
+  });
+
+  test('should create alert with given notifyWhen value if notifyWhen is not null', async () => {
+    const data = getMockData({ notifyWhen: 'onActionGroupChange', throttle: '10m' });
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      notifyWhen: 'onActionGroupChange',
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await alertsClient.create({ data });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        params: { bar: true },
+        apiKey: null,
+        apiKeyOwner: null,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
+        schedule: { interval: '10s' },
+        throttle: '10m',
+        notifyWhen: 'onActionGroupChange',
+        muteAll: false,
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+        },
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "consumer": "bar",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "1",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": "onActionGroupChange",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": "10m",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
+      }
+    `);
+  });
+
+  test('should create alert with notifyWhen = onThrottleInterval if notifyWhen is null and throttle is set', async () => {
+    const data = getMockData({ throttle: '10m' });
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      notifyWhen: 'onThrottleInterval',
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await alertsClient.create({ data });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        params: { bar: true },
+        apiKey: null,
+        apiKeyOwner: null,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
+        schedule: { interval: '10s' },
+        throttle: '10m',
+        notifyWhen: 'onThrottleInterval',
+        muteAll: false,
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+        },
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "consumer": "bar",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "1",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": "10m",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
+      }
+    `);
+  });
+
+  test('should create alert with notifyWhen = onActiveAlert if notifyWhen is null and throttle is null', async () => {
+    const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      notifyWhen: 'onActiveAlert',
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await alertsClient.create({ data });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        params: { bar: true },
+        apiKey: null,
+        apiKeyOwner: null,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
+        schedule: { interval: '10s' },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        muteAll: false,
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+        },
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "consumer": "bar",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "1",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
+      }
+    `);
   });
 
   test('should validate params', async () => {
@@ -1052,7 +1476,7 @@ describe('create()', () => {
         },
         schedule: { interval: '10s' },
         throttle: null,
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: 'onActiveAlert',
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],
@@ -1176,7 +1600,7 @@ describe('create()', () => {
         },
         schedule: { interval: '10s' },
         throttle: null,
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: 'onActiveAlert',
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],

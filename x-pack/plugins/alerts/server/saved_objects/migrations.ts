@@ -37,21 +37,18 @@ export function getMigrations(
     )
   );
 
-  const migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange = encryptedSavedObjects.createMigration<
+  const migrationAlertUpdatedAtAndNotifyWhen = encryptedSavedObjects.createMigration<
     RawAlert,
     RawAlert
   >(
-    // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyOnlyOnActionGroupChange" fields
+    // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setAlertUpdatedAtDate, setNotifyOnlyOnActionGroupChange)
+    pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(
-      migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange,
-      '7.11.0'
-    ),
+    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
   };
 }
 
@@ -85,14 +82,15 @@ const setAlertUpdatedAtDate = (
   };
 };
 
-const setNotifyOnlyOnActionGroupChange = (
+const setNotifyWhen = (
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> => {
+  const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      notifyOnlyOnActionGroupChange: false,
+      notifyWhen,
     },
   };
 };

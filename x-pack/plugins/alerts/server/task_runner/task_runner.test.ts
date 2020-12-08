@@ -92,7 +92,7 @@ describe('Task Runner', () => {
     updatedAt: new Date('2019-02-12T21:01:22.479Z'),
     throttle: null,
     muteAll: false,
-    notifyOnlyOnActionGroupChange: false,
+    notifyWhen: 'onActiveAlert',
     enabled: true,
     alertTypeId: alertType.id,
     apiKey: '',
@@ -353,7 +353,7 @@ describe('Task Runner', () => {
     });
   });
 
-  test('actionsPlugin.execute is not called when notifyOnlyOnActionGroupChange is true and alert instance state does not change', async () => {
+  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
@@ -381,7 +381,7 @@ describe('Task Runner', () => {
     );
     alertsClient.get.mockResolvedValue({
       ...mockedAlertTypeSavedObject,
-      notifyOnlyOnActionGroupChange: true,
+      notifyWhen: 'onActionGroupChange',
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
@@ -447,7 +447,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('actionsPlugin.execute is called when notifyOnlyOnActionGroupChange is true and alert instance state has changed', async () => {
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state has changed', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
@@ -462,7 +462,7 @@ describe('Task Runner', () => {
     );
     alertsClient.get.mockResolvedValue({
       ...mockedAlertTypeSavedObject,
-      notifyOnlyOnActionGroupChange: true,
+      notifyWhen: 'onActionGroupChange',
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',

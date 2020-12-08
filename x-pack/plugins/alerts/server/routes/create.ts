@@ -16,7 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
-import { Alert, BASE_ALERT_API_PATH } from '../types';
+import { Alert, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../types';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -38,7 +38,7 @@ export const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  notifyOnlyOnActionGroupChange: schema.boolean({ defaultValue: false }),
+  notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
 export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
