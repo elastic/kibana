@@ -467,7 +467,16 @@ export const updateAliases = (
       },
     })
     .then(() => {
-      // TODO: Do we need to check `acknowledged=true` ?
+      // Ignore `acknowledged: false`. When the coordinating node accepts
+      // the new cluster state update but not all nodes have applied the
+      // update within the timeout `acknowledged` will be false. However,
+      // retrying this update will always immediately result in `acknowledged:
+      // true` even if there are still nodes which are falling behind with
+      // cluster state updates.
+      // The only impact for using `updateAliases` to mark the version index
+      // as ready is that it could take longer for other Kibana instances to
+      // see that the version index is ready so they are more likely to
+      // perform unecessary duplicate work.
       return Either.right('update_aliases_succeeded' as const);
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
@@ -555,8 +564,8 @@ export const createIndex = (
       .then((res) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was
-         *   updated with the newly created index, but it probably will be
-         *   created sometime soon.
+         *   updated on all nodes with the newly created index, but it
+         *   probably will be created sometime soon.
          * - shards_acknowledged=false, we timed out before all shards were
          *   started
          * - acknowledged=true, shards_acknowledged=true, index creation complete
@@ -619,7 +628,7 @@ export const updateAndPickupMappings = (
 ): TaskEither.TaskEither<RetryableEsClientError, UpdateAndPickupMappingsResponse> => {
   const putMappingTask: TaskEither.TaskEither<
     RetryableEsClientError,
-    { acknowledged: boolean }
+    'update_mappings_succeeded'
   > = () => {
     return client.indices
       .putMapping<Record<string, any>, IndexMapping>({
@@ -628,8 +637,21 @@ export const updateAndPickupMappings = (
         body: mappings,
       })
       .then((res) => {
-        // TODO do we need to check res.body.acknowledged?
-        return Either.right({ acknowledged: res.body.acknowledged });
+        // Ignore `acknowledged: false`. When the coordinating node accepts
+        // the new cluster state update but not all nodes have applied the
+        // update within the timeout `acknowledged` will be false. However,
+        // retrying this update will always immediately result in `acknowledged:
+        // true` even if there are still nodes which are falling behind with
+        // cluster state updates.
+        // For updateAndPickupMappings this means that there is the potential
+        // that some existing document's fields won't be picked up if the node
+        // on which the Kibana shard is running has fallen behind with cluster
+        // state updates and the mapping update wasn't applied before we run
+        // `pickupUpdatedMappings`. ES tries to limit this risk by blocking
+        // index operations (including update_by_query used by
+        // updateAndPickupMappings) if there are pending mappings changes. But
+        // not all mapping changes will prevent this.
+        return Either.right('update_mappings_succeeded' as const);
       })
       .catch(catchRetryableEsClientErrors);
   };
