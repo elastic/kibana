@@ -63,9 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
-      // idle timeout, let's wait for 30s to make sure cleanup routine runs when idle timeout
+      // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(30000);
+      await delay(40000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
