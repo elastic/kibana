@@ -139,7 +139,7 @@
     <dependency>
       <groupId>co.elastic.teamcity</groupId>
       <artifactId>teamcity-common</artifactId>
-      <version>1.0.1-gcloud-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
