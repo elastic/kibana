@@ -295,4 +295,4 @@ This page has been moved. Please see <<Automating Report generation>>.
 [[development-plugin-localization]]
 === Localization for plugins
 
-This page has been moved. Please see <<Localization for plugins outside the Kibana repo>>.
+This page has been moved. Please see <<external-plugin-localization>>.
