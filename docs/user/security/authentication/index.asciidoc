@@ -310,7 +310,7 @@ NOTE: You can configure only one anonymous authentication provider per {kib} ins
 
 There are three ways to specify these credentials:
 
-If you have a user who can authenticate to {es} using username and password, for instance from a Native or LDAP security realms, you can also use these credentials to impersonate the anonymous users. Here is how your `kibana.yml` might look if you use username and password credentials:
+If you have a user who can authenticate to {es} using username and password, for instance from the Native or LDAP security realms, you can also use these credentials to impersonate the anonymous users. Here is how your `kibana.yml` might look if you use username and password credentials:
 
 [source,yaml]
 -----------------------------------------------
@@ -347,7 +347,7 @@ xpack.security.authc.providers:
 
 It's also possible to use {kib} anonymous access in conjunction with the {es} anonymous access.
 
-Prior to configuring {kib}, ensure that the anonymous access is enabled and properly configured in {es}. See {ref}/anonymous-access.html[Enabling anonymous access] for more information.
+Prior to configuring {kib}, ensure that anonymous access is enabled and properly configured in {es}. See {ref}/anonymous-access.html[Enabling anonymous access] for more information.
 
 Here is how your `kibana.yml` might look like if you want to use {es} anonymous access to impersonate anonymous users in {kib}:
 
@@ -364,7 +364,7 @@ xpack.security.authc.providers:
 [float]
 ===== Anonymous access and other types of authentication
 
-You can configure more authentication providers in addition to anonymous access in {kib}. In this case, the Login Selector presents a dedicated *Continue as Guest* option for anonymous access:
+You can configure more authentication providers in addition to anonymous access in {kib}. In this case, the Login Selector presents a configurable *Continue as Guest* option for anonymous access:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -385,13 +385,13 @@ One of the most popular use cases for anonymous access is when you embed {kib} i
 
 If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
 
-For example, if you generate the iFrame code to embed {kib}, it will look like this:
+For example, if you generate the iframe code to embed {kib}, it will look like this:
 
 ```html
 <iframe src="https://localhost:5601/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
 ```
 
-To make this iFrame leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iFrame attribute to look like this:
+To make this iframe leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iframe attribute to look like this:
 
 ```html
 <iframe src="https://localhost:5601/app/dashboards?auth_provider_hint=anonymous1#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
