@@ -119,10 +119,21 @@ export const GraphControls = React.memo(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
-    const [activePopover, setActivePopover] = useState<null | 'schemaInfo' | 'nodesLegend'>(null);
+    const [activePopover, setPopover] = useState<null | 'schemaInfo' | 'nodesLegend'>(null);
     const colorMap = useColors();
 
-    const closePopover = useCallback(() => setActivePopover(null), []);
+    const setActivePopover = useCallback(
+      (value) => {
+        if (value === activePopover) {
+          setPopover(null);
+        } else {
+          setPopover(value);
+        }
+      },
+      [setPopover, activePopover]
+    );
+
+    const closePopover = useCallback(() => setPopover(null), []);
 
     const handleZoomAmountChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
