@@ -9,11 +9,11 @@ import { useParams } from 'react-router-dom';
 import { getTransactionCharts } from '../selectors/chart_selectors';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { useApmService } from './use_apm_service';
+import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
 export function useTransactionChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { transactionType } = useApmService();
+  const { transactionType } = useApmServiceContext();
   const {
     urlParams: { start, end, transactionName },
     uiFilters,

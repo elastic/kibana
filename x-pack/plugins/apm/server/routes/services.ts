@@ -20,7 +20,6 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_trans
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getThroughput } from '../lib/services/get_throughput';
-import { latencyAggregationTypeRt } from '../lib/helpers/latency_aggregation_type';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
