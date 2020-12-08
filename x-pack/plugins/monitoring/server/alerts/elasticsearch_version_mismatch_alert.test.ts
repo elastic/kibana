@@ -17,14 +17,28 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('ElasticsearchVersionMismatchAlert', () => {
   it('should have defaults', () => {
     const alert = new ElasticsearchVersionMismatchAlert();
-    expect(alert.type).toBe(ALERT_ELASTICSEARCH_VERSION_MISMATCH);
-    expect(alert.label).toBe('Elasticsearch version mismatch');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_ELASTICSEARCH_VERSION_MISMATCH);
+    expect(alert.alertOptions.name).toBe('Elasticsearch version mismatch');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Elasticsearch running in this cluster.',
@@ -61,21 +75,6 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         cluster_uuid: clusterUuid,
       },
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -114,19 +113,11 @@ describe('ElasticsearchVersionMismatchAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new ElasticsearchVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -140,7 +131,6 @@ describe('ElasticsearchVersionMismatchAlert', () => {
                   'Multiple versions of Elasticsearch ([8.0.0, 7.2.1]) running in this cluster.',
               },
               severity: 'warning',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -165,93 +155,14 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         return [];
       });
       const alert = new ElasticsearchVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...legacyAlert,
-            resolved_timestamp: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: undefined,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new ElasticsearchVersionMismatchAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: undefined,
-            ui: {
-              isFiring: false,
-              message: {
-                text: 'All versions of Elasticsearch are the same in this cluster.',
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: 'Elasticsearch version mismatch alert is resolved for testCluster.',
-        internalShortMessage: 'Elasticsearch version mismatch alert is resolved for testCluster.',
-        clusterName,
-        state: 'resolved',
-      });
     });
   });
 });
