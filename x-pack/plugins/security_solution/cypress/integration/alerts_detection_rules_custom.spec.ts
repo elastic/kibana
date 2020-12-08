@@ -85,6 +85,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import {
   createAndActivateRule,
   fillAboutRule,
@@ -120,6 +121,7 @@ describe('Custom detection rules creation', () => {
   after(() => {
     deleteRule();
     esArchiverUnload('timeline');
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new rule', () => {
@@ -223,6 +225,7 @@ describe('Custom detection rules deletion and edition', () => {
   });
 
   afterEach(() => {
+    removeSignalsIndex();
     esArchiverUnload('custom_rules');
   });
 
