@@ -51,6 +51,7 @@ import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -60,11 +61,12 @@ interface SearchScope extends ng.IScope {
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (sortPair: SortOrder[]) => void;
+  setColumns?: (columns: string[]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: any[];
+  hits?: ElasticSearchHit[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
@@ -247,6 +249,10 @@ export class SearchEmbeddable
         return;
       }
       const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
+      this.updateInput({ columns });
+    };
+
+    searchScope.setColumns = (columns: string[]) => {
       this.updateInput({ columns });
     };
 
