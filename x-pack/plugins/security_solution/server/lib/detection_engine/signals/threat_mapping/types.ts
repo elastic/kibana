@@ -27,6 +27,7 @@ import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { TimestampsAndIndices } from '../utils';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -34,6 +35,7 @@ export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
+  timestampsAndIndices: TimestampsAndIndices;
   type: Type;
   filters: PartialFilter[];
   language: LanguageOrUndefined;
@@ -73,6 +75,7 @@ export interface CreateThreatSignalOptions {
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
+  timestampsAndIndices: TimestampsAndIndices;
   type: Type;
   filters: PartialFilter[];
   language: LanguageOrUndefined;

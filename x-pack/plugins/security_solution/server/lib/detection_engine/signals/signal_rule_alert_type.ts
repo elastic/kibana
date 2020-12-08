@@ -466,6 +466,7 @@ export const signalRulesAlertType = ({
             threatMapping,
             query,
             inputIndex: filteredIndexPattern,
+            timestampsAndIndices: preCheckResult.timestampsAndIndices,
             type,
             filters: filters ?? [],
             language,

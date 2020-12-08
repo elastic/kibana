@@ -9,7 +9,6 @@ import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
-  checkMappingForTimestampFields,
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
   createTotalHitsFromSearchResult,
@@ -57,6 +56,9 @@ export const searchAfterAndBulkCreate = async ({
   const timestampsToSort = Object.keys(timestampsAndIndices);
 
   if (timestampsToSort == null || timestampsToSort.length === 0) {
+    logger.error(
+      buildRuleMessage(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`)
+    );
     throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
   }
 
@@ -91,7 +93,7 @@ export const searchAfterAndBulkCreate = async ({
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
-            index: Object.keys(timestampsAndIndices[timestamp]),
+            index: timestampsAndIndices[timestamp],
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
@@ -100,6 +102,7 @@ export const searchAfterAndBulkCreate = async ({
             pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
             timestampOverride: timestamp,
           });
+
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnTypeFromResponse({

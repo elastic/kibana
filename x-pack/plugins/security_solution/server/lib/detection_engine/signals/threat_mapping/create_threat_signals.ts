@@ -16,6 +16,7 @@ export const createThreatSignals = async ({
   threatMapping,
   query,
   inputIndex,
+  timestampsAndIndices,
   type,
   filters,
   language,
@@ -88,7 +89,6 @@ export const createThreatSignals = async ({
     buildRuleMessage,
     perPage,
   });
-
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
@@ -98,6 +98,7 @@ export const createThreatSignals = async ({
           threatMapping,
           query,
           inputIndex,
+          timestampsAndIndices,
           type,
           filters,
           language,
