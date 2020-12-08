@@ -26,31 +26,53 @@ export const getSuggestions = ({
   tagCache,
 }: GetSuggestionOptions): SearchSuggestion[] => {
   const results: SearchSuggestion[] = [];
+  const suggestionTerm = searchTerm.trim();
 
-  const trimmedTerm = searchTerm.trim();
-
-  if (searchableTypes.includes(trimmedTerm)) {
+  const matchingType = findIgnoreCase(searchableTypes, suggestionTerm);
+  if (matchingType) {
+    const suggestedSearch = escapeIfWhiteSpaces(matchingType);
     results.push({
       key: '__type__suggestion__',
-      label: `type: ${trimmedTerm}`,
-      icon: 'tag',
+      label: `type: ${matchingType}`,
+      icon: 'filter',
       description: 'Filter by type',
-      suggestedSearch: `type:${searchTerm}`, // TODO: escape if necessary
+      suggestedSearch: `type:${suggestedSearch}`,
     });
   }
 
   if (tagCache && searchTerm) {
-    const matchingTag = tagCache.getState().find((tag) => tag.name === trimmedTerm);
+    const matchingTag = tagCache
+      .getState()
+      .find((tag) => equalsIgnoreCase(tag.name, suggestionTerm));
     if (matchingTag) {
+      const suggestedSearch = escapeIfWhiteSpaces(matchingTag.name);
       results.push({
         key: '__tag__suggestion__',
         label: `tag: ${matchingTag.name}`,
         icon: 'tag',
         description: 'Filter by tag name',
-        suggestedSearch: `tag:${searchTerm}`, // TODO: escape if necessary
+        suggestedSearch: `tag:${suggestedSearch}`,
       });
     }
   }
 
   return results;
+};
+
+const findIgnoreCase = (array: string[], target: string) => {
+  for (const item of array) {
+    if (equalsIgnoreCase(item, target)) {
+      return item;
+    }
+  }
+  return undefined;
+};
+
+const equalsIgnoreCase = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+const escapeIfWhiteSpaces = (term: string) => {
+  if (/\s/g.test(term)) {
+    return `"${term}"`;
+  }
+  return term;
 };
