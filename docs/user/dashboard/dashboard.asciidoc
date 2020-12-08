@@ -162,11 +162,11 @@ tools. To create a short URL, you must have write access to {kib}.
 To export the dashboard, open the main menu, then click *Stack Management > Saved Objects*. For more information,
 refer to <<managing-saved-objects, Managing saved objects>>.
 
-//[float]
-//[[try-it-lens]]
-//== Try it: Build a dashboard with panels of visualizations
+[float]
+[[try-it-lens]]
+== Try it: Build a dashboard with panels of visualizations
 
-//Lens end-to-end guide
+include::lens-end-to-end/lens-end-to-end.asciidoc[]
 
 [float]
 [[lens-tutorial-next-steps]]
