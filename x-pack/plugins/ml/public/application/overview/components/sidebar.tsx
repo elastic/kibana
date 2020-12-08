@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlKibana } from '../../contexts/kibana';
-import { getDocLinks } from '../../../../util/dependency_cache';
+import { getDocLinks } from '../../util/dependency_cache';
 const feedbackLink = 'https://www.elastic.co/community/';
 
 interface Props {
