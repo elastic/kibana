@@ -5,7 +5,6 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 import { ESFilter } from '../../../../../typings/elasticsearch';
@@ -26,7 +25,6 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
     uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
-    CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     filters && filters !== '' ? JSON.parse(filters) : null,
     Infinity
   );

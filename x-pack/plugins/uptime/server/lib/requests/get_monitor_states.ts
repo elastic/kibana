@@ -50,7 +50,8 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     sortDirection
   );
 
-  const iterator = new MonitorSummaryIterator(queryContext, [], pageSize * pageIndex);
+  const iterator = new MonitorSummaryIterator(queryContext);
+
   const page = await iterator.nextPage(pageSize);
 
   return {

@@ -22,7 +22,7 @@ import { MonitorSummary } from '../../../../common/runtime_types/monitor';
 
  */
 export const fetchChunk = async (queryContext: QueryContext, size: number, index: number) => {
-  const { monitorIds, totalMonitors } = await findPotentialMatches(queryContext, size, index);
+  const { monitorIds } = await findPotentialMatches(queryContext, size, index);
 
   const minInterval = getHistogramInterval(
     queryContext.dateRangeStart,
@@ -42,7 +42,7 @@ export const fetchChunk = async (queryContext: QueryContext, size: number, index
     .filter((summary) => summary);
 
   return {
-    totalMonitors,
+    skipped: monitorIds.length - monitorSummaries.length,
     monitorSummaries: monitorSummaries.map((s) => ({
       ...s,
       minInterval,

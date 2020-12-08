@@ -9,7 +9,13 @@ import { fetchChunk } from './fetch_chunk';
 import { MonitorSummary } from '../../../../common/runtime_types';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
-export const CHUNK_SIZE = 500;
+export const CHUNK_SIZE: Record<number, number> = {
+  5: 100,
+  10: 150,
+  25: 250,
+  50: 500,
+  100: 500,
+};
 
 // Function that fetches a chunk of data used in iteration
 export type ChunkFetcher = (
@@ -21,6 +27,7 @@ export type ChunkFetcher = (
 // Result of fetching more results from the search.
 export interface ChunkResult {
   monitorSummaries: MonitorSummary[];
+  skipped: number;
 }
 
 /**
@@ -39,6 +46,7 @@ export class MonitorSummaryIterator {
   endOfResults: boolean; // true if we've hit the end of results from ES
   totalResults: number;
   chunkPageIndex: number;
+  noOfSkipped: number;
 
   constructor(
     queryContext: QueryContext,
@@ -53,6 +61,7 @@ export class MonitorSummaryIterator {
     this.endOfResults = false;
     this.totalResults = 0;
     this.chunkPageIndex = 0;
+    this.noOfSkipped = 0;
   }
 
   // Fetch the next matching result.
@@ -127,7 +136,13 @@ export class MonitorSummaryIterator {
       this.buffer = [current];
       this.bufferPos = 0;
     }
-    const results = await this.chunkFetcher(this.queryContext, CHUNK_SIZE, this.chunkPageIndex);
+    const results = await this.chunkFetcher(
+      this.queryContext,
+      CHUNK_SIZE[this.queryContext.size],
+      this.chunkPageIndex
+    );
+
+    this.noOfSkipped += results.skipped;
 
     this.chunkPageIndex++;
     // If we've hit the end of the stream searchAfter will be empty

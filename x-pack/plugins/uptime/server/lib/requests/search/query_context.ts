@@ -26,8 +26,8 @@ export class QueryContext {
     dateRangeStart: string,
     dateRangeEnd: string,
     filterClause: any | null,
-    size: number,
-    pageIndex: number,
+    size?: number,
+    pageIndex?: number,
     statusFilter?: string,
     sortField?: string,
     sortDirection?: string
@@ -36,8 +36,8 @@ export class QueryContext {
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.filterClause = filterClause;
-    this.size = size;
-    this.pageIndex = pageIndex;
+    this.size = size!;
+    this.pageIndex = pageIndex!;
     this.statusFilter = statusFilter;
     this.sortField = sortField;
     this.sortDirection = sortDirection;

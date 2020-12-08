@@ -32,23 +32,9 @@ export const findPotentialMatches = async (
 };
 
 const query = async (queryContext: QueryContext, size: number, index: number) => {
-  const body = await queryBody(queryContext, size, index);
-
-  const params = {
-    body,
-  };
-
-  return await queryContext.search(params);
-};
-
-const queryBody = async (queryContext: QueryContext, size: number, index: number) => {
   const filters = await queryContext.dateAndCustomFilters();
 
   const sortField = queryContext.sortField;
-
-  if (queryContext.statusFilter) {
-    filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
-  }
 
   const sort = sortField
     ? [
@@ -68,14 +54,29 @@ const queryBody = async (queryContext: QueryContext, size: number, index: number
     });
   }
 
-  return {
+  const body = {
     sort,
     size,
-    from: index * size,
-    query: { bool: { filter: filters } },
+    from: index * size + queryContext.size * queryContext.pageIndex,
+    query: {
+      bool: {
+        filter: [
+          ...filters,
+          ...(queryContext.statusFilter
+            ? [{ match: { 'monitor.status': queryContext.statusFilter } }]
+            : []),
+        ],
+      },
+    },
     collapse: {
       field: 'monitor.id',
     },
     _source: 'monitor.id',
   };
+
+  const params = {
+    body,
+  };
+
+  return await queryContext.search(params);
 };

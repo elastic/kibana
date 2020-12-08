@@ -241,7 +241,12 @@ export const MonitorListComponent: ({
         columns={columns}
         tableLayout={'auto'}
         sorting={sorting}
-        pagination={{ totalItemCount: total ?? 0, pageSize, pageIndex }}
+        pagination={{
+          totalItemCount: total ?? 0,
+          pageSize,
+          pageIndex,
+          pageSizeOptions: [5, 10, 25, 50, 100],
+        }}
         onChange={onTableChange}
       />
     </EuiPanel>
