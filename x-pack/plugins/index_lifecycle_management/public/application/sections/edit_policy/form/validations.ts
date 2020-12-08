@@ -56,33 +56,29 @@ export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
  * This validator checks that and updates form values by setting errors states imperatively to
  * indicate this error state.
  */
-export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
+export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   const fields = form.getFields();
   if (
     !(
-      fields[ROLLOVER_FORM_PATHS.maxAge].value ||
-      fields[ROLLOVER_FORM_PATHS.maxDocs].value ||
-      fields[ROLLOVER_FORM_PATHS.maxSize].value
+      fields[ROLLOVER_FORM_PATHS.maxAge]?.value ||
+      fields[ROLLOVER_FORM_PATHS.maxDocs]?.value ||
+      fields[ROLLOVER_FORM_PATHS.maxSize]?.value
     )
   ) {
-    fields[ROLLOVER_FORM_PATHS.maxAge].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
-      },
-    ]);
-    fields[ROLLOVER_FORM_PATHS.maxDocs].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
-      },
-    ]);
-    fields[ROLLOVER_FORM_PATHS.maxSize].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
-      },
-    ]);
+    return path === ROLLOVER_FORM_PATHS.maxAge
+      ? {
+          code: ROLLOVER_EMPTY_VALIDATION,
+          message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
+        }
+      : path === ROLLOVER_FORM_PATHS.maxDocs
+      ? {
+          code: ROLLOVER_EMPTY_VALIDATION,
+          message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
+        }
+      : {
+          code: ROLLOVER_EMPTY_VALIDATION,
+          message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
+        };
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
     fields[ROLLOVER_FORM_PATHS.maxDocs].clearErrors(ROLLOVER_EMPTY_VALIDATION);

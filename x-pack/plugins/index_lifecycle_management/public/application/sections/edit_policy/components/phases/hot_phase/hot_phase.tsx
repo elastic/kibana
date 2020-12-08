@@ -143,7 +143,7 @@ export const HotPhase: FunctionComponent = () => {
                   <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
                     {(field) => {
                       const showErrorCallout = field.errors.some(
-                        (e) => e.validationType === ROLLOVER_EMPTY_VALIDATION
+                        (e) => e.code === ROLLOVER_EMPTY_VALIDATION
                       );
                       if (showErrorCallout !== showEmptyRolloverFieldsError) {
                         setShowEmptyRolloverFieldsError(showErrorCallout);
