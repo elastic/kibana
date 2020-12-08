@@ -131,7 +131,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         _meta.cold,
         coldPhase.actions,
         originalPolicy?.phases.cold?.actions,
-        updatedPolicy.phases.warm?.actions?.allocate?.number_of_replicas
+        updatedPolicy.phases.cold?.actions?.allocate?.number_of_replicas
       );
 
       if (_meta.cold.freezeEnabled) {
