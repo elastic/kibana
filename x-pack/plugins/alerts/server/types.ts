@@ -29,6 +29,7 @@ import {
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
 } from '../common';
+import { LicenseType } from '../../licensing/target/types/common/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -108,6 +109,7 @@ export interface AlertType<
     state?: ActionVariable[];
     params?: ActionVariable[];
   };
+  minimumLicenseRequired?: LicenseType;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {

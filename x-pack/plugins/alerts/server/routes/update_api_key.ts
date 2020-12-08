@@ -16,6 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { handleDisabledApiKeysError } from './lib/error_handler';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -41,8 +42,15 @@ export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) =
         }
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
-        await alertsClient.updateApiKey({ id });
-        return res.noContent();
+        try {
+          await alertsClient.updateApiKey({ id });
+          return res.noContent();
+        } catch (e) {
+          if (e instanceof AlertTypeDisabledError) {
+            return e.sendResponse(res);
+          }
+          throw e;
+        }
       })
     )
   );

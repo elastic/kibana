@@ -19,10 +19,12 @@ import {
   AlertInstanceContext,
 } from './types';
 import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
+import { ILicenseState } from './lib/license_state';
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
+  licenseState: ILicenseState;
 }
 
 export interface RegistryAlertType
@@ -34,8 +36,10 @@ export interface RegistryAlertType
     | 'defaultActionGroupId'
     | 'actionVariables'
     | 'producer'
+    | 'minimumLicenseRequired'
   > {
   id: string;
+  enabledInLicense: boolean;
 }
 
 /**
@@ -70,14 +74,20 @@ export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly alertTypes: Map<string, NormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly licenseState: ILicenseState;
 
-  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory, licenseState }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.licenseState = licenseState;
   }
 
   public has(id: string) {
     return this.alertTypes.has(id);
+  }
+
+  public ensureAlertTypeEnabled(id: string) {
+    this.licenseState.ensureLicenseForAlertType(this.get(id));
   }
 
   public register<
@@ -146,6 +156,7 @@ export class AlertTypeRegistry {
             defaultActionGroupId,
             actionVariables,
             producer,
+            minimumLicenseRequired,
           },
         ]: [string, NormalizedAlertType]) => ({
           id,
@@ -155,6 +166,9 @@ export class AlertTypeRegistry {
           defaultActionGroupId,
           actionVariables,
           producer,
+          enabledInLicense:
+            this.licenseState.isLicenseValidForAlertType(id, name, minimumLicenseRequired!)
+              .isValid === true,
         })
       )
     );

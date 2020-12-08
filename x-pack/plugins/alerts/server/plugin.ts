@@ -180,6 +180,7 @@ export class AlertingPlugin {
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
+      licenseState: this.licenseState,
     });
     this.alertTypeRegistry = alertTypeRegistry;
 

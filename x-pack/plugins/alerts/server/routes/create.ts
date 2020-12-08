@@ -17,6 +17,7 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
 import { Alert, BASE_ALERT_API_PATH } from '../types';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -61,10 +62,17 @@ export const createAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         }
         const alertsClient = context.alerting.getAlertsClient();
         const alert = req.body;
-        const alertRes: Alert = await alertsClient.create({ data: alert });
-        return res.ok({
-          body: alertRes,
-        });
+        try {
+          const alertRes: Alert = await alertsClient.create({ data: alert });
+          return res.ok({
+            body: alertRes,
+          });
+        } catch (e) {
+          if (e instanceof AlertTypeDisabledError) {
+            return e.sendResponse(res);
+          }
+          throw e;
+        }
       })
     )
   );

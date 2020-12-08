@@ -15,6 +15,7 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   alertId: schema.string(),
@@ -40,8 +41,15 @@ export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseS
       }
       const alertsClient = context.alerting.getAlertsClient();
       const { alertId, alertInstanceId } = req.params;
-      await alertsClient.unmuteInstance({ alertId, alertInstanceId });
-      return res.noContent();
+      try {
+        await alertsClient.unmuteInstance({ alertId, alertInstanceId });
+        return res.noContent();
+      } catch (e) {
+        if (e instanceof AlertTypeDisabledError) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

@@ -236,6 +236,8 @@ export class AlertsClient {
       throw error;
     }
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
+
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
 
@@ -619,6 +621,8 @@ export class AlertsClient {
       alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     }
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
+
     try {
       await this.authorization.ensureAuthorized(
         alertSavedObject.attributes.alertTypeId,
@@ -777,6 +781,8 @@ export class AlertsClient {
       version = alert.version;
     }
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -872,6 +878,8 @@ export class AlertsClient {
       attributes = alert.attributes;
       version = alert.version;
     }
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(
@@ -1046,6 +1054,8 @@ export class AlertsClient {
       id
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -1105,6 +1115,8 @@ export class AlertsClient {
       id
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -1163,6 +1175,7 @@ export class AlertsClient {
       'alert',
       alertId
     );
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(
@@ -1228,6 +1241,7 @@ export class AlertsClient {
       'alert',
       alertId
     );
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(
