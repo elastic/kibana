@@ -2,10 +2,12 @@
   font-size: $euiFontSizeS;
   line-height: $euiLineHeight;
   display: grid;
-  grid-template-columns: calc(35% + #{$euiSizeS * 7} ) $euiSize * 2 1fr;
+  grid-template-columns: 0.85fr $euiSizeXL 1fr;
   grid-gap: $euiSizeXS;
 
   &__separator {
+    text-align: center;
+
     &:after {
       content: '=>';
       color: $euiColorDarkShade;
@@ -13,7 +15,11 @@
   }
 
   &__value {
-    padding-left: $euiSizeS;
+    padding-left: $euiSize;
     overflow: hidden;
+
+    @include euiBreakpoint('xs') {
+      padding-left: 0;
+    }
   }
 }

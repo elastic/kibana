@@ -2,25 +2,27 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-}
+  margin-bottom: $euiSizeS;
 
-.appSearchResultHeaderColumn {
-  display: flex;
-  flex-wrap: wrap;
-
-  &--left {
-    justify-content: flex-start;
-
-    .appSearchResultHeaderItem {
-      margin-right: $euiSizeL;
-    }
+  @include euiBreakpoint('xs') {
+    flex-direction: column;
   }
 
-  &--right {
-    justify-content: flex-end;
+  &__column {
+    display: flex;
+    flex-wrap: wrap;
 
+    @include euiBreakpoint('xs') {
+      flex-direction: column;
+    }
+
+    & + &,
     .appSearchResultHeaderItem + .appSearchResultHeaderItem {
       margin-left: $euiSizeL;
+
+      @include euiBreakpoint('xs') {
+        margin-left: 0;
+      }
     }
   }
 }

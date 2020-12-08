@@ -1,40 +1,24 @@
 .appSearchResult {
-  overflow: hidden;
   display: flex;
-  justify-content: space-between;
-  width: 100%;
 
-  &__contentWrap {
+  &__content {
     width: 100%;
     padding: $euiSize;
-    display: grid;
-    grid-template-rows: 1fr $euiSizeXS * 5;
-    border-right: $euiBorderThin;
-  }
-
-  &__contentInner {
-    display: grid;
-    grid-gap: $euiSizeS;
     overflow: hidden;
-  }
-
-  &__fieldsetContainer {
-    display: flex;
-    flex-direction: column;
   }
 
   &__hiddenFieldsIndicator {
     font-size: $euiFontSizeXS;
     color: $euiColorDarkShade;
-    align-self: end;
-    padding-top: 0;
+    margin-top: $euiSizeS;
   }
 
-  &__toggleExpandButton {
-    justify-self: stretch;
-    align-self: stretch;
+  &__actionButton {
     display: flex;
+    justify-content: center;
+    align-items: center;
     width: $euiSizeL * 2;
+    border-left: $euiBorderThin;
 
     &:hover,
     &:focus,
@@ -42,14 +26,5 @@
       background-color: $euiPageBackgroundColor;
       cursor: pointer;
     }
-  }
-
-  &__toggleExpandButton {
-    grid-column: 2;
-  }
-
-  &__toggleIcon {
-    align-self: center;
-    margin: auto;
   }
 }

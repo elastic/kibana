@@ -20,9 +20,9 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
   const showEngineLabel: boolean = resultMeta.id !== resultMeta.scopedId;
 
   return (
-    <div className="appSearchResultHeader">
+    <header className="appSearchResultHeader">
       {showScore && (
-        <div className="appSearchResultHeaderColumn appSearchResultHeaderColumn--left">
+        <div className="appSearchResultHeader__column">
           <ResultHeaderItem
             data-test-subj="ResultScore"
             field="score"
@@ -32,7 +32,7 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
         </div>
       )}
 
-      <div className="appSearchResultHeaderColumn appSearchResultHeaderColumn--right">
+      <div className="appSearchResultHeader__column">
         {showEngineLabel && (
           <ResultHeaderItem
             data-test-subj="ResultEngine"
@@ -43,6 +43,6 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
         )}
         <ResultHeaderItem data-test-subj="ResultId" field="id" value={resultMeta.id} type="id" />
       </div>
-    </div>
+    </header>
   );
 };

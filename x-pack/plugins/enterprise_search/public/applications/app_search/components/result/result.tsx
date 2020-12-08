@@ -34,40 +34,36 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
   return (
     <EuiPanel
       paddingSize="none"
-      key="results"
       className={'appSearchResult'}
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
         defaultMessage: 'View document details',
       })}
     >
-      <div className="appSearchResult__contentWrap">
-        <div className="appSearchResult__contentInner">
-          <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
-          <div className="appSearchResult__fieldsetContainer">
-            <div>
-              {resultFields
-                .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-                .map(([field, value]: [string, FieldValue]) => (
-                  <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
-                ))}
-            </div>
-          </div>
+      <article className="appSearchResult__content">
+        <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
+        <div className="appSearchResult__body">
+          {resultFields
+            .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
+            .map(([field, value]: [string, FieldValue]) => (
+              <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
+            ))}
         </div>
         {numResults > RESULT_CUTOFF && !isOpen && (
-          <div className="appSearchResult__hiddenFieldsIndicator">
+          <footer className="appSearchResult__hiddenFieldsIndicator">
             {i18n.translate('xpack.enterpriseSearch.appSearch.result.numberOfAdditionalFields', {
               defaultMessage: '{numberOfAdditionalFields} more fields',
               values: {
                 numberOfAdditionalFields: numResults - RESULT_CUTOFF,
               },
             })}
-          </div>
+          </footer>
         )}
-      </div>
+      </article>
       {numResults > RESULT_CUTOFF && (
         <button
-          className="appSearchResult__toggleExpandButton"
+          type="button"
+          className="appSearchResult__actionButton"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={
             isOpen
@@ -80,17 +76,9 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
           }
         >
           {isOpen ? (
-            <EuiIcon
-              data-test-subj="CollapseResult"
-              type="arrowUp"
-              className="appSearchResult__toggleIcon"
-            />
+            <EuiIcon data-test-subj="CollapseResult" type="arrowUp" />
           ) : (
-            <EuiIcon
-              data-test-subj="ExpandResult"
-              type="arrowDown"
-              className="appSearchResult__toggleIcon"
-            />
+            <EuiIcon data-test-subj="ExpandResult" type="arrowDown" />
           )}
         </button>
       )}
