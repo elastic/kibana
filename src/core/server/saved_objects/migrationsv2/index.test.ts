@@ -556,7 +556,7 @@ describe('migrations v2', () => {
             type: 'index_not_found_exception',
             index: 'source_index_name',
           });
-          const newState = model(legacyDeleteState, res);
+          const newState = model(legacyDeleteState, res) as FatalState;
           expect(newState.controlState).toEqual('FATAL');
           expect(newState.reason).toMatchInlineSnapshot(
             `"LEGACY_DELETE failed because the source index [source_index_name] does not exist."`
