@@ -222,7 +222,7 @@ This page has been deleted. Please see <<dashboard>>.
 [[data-table]]
 === Data Table
 
-This page has been deleted. Please see <<Dashboard>>.
+This page has been deleted. Please see <<dashboard>>.
 
 
 [float]
