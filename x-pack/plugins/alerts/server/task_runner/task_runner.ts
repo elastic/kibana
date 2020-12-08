@@ -260,7 +260,7 @@ export class TaskRunner {
             const shouldExecuteAction = !throttled && !muted;
             if (!shouldExecuteAction) {
               this.logger.debug(
-                `skipping action execution for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
                   muted ? 'muted' : 'throttled'
                 }`
               );
@@ -272,7 +272,7 @@ export class TaskRunner {
           )
       );
     } else {
-      this.logger.debug(`no actions executed for alert ${alertLabel}: alert is muted.`);
+      this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
     }
 
     return {
@@ -555,7 +555,7 @@ function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecovere
   for (const id of recoveredIds) {
     if (mutedInstanceIdsSet.has(id)) {
       logger.debug(
-        `skipping action execution for '${id}' in alert ${alertLabel}: instance is muted`
+        `skipping scheduling of actions for '${id}' in alert ${alertLabel}: instance is muted`
       );
     } else {
       const instance = recoveredAlertInstances[id];

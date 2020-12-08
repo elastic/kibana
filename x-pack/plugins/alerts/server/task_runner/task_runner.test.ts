@@ -409,7 +409,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `no actions executed for alert test:1: 'alert-name': alert is muted.`
+      `no scheduling of actions for alert test:1: 'alert-name': alert is muted.`
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -519,7 +519,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `skipping action execution for '2' in alert test:1: 'alert-name': instance is muted`
+      `skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is muted`
     );
     expect(logger.debug).nthCalledWith(
       4,
