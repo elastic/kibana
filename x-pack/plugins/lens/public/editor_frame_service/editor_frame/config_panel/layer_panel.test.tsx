@@ -323,6 +323,47 @@ describe('LayerPanel', () => {
       component.update();
       expect(component.find('EuiFlyoutHeader').exists()).toBe(false);
     });
+
+    it('should only update the state on close when needed', () => {
+      const updateDatasource = jest.fn();
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel {...getDefaultProps()} updateDatasource={updateDatasource} />
+      );
+
+      // Close without a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn();
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).not.toHaveBeenCalled();
+
+      // Close with a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValue({ newState: true });
+
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).toHaveBeenCalledWith('ds1', { newState: true });
+    });
   });
 
   // This test is more like an integration test, since the layer panel owns all

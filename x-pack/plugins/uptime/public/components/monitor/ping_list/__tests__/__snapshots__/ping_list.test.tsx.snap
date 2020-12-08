@@ -2,92 +2,7 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <EuiPanel>
-  <EuiTitle
-    size="s"
-  >
-    <h4>
-      <FormattedMessage
-        defaultMessage="History"
-        id="xpack.uptime.pingList.checkHistoryTitle"
-        values={Object {}}
-      />
-    </h4>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        aria-label="Status"
-        describedByIds={Array []}
-        display="row"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label="Status"
-        labelType="label"
-      >
-        <EuiSelect
-          aria-label="Status"
-          data-test-subj="xpack.uptime.pingList.statusSelect"
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "data-test-subj": "xpack.uptime.pingList.statusOptions.all",
-                "text": "All",
-                "value": "",
-              },
-              Object {
-                "data-test-subj": "xpack.uptime.pingList.statusOptions.up",
-                "text": "Up",
-                "value": "up",
-              },
-              Object {
-                "data-test-subj": "xpack.uptime.pingList.statusOptions.down",
-                "text": "Down",
-                "value": "down",
-              },
-            ]
-          }
-          value=""
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiFormRow
-        aria-label="Location"
-        describedByIds={Array []}
-        display="row"
-        fullWidth={false}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label="Location"
-        labelType="label"
-      >
-        <EuiSelect
-          aria-label="Location"
-          data-test-subj="xpack.uptime.pingList.locationSelect"
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "data-test-subj": "xpack.uptime.pingList.locationOptions.all",
-                "text": "All",
-                "value": "",
-              },
-            ]
-          }
-          value=""
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <PingListHeader />
   <EuiSpacer
     size="s"
   />
@@ -112,24 +27,16 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "name": "IP",
         },
         Object {
-          "align": "right",
+          "align": "center",
           "field": "monitor.duration.us",
           "name": "Duration",
           "render": [Function],
         },
         Object {
-          "align": "right",
           "field": "error.type",
-          "name": "Error type",
+          "name": "Error",
           "render": [Function],
-        },
-        Object {
-          "align": "right",
-          "field": "http.response.status_code",
-          "name": <styled.span>
-            Response code
-          </styled.span>,
-          "render": [Function],
+          "width": "30%",
         },
         Object {
           "align": "right",
@@ -181,148 +88,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
           },
           "timestamp": "2019-01-28T17:47:09.075Z",
         },
-        Object {
-          "docId": "fejjio21",
-          "monitor": Object {
-            "duration": Object {
-              "us": 1452,
-            },
-            "id": "auto-tcp-0X81440A68E839814D",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "up",
-            "type": "tcp",
-          },
-          "timestamp": "2019-01-28T17:47:06.077Z",
-        },
-        Object {
-          "docId": "fewzio21",
-          "error": Object {
-            "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-            "type": "io",
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 1094,
-            },
-            "id": "auto-tcp-0X81440A68E839814E",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "down",
-            "type": "tcp",
-          },
-          "timestamp": "2019-01-28T17:47:07.075Z",
-        },
-        Object {
-          "docId": "fewpi321",
-          "error": Object {
-            "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-            "type": "io",
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 1597,
-            },
-            "id": "auto-http-0X3675F89EF061209G",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "down",
-            "type": "http",
-          },
-          "timestamp": "2019-01-28T17:47:07.074Z",
-        },
-        Object {
-          "docId": "0ewjio21",
-          "error": Object {
-            "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-            "type": "io",
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 1699,
-            },
-            "id": "auto-tcp-0X81440A68E839814H",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "down",
-            "type": "tcp",
-          },
-          "timestamp": "2019-01-28T17:47:18.080Z",
-        },
-        Object {
-          "docId": "3ewjio21",
-          "error": Object {
-            "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-            "type": "io",
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 5384,
-            },
-            "id": "auto-tcp-0X81440A68E839814I",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "down",
-            "type": "tcp",
-          },
-          "timestamp": "2019-01-28T17:47:19.076Z",
-        },
-        Object {
-          "docId": "fewjip21",
-          "error": Object {
-            "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-            "type": "io",
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 5397,
-            },
-            "id": "auto-http-0X3675F89EF061209J",
-            "ip": "127.0.0.1",
-            "name": "",
-            "status": "down",
-            "type": "http",
-          },
-          "timestamp": "2019-01-28T17:47:19.076Z",
-        },
-        Object {
-          "docId": "fewjio21",
-          "http": Object {
-            "response": Object {
-              "status_code": 200,
-            },
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 127511,
-            },
-            "id": "auto-tcp-0X81440A68E839814C",
-            "ip": "172.217.7.4",
-            "name": "",
-            "status": "up",
-            "type": "http",
-          },
-          "timestamp": "2019-01-28T17:47:19.077Z",
-        },
-        Object {
-          "docId": "fewjik81",
-          "http": Object {
-            "response": Object {
-              "status_code": 200,
-            },
-          },
-          "monitor": Object {
-            "duration": Object {
-              "us": 287543,
-            },
-            "id": "auto-http-0X131221E73F825974",
-            "ip": "192.30.253.112",
-            "name": "",
-            "status": "up",
-            "type": "http",
-          },
-          "timestamp": "2019-01-28T17:47:19.077Z",
-        },
       ]
     }
     loading={false}
@@ -339,11 +104,11 @@ exports[`PingList component renders sorted list without errors 1`] = `
           50,
           100,
         ],
-        "totalItemCount": 10,
+        "totalItemCount": 9231,
       }
     }
     responsive={true}
-    tableLayout="fixed"
+    tableLayout="auto"
   />
 </EuiPanel>
 `;

@@ -102,7 +102,9 @@ const TabComponent = (props: TabProps) => {
 };
 
 const TableWrapper = euiStyled.div`
-  margin-bottom: 20px
+  &:not(:last-child) {
+    margin-bottom: 16px
+  }
 `;
 
 const LoadingPlaceholder = () => {

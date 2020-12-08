@@ -149,10 +149,6 @@ const state: State = {
             serializedQuery:
               '{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}',
           },
-          filterQueryDraft: {
-            kind: 'kuery',
-            expression: 'host.name : *',
-          },
         },
       },
     },
