@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, set } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { SerializedActionWithAllocation } from '../../../../../../common/types';
 
