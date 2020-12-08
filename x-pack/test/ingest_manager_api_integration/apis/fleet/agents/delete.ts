@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../../api_integration/ftr_provider_con
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const supertestAsSuperuser = getService('supertest');
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
   const users: { [rollName: string]: { username: string; password: string; permissions?: any } } = {
@@ -60,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should return a 403 if user lacks fleet-write permissions', async () => {
+    it('should return a 403 if user lacks fleet-write permissions: only fleet read', async () => {
       const { body: apiResponse } = await supertest
         .delete(`/api/fleet/agents/agent1`)
         .auth(users.fleet_user.username, users.fleet_user.password)
@@ -71,19 +72,28 @@ export default function ({ getService }: FtrProviderContext) {
         action: 'deleted',
       });
     });
+    it('should return a 403 if user lacks fleet-write permissions: fleet all no superuser', async () => {
+      const { body: apiResponse } = await supertest
+        .delete(`/api/fleet/agents/agent1`)
+        .auth(users.fleet_admin.username, users.fleet_admin.password)
+        .set('kbn-xsrf', 'xx')
+        .expect(403);
+
+      expect(apiResponse).not.to.eql({
+        action: 'deleted',
+      });
+    });
 
     it('should return a 404 if there is no agent to delete', async () => {
-      await supertest
+      await supertestAsSuperuser
         .delete(`/api/fleet/agents/i-do-not-exist`)
-        .auth(users.fleet_admin.username, users.fleet_admin.password)
         .set('kbn-xsrf', 'xx')
         .expect(404);
     });
 
     it('should return a 200 after deleting an agent', async () => {
-      const { body: apiResponse } = await supertest
+      const { body: apiResponse } = await supertestAsSuperuser
         .delete(`/api/fleet/agents/agent1`)
-        .auth(users.fleet_admin.username, users.fleet_admin.password)
         .set('kbn-xsrf', 'xx')
         .expect(200);
       expect(apiResponse).to.eql({
