@@ -9,7 +9,7 @@
     "winlogbeat",
     "process"
   ],
-  "description": "Security: Windows - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
+  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Windows - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
