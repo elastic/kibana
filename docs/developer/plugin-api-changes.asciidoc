@@ -4,6 +4,21 @@
 This page discusses the plugin API changes that you need to be aware of when migrating
 your application to {kib} {minor-version}.
 
+[[breaking_plugin_v7.11.0_85234]]
+.Custom visualizations plugin need to build their own expression AST
+[%collapsible]
+====
+
+In {kib} all visualizations underneath render using {kib} expressions (that you can see user facing inside Canvas expression editor).
+Right now old custom visualization plugins are all using the same `visualizations` expression function underneath.
+**We're going to remove this function in one of the upcoming minors,** meaning your custom visualization plugin will require to register
+its own renderer and expression function and provide a `toExpressionAst` function.
+
+You can check any of the https://github.com/elastic/kibana/issues/46801[PRs for core visualizations] as a reference how those migration need to look like.
+
+*via https://github.com/elastic/kibana/pull/85234[#85234]*
+
+====
 
 [[breaking_plugin_v7.11.0_83575]]
 .Conflict checking is now disabled by default when copying saved objects
