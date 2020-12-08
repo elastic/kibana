@@ -81,9 +81,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85215
-// FLAKY: https://github.com/elastic/kibana/issues/85216
-describe.skip('Detection rules, Indicator Match', () => {
+describe('Detection rules, Indicator Match', () => {
   const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
   const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
   const expectedTags = newThreatIndicatorRule.tags.join('');
