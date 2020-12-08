@@ -21,24 +21,23 @@ export function handleResponse(response: ElasticsearchResponse, apmUuid: string)
     return {};
   }
 
+  const firstHit = response.hits.hits[0];
+
+  let firstStats = null;
+  const stats = firstHit._source.beats_stats ?? {};
+
   if (
-    !response.hits.hits[0].inner_hits?.first_hit?.hits?.hits ||
-    response.hits.hits[0].inner_hits?.first_hit?.hits?.hits.length === 0
+    firstHit.inner_hits?.first_hit?.hits?.hits &&
+    firstHit.inner_hits?.first_hit?.hits?.hits.length > 0 &&
+    firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats
   ) {
-    return {};
+    firstStats = firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats;
   }
 
-  const firstStats = response.hits.hits[0].inner_hits.first_hit?.hits.hits[0]._source.beats_stats;
-  const stats = response.hits.hits[0]._source.beats_stats;
-
-  if (!firstStats || !stats) {
-    return {};
-  }
-
-  const eventsTotalFirst = firstStats.metrics?.libbeat?.pipeline?.events?.total;
-  const eventsEmittedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.published;
-  const eventsDroppedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.dropped;
-  const bytesWrittenFirst = firstStats.metrics?.libbeat?.output?.write?.bytes;
+  const eventsTotalFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.total;
+  const eventsEmittedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.published;
+  const eventsDroppedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.dropped;
+  const bytesWrittenFirst = firstStats?.metrics?.libbeat?.output?.write?.bytes;
 
   const eventsTotalLast = stats.metrics?.libbeat?.pipeline?.events?.total;
   const eventsEmittedLast = stats.metrics?.libbeat?.pipeline?.events?.published;
