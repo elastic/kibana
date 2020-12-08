@@ -68,7 +68,6 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const [lastReloadTime, setLastReloadTime] = useState(0);
-  const [lastContainerId, setLastContainerId] = useState<number>();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
@@ -124,14 +123,9 @@ export function DashboardApp({
 
   // Manage dashboard container subscriptions
   useEffect(() => {
-    if (
-      !dashboardStateManager ||
-      !dashboardContainer ||
-      lastContainerId === dashboardContainer.runtimeId
-    ) {
+    if (!dashboardStateManager || !dashboardContainer) {
       return;
     }
-    setLastContainerId(dashboardContainer.runtimeId);
     const timeFilter = data.query.timefilter.timefilter;
     const subscriptions = new Subscription();
 
@@ -178,7 +172,6 @@ export function DashboardApp({
     core.http,
     uiSettings,
     data.query,
-    lastContainerId,
     dashboardContainer,
     data.search.session,
     indexPatternService,

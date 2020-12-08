@@ -113,8 +113,8 @@ export const useDashboardContainer = (
         );
       }
       setDashboardContainer(newContainer);
-      return () => setDashboardContainer(null);
     })();
+    return () => setDashboardContainer(null);
   }, [
     dashboardCapabilities,
     dashboardStateManager,

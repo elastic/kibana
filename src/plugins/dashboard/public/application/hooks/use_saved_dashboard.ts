@@ -39,10 +39,6 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
 
   useEffect(() => {
     (async function loadSavedDashboard() {
-      if (!savedDashboardId) {
-        return;
-      }
-
       if (savedDashboardId === 'create') {
         history.replace({
           ...history.location, // preserve query,
@@ -58,9 +54,11 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
       try {
         const dashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
         const { title, getFullPath } = dashboard;
+        if (savedDashboardId) {
+          recentlyAccessedPaths.add(getFullPath(), title, savedDashboardId);
+        }
 
         docTitle.change(title);
-        recentlyAccessedPaths.add(getFullPath(), title, savedDashboardId);
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
@@ -68,6 +66,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
         history.push(DashboardConstants.LANDING_PAGE_PATH);
       }
     })();
+    return () => setSavedDashboard(null);
   }, [
     docTitle,
     history,
