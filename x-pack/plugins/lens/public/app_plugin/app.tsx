@@ -683,7 +683,9 @@ export function App({
         <TagEnhancedSavedObjectSaveModalOrigin
           savedObjectsTagging={savedObjectsTagging}
           initialTags={tagsIds}
-          originatingApp={incomingState?.originatingApp}
+          originatingApp={
+            state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
+          }
           onSave={(props) => runSave(props, { saveToLibrary: true })}
           onClose={() => {
             setState((s) => ({ ...s, isSaveModalVisible: false }));
