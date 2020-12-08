@@ -12,7 +12,7 @@ running in no time. If you have any problems, file an issue in the https://githu
 * <<kibana-architecture>>
 * <<advanced>>
 * <<plugin-list>>
-* <<plugin-api-changes-7.11>>
+* <<plugin-api-changes>>
 
 --
 
@@ -30,4 +30,4 @@ include::advanced/index.asciidoc[]
 
 include::plugin-list.asciidoc[]
 
-include::plugin-api-changes.asciidoc[]
+include::plugin-api-changes/index.asciidoc[]

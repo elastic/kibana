@@ -1,0 +1,14 @@
+[[plugin-api-changes]]
+== Plugin API changes
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application from one version of {kib} to another.
+
+* <<plugin-api-changes-7-11, Changes in 7.11>>
+* <<general-plugin-API-changes-7-10, Changes in 7.10>>
+* <<general-plugin-API-changes-79, Changes in 7.9>>
+* <<general-plugin-API-changes-78, Changes in 7.8>>
+* <<general-plugin-API-changes-77, Changes in 7.7>>
+* <<general-plugin-API-changes-76, Changes in 7.6>>
+
+include::plugin-api-changes-7_11.asciidoc[leveloffset=+1]

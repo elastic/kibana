@@ -18,6 +18,7 @@ your application to Kibana 7.7.
 There are no user-facing breaking changes in 7.7.
 
 [float]
+[[general-plugin-API-changes-77]]
 === Breaking changes for plugin developers
 
 [discrete]

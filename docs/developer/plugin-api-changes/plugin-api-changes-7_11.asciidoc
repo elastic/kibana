@@ -1,5 +1,8 @@
-[[plugin-api-changes-7.11]]
+[[plugin-api-changes-7-11]]
 == Plugin API changes in {minor-version}
+++++
+<titleabbrev>7.11</titleabbrev>
+++++
 
 This page discusses the plugin API changes that you need to be aware of when migrating
 your application to {kib} {minor-version}.
@@ -20,15 +23,14 @@ You can check any of the https://github.com/elastic/kibana/issues/46801[PRs for 
 
 ====
 
-[[breaking_plugin_v7.11.0_83575]]
-.Conflict checking is now disabled by default when copying saved objects
+[[breaking_plugin_v7.11.0_84791]]
+.`server.xsrf.whitelist` rename `server.xsrf.allowlist`
 [%collapsible]
 ====
 
-See the `createNewCopies` parameter in 
-the <<spaces-api-copy-saved-objects,Copy saved objects to space API documentation>> for more information.
+`server.xsrf.whitelist` was deprecated in favor of `server.xsrf.allowlist`.
 
-*via https://github.com/elastic/kibana/pull/83575[#83575]*
+*via https://github.com/elastic/kibana/pull/84791[#84791]*
 
 ====
 
@@ -41,6 +43,37 @@ The `SavedObjectsRepository.incrementCounter` method no longer accepts a string 
 An array of field names to increment must be provided.
 
 *via https://github.com/elastic/kibana/pull/84326[#84326]*
+
+
+====
+
+[[breaking_plugin_v7.11.0_83575]]
+.Conflict checking is now disabled by default when copying saved objects
+[%collapsible]
+====
+
+See the `createNewCopies` parameter in
+the <<spaces-api-copy-saved-objects,Copy saved objects to space API documentation>> for more information.
+
+*via https://github.com/elastic/kibana/pull/83575[#83575]*
+
+====
+
+[[breaking_plugin_v7.11.0_83482]]
+.Predefined IDs allowed for encrypted saved objects
+[%collapsible]
+====
+
+Task Manager now uses predefined IDs with encrypted saved objects.
+{kib} previously generated the ID within the
+`EncryptedSavedObjectsClientWrapper` in order to use a UUID v4.
+This restriction was put in place because typically a saved object
+has a reference to an "encrypted saved object" and we wanted to reduce the
+likelihood of someone potentially guessing the reference ID. Instead of relaxing this constraint for
+all saved object types used with the encrypted saved objects plugin,
+this PR allows certain saved object types to opt-out of this protection.
+
+*via https://github.com/elastic/kibana/pull/83482[#83482]*
 
 ====
 
@@ -267,6 +300,22 @@ These methods were added for setting field formatters: `indexPattern.setFieldFor
 `indexPattern.getFormatterForFieldNoDefault` was also added, which is used by the management interface.
 
 *via https://github.com/elastic/kibana/pull/78352[#78352]*
+
+====
+
+[[breaking_plugin_v7.11.0_76889]]
+.Client side session service introduced
+[%collapsible]
+====
+
+This PR introduces the frontend session management service
+and integrates it into Discover
+by initializing a session before fetching fresh data from the server.
+
+This PR also uses the session service to show the timeout
+error once per session instead of using a debounce.
+
+*via https://github.com/elastic/kibana/pull/76889[#76889]*
 
 ====
 
