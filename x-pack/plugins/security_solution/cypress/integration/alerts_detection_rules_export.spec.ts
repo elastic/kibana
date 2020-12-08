@@ -19,8 +19,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Export rules', () => {
   let rule = '';
   before(async () => {
-    cy.server();
-    cy.route(
+    cy.intercept(
       'POST',
       '**api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson*'
     ).as('export');

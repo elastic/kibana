@@ -16,8 +16,7 @@ let timelineId = '';
 
 describe('Export timelines', () => {
   before(async () => {
-    cy.server();
-    cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    cy.intercept('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
     const newTimeline = await createTimeline(timeline);
     timelineId = newTimeline[0];
     timelineBody = newTimeline[1];
