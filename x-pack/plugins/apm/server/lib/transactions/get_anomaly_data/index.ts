@@ -5,13 +5,13 @@
  */
 import { Logger } from 'kibana/server';
 import { isNumber } from 'lodash';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
 import { anomalySeriesTransform } from './transform';
-import { getMLJobIds } from '../../../service_map/get_service_anomalies';
+import { getMLJobIds } from '../../service_map/get_service_anomalies';
 
 export async function getAnomalySeries({
   serviceName,
