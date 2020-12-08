@@ -8,6 +8,7 @@ import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
@@ -260,7 +261,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Track component loaded
   useEffect(() => {
-    uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
+    uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
 
   return (

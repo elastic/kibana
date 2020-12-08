@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   Axis,
   Chart,
+  ChartSizeArray,
   niceTimeFormatter,
   Position,
   Settings,
@@ -17,7 +18,7 @@ import {
   PointerEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
@@ -39,7 +40,6 @@ import { createInventoryMetricFormatter } from '../../../../lib/create_inventory
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
 import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
 import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../../../../../observability/public';
 import { ChartHeader } from './chart_header';
 import {
   SYSTEM_METRIC_NAME,
@@ -56,6 +56,8 @@ import {
 import { TimeDropdown } from './time_dropdown';
 
 const ONE_HOUR = 60 * 60 * 1000;
+const CHART_SIZE: ChartSizeArray = ['100%', 160];
+
 const TabComponent = (props: TabProps) => {
   const cpuChartRef = useRef<Chart>(null);
   const networkChartRef = useRef<Chart>(null);
@@ -282,217 +284,184 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      <TimepickerWrapper>
-        <TimeDropdown value={time} onChange={updateTime} />
-      </TimepickerWrapper>
-      <ChartsContainer>
-        <ChartContainerWrapper>
+      <TimeDropdown value={time} onChange={updateTime} />
+
+      <EuiSpacer size={'l'} />
+
+      <EuiFlexGrid columns={2} gutterSize={'l'} responsive={false}>
+        <EuiFlexItem>
           <ChartHeader title={CPU_CHART_TITLE} metrics={cpuChartMetrics} />
-          <ChartContainer>
-            <Chart ref={cpuChartRef}>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={cpuChartMetrics[0]}
-                id={'0'}
-                series={systemMetricsTs!}
-                stack={false}
-              />
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={cpuChartMetrics[1]}
-                id={'0'}
-                series={userMetricsTs}
-                stack={false}
-              />
-              <Axis
-                id={'timestamp'}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={formatter}
-              />
-              <Axis
-                id={'values'}
-                position={Position.Left}
-                tickFormat={cpuFormatter}
-                domain={getDomain(cpuTimeseries, cpuChartMetrics)}
-                ticks={6}
-                showGridLines
-              />
-              <Settings
-                onPointerUpdate={pointerUpdate}
-                tooltip={tooltipProps}
-                theme={getTimelineChartTheme(isDarkMode)}
-              />
-            </Chart>
-          </ChartContainer>
-        </ChartContainerWrapper>
+          <Chart ref={cpuChartRef} size={CHART_SIZE}>
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={cpuChartMetrics[0]}
+              id={'0'}
+              series={systemMetricsTs!}
+              stack={false}
+            />
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={cpuChartMetrics[1]}
+              id={'0'}
+              series={userMetricsTs}
+              stack={false}
+            />
+            <Axis
+              id={'timestamp'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={formatter}
+            />
+            <Axis
+              id={'values'}
+              position={Position.Left}
+              tickFormat={cpuFormatter}
+              domain={getDomain(cpuTimeseries, cpuChartMetrics)}
+              ticks={6}
+              showGridLines
+            />
+            <Settings
+              onPointerUpdate={pointerUpdate}
+              tooltip={tooltipProps}
+              theme={getTimelineChartTheme(isDarkMode)}
+            />
+          </Chart>
+        </EuiFlexItem>
 
-        <ChartContainerWrapper>
+        <EuiFlexItem>
           <ChartHeader title={LOAD_CHART_TITLE} metrics={loadChartMetrics} />
-          <ChartContainer>
-            <Chart ref={loadChartRef}>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={loadChartMetrics[0]}
-                id="0"
-                series={load1mMetricsTs}
-                stack={false}
-              />
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={loadChartMetrics[1]}
-                id="0"
-                series={load5mMetricsTs}
-                stack={false}
-              />
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={loadChartMetrics[2]}
-                id="0"
-                series={load15mMetricsTs}
-                stack={false}
-              />
-              <Axis
-                id={'timestamp'}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={formatter}
-              />
-              <Axis
-                id={'values1'}
-                position={Position.Left}
-                tickFormat={loadFormatter}
-                domain={getDomain(loadTimeseries, loadChartMetrics)}
-                ticks={6}
-                showGridLines
-              />
-              <Settings
-                onPointerUpdate={pointerUpdate}
-                tooltip={tooltipProps}
-                theme={getTimelineChartTheme(isDarkMode)}
-              />
-            </Chart>
-          </ChartContainer>
-        </ChartContainerWrapper>
+          <Chart ref={loadChartRef} size={CHART_SIZE}>
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={loadChartMetrics[0]}
+              id="0"
+              series={load1mMetricsTs}
+              stack={false}
+            />
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={loadChartMetrics[1]}
+              id="0"
+              series={load5mMetricsTs}
+              stack={false}
+            />
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={loadChartMetrics[2]}
+              id="0"
+              series={load15mMetricsTs}
+              stack={false}
+            />
+            <Axis
+              id={'timestamp'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={formatter}
+            />
+            <Axis
+              id={'values1'}
+              position={Position.Left}
+              tickFormat={loadFormatter}
+              domain={getDomain(loadTimeseries, loadChartMetrics)}
+              ticks={6}
+              showGridLines
+            />
+            <Settings
+              onPointerUpdate={pointerUpdate}
+              tooltip={tooltipProps}
+              theme={getTimelineChartTheme(isDarkMode)}
+            />
+          </Chart>
+        </EuiFlexItem>
 
-        <ChartContainerWrapper>
+        <EuiFlexItem>
           <ChartHeader title={MEMORY_CHART_TITLE} metrics={memoryChartMetrics} />
-          <ChartContainer>
-            <Chart ref={memoryChartRef}>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={memoryChartMetrics[0]}
-                id="0"
-                series={usedMemoryMetricsTs}
-                stack={false}
-              />
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={memoryChartMetrics[1]}
-                id="0"
-                series={freeMemoryMetricsTs}
-                stack={false}
-              />
-              <Axis
-                id={'timestamp'}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={formatter}
-              />
-              <Axis
-                id={'values'}
-                position={Position.Left}
-                tickFormat={memoryFormatter}
-                domain={getDomain(memoryTimeseries, memoryChartMetrics)}
-                ticks={6}
-                showGridLines
-              />
-              <Settings
-                onPointerUpdate={pointerUpdate}
-                tooltip={tooltipProps}
-                theme={getTimelineChartTheme(isDarkMode)}
-              />
-            </Chart>
-          </ChartContainer>
-        </ChartContainerWrapper>
+          <Chart ref={memoryChartRef} size={CHART_SIZE}>
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={memoryChartMetrics[0]}
+              id="0"
+              series={usedMemoryMetricsTs}
+              stack={false}
+            />
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={memoryChartMetrics[1]}
+              id="0"
+              series={freeMemoryMetricsTs}
+              stack={false}
+            />
+            <Axis
+              id={'timestamp'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={formatter}
+            />
+            <Axis
+              id={'values'}
+              position={Position.Left}
+              tickFormat={memoryFormatter}
+              domain={getDomain(memoryTimeseries, memoryChartMetrics)}
+              ticks={6}
+              showGridLines
+            />
+            <Settings
+              onPointerUpdate={pointerUpdate}
+              tooltip={tooltipProps}
+              theme={getTimelineChartTheme(isDarkMode)}
+            />
+          </Chart>
+        </EuiFlexItem>
 
-        <ChartContainerWrapper>
+        <EuiFlexItem>
           <ChartHeader title={NETWORK_CHART_TITLE} metrics={networkChartMetrics} />
-          <ChartContainer>
-            <Chart ref={networkChartRef}>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={networkChartMetrics[0]}
-                id="0"
-                series={rxMetricsTs}
-                stack={false}
-              />
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={networkChartMetrics[1]}
-                id="0"
-                series={txMetricsTs}
-                stack={false}
-              />
-              <Axis
-                id={'timestamp'}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={formatter}
-              />
-              <Axis
-                id={'values'}
-                position={Position.Left}
-                tickFormat={networkFormatter}
-                domain={getDomain(networkTimeseries, networkChartMetrics)}
-                ticks={6}
-                showGridLines
-              />
-              <Settings
-                onPointerUpdate={pointerUpdate}
-                tooltip={tooltipProps}
-                theme={getTimelineChartTheme(isDarkMode)}
-              />
-            </Chart>
-          </ChartContainer>
-        </ChartContainerWrapper>
-      </ChartsContainer>
+          <Chart ref={networkChartRef} size={CHART_SIZE}>
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={networkChartMetrics[0]}
+              id="0"
+              series={rxMetricsTs}
+              stack={false}
+            />
+            <MetricExplorerSeriesChart
+              type={MetricsExplorerChartType.line}
+              metric={networkChartMetrics[1]}
+              id="0"
+              series={txMetricsTs}
+              stack={false}
+            />
+            <Axis
+              id={'timestamp'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={formatter}
+            />
+            <Axis
+              id={'values'}
+              position={Position.Left}
+              tickFormat={networkFormatter}
+              domain={getDomain(networkTimeseries, networkChartMetrics)}
+              ticks={6}
+              showGridLines
+            />
+            <Settings
+              onPointerUpdate={pointerUpdate}
+              tooltip={tooltipProps}
+              theme={getTimelineChartTheme(isDarkMode)}
+            />
+          </Chart>
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </TabContent>
   );
 };
-
-const ChartsContainer = euiStyled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-`;
-
-const ChartContainerWrapper = euiStyled.div`
-  width: 50%
-`;
-
-const TimepickerWrapper = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.m};
-  width: 50%;
-`;
-
-const ChartContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-    }}
-  >
-    {children}
-  </div>
-);
 
 const LoadingPlaceholder = () => {
   return (
     <div
       style={{
         width: '100%',
-        height: '100%',
+        height: '200px',
         padding: '16px',
         display: 'flex',
         alignItems: 'center',

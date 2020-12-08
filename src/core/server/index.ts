@@ -303,6 +303,7 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,

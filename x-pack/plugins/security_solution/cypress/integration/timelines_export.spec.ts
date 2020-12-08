@@ -15,8 +15,7 @@ const EXPECTED_EXPORTED_TIMELINE_PATH = 'cypress/test_files/expected_timelines_e
 describe('Export timelines', () => {
   before(() => {
     esArchiverLoad('timeline');
-    cy.server();
-    cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
   });
 
   after(() => {
@@ -32,9 +31,9 @@ describe('Export timelines', () => {
       const timelineId = parsedJson.savedObjectId;
       exportTimeline(timelineId);
 
-      cy.wait('@export').then((response) => {
-        cy.wrap(response.status).should('eql', 200);
-        cy.wrap(response.xhr.responseText).should('eql', $expectedExportedJson);
+      cy.wait('@export').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response!.body).should('eql', $expectedExportedJson);
       });
     });
   });

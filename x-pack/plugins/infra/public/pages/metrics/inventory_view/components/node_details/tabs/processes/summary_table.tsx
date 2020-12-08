@@ -5,16 +5,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { mapValues, countBy } from 'lodash';
+import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiLoadingSpinner, EuiBasicTableColumn } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../observability/public';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
-import { parseProcessList } from './parse_process_list';
 import { STATE_NAMES } from './states';
 
 interface Props {
-  processList: ProcessListAPIResponse;
+  processSummary: ProcessListAPIResponse['summary'];
   isLoading: boolean;
 }
 
@@ -22,18 +21,17 @@ type SummaryColumn = {
   total: number;
 } & Record<keyof typeof STATE_NAMES, number>;
 
-export const SummaryTable = ({ processList, isLoading }: Props) => {
-  const parsedList = parseProcessList(processList);
+export const SummaryTable = ({ processSummary, isLoading }: Props) => {
   const processCount = useMemo(
     () =>
       [
         {
-          total: isLoading ? -1 : parsedList.length,
+          total: isLoading ? -1 : processSummary.total,
           ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-          ...(isLoading ? [] : countBy(parsedList, 'state')),
+          ...(isLoading ? {} : processSummary),
         },
       ] as SummaryColumn[],
-    [parsedList, isLoading]
+    [processSummary, isLoading]
   );
   return (
     <StyleWrapper>

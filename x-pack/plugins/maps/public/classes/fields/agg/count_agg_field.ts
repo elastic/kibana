@@ -97,4 +97,8 @@ export class CountAggField implements IESAggField {
   canReadFromGeoJson(): boolean {
     return this._canReadFromGeoJson;
   }
+
+  isEqual(field: IESAggField) {
+    return field.getName() === this.getName();
+  }
 }

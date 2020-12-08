@@ -1920,6 +1920,35 @@
         }
       }
     },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword"
+              },
+              "eventName": {
+                "type": "keyword"
+              },
+              "lastUpdatedAt": {
+                "type": "date"
+              },
+              "fromTimestamp": {
+                "type": "date"
+              },
+              "counterType": {
+                "type": "keyword"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
     "ui_metric": {
       "properties": {
         "console": {

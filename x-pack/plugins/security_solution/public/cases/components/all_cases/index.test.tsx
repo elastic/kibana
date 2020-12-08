@@ -14,6 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -159,7 +160,7 @@ describe('AllCases', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
     await waitFor(() => {
-      getCasesColumns([], 'open', false).map(
+      getCasesColumns([], CaseStatuses.open, false).map(
         (i, key) => i.name != null && checkIt(`${i.name}`, key)
       );
     });
@@ -175,7 +176,9 @@ describe('AllCases', () => {
       const checkIt = (columnName: string) => {
         expect(columnName).not.toEqual(i18n.ACTIONS);
       };
-      getCasesColumns([], 'open', true).map((i, key) => i.name != null && checkIt(`${i.name}`));
+      getCasesColumns([], CaseStatuses.open, true).map(
+        (i, key) => i.name != null && checkIt(`${i.name}`)
+      );
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
   });
@@ -208,7 +211,7 @@ describe('AllCases', () => {
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
         updateKey: 'status',
-        updateValue: 'closed',
+        updateValue: CaseStatuses.closed,
         refetchCasesStatus: fetchCasesStatus,
         version: firstCase.version,
       });
@@ -217,7 +220,7 @@ describe('AllCases', () => {
   it('opens case when row action icon clicked', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: 'closed' },
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
     const wrapper = mount(
@@ -231,7 +234,7 @@ describe('AllCases', () => {
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
         updateKey: 'status',
-        updateValue: 'open',
+        updateValue: CaseStatuses.open,
         refetchCasesStatus: fetchCasesStatus,
         version: firstCase.version,
       });
@@ -288,7 +291,7 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().simulate('click');
-      expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'closed');
+      expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.closed);
     });
   });
   it('Bulk open status update', async () => {
@@ -297,7 +300,7 @@ describe('AllCases', () => {
       selectedCases: useGetCasesMockState.data.cases,
       filterOptions: {
         ...defaultGetCases.filterOptions,
-        status: 'closed',
+        status: CaseStatuses.closed,
       },
     });
 
@@ -309,7 +312,7 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
-      expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'open');
+      expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.open);
     });
   });
   it('isDeleted is true, refetch', async () => {
