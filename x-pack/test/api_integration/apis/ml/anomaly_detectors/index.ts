@@ -9,5 +9,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detectors', function () {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./get_with_spaces'));
+    loadTestFile(require.resolve('./open_with_spaces'));
+    loadTestFile(require.resolve('./close_with_spaces'));
+    loadTestFile(require.resolve('./delete_with_spaces'));
+    loadTestFile(require.resolve('./create_with_spaces'));
   });
 }
