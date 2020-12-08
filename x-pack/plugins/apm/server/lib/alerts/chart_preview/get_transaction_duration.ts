@@ -26,51 +26,65 @@ export async function getTransactionDurationChartPreview({
   setup: Setup;
   alertParams: AlertParams;
 }) {
-  // const { apmEventClient } = setup;
-  // const { threshold, serviceName, transactionType, environment } = alertParams;
-  // const query = {
-  //   bool: {
-  //     filter: [
-  //       { range: rangeFilter(start, end) },
-  //       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-  //       ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-  //       ...(transactionType
-  //         ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-  //         : []),
-  //       ...getEnvironmentUiFilterES(environment),
-  //     ],
-  //   },
-  // };
-  // const outcomes = getOutcomeAggregation({
-  //   searchAggregatedTransactions: false,
-  // });
-  // const aggs = {
-  //   outcomes,
-  //   timeseries: {
-  //     date_histogram: {
-  //       field: '@timestamp',
-  //       fixed_interval: intervalString,
-  //       min_doc_count: 0,
-  //       extended_bounds: { min: start, max: end },
-  //     },
-  //     aggs: { outcomes },
-  //   },
-  // };
-  // const params = {
-  //   apm: { events: [ProcessorEvent.transaction] },
-  //   body: { size: 0, query, aggs },
-  // };
-  // const resp = await apmEventClient.search(params);
-  // if (!resp.aggregations) {
-  //   return [];
-  // }
-  // return resp.aggregations.timeseries.buckets.map((bucket) => {
-  //   const errorPercentage = calculateTransactionErrorPercentage(
-  //     bucket.outcomes
-  //   );
-  //   return {
-  //     x: bucket.key,
-  //     y: errorPercentage > threshold ? errorPercentage : null,
-  //   };
-  // });
+  const { apmEventClient } = setup;
+  const {
+    environment,
+    serviceName,
+    threshold,
+    transactionType,
+    windowSize,
+    windowUnit,
+  } = alertParams;
+
+  const query = {
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${windowSize * BUCKET_SIZE}${windowUnit}`,
+            },
+          },
+        },
+        { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+        ...(transactionType
+          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+          : []),
+        ...getEnvironmentUiFilterES(environment),
+      ],
+    },
+  };
+  const outcomes = getOutcomeAggregation({
+    searchAggregatedTransactions: false,
+  });
+  const aggs = {
+    outcomes,
+    timeseries: {
+      date_histogram: {
+        field: '@timestamp',
+        fixed_interval: intervalString,
+        min_doc_count: 0,
+        extended_bounds: { min: start, max: end },
+      },
+      aggs: { outcomes },
+    },
+  };
+  const params = {
+    apm: { events: [ProcessorEvent.transaction] },
+    body: { size: 0, query, aggs },
+  };
+  const resp = await apmEventClient.search(params);
+  if (!resp.aggregations) {
+    return [];
+  }
+  return resp.aggregations.timeseries.buckets.map((bucket) => {
+    const errorPercentage = calculateTransactionErrorPercentage(
+      bucket.outcomes
+    );
+    return {
+      x: bucket.key,
+      y: errorPercentage > threshold ? errorPercentage : null,
+    };
+  });
 }

@@ -31,7 +31,6 @@ export async function getTransactionErrorRateChartPreview({
   const {
     windowSize,
     windowUnit,
-    threshold,
     serviceName,
     environment,
     transactionType,
