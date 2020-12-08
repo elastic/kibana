@@ -10,6 +10,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -27,6 +28,7 @@ describe('Export rules', () => {
   });
 
   after(() => {
+    removeSignalsIndex();
     esArchiverUnload('export_rule');
   });
 
