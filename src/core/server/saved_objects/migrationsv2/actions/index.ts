@@ -44,7 +44,21 @@ export type FetchIndexResponse = Record<
   { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
 >;
 
+/**
+ * Batch size for updateByQuery, reindex & search operations. Smaller batches
+ * reduce the memory pressure on Elasticsearch and Kibana so are less likely
+ * to cause failures.
+ * TODO (profile/tune): How much smaller can we make this number before it
+ * starts impacting how long migrations take to perform?
+ */
 const BATCH_SIZE = 100;
+const DEFAULT_TIMEOUT = '60s';
+/** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
+const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
+/** ES rule of thumb: shards should be several GB to 10's of GB, so Kibana is unlikely to cross that limit */
+const INDEX_NUMBER_OF_SHARDS = 1;
+/** Wait for all shards to be active before starting an operation */
+const WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE = 'all';
 
 /**
  * Fetches information about the given indices including aliases, mappings and
@@ -114,13 +128,12 @@ export const setWriteBlock = (
     .catch(catchRetryableEsClientErrors);
 };
 
-const waitForStatus = (
+const waitForIndexStatusGreen = (
   client: ElasticsearchClient,
-  index: string,
-  status: 'green' | 'yellow' | 'red'
+  index: string
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
-    .health({ index, wait_for_status: status, timeout: '30s' })
+    .health({ index, wait_for_status: 'green', timeout: '30s' })
     .then(() => {
       return Either.right({});
     })
@@ -136,7 +149,7 @@ export type CloneIndexResponse = AcknowledgeResponse;
  * This method adds some additional logic to the ES clone index API:
  *  - it is idempotent, if it gets called multiple times subsequent calls will
  *    wait for the first clone operation to complete (up to 60s)
- *  - the first call will wait up to 120s for the cluster state and all shards
+ *  - the first call will wait up to 90s for the cluster state and all shards
  *    to be updated.
  */
 export const cloneIndex = (
@@ -150,18 +163,15 @@ export const cloneIndex = (
         {
           index: source,
           target,
-          wait_for_active_shards: 'all',
+          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
           body: {
             settings: {
               index: {
                 // The source we're cloning from will have a write block set, so
                 // we need to remove it to allow writes to our newly cloned index
                 'blocks.write': false,
-                // ES rule of thumb: shards should be several GB to 10's of GB, so
-                // Kibana is unlikely to cross that limit.
-                number_of_shards: 1,
-                // Allocate 1 replica if there are enough data nodes
-                auto_expand_replicas: '0-1',
+                number_of_shards: INDEX_NUMBER_OF_SHARDS,
+                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
                 // Set an explicit refresh interval so that we don't inherit the
                 // value from incorrectly configured index templates (not required
                 // after we adopt system indices)
@@ -171,7 +181,7 @@ export const cloneIndex = (
               },
             },
           },
-          timeout: '60s',
+          timeout: DEFAULT_TIMEOUT,
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
@@ -216,7 +226,7 @@ export const cloneIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForStatus(client, target, 'green'),
+          waitForIndexStatusGreen(client, target),
           TaskEither.map((value) => {
             /** When the index status is 'green' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };
@@ -296,8 +306,7 @@ export const pickupUpdatedMappings = (
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
       index,
-      // Update documents in batches of 100 documents at a time
-      // TODO: profile performance to see how much difference `scroll_size` makes
+      // How many documents to update per batch
       scroll_size: BATCH_SIZE,
       // force a refresh so that we can query the updated index immediately
       // after the operation completes
@@ -338,7 +347,7 @@ export const reindex = (
         conflicts: 'proceed',
         source: {
           index: sourceIndex,
-          // Set batch size
+          // Set reindex batch size
           size: BATCH_SIZE,
         },
         dest: {
@@ -458,6 +467,7 @@ export const updateAliases = (
       },
     })
     .then(() => {
+      // TODO: Do we need to check `acknowledged=true` ?
       return Either.right('update_aliases_succeeded' as const);
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
@@ -518,10 +528,10 @@ export const createIndex = (
           index: indexName,
           // wait until all shards are available before creating the index
           // (since number_of_shards=1 this does not have any effect atm)
-          wait_for_active_shards: 'all',
+          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
           // Wait up to 60s for the cluster state to update and all shards to be
           // started
-          timeout: '60s',
+          timeout: DEFAULT_TIMEOUT,
           body: {
             mappings,
             settings: {
@@ -529,8 +539,7 @@ export const createIndex = (
                 // ES rule of thumb: shards should be several GB to 10's of GB, so
                 // Kibana is unlikely to cross that limit.
                 number_of_shards: 1,
-                // Allocate 1 replica if there are enough data nodes
-                auto_expand_replicas: '0-1',
+                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
                 // Set an explicit refresh interval so that we don't inherit the
                 // value from incorrectly configured index templates (not required
                 // after we adopt system indices)
@@ -584,7 +593,7 @@ export const createIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForStatus(client, indexName, 'green'),
+          waitForIndexStatusGreen(client, indexName),
           TaskEither.map(() => {
             /** When the index status is 'green' we know that all shards were started */
             return 'create_index_succeeded';
@@ -615,7 +624,7 @@ export const updateAndPickupMappings = (
     return client.indices
       .putMapping<Record<string, any>, IndexMapping>({
         index,
-        timeout: '60s',
+        timeout: DEFAULT_TIMEOUT,
         body: mappings,
       })
       .then((res) => {
@@ -660,11 +669,6 @@ export const searchForOutdatedDocuments = (
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
-      // Return batches of 100 documents. Smaller batches reduce the memory
-      // pressure on Elasticsearch and Kibana so are less likely to cause
-      // failures.
-      // TODO (profile/tune): How much smaller can we make this number before
-      // it starts impacting how long migrations take to perform?
       size: BATCH_SIZE,
       body: {
         query,
@@ -723,7 +727,7 @@ export const bulkOverwriteTransformedDocuments = (
       // probably unlikely so for now we'll accept this risk and wait till
       // system indices puts in place a hard control.
       require_alias: false,
-      wait_for_active_shards: 'all',
+      wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
       // Wait for a refresh to happen before returning. This ensures that when
       // this Kibana instance searches for outdated documents, it won't find
       // documents that were already transformed by itself or another Kibna

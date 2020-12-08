@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-/* eslint-disable prettier/prettier */
-
 export interface ControlState {
   controlState: string;
 }
+
+const MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE = 50;
 
 /**
  * A state-action machine for performing Saved Object Migrations.
@@ -55,15 +54,13 @@ export interface ControlState {
  * @param onStepComplete A callback functions which is called after every
  * completed step
  */
-export async function stateActionMachine<
-  S extends ControlState,
->(
+export async function stateActionMachine<S extends ControlState>(
   initialState: S,
   // It would be nice to use generics to enforce that model should accept all
   // the types of responses that actions could return. But seems to be
   // impossible because of https://github.com/microsoft/TypeScript/issues/13995#issuecomment-477978591
   next: (state: S) => (() => Promise<unknown>) | null,
-  model: (state: S, res: any) => S,
+  model: (state: S, res: any) => S
 ) {
   let state = initialState;
   let controlStateStepCounter = 0;
@@ -76,9 +73,11 @@ export async function stateActionMachine<
 
     controlStateStepCounter =
       newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
-    if (controlStateStepCounter === 50) {
+    if (controlStateStepCounter >= MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE) {
       // This is just a fail-safe to ensure we don't get stuck in an infinite loop
-      throw new Error("Control state didn't change after 50 steps aborting.");
+      throw new Error(
+        `Control state didn't change after ${MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE} steps aborting.`
+      );
     }
 
     // Get ready for the next step

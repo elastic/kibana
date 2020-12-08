@@ -892,7 +892,9 @@ export async function migrationStateMachine({
         .forEach((log) => indexLogger[log.level](log.message));
     }
 
-    // @ts-expect-error
+    // Sanitize the state for logging by removing logs and documents which
+    // might contain sensitive information.
+    // @ts-expect-error outdatedDocuments don't exist in all states
     const { logs, outdatedDocuments, ...logState } = newState;
     indexLogger.info(`${oldState.controlState} -> ${newState.controlState}: `, logState);
   };
