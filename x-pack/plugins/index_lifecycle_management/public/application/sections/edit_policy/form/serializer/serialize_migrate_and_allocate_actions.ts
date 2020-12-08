@@ -28,7 +28,7 @@ export const serializeMigrateAndAllocateActions = (
   /**
    * The number of replicas value to set in the allocate action.
    */
-  nrOfReplicas?: number
+  numberOfReplicas?: number
 ): SerializedActionWithAllocation => {
   const { allocate, migrate, ...otherActions } = mergedActions;
 
@@ -85,10 +85,10 @@ export const serializeMigrateAndAllocateActions = (
     default:
   }
 
-  if (nrOfReplicas != null) {
+  if (numberOfReplicas != null) {
     actions.allocate = {
       ...actions.allocate,
-      number_of_replicas: nrOfReplicas,
+      number_of_replicas: numberOfReplicas,
     };
   }
 
