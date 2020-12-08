@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
 import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
@@ -22,8 +21,7 @@ import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
-import { inputsSelectors, State } from '../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { inputsSelectors } from '../../common/store';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
@@ -33,6 +31,7 @@ import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enable
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -41,11 +40,17 @@ const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
 
-const OverviewComponent: React.FC<PropsFromRedux> = ({
-  filters = NO_FILTERS,
-  query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
-}) => {
+const OverviewComponent = () => {
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector((state) => getGlobalQuerySelector(state) ?? DEFAULT_QUERY);
+  const filters = useDeepEqualSelector(
+    (state) => getGlobalFiltersQuerySelector(state) ?? NO_FILTERS
+  );
+
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
 
@@ -94,7 +99,6 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       from={from}
                       indexPattern={indexPattern}
                       query={query}
-                      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                       setQuery={setQuery}
                       to={to}
                     />
@@ -152,22 +156,4 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulOverview = connector(React.memo(OverviewComponent));
+export const StatefulOverview = React.memo(OverviewComponent);

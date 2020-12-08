@@ -147,26 +147,22 @@ export class MapsPlugin implements Plugin {
       return;
     }
 
-    let routesInitialized = false;
     let isEnterprisePlus = false;
+    let lastLicenseId: string | undefined;
     const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
-      const basic = license.check(APP_ID, 'basic');
-
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';
-
-      if (basic.state === 'valid' && !routesInitialized) {
-        routesInitialized = true;
-        initRoutes(
-          core.http.createRouter(),
-          license.uid,
-          emsSettings,
-          this.kibanaVersion,
-          this._logger
-        );
-      }
+      lastLicenseId = license.uid;
     });
+
+    initRoutes(
+      core.http.createRouter(),
+      () => lastLicenseId,
+      emsSettings,
+      this.kibanaVersion,
+      this._logger
+    );
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 

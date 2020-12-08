@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
-
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonArray, JsonObject } from '../../../../common/typed_json';
+import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
   LogEntry,
-  LogEntriesItem,
-  LogEntriesCursor,
   LogColumn,
   LogEntriesRequest,
 } from '../../../../common/http_api';
@@ -23,7 +19,6 @@ import {
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
-import { convertESFieldsToLogItemFields } from './convert_document_source_to_log_item_fields';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
@@ -38,20 +33,21 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
+import { LogEntryCursor } from '../../../../common/log_entry';
 
 export interface LogEntriesParams {
   startTimestamp: number;
   endTimestamp: number;
   size?: number;
   query?: JsonObject;
-  cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
+  cursor?: { before: LogEntryCursor | 'last' } | { after: LogEntryCursor | 'first' };
   highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
   startTimestamp: number;
   endTimestamp: number;
   size?: number;
-  center: LogEntriesCursor;
+  center: LogEntryCursor;
   query?: JsonObject;
   highlightTerm?: string;
 }
@@ -259,31 +255,6 @@ export class InfraLogEntriesDomain {
     return summaries;
   }
 
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ): Promise<LogEntriesItem> {
-    const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
-    const defaultFields = [
-      { field: '_index', value: [document._index] },
-      { field: '_id', value: [document._id] },
-    ];
-
-    return {
-      id: document._id,
-      index: document._index,
-      key: {
-        time: document.sort[0],
-        tiebreaker: document.sort[1],
-      },
-      fields: sortBy(
-        [...defaultFields, ...convertESFieldsToLogItemFields(document.fields)],
-        'field'
-      ),
-    };
-  }
-
   public async getLogEntryDatasets(
     requestContext: RequestHandlerContext,
     timestampField: string,
@@ -324,13 +295,6 @@ export class InfraLogEntriesDomain {
   }
 }
 
-export interface LogItemHit {
-  _index: string;
-  _id: string;
-  fields: { [field: string]: [value: JsonArray] };
-  sort: [number, number];
-}
-
 export interface LogEntriesAdapter {
   getLogEntries(
     requestContext: RequestHandlerContext,
@@ -347,12 +311,6 @@ export interface LogEntriesAdapter {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]>;
-
-  getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    source: InfraSourceConfiguration
-  ): Promise<LogItemHit>;
 }
 
 export type LogEntryQuery = JsonObject;
@@ -361,14 +319,14 @@ export interface LogEntryDocument {
   id: string;
   fields: Fields;
   highlights: Highlights;
-  cursor: LogEntriesCursor;
+  cursor: LogEntryCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: LogEntriesCursor[];
+  topEntryKeys: LogEntryCursor[];
 }
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>

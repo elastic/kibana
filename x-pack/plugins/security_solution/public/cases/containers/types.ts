@@ -10,6 +10,7 @@ import {
   UserAction,
   CaseConnector,
   CommentType,
+  CaseStatuses,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -57,7 +58,7 @@ export interface Case {
   createdBy: ElasticUser;
   description: string;
   externalService: CaseExternalService | null;
-  status: string;
+  status: CaseStatuses;
   tags: string[];
   title: string;
   totalComment: number;
@@ -75,7 +76,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: string;
+  status: CaseStatuses;
   tags: string[];
   reporters: User[];
 }
@@ -83,6 +84,7 @@ export interface FilterOptions {
 export interface CasesStatus {
   countClosedCases: number | null;
   countOpenCases: number | null;
+  countInProgressCases: number | null;
 }
 
 export interface AllCases extends CasesStatus {
@@ -95,6 +97,7 @@ export interface AllCases extends CasesStatus {
 export enum SortFieldCase {
   createdAt = 'createdAt',
   closedAt = 'closedAt',
+  updatedAt = 'updatedAt',
 }
 
 export interface ElasticUser {

@@ -14,9 +14,20 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 
-import { useForm, Form, FormHook, UseField, TextField, CodeEditor } from '../../shared_imports';
+import {
+  useForm,
+  useFormData,
+  Form,
+  FormHook,
+  UseField,
+  TextField,
+  CodeEditor,
+  ValidationFunc,
+  FieldConfig,
+} from '../../shared_imports';
 import { RuntimeField } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
@@ -29,15 +40,82 @@ export interface FormState {
 
 export interface Props {
   links: {
-    painlessSyntax: string;
+    runtimePainless: string;
   };
   defaultValue?: RuntimeField;
   onChange?: (state: FormState) => void;
+  /**
+   * Optional context object
+   */
+  ctx?: {
+    /** An array of field name not allowed */
+    namesNotAllowed?: string[];
+    /**
+     * An array of existing concrete fields. If the user gives a name to the runtime
+     * field that matches one of the concrete fields, a callout will be displayed
+     * to indicate that this runtime field will shadow the concrete field.
+     */
+    existingConcreteFields?: string[];
+  };
 }
 
-const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
+const createNameNotAllowedValidator = (
+  namesNotAllowed: string[]
+): ValidationFunc<{}, string, string> => ({ value }) => {
+  if (namesNotAllowed.includes(value)) {
+    return {
+      message: i18n.translate(
+        'xpack.runtimeFields.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
+        {
+          defaultMessage: 'There is already a field with this name.',
+        }
+      ),
+    };
+  }
+};
+
+/**
+ * Dynamically retrieve the config for the "name" field, adding
+ * a validator to avoid duplicated runtime fields to be created.
+ *
+ * @param namesNotAllowed Array of names not allowed for the field "name"
+ * @param defaultValue Initial value of the form
+ */
+const getNameFieldConfig = (
+  namesNotAllowed?: string[],
+  defaultValue?: Props['defaultValue']
+): FieldConfig<string, RuntimeField> => {
+  const nameFieldConfig = schema.name as FieldConfig<string, RuntimeField>;
+
+  if (!namesNotAllowed) {
+    return nameFieldConfig;
+  }
+
+  // Add validation to not allow duplicates
+  return {
+    ...nameFieldConfig!,
+    validations: [
+      ...(nameFieldConfig.validations ?? []),
+      {
+        validator: createNameNotAllowedValidator(
+          namesNotAllowed.filter((name) => name !== defaultValue?.name)
+        ),
+      },
+    ],
+  };
+};
+
+const RuntimeFieldFormComp = ({
+  defaultValue,
+  onChange,
+  links,
+  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
+}: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
+  const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
+
+  const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
 
   useEffect(() => {
     if (onChange) {
@@ -50,7 +128,19 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
       <EuiFlexGroup>
         {/* Name */}
         <EuiFlexItem>
-          <UseField path="name" component={TextField} data-test-subj="nameField" />
+          <UseField<string, RuntimeField>
+            path="name"
+            config={nameFieldConfig}
+            component={TextField}
+            data-test-subj="nameField"
+            componentProps={{
+              euiFieldProps: {
+                'aria-label': i18n.translate('xpack.runtimeFields.form.nameAriaLabel', {
+                  defaultMessage: 'Name field',
+                }),
+              },
+            }}
+          />
         </EuiFlexItem>
 
         {/* Return type */}
@@ -82,6 +172,9 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
                       }}
                       isClearable={false}
                       data-test-subj="typeField"
+                      aria-label={i18n.translate('xpack.runtimeFields.form.typeSelectAriaLabel', {
+                        defaultMessage: 'Type select',
+                      })}
                       fullWidth
                     />
                   </EuiFormRow>
@@ -92,10 +185,32 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {existingConcreteFields.includes(name) && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
+              defaultMessage: 'Field shadowing',
+            })}
+            color="warning"
+            iconType="pin"
+            size="s"
+            data-test-subj="shadowingFieldCallout"
+          >
+            <div>
+              {i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutDescription', {
+                defaultMessage:
+                  'This field shares the name of a mapped field. Values for this field will be returned in search results.',
+              })}
+            </div>
+          </EuiCallOut>
+        </>
+      )}
+
       <EuiSpacer size="l" />
 
       {/* Script */}
-      <UseField<string> path="script">
+      <UseField<string> path="script.source">
         {({ value, setValue, label, isValid, getErrorsMessages }) => {
           return (
             <EuiFormRow
@@ -106,7 +221,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      href={links.painlessSyntax}
+                      href={links.runtimePainless}
                       target="_blank"
                       external
                       data-test-subj="painlessSyntaxLearnMoreLink"
@@ -137,6 +252,9 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
                   automaticLayout: true,
                 }}
                 data-test-subj="scriptField"
+                aria-label={i18n.translate('xpack.runtimeFields.form.scriptEditorAriaLabel', {
+                  defaultMessage: 'Script editor',
+                })}
               />
             </EuiFormRow>
           );

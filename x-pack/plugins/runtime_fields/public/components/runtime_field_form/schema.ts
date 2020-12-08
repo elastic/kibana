@@ -42,17 +42,10 @@ export const schema: FormSchema<RuntimeField> = {
     serializer: (value: Array<ComboBoxOption<RuntimeType>>) => value[0].value!,
   },
   script: {
-    label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
-      defaultMessage: 'Define field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.runtimeFields.form.validations.scriptIsRequiredErrorMessage', {
-            defaultMessage: 'Script must emit() a value.',
-          })
-        ),
-      },
-    ],
+    source: {
+      label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
+        defaultMessage: 'Define field (optional)',
+      }),
+    },
   },
 };

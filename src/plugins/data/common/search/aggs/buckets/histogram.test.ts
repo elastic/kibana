@@ -72,6 +72,50 @@ describe('Histogram Agg', () => {
     return aggConfigs.aggs[0].toDsl()[BUCKET_TYPES.HISTOGRAM];
   };
 
+  test('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs({
+      intervalBase: 100,
+      field: {
+        name: 'field',
+      },
+    });
+    expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "extended_bounds": Array [
+            "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+          ],
+          "field": Array [
+            "field",
+          ],
+          "has_extended_bounds": Array [
+            false,
+          ],
+          "id": Array [
+            "test",
+          ],
+          "interval": Array [
+            "auto",
+          ],
+          "intervalBase": Array [
+            100,
+          ],
+          "min_doc_count": Array [
+            false,
+          ],
+          "schema": Array [
+            "segment",
+          ],
+        },
+        "function": "aggHistogram",
+        "type": "function",
+      }
+    `);
+  });
+
   describe('ordered', () => {
     let histogramType: BucketAggType<IBucketHistogramAggConfig>;
 

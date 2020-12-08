@@ -9,6 +9,7 @@ import {
   MachineLearningRule,
   machineLearningRule,
   OverrideRule,
+  ThreatIndicatorRule,
   ThresholdRule,
 } from '../objects/rule';
 import {
@@ -26,6 +27,7 @@ import {
   DEFINE_EDIT_TAB,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
+  INDICATOR_MATCH_TYPE,
   INPUT,
   INVESTIGATION_NOTES_TEXTAREA,
   LOOK_BACK_INTERVAL,
@@ -63,11 +65,13 @@ import {
   QUERY_PREVIEW_BUTTON,
   EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
+  COMBO_BOX_CLEAR_BTN,
+  COMBO_BOX_RESULT,
 } from '../screens/create_new_rule';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
+import { NUMBER_OF_ALERTS } from '../screens/alerts';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -75,7 +79,9 @@ export const createAndActivateRule = () => {
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
 };
 
-export const fillAboutRule = (rule: CustomRule | MachineLearningRule | ThresholdRule) => {
+export const fillAboutRule = (
+  rule: CustomRule | MachineLearningRule | ThresholdRule | ThreatIndicatorRule
+) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
 
@@ -121,7 +127,7 @@ export const fillAboutRule = (rule: CustomRule | MachineLearningRule | Threshold
 };
 
 export const fillAboutRuleAndContinue = (
-  rule: CustomRule | MachineLearningRule | ThresholdRule
+  rule: CustomRule | MachineLearningRule | ThresholdRule | ThreatIndicatorRule
 ) => {
   fillAboutRule(rule);
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
@@ -195,7 +201,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timelineId)).click();
+  cy.get(TIMELINE(rule.timelineId!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -213,7 +219,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery!);
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -228,7 +234,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
-  cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
+  cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
   cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
@@ -236,6 +242,22 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
+};
+
+export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
+  const INDEX_PATTERNS = 0;
+  const INDICATOR_INDEX_PATTERN = 2;
+  const INDICATOR_MAPPING = 3;
+  const INDICATOR_INDEX_FIELD = 4;
+
+  cy.get(COMBO_BOX_CLEAR_BTN).click();
+  cy.get(COMBO_BOX_INPUT).eq(INDEX_PATTERNS).type(`${rule.index}{enter}`);
+  cy.get(COMBO_BOX_INPUT).eq(INDICATOR_INDEX_PATTERN).type(`${rule.indicatorIndexPattern}{enter}`);
+  cy.get(COMBO_BOX_INPUT).eq(INDICATOR_MAPPING).type(`${rule.indicatorMapping}{enter}`);
+  cy.get(COMBO_BOX_RESULT).first().click();
+  cy.get(COMBO_BOX_INPUT).eq(INDICATOR_INDEX_FIELD).type(`${rule.indicatorIndexField}{enter}`);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
@@ -265,28 +287,20 @@ export const goToActionsStepTab = () => {
   cy.get(ACTIONS_EDIT_TAB).click({ force: true });
 };
 
+export const selectEqlRuleType = () => {
+  cy.get(EQL_TYPE).click({ force: true });
+};
+
+export const selectIndicatorMatchType = () => {
+  cy.get(INDICATOR_MATCH_TYPE).click({ force: true });
+};
+
 export const selectMachineLearningRuleType = () => {
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
-};
-
-export const waitForAlertsToPopulate = async () => {
-  cy.waitUntil(
-    () => {
-      refreshPage();
-      return cy
-        .get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((countText) => {
-          const alertCount = parseInt(countText, 10) || 0;
-          return alertCount > 0;
-        });
-    },
-    { interval: 500, timeout: 12000 }
-  );
 };
 
 export const waitForTheRuleToBeExecuted = () => {
@@ -299,6 +313,15 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const selectEqlRuleType = () => {
-  cy.get(EQL_TYPE).click({ force: true });
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(() => {
+    refreshPage();
+    return cy
+      .get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .then((countText) => {
+        const alertCount = parseInt(countText, 10) || 0;
+        return alertCount > 0;
+      });
+  });
 };

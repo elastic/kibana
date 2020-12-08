@@ -101,7 +101,7 @@ export interface RegistryPackage extends InstallablePackage {
   path: string;
 }
 
-interface RegistryImage {
+export interface RegistryImage {
   src: string;
   path: string;
   title?: string;

@@ -6,6 +6,7 @@
 import { useStartServices } from '../../../hooks/use_core';
 import { PLUGIN_ID } from '../../../constants';
 import { epmRouteService } from '../../../services';
+import { RegistryImage } from '../../../../../../common';
 
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;
@@ -14,7 +15,12 @@ export function useLinks() {
   const { http } = useStartServices();
   return {
     toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
-    toImage: (path: string) => http.basePath.prepend(epmRouteService.getFilePath(path)),
+    toPackageImage: (img: RegistryImage, pkgName: string, pkgVersion: string): string =>
+      img.src
+        ? http.basePath.prepend(
+            epmRouteService.getFilePath(`/package/${pkgName}/${pkgVersion}${img.src}`)
+          )
+        : http.basePath.prepend(epmRouteService.getFilePath(img.path)),
     toRelativeImage: ({
       path,
       packageName,
