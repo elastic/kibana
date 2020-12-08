@@ -16,6 +16,7 @@ import {
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
+import { getEsPackage } from '../archive/save_to_es';
 import { getArchivePackage } from '../archive';
 
 export { getFile, SearchParams } from '../registry';
@@ -103,13 +104,14 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion,
+    savedObjectsClient,
     pkgInstallSource:
       savedObject?.attributes.version === pkgVersion
         ? savedObject?.attributes.install_source
-        : 'registry',
+        : undefined,
   });
-  const paths = getPackageRes.paths;
-  const packageInfo = getPackageRes.packageInfo;
+  if (!getPackageRes) throw new Error('jlk');
+  const { paths, packageInfo } = getPackageRes;
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
@@ -123,28 +125,41 @@ export async function getPackageInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
+interface PackageResponse {
+  paths: string[];
+  packageInfo: ArchivePackage | RegistryPackage;
+}
+type GetPackageResponse = PackageResponse | undefined;
+
 // gets package from install_source if it exists otherwise gets from registry
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   pkgInstallSource?: InstallSource;
-}): Promise<{
-  paths: string[] | undefined;
-  packageInfo: RegistryPackage | ArchivePackage;
-}> {
-  const { pkgName, pkgVersion, pkgInstallSource } = options;
-  // TODO: Check package storage before checking registry
-  let res;
-  if (pkgInstallSource === 'upload') {
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<PackageResponse> {
+  const { pkgName, pkgVersion, pkgInstallSource, savedObjectsClient } = options;
+  let res: GetPackageResponse;
+  // if the package is installed
+  if (pkgInstallSource) {
+    // check cache
     res = getArchivePackage({
       name: pkgName,
       version: pkgVersion,
     });
+    // check storage
+    if (!res) {
+      res = await getEsPackage(pkgName, pkgVersion, savedObjectsClient);
+    }
+    // for packages not in cache or package storage and installed from registry
+    if (!res && pkgInstallSource === 'registry') {
+      res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+    }
   } else {
+    // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  if (!res.packageInfo || !res.paths)
-    throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,

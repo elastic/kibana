@@ -113,6 +113,7 @@ export async function installIndexPatterns(
       pkgName: pkg.name,
       pkgVersion: pkg.version,
       pkgInstallSource: pkg.installSource,
+      savedObjectsClient,
     })
   );
   const packages = await Promise.all(packagesToFetchPromise);

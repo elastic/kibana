@@ -211,7 +211,7 @@ function parseAndVerifyDataStreams(
 
   return dataStreams;
 }
-function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
   const streams: RegistryStream[] = [];
   const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
@@ -278,7 +278,7 @@ function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVars
   }
   return vars;
 }
-function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+export function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
   if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
