@@ -35,7 +35,7 @@ export const serializeMigrateAndAllocateActions = (
   // First copy over all non-allocate and migrate actions.
   const actions: SerializedActionWithAllocation = { ...otherActions };
 
-  // The UI only knows about include, exclude and require and number_of_replicas so copy over all other values.
+  // The UI only knows about include, exclude, require and number_of_replicas so copy over all other values.
   if (allocate) {
     const { include, exclude, require, number_of_replicas: __, ...otherSettings } = allocate;
     if (!isEmpty(otherSettings)) {
