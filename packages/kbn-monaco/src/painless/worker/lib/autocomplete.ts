@@ -23,7 +23,7 @@ import {
   PainlessCompletionResult,
   PainlessCompletionItem,
   PainlessContext,
-  Field,
+  PainlessAutocompleteField,
 } from '../../types';
 
 import {
@@ -176,7 +176,9 @@ export const getClassMemberSuggestions = (
   };
 };
 
-export const getFieldSuggestions = (fields: Field[]): PainlessCompletionResult => {
+export const getFieldSuggestions = (
+  fields: PainlessAutocompleteField[]
+): PainlessCompletionResult => {
   const suggestions: PainlessCompletionItem[] = fields.map(({ name }) => {
     return {
       label: name,
@@ -220,7 +222,7 @@ export const getConstructorSuggestions = (suggestions: Suggestion[]): PainlessCo
 export const getAutocompleteSuggestions = (
   painlessContext: PainlessContext,
   words: string[],
-  fields?: Field[]
+  fields?: PainlessAutocompleteField[]
 ): PainlessCompletionResult => {
   const suggestions = mapContextToData[painlessContext].suggestions;
   // What the user is currently typing

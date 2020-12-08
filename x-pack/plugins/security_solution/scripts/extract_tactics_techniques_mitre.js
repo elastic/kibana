@@ -10,13 +10,12 @@ const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const fetch = require('node-fetch');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { camelCase } = require('lodash');
+const { camelCase, startCase } = require('lodash');
 const { resolve } = require('path');
 
 const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
-// Revert to https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json once we support sub-techniques
 const MITRE_ENTERPRISE_ATTACK_URL =
-  'https://raw.githubusercontent.com/mitre/cti/ATT%26CK-v6.3/enterprise-attack/enterprise-attack.json';
+  'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
 const getTacticsOptions = (tactics) =>
   tactics.map((t) =>
@@ -49,6 +48,24 @@ const getTechniquesOptions = (techniques) =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
+const getSubtechniquesOptions = (subtechniques) =>
+  subtechniques.map((t) =>
+    `{
+  label: i18n.translate(
+    'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.${camelCase(t.name)}${
+      t.techniqueId // Seperates subtechniques that have the same name but belong to different techniques
+    }Description', {
+      defaultMessage: '${t.name} (${t.id})'
+  }),
+  id: '${t.id}',
+  name: '${t.name}',
+  reference: '${t.reference}',
+  tactics: '${t.tactics.join()}',
+  techniqueId: '${t.techniqueId}',
+  value: '${camelCase(t.name)}'
+}`.replace(/(\r\n|\n|\r)/gm, ' ')
+  );
+
 const getIdReference = (references) =>
   references.reduce(
     (obj, extRef) => {
@@ -62,6 +79,20 @@ const getIdReference = (references) =>
     },
     { id: '', reference: '' }
   );
+
+const buildMockThreatData = (tactics, techniques, subtechniques) => {
+  const subtechnique = subtechniques[0];
+  const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
+  const tactic = tactics.find(
+    (tactic) => tactic.name === startCase(camelCase(technique.tactics[0]))
+  );
+
+  return {
+    tactic,
+    technique,
+    subtechnique,
+  };
+};
 
 async function main() {
   fetch(MITRE_ENTERPRISE_ATTACK_URL)
@@ -83,7 +114,7 @@ async function main() {
           ];
         }, []);
       const techniques = mitreData
-        .filter((obj) => obj.type === 'attack-pattern')
+        .filter((obj) => obj.type === 'attack-pattern' && obj.x_mitre_is_subtechnique === false)
         .reduce((acc, item) => {
           let tactics = [];
           const { id, reference } = getIdReference(item.external_references);
@@ -104,6 +135,30 @@ async function main() {
           ];
         }, []);
 
+      const subtechniques = mitreData
+        .filter((obj) => obj.x_mitre_is_subtechnique === true)
+        .reduce((acc, item) => {
+          let tactics = [];
+          const { id, reference } = getIdReference(item.external_references);
+          if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
+            item.kill_chain_phases.forEach((tactic) => {
+              tactics = [...tactics, tactic.phase_name];
+            });
+          }
+          const techniqueId = id.split('.')[0];
+
+          return [
+            ...acc,
+            {
+              name: item.name,
+              id,
+              reference,
+              tactics,
+              techniqueId,
+            },
+          ];
+        }, []);
+
       const body = `/*
           * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
           * or more contributor license agreements. Licensed under the Elastic License;
@@ -112,7 +167,7 @@ async function main() {
 
           import { i18n } from '@kbn/i18n';
 
-          import { MitreTacticsOptions, MitreTechniquesOptions } from './types';
+          import { MitreTacticsOptions, MitreTechniquesOptions, MitreSubtechniquesOptions } from './types';
 
           export const tactics = ${JSON.stringify(tactics, null, 2)};
 
@@ -127,6 +182,26 @@ async function main() {
             ${JSON.stringify(getTechniquesOptions(techniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
+
+          export const subtechniques = ${JSON.stringify(subtechniques, null, 2)};
+
+          export const subtechniquesOptions: MitreSubtechniquesOptions[] =
+            ${JSON.stringify(getSubtechniquesOptions(subtechniques), null, 2)
+              .replace(/}"/g, '}')
+              .replace(/"{/g, '{')};
+
+          /**
+           * A full object of Mitre Attack Threat data that is taken directly from the \`mitre_tactics_techniques.ts\` file
+           * 
+           * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
+           */
+          export const mockThreatData = ${JSON.stringify(
+            buildMockThreatData(tactics, techniques, subtechniques),
+            null,
+            2
+          )
+            .replace(/}"/g, '}')
+            .replace(/"{/g, '{')};
       `;
 
       fs.writeFileSync(`${OUTPUT_DIRECTORY}/mitre_tactics_techniques.ts`, body, 'utf-8');

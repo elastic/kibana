@@ -18,7 +18,12 @@ import { useFormData, UseField, ToggleField, NumericField } from '../../../../..
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { useConfigurationIssues } from '../../../form';
 
-import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
+import {
+  LearnMoreLink,
+  ActiveBadge,
+  DescribedFormRow,
+  ToggleFieldWithDescribedFormRow,
+} from '../../';
 
 import {
   MinAgeInputField,
@@ -115,7 +120,7 @@ export const ColdPhase: FunctionComponent = () => {
               {
                 /* Replicas section */
                 showReplicasField && (
-                  <DescribedFormField
+                  <DescribedFormRow
                     title={
                       <h3>
                         {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
@@ -153,13 +158,13 @@ export const ColdPhase: FunctionComponent = () => {
                         },
                       }}
                     />
-                  </DescribedFormField>
+                  </DescribedFormRow>
                 )
               }
 
               {/* Freeze section */}
               {!isUsingSearchableSnapshotInHotPhase && (
-                <EuiDescribedFormGroup
+                <ToggleFieldWithDescribedFormRow
                   title={
                     <h3>
                       <FormattedMessage
@@ -179,17 +184,13 @@ export const ColdPhase: FunctionComponent = () => {
                   }
                   fullWidth
                   titleSize="xs"
+                  switchProps={{
+                    'data-test-subj': 'freezeSwitch',
+                    path: '_meta.cold.freezeEnabled',
+                  }}
                 >
-                  <UseField
-                    path="_meta.cold.freezeEnabled"
-                    component={ToggleField}
-                    componentProps={{
-                      euiFieldProps: {
-                        'data-test-subj': 'freezeSwitch',
-                      },
-                    }}
-                  />
-                </EuiDescribedFormGroup>
+                  <div />
+                </ToggleFieldWithDescribedFormRow>
               )}
               {/* Data tier allocation section */}
               <DataTierAllocationField
