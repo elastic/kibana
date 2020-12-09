@@ -26,7 +26,7 @@ describe('AvailableSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<AvailableSourcesList sources={mergedAvailableSources} />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(12);
+    expect(wrapper.find(EuiCard)).toHaveLength(11);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="CustomAPISourceLink"]')).toHaveLength(1);
   });
@@ -35,7 +35,7 @@ describe('AvailableSourcesList', () => {
     setMockValues({ hasPlatinumLicense: false });
     const wrapper = shallow(<AvailableSourcesList sources={mergedAvailableSources} />);
 
-    expect(wrapper.find(EuiToolTip)).toHaveLength(2);
+    expect(wrapper.find(EuiToolTip)).toHaveLength(1);
   });
 
   it('handles empty state', () => {
