@@ -79,7 +79,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   const boom = Boom.isBoom(error) ? error : Boom.boomify(error, { statusCode: error.statusCode });
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 }

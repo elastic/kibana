@@ -86,7 +86,7 @@ export class LegacyElasticsearchErrorHelpers {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
     const wwwAuthHeader = get(error, 'body.error.header[WWW-Authenticate]') as string;
 
-    decoratedError.output.headers['WWW-Authenticate'] =
+    (decoratedError.output.headers as { [key: string]: string })['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
 
     return decoratedError;
