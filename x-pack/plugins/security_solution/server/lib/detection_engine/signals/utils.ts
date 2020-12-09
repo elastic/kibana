@@ -6,6 +6,7 @@
 import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import { isEmpty, partition } from 'lodash/fp';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
@@ -706,6 +707,73 @@ export const checkMappingForTimestampFields = async (
   }
 };
 
+export const getIndexesMatchingIndexPatterns = (
+  indices: string[],
+  services: AlertServices,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+): Promise<Record<string, string[]>> => {
+  try {
+    const res = indices.reduce(async (acc, indexPattern) => {
+      const totalIndices: Array<Record<'index', string>> = await services.callCluster(
+        'cat.indices',
+        {
+          index: indexPattern,
+          format: 'json',
+        }
+      );
+      return { [indexPattern]: totalIndices.map((item) => item.index), ...(await acc) };
+    }, {} as Promise<Record<string, string[]>>);
+    return res;
+  } catch (exc) {
+    logger.error(
+      buildRuleMessage(`[-] failed to cat indices: ${JSON.stringify(indices, null, 2)}`)
+    );
+    logger.error(buildRuleMessage(`Exception: ${exc}`));
+    return Promise.resolve({});
+  }
+};
+
+export const findIndicesWithTimestampAndWithout = (
+  indexPatternRegEx: Record<string, RegExp>,
+  indexPatternIndices: Record<string, string[]>,
+  timestampsAndIndices: TimestampsAndIndices,
+  timestamp: string,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+) => {
+  let failingIndexes: string[] = [];
+  let successIndexes: string[] = [];
+  for (const indexPattern of Object.keys(indexPatternRegEx)) {
+    const matchingIndexes = timestampsAndIndices[timestamp].filter((index) =>
+      indexPatternRegEx[indexPattern].test(index)
+    );
+    const [indexesWithTimestampField, indexesMissingTimestampField] = partition(
+      (index) => matchingIndexes.some((idx) => idx === index),
+      indexPatternIndices[indexPattern]
+    );
+
+    if (indexesMissingTimestampField.length > 0) {
+      logger.error(
+        buildRuleMessage(
+          `The following indices ${JSON.stringify(
+            indexesMissingTimestampField,
+            null,
+            2
+          )} matching matching index pattern ${JSON.stringify(
+            indexPattern,
+            null,
+            2
+          )} are missing required field ${timestamp}.`
+        )
+      );
+      failingIndexes = [...failingIndexes, ...indexesMissingTimestampField];
+    }
+    successIndexes = [...successIndexes, ...indexesWithTimestampField];
+  }
+  return [successIndexes, failingIndexes];
+};
+
 export interface PreCheckRuleResultInterface {
   result: 'success' | 'partial failure' | 'error';
   failingIndexes: string[];
@@ -737,13 +805,19 @@ export const preExecutionRuleCheck = async (
     buildRuleMessage
   );
 
-  const indexPatternIndices = await indices.reduce(async (acc, index) => {
-    const totalIndices: Array<Record<'index', string>> = await services.callCluster('cat.indices', {
-      index,
-      format: 'json',
-    });
-    return { [index]: totalIndices.map((item) => item.index), ...(await acc) };
-  }, {} as Promise<Record<string, string[]>>);
+  // get all indices which match the given index pattern
+  // we will use this for determining which indices within
+  // a given index pattern are missing timestamp field(s)
+  const indexPatternIndices = await getIndexesMatchingIndexPatterns(
+    indices,
+    services,
+    logger,
+    buildRuleMessage
+  );
+
+  if (isEmpty(indexPatternIndices)) {
+    throw Error(`No indices found given index patterns: ${JSON.stringify(indices, null, 2)}`);
+  }
 
   const timestampKeys = Object.keys(timestampsAndIndices);
 
@@ -762,9 +836,7 @@ export const preExecutionRuleCheck = async (
         logger.error(
           buildRuleMessage(
             `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-              indices,
-              null,
-              2
+              indices
             )}`
           )
         );
@@ -773,9 +845,7 @@ export const preExecutionRuleCheck = async (
           resultMessages: [
             ...acc.resultMessages,
             `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-              indices,
-              null,
-              2
+              indices
             )}`,
           ],
           failingIndexes: [...acc.failingIndexes, ...indices],
@@ -783,53 +853,33 @@ export const preExecutionRuleCheck = async (
           timestampsAndIndices,
         };
       }
-      // find all indexes that match given pattern, make sure the length of all indexes that match pattern in timestampsAndIndices[timestamp] is equal to the indexPatternsCount[regExp]
-      let failingIndexes: string[] = [];
-      let successIndexes: string[] = [];
-      for (const indexPattern of Object.keys(indexPatternRegEx)) {
-        const matchingIndexes = timestampsAndIndices[timestamp].filter((index) =>
-          indexPatternRegEx[indexPattern].test(index)
-        );
-        const indexesMissingTimestampField = indexPatternIndices[indexPattern].filter(
-          (index) => !matchingIndexes.some((idx) => idx === index)
-        );
-        const indexesWithTimestampField = indexPatternIndices[indexPattern].filter((index) =>
-          matchingIndexes.some((idx) => idx === index)
-        );
-        if (indexesMissingTimestampField.length > 0) {
-          logger.error(
-            buildRuleMessage(
-              `The following indices ${JSON.stringify(
-                indexesMissingTimestampField,
-                null,
-                2
-              )} matching matching index pattern ${JSON.stringify(
-                indexPattern,
-                null,
-                2
-              )} are missing required field ${timestamp}.`
-            )
-          );
-          failingIndexes = [...failingIndexes, ...indexesMissingTimestampField];
-        }
-        successIndexes = [...successIndexes, ...indexesWithTimestampField];
-      }
-      // find the full name indices which match one of the index patterns
-      // we are logging the index patterns that do not have the timestamp we are about to sort on
-      // so filtering those index patterns out so that we do not have to do weird things with the
-      // errors that we get back.
+
+      // find all indexes that match given pattern
+      // make sure the length of all indexes that
+      // match pattern in timestampsAndIndices[timestamp] is equal to
+      const [successIndexes, failingIndexes] = findIndicesWithTimestampAndWithout(
+        indexPatternRegEx,
+        indexPatternIndices,
+        timestampsAndIndices,
+        timestamp,
+        logger,
+        buildRuleMessage
+      );
+
+      const resultMessages =
+        failingIndexes.length > 0
+          ? [
+              ...acc.resultMessages,
+              `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
+                failingIndexes
+              )}`,
+            ]
+          : [...acc.resultMessages];
 
       return {
         result:
           acc.result !== 'success' || failingIndexes.length > 0 ? 'partial failure' : acc.result,
-        resultMessages: [
-          ...acc.resultMessages,
-          `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-            failingIndexes,
-            null,
-            2
-          )}`,
-        ],
+        resultMessages,
         failingIndexes: [...acc.failingIndexes, ...failingIndexes],
         successIndexes: [...acc.successIndexes, ...successIndexes],
         timestampsAndIndices,

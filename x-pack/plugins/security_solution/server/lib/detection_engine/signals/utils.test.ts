@@ -36,6 +36,9 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  preExecutionRuleCheck,
+  checkMappingForTimestampFields,
+  getIndexesMatchingIndexPatterns,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1301,6 +1304,157 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('checkMappingForTimestampFields', () => {
+    let alertServices: AlertServicesMock;
+
+    beforeEach(() => {
+      alertServices = alertsMock.createAlertServices();
+    });
+    test('it should return the right object', async () => {
+      alertServices.callCluster.mockImplementation(async () => ({
+        'auditbeat-7.8.0-2020.10.22-000002': {
+          mappings: {
+            '@timestamp': {
+              full_name: '@timestamp',
+              mapping: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
+          },
+        },
+      }));
+      const res = await checkMappingForTimestampFields(
+        ['auditbeat-*'],
+        ['@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toEqual({
+        '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'],
+      });
+    });
+  });
+
+  describe('getIndexesMatchingIndexPatterns', () => {
+    let alertServices: AlertServicesMock;
+
+    beforeEach(() => {
+      alertServices = alertsMock.createAlertServices();
+    });
+    test('it should return the right object', async () => {
+      alertServices.callCluster.mockImplementation(async () => [
+        {
+          index: 'auditbeat-7.8.0-2020.10.22-000002',
+        },
+      ]);
+      const res = await getIndexesMatchingIndexPatterns(
+        ['auditbeat-*'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toEqual({
+        'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'],
+      });
+    });
+  });
+
+  describe('preExecutionRuleCheck', () => {
+    let alertServices: AlertServicesMock;
+
+    beforeEach(() => {
+      alertServices = alertsMock.createAlertServices();
+    });
+    test('it should return success when indexes in index pattern contain timestamp field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                '@timestamp': {
+                  full_name: '@timestamp',
+                  mapping: {
+                    '@timestamp': {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else if (endpoint === 'cat.indices') {
+          return [
+            {
+              index: 'auditbeat-7.8.0-2020.10.22-000002',
+            },
+          ];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*'],
+        ['@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toEqual({
+        result: 'success',
+        resultMessages: [],
+        failingIndexes: [],
+        successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
+        timestampsAndIndices: { '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'] },
+      });
+    });
+    test('it should return success and failures when some indexes in index pattern contain timestamp field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                '@timestamp': {
+                  full_name: '@timestamp',
+                  mapping: {
+                    '@timestamp': {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else if (endpoint === 'cat.indices') {
+          return [
+            {
+              index: 'auditbeat-7.8.0-2020.10.22-000002',
+            },
+            {
+              index: 'auditbeat-7.9.0-2020.11.22-999999',
+            },
+          ];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*'],
+        ['@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toMatchObject({
+        result: 'partial failure',
+        resultMessages: [
+          'The field @timestamp was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"]',
+        ],
+        failingIndexes: ['auditbeat-7.9.0-2020.11.22-999999'],
+        successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
+        timestampsAndIndices: { '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'] },
+      });
     });
   });
 });
