@@ -30,14 +30,10 @@ const ReadMore = styled(EuiButtonEmpty)`
 
 const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) => {
   const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
-  const [readMoreButtonText, setReadMoreButtonText] = useState<string>(i18n.READ_MORE);
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
   const toggleReadMore = useCallback(() => {
     setIsExpanded((prevState) => !prevState);
-    setReadMoreButtonText((prevState) =>
-      prevState === i18n.READ_MORE ? i18n.READ_LESS : i18n.READ_MORE
-    );
   }, []);
 
   useEffect(() => {
@@ -55,6 +51,7 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
         setIsOverflow(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, descriptionRef?.current?.clientHeight]);
 
   return content != null ? (
@@ -66,7 +63,7 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
       )}
       {isOverflow && (
         <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
-          {readMoreButtonText}
+          {isExpanded ? i18n.READ_LESS : i18n.READ_MORE}
         </ReadMore>
       )}
     </>

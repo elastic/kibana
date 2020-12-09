@@ -5,7 +5,7 @@
  */
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { isString, isEmpty } from 'lodash/fp';
+import { isString, isEmpty, getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -195,4 +195,13 @@ export const renderUrl = ({
   ) : (
     getEmptyTagValue()
   );
+};
+
+export const getSingalStatusBadge = (status: string | number | null | undefined) => {
+  const mapping = {
+    open: 'primary',
+    'in progress': 'warnging',
+  };
+
+  return status ? getOr('default', status, mapping) : 'default';
 };

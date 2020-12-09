@@ -13,7 +13,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { find } from 'lodash/fp';
+import { findIndex, pick } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -23,11 +23,11 @@ import {
   OnEventDetailsClose,
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { useTimelineEventsDetails } from '../../containers/details';
 import { TimelineId } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
-import { timelineActions } from '../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { timelineDefaults } from '../../store/timeline/defaults';
 
 interface EventDetailsProps {
   browserFields: BrowserFields;
@@ -43,9 +43,9 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   onEventDetailsClose,
 }) => {
   const dispatch = useDispatch();
-
-  const { expandedEvent, isSaving } = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { expandedEvent, isSaving } = useDeepEqualSelector((state) =>
+    pick(['expandedEvent', 'isSaving'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
 
   const [loading, detailsData] = useTimelineEventsDetails({
@@ -57,13 +57,7 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
 
   const isAlert = useMemo(() => {
     if (detailsData) {
-      const signalField = find({ category: 'signal', field: 'signal.rule.id' }, detailsData) as
-        | TimelineEventsDetailsItem
-        | undefined;
-
-      if (signalField?.originalValue) {
-        return true;
-      }
+      return findIndex({ category: 'signal', field: 'signal.rule.id' }, detailsData) >= 0;
     }
     return false;
   }, [detailsData]);
@@ -72,14 +66,14 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
-        event: null,
+        event: {},
       })
     );
 
     if (timelineId === TimelineId.active) {
       activeTimeline.toggleExpandedEvent({
         eventId: expandedEvent.eventId,
-        indexName: '',
+        indexName: expandedEvent.indexName,
         loading: false,
       });
     }
@@ -87,7 +81,7 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
     if (onEventDetailsClose) {
       onEventDetailsClose();
     }
-  }, [dispatch, timelineId, expandedEvent.eventId, onEventDetailsClose]);
+  }, [dispatch, timelineId, expandedEvent.indexName, expandedEvent.eventId, onEventDetailsClose]);
 
   useEffect(() => {
     if (isSaving) {
@@ -100,7 +94,6 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
-        timelineId={timelineId}
         onEventDetailsClose={handleOnEventClosed}
       />
       <EuiSpacer size="m" />

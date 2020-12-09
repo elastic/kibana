@@ -183,7 +183,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       ...state.timelineById,
       [timelineId]: {
         ...state.timelineById[timelineId],
-        expandedEvent: event ?? {},
+        expandedEvent: event,
       },
     },
   }))

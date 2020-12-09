@@ -9,7 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
-import { find } from 'lodash/fp';
+import { findIndex } from 'lodash/fp';
 
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
@@ -19,7 +19,6 @@ import {
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
@@ -52,13 +51,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
 
   const isAlert = useMemo(() => {
     if (detailsData) {
-      const signalField = find({ category: 'signal', field: 'signal.rule.id' }, detailsData) as
-        | TimelineEventsDetailsItem
-        | undefined;
-
-      if (signalField?.originalValue) {
-        return true;
-      }
+      return findIndex({ category: 'signal', field: 'signal.rule.id' }, detailsData) >= 0;
     }
     return false;
   }, [detailsData]);
@@ -79,7 +72,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle isAlert={isAlert} loading={loading} timelineId={timelineId} />
+        <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ExpandableEvent

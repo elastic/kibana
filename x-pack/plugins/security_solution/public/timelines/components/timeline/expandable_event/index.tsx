@@ -45,7 +45,6 @@ interface Props {
 interface ExpandableEventTitleProps {
   isAlert: boolean;
   loading: boolean;
-  timelineId: string;
   onEventDetailsClose?: OnEventDetailsClose;
 }
 
@@ -54,22 +53,20 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ExpandableEventTitle = React.memo(
-  ({ isAlert, loading, timelineId, onEventDetailsClose }: ExpandableEventTitleProps) => {
-    return (
-      <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+  ({ isAlert, loading, onEventDetailsClose }: ExpandableEventTitleProps) => (
+    <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
+        </EuiTitle>
+      </EuiFlexItem>
+      {onEventDetailsClose && (
         <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
-          </EuiTitle>
+          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={onEventDetailsClose} />
         </EuiFlexItem>
-        {onEventDetailsClose && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={onEventDetailsClose} />
-          </EuiFlexItem>
-        )}
-      </StyledEuiFlexGroup>
-    );
-  }
+      )}
+    </StyledEuiFlexGroup>
+  )
 );
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';

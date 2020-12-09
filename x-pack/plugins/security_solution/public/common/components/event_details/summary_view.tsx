@@ -6,7 +6,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiBadge,
   EuiDescriptionList,
   EuiSpacer,
   EuiDescriptionListTitle,
@@ -64,20 +63,6 @@ const getDescription = ({
   fieldType?: string;
   linkValue?: string;
 }) => {
-  if (fieldName === 'signal.status') {
-    return (
-      <EuiBadge>
-        <FormattedFieldValue
-          contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-          eventId={eventId}
-          fieldName={fieldName}
-          fieldType={fieldType}
-          value={value}
-        />
-      </EuiBadge>
-    );
-  }
-
   return (
     <FormattedFieldValue
       contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -90,6 +75,49 @@ const getDescription = ({
   );
 };
 
+const getSummary = ({
+  data,
+  browserFields,
+  timelineId,
+  eventId,
+}: {
+  data: TimelineEventsDetailsItem[];
+  browserFields: BrowserFields;
+  timelineId: string;
+  eventId: string;
+}) => {
+  return data != null
+    ? fields.reduce<Summary>((acc, item) => {
+        const field = data.find((d) => d.field === item.id);
+        if (!field) {
+          return acc;
+        }
+        const linkValueField =
+          item.linkField != null && data.find((d) => d.field === item.linkField);
+        const linkValue = getOr(null, 'originalValue', linkValueField);
+        const value = getOr(null, 'originalValue', field);
+        const category = field.category;
+        const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
+        const description = getDescription({
+          contextId: timelineId,
+          eventId,
+          fieldName: item.id,
+          value,
+          fieldType: item.fieldType ?? fieldType,
+          linkValue: linkValue ?? undefined,
+        });
+
+        return [
+          ...acc,
+          {
+            title: item.label ?? item.id,
+            description,
+          },
+        ];
+      }, [])
+    : [];
+};
+
 export const SummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
@@ -98,41 +126,22 @@ export const SummaryViewComponent: React.FC<{
 }> = ({ data, eventId, timelineId, browserFields }) => {
   const [investigationGuide, setInvestigationGuide] = useState<string | null>(null);
 
-  const ruleIdField = useMemo(() => data.find((d) => d.field === 'signal.rule.id'), [data]);
-  const ruleId = getOr(null, 'originalValue', ruleIdField);
+  const ruleId = useMemo(
+    () =>
+      getOr(
+        null,
+        'originalValue',
+        data.find((d) => d.field === 'signal.rule.id')
+      ),
+    [data]
+  );
   const { rule: maybeRule } = useRuleAsync(ruleId);
-  const summaryList = useMemo(() => {
-    return data != null
-      ? fields.reduce<Summary>((acc, item) => {
-          const field = data.find((d) => d.field === item.id);
-          if (!field) {
-            return acc;
-          }
-          const linkValueField =
-            item.linkField != null && data.find((d) => d.field === item.linkField);
-          const linkValue = getOr(null, 'originalValue', linkValueField);
-          const value = getOr(null, 'originalValue', field);
-          const category = field.category;
-          const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
-          const description = getDescription({
-            contextId: timelineId,
-            eventId,
-            fieldName: item.id,
-            value,
-            fieldType: item.fieldType ?? fieldType,
-            linkValue: linkValue ?? undefined,
-          });
-
-          return [
-            ...acc,
-            {
-              title: item.label ?? item.id,
-              description,
-            },
-          ];
-        }, [])
-      : [];
-  }, [browserFields, data, eventId, timelineId]);
+  const summaryList = useMemo(() => getSummary({ browserFields, data, eventId, timelineId }), [
+    browserFields,
+    data,
+    eventId,
+    timelineId,
+  ]);
 
   useEffect(() => {
     if (maybeRule != null && maybeRule.note != null) {
@@ -142,7 +151,6 @@ export const SummaryViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiDescriptionList
         data-test-subj="summary-view"
         type="responsiveColumn"
