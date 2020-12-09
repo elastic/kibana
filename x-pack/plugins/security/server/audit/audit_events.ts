@@ -9,7 +9,7 @@ import { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
  * Audit event schema using ECS format.
- * https://www.elastic.co/guide/en/ecs/1.5/index.html
+ * https://www.elastic.co/guide/en/ecs/1.6/index.html
  * @public
  */
 export interface AuditEvent {

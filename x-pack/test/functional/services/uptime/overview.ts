@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async expandMonitorDetail(id: string): Promise<void> {
@@ -24,15 +25,20 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
      * Otherwise, open the popover, then click the nested button.
      */
     async navigateToNestedPopover(): Promise<void> {
-      if (testSubjects.exists('xpack.uptime.openAlertContextPanel')) {
+      if (await testSubjects.exists('xpack.uptime.openAlertContextPanel')) {
         return testSubjects.click('xpack.uptime.openAlertContextPanel');
       }
       await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
       return testSubjects.click('xpack.uptime.openAlertContextPanel');
     },
 
-    async displaysDefineConnector() {
-      return await testSubjects.existOrFail('uptimeSettingsDefineConnector');
+    async clickDefineSettings() {
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('errorToastMessage', { timeout: 0 })) {
+          await testSubjects.click('toastCloseButton');
+        }
+        await testSubjects.click('uptimeSettingsLink');
+      });
     },
   };
 }

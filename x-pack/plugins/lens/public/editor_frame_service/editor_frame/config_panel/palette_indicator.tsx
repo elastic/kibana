@@ -5,23 +5,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiColorPaletteDisplay } from '@elastic/eui';
 import { AccessorConfig } from '../../../types';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
   if (accessorConfig.triggerIcon !== 'colorBy' || !accessorConfig.palette) return null;
   return (
-    <EuiFlexGroup className="lnsLayerPanel__paletteContainer" gutterSize="none" alignItems="center">
-      {accessorConfig.palette.map((color) => (
-        <EuiFlexItem
-          key={color}
-          className="lnsLayerPanel__paletteColor"
-          grow={true}
-          style={{
-            backgroundColor: color,
-          }}
-        />
-      ))}
-    </EuiFlexGroup>
+    <div className="lnsLayerPanel__paletteContainer">
+      <EuiColorPaletteDisplay
+        className="lnsLayerPanel__palette"
+        size="xs"
+        palette={accessorConfig.palette}
+      />
+    </div>
   );
 }
