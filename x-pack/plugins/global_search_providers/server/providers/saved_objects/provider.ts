@@ -10,12 +10,6 @@ import { SavedObjectsFindOptionsReference, ISavedObjectTypeRegistry } from 'src/
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
 
-const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) =>
-  typeRegistry
-    .getVisibleTypes()
-    .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
-    .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
-
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
     id: 'savedObjects',
@@ -62,6 +56,12 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
     },
   };
 };
+
+const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) =>
+  typeRegistry
+    .getVisibleTypes()
+    .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
+    .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
 
 const uniq = <T>(values: T[]): T[] => [...new Set(values)];
 
