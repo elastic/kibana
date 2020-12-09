@@ -105,7 +105,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Custom detection rules creation', async () => {
+describe('Custom detection rules creation', () => {
   const expectedUrls = newRule.referenceUrls.join('');
   const expectedFalsePositives = newRule.falsePositivesExamples.join('');
   const expectedTags = newRule.tags.join('');

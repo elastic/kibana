@@ -87,7 +87,7 @@ describe('Detection rules, threshold', () => {
 
   const rule = { ...newThresholdRule };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });

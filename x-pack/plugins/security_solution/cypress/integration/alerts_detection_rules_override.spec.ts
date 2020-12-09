@@ -91,7 +91,7 @@ describe('Detection rules, override', () => {
 
   const rule = { ...newOverrideRule };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     createTimeline(newOverrideRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
