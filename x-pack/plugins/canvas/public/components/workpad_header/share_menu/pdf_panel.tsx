@@ -5,7 +5,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 import { LayoutType } from './utils';
 
@@ -33,17 +42,21 @@ export const PDFPanel = ({ getPdfURL, onExport, onCopy }: Props) => {
         <p>{strings.getPDFPanelGenerateDescription()}</p>
       </EuiText>
       <EuiSpacer size="s" />
-
-      <EuiSwitch
-        label="Full page layout"
-        checked={reportLayout === 'canvas'}
-        onChange={() =>
-          reportLayout === 'canvas' ? setReportLayout('preserve_layout') : setReportLayout('canvas')
-        }
-      />
-
-      <EuiSpacer size="m" />
-
+      <EuiTitle size="xxs">
+        <h6>{strings.getPDFPanelOptionsLabel()}</h6>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFormRow helpText={strings.getPDFFullPageLayoutHelpText()}>
+        <EuiSwitch
+          label={strings.getPDFFullPageLayoutLabel()}
+          checked={reportLayout === 'canvas'}
+          onChange={() =>
+            reportLayout === 'canvas'
+              ? setReportLayout('preserve_layout')
+              : setReportLayout('canvas')
+          }
+        />
+      </EuiFormRow>
       <EuiButton
         fill
         onClick={() => onExport(reportLayout)}
@@ -53,21 +66,27 @@ export const PDFPanel = ({ getPdfURL, onExport, onCopy }: Props) => {
       >
         {strings.getPDFPanelGenerateButtonLabel()}
       </EuiButton>
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <p>{strings.getPDFPanelCopyDescription()}</p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <Clipboard content={getPdfURL(reportLayout)} onCopy={onCopy}>
-        <EuiButton
-          iconType="copy"
-          size="s"
-          style={{ width: '100%' }}
-          aria-label={strings.getPDFPanelCopyAriaLabel()}
-        >
-          {strings.getPDFPanelCopyButtonLabel()}
-        </EuiButton>
-      </Clipboard>
+      <EuiHorizontalRule
+        margin="s"
+        style={{ width: 'auto', marginLeft: '-16px', marginRight: '-16px' }}
+      />
+      <EuiAccordion id="advanced-options" buttonContent="Advanced options" paddingSize="none">
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <p>{strings.getPDFPanelCopyDescription()}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <Clipboard content={getPdfURL(reportLayout)} onCopy={onCopy}>
+          <EuiButton
+            iconType="copy"
+            size="s"
+            style={{ width: '100%' }}
+            aria-label={strings.getPDFPanelCopyAriaLabel()}
+          >
+            {strings.getPDFPanelCopyButtonLabel()}
+          </EuiButton>
+        </Clipboard>
+      </EuiAccordion>
     </div>
   );
 };

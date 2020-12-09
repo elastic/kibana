@@ -1420,6 +1420,14 @@ export const ComponentStrings = {
           workpadName,
         },
       }),
+    getPDFFullPageLayoutHelpText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutHelpText', {
+        defaultMessage: 'Remove borders and footer logot',
+      }),
+    getPDFFullPageLayoutLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutLabel', {
+        defaultMessage: 'Full page layout',
+      }),
     getPDFPanelCopyAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyAriaLabel', {
         defaultMessage:
@@ -1461,6 +1469,10 @@ export const ComponentStrings = {
         values: {
           PDF,
         },
+      }),
+    getPDFPanelOptionsLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelOptionsLabel', {
+        defaultMessage: 'Options',
       }),
     getShareableZipErrorTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
