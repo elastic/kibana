@@ -41,17 +41,20 @@ export function getThroughputTimeseries({
   theme: EuiTheme;
   throuputChart: ThrouputChartsResponse;
 }) {
-  const bucketKeys = throuputChart.throughput.map(({ key }) => key);
+  const { throughputTimeseries } = throuputChart;
+  const bucketKeys = throughputTimeseries.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys, theme);
 
-  const { throughput } = throuputChart;
-  if (!throughput.length) {
-    const start = throughput[0].dataPoints[0].x;
-    const end = throughput[0].dataPoints[throughput[0].dataPoints.length - 1].x;
+  if (!throughputTimeseries.length) {
+    const start = throughputTimeseries[0].dataPoints[0].x;
+    const end =
+      throughputTimeseries[0].dataPoints[
+        throughputTimeseries[0].dataPoints.length - 1
+      ].x;
     return getEmptySeries(start, end);
   }
 
-  return throughput.map((bucket) => {
+  return throughputTimeseries.map((bucket) => {
     return {
       title: bucket.key,
       data: bucket.dataPoints,

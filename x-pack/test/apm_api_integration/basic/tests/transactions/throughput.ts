@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        expect(response.body.throughput.length).to.be(0);
+        expect(response.body.throughputTimeseries.length).to.be(0);
       });
     });
 
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns throughput timeseries', async () => {
         expect(response.status).to.be(200);
 
-        expect(response.body.throughput.length).to.be.greaterThan(0);
+        expect(response.body.throughputTimeseries.length).to.be.greaterThan(0);
       });
     });
   });
