@@ -17932,7 +17932,6 @@
     "xpack.securitySolution.resolver.eventDescription.networkEventLabel": "{ networkDirection } { forwardedIP }",
     "xpack.securitySolution.resolver.eventDescription.registryKeyLabel": "{ registryKey }",
     "xpack.securitySolution.resolver.eventDescription.registryPathLabel": "{ registryPath }",
-    "xpack.securitySolution.resolver.node_icon": "{running, select, true {正在运行的进程} false {已终止的进程}}",
     "xpack.securitySolution.resolver.panel.copyToClipboard": "复制到剪贴板",
     "xpack.securitySolution.resolver.panel.eventDetail.requestError": "无法检索事件详情",
     "xpack.securitySolution.resolver.panel.nodeList.title": "所有进程事件",
