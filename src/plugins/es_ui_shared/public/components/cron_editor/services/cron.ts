@@ -17,15 +17,10 @@
  * under the License.
  */
 
-export const MINUTE = 'MINUTE';
-export const HOUR = 'HOUR';
-export const DAY = 'DAY';
-export const WEEK = 'WEEK';
-export const MONTH = 'MONTH';
-export const YEAR = 'YEAR';
+import { FieldToValueMap } from '../types';
 
-export function cronExpressionToParts(expression) {
-  const parsedCron = {
+export function cronExpressionToParts(expression: string): FieldToValueMap {
+  const parsedCron: FieldToValueMap = {
     second: undefined,
     minute: undefined,
     hour: undefined,
@@ -63,6 +58,13 @@ export function cronExpressionToParts(expression) {
   return parsedCron;
 }
 
-export function cronPartsToExpression({ second, minute, hour, day, date, month }) {
+export function cronPartsToExpression({
+  second,
+  minute,
+  hour,
+  day,
+  date,
+  month,
+}: FieldToValueMap): string {
   return `${second} ${minute} ${hour} ${date} ${month} ${day}`;
 }

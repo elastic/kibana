@@ -18,13 +18,17 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+interface Props {
+  minute?: string;
+  minuteOptions: EuiSelectOption[];
+  onChange: ({ minute }: { minute?: string }) => void;
+}
 
-export const CronHourly = ({ minute, minuteOptions, onChange }) => (
+export const CronHourly: React.FunctionComponent<Props> = ({ minute, minuteOptions, onChange }) => (
   <Fragment>
     <EuiFormRow
       label={
@@ -46,9 +50,3 @@ export const CronHourly = ({ minute, minuteOptions, onChange }) => (
     </EuiFormRow>
   </Fragment>
 );
-
-CronHourly.propTypes = {
-  minute: PropTypes.string.isRequired,
-  minuteOptions: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
-};

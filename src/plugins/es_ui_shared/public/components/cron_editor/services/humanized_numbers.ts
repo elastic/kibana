@@ -19,6 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+export type DayOrdinal = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type MonthOrdinal = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
 // The international ISO standard dictates Monday as the first day of the week, but cron patterns
 // use Sunday as the first day, so we're going with the cron way.
 const dayOrdinalToDayNameMap = {
@@ -46,7 +49,7 @@ const monthOrdinalToMonthNameMap = {
   11: i18n.translate('esUi.cronEditor.month.december', { defaultMessage: 'December' }),
 };
 
-export function getOrdinalValue(number) {
+export function getOrdinalValue(number: number): string {
   // TODO: This is breaking reporting pdf generation. Possibly due to phantom not setting locale,
   // which is needed by i18n (formatjs). Need to verify, fix, and restore i18n in place of static stings.
   // return i18n.translate('esUi.cronEditor.number.ordinal', {
@@ -57,15 +60,16 @@ export function getOrdinalValue(number) {
 
   // Protects against falsey (including 0) values
   const num = number && number.toString();
-  let lastDigit = num && num.substr(-1);
+  const lastDigitString = num && num.substr(-1);
   let ordinal;
 
-  if (!lastDigit) {
-    return number;
+  if (!lastDigitString) {
+    return number.toString();
   }
-  lastDigit = parseFloat(lastDigit);
 
-  switch (lastDigit) {
+  const lastDigitNumeric = parseFloat(lastDigitString);
+
+  switch (lastDigitNumeric) {
     case 1:
       ordinal = 'st';
       break;
@@ -82,10 +86,10 @@ export function getOrdinalValue(number) {
   return `${num}${ordinal}`;
 }
 
-export function getDayName(dayOrdinal) {
+export function getDayName(dayOrdinal: DayOrdinal): string {
   return dayOrdinalToDayNameMap[dayOrdinal];
 }
 
-export function getMonthName(monthOrdinal) {
+export function getMonthName(monthOrdinal: MonthOrdinal): string {
   return monthOrdinalToMonthNameMap[monthOrdinal];
 }
