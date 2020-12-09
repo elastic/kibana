@@ -53,7 +53,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     [layer, columnId, currentIndexPattern]
   );
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
     return null;

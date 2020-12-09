@@ -18,7 +18,6 @@
  */
 
 import { PainlessCompletionItem } from '../../types';
-import { lexerRules } from '../../lexer_rules';
 
 import {
   getStaticSuggestions,
@@ -26,17 +25,11 @@ import {
   getClassMemberSuggestions,
   getPrimitives,
   getConstructorSuggestions,
+  getKeywords,
   Suggestion,
 } from './autocomplete';
 
-const keywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
-  return {
-    label: keyword,
-    kind: 'keyword',
-    documentation: 'Keyword: char',
-    insertText: keyword,
-  };
-});
+const keywords: PainlessCompletionItem[] = getKeywords();
 
 const testSuggestions: Suggestion[] = [
   {
@@ -101,7 +94,7 @@ const testSuggestions: Suggestion[] = [
 describe('Autocomplete lib', () => {
   describe('Static suggestions', () => {
     test('returns static suggestions', () => {
-      expect(getStaticSuggestions(testSuggestions, false)).toEqual({
+      expect(getStaticSuggestions({ suggestions: testSuggestions })).toEqual({
         isIncomplete: false,
         suggestions: [
           {
@@ -134,11 +127,25 @@ describe('Autocomplete lib', () => {
     });
 
     test('returns doc keyword when fields exist', () => {
-      const autocompletion = getStaticSuggestions(testSuggestions, true);
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        hasFields: true,
+      });
       const docSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'doc'
       );
       expect(Boolean(docSuggestion)).toBe(true);
+    });
+
+    test('returns emit keyword for runtime fields', () => {
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        isRuntimeContext: true,
+      });
+      const emitSuggestion = autocompletion.suggestions.find(
+        (suggestion) => suggestion.label === 'emit'
+      );
+      expect(Boolean(emitSuggestion)).toBe(true);
     });
   });
 

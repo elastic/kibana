@@ -29,27 +29,24 @@ import {
   editAction,
 } from './actions';
 
+interface Options {
+  client: Client;
+  dataDir: string;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}
+
 export class EsArchiver {
   private readonly client: Client;
   private readonly dataDir: string;
   private readonly log: ToolingLog;
   private readonly kbnClient: KbnClient;
 
-  constructor({
-    client,
-    dataDir,
-    log,
-    kibanaUrl,
-  }: {
-    client: Client;
-    dataDir: string;
-    log: ToolingLog;
-    kibanaUrl: string;
-  }) {
-    this.client = client;
-    this.dataDir = dataDir;
-    this.log = log;
-    this.kbnClient = new KbnClient({ log, url: kibanaUrl });
+  constructor(options: Options) {
+    this.client = options.client;
+    this.dataDir = options.dataDir;
+    this.log = options.log;
+    this.kbnClient = options.kbnClient;
   }
 
   /**

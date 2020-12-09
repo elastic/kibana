@@ -37,7 +37,6 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
-import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -62,15 +61,9 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    http,
-    notifications: { toasts },
     application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
-    uiSettings,
-    docLinks,
-    charts,
-    data,
     setBreadcrumbs,
     chrome,
   } = useKibana().services;
@@ -153,30 +146,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         />
                       </EuiButtonEmpty>
                       {editFlyoutVisible && (
-                        <AlertsContextProvider
-                          value={{
-                            http,
-                            actionTypeRegistry,
-                            alertTypeRegistry,
-                            toastNotifications: toasts,
-                            uiSettings,
-                            docLinks,
-                            charts,
-                            dataFieldsFormats: data.fieldFormats,
-                            reloadAlerts: setAlert,
-                            capabilities,
-                            dataUi: data.ui,
-                            dataIndexPatterns: data.indexPatterns,
+                        <AlertEdit
+                          initialAlert={alert}
+                          onClose={() => {
+                            setInitialAlert(alert);
+                            setEditFlyoutVisibility(false);
                           }}
-                        >
-                          <AlertEdit
-                            initialAlert={alert}
-                            onClose={() => {
-                              setInitialAlert(alert);
-                              setEditFlyoutVisibility(false);
-                            }}
-                          />
-                        </AlertsContextProvider>
+                          actionTypeRegistry={actionTypeRegistry}
+                          alertTypeRegistry={alertTypeRegistry}
+                          reloadAlerts={setAlert}
+                        />
                       )}
                     </Fragment>
                   </EuiFlexItem>

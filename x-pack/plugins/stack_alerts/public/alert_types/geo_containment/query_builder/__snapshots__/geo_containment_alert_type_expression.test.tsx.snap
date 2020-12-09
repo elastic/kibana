@@ -16,12 +16,22 @@ exports[`should render BoundaryIndexExpression 1`] = `
         labelType="label"
       >
         <GeoIndexPatternSelect
-          IndexPatternSelectComponent={null}
-          http={null}
+          IndexPatternSelectComponent={[MockFunction]}
           includedGeoTypes={
             Array [
               "geo_shape",
             ]
+          }
+          indexPatternService={
+            Object {
+              "clearCache": [MockFunction],
+              "createField": [MockFunction],
+              "createFieldList": [MockFunction],
+              "ensureDefaultIndexPattern": [MockFunction],
+              "find": [MockFunction],
+              "get": [MockFunction],
+              "make": [Function],
+            }
           }
           onChange={[Function]}
         />
@@ -82,12 +92,22 @@ exports[`should render EntityIndexExpression 1`] = `
         labelType="label"
       >
         <GeoIndexPatternSelect
-          IndexPatternSelectComponent={null}
-          http={null}
+          IndexPatternSelectComponent={[MockFunction]}
           includedGeoTypes={
             Array [
               "geo_point",
             ]
+          }
+          indexPatternService={
+            Object {
+              "clearCache": [MockFunction],
+              "createField": [MockFunction],
+              "createFieldList": [MockFunction],
+              "ensureDefaultIndexPattern": [MockFunction],
+              "find": [MockFunction],
+              "get": [MockFunction],
+              "make": [Function],
+            }
           }
           onChange={[Function]}
         />
@@ -154,12 +174,22 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
         labelType="label"
       >
         <GeoIndexPatternSelect
-          IndexPatternSelectComponent={null}
-          http={null}
+          IndexPatternSelectComponent={[MockFunction]}
           includedGeoTypes={
             Array [
               "geo_point",
             ]
+          }
+          indexPatternService={
+            Object {
+              "clearCache": [MockFunction],
+              "createField": [MockFunction],
+              "createFieldList": [MockFunction],
+              "ensureDefaultIndexPattern": [MockFunction],
+              "find": [MockFunction],
+              "get": [MockFunction],
+              "make": [Function],
+            }
           }
           onChange={[Function]}
         />

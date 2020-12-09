@@ -51,7 +51,7 @@ describe('EventColumnView', () => {
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
-    timelineId: 'timeline-1',
+    timelineId: 'timeline-test',
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,

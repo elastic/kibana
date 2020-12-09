@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
@@ -52,6 +53,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -67,11 +69,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = machineLearningRule.referenceUrls.join('');
 const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
 const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = machineLearningRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
 const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
 
 describe('Detection rules, machine learning', () => {
@@ -82,6 +80,7 @@ describe('Detection rules, machine learning', () => {
   after(() => {
     deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new ml rule', () => {

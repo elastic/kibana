@@ -44,6 +44,7 @@ export const ViewContentHeader: React.FC<ViewContentHeaderProps> = ({
       <EuiFlexGroup alignItems={alignItems} justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size={titleSize}>{titleElement}</EuiTitle>
+          <EuiSpacer size="s" />
           {description && (
             <EuiText grow={false} color="subdued">
               <p>{description}</p>

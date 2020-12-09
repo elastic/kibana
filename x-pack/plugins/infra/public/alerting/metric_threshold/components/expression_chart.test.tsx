@@ -5,11 +5,9 @@
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { AlertContextMeta, MetricExpression } from '../types';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
+import { MetricExpression } from '../types';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import React from 'react';
@@ -17,38 +15,30 @@ import { ExpressionChart } from './expression_chart';
 import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Aggregators, Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerResponse } from '../../../../common/http_api';
+
+const mockStartServices = mockCoreMock.createStart();
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: {
+      ...mockStartServices,
+    },
+  }),
+}));
+
+const mockResponse = {
+  pageInfo: {
+    afterKey: null,
+    total: 0,
+  },
+  series: [{ id: 'Everything', rows: [], columns: [] }],
+};
+
+jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
+  useMetricsExplorerChartData: () => ({ loading: false, data: mockResponse }),
+}));
 
 describe('ExpressionChart', () => {
-  async function setup(
-    expression: MetricExpression,
-    response: MetricsExplorerResponse | null,
-    filterQuery?: string,
-    groupBy?: string
-  ) {
-    const mocks = coreMock.createSetup();
-    const startMocks = coreMock.createStart();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-
-    const context: AlertsContextValue<AlertContextMeta> = {
-      http: mocks.http,
-      toastNotifications: mocks.notifications.toasts,
-      actionTypeRegistry: actionTypeRegistryMock.create() as any,
-      alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: startMocks.docLinks,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-    };
+  async function setup(expression: MetricExpression, filterQuery?: string, groupBy?: string) {
     const derivedIndexPattern: IIndexPattern = {
       title: 'metricbeat-*',
       fields: [],
@@ -76,11 +66,8 @@ describe('ExpressionChart', () => {
       },
     };
 
-    mocks.http.fetch.mockImplementation(() => Promise.resolve(response));
-
     const wrapper = mountWithIntl(
       <ExpressionChart
-        context={context}
         expression={expression}
         derivedIndexPattern={derivedIndexPattern}
         source={source}
@@ -97,7 +84,7 @@ describe('ExpressionChart', () => {
 
     await update();
 
-    return { wrapper, update, fetchMock: mocks.http.fetch };
+    return { wrapper, update };
   }
 
   it('should display no data message', async () => {
@@ -109,14 +96,7 @@ describe('ExpressionChart', () => {
       threshold: [1],
       comparator: Comparator.GT_OR_EQ,
     };
-    const response = {
-      pageInfo: {
-        afterKey: null,
-        total: 0,
-      },
-      series: [{ id: 'Everything', rows: [], columns: [] }],
-    };
-    const { wrapper } = await setup(expression, response);
+    const { wrapper } = await setup(expression);
     expect(wrapper.find('[data-test-subj~="noChartData"]').exists()).toBeTruthy();
   });
 });

@@ -20,23 +20,17 @@ import {
 
 import { Phases } from '../../../../../../../common/types';
 
-import {
-  useFormData,
-  UseField,
-  SelectField,
-  ToggleField,
-  NumericField,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
-import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
+import { LearnMoreLink, ActiveBadge, ToggleFieldWithDescribedFormRow } from '../../';
 
 import {
   ForcemergeField,
@@ -56,8 +50,6 @@ export const HotPhase: FunctionComponent = () => {
   });
   const isRolloverEnabled = get(formData, useRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
-
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
     <>
@@ -95,7 +87,7 @@ export const HotPhase: FunctionComponent = () => {
         })}
         paddingSize="m"
       >
-        <DescribedFormField
+        <ToggleFieldWithDescribedFormRow
           title={
             <h3>
               {i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
@@ -123,19 +115,12 @@ export const HotPhase: FunctionComponent = () => {
               </p>
             </EuiTextColor>
           }
+          switchProps={{
+            path: '_meta.hot.useRollover',
+            'data-test-subj': 'rolloverSwitch',
+          }}
           fullWidth
         >
-          <UseField<boolean>
-            key="_meta.hot.useRollover"
-            path="_meta.hot.useRollover"
-            component={ToggleField}
-            componentProps={{
-              fullWidth: false,
-              euiFieldProps: {
-                'data-test-subj': 'rolloverSwitch',
-              },
-            }}
-          />
           {isRolloverEnabled && (
             <>
               <EuiSpacer size="m" />
@@ -156,7 +141,7 @@ export const HotPhase: FunctionComponent = () => {
                   <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
                     {(field) => {
                       const showErrorCallout = field.errors.some(
-                        (e) => e.validationType === ROLLOVER_EMPTY_VALIDATION
+                        (e) => e.code === ROLLOVER_EMPTY_VALIDATION
                       );
                       if (showErrorCallout !== showEmptyRolloverFieldsError) {
                         setShowEmptyRolloverFieldsError(showErrorCallout);
@@ -246,10 +231,12 @@ export const HotPhase: FunctionComponent = () => {
               </EuiFlexGroup>
             </>
           )}
-        </DescribedFormField>
-        {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-        {isRolloverEnabled && !isUsingSearchableSnapshotInHotPhase && (
-          <ForcemergeField phase="hot" />
+        </ToggleFieldWithDescribedFormRow>
+        {isRolloverEnabled && (
+          <>
+            {<ForcemergeField phase="hot" />}
+            {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+          </>
         )}
         <SetPriorityInputField phase={hotProperty} />
       </EuiAccordion>

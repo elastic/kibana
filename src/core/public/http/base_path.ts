@@ -22,7 +22,8 @@ import { modifyUrl } from '@kbn/std';
 export class BasePath {
   constructor(
     private readonly basePath: string = '',
-    public readonly serverBasePath: string = basePath
+    public readonly serverBasePath: string = basePath,
+    public readonly publicBaseUrl?: string
   ) {}
 
   public get = () => {

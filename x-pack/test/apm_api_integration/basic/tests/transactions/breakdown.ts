@@ -72,24 +72,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2020-09-29T14:30:00.000Z",
-              "y": 1,
-            },
-            Object {
-              "x": "2020-09-29T14:30:30.000Z",
-              "y": 1,
-            },
-            Object {
-              "x": "2020-09-29T14:31:00.000Z",
-              "y": 1,
-            },
-            Object {
-              "x": "2020-09-29T14:31:30.000Z",
+              "x": "2020-12-08T13:57:30.000Z",
               "y": null,
             },
             Object {
-              "x": "2020-09-29T14:32:00.000Z",
+              "x": "2020-12-08T13:58:00.000Z",
+              "y": null,
+            },
+            Object {
+              "x": "2020-12-08T13:58:30.000Z",
               "y": 1,
+            },
+            Object {
+              "x": "2020-12-08T13:59:00.000Z",
+              "y": 1,
+            },
+            Object {
+              "x": "2020-12-08T13:59:30.000Z",
+              "y": null,
             },
           ]
         `);
@@ -114,6 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "app",
             "http",
             "postgresql",
+            "redis",
           ]
         `);
       });

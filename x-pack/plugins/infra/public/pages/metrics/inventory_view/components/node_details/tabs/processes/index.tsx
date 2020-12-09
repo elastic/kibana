@@ -5,16 +5,28 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton, Query } from '@elastic/eui';
-import { useProcessList } from '../../../../hooks/use_process_list';
+import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import {
+  useProcessList,
+  SortBy,
+  ProcessListContextProvider,
+} from '../../../../hooks/use_process_list';
 import { TabContent, TabProps } from '../shared';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
 import { ProcessesTable } from './processes_table';
+import { parseSearchString } from './parse_search_string';
 
 const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
-  const [searchFilter, setSearchFilter] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
+  const [searchFilter, setSearchFilter] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortBy>({
+    name: 'cpu',
+    isAscending: false,
+  });
+
+  const timefield = options.fields!.timestamp;
 
   const hostTerm = useMemo(() => {
     const field =
@@ -26,69 +38,80 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
 
   const { loading, error, response, makeRequest: reload } = useProcessList(
     hostTerm,
-    'metricbeat-*',
-    options.fields!.timestamp,
-    currentTime
+    timefield,
+    currentTime,
+    sortBy,
+    parseSearchString(searchFilter)
   );
 
-  if (error) {
-    return (
-      <TabContent>
-        <EuiEmptyPrompt
-          iconType="tableDensityNormal"
-          title={
-            <h4>
-              {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
-                defaultMessage: 'Unable to show process data',
-              })}
-            </h4>
-          }
-          actions={
-            <EuiButton color="primary" fill onClick={reload}>
-              {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
-                defaultMessage: 'Try again',
-              })}
-            </EuiButton>
-          }
-        />
-      </TabContent>
-    );
-  }
+  const debouncedSearchOnChange = useMemo(
+    () =>
+      debounce<(props: { queryText: string }) => void>(
+        ({ queryText }) => setSearchFilter(queryText),
+        500
+      ),
+    [setSearchFilter]
+  );
 
   return (
     <TabContent>
-      <SummaryTable isLoading={loading} processList={response ?? []} />
-      <EuiSpacer size="m" />
-      <EuiSearchBar
-        query={searchFilter}
-        onChange={({ query }) => setSearchFilter(query ?? EuiSearchBar.Query.MATCH_ALL)}
-        box={{
-          incremental: true,
-          placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
-            defaultMessage: 'Search for processes…',
-          }),
-        }}
-        filters={[
-          {
-            type: 'field_value_selection',
-            field: 'state',
-            name: 'State',
-            operator: 'exact',
-            multiSelect: false,
-            options: Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
-              value,
-              view,
-            })),
-          },
-        ]}
-      />
-      <EuiSpacer size="m" />
-      <ProcessesTable
-        currentTime={currentTime}
-        isLoading={loading || !response}
-        processList={response ?? []}
-        searchFilter={searchFilter}
-      />
+      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime} timefield={timefield}>
+        <SummaryTable
+          isLoading={loading}
+          processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
+        />
+        <EuiSpacer size="m" />
+        <EuiSearchBar
+          onChange={debouncedSearchOnChange}
+          box={{
+            incremental: true,
+            placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+              defaultMessage: 'Search for processes…',
+            }),
+          }}
+          filters={[
+            {
+              type: 'field_value_selection',
+              field: 'state',
+              name: 'State',
+              operator: 'exact',
+              multiSelect: false,
+              options: Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
+                value,
+                view,
+              })),
+            },
+          ]}
+        />
+        <EuiSpacer size="m" />
+        {!error ? (
+          <ProcessesTable
+            currentTime={currentTime}
+            isLoading={loading || !response}
+            processList={response?.processList ?? []}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
+        ) : (
+          <EuiEmptyPrompt
+            iconType="tableDensityNormal"
+            title={
+              <h4>
+                {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
+                  defaultMessage: 'Unable to show process data',
+                })}
+              </h4>
+            }
+            actions={
+              <EuiButton color="primary" fill onClick={reload}>
+                {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
+                  defaultMessage: 'Try again',
+                })}
+              </EuiButton>
+            }
+          />
+        )}
+      </ProcessListContextProvider>
     </TabContent>
   );
 };

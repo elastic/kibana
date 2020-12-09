@@ -453,6 +453,7 @@ type DllFields = Partial<{
 export type AlertEvent = Partial<{
   event: Partial<{
     action: ECSField<string>;
+    code: ECSField<string>;
     dataset: ECSField<string>;
     module: ECSField<string>;
   }>;

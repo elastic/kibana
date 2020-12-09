@@ -492,6 +492,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1000}
     noItemsFragment={
       <div>
