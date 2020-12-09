@@ -374,6 +374,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        geoall_data_writer: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['create', 'read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         global_devtools_read: {
           kibana: [
             {
