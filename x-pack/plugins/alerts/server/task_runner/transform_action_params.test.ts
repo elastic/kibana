@@ -335,6 +335,7 @@ test('alertActionGroupName is passed to templates', () => {
     alertActionGroup: 'action-group',
     alertActionGroupName: 'Action Group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -445,6 +446,7 @@ test('injects viewInKibanaPath when actionTypeId is .email', () => {
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
     alertParams: {},
     actionTypeId: '.email',
   });
