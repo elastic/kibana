@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 import {
   mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin,
   firstRelatedEventID,
@@ -12,9 +12,10 @@ import {
 } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -55,7 +56,11 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
-  const tree = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
+  const {
+    tree,
+    relatedEvents,
+    nodeDataResponse,
+  } = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     originID: metadata.entityIDs.origin,
     firstChildID: metadata.entityIDs.firstChild,
     secondChildID: metadata.entityIDs.secondChild,
@@ -67,11 +72,19 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
       /**
        * Fetch related events for an entity ID
        */
-      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents({
+        entityID,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
-        const events = entityID === metadata.entityIDs.origin ? tree.relatedEvents.events : [];
+        const events = entityID === metadata.entityIDs.origin ? relatedEvents.events : [];
 
         return {
           entityID,
@@ -87,11 +100,19 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
        * return the first event, calling with the cursor set to the id of the first event
        * will return the second.
        */
-      async eventsWithEntityIDAndCategory(
-        entityID: string,
-        category: string,
-        after?: string
-      ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
+      async eventsWithEntityIDAndCategory({
+        entityID,
+        category,
+        after,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         /**
          * For testing: This 'fakes' the behavior of one related event being `after`
          * a cursor for an earlier event.
@@ -109,7 +130,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
 
         const events =
           entityID === metadata.entityIDs.origin
-            ? tree.relatedEvents.events.filter(
+            ? relatedEvents.events.filter(
                 (event) =>
                   eventModel.eventCategory(event).includes(category) && splitOnCursor(event)
               )
@@ -123,17 +144,62 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
       /**
        * Any of the origin's related events by event.id
        */
-      async event(eventID: string): Promise<SafeResolverEvent | null> {
-        return (
-          tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
-        );
+      async event({
+        nodeID,
+        eventID,
+        eventCategory,
+        eventTimestamp,
+        winlogRecordID,
+        timeRange,
+        indexPatterns,
+      }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
+        eventID?: string | number;
+        winlogRecordID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
+        return relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
+      },
+
+      /**
+       * Returns a static array of events. Ignores request parameters.
+       */
+      async nodeData({
+        ids,
+        timeRange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timeRange: TimeRange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return nodeDataResponse;
       },
 
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
-        return tree;
+      async resolverTree({
+        dataId,
+        schema,
+        timeRange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: ResolverSchema;
+        timeRange: TimeRange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
+        return tree.nodes;
       },
 
       /**
