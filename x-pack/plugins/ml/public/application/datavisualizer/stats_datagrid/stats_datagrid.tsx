@@ -22,12 +22,12 @@ import { FieldTypeIcon } from '../../components/field_type_icon';
 import { FieldVisConfig } from '../index_based/common';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { DataVisualizerFieldExpandedRow } from './expanded_row';
-import { DocumentStat } from './components/field_data_column/document_stats';
-import { DistinctValues } from './components/field_data_column/distinct_values';
-import { NumberContentPreview } from './components/field_data_column/number_content_preview';
+import { DocumentStat } from './components/field_data_column_header/document_stats';
+import { DistinctValues } from './components/field_data_column_header/distinct_values';
+import { NumberContentPreview } from './components/field_data_row/number_content_preview';
 import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { TopValuesPreview } from './components/field_data_column/top_values_preview';
+import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 
 const FIELD_NAME = 'fieldName';
 
