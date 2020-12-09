@@ -96,7 +96,7 @@ export const EditPackagePolicyForm = memo<{
         const { data: packagePolicyData } = await sendGetOnePackagePolicy(packagePolicyId);
 
         if (!packagePolicyData?.item.policy_id) {
-          throw new Error(`Agent Policy ID missing in package policy ${packagePolicyId}`);
+          throw new window.Error(`Agent Policy ID missing in package policy ${packagePolicyId}`);
         }
 
         const { data: agentPolicyData } = await sendGetOneAgentPolicy(
