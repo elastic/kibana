@@ -386,3 +386,61 @@ export const SOURCE_FEATURES_INCLUDED_FEATURES_TITLE = i18n.translate(
     defaultMessage: 'Included features',
   }
 );
+
+export const CONNECT_REMOTE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.remote.text',
+  {
+    defaultMessage: 'Remote',
+  }
+);
+
+export const CONNECT_PRIVATE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.private.text',
+  {
+    defaultMessage: 'Private',
+  }
+);
+
+export const CONNECT_WHICH_OPTION_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.whichOption.link',
+  {
+    defaultMessage: 'Which option should I choose?',
+  }
+);
+
+export const CONNECT_DOC_PERMISSIONS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.permissions.label',
+  {
+    defaultMessage: 'Enable document-level permission synchronization',
+  }
+);
+
+export const CONNECT_DOC_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.permissions.title',
+  {
+    defaultMessage: 'Document-level permissions',
+  }
+);
+
+export const CONNECT_NEEDS_PERMISSIONS = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.needsPermissions.text',
+  {
+    defaultMessage:
+      'Document-level permission information will be synchronized. Additional configuration is required following the initial connection before documents are available for search.',
+  }
+);
+
+export const CONNECT_NOT_SYNCED_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.notSynced.title',
+  {
+    defaultMessage: 'Document-level permissions will not be synchronized',
+  }
+);
+
+export const CONNECT_NOT_SYNCED_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.notSynced.text',
+  {
+    defaultMessage:
+      'All documents accessible to the connecting service user will be synchronized and made available to the organization’s users, or group’s users. Documents are immediately available for search. ',
+  }
+);
