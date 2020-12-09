@@ -267,3 +267,45 @@ export const DOCUMENTATION_LINK_TITLE = i18n.translate(
     defaultMessage: 'Documentation',
   }
 );
+
+export const PUBLIC_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.publicKey.label',
+  {
+    defaultMessage: 'Public Key',
+  }
+);
+
+export const CONSUMER_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.consumerKey.label',
+  {
+    defaultMessage: 'Consumer Key',
+  }
+);
+
+export const BASE_URI_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.baseUri.label',
+  {
+    defaultMessage: 'Base URI',
+  }
+);
+
+export const BASE_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.baseUrl.label',
+  {
+    defaultMessage: 'Base URL',
+  }
+);
+
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.clientId.label',
+  {
+    defaultMessage: 'Client id',
+  }
+);
+
+export const CLIENT_SECRET_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.clientSecret.label',
+  {
+    defaultMessage: 'Client secret',
+  }
+);

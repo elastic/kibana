@@ -20,6 +20,15 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 
+import {
+  PUBLIC_KEY_LABEL,
+  CONSUMER_KEY_LABEL,
+  BASE_URI_LABEL,
+  BASE_URL_LABEL,
+  CLIENT_ID_LABEL,
+  CLIENT_SECRET_LABEL,
+} from '../../../../constants';
+
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
 import { ApiKey } from '../../../../components/shared/api_key';
@@ -112,10 +121,10 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
       <EuiSpacer />
       <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ApiKey label="Public Key" apiKey={publicKey} />
+          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ApiKey label="Consumer Key" apiKey={consumerKey} />
+          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -133,7 +142,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const publicKeyStep2 = (
     <>
-      <EuiFormRow label="Base URI">
+      <EuiFormRow label={BASE_URI_LABEL}>
         <EuiFieldText
           value={baseUrlValue}
           required
@@ -152,7 +161,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
         <EuiForm>
-          <EuiFormRow label="Client id">
+          <EuiFormRow label={CLIENT_ID_LABEL}>
             <EuiFieldText
               value={clientIdValue}
               required
@@ -162,7 +171,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
               name="client-id"
             />
           </EuiFormRow>
-          <EuiFormRow label="Client secret">
+          <EuiFormRow label={CLIENT_SECRET_LABEL}>
             <EuiFieldText
               value={clientSecretValue}
               required
@@ -173,7 +182,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
             />
           </EuiFormRow>
           {needsBaseUrl && (
-            <EuiFormRow label={baseUrlTitle || 'Base URL'}>
+            <EuiFormRow label={baseUrlTitle || BASE_URL_LABEL}>
               <EuiFieldText
                 value={baseUrlValue}
                 required
