@@ -38,33 +38,29 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       const decodedPagination = pagination
         ? JSON.parse(decodeURIComponent(pagination))
         : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
-      const [
-        indexStatus,
-        { summaries, nextPagePagination, prevPagePagination },
-      ] = await Promise.all([
-        libs.requests.getIndexStatus({ uptimeEsClient }),
-        libs.requests.getMonitorStates({
-          uptimeEsClient,
-          dateRangeStart,
-          dateRangeEnd,
-          pagination: decodedPagination,
-          pageSize,
-          filters,
-          // this is added to make typescript happy,
-          // this sort of reassignment used to be further downstream but I've moved it here
-          // because this code is going to be decomissioned soon
-          statusFilter: statusFilter || undefined,
-        }),
-      ]);
 
-      const totalSummaryCount = indexStatus?.docCount ?? 0;
+      const {
+        summaries,
+        nextPagePagination,
+        prevPagePagination,
+      } = await libs.requests.getMonitorStates({
+        uptimeEsClient,
+        dateRangeStart,
+        dateRangeEnd,
+        pagination: decodedPagination,
+        pageSize,
+        filters,
+        // this is added to make typescript happy,
+        // this sort of reassignment used to be further downstream but I've moved it here
+        // because this code is going to be decomissioned soon
+        statusFilter: statusFilter || undefined,
+      });
 
       return response.ok({
         body: {
           summaries,
           nextPagePagination,
           prevPagePagination,
-          totalSummaryCount,
         },
       });
     } catch (e) {

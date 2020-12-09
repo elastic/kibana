@@ -630,7 +630,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in create by value mode', async () => {
+      it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServices();
         services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
