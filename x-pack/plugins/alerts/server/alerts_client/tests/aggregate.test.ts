@@ -15,6 +15,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
+import { RegistryAlertType } from '../../alert_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -49,7 +50,7 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('aggregate()', () => {
-  const listedTypes = new Set([
+  const listedTypes = new Set<RegistryAlertType>([
     {
       actionGroups: [],
       actionVariables: undefined,
@@ -59,6 +60,7 @@ describe('aggregate()', () => {
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
+      enabledInLicense: true,
     },
   ]);
   beforeEach(() => {
@@ -111,6 +113,7 @@ describe('aggregate()', () => {
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ])
     );

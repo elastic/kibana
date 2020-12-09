@@ -25,6 +25,7 @@ export enum AlertExecutionStatusErrorReasons {
   Decrypt = 'decrypt',
   Execute = 'execute',
   Unknown = 'unknown',
+  License = 'license',
 }
 
 export interface AlertExecutionStatus {

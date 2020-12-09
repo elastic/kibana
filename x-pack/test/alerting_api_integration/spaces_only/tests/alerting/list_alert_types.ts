@@ -41,6 +41,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         },
         producer: 'alertsFixture',
         minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });

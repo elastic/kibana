@@ -17,6 +17,7 @@ import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertType } from '../alert_type_registry';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -533,7 +534,7 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -542,8 +543,9 @@ describe('AlertsAuthorization', () => {
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -552,8 +554,9 @@ describe('AlertsAuthorization', () => {
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
-    const mySecondAppAlertType = {
+    const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -562,6 +565,7 @@ describe('AlertsAuthorization', () => {
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
@@ -829,7 +833,7 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('filterByAlertTypeAuthorization', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -838,8 +842,9 @@ describe('AlertsAuthorization', () => {
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -848,6 +853,7 @@ describe('AlertsAuthorization', () => {
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
@@ -890,6 +896,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
@@ -921,6 +928,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
@@ -992,6 +1000,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
@@ -1019,6 +1028,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
@@ -1085,6 +1095,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
@@ -1180,6 +1191,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
@@ -1207,6 +1219,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
@@ -1286,6 +1299,7 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
                   "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",

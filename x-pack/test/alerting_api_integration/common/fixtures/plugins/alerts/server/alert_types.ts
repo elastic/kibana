@@ -410,6 +410,15 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     async executor() {},
   };
+  const goldNoopAlertType: AlertType = {
+    id: 'test.gold.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'gold',
+    async executor() {},
+  };
   const onlyContextVariablesAlertType: AlertType = {
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
@@ -479,4 +488,5 @@ export function defineAlertTypes(
   alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
   alerts.registerType(longRunningAlertType);
+  alerts.registerType(goldNoopAlertType);
 }

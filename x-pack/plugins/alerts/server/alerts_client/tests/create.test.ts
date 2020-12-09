@@ -1194,4 +1194,14 @@ describe('create()', () => {
       }
     );
   });
+
+  test('throws error when ensureActionTypeEnabled throws', async () => {
+    const data = getMockData();
+    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail"`
+    );
+  });
 });

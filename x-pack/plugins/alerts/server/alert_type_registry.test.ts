@@ -5,17 +5,27 @@
  */
 
 import { TaskRunnerFactory } from './task_runner';
-import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertTypeRegistry, ConstructorOptions } from './alert_type_registry';
 import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
+import { ILicenseState } from './lib/license_state';
+import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '../../licensing/server/mocks';
+let mockedLicenseState: jest.Mocked<ILicenseState>;
+let alertTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
-const alertTypeRegistryParams = {
-  taskManager,
-  taskRunnerFactory: new TaskRunnerFactory(),
-};
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockedLicenseState = licenseStateMock.create();
+  alertTypeRegistryParams = {
+    taskManager,
+    taskRunnerFactory: new TaskRunnerFactory(),
+    licenseState: mockedLicenseState,
+    licensing: licensingMock.createSetup(),
+  };
+});
 
 describe('has()', () => {
   test('returns false for unregistered alert types', () => {
@@ -379,6 +389,7 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
+          "enabledInLicense": false,
           "id": "test",
           "minimumLicenseRequired": "basic",
           "name": "Test",
@@ -424,6 +435,43 @@ describe('list()', () => {
     expect(context).toBeTruthy();
     expect(context!.length).toBe(1);
     expect(context![0]).toEqual({ name: 'c', description: 'x context' });
+  });
+});
+
+describe('ensureAlertTypeEnabled', () => {
+  let alertTypeRegistry: AlertTypeRegistry;
+
+  beforeEach(() => {
+    alertTypeRegistry = new AlertTypeRegistry(alertTypeRegistryParams);
+    alertTypeRegistry.register({
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    });
+  });
+
+  test('should call ensureLicenseForAlertType on the license state', async () => {
+    alertTypeRegistry.ensureAlertTypeEnabled('test');
+    expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalled();
+  });
+
+  test('should throw when ensureLicenseForAlertType throws', async () => {
+    mockedLicenseState.ensureLicenseForAlertType.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    expect(() =>
+      alertTypeRegistry.ensureAlertTypeEnabled('test')
+    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });
 
