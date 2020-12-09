@@ -531,6 +531,7 @@ export class EndpointDocGenerator {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
+        code: 'malicious_file',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -1337,6 +1338,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',

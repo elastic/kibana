@@ -121,6 +121,37 @@ describe('when on integration detail', () => {
     });
   });
 
+  describe('and the Add integration button is clicked', () => {
+    beforeEach(() => render());
+
+    it('should link to the create page', () => {
+      const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
+      expect(addButton.href).toEqual(
+        'http://localhost/mock/app/fleet#/integrations/nginx-0.3.7/add-integration'
+      );
+    });
+
+    it('should link to create page with route state for return trip', () => {
+      const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
+      act(() => addButton.click());
+      expect(testRenderer.history.location.state).toEqual({
+        onCancelNavigateTo: [
+          'fleet',
+          {
+            path: '#/integrations/detail/nginx-0.3.7',
+          },
+        ],
+        onCancelUrl: '#/integrations/detail/nginx-0.3.7',
+        onSaveNavigateTo: [
+          'fleet',
+          {
+            path: '#/integrations/detail/nginx-0.3.7',
+          },
+        ],
+      });
+    });
+  });
+
   describe('and on the Policies Tab', () => {
     const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
     beforeEach(() => {

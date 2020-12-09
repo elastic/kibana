@@ -7,15 +7,15 @@
 import React, { FC, useEffect, useState } from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import cytoscape from 'cytoscape';
-import { uniqWith, isEqual } from 'lodash';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
-import { ml } from '../../../services/ml_api_service';
-import { useMlKibana } from '../../../contexts/kibana';
-import { useRefDimensions } from './components/use_ref_dimensions';
+import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useRefDimensions } from './components/use_ref_dimensions';
+import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
+import { JobMapTitle } from './job_map_title';
 
 const cytoscapeDivStyle = {
   background: `linear-gradient(
@@ -37,103 +37,83 @@ ${theme.euiColorLightShade}`,
   marginTop: 0,
 };
 
-export const JobMapTitle: React.FC<{ analyticsId?: string; modelId?: string }> = ({
-  analyticsId,
-  modelId,
-}) => (
-  <EuiTitle size="xs">
-    <span>
-      {analyticsId
-        ? i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
-            defaultMessage: 'Map for analytics ID {analyticsId}',
-            values: { analyticsId },
-          })
-        : i18n.translate('xpack.ml.dataframe.analyticsMap.modelIdTitle', {
-            defaultMessage: 'Map for trained model ID {modelId}',
-            values: { modelId },
-          })}
-    </span>
-  </EuiTitle>
-);
-
-interface GetDataObjectParameter {
-  id: string;
-  type: string;
-}
-
 interface Props {
   analyticsId?: string;
   modelId?: string;
 }
 
 export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
-  const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
-  const [nodeDetails, setNodeDetails] = useState({});
-  const [error, setError] = useState(undefined);
+  // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
+  const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
+  const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
+  const {
+    elements,
+    error,
+    fetchAndSetElementsWrapper,
+    isLoading,
+    message,
+    nodeDetails,
+    setElements,
+    setError,
+  } = useFetchAnalyticsMapData();
 
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      application: { navigateToUrl },
+    },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
 
-  const getDataWrapper = async (params?: GetDataObjectParameter) => {
-    const { id, type } = params ?? {};
-    const treatAsRoot = id !== undefined;
-    let idToUse: string;
-
-    if (id !== undefined) {
-      idToUse = id;
-    } else if (modelId !== undefined) {
-      idToUse = modelId;
-    } else {
-      idToUse = analyticsId as string;
-    }
-
-    await getData(
-      idToUse,
-      treatAsRoot,
-      modelId !== undefined && treatAsRoot === false ? JOB_MAP_NODE_TYPES.TRAINED_MODEL : type
-    );
+  const redirectToAnalyticsManagementPage = async () => {
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    await navigateToUrl(url);
   };
 
-  const getData = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
-    // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
-    // TODO: update analyticsMap return type here
-    const analyticsMap: any = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
-      idToUse,
-      treatAsRoot,
-      type
-    );
+  const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
+    // If removing the root job just go back to the jobs list
+    if (nodeLabel === analyticsId) {
+      redirectToAnalyticsManagementPage();
+    } else {
+      // Remove job element
+      const filteredElements = elements.filter((e) => {
+        // Filter out job node and related edges, including trained model node.
+        let isNotDeletedNodeOrRelated =
+          e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
 
-    const { elements: nodeElements, details, error: fetchError } = analyticsMap;
+        if (e.data.id !== undefined && e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
+          // remove training model node related to that job
+          isNotDeletedNodeOrRelated =
+            isNotDeletedNodeOrRelated &&
+            nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
+        }
 
-    if (fetchError !== null) {
-      setError(fetchError);
-    }
+        if (destIndexNode !== undefined) {
+          // Filter out destination index node for that job
+          return (
+            isNotDeletedNodeOrRelated &&
+            e.data.id !== destIndexNode &&
+            e.data.target !== destIndexNode &&
+            e.data.source !== destIndexNode
+          );
+        }
 
-    if (nodeElements && nodeElements.length === 0) {
-      notifications.toasts.add(
-        i18n.translate('xpack.ml.dataframe.analyticsMap.emptyResponseMessage', {
-          defaultMessage: 'No related analytics jobs found for {id}.',
-          values: { id: idToUse },
-        })
-      );
-    }
-
-    if (nodeElements && nodeElements.length > 0) {
-      if (treatAsRoot === false) {
-        setElements(nodeElements);
-        setNodeDetails(details);
-      } else {
-        const uniqueElements = uniqWith([...nodeElements, ...elements], isEqual);
-        setElements(uniqueElements);
-        setNodeDetails({ ...details, ...nodeDetails });
-      }
+        return isNotDeletedNodeOrRelated;
+      });
+      setItemsDeleted(true);
+      setElements(filteredElements);
     }
   };
 
   useEffect(() => {
-    getDataWrapper();
+    fetchAndSetElementsWrapper({ analyticsId, modelId });
   }, [analyticsId, modelId]);
+
+  useEffect(() => {
+    if (message !== undefined) {
+      notifications.toasts.add(message);
+    }
+  }, [message]);
 
   if (error !== undefined) {
     notifications.toasts.addDanger(
@@ -150,21 +130,63 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <JobMapLegend />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <Cytoscape height={height} elements={elements} width={width} style={cytoscapeDivStyle}>
+      <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <JobMapLegend />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" component="span">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
+                onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
+                isLoading={isLoading}
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
+                  defaultMessage="Refresh"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="mlAnalyticsResetGraphButton"
+                // trigger reset on value change
+                onClick={() => setResetCyToggle(!resetCyToggle)}
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
+                  defaultMessage="Reset"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) - 20 }} ref={ref}>
+        <Cytoscape
+          height={height - 20}
+          elements={elements}
+          width={width}
+          style={cytoscapeDivStyle}
+          itemsDeleted={itemsDeleted}
+          resetCy={resetCyToggle}
+        >
           <Controls
             details={nodeDetails}
-            getNodeData={getDataWrapper}
+            getNodeData={fetchAndSetElementsWrapper}
             analyticsId={analyticsId}
             modelId={modelId}
+            updateElements={updateElements}
           />
         </Cytoscape>
       </div>
