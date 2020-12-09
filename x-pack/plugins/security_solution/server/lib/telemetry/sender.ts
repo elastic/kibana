@@ -329,6 +329,8 @@ const allowlistEventFields: AllowlistFields = {
     executable: true,
     command_line: true,
     hash: true,
+    pid: true,
+    uptime: true,
     Ext: {
       code_signature: true,
     },
@@ -340,6 +342,12 @@ const allowlistEventFields: AllowlistFields = {
       Ext: {
         code_signature: true,
       },
+      uptime: true,
+      pid: true,
+      ppid: true,
+    },
+    token: {
+      integrity_level_name: true,
     },
   },
 };
