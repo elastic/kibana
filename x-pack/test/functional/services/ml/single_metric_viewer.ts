@@ -192,5 +192,8 @@ export function MachineLearningSingleMetricViewerProvider(
       const toast = await testSubjects.find(dataTestSubj);
       expect(toast).not.to.be(undefined);
     },
+    async assertDisabledJobReasonWarningToastExist() {
+      await this.assertToastMessageExists('mlTimeSeriesExplorerDisabledJobReasonWarningToast');
+    },
   };
 }
