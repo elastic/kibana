@@ -98,4 +98,13 @@ describe('BasePath', () => {
       expect(new BasePath('/foo/bar', '/foo').serverBasePath).toEqual('/foo');
     });
   });
+
+  describe('publicBaseUrl', () => {
+    it('returns value passed into construtor', () => {
+      expect(new BasePath('/foo/bar', '/foo').publicBaseUrl).toEqual(undefined);
+      expect(new BasePath('/foo/bar', '/foo', 'http://myhost.com/foo').publicBaseUrl).toEqual(
+        'http://myhost.com/foo'
+      );
+    });
+  });
 });

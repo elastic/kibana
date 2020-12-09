@@ -107,6 +107,23 @@ export async function mountApp(
     }
   };
 
+  const redirectToDashboard = (embeddableInput: LensEmbeddableInput, dashboardId: string) => {
+    if (!lensServices.dashboardFeatureFlag.allowByValueEmbeddables) {
+      throw new Error('redirectToDashboard called with by-value embeddables disabled');
+    }
+
+    const state = {
+      input: embeddableInput,
+      type: LENS_EMBEDDABLE_TYPE,
+    };
+
+    const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      state,
+      path,
+    });
+  };
+
   const redirectToOrigin = (props?: RedirectToOriginProps) => {
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
@@ -135,6 +152,7 @@ export async function mountApp(
         initialInput={getInitialInput(routeProps)}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
         redirectToOrigin={redirectToOrigin}
+        redirectToDashboard={redirectToDashboard}
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}

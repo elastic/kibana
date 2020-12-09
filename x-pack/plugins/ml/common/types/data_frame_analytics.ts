@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -85,3 +86,54 @@ export interface DataFrameAnalyticsConfig {
 }
 
 export type DataFrameAnalysisConfigType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+
+export type DataFrameTaskStateType = typeof DATA_FRAME_TASK_STATE[keyof typeof DATA_FRAME_TASK_STATE];
+
+interface ProgressSection {
+  phase: string;
+  progress_percent: number;
+}
+
+export interface DataFrameAnalyticsStats {
+  assignment_explanation?: string;
+  id: DataFrameAnalyticsId;
+  memory_usage?: {
+    timestamp?: string;
+    peak_usage_bytes: number;
+    status: string;
+  };
+  node?: {
+    attributes: Record<string, any>;
+    ephemeral_id: string;
+    id: string;
+    name: string;
+    transport_address: string;
+  };
+  progress: ProgressSection[];
+  failure_reason?: string;
+  state: DataFrameTaskStateType;
+}
+
+export interface AnalyticsMapNodeElement {
+  data: {
+    id: string;
+    label: string;
+    type: string;
+    analysisType?: string;
+  };
+}
+
+export interface AnalyticsMapEdgeElement {
+  data: {
+    id: string;
+    source: string;
+    target: string;
+  };
+}
+
+export type MapElements = AnalyticsMapNodeElement | AnalyticsMapEdgeElement;
+export interface AnalyticsMapReturnType {
+  elements: MapElements[];
+  details: Record<string, any>; // transform, job, or index details
+  error: null | any;
+}
