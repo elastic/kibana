@@ -17,6 +17,7 @@ import {
   CommentRequestRt,
   CaseResponse,
   CommentType,
+  CaseStatuses,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
@@ -44,6 +45,11 @@ export const addComment = ({
     client: savedObjectsClient,
     caseId,
   });
+
+  // An alert cannot be attach to a closed case.
+  if (query.type === CommentType.alert && myCase.attributes.status === CaseStatuses.closed) {
+    throw Boom.badRequest('Alert cannot be attached to a closed case');
+  }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
