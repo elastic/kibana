@@ -11312,7 +11312,6 @@
     "xpack.maps.source.emsTile.settingsTitle": "ベースマップ",
     "xpack.maps.source.emsTileDescription": "Elastic Maps Service のマップタイル",
     "xpack.maps.source.emsTileTitle": "タイル",
-    "xpack.maps.source.esAggSource.topTermLabel": "トップ {fieldName}",
     "xpack.maps.source.esGeoGrid.geofieldLabel": "地理空間フィールド",
     "xpack.maps.source.esGeoGrid.geofieldPlaceholder": "ジオフィールドを選択",
     "xpack.maps.source.esGeoGrid.gridRectangleDropdownOption": "グリッド",
