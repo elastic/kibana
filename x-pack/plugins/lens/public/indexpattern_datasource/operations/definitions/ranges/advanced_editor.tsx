@@ -6,7 +6,7 @@
 
 import './advanced_editor.scss';
 
-import React, { useState, MouseEventHandler } from 'react';
+import React, { useState, MouseEventHandler, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -47,17 +47,21 @@ export const RangePopover = ({
   range,
   setRange,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: (open: boolean) => void;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
+
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
@@ -86,9 +90,6 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    if (isOpenByCreation) {
-      setIsOpenByCreation(false);
-    }
     if (isPopoverOpen) {
       setIsPopoverOpen(false);
     }
@@ -98,14 +99,11 @@ export const RangePopover = ({
     <EuiPopover
       display="block"
       ownFocus
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       closePopover={onSubmit}
       button={
         <Button
           onClick={() => {
-            if (isOpenByCreation) {
-              setIsOpenByCreation(false);
-            }
             setIsPopoverOpen((isOpen) => !isOpen);
           }}
         />
@@ -255,11 +253,7 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => {
-            if (isOpenByCreation) {
-              setIsOpenByCreation(false);
-            }
-          }}
+          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
@@ -283,8 +277,7 @@ export const AdvancedRangeEditor = ({
             >
               <RangePopover
                 range={range}
-                isOpenByCreation={idx === lastIndex && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === lastIndex && isOpenByCreation}
                 setRange={(newRange: LocalRangeType) => {
                   const newRanges = [...localRanges];
                   if (newRange.id === newRanges[idx].id) {

@@ -5,6 +5,7 @@
  */
 
 import { createHash } from 'crypto';
+import stringify from 'json-stable-stringify';
 
 /**
  * Generate the hash for this request so that, in the future, this hash can be used to look up
@@ -13,5 +14,5 @@ import { createHash } from 'crypto';
  */
 export function createRequestHash(keys: Record<any, any>) {
   const { preference, ...params } = keys;
-  return createHash(`sha256`).update(JSON.stringify(params)).digest('hex');
+  return createHash(`sha256`).update(stringify(params)).digest('hex');
 }

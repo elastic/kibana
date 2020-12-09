@@ -7,16 +7,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { StatusFilter } from './status_filter';
-import { CERTIFICATES_ROUTE } from '../../../../common/constants';
-
-const LinkStyle = styled(Link)`
-  position: absolute;
-  right: 16px;
-  top: 16px;
-`;
 
 const FlexGroupContainer = styled(EuiFlexGroup)`
   position: relative;
@@ -38,12 +30,6 @@ export const MonitorListHeader: React.FC = () => {
       <EuiFlexItem grow={false}>
         <StatusFilter />
       </EuiFlexItem>
-      <LinkStyle to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
-        <FormattedMessage
-          id="xpack.uptime.monitorList.viewCertificateTitle"
-          defaultMessage="Certificates status"
-        />
-      </LinkStyle>
     </FlexGroupContainer>
   );
 };

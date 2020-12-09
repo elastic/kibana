@@ -100,6 +100,7 @@ describe('filterByAgent', () => {
     it('nodejs', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
         'capture_body',
+        'log_level',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);

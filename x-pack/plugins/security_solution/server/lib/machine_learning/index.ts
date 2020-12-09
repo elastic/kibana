@@ -6,8 +6,8 @@
 
 import { RequestParams } from '@elastic/elasticsearch';
 
+import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
 import { ExceptionListItemSchema } from '../../../../lists/common';
-import { buildExceptionFilter } from '../../../common/detection_engine/get_query_filter';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 import { SearchResponse } from '../types';
 
@@ -54,12 +54,6 @@ export const getAnomalies = async (
             ],
             must_not: buildExceptionFilter({
               lists: params.exceptionItems,
-              config: {
-                allowLeadingWildcards: true,
-                queryStringOptions: { analyze_wildcard: true },
-                ignoreFilterIfFieldNotInIndex: false,
-                dateFormatTZ: 'Zulu',
-              },
               excludeExceptions: true,
               chunkSize: 1024,
             })?.query,
