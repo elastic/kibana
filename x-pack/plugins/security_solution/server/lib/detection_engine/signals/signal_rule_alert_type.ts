@@ -188,7 +188,7 @@ export const signalRulesAlertType = ({
       } else if (preCheckResult.result === 'partial failure') {
         // write the partial failure here
         // but continue with the execution, ensuring no further statuses are written.
-        await ruleStatusService.error(
+        await ruleStatusService.partialFailure(
           `There was a partial failure: ${preCheckResult.resultMessages.join(' | ')}`
         );
         wroteStatus = true;
