@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { TableText } from '../';
+import { UISession } from '../../../../../common/search/sessions_mgmt';
+import { getStatusText } from '../status';
+
+export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({
+  type: 'field_value_selection',
+  name: i18n.translate('xpack.data.mgmt.searchSessions.search.filterStatus', {
+    defaultMessage: 'Status',
+  }),
+  field: 'status',
+  multiSelect: 'or',
+  options: tableData.reduce((options: FieldValueOptionType[], session) => {
+    const { status: statusType } = session;
+    const existingOption = options.find((o) => o.value === statusType);
+    if (!existingOption) {
+      return [
+        ...options,
+        {
+          value: statusType,
+          view: <TableText>{getStatusText(session.status)}</TableText>,
+        },
+      ];
+    }
+
+    return options;
+  }, []),
+});

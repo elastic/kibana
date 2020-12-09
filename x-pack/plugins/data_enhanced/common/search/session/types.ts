@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BackgroundSessionStatus } from './';
+
 export interface BackgroundSessionSavedObjectAttributes {
   /**
    * User-facing session name to be displayed in session management
@@ -15,7 +17,7 @@ export interface BackgroundSessionSavedObjectAttributes {
   appId: string;
   created: string;
   expires: string;
-  status: string;
+  status: BackgroundSessionStatus;
   urlGeneratorId: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;

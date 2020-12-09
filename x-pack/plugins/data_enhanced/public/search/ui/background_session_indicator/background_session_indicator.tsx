@@ -66,7 +66,7 @@ const ContinueInBackgroundButton = ({
 );
 
 const ViewBackgroundSessionsButton = ({
-  viewBackgroundSessionsLink = 'management',
+  viewBackgroundSessionsLink = 'management/kibana/background_sessions',
   buttonProps = {},
 }: ActionButtonProps) => (
   <EuiButtonEmpty

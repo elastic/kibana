@@ -67,8 +67,8 @@ export class SessionsClient {
     });
   }
 
-  public find(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse> {
-    return this.http!.post(`/internal/session`, {
+  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SavedObjectsFindResponse> {
+    return this.http!.post(`/internal/session/_find`, {
       body: JSON.stringify(options),
     });
   }
