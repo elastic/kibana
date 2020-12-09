@@ -19,6 +19,7 @@ import {
   ESCasePatchRequest,
   CasePatchRequest,
   CasesResponse,
+  CaseStatuses,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -98,12 +99,15 @@ export const update = ({
       cases: updateFilterCases.map((thisCase) => {
         const { id: caseId, version, ...updateCaseAttributes } = thisCase;
         let closedInfo = {};
-        if (updateCaseAttributes.status && updateCaseAttributes.status === 'closed') {
+        if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
           closedInfo = {
             closed_at: updatedDt,
             closed_by: { email, full_name, username },
           };
-        } else if (updateCaseAttributes.status && updateCaseAttributes.status === 'open') {
+        } else if (
+          updateCaseAttributes.status &&
+          updateCaseAttributes.status === CaseStatuses.open
+        ) {
           closedInfo = {
             closed_at: null,
             closed_by: null,

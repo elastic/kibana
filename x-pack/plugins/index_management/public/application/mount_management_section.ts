@@ -12,7 +12,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { FleetSetup } from '../../../fleet/public';
 import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
-import { IndexMgmtMetricsType, StartDependencies } from '../types';
+import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -23,7 +23,7 @@ import { renderApp } from '.';
 interface InternalServices {
   httpService: HttpService;
   notificationService: NotificationService;
-  uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+  uiMetricService: UiMetricService;
   extensionsService: ExtensionsService;
 }
 

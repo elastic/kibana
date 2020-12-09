@@ -4,6 +4,7 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Quick Commit Checks', 'test/scripts/checks/commit/commit.sh'),
     kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
@@ -35,8 +36,6 @@ def test() {
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
-    kibanaPipeline.scriptTask('X-Pack SIEM cyclic dependency', 'test/scripts/test/xpack_siem_cyclic_dependency.sh'),
-    kibanaPipeline.scriptTask('X-Pack List cyclic dependency', 'test/scripts/test/xpack_list_cyclic_dependency.sh'),
     kibanaPipeline.scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
   ])
 }
@@ -76,7 +75,7 @@ def functionalOss(Map params = [:]) {
     }
 
     if (config.serverIntegration) {
-      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
     }
   }
 }

@@ -1,0 +1,182 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ping Timestamp component render without errors 1`] = `
+.c0 {
+  position: relative;
+}
+
+.c0 figure.euiImage div.stepArrowsFullScreen {
+  display: none;
+}
+
+.c0 figure.euiImage-isFullScreen div.stepArrowsFullScreen {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c0 div.stepArrows {
+  display: none;
+}
+
+.c0:hover div.stepArrows {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c1 {
+  width: 120px;
+  text-align: center;
+  border: 1px solid #d3dae6;
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiText euiText--medium c1"
+      >
+        <strong>
+          No image available
+        </strong>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+       
+      <div
+        class="stepArrowsFullScreen"
+        style="position:absolute;bottom:32px;width:100%"
+      />
+      <a
+        class="euiLink euiLink--primary eui-textNoWrap"
+        href="/step/details"
+        rel="noreferrer"
+      >
+        Nov 26, 2020 10:28:56 AM
+      </a>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive stepArrows"
+    style="position:absolute;bottom:0;left:30px"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="Next"
+        class="euiButtonIcon euiButtonIcon--subdued"
+        disabled=""
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="arrowLeft"
+        />
+      </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="Next"
+        class="euiButtonIcon euiButtonIcon--subdued"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Ping Timestamp component shallow render without errors 1`] = `
+<styled.div>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <NoImageAvailable />
+    </EuiFlexItem>
+    <EuiFlexItem>
+       
+      <div
+        className="stepArrowsFullScreen"
+        style={
+          Object {
+            "bottom": 32,
+            "position": "absolute",
+            "width": "100%",
+          }
+        }
+      />
+      <EuiLink
+        className="eui-textNoWrap"
+        href="/step/details"
+      >
+        Nov 26, 2020 10:28:56 AM
+      </EuiLink>
+      <EuiSpacer
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="center"
+    className="stepArrows"
+    gutterSize="s"
+    style={
+      Object {
+        "bottom": 0,
+        "left": 30,
+        "position": "absolute",
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Next"
+        color="subdued"
+        disabled={true}
+        iconType="arrowLeft"
+        onClick={[Function]}
+        size="s"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Next"
+        color="subdued"
+        disabled={false}
+        iconType="arrowRight"
+        onClick={[Function]}
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</styled.div>
+`;

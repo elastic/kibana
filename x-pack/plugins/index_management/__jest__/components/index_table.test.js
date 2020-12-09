@@ -119,7 +119,7 @@ describe('index table', () => {
       extensionsService: new ExtensionsService(),
       uiMetricService: new UiMetricService('index_management'),
     };
-    services.uiMetricService.setup({ reportUiStats() {} });
+    services.uiMetricService.setup({ reportUiCounter() {} });
     setExtensionsService(services.extensionsService);
     setUiMetricService(services.uiMetricService);
 

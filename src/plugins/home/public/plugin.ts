@@ -80,7 +80,7 @@ export class HomePublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
-          ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
+          ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
         const [
           coreStart,

@@ -17,7 +17,7 @@ object Lint : BuildType({
       scriptContent =
         """
           #!/bin/bash
-          yarn run grunt run:sasslint
+          ./.ci/teamcity/checks/sasslint.sh
         """.trimIndent()
     }
 
@@ -26,7 +26,7 @@ object Lint : BuildType({
       scriptContent =
         """
           #!/bin/bash
-          yarn run grunt run:eslint
+          ./.ci/teamcity/checks/eslint.sh
         """.trimIndent()
     }
   }

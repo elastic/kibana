@@ -23,9 +23,9 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 
+    // TODO: we should not have a service overview.
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
-      loadTestFile(require.resolve('./service_overview/transaction_groups'));
     });
 
     describe('Settings', function () {
@@ -43,12 +43,13 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./traces/top_traces'));
     });
 
-    describe('Transaction Group', function () {
-      loadTestFile(require.resolve('./transaction_groups/top_transaction_groups'));
-      loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
-      loadTestFile(require.resolve('./transaction_groups/error_rate'));
-      loadTestFile(require.resolve('./transaction_groups/breakdown'));
-      loadTestFile(require.resolve('./transaction_groups/distribution'));
+    describe('Transactions', function () {
+      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
+      loadTestFile(require.resolve('./transactions/transaction_charts'));
+      loadTestFile(require.resolve('./transactions/error_rate'));
+      loadTestFile(require.resolve('./transactions/breakdown'));
+      loadTestFile(require.resolve('./transactions/distribution'));
+      loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
     });
 
     describe('Observability overview', function () {

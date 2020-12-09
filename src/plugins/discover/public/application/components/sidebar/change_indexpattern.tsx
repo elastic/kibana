@@ -75,7 +75,6 @@ export function ChangeIndexPattern({
       closePopover={() => setPopoverIsOpen(false)}
       display="block"
       panelPaddingSize="s"
-      ownFocus
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>

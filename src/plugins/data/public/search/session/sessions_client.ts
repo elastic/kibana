@@ -18,9 +18,8 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, SavedObjectsFindOptions } from 'kibana/public';
 import type { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { BackgroundSessionSavedObjectAttributes, SearchSessionFindOptions } from '../../../common';
 
 export type ISessionsClient = PublicContract<SessionsClient>;
 export interface SessionsClientDeps {
@@ -37,7 +36,7 @@ export class SessionsClient {
     this.http = deps.http;
   }
 
-  public get(sessionId: string): Promise<SavedObject<BackgroundSessionSavedObjectAttributes>> {
+  public get(sessionId: string): Promise<SavedObject> {
     return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
@@ -55,7 +54,7 @@ export class SessionsClient {
     restoreState: Record<string, unknown>;
     urlGeneratorId: string;
     sessionId: string;
-  }): Promise<SavedObject<BackgroundSessionSavedObjectAttributes>> {
+  }): Promise<SavedObject> {
     return this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
@@ -68,18 +67,13 @@ export class SessionsClient {
     });
   }
 
-  public find(
-    options: SearchSessionFindOptions
-  ): Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>> {
+  public find(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse> {
     return this.http!.post(`/internal/session`, {
       body: JSON.stringify(options),
     });
   }
 
-  public update(
-    sessionId: string,
-    attributes: Partial<BackgroundSessionSavedObjectAttributes>
-  ): Promise<SavedObject<BackgroundSessionSavedObjectAttributes>> {
+  public update(sessionId: string, attributes: unknown): Promise<SavedObject> {
     return this.http!.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
       body: JSON.stringify(attributes),
     });
