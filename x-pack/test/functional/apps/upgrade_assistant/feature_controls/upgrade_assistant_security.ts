@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
   const deployment = getService('deployment');
 
-  describe('security', () => {
+  describe('security', function () {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await PageObjects.common.navigateToApp('home');
@@ -59,21 +59,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Stack" section with Upgrde Assistant', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(3);
-        if (deployment.isCloud()) {
-          expect(sections[2]).to.eql({
-            sectionId: 'stack',
-            sectionLinks: ['upgrade_assistant'],
-          });
-        } else {
+      describe('[SkipCloud] global dashboard all with global_upgrade_assistant_role', function () {
+        this.tags('skipCloud');
+        it('should render the "Stack" section with Upgrde Assistant', async function () {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          expect(sections).to.have.length(3);
           expect(sections[2]).to.eql({
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],
           });
-        }
+        });
       });
     });
   });
