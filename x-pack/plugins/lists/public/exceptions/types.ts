@@ -108,7 +108,6 @@ export interface ApiCallFetchExceptionListsProps {
 }
 
 export interface UseExceptionListsSuccess {
-  loading: boolean;
   exceptions: ExceptionListSchema[];
   pagination: Pagination;
 }
