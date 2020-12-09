@@ -232,7 +232,7 @@
     "react-router": "^5.2.0",
     "react-shortcuts": "^2.0.0",
     "react-sticky": "^6.0.3",
-    "react-syntax-highlighter": "^5.7.0",
+    "react-syntax-highlighter": "^15.3.1",
     "react-test-renderer": "^16.12.0",
     "react-tiny-virtual-list": "^2.2.0",
     "react-use": "^13.27.0",
