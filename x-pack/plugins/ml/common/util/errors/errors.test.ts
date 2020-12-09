@@ -78,6 +78,7 @@ describe('ML - error message utils', () => {
       // boom error
       const boomError: Boom.Boom<any> = {
         message: '',
+        typeof: Boom.Boom.constructor,
         reformat: () => '',
         name: '',
         data: [],
