@@ -94,8 +94,13 @@ export const EditPackagePolicyForm = memo<{
       setLoadingError(undefined);
       try {
         const { data: packagePolicyData } = await sendGetOnePackagePolicy(packagePolicyId);
+
+        if (!packagePolicyData?.item.policy_id) {
+          throw new Error(`Agent Policy ID missing in package policy ${packagePolicyId}`);
+        }
+
         const { data: agentPolicyData } = await sendGetOneAgentPolicy(
-          packagePolicyData?.item.policy_id ?? 'id-missing-in-package-policy'
+          packagePolicyData.item.policy_id
         );
 
         if (agentPolicyData?.item) {
