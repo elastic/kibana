@@ -24,7 +24,7 @@ import {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
   PLUGIN_ID,
@@ -85,12 +85,15 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export type FleetStartDeps = object;
+export interface FleetStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
+}
 
 export interface FleetAppContext {
   encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  security?: SecurityPluginSetup;
+  security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
@@ -150,7 +153,6 @@ export class FleetPlugin
   implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
-  private security: SecurityPluginSetup | undefined;
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
@@ -171,9 +173,6 @@ export class FleetPlugin
   public async setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
-    if (deps.security) {
-      this.security = deps.security;
-    }
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
@@ -226,7 +225,7 @@ export class FleetPlugin
     // For all the routes we enforce the user to have role superuser
     const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
-    if (this.security) {
+    if (deps.security) {
       registerSetupRoutes(routerSuperuserOnly, config);
       registerAgentPolicyRoutes(routerSuperuserOnly);
       registerPackagePolicyRoutes(routerSuperuserOnly);
@@ -262,16 +261,11 @@ export class FleetPlugin
     }
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: {
-      encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-    }
-  ): Promise<FleetStartContract> {
+  public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      security: this.security,
+      security: plugins.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
