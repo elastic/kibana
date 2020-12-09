@@ -52,11 +52,11 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
       defaultMessage="Configure on-failure processor"
     />
   ) : (
-    <FormattedMessage
-      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
-      defaultMessage="Configure processor"
-    />
-  );
+      <FormattedMessage
+        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
+        defaultMessage="Configure processor"
+      />
+    );
 };
 
 export const AddProcessorForm: FunctionComponent<Props> = ({
@@ -81,7 +81,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
-                <EuiTitle size="m">
+                <EuiTitle size="m" data-test-subj="configurePipelineHeader">
                   <h2>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>

@@ -14,20 +14,11 @@ export default function ({ getService, getPageObjects }: any) {
 
   describe('Ingest Node Pipelines', async () => {
     before(async () => {
-      await deleteAllPipelines(esClient, log);
-      /* navigates to the page we want to test */
-    });
-
-    it('Empty State Home View', async () => {
+      await putSamplePipeline(esClient);
       await common.navigateToApp('ingestPipelines');
-      await retry.waitFor('Create New Pipeline Title to be visible', async () => {
-        return testSubjects.exists('title') ? true : false;
-      }); /* confirm you're on the correct page and that it's loaded */
-      await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
     });
 
     it('List View', async () => {
-      await putSamplePipeline(esClient);
       await retry.waitFor('Ingest Node Pipelines page to be visible', async () => {
         await common.navigateToApp('ingestPipelines');
         return testSubjects.exists('pipelineDetailsLink') ? true : false;
@@ -45,22 +36,26 @@ export default function ({ getService, getPageObjects }: any) {
       });
       await a11y.testAppSnapshot();
     });
-    /**
-     * If these tests were added by our QA team, tests that fail that require significant app code
-     * changes to be fixed will be skipped with a corresponding issue label with more info
-     */
-    // Skipped due to https://github.com/elastic/kibana/issues/99999
-    it.skip('all plugins view page meets a11y requirements', async () => {
-      // await home.clickAllKibanaPlugins();
-      await a11y.testAppSnapshot();
+
+    it('Empty State Home View', async () => {
+      await deleteAllPipelines(esClient, log);
+      await common.navigateToApp('ingestPipelines');
+      await retry.waitFor('Create New Pipeline Title to be visible', async () => {
+        return testSubjects.exists('title') ? true : false;
+      }); /* confirm you're on the correct page and that it's loaded */
+      await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
     });
 
-    /**
-     * Testing all the versions and different views of of a page is important to get good
-     * coverage. Things like empty states, different license levels, different permissions, and
-     * loaded data can all significantly change the UI which necessitates their own test.
-     */
-    it.skip('Add Kibana sample data page', async () => {
+    it('Create Pipeline Wizard', async () => {
+      await testSubjects.click('emptyStateCreatePipelineButton');
+      await retry.waitFor('Create pipeline page one to be visible', async () => {
+        return testSubjects.isDisplayed('pageTitle') ? true : false;
+      });
+      await a11y.testAppSnapshot();
+      await testSubjects.click('addProcessorButton');
+      await retry.waitFor('Configure Pipeline flyout to be visible', async () => {
+        return testSubjects.isDisplayed('configurePipelineHeader') ? true : false;
+      });
       await a11y.testAppSnapshot();
     });
   });
