@@ -44,10 +44,7 @@ export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
 });
 
 export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => ({
-  delete: jest.fn(),
-  get: jest.fn(),
   find: jest.fn(),
-  patch: jest.fn(),
   post: jest.fn(),
 });
 
