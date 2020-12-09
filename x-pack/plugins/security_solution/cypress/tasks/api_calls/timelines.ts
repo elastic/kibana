@@ -50,51 +50,49 @@ export const createTimeline = (timeline: CompleteTimeline) =>
   });
 
 export const createTimelineTemplate = (timeline: CompleteTimeline) =>
-  cy
-    .request({
-      method: 'POST',
-      url: 'api/timeline',
-      body: {
-        timeline: {
-          columns: [
-            {
-              id: '@timestamp',
-            },
-            {
-              id: 'user.name',
-            },
-            {
-              id: 'event.category',
-            },
-            {
-              id: 'event.action',
-            },
-            {
-              id: 'host.name',
-            },
-          ],
-          kqlMode: 'filter',
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: timeline.query,
-                kind: 'kuery',
-              },
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline',
+    body: {
+      timeline: {
+        columns: [
+          {
+            id: '@timestamp',
+          },
+          {
+            id: 'user.name',
+          },
+          {
+            id: 'event.category',
+          },
+          {
+            id: 'event.action',
+          },
+          {
+            id: 'host.name',
+          },
+        ],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              expression: timeline.query,
+              kind: 'kuery',
             },
           },
-          dateRange: {
-            end: '1577881376000',
-            start: '1514809376000',
-          },
-          description: timeline.description,
-          title: timeline.title,
-          templateTimelineVersion: 1,
-          timelineType: 'template',
         },
+        dateRange: {
+          end: '1577881376000',
+          start: '1514809376000',
+        },
+        description: timeline.description,
+        title: timeline.title,
+        templateTimelineVersion: 1,
+        timelineType: 'template',
       },
-      headers: { 'kbn-xsrf': 'cypress-creds' },
-    })
-    .as('createTimelineTemplate');
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
 
 export const deleteTimeline = (timelineId: string) => {
   cy.request({
