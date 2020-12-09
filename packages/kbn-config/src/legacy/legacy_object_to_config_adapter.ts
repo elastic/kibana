@@ -84,6 +84,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       maxPayload: configValue.maxPayloadBytes,
       name: configValue.name,
       port: configValue.port,
+      publicBaseUrl: configValue.publicBaseUrl,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
       keepaliveTimeout: configValue.keepaliveTimeout,

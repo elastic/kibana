@@ -44,9 +44,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.serviceCount).to.be.greaterThan(0);
         expect(response.body.transactionCoordinates.length).to.be.greaterThan(0);
 
-        expectSnapshot(response.body.serviceCount).toMatchInline(`8`);
+        expectSnapshot(response.body.serviceCount).toMatchInline(`9`);
 
-        expectSnapshot(response.body.transactionCoordinates.length).toMatchInline(`30`);
+        expectSnapshot(response.body.transactionCoordinates.length).toMatchInline(`31`);
 
         expectSnapshot(
           response.body.transactionCoordinates
@@ -58,24 +58,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2020-09-29T14:30:00.000Z",
-              "y": 2.26666666666667,
+              "x": "2020-12-08T13:57:00.000Z",
+              "y": 0.166666666666667,
             },
             Object {
-              "x": "2020-09-29T14:31:00.000Z",
-              "y": 1.03333333333333,
+              "x": "2020-12-08T13:58:00.000Z",
+              "y": 5.23333333333333,
             },
             Object {
-              "x": "2020-09-29T14:32:00.000Z",
-              "y": 1.9,
+              "x": "2020-12-08T13:59:00.000Z",
+              "y": 4.4,
             },
             Object {
-              "x": "2020-09-29T14:33:00.000Z",
-              "y": 0.8,
+              "x": "2020-12-08T14:00:00.000Z",
+              "y": 5.73333333333333,
             },
             Object {
-              "x": "2020-09-29T14:34:00.000Z",
-              "y": 1.9,
+              "x": "2020-12-08T14:01:00.000Z",
+              "y": 4.33333333333333,
             },
           ]
         `);

@@ -14,12 +14,9 @@ import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
 import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
 import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
+import { FixtureStartDeps } from './plugin';
 
-export function defineRoutes(
-  core: CoreSetup<FixtureStartDeps>,
-  { spaces, security }: Partial<FixtureSetupDeps>
-) {
+export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -40,13 +37,16 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       const { id } = req.params;
 
+      const [
+        { savedObjects },
+        { encryptedSavedObjects, security, spaces },
+      ] = await core.getStartServices();
       if (!security) {
         return res.ok({
           body: {},
         });
       }
 
-      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
       const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
         includedHiddenTypes: ['alert'],
       });
@@ -70,7 +70,7 @@ export function defineRoutes(
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
       // API key for the user, instead of having the user create it themselves, which requires api_key
       // privileges
-      const createAPIKeyResult = await security.authc.grantAPIKeyAsInternalUser(req, {
+      const createAPIKeyResult = await security.authc.apiKeys.grantAsInternalUser(req, {
         name: `alert:migrated-to-7.10:${user.username}`,
         role_descriptors: {},
       });

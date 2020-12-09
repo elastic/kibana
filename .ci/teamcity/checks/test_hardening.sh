@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:test_hardening
+checks-reporter-with-killswitch "Test Hardening" \
+  node scripts/test_hardening
