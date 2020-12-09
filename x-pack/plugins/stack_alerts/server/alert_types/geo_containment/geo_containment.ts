@@ -94,6 +94,40 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
+export function getActiveEntriesAndGenerateAlerts(
+  prevLocationMap: Record<string, LatestEntityLocation>,
+  currLocationMap: Map<string, LatestEntityLocation>,
+  alertInstanceFactory: (
+    x: string
+  ) => { scheduleActions: (x: string, y: Record<string, unknown>) => void },
+  shapesIdsNamesMap: Record<string, unknown>,
+  currIntervalEndTime: Date
+) {
+  const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
+    ...Object.entries(prevLocationMap || {}),
+    ...currLocationMap,
+  ]);
+  allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
+    const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
+    const context = {
+      entityId: entityName,
+      entityDateTime: new Date(currIntervalEndTime).toISOString(),
+      entityDocumentId: docId,
+      detectionDateTime: new Date(currIntervalEndTime).toISOString(),
+      entityLocation: `POINT (${location[0]} ${location[1]})`,
+      containingBoundaryId: shapeLocationId,
+      containingBoundaryName,
+    };
+    const alertInstanceId = `${entityName}-${containingBoundaryName}`;
+    if (shapeLocationId === OTHER_CATEGORY) {
+      allActiveEntriesMap.delete(entityName);
+    } else {
+      alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+    }
+  });
+  return allActiveEntriesMap;
+}
+
 export const getGeoContainmentExecutor = (log: Logger) =>
   async function ({
     previousStartedAt,
@@ -153,30 +187,15 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    // Combine newly active with previously active entries
-    const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
-      ...Object.entries(state.prevLocationMap || {}),
-      ...currLocationMap,
-    ]);
-    allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
-      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
-      const context = {
-        entityId: entityName,
-        entityDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityLocation: `POINT (${location[0]} ${location[1]})`,
-        containingBoundaryId: shapeLocationId,
-        containingBoundaryName,
-      };
-      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-      if (shapeLocationId === OTHER_CATEGORY) {
-        allActiveEntriesMap.delete(entityName);
-      } else {
-        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
-      }
-    });
+    const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      state.prevLocationMap as Record<string, LatestEntityLocation>,
+      currLocationMap,
+      services.alertInstanceFactory,
+      shapesIdsNamesMap,
+      currIntervalEndTime
+    );
 
+    // Combine newly active with previously active entries
     return {
       shapesFilters,
       shapesIdsNamesMap,
