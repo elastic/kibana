@@ -20,7 +20,7 @@
       }
     ],
     "influencers": [
-      "agent.id",
+      "process.name",
       "host.name",
       "user.name"
     ]

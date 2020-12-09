@@ -20,8 +20,8 @@
       }
     ],
     "influencers": [
-      "agent.id",
-      "host.name"
+      "host.name",
+      "user.name"
     ]
   },
   "allow_lazy_open": true,

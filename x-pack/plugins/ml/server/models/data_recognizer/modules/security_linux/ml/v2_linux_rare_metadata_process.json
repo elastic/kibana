@@ -18,9 +18,9 @@
       }
     ],
     "influencers": [
-      "agent.id",
       "host.name",
-      "user.name"
+      "user.name",
+      "process.name"
     ]
   },
   "allow_lazy_open": true,
