@@ -51,8 +51,7 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
         setIsOverflow(false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, descriptionRef?.current?.clientHeight]);
+  }, [content]);
 
   return content != null ? (
     <>
