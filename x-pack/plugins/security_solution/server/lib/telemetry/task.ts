@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment from 'moment';
 import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -37,13 +38,38 @@ export class TelemetryDiagTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              await this.runTask(taskInstance.id);
+              const executeTo = moment().utc().toISOString();
+              const executeFrom = this.getLastExecutionTimestamp(
+                executeTo,
+                taskInstance.state?.lastExecutionTimestamp
+              );
+              await this.runTask(taskInstance.id, executeFrom, executeTo);
+
+              return {
+                state: {
+                  lastExecutionTimestamp: executeTo,
+                },
+              };
             },
             cancel: async () => {},
           };
         },
       },
     });
+  }
+
+  public getLastExecutionTimestamp(executeTo: string, lastExecutionTimestamp?: string) {
+    if (lastExecutionTimestamp === undefined) {
+      this.logger.debug(`No last execution timestamp defined`);
+      return moment(executeTo).subtract(5, 'minutes').toISOString();
+    }
+
+    if (moment(lastExecutionTimestamp).diff(executeTo) >= 10) {
+      this.logger.debug(`last execution timestamp was greater than 10 minutes`);
+      return moment(executeTo).subtract(10, 'minutes').toISOString();
+    }
+
+    return lastExecutionTimestamp;
   }
 
   public start = async (taskManager: TaskManagerStartContract) => {
@@ -67,7 +93,7 @@ export class TelemetryDiagTask {
     return `${TelemetryDiagTaskConstants.TYPE}:${TelemetryDiagTaskConstants.VERSION}`;
   };
 
-  public runTask = async (taskId: string) => {
+  public runTask = async (taskId: string, searchFrom: string, searchTo: string) => {
     this.logger.debug(`Running task ${taskId}`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
@@ -80,7 +106,7 @@ export class TelemetryDiagTask {
       return;
     }
 
-    const response = await this.sender.fetchDiagnosticAlerts();
+    const response = await this.sender.fetchDiagnosticAlerts(searchFrom, searchTo);
 
     const hits = response.hits?.hits || [];
     if (!Array.isArray(hits) || !hits.length) {

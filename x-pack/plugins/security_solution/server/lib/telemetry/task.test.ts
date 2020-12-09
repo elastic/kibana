@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { moment } from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -100,5 +101,49 @@ describe('test', () => {
     const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
     await taskRunner.run();
     expect(mockSender.fetchDiagnosticAlerts).not.toHaveBeenCalled();
+  });
+
+  test('test -5 mins is returned when there is no previous task run', async () => {
+    const telemetryDiagTask = new TelemetryDiagTask(
+      logger,
+      taskManagerMock.createSetup(),
+      createMockTelemetryEventsSender(true)
+    );
+
+    const executeTo = moment().utc().toISOString();
+    const executeFrom = undefined;
+    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
+
+    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(5, 'minutes'));
+  });
+
+  test('test -6 mins is returned when there was a previous task run', async () => {
+    const telemetryDiagTask = new TelemetryDiagTask(
+      logger,
+      taskManagerMock.createSetup(),
+      createMockTelemetryEventsSender(true)
+    );
+
+    const executeTo = moment().utc().toISOString();
+    const executeFrom = moment(executeTo).subtract(6, 'minutes');
+    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
+
+    expect(newExecuteFrom).toEqual(executeFrom);
+  });
+
+  // it's possible if Kibana is down for a prolonged period the stored lastRun would have drifted
+  // if that is the case we will just roll it back to a 10 min search window
+  test('test 10 mins is returned when previous task run took longer than 10 minutes', async () => {
+    const telemetryDiagTask = new TelemetryDiagTask(
+      logger,
+      taskManagerMock.createSetup(),
+      createMockTelemetryEventsSender(true)
+    );
+
+    const executeTo = moment().utc().toISOString();
+    const executeFrom = moment(executeTo).subtract(142, 'minutes');
+    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
+
+    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes'));
   });
 });

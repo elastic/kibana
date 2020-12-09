@@ -101,7 +101,7 @@ export class TelemetryEventsSender {
     }
   }
 
-  public async fetchDiagnosticAlerts() {
+  public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
     const query = {
       expand_wildcards: 'open,hidden',
       index: 'logs-endpoint.diagnostic.collection-default*',
@@ -111,15 +111,15 @@ export class TelemetryEventsSender {
         query: {
           range: {
             'event.ingested': {
-              gte: 'now-5m',
-              lt: 'now',
+              gte: executeFrom,
+              lt: executeTo,
             },
           },
         },
         sort: [
           {
             'event.ingested': {
-              order: 'asc',
+              order: 'desc',
             },
           },
         ],
