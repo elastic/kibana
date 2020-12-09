@@ -23,18 +23,21 @@ export class ContactCardExportableEmbeddable extends ContactCardEmbeddable {
   public getInspectorAdapters = () => {
     return {
       tables: {
-        layer1: {
-          type: 'datatable',
-          columns: [
-            { id: 'firstName', name: 'First Name' },
-            { id: 'originalLastName', name: 'Last Name' },
-          ],
-          rows: [
-            {
-              firstName: this.getInput().firstName,
-              orignialLastName: this.getInput().lastName,
-            },
-          ],
+        lens: true,
+        tables: {
+          layer1: {
+            type: 'datatable',
+            columns: [
+              { id: 'firstName', name: 'First Name' },
+              { id: 'originalLastName', name: 'Last Name' },
+            ],
+            rows: [
+              {
+                firstName: this.getInput().firstName,
+                orignialLastName: this.getInput().lastName,
+              },
+            ],
+          },
         },
       },
     };

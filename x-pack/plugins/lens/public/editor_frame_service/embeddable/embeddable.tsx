@@ -20,7 +20,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { RenderMode } from 'src/plugins/expressions';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -44,7 +44,6 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
-import { LensInspectorAdapters } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -85,7 +84,7 @@ export class Embeddable
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
-  private activeData: LensInspectorAdapters | undefined;
+  private activeData: Partial<DefaultInspectorAdapters> | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -183,7 +182,7 @@ export class Embeddable
 
   private updateActiveData = (
     data: unknown,
-    inspectorAdapters?: LensInspectorAdapters | undefined
+    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
   };

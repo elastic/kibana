@@ -50,9 +50,9 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
 import { validateDatasourceAndVisualization } from '../state_helpers';
+import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -374,7 +374,7 @@ export const InnerVisualizationWrapper = ({
   );
 
   const onData$ = useCallback(
-    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+    (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
         dispatch({
           type: 'UPDATE_ACTIVE_DATA',

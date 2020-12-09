@@ -77,7 +77,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   private getDataTableContent = (adapters: Adapters | undefined) => {
     if (this.hasDatatableContent(adapters)) {
-      return adapters?.tables;
+      return adapters?.tables.tables;
     }
     return;
   };
