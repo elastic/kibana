@@ -23,6 +23,7 @@ import {
 import { ml } from '../../services/ml_api_service';
 import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 const shouldUnTagLabel = i18n.translate('xpack.ml.deleteJobCheckModal.shouldUnTagLabel', {
   defaultMessage: 'Remove job from current space',
@@ -157,6 +158,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
   const {
     savedObjects: { canDeleteJob },
   } = useMlApiContext();
+  const { displayErrorToast } = useToastNotificationService();
 
   useEffect(() => {
     // Do the spaces check and set the content for the modal and buttons depending on results
@@ -170,14 +172,21 @@ export const DeleteJobCheckModal: FC<Props> = ({
   }, []);
 
   const onClick = async () => {
-    // remove job from current space then execute relevant callback
+    // Remove job(s) from current space then execute relevant callback
     // TODO: get current space for job
     const currentSpace = 'default';
     if (shouldUnTag === true) {
       const resp = await ml.savedObjects.removeJobFromSpace(jobType, jobIds, [currentSpace]);
-      if (resp.error !== undefined) {
-        // TODO: toast notification that removal failed
-      }
+
+      Object.entries(resp).forEach(([id, { success, error }]) => {
+        if (success === false) {
+          const title = i18n.translate('xpack.ml.deleteJobCheckModal.unTagErrorErrorTitle', {
+            defaultMessage: 'Error updating {id}',
+            values: { id },
+          });
+          displayErrorToast(error, title);
+        }
+      });
     }
 
     if (jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canDelete) {

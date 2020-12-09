@@ -29,12 +29,17 @@ import {
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
+import { JobType } from '../../../../../../../common/types/saved_objects';
+
+const DF_ANALYTICS_JOB_TYPE: JobType = 'data-frame-analytics';
+
 type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [item, setItem] = useState<DataFrameAnalyticsListRowEssentials>();
 
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [isDeleteJobCheckModalVisible, setDeleteJobCheckModalVisible] = useState<boolean>(false);
   const [deleteItem, setDeleteItem] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
@@ -116,6 +121,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   }, [isModalVisible]);
 
   const closeModal = () => setModalVisible(false);
+  const closeDeleteJobCheckModal = () => setDeleteJobCheckModalVisible(false);
   const deleteAndCloseModal = () => {
     setDeleteItem(true);
     setModalVisible(false);
@@ -142,6 +148,11 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     setModalVisible(true);
   };
 
+  const openDeleteJobCheckModal = (newItem: DataFrameAnalyticsListRowEssentials) => {
+    setItem(newItem);
+    setDeleteJobCheckModalVisible(true);
+  };
+
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       name: (i: DataFrameAnalyticsListRow) => (
@@ -155,7 +166,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',
-      onClick: (i: DataFrameAnalyticsListRow) => openModal(i),
+      onClick: (i: DataFrameAnalyticsListRow) => openDeleteJobCheckModal(i),
       'data-test-subj': 'mlAnalyticsJobDeleteButton',
     }),
     []
@@ -163,16 +174,20 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   return {
     action,
+    closeDeleteJobCheckModal,
     closeModal,
     deleteAndCloseModal,
     deleteTargetIndex,
     deleteIndexPattern,
     deleteItem,
     indexPatternExists,
+    isDeleteJobCheckModalVisible,
     isModalVisible,
     isLoading,
     item,
+    jobType: DF_ANALYTICS_JOB_TYPE,
     openModal,
+    openDeleteJobCheckModal,
     toggleDeleteIndex,
     toggleDeleteIndexPattern,
     userCanDeleteIndex,

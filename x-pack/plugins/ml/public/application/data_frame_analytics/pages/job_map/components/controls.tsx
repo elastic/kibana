@@ -42,6 +42,7 @@ import {
   useDeleteAction,
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
+import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
 
 interface Props {
   analyticsId?: string;
@@ -87,7 +88,17 @@ export const Controls: FC<Props> = ({
 
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
   const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
-  const { deleteItem, deleteTargetIndex, isModalVisible, openModal } = deleteAction;
+  const {
+    closeDeleteJobCheckModal,
+    deleteItem,
+    deleteTargetIndex,
+    isModalVisible,
+    isDeleteJobCheckModalVisible,
+    item,
+    jobType,
+    openModal,
+    openDeleteJobCheckModal,
+  } = deleteAction;
   const { toasts } = useNotifications();
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
@@ -195,7 +206,7 @@ export const Controls: FC<Props> = ({
             key={`${nodeId}-delete`}
             icon="trash"
             onClick={() => {
-              openModal({ config: details[nodeId], stats: details[nodeId]?.stats });
+              openDeleteJobCheckModal({ config: details[nodeId], stats: details[nodeId]?.stats });
             }}
           >
             <FormattedMessage
@@ -299,6 +310,18 @@ export const Controls: FC<Props> = ({
           )}
         </EuiFlyoutFooter>
       </EuiFlyout>
+      {isDeleteJobCheckModalVisible && item && (
+        <DeleteJobCheckModal
+          jobType={jobType}
+          jobIds={[item.config.id]}
+          onCloseCallback={closeDeleteJobCheckModal}
+          canDeleteCallback={() => {
+            // Item will always be set by the time we open the delete modal
+            openModal(deleteAction.item!);
+            closeDeleteJobCheckModal();
+          }}
+        />
+      )}
       {isModalVisible && <DeleteActionModal {...deleteAction} />}
     </EuiPortal>
   );
