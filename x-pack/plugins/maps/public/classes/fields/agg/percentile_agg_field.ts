@@ -7,22 +7,25 @@
 import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
-import { CountAggField } from './count_agg_field';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { ESDocField } from '../es_doc_field';
 import { getOrdinalSuffix } from '../../util/ordinal_suffix';
+import { AggField } from './agg_field';
 
 interface PercentileAggParams extends CountAggFieldParams {
   esDocField?: ESDocField;
   percentile: number;
 }
 
-export class PercentileAggField extends CountAggField implements IESAggField {
+export class PercentileAggField extends AggField implements IESAggField {
   private readonly _percentile: number;
-  private readonly _esDocField?: ESDocField;
   constructor(params: PercentileAggParams) {
-    super(params);
-    this._esDocField = params.esDocField;
+    super({
+      ...params,
+      ...{
+        aggType: AGG_TYPE.PERCENTILE,
+      },
+    });
     this._percentile = params.percentile;
   }
 
@@ -48,10 +51,6 @@ export class PercentileAggField extends CountAggField implements IESAggField {
     return `${super.getName()}_${this._percentile}`;
   }
 
-  getRootName(): string {
-    return this._esDocField ? this._esDocField.getName() : '';
-  }
-
   getValueAggDsl(indexPattern: IndexPattern): unknown {
     const field = getField(indexPattern, this.getRootName());
     const dsl: Record<string, unknown> = addFieldToDSL({}, field);
@@ -59,27 +58,5 @@ export class PercentileAggField extends CountAggField implements IESAggField {
     return {
       percentiles: dsl,
     };
-  }
-
-  _getAggType(): AGG_TYPE {
-    return AGG_TYPE.PERCENTILE;
-  }
-
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
-    return this._esDocField ? await this._esDocField.getExtendedStatsFieldMetaRequest() : null;
-  }
-
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown | null> {
-    return this._esDocField ? await this._esDocField.getCategoricalFieldMetaRequest(size) : null;
-  }
-
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
-    return this._esDocField
-      ? await this._esDocField.getPercentilesFieldMetaRequest(percentiles)
-      : null;
-  }
-
-  isValid(): boolean {
-    return !!this._esDocField;
   }
 }
