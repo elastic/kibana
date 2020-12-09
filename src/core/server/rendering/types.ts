@@ -40,6 +40,7 @@ export interface RenderingMetadata {
     branch: string;
     basePath: string;
     serverBasePath: string;
+    publicBaseUrl?: string;
     env: {
       mode: EnvironmentMode;
       packageInfo: PackageInfo;

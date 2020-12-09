@@ -19,6 +19,7 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { hostname } from 'os';
+import url from 'url';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
@@ -32,11 +33,12 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // before update to make sure it's in sync with validation rules in Legacy
 // https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
-  path: 'server',
+  path: 'server' as const,
   schema: schema.object(
     {
       name: schema.string({ defaultValue: () => hostname() }),
       autoListen: schema.boolean({ defaultValue: true }),
+      publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       basePath: schema.maybe(
         schema.string({
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
@@ -106,6 +108,17 @@ export const config = {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
+
+        if (rawConfig.publicBaseUrl) {
+          const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+          if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
+            return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
+          }
+          if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
+            return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
+          }
+        }
+
         if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
           return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
@@ -138,6 +151,7 @@ export class HttpConfig {
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
+  public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
@@ -165,6 +179,7 @@ export class HttpConfig {
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
+    this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;

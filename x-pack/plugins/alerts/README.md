@@ -661,16 +661,16 @@ Below is an example of an alert that takes advantage of templating:
 ```
 {
   ...
-  id: "123",
-  name: "cpu alert",
-  actions: [
+  "id": "123",
+  "name": "cpu alert",
+  "actions": [
     {
       "group": "default",
       "id": "3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5",
       "params": {
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
-        "subject": "A notification about {{context.server}}"
+        "subject": "A notification about {{context.server}}",
         "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the alert {{alertId}} {{alertName}}."
       }
     }
