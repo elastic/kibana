@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
+<EuiBadgeGroup>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="red"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    red
+  </EuiBadge>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="green"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    green
+  </EuiBadge>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="blue"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    blue
+  </EuiBadge>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="black"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    black
+  </EuiBadge>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="purple"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    purple
+  </EuiBadge>
+  <EuiBadge
+    color="hollow"
+    onClick={[Function]}
+    onClickAriaLabel="Click to view remaining tags"
+  >
+    +
+    1
+  </EuiBadge>
+</EuiBadgeGroup>
+`;
+
+exports[`MonitorTags component render against summary 1`] = `
+<EuiBadgeGroup>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="org:google"
+    onClick={[Function]}
+    onClickAriaLabel="Filter all monitors with tag org:google"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+    title="Filter all monitors with tag org:google"
+  >
+    org:google
+  </EuiBadge>
+</EuiBadgeGroup>
+`;
+
+exports[`MonitorTags component renders against ping 1`] = `
+<EuiBadgeGroup>
+  <EuiBadge
+    className="eui-textTruncate"
+    color="hollow"
+    key="org:google"
+    style={
+      Object {
+        "maxWidth": 120,
+      }
+    }
+  >
+    org:google
+  </EuiBadge>
+</EuiBadgeGroup>
+`;
