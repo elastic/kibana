@@ -4,28 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
-import { Plugin, SecurityPluginSetup, PluginSetupDependencies } from './plugin';
+import {
+  Plugin,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+} from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export {
-  Authentication,
-  AuthenticationResult,
-  DeauthenticationResult,
+export type {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
-  SAMLLogin,
-  OIDCLogin,
 } from './authentication';
 export {
   LegacyAuditLogger,
@@ -35,8 +35,8 @@ export {
   EventType,
   EventOutcome,
 } from './audit';
-export { SecurityPluginSetup };
-export { AuthenticatedUser } from '../common/model';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common/model';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
@@ -102,6 +102,6 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
 };
 export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,
-  void,
+  RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
 > = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);
