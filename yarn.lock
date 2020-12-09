@@ -15329,13 +15329,6 @@ grunt-peg@^2.0.1:
   dependencies:
     pegjs "~0.9.0"
 
-grunt-run@0.8.1:
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/grunt-run/-/grunt-run-0.8.1.tgz#502f988947a59f9ad567e2dcb5eeedec712980ec"
-  integrity sha512-+wvoOJevugcjMLldbVCyspRHHntwVIJiTGjx0HFq+UwXhVPe7AaAiUdY4135CS68pAoRLhd7pAILpL2ITe1tmA==
-  dependencies:
-    strip-ansi "^3.0.0"
-
 grunt@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/grunt/-/grunt-1.3.0.tgz#55db6ccd80c6fb53722e496f680620a2e681f809"
