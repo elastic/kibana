@@ -21,9 +21,10 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { cloneDeep } from 'lodash';
 import { AliasAction, RetryableEsClientError } from './actions';
-import { AllActionStates, State } from './types';
+import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
+import { SavedObjectsMigrationVersion } from '../types';
 
 /**
  * How many times to retry a failing step.
@@ -521,4 +522,55 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else {
     return throwBadControlState(stateP);
   }
+};
+
+/**
+ * Construct the initial state for the model
+ */
+export const createInitialState = ({
+  kibanaVersion,
+  targetMappings,
+  preMigrationScript,
+  migrationVersionPerType,
+  indexPrefix,
+}: {
+  kibanaVersion: string;
+  targetMappings: IndexMapping;
+  preMigrationScript?: string;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+}): InitState => {
+  const outdatedDocumentsQuery = {
+    bool: {
+      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
+        bool: {
+          must: [
+            { exists: { field: type } },
+            {
+              bool: {
+                must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+              },
+            },
+          ],
+        },
+      })),
+    },
+  };
+
+  const initialState: InitState = {
+    controlState: 'INIT',
+    indexPrefix,
+    legacyIndex: indexPrefix,
+    currentAlias: indexPrefix,
+    versionAlias: indexPrefix + '_' + kibanaVersion,
+    versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
+    kibanaVersion,
+    preMigrationScript: Option.fromNullable(preMigrationScript),
+    targetMappings,
+    outdatedDocumentsQuery,
+    retryCount: 0,
+    retryDelay: 0,
+    logs: [],
+  };
+  return initialState;
 };

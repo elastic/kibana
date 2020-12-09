@@ -39,7 +39,7 @@ import {
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
-import { model } from './model';
+import { createInitialState, model } from './model';
 import { ResponseType } from './next';
 
 describe('migrations v2 model', () => {
@@ -177,7 +177,7 @@ describe('migrations v2 model', () => {
     });
   });
 
-  describe('transitions from', () => {
+  describe('model transitions from', () => {
     describe('INIT', () => {
       const initState: State = {
         ...baseState,
@@ -806,6 +806,147 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+    });
+  });
+  describe('createInitialState', () => {
+    it('creates the initial state for the model based on the passed in paramaters', () => {
+      expect(
+        createInitialState({
+          kibanaVersion: '8.1.0',
+          targetMappings: {
+            dynamic: 'strict',
+            properties: { my_type: { properties: { title: { type: 'text' } } } },
+          },
+          migrationVersionPerType: {},
+          indexPrefix: '.kibana_task_manager',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "controlState": "INIT",
+          "currentAlias": ".kibana_task_manager",
+          "indexPrefix": ".kibana_task_manager",
+          "kibanaVersion": "8.1.0",
+          "legacyIndex": ".kibana_task_manager",
+          "logs": Array [],
+          "outdatedDocumentsQuery": Object {
+            "bool": Object {
+              "should": Array [],
+            },
+          },
+          "preMigrationScript": Object {
+            "_tag": "None",
+          },
+          "retryCount": 0,
+          "retryDelay": 0,
+          "targetMappings": Object {
+            "dynamic": "strict",
+            "properties": Object {
+              "my_type": Object {
+                "properties": Object {
+                  "title": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          },
+          "versionAlias": ".kibana_task_manager_8.1.0",
+          "versionIndex": ".kibana_task_manager_8.1.0_001",
+        }
+      `);
+    });
+    it('returns state with a preMigration script', () => {
+      const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
+      const initialState = createInitialState({
+        kibanaVersion: '8.1.0',
+        targetMappings: {
+          dynamic: 'strict',
+          properties: { my_type: { properties: { title: { type: 'text' } } } },
+        },
+        preMigrationScript,
+        migrationVersionPerType: {},
+        indexPrefix: '.kibana_task_manager',
+      });
+
+      expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
+      expect(initialState.preMigrationScript).toEqual(preMigrationScript);
+    });
+    it('returns state without a preMigration script', () => {
+      expect(
+        Option.isNone(
+          createInitialState({
+            kibanaVersion: '8.1.0',
+            targetMappings: {
+              dynamic: 'strict',
+              properties: { my_type: { properties: { title: { type: 'text' } } } },
+            },
+            preMigrationScript: undefined,
+            migrationVersionPerType: {},
+            indexPrefix: '.kibana_task_manager',
+          }).preMigrationScript
+        )
+      ).toEqual(true);
+    });
+    it('returns state with an outdatedDocumentsQuery', () => {
+      expect(
+        createInitialState({
+          kibanaVersion: '8.1.0',
+          targetMappings: {
+            dynamic: 'strict',
+            properties: { my_type: { properties: { title: { type: 'text' } } } },
+          },
+          preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
+          migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
+          indexPrefix: '.kibana_task_manager',
+        }).outdatedDocumentsQuery
+      ).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "my_dashboard",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Object {
+                          "term": Object {
+                            "migrationVersion.my_dashboard": "7.10.1",
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "my_viz",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Object {
+                          "term": Object {
+                            "migrationVersion.my_viz": "8.0.0",
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
     });
   });
 });

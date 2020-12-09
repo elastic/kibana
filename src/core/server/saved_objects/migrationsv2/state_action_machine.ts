@@ -23,6 +23,18 @@ export interface ControlState {
 const MAX_STEPS_WITHOUT_CONTROL_STATE_CHANGE = 50;
 
 /**
+ * A state-action machine next function that returns the next action thunk
+ * based on the passed in state.
+ */
+export type Next<S> = (state: S) => (() => Promise<unknown>) | null;
+
+/**
+ * A state-action machine model that given the current state and an action
+ * response returns the state for the next step.
+ */
+export type Model<S> = (state: S, res: any) => S;
+
+/**
  * A state-action machine for performing Saved Object Migrations.
  *
  * Based on https://www.microsoft.com/en-us/research/uploads/prod/2016/12/Computation-and-State-Machines.pdf
@@ -59,8 +71,8 @@ export async function stateActionMachine<S extends ControlState>(
   // It would be nice to use generics to enforce that model should accept all
   // the types of responses that actions could return. But seems to be
   // impossible because of https://github.com/microsoft/TypeScript/issues/13995#issuecomment-477978591
-  next: (state: S) => (() => Promise<unknown>) | null,
-  model: (state: S, res: any) => S
+  next: Next<S>,
+  model: Model<S>
 ) {
   let state = initialState;
   let controlStateStepCounter = 0;
