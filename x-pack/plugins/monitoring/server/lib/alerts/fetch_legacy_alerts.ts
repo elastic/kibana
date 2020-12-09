@@ -28,6 +28,7 @@ export async function fetchLegacyAlerts(
         {
           timestamp: {
             order: 'desc',
+            unmapped_type: 'long',
           },
         },
       ],

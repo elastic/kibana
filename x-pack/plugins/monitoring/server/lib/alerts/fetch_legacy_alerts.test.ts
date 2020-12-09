@@ -69,7 +69,7 @@ describe('fetchLegacyAlerts', () => {
       ],
       body: {
         size,
-        sort: [{ timestamp: { order: 'desc' } }],
+        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
         query: {
           bool: {
             minimum_should_match: 1,

@@ -58,6 +58,7 @@ export async function fetchESUsage(
         {
           timestamp: {
             order: 'desc',
+            unmapped_type: 'long',
           },
         },
       ],

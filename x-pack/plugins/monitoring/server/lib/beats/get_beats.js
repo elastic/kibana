@@ -122,7 +122,7 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }],
+          sort: [{ 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } }],
         },
       },
       sort: [
