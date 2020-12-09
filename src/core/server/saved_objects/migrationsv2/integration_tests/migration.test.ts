@@ -102,6 +102,24 @@ describe('migration v2', () => {
     }
   };
 
+  describe('migrating from 7.3.0-xpack version', () => {
+    beforeAll(async () => {
+      await startServers({
+        oss: false,
+        dataArchive: join(__dirname, 'archives', '7_3_0_xpack.zip'),
+      });
+    });
+
+    afterAll(async () => {
+      await stopServers();
+    });
+
+    it.only('works (tm)', async () => {
+      const response = await esClient.cat.indices();
+      console.log(response.body);
+    });
+  });
+
   describe('migrating from the same Kibana version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 

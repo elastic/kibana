@@ -357,8 +357,8 @@ export const reindex = (
         },
         script: Option.fold(
           () => undefined,
-          () => ({
-            source: reindexScript,
+          (script) => ({
+            source: script,
             lang: 'painless',
           })
         )(reindexScript),
