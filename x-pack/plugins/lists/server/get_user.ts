@@ -6,10 +6,10 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginStart } from '../../security/server';
 
 export interface GetUserOptions {
-  security: SecurityPluginSetup | null | undefined;
+  security: SecurityPluginStart | null | undefined;
   request: KibanaRequest;
 }
 
