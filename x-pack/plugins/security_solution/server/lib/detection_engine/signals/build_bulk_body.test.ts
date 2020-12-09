@@ -11,7 +11,7 @@ import {
   sampleIdGuid,
   sampleDocWithAncestors,
   sampleRuleSO,
-  sampleDocNoSortIdNoVersion,
+  sampleWrappedSignalHit,
 } from './__mocks__/es_results';
 import {
   buildBulkBody,
@@ -754,10 +754,10 @@ describe('buildBulkBody', () => {
 
 describe('buildSignalFromSequence', () => {
   test('builds a basic signal from a sequence of building blocks', () => {
-    const block1 = sampleDocWithAncestors().hits.hits[0];
+    const block1 = sampleWrappedSignalHit();
     block1._source.new_key = 'new_key_value';
     block1._source.new_key2 = 'new_key2_value';
-    const block2 = sampleDocWithAncestors().hits.hits[0];
+    const block2 = sampleWrappedSignalHit();
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
     const ruleSO = sampleRuleSO();
@@ -765,8 +765,7 @@ describe('buildSignalFromSequence', () => {
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete signal['@timestamp'];
-    const expected: Omit<SignalHit, '@timestamp'> & { someKey: string; new_key: string } = {
-      someKey: 'someValue',
+    const expected: Omit<SignalHit, '@timestamp'> & { new_key: string } = {
       new_key: 'new_key_value',
       event: {
         kind: 'signal',
@@ -775,14 +774,14 @@ describe('buildSignalFromSequence', () => {
         parents: [
           {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
           },
           {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -796,8 +795,14 @@ describe('buildSignalFromSequence', () => {
             depth: 0,
           },
           {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -809,8 +814,14 @@ describe('buildSignalFromSequence', () => {
             depth: 0,
           },
           {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -864,8 +875,8 @@ describe('buildSignalFromSequence', () => {
   });
 
   test('builds a basic signal if there is no overlap between source events', () => {
-    const block1 = sampleDocNoSortIdNoVersion();
-    const block2 = sampleDocNoSortIdNoVersion();
+    const block1 = sampleWrappedSignalHit();
+    const block2 = sampleWrappedSignalHit();
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
     const ruleSO = sampleRuleSO();
@@ -881,29 +892,57 @@ describe('buildSignalFromSequence', () => {
         parents: [
           {
             id: sampleIdGuid,
-            type: 'event',
+            type: 'signal',
             index: 'myFakeSignalIndex',
-            depth: 0,
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
           {
             id: sampleIdGuid,
-            type: 'event',
+            type: 'signal',
             index: 'myFakeSignalIndex',
-            depth: 0,
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
         ],
         ancestors: [
           {
-            id: sampleIdGuid,
+            id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
             type: 'event',
             index: 'myFakeSignalIndex',
             depth: 0,
           },
           {
             id: sampleIdGuid,
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+          },
+          {
+            id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
             type: 'event',
             index: 'myFakeSignalIndex',
             depth: 0,
+          },
+          {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
+            id: sampleIdGuid,
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
         ],
         status: 'open',
@@ -944,7 +983,7 @@ describe('buildSignalFromSequence', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
-        depth: 1,
+        depth: 2,
         group: {
           id: '269c1f5754bff92fb8040283b687258e99b03e8b2ab1262cc20c82442e5de5ea',
         },

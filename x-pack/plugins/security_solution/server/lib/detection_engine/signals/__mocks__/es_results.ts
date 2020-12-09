@@ -12,6 +12,7 @@ import {
   BulkItem,
   RuleAlertAttributes,
   SignalHit,
+  WrappedSignalHit,
 } from '../types';
 import {
   Logger,
@@ -239,6 +240,14 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     hits: [],
   },
 });
+
+export const sampleWrappedSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleSignalHit(),
+  };
+};
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();

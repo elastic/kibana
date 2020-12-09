@@ -247,7 +247,10 @@ export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] 
   );
 };
 
-export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): WrappedSignalHit[] => {
+export const wrapBuildingBlocks = (
+  buildingBlocks: SignalHit[],
+  index: string
+): WrappedSignalHit[] => {
   const blockIds = generateBuildingBlockIds(buildingBlocks);
   return buildingBlocks.map((block, idx) => {
     return {

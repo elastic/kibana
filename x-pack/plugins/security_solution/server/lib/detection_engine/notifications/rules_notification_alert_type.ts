@@ -79,7 +79,13 @@ export const rulesNotificationAlertType = ({
 
     if (signalsCount !== 0) {
       const alertInstance = services.alertInstanceFactory(alertId);
-      scheduleNotificationActions({ alertInstance, signalsCount, resultsLink, ruleParams, signals });
+      scheduleNotificationActions({
+        alertInstance,
+        signalsCount,
+        resultsLink,
+        ruleParams,
+        signals,
+      });
     }
   },
 });

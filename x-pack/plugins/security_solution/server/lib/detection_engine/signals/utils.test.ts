@@ -979,6 +979,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -996,6 +997,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
@@ -1147,6 +1149,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1159,6 +1162,7 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1167,6 +1171,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1178,11 +1183,13 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override select values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1198,6 +1205,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1251,6 +1259,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
@@ -1259,6 +1268,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
           createdSignalsCount: 2,
+          createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
@@ -1268,6 +1278,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
         createdSignalsCount: 5, // Adds the 3 and 2 together
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
