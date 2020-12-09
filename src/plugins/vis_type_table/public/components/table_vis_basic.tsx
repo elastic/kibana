@@ -67,7 +67,7 @@ export const TableVisBasic = memo(
     const gridColumns = createGridColumns(table, columns, columnsWidth, sortedRows, fireEvent);
 
     // Pagination config
-    const pagination = usePagination(visConfig);
+    const pagination = usePagination(visConfig, rows.length);
     // Sorting config
     const sortingColumns = useMemo(
       () =>

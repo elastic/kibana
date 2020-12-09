@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TableVisParams } from '../../types';
 
-export const usePagination = (visParams: TableVisParams) => {
+export const usePagination = (visParams: TableVisParams, rowCount: number) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: visParams.perPage || 0,
@@ -35,11 +35,18 @@ export const usePagination = (visParams: TableVisParams) => {
   );
 
   useEffect(() => {
-    setPagination({
-      pageIndex: 0,
-      pageSize: visParams.perPage || 0,
-    });
-  }, [visParams.perPage]);
+    const pageSize = visParams.perPage || 0;
+    const lastPageIndex = Math.ceil(rowCount / pageSize) - 1;
+    /**
+     * When the underlying data changes, there might be a case when actual pagination page
+     * doesn't exist anymore - if the number of rows has decreased.
+     * Set the last page as an actual.
+     */
+    setPagination((pag) => ({
+      pageIndex: pag.pageIndex > lastPageIndex ? lastPageIndex : pag.pageIndex,
+      pageSize,
+    }));
+  }, [visParams.perPage, rowCount]);
 
   const paginationMemoized = useMemo(
     () =>
