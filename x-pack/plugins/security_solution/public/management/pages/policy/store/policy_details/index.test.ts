@@ -7,7 +7,7 @@
 import { PolicyDetailsState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction, policyDetailsMiddlewareFactory } from './index';
-import { licenseState, policyConfig } from './selectors';
+import { policyConfig } from './selectors';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
