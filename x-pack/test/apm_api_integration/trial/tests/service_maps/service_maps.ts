@@ -59,7 +59,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           expectSnapshot(serviceNames).toMatchInline(`
             Array [
-              "elastic-co-frontend",
+              "kibana",
+              "kibana-frontend",
               "opbeans-dotnet",
               "opbeans-go",
               "opbeans-java",
@@ -79,6 +80,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           expectSnapshot(externalDestinations).toMatchInline(`
             Array [
               ">elasticsearch",
+              ">feeds.elastic.co:443",
               ">postgresql",
               ">redis",
             ]
@@ -156,54 +158,54 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
           );
 
-          expectSnapshot(dataWithAnomalies.length).toMatchInline(`5`);
+          expectSnapshot(dataWithAnomalies.length).toMatchInline(`8`);
           expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
-          Array [
-            Object {
-              "data": Object {
-                "agent.name": "ruby",
-                "id": "opbeans-ruby",
-                "service.environment": "production",
-                "service.name": "opbeans-ruby",
-                "serviceAnomalyStats": Object {
-                  "actualValue": 141536.936507937,
-                  "anomalyScore": 0,
-                  "healthStatus": "healthy",
-                  "jobId": "apm-production-229a-high_mean_transaction_duration",
-                  "transactionType": "request",
+            Array [
+              Object {
+                "data": Object {
+                  "agent.name": "python",
+                  "id": "opbeans-python",
+                  "service.name": "opbeans-python",
+                  "serviceAnomalyStats": Object {
+                    "anomalyScore": 0,
+                    "healthStatus": "healthy",
+                    "jobId": "apm-production-1369-high_mean_transaction_duration",
+                    "transactionType": "request",
+                  },
                 },
               },
-            },
-            Object {
-              "data": Object {
-                "agent.name": "java",
-                "id": "opbeans-java",
-                "service.environment": "production",
-                "service.name": "opbeans-java",
-                "serviceAnomalyStats": Object {
-                  "actualValue": 559010.6,
-                  "anomalyScore": 0,
-                  "healthStatus": "healthy",
-                  "jobId": "apm-production-229a-high_mean_transaction_duration",
-                  "transactionType": "request",
+              Object {
+                "data": Object {
+                  "agent.name": "nodejs",
+                  "id": "opbeans-node",
+                  "service.environment": "testing",
+                  "service.name": "opbeans-node",
+                  "serviceAnomalyStats": Object {
+                    "actualValue": 29300.5555555556,
+                    "anomalyScore": 0,
+                    "healthStatus": "healthy",
+                    "jobId": "apm-testing-384f-high_mean_transaction_duration",
+                    "transactionType": "request",
+                  },
                 },
               },
-            },
-            Object {
-              "data": Object {
-                "agent.name": "rum-js",
-                "id": "elastic-co-frontend",
-                "service.name": "elastic-co-frontend",
-                "serviceAnomalyStats": Object {
-                  "anomalyScore": 0,
-                  "healthStatus": "healthy",
-                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
-                  "transactionType": "page-load",
+              Object {
+                "data": Object {
+                  "agent.name": "rum-js",
+                  "id": "opbeans-rum",
+                  "service.environment": "testing",
+                  "service.name": "opbeans-rum",
+                  "serviceAnomalyStats": Object {
+                    "actualValue": 2386500,
+                    "anomalyScore": 0,
+                    "healthStatus": "healthy",
+                    "jobId": "apm-testing-384f-high_mean_transaction_duration",
+                    "transactionType": "page-load",
+                  },
                 },
               },
-            },
-          ]
-        `);
+            ]
+          `);
 
           expectSnapshot(response.body).toMatch();
         });

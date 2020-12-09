@@ -56,11 +56,17 @@ const originalPolicy: SerializedPolicy = {
         shrink: { number_of_shards: 12 },
         allocate: {
           number_of_replicas: 3,
+          include: {
+            some: 'value',
+          },
+          exclude: {
+            some: 'value',
+          },
         },
         set_priority: {
           priority: 10,
         },
-        migrate: { enabled: false },
+        migrate: { enabled: true },
       },
     },
     cold: {
@@ -133,7 +139,8 @@ describe('deserializer and serializer', () => {
 
     const copyOfThisTestPolicy = cloneDeep(thisTestPolicy);
 
-    expect(serializer(deserializer(thisTestPolicy))).toEqual(thisTestPolicy);
+    const _formInternal = deserializer(thisTestPolicy);
+    expect(serializer(_formInternal)).toEqual(thisTestPolicy);
 
     // Assert that the policy we passed in is unaltered after deserialization and serialization
     expect(thisTestPolicy).not.toBe(copyOfThisTestPolicy);
@@ -245,6 +252,42 @@ describe('deserializer and serializer', () => {
         cold: { min_age: '2d', actions: {} },
         delete: { min_age: '3d', actions: { delete: {} } },
       },
+    });
+  });
+
+  it('sets all known allocate options correctly', () => {
+    formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
+    formInternal._meta.warm.dataTierAllocationType = 'node_attrs';
+    formInternal._meta.warm.allocationNodeAttribute = 'some:value';
+
+    expect(serializer(formInternal).phases.warm!.actions.allocate).toEqual({
+      number_of_replicas: 0,
+      require: {
+        some: 'value',
+      },
+      include: {
+        some: 'value',
+      },
+      exclude: {
+        some: 'value',
+      },
+    });
+  });
+
+  it('sets allocate and migrate actions when defined together', () => {
+    formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
+    formInternal._meta.warm.dataTierAllocationType = 'none';
+    // This should not be set...
+    formInternal._meta.warm.allocationNodeAttribute = 'some:value';
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.allocate).toEqual({
+      number_of_replicas: 0,
+    });
+
+    expect(result.phases.warm!.actions.migrate).toEqual({
+      enabled: false,
     });
   });
 });
