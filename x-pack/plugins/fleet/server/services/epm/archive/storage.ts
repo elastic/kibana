@@ -169,7 +169,6 @@ export const getEsPackage = async (
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${manifestPath}`,
   });
   const packageInfo = yaml.load(soResManifest.saved_objects[0].attributes.data_utf8);
-
   const readmePath = `${pkgName}-${pkgVersion}/docs/README.md`;
   const readmeRes = await savedObjectsClient.find<PackageAsset>({
     type: ASSETS_SAVED_OBJECT_TYPE,

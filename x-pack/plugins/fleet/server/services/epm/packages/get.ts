@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
-  ArchivePackage,
-  InstallSource,
-  RegistryPackage,
-  EpmPackageAdditions,
-} from '../../../../common/types';
+import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
@@ -105,12 +100,8 @@ export async function getPackageInfo(options: {
     pkgName,
     pkgVersion,
     savedObjectsClient,
-    pkgInstallSource:
-      savedObject?.attributes.version === pkgVersion
-        ? savedObject?.attributes.install_source
-        : undefined,
+    installedPkgSO: savedObject,
   });
-  if (!getPackageRes) throw new Error('jlk');
   const { paths, packageInfo } = getPackageRes;
 
   // add properties that aren't (or aren't yet) on the package
@@ -135,13 +126,15 @@ type GetPackageResponse = PackageResponse | undefined;
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
-  pkgInstallSource?: InstallSource;
+  installedPkgSO?: SavedObject<Installation>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<PackageResponse> {
-  const { pkgName, pkgVersion, pkgInstallSource, savedObjectsClient } = options;
+  const { pkgName, pkgVersion, installedPkgSO, savedObjectsClient } = options;
   let res: GetPackageResponse;
   // if the package is installed
-  if (pkgInstallSource) {
+
+  if (installedPkgSO && installedPkgSO.attributes.version === pkgVersion) {
+    const { install_source: pkgInstallSource } = installedPkgSO.attributes;
     // check cache
     res = getArchivePackage({
       name: pkgName,
@@ -149,7 +142,12 @@ export async function getPackageFromSource(options: {
     });
     // check storage
     if (!res) {
-      res = await getEsPackage(pkgName, pkgVersion, savedObjectsClient);
+      res = await getEsPackage(
+        pkgName,
+        pkgVersion,
+        installedPkgSO.attributes.package_assets,
+        savedObjectsClient
+      );
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {
