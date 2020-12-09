@@ -7,17 +7,22 @@
 import React, { ChangeEventHandler, memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
-  EuiFieldText,
-  EuiButtonIcon,
   EuiSuperSelectOption,
 } from '@elastic/eui';
 
-import { ConditionEntryField, TrustedApp } from '../../../../../../../../common/endpoint/types';
-import { CONDITION_FIELD_TITLE } from '../../../translations';
+import {
+  ConditionEntry,
+  ConditionEntryField,
+  OperatingSystem,
+} from '../../../../../../../common/endpoint/types';
+
+import { CONDITION_FIELD_TITLE, ENTRY_PROPERTY_TITLES, OPERATOR_TITLE } from '../../translations';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;
@@ -35,25 +40,27 @@ const ConditionEntryCell = memo<{
 
 ConditionEntryCell.displayName = 'ConditionEntryCell';
 
-export interface ConditionEntryProps {
-  os: TrustedApp['os'];
-  entry: TrustedApp['entries'][0];
+export interface ConditionEntryInputProps {
+  os: OperatingSystem;
+  entry: ConditionEntry;
   /** controls if remove button is enabled/disabled */
   isRemoveDisabled?: boolean;
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
-  onRemove: (entry: TrustedApp['entries'][0]) => void;
-  onChange: (newEntry: TrustedApp['entries'][0], oldEntry: TrustedApp['entries'][0]) => void;
+  onRemove: (entry: ConditionEntry) => void;
+  onChange: (newEntry: ConditionEntry, oldEntry: ConditionEntry) => void;
   /**
    * invoked when at least one field in the entry was visited (triggered when `onBlur` DOM event is dispatched)
    * For this component, that will be triggered only when the `value` field is visited, since that is the
    * only one needs user input.
    */
-  onVisited?: (entry: TrustedApp['entries'][0]) => void;
+  onVisited?: (entry: ConditionEntry) => void;
   'data-test-subj'?: string;
 }
-export const ConditionEntry = memo<ConditionEntryProps>(
+
+export const ConditionEntryInput = memo<ConditionEntryInputProps>(
   ({
+    os,
     entry,
     showLabels = false,
     onRemove,
@@ -62,14 +69,9 @@ export const ConditionEntry = memo<ConditionEntryProps>(
     onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useCallback((suffix: string) => dataTestSubj && `${dataTestSubj}-${suffix}`, [
+      dataTestSubj,
+    ]);
 
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
@@ -81,38 +83,28 @@ export const ConditionEntry = memo<ConditionEntryProps>(
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
         },
+        ...(os === OperatingSystem.WINDOWS
+          ? [
+              {
+                inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
+                value: ConditionEntryField.SIGNER,
+              },
+            ]
+          : []),
       ];
-    }, []);
+    }, [os]);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
-      (ev) => {
-        onChange(
-          {
-            ...entry,
-            value: ev.target.value,
-          },
-          entry
-        );
-      },
+      (ev) => onChange({ ...entry, value: ev.target.value }, entry),
       [entry, onChange]
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => {
-        onChange(
-          {
-            ...entry,
-            field: newField,
-          },
-          entry
-        );
-      },
+      (newField) => onChange({ ...entry, field: newField }, entry),
       [entry, onChange]
     );
 
-    const handleRemoveClick = useCallback(() => {
-      onRemove(entry);
-    }, [entry, onRemove]);
+    const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
       if (onVisited) {
@@ -129,13 +121,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         responsive={false}
       >
         <EuiFlexItem grow={2}>
-          <ConditionEntryCell
-            showLabel={showLabels}
-            label={i18n.translate(
-              'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field',
-              { defaultMessage: 'Field' }
-            )}
-          >
+          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.field}>
             <EuiSuperSelect
               options={fieldOptions}
               valueOfSelected={entry.field}
@@ -145,31 +131,12 @@ export const ConditionEntry = memo<ConditionEntryProps>(
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ConditionEntryCell
-            showLabel={showLabels}
-            label={i18n.translate(
-              'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.operator',
-              { defaultMessage: 'Operator' }
-            )}
-          >
-            <EuiFieldText
-              name="operator"
-              value={i18n.translate(
-                'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.operator.is',
-                { defaultMessage: 'is' }
-              )}
-              readOnly
-            />
+          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.operator}>
+            <EuiFieldText name="operator" value={OPERATOR_TITLE.included} readOnly />
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <ConditionEntryCell
-            showLabel={showLabels}
-            label={i18n.translate(
-              'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.value',
-              { defaultMessage: 'Value' }
-            )}
-          >
+          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText
               name="value"
               value={entry.value}
@@ -202,4 +169,4 @@ export const ConditionEntry = memo<ConditionEntryProps>(
   }
 );
 
-ConditionEntry.displayName = 'ConditionEntry';
+ConditionEntryInput.displayName = 'ConditionEntryInput';
