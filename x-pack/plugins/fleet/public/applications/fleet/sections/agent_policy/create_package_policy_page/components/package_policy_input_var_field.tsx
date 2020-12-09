@@ -89,8 +89,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     );
   }, [isInvalid, multi, onChange, type, value, fieldLabel]);
 
-  // Boolean cannot be optionnal by default set to false
-  const isOptionnal = type !== 'bool' && !required;
+  // Boolean cannot be optional by default set to false
+  const isOptional = type !== 'bool' && !required;
 
   return (
     <EuiFormRow
@@ -98,7 +98,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       error={errors}
       label={fieldLabel}
       labelAppend={
-        isOptionnal ? (
+        isOptional ? (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
