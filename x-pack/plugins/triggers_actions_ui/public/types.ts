@@ -152,6 +152,7 @@ export interface AlertType
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
+  enabledInLicense: boolean;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;

@@ -6,6 +6,7 @@
 import React, { Fragment, useState, useEffect, Suspense, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { upperFirst } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +32,7 @@ import {
   EuiText,
   EuiNotificationBadge,
   EuiErrorBoundary,
+  EuiToolTip,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -67,6 +69,8 @@ import './alert_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
+import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 
 const ENTER_KEY = 13;
 
@@ -355,7 +359,15 @@ export const AlertForm = ({
 
   const alertTypesByProducer = filteredAlertTypes.reduce(
     (
-      result: Record<string, Array<{ id: string; name: string; alertTypeItem: AlertTypeModel }>>,
+      result: Record<
+        string,
+        Array<{
+          id: string;
+          name: string;
+          checkEnabledResult: IsEnabledResult | IsDisabledResult;
+          alertTypeItem: AlertTypeModel;
+        }>
+      >,
       alertTypeValue
     ) => {
       const producer = alertTypeValue.alertType.producer;
@@ -366,6 +378,7 @@ export const AlertForm = ({
               ? alertTypeValue.alertTypeModel.name
               : alertTypeValue.alertTypeModel.name.props.defaultMessage,
           id: alertTypeValue.alertTypeModel.id,
+          checkEnabledResult: checkAlertTypeEnabled(alertTypeValue.alertType),
           alertTypeItem: alertTypeValue.alertTypeModel,
         });
       }
@@ -406,31 +419,44 @@ export const AlertForm = ({
         <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
           {items
             .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
-            .map((item, index) => (
-              <Fragment key={index}>
-                <EuiListGroupItem
-                  data-test-subj={`${item.id}-SelectOption`}
-                  color="primary"
-                  label={
-                    <span>
-                      <strong>{item.name}</strong>
-                      <EuiText color="subdued" size="s">
-                        <p>{item.alertTypeItem.description}</p>
-                      </EuiText>
-                    </span>
-                  }
-                  onClick={() => {
-                    setAlertProperty('alertTypeId', item.id);
-                    setActions([]);
-                    setAlertTypeModel(item.alertTypeItem);
-                    setAlertProperty('params', {});
-                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+            .map((item, index) => {
+              const alertTypeListItemHtml = (
+                <span>
+                  <strong>{item.name}</strong>
+                  <EuiText color="subdued" size="s">
+                    <p>{item.alertTypeItem.description}</p>
+                  </EuiText>
+                </span>
+              );
+              return (
+                <Fragment key={index}>
+                  <EuiListGroupItem
+                    data-test-subj={`${item.id}-SelectOption`}
+                    color="primary"
+                    label={
+                      item.checkEnabledResult.isEnabled ? (
+                        alertTypeListItemHtml
+                      ) : (
+                        <EuiToolTip position="top" content={item.checkEnabledResult.message}>
+                          {alertTypeListItemHtml}
+                        </EuiToolTip>
+                      )
                     }
-                  }}
-                />
-              </Fragment>
-            ))}
+                    isDisabled={!item.checkEnabledResult.isEnabled}
+                    aria-label={'test fdgfgdfgdf'}
+                    onClick={() => {
+                      setAlertProperty('alertTypeId', item.id);
+                      setActions([]);
+                      setAlertTypeModel(item.alertTypeItem);
+                      setAlertProperty('params', {});
+                      if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                        setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                      }
+                    }}
+                  />
+                </Fragment>
+              );
+            })}
         </EuiListGroup>
         <EuiSpacer />
       </Fragment>
