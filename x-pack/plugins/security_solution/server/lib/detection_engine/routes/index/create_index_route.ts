@@ -78,7 +78,7 @@ export const createDetectionIndex = async (
   const indexExists = await getIndexExists(callCluster, index);
   if (indexExists) {
     const indexVersion = await getIndexVersion(callCluster, index);
-    if (indexVersion !== SIGNALS_TEMPLATE_VERSION) {
+    if ((indexVersion ?? 0) < SIGNALS_TEMPLATE_VERSION) {
       await callCluster('indices.rollover', { alias: index });
     }
   } else {
