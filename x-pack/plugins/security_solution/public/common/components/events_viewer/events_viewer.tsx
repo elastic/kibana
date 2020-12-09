@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, findIndex } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -35,7 +35,7 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -101,6 +101,7 @@ interface Props {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
+  expandedEvent: TimelineExpandedEvent;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
@@ -113,6 +114,7 @@ interface Props {
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   query: Query;
+  onFlyoutCollapsed: (args: { indexName: string; eventId: string }) => void;
   onRuleChange?: () => void;
   start: string;
   sort: Sort;
@@ -128,6 +130,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   docValueFields,
   end,
+  expandedEvent,
   filters,
   headerFilterGroup,
   id,
@@ -140,6 +143,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   query,
   onRuleChange,
+  onFlyoutCollapsed,
   start,
   sort,
   utilityBar,
@@ -224,6 +228,12 @@ const EventsViewerComponent: React.FC<Props> = ({
     endDate: end,
     skip: !canQueryTimeline,
   });
+
+  useEffect(() => {
+    if (findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
+      onFlyoutCollapsed({ indexName: expandedEvent.indexName, eventId: expandedEvent.eventId });
+    }
+  }, [expandedEvent, onFlyoutCollapsed, events]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),

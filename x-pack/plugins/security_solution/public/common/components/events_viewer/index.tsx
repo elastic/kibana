@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo, useEffect } from 'react';
+import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -20,6 +21,8 @@ import { useFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { EventDetailsFlyout } from './event_details_flyout';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineId } from '../../../../common/types/timeline';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -51,6 +54,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
+  expandedEvent,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -62,6 +66,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   pageFilters,
   query,
   onRuleChange,
+  onFlyoutCollapsed,
   start,
   scopeId,
   showCheckboxes,
@@ -111,6 +116,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             dataProviders={dataProviders!}
             deletedEventIds={deletedEventIds}
             end={end}
+            expandedEvent={expandedEvent}
             isLoadingIndexPattern={isLoadingIndexPattern}
             filters={globalFilters}
             headerFilterGroup={headerFilterGroup}
@@ -122,6 +128,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             kqlMode={kqlMode}
             query={query}
             onRuleChange={onRuleChange}
+            onFlyoutCollapsed={onFlyoutCollapsed}
             start={start}
             sort={sort}
             utilityBar={utilityBar}
@@ -147,6 +154,8 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+    const { expandedEvent, graphEventId } = timeline;
     const {
       columns,
       dataProviders,
@@ -163,6 +172,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
+      expandedEvent,
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
@@ -175,16 +185,24 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
+      graphEventId,
     };
   };
   return mapStateToProps;
 };
 
-const mapDispatchToProps = {
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-};
+  onFlyoutCollapsed: ({ indexName, eventId }: { indexName: string; eventId: string }) => {
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId: TimelineId.detectionsPage,
+        event: {},
+      })
+    );
+  },
+});
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
