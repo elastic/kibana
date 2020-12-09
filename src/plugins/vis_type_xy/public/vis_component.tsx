@@ -58,7 +58,7 @@ import {
   renderAllSeries,
   getSeriesNameFn,
   getLegendActions,
-  getColorPicker,
+  useColorPicker,
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
@@ -257,7 +257,7 @@ const VisComponent = (props: VisComponentProps) => {
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={getColorPicker(legendPosition, setColor, getSeriesName)}
+          legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
           onElementClick={handleFilterClick(visData, xAccessor)}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}

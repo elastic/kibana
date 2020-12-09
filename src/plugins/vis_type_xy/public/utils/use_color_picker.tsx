@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent } from 'react';
+import React, { BaseSyntheticEvent, useMemo } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
@@ -37,7 +37,7 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
-export const getColorPicker = (
+export const useColorPicker = (
   legendPosition: Position,
   setColor: (
     newColor: string | null,
@@ -45,31 +45,35 @@ export const getColorPicker = (
     event: BaseSyntheticEvent
   ) => void,
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
-): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
-  const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
-  const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-    if (!seriesName) {
-      return;
-    }
-    if (newColor) {
-      onChange(newColor);
-    }
-    setColor(newColor, seriesName, event);
-    // must be called after onChange
-    onClose();
-  };
+): LegendColorPicker =>
+  useMemo(
+    () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+      const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+      const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
+        if (!seriesName) {
+          return;
+        }
+        if (newColor) {
+          onChange(newColor);
+        }
+        setColor(newColor, seriesName, event);
+        // must be called after onChange
+        onClose();
+      };
 
-  return (
-    <EuiWrappingPopover
-      isOpen
-      ownFocus
-      display="block"
-      button={anchor}
-      anchorPosition={getAnchorPosition(legendPosition)}
-      closePopover={onClose}
-      panelPaddingSize="s"
-    >
-      <ColorPicker color={color} onChange={handlChange} label={seriesName} />
-    </EuiWrappingPopover>
+      return (
+        <EuiWrappingPopover
+          isOpen
+          ownFocus
+          display="block"
+          button={anchor}
+          anchorPosition={getAnchorPosition(legendPosition)}
+          closePopover={onClose}
+          panelPaddingSize="s"
+        >
+          <ColorPicker color={color} onChange={handlChange} label={seriesName} />
+        </EuiWrappingPopover>
+      );
+    },
+    [getSeriesName, legendPosition, setColor]
   );
-};
