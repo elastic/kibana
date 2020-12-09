@@ -140,7 +140,7 @@ export class RollingFileAppender implements DisposableAppender {
       await this.fileManager.closeStream();
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log('Error while rolling file: ', e);
+      console.error('[RollingFileAppender]: error while rolling file: ', e);
     }
     this.rollingPromise = undefined;
     this.isRolling = false;

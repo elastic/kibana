@@ -41,6 +41,10 @@ export class RollingFileContext {
     } catch (e) {
       this.currentFileTime = Date.now();
       this.currentFileSize = 0;
+      if (e.code !== 'ENOENT') {
+        // eslint-disable-next-line no-console
+        console.log('[RollingFileAppender] error accessing the log file', e);
+      }
     }
   }
 }
