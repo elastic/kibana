@@ -43,7 +43,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
-    window.location.href = oauthUrl;
+    window.location.replace(oauthUrl);
   };
 
   return (
