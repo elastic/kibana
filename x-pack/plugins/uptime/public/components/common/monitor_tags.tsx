@@ -72,6 +72,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
         // filtering only makes sense in monitor list, where we have summary
         summary ? (
           <EuiBadge
+            key={tag}
             title={getFilterLabel(tag)}
             onClick={() => {
               setFilterType([tag]);
@@ -84,7 +85,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             {tag}
           </EuiBadge>
         ) : (
-          <EuiBadge color="hollow" className="eui-textTruncate" style={{ maxWidth: 120 }}>
+          <EuiBadge key={tag} color="hollow" className="eui-textTruncate" style={{ maxWidth: 120 }}>
             {tag}
           </EuiBadge>
         )
