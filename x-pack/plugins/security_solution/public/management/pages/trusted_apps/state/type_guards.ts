@@ -5,40 +5,11 @@
  */
 
 import {
-  TrustedAppCreatePending,
-  TrustedAppsListPageState,
-  TrustedAppCreateFailure,
-  TrustedAppCreateSuccess,
-} from './trusted_apps_list_page_state';
-import {
   ConditionEntry,
   ConditionEntryField,
-  Immutable,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
-
-type CreateViewPossibleStates =
-  | TrustedAppsListPageState['createView']
-  | Immutable<TrustedAppsListPageState['createView']>;
-
-export const isTrustedAppCreatePendingState = (
-  data: CreateViewPossibleStates
-): data is TrustedAppCreatePending => {
-  return data?.type === 'pending';
-};
-
-export const isTrustedAppCreateSuccessState = (
-  data: CreateViewPossibleStates
-): data is TrustedAppCreateSuccess => {
-  return data?.type === 'success';
-};
-
-export const isTrustedAppCreateFailureState = (
-  data: CreateViewPossibleStates
-): data is TrustedAppCreateFailure => {
-  return data?.type === 'failure';
-};
 
 export const isWindowsTrustedAppCondition = (
   condition: ConditionEntry
