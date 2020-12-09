@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 
 import './result_header_item.scss';
@@ -30,7 +31,7 @@ export const ResultHeaderItem: React.FC<Props> = ({ field, type, value }) => {
       <div className="appSearchResultHeaderItem__key">
         <TruncatedContent content={field} length={MAX_CHARACTER_LENGTH} tooltipType="title" />
       </div>
-      <div className={`appSearchResultHeaderItem__value`}>
+      <div className="appSearchResultHeaderItem__value">
         <TruncatedContent
           content={formattedValue}
           length={MAX_CHARACTER_LENGTH}

@@ -20,6 +20,6 @@ describe('ResultField', () => {
         type="string"
       />
     );
-    expect(wrapper.find('div').exists()).toBe(true);
+    expect(wrapper.find('ResultFieldValue').exists()).toBe(true);
   });
 });

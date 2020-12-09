@@ -28,13 +28,16 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
   const ID = 'id';
   const META = '_meta';
   const resultMeta = result[META];
-  const resultFields = Object.entries(result).filter(([key]) => key !== META && key !== ID);
+  const resultFields = useMemo(
+    () => Object.entries(result).filter(([key]) => key !== META && key !== ID),
+    [result]
+  );
   const numResults = resultFields.length;
 
   return (
     <EuiPanel
       paddingSize="none"
-      className={'appSearchResult'}
+      className="appSearchResult"
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
         defaultMessage: 'View document details',
