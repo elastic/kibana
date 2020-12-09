@@ -484,13 +484,9 @@ describe('embeddable', () => {
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
-    onEvent({ name: 'tableRowContextMenuClick', data: eventData });
+    onEvent({ name: 'tableRowContextMenuClick', data: {} });
 
     expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick);
-    expect(trigger.exec).toHaveBeenCalledWith(
-      expect.objectContaining({ data: eventData, embeddable: expect.anything() })
-    );
   });
 
   it('should not re-render if only change is in disabled filter', async () => {
