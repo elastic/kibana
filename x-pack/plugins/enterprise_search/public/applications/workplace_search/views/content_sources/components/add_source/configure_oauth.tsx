@@ -25,6 +25,8 @@ import { parseQueryParams } from '../../../../../../applications/shared/query_pa
 import { Loading } from '../../../../../../applications/shared/loading';
 import { SourceLogic } from '../../source_logic';
 
+import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
+
 interface OauthQueryParams {
   preContentSourceId: string;
 }
@@ -78,7 +80,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
         responsive={false}
       >
         <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-          <EuiFormRow label="Select GitHub organizations to sync">
+          <EuiFormRow label={CONFIG_OAUTH_LABEL}>
             <EuiCheckboxGroup
               options={checkboxOptions}
               idToSelectedMap={selectedGithubOrganizationsMap as EuiCheckboxGroupIdToSelectedMap}
@@ -88,7 +90,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
           <EuiSpacer size="xl" />
           <EuiFormRow>
             <EuiButton isLoading={formLoading} color="primary" fill type="submit">
-              Complete connection
+              {CONFIG_OAUTH_BUTTON}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>

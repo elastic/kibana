@@ -171,3 +171,17 @@ export const CONFIG_CUSTOM_BUTTON = i18n.translate(
     defaultMessage: 'Create Custom API Source',
   }
 );
+
+export const CONFIG_OAUTH_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.label',
+  {
+    defaultMessage: 'Complete connection',
+  }
+);
+
+export const CONFIG_OAUTH_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.button',
+  {
+    defaultMessage: 'Complete connection',
+  }
+);
