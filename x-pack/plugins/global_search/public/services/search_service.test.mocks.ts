@@ -9,6 +9,11 @@ jest.doMock('./fetch_server_results', () => ({
   fetchServerResults: fetchServerResultsMock,
 }));
 
+export const fetchServerSearchableTypesMock = jest.fn();
+jest.doMock('./fetch_server_searchable_types', () => ({
+  fetchServerSearchableTypes: fetchServerSearchableTypesMock,
+}));
+
 export const getDefaultPreferenceMock = jest.fn();
 jest.doMock('./utils', () => {
   const original = jest.requireActual('./utils');
