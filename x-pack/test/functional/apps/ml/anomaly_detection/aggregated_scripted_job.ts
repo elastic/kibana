@@ -387,7 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep(
-            'check that the single viewer metric button is disabled'
+            'check that the single metric viewer button is enabled'
           );
           await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
@@ -396,13 +396,12 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobConfig.job_id,
             true
           );
-        });
-
-        it('displays job results correctly in both anomaly explorer and single metric viewer', async () => {
           await ml.testExecution.logTestStep('opens job in single metric viewer');
           await ml.jobTable.clickOpenJobInSingleMetricViewerButton(testData.jobConfig.job_id);
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+        });
 
+        it('displays job results correctly in both anomaly explorer and single metric viewer', async () => {
           await ml.testExecution.logTestStep('should display the chart');
           await ml.singleMetricViewer.assertChartExist();
 
@@ -434,7 +433,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep(
-            'check that the single viewer metric button is disabled'
+            'check that the single metric viewer button is disabled'
           );
           await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
@@ -463,8 +462,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should navigate to single metric viewer');
           await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
 
-          await ml.testExecution.logTestStep('should redirect single metric viewer to another job');
-          await ml.jobSelection.assertJobSelectionNotExist([testData.jobConfig.job_id]);
+          await ml.testExecution.logTestStep(
+            'should show warning message and redirect single metric viewer to another job'
+          );
+          await ml.singleMetricViewer.assertToastMessageExists(
+            'mlTimeSeriesExplorerDisabledJobReasonWarningToast'
+          );
+          await ml.jobSelection.assertJobSelectionNotContains([testData.jobConfig.job_id]);
         });
       });
     }

@@ -50,7 +50,10 @@ export function validateJobSelection(
           },
         }
       );
-      toastNotifications.addWarning(warningText);
+      toastNotifications.addWarning({
+        title: warningText,
+        'data-test-subj': 'mlTimeSeriesExplorerDisabledJobReasonWarningToast',
+      });
     }
   }
 
