@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepMerge from 'deepmerge';
 import { formatMitreAttackDescription } from '../helpers/rules';
 import { eqlRule, eqlSequenceRule, indexPatterns } from '../objects/rule';
 
@@ -86,11 +85,12 @@ describe('Detection rules, EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = 7;
 
-  let rule: typeof eqlRule;
+  const rule = { ...eqlRule };
 
-  before(async () => {
-    const createdTimeline = await createTimeline(eqlRule.timeline);
-    rule = deepMerge(eqlRule, { timeline: { id: createdTimeline[0] } });
+  before(() => {
+    createTimeline(eqlRule.timeline).then((response) => {
+      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   after(() => {
@@ -180,15 +180,16 @@ describe('Detection rules, EQL', () => {
 describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = 1;
-  let rule: typeof eqlSequenceRule;
+  const rule = { ...eqlSequenceRule };
 
-  before(async () => {
-    const createdTimeline = await createTimeline(eqlSequenceRule.timeline);
-    rule = deepMerge(eqlSequenceRule, { timeline: { id: createdTimeline[0] } });
+  before(() => {
+    createTimeline(eqlSequenceRule.timeline).then((response) => {
+      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   afterEach(() => {
-    deleteTimeline(eqlRule.timeline.id!);
+    deleteTimeline(eqlSequenceRule.timeline.id!);
     deleteRule();
   });
 

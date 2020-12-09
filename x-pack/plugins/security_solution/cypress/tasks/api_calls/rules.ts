@@ -6,8 +6,8 @@
 
 import { CustomRule } from '../../objects/rule';
 
-export const createCustomRule = async (rule: CustomRule): Promise<string> => {
-  const response = await cy
+export const createCustomRule = (rule: CustomRule) =>
+  cy
     .request({
       method: 'POST',
       url: 'api/detection_engine/rules',
@@ -27,10 +27,7 @@ export const createCustomRule = async (rule: CustomRule): Promise<string> => {
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
     })
-    .promisify();
-
-  return response.body;
-};
+    .as('createCustomRule');
 
 export const deleteCustomRule = () => {
   cy.request({

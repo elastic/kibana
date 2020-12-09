@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepMerge from 'deepmerge';
 import { formatMitreAttackDescription } from '../helpers/rules';
 import { indexPatterns, newThresholdRule } from '../objects/rule';
 
@@ -86,11 +85,12 @@ describe('Detection rules, threshold', () => {
   const expectedTags = newThresholdRule.tags.join('');
   const expectedMitre = formatMitreAttackDescription(newThresholdRule.mitre);
 
-  let rule: typeof newThresholdRule;
+  const rule = { ...newThresholdRule };
 
   beforeEach(async () => {
-    const createdTimeline = await createTimeline(newThresholdRule.timeline);
-    rule = deepMerge(newThresholdRule, { timeline: { id: createdTimeline[0] } });
+    createTimeline(newThresholdRule.timeline).then((response) => {
+      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   afterEach(() => {

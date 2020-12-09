@@ -17,8 +17,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Export rules', () => {
-  let rule = '';
-  before(async () => {
+  let ruleResponse: Cypress.Response;
+  before(() => {
     cy.intercept(
       'POST',
       'api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
@@ -26,7 +26,9 @@ describe('Export rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    rule = await createCustomRule(newRule);
+    createCustomRule(newRule).then((response) => {
+      ruleResponse = response;
+    });
   });
 
   after(() => {
@@ -37,7 +39,7 @@ describe('Export rules', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(rule));
+      cy.wrap(response!.body).should('eql', expectedExportedRule(ruleResponse));
     });
   });
 });

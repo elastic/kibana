@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Timeline, timeline } from './timeline';
+import { CompleteTimeline, timeline } from './timeline';
 
 export interface TestCase {
   name: string;
   tags: string[];
   description: string;
-  timeline: Timeline;
+  timeline: CompleteTimeline;
   reporter: string;
 }
 

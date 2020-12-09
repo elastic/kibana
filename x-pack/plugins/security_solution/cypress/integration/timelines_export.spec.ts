@@ -12,13 +12,14 @@ import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { expectedExportedTimeline, timeline } from '../objects/timeline';
 
 describe('Export timelines', () => {
-  let timelineBody = '';
-  let timelineId = '';
-  before(async () => {
+  let timelineResponse: Cypress.Response;
+  let timelineId: string;
+  before(() => {
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    const newTimeline = await createTimeline(timeline);
-    timelineId = newTimeline[0];
-    timelineBody = newTimeline[1];
+    createTimeline(timeline).then((response) => {
+      timelineResponse = response;
+      timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   after(() => {
@@ -28,13 +29,11 @@ describe('Export timelines', () => {
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
-
-    const jsonTimeline = timelineBody;
     exportTimeline(timelineId);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response!.statusCode).should('eql', 200);
-      cy.wrap(response!.body).should('eql', expectedExportedTimeline(jsonTimeline));
+      cy.wrap(response!.body).should('eql', expectedExportedTimeline(timelineResponse));
     });
   });
 });

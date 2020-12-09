@@ -4,61 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Timeline } from '../../objects/timeline';
+import { CompleteTimeline } from '../../objects/timeline';
 
-export const createTimeline = async (timeline: Timeline): Promise<string[]> => {
-  const response = await cy
-    .request({
-      method: 'POST',
-      url: 'api/timeline',
-      body: {
-        timeline: {
-          columns: [
-            {
-              id: '@timestamp',
-            },
-            {
-              id: 'user.name',
-            },
-            {
-              id: 'event.category',
-            },
-            {
-              id: 'event.action',
-            },
-            {
-              id: 'host.name',
-            },
-          ],
-          kqlMode: 'filter',
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: timeline.query,
-                kind: 'kuery',
-              },
+export const createTimeline = (timeline: CompleteTimeline) =>
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline',
+    body: {
+      timeline: {
+        columns: [
+          {
+            id: '@timestamp',
+          },
+          {
+            id: 'user.name',
+          },
+          {
+            id: 'event.category',
+          },
+          {
+            id: 'event.action',
+          },
+          {
+            id: 'host.name',
+          },
+        ],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              expression: timeline.query,
+              kind: 'kuery',
             },
           },
-          dateRange: {
-            end: '1577881376000',
-            start: '1514809376000',
-          },
-          description: timeline.description,
-          title: timeline.title,
         },
+        dateRange: {
+          end: '1577881376000',
+          start: '1514809376000',
+        },
+        description: timeline.description,
+        title: timeline.title,
       },
-      headers: { 'kbn-xsrf': 'cypress-creds' },
-    })
-    .promisify();
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
 
-  const timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-  const timelineBody = response.body.data.persistTimeline.timeline;
-
-  return [timelineId, timelineBody];
-};
-
-export const createTimelineTemplate = async (timeline: Timeline) => {
-  const response = await cy
+export const createTimelineTemplate = (timeline: CompleteTimeline) =>
+  cy
     .request({
       method: 'POST',
       url: 'api/timeline',
@@ -102,11 +94,7 @@ export const createTimelineTemplate = async (timeline: Timeline) => {
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
     })
-    .promisify();
-
-  const timelinetemplate = response.body.data.persistTimeline.timeline;
-  return timelinetemplate;
-};
+    .as('createTimelineTemplate');
 
 export const deleteTimeline = (timelineId: string) => {
   cy.request({
@@ -115,7 +103,7 @@ export const deleteTimeline = (timelineId: string) => {
     body: {
       operationName: 'DeleteTimelineMutation',
       variables: {
-        id: [`${timelineId}`],
+        id: [timelineId],
       },
       query: 'mutation DeleteTimelineMutation($id: [ID!]!) {\n  deleteTimeline(id: $id)\n}\n',
     },

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepMerge from 'deepmerge';
 import { case1 } from '../objects/case';
 
 import {
@@ -53,11 +52,12 @@ import { closeTimeline } from '../tasks/timeline';
 import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
-  let mycase: typeof case1;
+  const mycase = { ...case1 };
 
   before(async () => {
-    const createdTimeline = await createTimeline(case1.timeline);
-    mycase = deepMerge(case1, { timeline: { id: createdTimeline[0] } });
+    createTimeline(case1.timeline).then((response) => {
+      mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   after(() => {

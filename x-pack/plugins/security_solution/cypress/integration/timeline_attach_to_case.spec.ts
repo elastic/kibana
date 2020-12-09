@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepMerge from 'deepmerge';
 import { loginAndWaitForTimeline } from '../tasks/login';
 import {
   attachTimelineToNewCase,
@@ -19,13 +18,13 @@ import { caseTimeline, timeline } from '../objects/timeline';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 
 describe('attach timeline to case', () => {
-  let myTimeline: typeof timeline;
+  const myTimeline = { ...timeline };
 
   context('without cases created', () => {
-    before(async () => {
-      const createdTimeline = await createTimeline(timeline);
-      myTimeline = deepMerge(timeline, {});
-      myTimeline.id = createdTimeline[0];
+    before(() => {
+      createTimeline(timeline).then((response) => {
+        myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+      });
     });
 
     after(() => {
