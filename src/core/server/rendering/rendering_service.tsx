@@ -52,7 +52,7 @@ export class RenderingService {
           packageInfo: this.coreContext.env.packageInfo,
         };
         const basePath = http.basePath.get(request);
-        const serverBasePath = http.basePath.serverBasePath;
+        const { serverBasePath, publicBaseUrl } = http.basePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
@@ -72,6 +72,7 @@ export class RenderingService {
             branch: env.packageInfo.branch,
             basePath,
             serverBasePath,
+            publicBaseUrl,
             env,
             anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {

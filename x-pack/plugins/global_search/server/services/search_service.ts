@@ -6,6 +6,7 @@
 
 import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
 import {
@@ -71,6 +72,11 @@ export interface SearchServiceStart {
     options: GlobalSearchFindOptions,
     request: KibanaRequest
   ): Observable<GlobalSearchBatchedResults>;
+
+  /**
+   * Returns all the searchable types registered by the underlying result providers.
+   */
+  getSearchableTypes(request: KibanaRequest): Promise<string[]>;
 }
 
 interface SetupDeps {
@@ -119,7 +125,18 @@ export class SearchService {
     this.contextFactory = getContextFactory(core);
     return {
       find: (params, options, request) => this.performFind(params, options, request),
+      getSearchableTypes: (request) => this.getSearchableTypes(request),
     };
+  }
+
+  private async getSearchableTypes(request: KibanaRequest) {
+    const context = this.contextFactory!(request);
+    const allTypes = (
+      await Promise.all(
+        [...this.providers.values()].map((provider) => provider.getSearchableTypes(context))
+      )
+    ).flat();
+    return uniq(allTypes);
   }
 
   private performFind(

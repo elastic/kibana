@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import { FormInternal } from '../types';
 
@@ -127,6 +130,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
@@ -141,6 +145,7 @@ export const schema: FormSchema<FormInternal> = {
               },
             ],
             serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
@@ -154,6 +159,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
         },
         forcemerge: {

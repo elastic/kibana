@@ -20,7 +20,7 @@ import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -32,10 +32,12 @@ import {
 } from '../../../global_search/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 import { parseSearchParams } from '../search_syntax';
+import { getSuggestions, SearchSuggestion } from '../suggestions';
+
 import './search_bar.scss';
 
 interface Props {
-  globalSearch: GlobalSearchPluginStart['find'];
+  globalSearch: GlobalSearchPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   taggingApi?: SavedObjectTaggingPluginStart;
@@ -43,15 +45,18 @@ interface Props {
   darkMode: boolean;
 }
 
-const clearField = (field: HTMLInputElement) => {
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+
+const setFieldValue = (field: HTMLInputElement, value: string) => {
   const nativeInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
   const nativeInputValueSetter = nativeInputValue ? nativeInputValue.set : undefined;
   if (nativeInputValueSetter) {
-    nativeInputValueSetter.call(field, '');
+    nativeInputValueSetter.call(field, value);
   }
-
   field.dispatchEvent(new Event('change'));
 };
+
+const clearField = (field: HTMLInputElement) => setFieldValue(field, '');
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 const blurEvent = new FocusEvent('blur');
@@ -92,6 +97,19 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
   return option;
 };
 
+const suggestionToOption = (suggestion: SearchSuggestion): EuiSelectableTemplateSitewideOption => {
+  const { key, label, description, icon, suggestedSearch } = suggestion;
+  return {
+    key,
+    label,
+    type: '__suggestion__',
+    icon: { type: icon },
+    suggestion: suggestedSearch,
+    meta: [{ text: description }],
+    'data-test-subj': `nav-search-option`,
+  };
+};
+
 export function SearchBar({
   globalSearch,
   taggingApi,
@@ -105,16 +123,34 @@ export function SearchBar({
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
-  const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
-  const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+  const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
+  const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const types = await globalSearch.getSearchableTypes();
+      setSearchableTypes(types);
+    };
+    fetch();
+  }, [globalSearch]);
+
+  const loadSuggestions = useCallback(
+    (searchTerm: string) => {
+      return getSuggestions({
+        searchTerm,
+        searchableTypes,
+        tagCache: taggingApi?.cache,
+      });
+    },
+    [taggingApi, searchableTypes]
+  );
 
   const setOptions = useCallback(
-    (_options: GlobalSearchResult[]) => {
+    (_options: GlobalSearchResult[], suggestions: SearchSuggestion[]) => {
       if (!isMounted()) {
         return;
       }
-
-      _setOptions(_options.map(resultToOption));
+      _setOptions([...suggestions.map(suggestionToOption), ..._options.map(resultToOption)]);
     },
     [isMounted, _setOptions]
   );
@@ -127,7 +163,9 @@ export function SearchBar({
         searchSubscription.current = null;
       }
 
-      let arr: GlobalSearchResult[] = [];
+      const suggestions = loadSuggestions(searchValue);
+
+      let aggregatedResults: GlobalSearchResult[] = [];
       if (searchValue.length !== 0) {
         trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
       }
@@ -145,20 +183,20 @@ export function SearchBar({
         tags: tagIds,
       };
 
-      searchSubscription.current = globalSearch(searchParams, {}).subscribe({
+      searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
-            arr = [...results, ...arr].sort(sortByScore);
-            setOptions(arr);
+            aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
+            setOptions(aggregatedResults, suggestions);
             return;
           }
 
           // if searchbar is empty, filter to only applications and sort alphabetically
           results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
 
-          arr = [...results, ...arr].sort(sortByTitle);
+          aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
 
-          setOptions(arr);
+          setOptions(aggregatedResults, suggestions);
         },
         error: () => {
           // Not doing anything on error right now because it'll either just show the previous
@@ -169,7 +207,7 @@ export function SearchBar({
       });
     },
     350,
-    [searchValue]
+    [searchValue, loadSuggestions]
   );
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -191,7 +229,15 @@ export function SearchBar({
     }
 
     // @ts-ignore - ts error is "union type is too complex to express"
-    const { url, type } = selected;
+    const { url, type, suggestion } = selected;
+
+    // if the type is a suggestion, we change the query on the input and trigger a new search
+    // by setting the searchValue (only setting the field value does not trigger a search)
+    if (type === '__suggestion__') {
+      setFieldValue(searchRef!, suggestion);
+      setSearchValue(suggestion);
+      return;
+    }
 
     // errors in tracking should not prevent selection behavior
     try {
