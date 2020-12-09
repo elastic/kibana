@@ -12,7 +12,11 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({ router, logger, authc }: RouteDefinitionParams) {
+export function defineSAMLRoutes({
+  router,
+  logger,
+  getAuthenticationService,
+}: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/saml/callback',
@@ -27,7 +31,7 @@ export function defineSAMLRoutes({ router, logger, authc }: RouteDefinitionParam
     async (context, request, response) => {
       try {
         // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
-        const authenticationResult = await authc.login(request, {
+        const authenticationResult = await getAuthenticationService().login(request, {
           provider: { type: SAMLAuthenticationProvider.type },
           value: {
             type: SAMLLogin.LoginWithSAMLResponse,

@@ -49,6 +49,8 @@ import {
   LegacyRequest,
 } from './types';
 
+import { Globals } from './static_globals';
+
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
 
@@ -115,26 +117,10 @@ export class Plugin {
       log: this.log,
     });
 
+    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
     const serverInfo = core.http.getServerInfo();
-    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
-    if (core.http.basePath.serverBasePath) {
-      kibanaUrl += `/${core.http.basePath.serverBasePath}`;
-    }
-    const getUiSettingsService = async () => {
-      const coreStart = (await core.getStartServices())[0];
-      return coreStart.uiSettings;
-    };
-    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(
-        getUiSettingsService,
-        cluster,
-        this.getLogger,
-        config,
-        kibanaUrl,
-        isCloud
-      );
       plugins.alerts?.registerType(alert.getAlertType());
     }
 

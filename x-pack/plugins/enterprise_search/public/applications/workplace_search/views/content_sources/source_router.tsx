@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 import moment from 'moment';
 import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -69,18 +69,15 @@ export const SourceRouter: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const pageHeader = (
-    <div>
-      <span className="eui-textOverflowWrap" title={name}>
-        {name}
-
-        <SourceInfoCard
-          sourceName={serviceName}
-          sourceType={serviceType}
-          dateCreated={moment(createdAt).format('MMMM D, YYYY')}
-          isFederatedSource={isFederatedSource}
-        />
-      </span>
-    </div>
+    <>
+      <SourceInfoCard
+        sourceName={serviceName}
+        sourceType={serviceType}
+        dateCreated={moment(createdAt).format('MMMM D, YYYY')}
+        isFederatedSource={isFederatedSource}
+      />
+      <EuiHorizontalRule />
+    </>
   );
 
   const callout = (
@@ -101,7 +98,6 @@ export const SourceRouter: React.FC = () => {
   return (
     <>
       {!supportedByLicense && callout}
-      {/* TODO: Figure out with design how to make this look better */}
       {pageHeader}
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
