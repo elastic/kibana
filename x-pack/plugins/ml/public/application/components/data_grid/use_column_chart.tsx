@@ -89,13 +89,13 @@ export const isNumericChartData = (arg: any): arg is NumericChartData => {
   );
 };
 
-interface OrdinalDataItem {
+export interface OrdinalDataItem {
   key: string;
   key_as_string?: string;
   doc_count: number;
 }
 
-interface OrdinalChartData {
+export interface OrdinalChartData {
   type: 'ordinal' | 'boolean';
   cardinality: number;
   data: OrdinalDataItem[];
@@ -120,7 +120,7 @@ export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData =>
   return arg.hasOwnProperty('type') && arg.type === 'unsupported';
 };
 
-type ChartDataItem = NumericDataItem | OrdinalDataItem;
+export type ChartDataItem = NumericDataItem | OrdinalDataItem;
 export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 type LegendText = string | JSX.Element;
