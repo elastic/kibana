@@ -56,7 +56,7 @@ export const Node = class extends React.PureComponent<Props, State> {
       values: { nodeName: node.name },
     });
 
-    const nodeBorder = this.state.isOverlayOpen ? {border: 'solid 4px #000'} : undefined;
+    const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
     return (
       <>
