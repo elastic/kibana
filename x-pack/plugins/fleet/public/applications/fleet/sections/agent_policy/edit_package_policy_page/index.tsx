@@ -93,15 +93,22 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const { data: packagePolicyData } = await sendGetOnePackagePolicy(packagePolicyId);
+        const {
+          data: packagePolicyData,
+          error: packagePolicyError,
+        } = await sendGetOnePackagePolicy(packagePolicyId);
 
-        if (!packagePolicyData?.item.policy_id) {
-          throw new window.Error(`Agent Policy ID missing in package policy ${packagePolicyId}`);
+        if (packagePolicyError) {
+          throw packagePolicyError;
         }
 
-        const { data: agentPolicyData } = await sendGetOneAgentPolicy(
-          packagePolicyData.item.policy_id
+        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
+          packagePolicyData!.item.policy_id
         );
+
+        if (agentPolicyError) {
+          throw agentPolicyError;
+        }
 
         if (agentPolicyData?.item) {
           setAgentPolicy(agentPolicyData.item);
