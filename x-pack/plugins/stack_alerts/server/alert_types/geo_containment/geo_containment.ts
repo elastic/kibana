@@ -111,7 +111,7 @@ export function getActiveEntriesAndGenerateAlerts(
     const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
     const context = {
       entityId: entityName,
-      entityDateTime: new Date(currIntervalEndTime).toISOString(),
+      entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
       entityDocumentId: docId,
       detectionDateTime: new Date(currIntervalEndTime).toISOString(),
       entityLocation: `POINT (${location[0]} ${location[1]})`,
