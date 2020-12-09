@@ -6,13 +6,13 @@
 
 import React from 'react';
 import { PageHeader } from '../page_header';
-import { renderWithRouter, MountWithReduxProvider } from '../../lib';
+import { renderWithRouter, MountWithReduxProvider } from '../../../../lib';
 
 describe('PageHeader', () => {
   it('shallow renders with the date picker', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} datePicker={true} />
+        <PageHeader />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_date_picker');
@@ -21,7 +21,7 @@ describe('PageHeader', () => {
   it('shallow renders without the date picker', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} datePicker={false} />
+        <PageHeader />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_no_date_picker');
@@ -30,7 +30,7 @@ describe('PageHeader', () => {
   it('shallow renders extra links', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} extraLinks={true} datePicker={true} />
+        <PageHeader />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_extra_links');
