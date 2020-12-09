@@ -377,7 +377,11 @@ export const getActionMessageParams = memoizeOne(
       state: [{ name: 'signals_count', description: 'state.signals_count' }],
       params: [],
       context: [
-        { name: 'results_link', description: 'context.results_link' },
+        {
+          name: 'results_link',
+          description: 'context.results_link',
+          useWithTripleBracesInTemplates: true,
+        },
         ...actionMessageRuleParams.map((param) => {
           const extendedParam = `rule.${param}`;
           return { name: extendedParam, description: `context.${extendedParam}` };

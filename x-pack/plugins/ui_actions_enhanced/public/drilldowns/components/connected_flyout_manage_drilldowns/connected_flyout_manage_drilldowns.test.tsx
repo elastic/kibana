@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, wait, cleanup } from '@testing-library/react';
+import { fireEvent, render, waitFor, cleanup } from '@testing-library/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   mockGetTriggerInfo,
@@ -50,7 +50,7 @@ test('Allows to manage drilldowns', async () => {
   );
 
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  await waitFor(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
 
   // no drilldowns in the list
   expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0);
@@ -87,7 +87,7 @@ test('Allows to manage drilldowns', async () => {
 
   expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
 
-  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(1));
+  await waitFor(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(1));
   expect(screen.getByText(name)).toBeVisible();
   const editButton = screen.getByText(/edit/i);
   fireEvent.click(editButton);
@@ -105,14 +105,14 @@ test('Allows to manage drilldowns', async () => {
   fireEvent.click(screen.getByText(/save/i));
 
   expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
-  await wait(() => screen.getByText(newName));
+  await waitFor(() => screen.getByText(newName));
 
   // delete drilldown from edit view
   fireEvent.click(screen.getByText(/edit/i));
   fireEvent.click(screen.getByText(/delete/i));
 
   expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
-  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
+  await waitFor(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
 });
 
 test('Can delete multiple drilldowns', async () => {
@@ -123,7 +123,7 @@ test('Can delete multiple drilldowns', async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  await waitFor(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
 
   const createDrilldown = async () => {
     const oldCount = screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM).length;
@@ -136,7 +136,7 @@ test('Can delete multiple drilldowns', async () => {
       target: { value: 'https://elastic.co' },
     });
     fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
-    await wait(() =>
+    await waitFor(() =>
       expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(oldCount + 1)
     );
   };
@@ -151,7 +151,7 @@ test('Can delete multiple drilldowns', async () => {
   expect(screen.queryByText(/Create/i)).not.toBeInTheDocument();
   fireEvent.click(screen.getByText(/Delete \(3\)/i));
 
-  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
+  await waitFor(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
 });
 
 test('Create only mode', async () => {
@@ -165,7 +165,7 @@ test('Create only mode', async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  await waitFor(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
   fireEvent.change(screen.getByLabelText(/name/i), {
     target: { value: 'test' },
   });
@@ -175,7 +175,7 @@ test('Create only mode', async () => {
   });
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
 
-  await wait(() => expect(toasts.addSuccess).toBeCalled());
+  await waitFor(() => expect(toasts.addSuccess).toBeCalled());
   expect(onClose).toBeCalled();
   expect(await mockDynamicActionManager.state.get().events.length).toBe(1);
 });
@@ -189,7 +189,7 @@ test('After switching between action factories state is restored', async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  await waitFor(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
   fireEvent.change(screen.getByLabelText(/name/i), {
     target: { value: 'test' },
   });
@@ -210,7 +210,7 @@ test('After switching between action factories state is restored', async () => {
   expect(screen.getByLabelText(/name/i)).toHaveValue('test');
 
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
-  await wait(() => expect(toasts.addSuccess).toBeCalled());
+  await waitFor(() => expect(toasts.addSuccess).toBeCalled());
   expect(await (mockDynamicActionManager.state.get().events[0].action.config as any).url).toBe(
     'https://elastic.co'
   );
@@ -230,7 +230,7 @@ test("Error when can't save drilldown changes", async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  await waitFor(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   fireEvent.click(screen.getByText(/Create new/i));
   fireEvent.change(screen.getByLabelText(/name/i), {
     target: { value: 'test' },
@@ -240,7 +240,7 @@ test("Error when can't save drilldown changes", async () => {
     target: { value: 'https://elastic.co' },
   });
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
-  await wait(() =>
+  await waitFor(() =>
     expect(toasts.addError).toBeCalledWith(error, { title: toastDrilldownsCRUDError })
   );
 });
@@ -254,7 +254,7 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   );
 
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  await waitFor(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
 
   expect(screen.getByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeVisible();
   fireEvent.click(screen.getByText(/hide/i));
@@ -268,7 +268,7 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  await waitFor(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();
 });
 
@@ -281,7 +281,7 @@ test('Drilldown type is not shown if no supported trigger', async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  await waitFor(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
   expect(screen.queryByText(/Go to Dashboard/i)).not.toBeInTheDocument(); // dashboard action is not visible, because APPLY_FILTER_TRIGGER not supported
   expect(screen.getByTestId('selectedActionFactory-Url')).toBeInTheDocument();
 });
@@ -295,7 +295,7 @@ test('Can pick a trigger', async () => {
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
-  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  await waitFor(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
 
   // input drilldown name
   const name = 'Test name';
@@ -318,6 +318,6 @@ test('Can pick a trigger', async () => {
 
   expect(createButton).toBeEnabled();
   fireEvent.click(createButton);
-  await wait(() => expect(toasts.addSuccess).toBeCalled());
+  await waitFor(() => expect(toasts.addSuccess).toBeCalled());
   expect(mockDynamicActionManager.state.get().events[0].triggers).toEqual(['SELECT_RANGE_TRIGGER']);
 });

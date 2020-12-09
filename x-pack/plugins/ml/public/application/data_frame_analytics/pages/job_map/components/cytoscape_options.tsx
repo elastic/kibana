@@ -20,6 +20,7 @@ const MAP_SHAPES = {
   ELLIPSE: 'ellipse',
   RECTANGLE: 'rectangle',
   DIAMOND: 'diamond',
+  TRIANGLE: 'triangle',
 } as const;
 type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
 
@@ -32,6 +33,8 @@ function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
       return MAP_SHAPES.RECTANGLE;
     case JOB_MAP_NODE_TYPES.INDEX:
       return MAP_SHAPES.DIAMOND;
+    case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
+      return MAP_SHAPES.TRIANGLE;
     default:
       return MAP_SHAPES.ELLIPSE;
   }
@@ -66,6 +69,8 @@ function borderColorForNode(el: cytoscape.NodeSingular) {
       return theme.euiColorVis1;
     case JOB_MAP_NODE_TYPES.INDEX:
       return theme.euiColorVis2;
+    case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
+      return theme.euiColorVis3;
     default:
       return theme.euiColorMediumShade;
   }
@@ -88,7 +93,8 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'border-style': 'solid',
         // @ts-ignore
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 2 : 1),
+        'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
+        // @ts-ignore
         color: theme.euiTextColors.default,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
         'font-size': theme.euiFontSizeXS,

@@ -6,9 +6,59 @@
 
 import { orderByTime } from '../process_event';
 import { IndexedProcessTree } from '../../types';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
-import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
-import * as eventModel from '../../../../common/endpoint/models/event';
+import { ResolverNode } from '../../../../common/endpoint/types';
+import {
+  levelOrder as baseLevelOrder,
+  calculateGenerationsAndDescendants,
+} from '../../lib/tree_sequencers';
+import * as nodeModel from '../../../../common/endpoint/models/node';
+
+function calculateGenerationsAndDescendantsFromOrigin(
+  origin: ResolverNode | undefined,
+  descendants: Map<string | undefined, ResolverNode[]>
+): { generations: number; descendants: number } | undefined {
+  if (!origin) {
+    return;
+  }
+
+  return calculateGenerationsAndDescendants({
+    node: origin,
+    currentLevel: 0,
+    totalDescendants: 0,
+    children: (parentNode: ResolverNode): ResolverNode[] =>
+      descendants.get(nodeModel.nodeID(parentNode)) ?? [],
+  });
+}
+
+function parentInternal(node: ResolverNode, idToNode: Map<string, ResolverNode>) {
+  const uniqueParentId = nodeModel.parentId(node);
+  if (uniqueParentId === undefined) {
+    return undefined;
+  } else {
+    return idToNode.get(uniqueParentId);
+  }
+}
+
+/**
+ * Returns the number of ancestors nodes (including the origin) in the graph.
+ */
+function countAncestors(
+  originID: string | undefined,
+  idToNode: Map<string, ResolverNode>
+): number | undefined {
+  if (!originID) {
+    return;
+  }
+
+  // include the origin
+  let total = 1;
+  let current: ResolverNode | undefined = idToNode.get(originID);
+  while (current !== undefined && parentInternal(current, idToNode) !== undefined) {
+    total++;
+    current = parentInternal(current, idToNode);
+  }
+  return total;
+}
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents.
@@ -16,24 +66,25 @@ import * as eventModel from '../../../../common/endpoint/models/event';
  */
 export function factory(
   // Array of processes to index as a tree
-  processes: SafeResolverEvent[]
+  nodes: ResolverNode[],
+  originID: string | undefined
 ): IndexedProcessTree {
-  const idToChildren = new Map<string | undefined, SafeResolverEvent[]>();
-  const idToValue = new Map<string, SafeResolverEvent>();
+  const idToChildren = new Map<string | undefined, ResolverNode[]>();
+  const idToValue = new Map<string, ResolverNode>();
 
-  for (const process of processes) {
-    const entityID: string | undefined = eventModel.entityIDSafeVersion(process);
-    if (entityID !== undefined) {
-      idToValue.set(entityID, process);
+  for (const node of nodes) {
+    const nodeID: string | undefined = nodeModel.nodeID(node);
+    if (nodeID !== undefined) {
+      idToValue.set(nodeID, node);
 
-      const uniqueParentPid: string | undefined = eventModel.parentEntityIDSafeVersion(process);
+      const uniqueParentId: string | undefined = nodeModel.parentId(node);
 
-      let childrenWithTheSameParent = idToChildren.get(uniqueParentPid);
+      let childrenWithTheSameParent = idToChildren.get(uniqueParentId);
       if (!childrenWithTheSameParent) {
         childrenWithTheSameParent = [];
-        idToChildren.set(uniqueParentPid, childrenWithTheSameParent);
+        idToChildren.set(uniqueParentId, childrenWithTheSameParent);
       }
-      childrenWithTheSameParent.push(process);
+      childrenWithTheSameParent.push(node);
     }
   }
 
@@ -42,28 +93,43 @@ export function factory(
     siblings.sort(orderByTime);
   }
 
+  let generations: number | undefined;
+  let descendants: number | undefined;
+  if (originID) {
+    const originNode = idToValue.get(originID);
+    const treeGenerationsAndDescendants = calculateGenerationsAndDescendantsFromOrigin(
+      originNode,
+      idToChildren
+    );
+    generations = treeGenerationsAndDescendants?.generations;
+    descendants = treeGenerationsAndDescendants?.descendants;
+  }
+
+  const ancestors = countAncestors(originID, idToValue);
+
   return {
     idToChildren,
-    idToProcess: idToValue,
+    idToNode: idToValue,
+    originID,
+    generations,
+    descendants,
+    ancestors,
   };
 }
 
 /**
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
-export function children(
-  tree: IndexedProcessTree,
-  parentID: string | undefined
-): SafeResolverEvent[] {
-  const currentProcessSiblings = tree.idToChildren.get(parentID);
-  return currentProcessSiblings === undefined ? [] : currentProcessSiblings;
+export function children(tree: IndexedProcessTree, parentID: string | undefined): ResolverNode[] {
+  const currentSiblings = tree.idToChildren.get(parentID);
+  return currentSiblings === undefined ? [] : currentSiblings;
 }
 
 /**
  * Get the indexed process event for the ID
  */
-export function processEvent(tree: IndexedProcessTree, entityID: string): SafeResolverEvent | null {
-  return tree.idToProcess.get(entityID) ?? null;
+export function treeNode(tree: IndexedProcessTree, entityID: string): ResolverNode | null {
+  return tree.idToNode.get(entityID) ?? null;
 }
 
 /**
@@ -71,21 +137,16 @@ export function processEvent(tree: IndexedProcessTree, entityID: string): SafeRe
  */
 export function parent(
   tree: IndexedProcessTree,
-  childProcess: SafeResolverEvent
-): SafeResolverEvent | undefined {
-  const uniqueParentPid = eventModel.parentEntityIDSafeVersion(childProcess);
-  if (uniqueParentPid === undefined) {
-    return undefined;
-  } else {
-    return tree.idToProcess.get(uniqueParentPid);
-  }
+  childNode: ResolverNode
+): ResolverNode | undefined {
+  return parentInternal(childNode, tree.idToNode);
 }
 
 /**
  * Number of processes in the tree
  */
 export function size(tree: IndexedProcessTree) {
-  return tree.idToProcess.size;
+  return tree.idToNode.size;
 }
 
 /**
@@ -96,7 +157,7 @@ export function root(tree: IndexedProcessTree) {
     return null;
   }
   // any node will do
-  let current: SafeResolverEvent = tree.idToProcess.values().next().value;
+  let current: ResolverNode = tree.idToNode.values().next().value;
 
   // iteratively swap current w/ its parent
   while (parent(tree, current) !== undefined) {
@@ -111,8 +172,8 @@ export function root(tree: IndexedProcessTree) {
 export function* levelOrder(tree: IndexedProcessTree) {
   const rootNode = root(tree);
   if (rootNode !== null) {
-    yield* baseLevelOrder(rootNode, (parentNode: SafeResolverEvent): SafeResolverEvent[] =>
-      children(tree, eventModel.entityIDSafeVersion(parentNode))
+    yield* baseLevelOrder(rootNode, (parentNode: ResolverNode): ResolverNode[] =>
+      children(tree, nodeModel.nodeID(parentNode))
     );
   }
 }

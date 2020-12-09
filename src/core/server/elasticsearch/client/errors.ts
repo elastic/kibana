@@ -23,10 +23,10 @@ export type UnauthorizedError = ResponseError & {
   statusCode: 401;
 };
 
-export function isResponseError(error: any): error is ResponseError {
-  return Boolean(error.body && error.statusCode && error.headers);
+export function isResponseError(error: unknown): error is ResponseError {
+  return error instanceof ResponseError;
 }
 
-export function isUnauthorizedError(error: any): error is UnauthorizedError {
+export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
   return isResponseError(error) && error.statusCode === 401;
 }

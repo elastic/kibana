@@ -21,7 +21,6 @@ import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { IndicesForm } from '../components/settings/indices_form';
 import {
@@ -33,7 +32,6 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
-import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 
 interface SettingsPageFieldErrors {
@@ -147,17 +145,8 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <ReactRouterEuiButtonEmpty
-        color="primary"
-        data-test-subj="uptimeSettingsToOverviewLink"
-        iconType="arrowLeft"
-        to={OVERVIEW_ROUTE}
-        size="s"
-      >
-        {Translations.settings.returnToOverviewLinkLabel}
-      </ReactRouterEuiButtonEmpty>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
         </EuiFlexGroup>
