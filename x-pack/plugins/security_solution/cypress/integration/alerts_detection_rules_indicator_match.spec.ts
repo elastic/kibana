@@ -97,8 +97,8 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
-    removeSignalsIndex();
     deleteRule();
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new Indicator Match rule', () => {
