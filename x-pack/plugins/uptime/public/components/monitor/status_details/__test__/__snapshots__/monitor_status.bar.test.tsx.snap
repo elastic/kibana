@@ -13,17 +13,17 @@ Array [
     class="euiSpacer euiSpacer--l"
   />,
   .c0.c0.c0 {
-  width: 35%;
+  width: 30%;
+  max-width: 250px;
 }
 
 .c1.c1.c1 {
-  width: 65%;
+  width: 70%;
   overflow-wrap: anywhere;
 }
 
 <dl
     class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
-    style="max-width:450px"
   >
     <dt
       class="euiDescriptionList__title c0"
@@ -51,10 +51,6 @@ Array [
         rel="noopener noreferrer"
         target="_blank"
       >
-         
-        <span
-          data-euiicon-type="popout"
-        />
         <span
           aria-label="External link"
           class="euiLink__externalIcon"

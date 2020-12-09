@@ -23,7 +23,6 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as AlertTypeRegistryContract,
-    notifications: core.notifications,
     dataPlugin: jest.fn(),
     navigateToApp: jest.fn(),
     alerts: {

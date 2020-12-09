@@ -202,7 +202,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -273,7 +273,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -285,6 +285,14 @@ export const schema: FormSchema<FormInternal> = {
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
+          },
+        },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
           },
         },
       },
