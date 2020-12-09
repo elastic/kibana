@@ -8,9 +8,9 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TrustedApp, WindowsConditionEntry } from '../../../../../../../../common/endpoint/types';
-import { ConditionEntry, ConditionEntryProps } from './condition_entry';
-import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
+import { ConditionEntry, OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
+import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it
@@ -41,14 +41,14 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export interface ConditionGroupProps {
-  os: TrustedApp['os'];
-  entries: TrustedApp['entries'];
-  onEntryRemove: ConditionEntryProps['onRemove'];
-  onEntryChange: ConditionEntryProps['onChange'];
+  os: OperatingSystem;
+  entries: ConditionEntry[];
+  onEntryRemove: ConditionEntryInputProps['onRemove'];
+  onEntryChange: ConditionEntryInputProps['onChange'];
   onAndClicked: () => void;
   isAndDisabled?: boolean;
   /** called when any of the entries is visited (triggered via `onBlur` DOM event) */
-  onVisited?: ConditionEntryProps['onVisited'];
+  onVisited?: ConditionEntryInputProps['onVisited'];
   'data-test-subj'?: string;
 }
 export const ConditionGroup = memo<ConditionGroupProps>(
@@ -85,8 +85,8 @@ export const ConditionGroup = memo<ConditionGroupProps>(
         )}
         <EuiFlexItem grow={1}>
           <div data-test-subj={getTestId('entries')} className="group-entries">
-            {(entries as WindowsConditionEntry[]).map((entry, index) => (
-              <ConditionEntry
+            {(entries as ConditionEntry[]).map((entry, index) => (
+              <ConditionEntryInput
                 key={index}
                 os={os}
                 entry={entry}
