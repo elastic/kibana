@@ -231,6 +231,22 @@ Note:
 `{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
 `{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
 
+| *Row click*
+| event.rowIndex
+| Number, representing the row that was clicked, starting from 0.
+
+|
+| event.values
+| An array of all cell values for the raw on which the action will execute.
+
+|
+| event.keys
+| An array of field names for each column.
+
+|
+| event.columnNames
+| An array of column names.
+
 | *Range selection*
 | event.from +
 event.to
