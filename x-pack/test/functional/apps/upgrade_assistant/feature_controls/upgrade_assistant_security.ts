@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
+  const deployment = getService('deployment')
 
   describe('security', () => {
     before(async () => {
@@ -62,10 +63,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
         expect(sections).to.have.length(3);
-        expect(sections[2]).to.eql({
-          sectionId: 'stack',
-          sectionLinks: ['license_management', 'upgrade_assistant'],
-        });
+        if (deployment.isCloud()) {
+          expect(sections[2]).to.eql({
+            sectionId: 'stack',
+            sectionLinks: ['upgrade_assistant'],
+          });
+        } else {
+          expect(sections[2]).to.eql({
+            sectionId: 'stack',
+            sectionLinks: ['license_management', 'upgrade_assistant'],
+          });
       });
     });
   });
