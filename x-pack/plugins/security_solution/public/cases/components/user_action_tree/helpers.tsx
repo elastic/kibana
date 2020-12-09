@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
 
 import {
   CaseFullExternalService,
@@ -214,11 +214,19 @@ export const getAlertComment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {alert != null && (
+          {alert != null ? (
             <UserActionShowAlert
               id={action.actionId}
               alert={alert}
               onShowAlertDetails={onShowAlertDetails}
+            />
+          ) : (
+            <EuiIconTip
+              aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
+              size="l"
+              type="alert"
+              color="danger"
+              content={i18n.ALERT_NOT_FOUND_TOOLTIP}
             />
           )}
         </EuiFlexItem>
