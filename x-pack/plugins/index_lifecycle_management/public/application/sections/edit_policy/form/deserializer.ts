@@ -23,6 +23,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
     hot: {
       useRollover: Boolean(hot?.actions?.rollover),
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
+      readonlyEnabled: Boolean(hot?.actions?.readonly),
     },
     warm: {
       enabled: Boolean(warm),

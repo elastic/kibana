@@ -60,9 +60,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
           hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
+
+        if (_meta.hot.readonlyEnabled) {
+          hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
+        } else {
+          delete hotPhaseActions.readonly;
+        }
       } else {
         delete hotPhaseActions.rollover;
         delete hotPhaseActions.forcemerge;
+        delete hotPhaseActions.readonly;
       }
 
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {

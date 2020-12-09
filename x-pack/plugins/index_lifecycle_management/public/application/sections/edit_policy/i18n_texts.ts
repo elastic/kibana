@@ -28,6 +28,9 @@ export const i18nTexts = {
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
     }),
+    readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonly.enableLabel', {
+      defaultMessage: 'Make the index read-only',
+    }),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
       {

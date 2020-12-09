@@ -65,6 +65,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_docs?: number;
     };
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };
