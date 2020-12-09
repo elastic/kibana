@@ -14,6 +14,9 @@ export const backgroundSessionMapping: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
+      sessionId: {
+        type: 'keyword',
+      },
       name: {
         type: 'keyword',
       },

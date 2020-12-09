@@ -16,6 +16,7 @@ Object {
   "maxPayload": 1000,
   "name": "kibana-hostname",
   "port": 1234,
+  "publicBaseUrl": "https://myhost.com/abc",
   "rewriteBasePath": false,
   "socketTimeout": 2000,
   "ssl": Object {
@@ -47,6 +48,7 @@ Object {
   "maxPayload": 1000,
   "name": "kibana-hostname",
   "port": 1234,
+  "publicBaseUrl": "http://myhost.com/abc",
   "rewriteBasePath": false,
   "socketTimeout": 2000,
   "ssl": Object {

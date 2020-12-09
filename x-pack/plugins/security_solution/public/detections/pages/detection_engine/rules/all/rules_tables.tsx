@@ -461,6 +461,7 @@ export const RulesTables = React.memo<RulesTableProps>(
                 onFilterChanged={onFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
+                currentFilterTags={filterOptions.tags ?? []}
               />
             </HeaderSection>
 
