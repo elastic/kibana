@@ -25,7 +25,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
     const options: Option[] = [];
     if (overallStats) {
       Object.keys(overallStats).forEach((key) => {
-        const fieldsGroup = overallStats[key];
+        const fieldsGroup = overallStats[key as keyof OverallStats];
         if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
           fieldsGroup.forEach((field) => {
             if (field.existsInDocs === true && field.fieldName !== undefined) {

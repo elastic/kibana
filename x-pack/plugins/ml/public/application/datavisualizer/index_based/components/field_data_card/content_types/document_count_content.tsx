@@ -11,12 +11,19 @@ import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_c
 
 export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
+  if (stats === undefined) return null;
 
   const { documentCounts, timeRangeEarliest, timeRangeLatest } = stats;
+  if (
+    documentCounts === undefined ||
+    timeRangeEarliest === undefined ||
+    timeRangeLatest === undefined
+  )
+    return null;
 
   let chartPoints: DocumentCountChartPoint[] = [];
-  if (documentCounts !== undefined && documentCounts.buckets !== undefined) {
-    const buckets: Record<string, number> = stats.documentCounts.buckets;
+  if (documentCounts.buckets !== undefined) {
+    const buckets: Record<string, number> = documentCounts?.buckets;
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
   }
 

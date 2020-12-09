@@ -32,7 +32,9 @@ export interface FieldVisStats {
   falseCount?: number;
   earliest?: any;
   latest?: any;
-  documentCounts?: number;
+  documentCounts?: {
+    buckets?: any;
+  };
   avg?: number;
   distribution?: {
     percentiles: Percentile[];

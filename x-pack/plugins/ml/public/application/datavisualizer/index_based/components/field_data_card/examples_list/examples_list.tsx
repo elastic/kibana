@@ -15,7 +15,12 @@ interface Props {
 }
 
 export const ExamplesList: FC<Props> = ({ examples }) => {
-  if (examples === undefined || examples === null || examples.length === 0) {
+  if (
+    examples === undefined ||
+    examples === null ||
+    !Array.isArray(examples) ||
+    examples.length === 0
+  ) {
     return null;
   }
 

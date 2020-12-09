@@ -176,7 +176,7 @@ export const FieldsPanel: FC<Props> = ({
           .filter(({ stats }) => stats !== undefined)
           .map((visConfig, i) => (
             <EuiFlexItem
-              key={`${visConfig.fieldName}_${visConfig.stats.count}`}
+              key={`${visConfig.fieldName}_${visConfig.stats!.count}`}
               style={{ minWidth: '360px' }}
             >
               <FieldDataCard config={visConfig} />

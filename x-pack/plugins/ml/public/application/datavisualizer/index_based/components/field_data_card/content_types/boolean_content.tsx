@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,29 +26,12 @@ function getPercentLabel(value: number): string {
 
 export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
-
-  const { count, sampleCount, trueCount, falseCount } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  if (stats === undefined) return null;
+  const { count, trueCount, falseCount } = stats;
+  if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
 
   return (
     <div className="mlFieldDataCard__stats">
-      <div>
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="document" />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardBoolean.documentsCountDescription"
-            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-            values={{
-              count,
-              docsPercent,
-            }}
-          />
-        </EuiText>
-      </div>
-
-      <EuiSpacer size="m" />
-
       <div>
         <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
           <span>
