@@ -13,36 +13,15 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
   describe('create gold noop alert', () => {
     it('should return 403 when creating an gold alert', async () => {
-      const { body: createdAction } = await supertest
-        .post(`/api/actions/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          actionTypeId: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
       await supertest
         .post(`/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-          })
-        )
+        .send(getTestAlertData({ alertTypeId: 'test.gold.noop' }))
         .expect(403, {
           statusCode: 403,
           error: 'Forbidden',
           message:
-            'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+            'Alert type test.gold.noop is disabled because your basic license does not support it. Please upgrade your license.',
         });
     });
   });

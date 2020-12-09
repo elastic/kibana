@@ -22,3 +22,12 @@ export interface AlertingFrameworkHealth {
 
 export const BASE_ALERT_API_PATH = '/api/alerts';
 export const ALERTS_FEATURE_ID = 'alerts';
+
+export enum LicenseTypeValues {
+  Basic = 'basic',
+  Gold = 'gold',
+  Platinum = 'platinum',
+  Enterprise = 'enterprise',
+  Standard = 'standard',
+  Trial = 'trial',
+}

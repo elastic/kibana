@@ -13,31 +13,10 @@ export default function basicAlertTest({ getService }: FtrProviderContext) {
 
   describe('basic alert', () => {
     it('should return 200 when creating a basic license alert', async () => {
-      const { body: createdAction } = await supertest
-        .post(`/api/actions/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          actionTypeId: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
       await supertest
         .post(`/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-          })
-        )
+        .send(getTestAlertData())
         .expect(200);
     });
   });

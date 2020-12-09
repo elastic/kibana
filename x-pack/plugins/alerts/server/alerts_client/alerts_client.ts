@@ -621,8 +621,6 @@ export class AlertsClient {
       alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         alertSavedObject.attributes.alertTypeId,
@@ -647,6 +645,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
     const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
 
@@ -686,8 +686,6 @@ export class AlertsClient {
     { id, data }: UpdateOptions,
     { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert> {
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
@@ -783,8 +781,6 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -826,6 +822,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
@@ -881,8 +879,6 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -911,6 +907,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -986,8 +984,6 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -1012,6 +1008,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
@@ -1058,8 +1056,6 @@ export class AlertsClient {
       id
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -1088,6 +1084,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: true,
@@ -1119,8 +1117,6 @@ export class AlertsClient {
       id
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
-
     try {
       await this.authorization.ensureAuthorized(
         attributes.alertTypeId,
@@ -1149,6 +1145,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: false,
@@ -1179,7 +1177,6 @@ export class AlertsClient {
       'alert',
       alertId
     );
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(
@@ -1209,6 +1206,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1245,7 +1244,6 @@ export class AlertsClient {
       'alert',
       alertId
     );
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(
@@ -1274,6 +1272,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
