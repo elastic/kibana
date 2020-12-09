@@ -23,7 +23,7 @@ export class ContactCardExportableEmbeddable extends ContactCardEmbeddable {
   public getInspectorAdapters = () => {
     return {
       tables: {
-        lens: true,
+        allowCsvExport: true,
         tables: {
           layer1: {
             type: 'datatable',

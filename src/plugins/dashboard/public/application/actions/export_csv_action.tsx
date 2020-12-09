@@ -66,7 +66,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
-    return Object.keys(adapters?.tables || {}).length > 0 && adapters!.tables.lens;
+    return Object.keys(adapters?.tables || {}).length > 0 && adapters!.tables.allowCsvExport;
   };
 
   private getFormatter = (): FormatFactory | undefined => {

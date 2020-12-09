@@ -53,7 +53,7 @@ export const mergeTables: ExpressionFunctionDefinition<
       resultTables[layerIds[index]] = table;
       // adapter is always defined at that point because we make sure by the beginning of the function
       if (context?.inspectorAdapters?.tables) {
-        context.inspectorAdapters.tables.lens = true;
+        context.inspectorAdapters.tables.allowCsvExport = true;
         context.inspectorAdapters.tables.logDatatable(layerIds[index], table);
       }
     });
