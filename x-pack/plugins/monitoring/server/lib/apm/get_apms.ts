@@ -26,11 +26,11 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     let earliestStats = null;
     if (
-      hit.inner_hits?.first_hit?.hits?.hits &&
-      hit.inner_hits?.first_hit?.hits?.hits.length > 0 &&
-      hit.inner_hits.first_hit.hits.hits[0]._source.beats_stats
+      hit.inner_hits?.earliest?.hits?.hits &&
+      hit.inner_hits?.earliest?.hits?.hits.length > 0 &&
+      hit.inner_hits.earliest.hits.hits[0]._source.beats_stats
     ) {
-      earliestStats = hit.inner_hits.first_hit.hits.hits[0]._source.beats_stats;
+      earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
     }
 
     const uuid = stats?.beat?.uuid;
