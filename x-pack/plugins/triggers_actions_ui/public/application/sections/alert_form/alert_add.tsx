@@ -26,10 +26,9 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  addFlyoutVisible: boolean;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
@@ -39,10 +38,9 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
 
 const AlertAdd = ({
   consumer,
-  addFlyoutVisible,
   alertTypeRegistry,
   actionTypeRegistry,
-  setAddFlyoutVisibility,
+  onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
@@ -91,9 +89,9 @@ const AlertAdd = ({
   }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-  }, [initialAlert, setAddFlyoutVisibility]);
+    onClose();
+  }, [initialAlert, onClose]);
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
@@ -105,10 +103,6 @@ const AlertAdd = ({
       }
     }
   };
-
-  if (!addFlyoutVisible) {
-    return null;
-  }
 
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
   const errors = {
