@@ -35,7 +35,7 @@ import {
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { StateSetter, OperationMetadata } from '../../../types';
+import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import {
   IndexPatternPrivateState,
@@ -116,7 +116,7 @@ export {
 export interface ParamEditorProps<C> {
   currentColumn: C;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
   layerId: string;
   uiSettings: IUiSettingsClient;

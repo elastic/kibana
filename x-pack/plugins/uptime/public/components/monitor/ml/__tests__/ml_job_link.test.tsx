@@ -5,9 +5,12 @@
  */
 
 import React from 'react';
+import { coreMock } from 'src/core/public/mocks';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import { MLJobLink } from '../ml_job_link';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
+const core = coreMock.createStart();
 describe('ML JobLink', () => {
   it('shallow renders without errors', () => {
     const wrapper = shallowWithRouter(
@@ -18,7 +21,11 @@ describe('ML JobLink', () => {
 
   it('renders without errors', () => {
     const wrapper = renderWithRouter(
-      <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
+      <KibanaContextProvider
+        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
+      >
+        <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
+      </KibanaContextProvider>
     );
     expect(wrapper).toMatchSnapshot();
   });

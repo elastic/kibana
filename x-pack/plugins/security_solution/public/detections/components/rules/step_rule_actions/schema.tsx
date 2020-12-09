@@ -15,13 +15,13 @@ import {
 import { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
 import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import * as I18n from './translations';
-import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = (
   actionItem: AlertAction,
   actionTypeRegistry: ActionTypeRegistryContract
 ): string[] => {
-  if (!isUuidv4(actionItem.id)) {
+  if (!isUuid(actionItem.id)) {
     return [I18n.NO_CONNECTOR_SELECTED];
   }
 

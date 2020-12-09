@@ -29,7 +29,7 @@ export enum AlertProvidedActionVariables {
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
-    return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
+    return { ...actionVariable, name: `${prefix}${actionVariable.name}` };
   });
 }
 
@@ -85,6 +85,17 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
       defaultMessage: 'The alert action group that was used to scheduled actions for the alert.',
     }),
+  });
+
+  result.push({
+    name: 'alertActionGroupName',
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertActionGroupNameLabel',
+      {
+        defaultMessage:
+          'The human readable name of the alert action group that was used to scheduled actions for the alert.',
+      }
+    ),
   });
 
   return result;

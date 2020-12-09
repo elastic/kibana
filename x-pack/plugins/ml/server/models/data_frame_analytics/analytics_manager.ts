@@ -11,12 +11,16 @@ import {
   JobMapNodeTypes,
 } from '../../../common/constants/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../../common/types/trained_models';
-import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   AnalyticsMapEdgeElement,
   AnalyticsMapReturnType,
   AnalyticsMapNodeElement,
+  DataFrameAnalyticsStats,
+  MapElements,
+} from '../../../common/types/data_frame_analytics';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import { getAnalysisType } from '../../../common/util/analytics_utils';
+import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
   InitialElementsReturnType,
@@ -26,7 +30,6 @@ import {
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  MapElements,
   NextLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
@@ -34,12 +37,22 @@ import type { MlClient } from '../../lib/ml_client';
 export class AnalyticsManager {
   private _client: IScopedClusterClient['asInternalUser'];
   private _mlClient: MlClient;
-  public _inferenceModels: TrainedModelConfigResponse[];
+  private _inferenceModels: TrainedModelConfigResponse[];
+  private _jobStats: DataFrameAnalyticsStats[];
 
   constructor(mlClient: MlClient, client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
     this._mlClient = mlClient;
     this._inferenceModels = [];
+    this._jobStats = [];
+  }
+
+  public set jobStats(stats) {
+    this._jobStats = stats;
+  }
+
+  public get jobStats() {
+    return this._jobStats;
   }
 
   public set inferenceModels(models) {
@@ -55,9 +68,18 @@ export class AnalyticsManager {
       const models = await this.getAnalyticsModels();
       this.inferenceModels = models;
     } catch (error) {
-      // TODO: bubble up this error?
       // eslint-disable-next-line
       console.error('Unable to fetch inference models', error);
+    }
+  }
+
+  async setJobStats() {
+    try {
+      const jobStats = await this.getAnalyticsStats();
+      this.jobStats = jobStats;
+    } catch (error) {
+      // eslint-disable-next-line
+      console.error('Unable to fetch job stats', error);
     }
   }
 
@@ -89,6 +111,12 @@ export class AnalyticsManager {
     return models;
   }
 
+  private async getAnalyticsStats() {
+    const resp = await this._mlClient.getDataFrameAnalyticsStats({ size: 1000 });
+    const stats = resp?.body?.data_frame_analytics;
+    return stats;
+  }
+
   private async getAnalyticsData(analyticsId?: string) {
     const options = analyticsId
       ? {
@@ -96,9 +124,19 @@ export class AnalyticsManager {
         }
       : undefined;
     const resp = await this._mlClient.getDataFrameAnalytics(options);
-    const jobData = analyticsId
+    let jobData = analyticsId
       ? resp?.body?.data_frame_analytics[0]
       : resp?.body?.data_frame_analytics;
+
+    if (analyticsId !== undefined) {
+      const jobStats = this.findJobStats(analyticsId);
+      jobData = { ...jobData, stats: { ...jobStats } };
+    } else {
+      jobData = jobData.map((job: any) => {
+        const jobStats = this.findJobStats(job.id);
+        return { ...job, stats: { ...jobStats } };
+      });
+    }
 
     return jobData;
   }
@@ -121,8 +159,12 @@ export class AnalyticsManager {
 
   private findJobModel(analyticsId: string): any {
     return this.inferenceModels.find(
-      (model: any) => model.metadata?.analytics_config?.id === analyticsId
+      (model) => model.metadata?.analytics_config?.id === analyticsId
     );
+  }
+
+  private findJobStats(analyticsId: string): DataFrameAnalyticsStats | undefined {
+    return this.jobStats.find((js) => js.id === analyticsId);
   }
 
   private async getNextLink({
@@ -243,31 +285,37 @@ export class AnalyticsManager {
     details[modelNodeId] = data;
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
-      data = await this.getAnalyticsData(sourceJobId);
+      try {
+        data = await this.getAnalyticsData(sourceJobId);
+        nextLinkId = data?.source?.index[0];
+        nextType = JOB_MAP_NODE_TYPES.INDEX;
 
-      nextLinkId = data?.source?.index[0];
-      nextType = JOB_MAP_NODE_TYPES.INDEX;
+        previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
-      previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        resultElements.push({
+          data: {
+            id: previousNodeId,
+            label: data.id,
+            type: JOB_MAP_NODE_TYPES.ANALYTICS,
+            analysisType: getAnalysisType(data?.analysis),
+          },
+        });
+        // Create edge between job and model
+        modelElements.push({
+          data: {
+            id: `${previousNodeId}~${modelNodeId}`,
+            source: previousNodeId,
+            target: modelNodeId,
+          },
+        });
 
-      resultElements.push({
-        data: {
-          id: previousNodeId,
-          label: data.id,
-          type: JOB_MAP_NODE_TYPES.ANALYTICS,
-          analysisType: getAnalysisType(data?.analysis),
-        },
-      });
-      // Create edge between job and model
-      modelElements.push({
-        data: {
-          id: `${previousNodeId}~${modelNodeId}`,
-          source: previousNodeId,
-          target: modelNodeId,
-        },
-      });
-
-      details[previousNodeId] = data;
+        details[previousNodeId] = data;
+      } catch (error) {
+        // fail silently if job doesn't exist
+        if (error.statusCode !== 404) {
+          throw error.body ?? error;
+        }
+      }
     }
 
     return { data, details, resultElements, modelElements, nextLinkId, nextType, previousNodeId };
@@ -325,7 +373,7 @@ export class AnalyticsManager {
     const indexPatternElements: MapElements[] = [];
 
     try {
-      await this.setInferenceModels();
+      await Promise.all([this.setInferenceModels(), this.setJobStats()]);
       // Create first node for incoming analyticsId or modelId
       let initialData: InitialElementsReturnType = {} as InitialElementsReturnType;
       if (analyticsId !== undefined) {
@@ -532,7 +580,7 @@ export class AnalyticsManager {
   }: ExtendAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
     const result: AnalyticsMapReturnType = { elements: [], details: {}, error: null };
     try {
-      await this.setInferenceModels();
+      await Promise.all([this.setInferenceModels(), this.setJobStats()]);
       const jobs = await this.getAnalyticsData();
       let rootIndex;
       let rootIndexNodeId;

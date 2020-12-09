@@ -24,7 +24,7 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(layer: LayerColorConfig, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string): number;
   }
 >;
 
@@ -72,8 +72,8 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(layer: LayerColorConfig, seriesKey: string, yAccessor: string) {
-        const layerIndex = paletteLayers.indexOf(layer);
+      getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string) {
+        const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
         return (
@@ -82,8 +82,10 @@ export function getColorAssignments(
             : seriesPerLayer
                 .slice(0, layerIndex)
                 .reduce((sum, perLayer) => sum + perLayer.numberOfSeries, 0)) +
-          (layer.splitAccessor && splitRank !== -1 ? splitRank * layer.accessors.length : 0) +
-          layer.accessors.indexOf(yAccessor)
+          (sortedLayer.splitAccessor && splitRank !== -1
+            ? splitRank * sortedLayer.accessors.length
+            : 0) +
+          sortedLayer.accessors.indexOf(yAccessor)
         );
       },
     };
@@ -94,13 +96,12 @@ export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: FramePublicAPI,
   layer: LayerConfig,
-  sortedAccessors: string[],
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-  return sortedAccessors.map((accessor) => {
+  return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
       return {

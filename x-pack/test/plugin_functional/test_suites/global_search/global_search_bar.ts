@@ -43,6 +43,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).to.contain('discover');
     });
 
+    describe('search suggestions', () => {
+      it('shows a suggestion when searching for a term matching a type', async () => {
+        await navigationalSearch.searchFor('dashboard');
+
+        let results = await navigationalSearch.getDisplayedResults();
+        expect(results[0].label).to.eql('type: dashboard');
+
+        await navigationalSearch.clickOnOption(0);
+        await navigationalSearch.waitForResultsLoaded();
+
+        const searchTerm = await navigationalSearch.getFieldValue();
+        expect(searchTerm).to.eql('type:dashboard');
+
+        results = await navigationalSearch.getDisplayedResults();
+        expect(results.map((result) => result.label)).to.eql([
+          'dashboard 1 (tag-2)',
+          'dashboard 2 (tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+      it('shows a suggestion when searching for a term matching a tag name', async () => {
+        await navigationalSearch.searchFor('tag-1');
+
+        let results = await navigationalSearch.getDisplayedResults();
+        expect(results[0].label).to.eql('tag: tag-1');
+
+        await navigationalSearch.clickOnOption(0);
+        await navigationalSearch.waitForResultsLoaded();
+
+        const searchTerm = await navigationalSearch.getFieldValue();
+        expect(searchTerm).to.eql('tag:tag-1');
+
+        results = await navigationalSearch.getDisplayedResults();
+        expect(results.map((result) => result.label)).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+          'dashboard 3 (tag-1 and tag-3)',
+        ]);
+      });
+    });
+
     describe('advanced search syntax', () => {
       it('allows to filter by type', async () => {
         await navigationalSearch.searchFor('type:dashboard');

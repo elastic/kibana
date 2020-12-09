@@ -78,7 +78,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {
@@ -183,7 +183,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {
@@ -257,7 +257,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {

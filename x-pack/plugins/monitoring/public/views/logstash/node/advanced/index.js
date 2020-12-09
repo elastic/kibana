@@ -29,8 +29,6 @@ import { MonitoringTimeseriesContainer } from '../../../../components/chart';
 import {
   CODE_PATH_LOGSTASH,
   ALERT_LOGSTASH_VERSION_MISMATCH,
-  ALERT_MISSING_MONITORING_DATA,
-  LOGSTASH_SYSTEM_ID,
 } from '../../../../../common/constants';
 import { AlertsCallout } from '../../../../alerts/callout';
 
@@ -78,12 +76,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: LOGSTASH_SYSTEM_ID,
-              },
-            ],
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
           },
         },
         telemetryPageViewTitle: 'logstash_node_advanced',
@@ -129,15 +122,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
                   <DetailStatus stats={data.nodeSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
-                <AlertsCallout
-                  alerts={this.alerts}
-                  nextStepsFilter={(nextStep) => {
-                    if (nextStep.text.includes('Logstash nodes')) {
-                      return false;
-                    }
-                    return true;
-                  }}
-                />
+                <AlertsCallout alerts={this.alerts} />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (

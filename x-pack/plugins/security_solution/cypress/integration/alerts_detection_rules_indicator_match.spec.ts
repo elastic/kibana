@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newThreatIndicatorRule } from '../objects/rule';
 
 import {
@@ -83,11 +84,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
 const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
 const expectedTags = newThreatIndicatorRule.tags.join('');
-const expectedMitre = newThreatIndicatorRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 1;
 
@@ -100,8 +97,8 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
-    removeSignalsIndex();
     deleteRule();
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new Indicator Match rule', () => {

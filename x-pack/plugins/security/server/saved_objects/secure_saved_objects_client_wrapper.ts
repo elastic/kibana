@@ -96,15 +96,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const namespaces = [options.namespace, ...(options.initialNamespaces || [])];
+    const optionsWithId = { ...options, id: options.id ?? SavedObjectsUtils.generateId() };
+    const namespaces = [optionsWithId.namespace, ...(optionsWithId.initialNamespaces || [])];
     try {
-      const args = { type, attributes, options };
+      const args = { type, attributes, options: optionsWithId };
       await this.ensureAuthorized(type, 'create', namespaces, { args });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.CREATE,
-          savedObject: { type, id: options.id },
+          savedObject: { type, id: optionsWithId.id },
           error,
         })
       );
@@ -114,11 +115,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
         outcome: EventOutcome.UNKNOWN,
-        savedObject: { type, id: options.id },
+        savedObject: { type, id: optionsWithId.id },
       })
     );
 
-    const savedObject = await this.baseClient.create(type, attributes, options);
+    const savedObject = await this.baseClient.create(type, attributes, optionsWithId);
     return await this.redactSavedObjectNamespaces(savedObject, namespaces);
   }
 
@@ -141,17 +142,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
-    const namespaces = objects.reduce(
+    const objectsWithId = objects.map((obj) => ({
+      ...obj,
+      id: obj.id ?? SavedObjectsUtils.generateId(),
+    }));
+    const namespaces = objectsWithId.reduce(
       (acc, { initialNamespaces = [] }) => acc.concat(initialNamespaces),
       [options.namespace]
     );
     try {
-      const args = { objects, options };
-      await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_create', namespaces, {
-        args,
-      });
+      const args = { objects: objectsWithId, options };
+      await this.ensureAuthorized(
+        this.getUniqueObjectTypes(objectsWithId),
+        'bulk_create',
+        namespaces,
+        {
+          args,
+        }
+      );
     } catch (error) {
-      objects.forEach(({ type, id }) =>
+      objectsWithId.forEach(({ type, id }) =>
         this.auditLogger.log(
           savedObjectEvent({
             action: SavedObjectAction.CREATE,
@@ -162,7 +172,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
       throw error;
     }
-    objects.forEach(({ type, id }) =>
+    objectsWithId.forEach(({ type, id }) =>
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.CREATE,
@@ -172,7 +182,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       )
     );
 
-    const response = await this.baseClient.bulkCreate(objects, options);
+    const response = await this.baseClient.bulkCreate(objectsWithId, options);
     return await this.redactSavedObjectsNamespaces(response, namespaces);
   }
 
@@ -284,14 +294,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const response = await this.baseClient.bulkGet<T>(objects, options);
 
-    objects.forEach(({ type, id }) =>
-      this.auditLogger.log(
-        savedObjectEvent({
-          action: SavedObjectAction.GET,
-          savedObject: { type, id },
-        })
-      )
-    );
+    response.saved_objects.forEach(({ error, type, id }) => {
+      if (!error) {
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.GET,
+            savedObject: { type, id },
+          })
+        );
+      }
+    });
 
     return await this.redactSavedObjectsNamespaces(response, [options.namespace]);
   }
