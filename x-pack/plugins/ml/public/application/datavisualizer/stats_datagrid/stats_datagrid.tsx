@@ -12,6 +12,8 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
+  HorizontalAlignment,
+  LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -105,22 +107,22 @@ export const DataVisualizerDataGrid = ({
     width: '40px',
     isExpander: true,
     render: (item: FieldVisConfig) => {
-      if (item[FIELD_NAME] === undefined) return null;
+      if (item.fieldName === undefined) return null;
       return (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={
-            expandedRowItemIds.includes(item[FIELD_NAME])
+            expandedRowItemIds.includes(item.fieldName)
               ? i18n.translate('xpack.ml.datavisualizer.dataGrid.rowCollapse', {
                   defaultMessage: 'Hide details for {fieldName}',
-                  values: { fieldName: item[FIELD_NAME] },
+                  values: { fieldName: item.fieldName },
                 })
               : i18n.translate('xpack.ml.datavisualizer.dataGrid.rowExpand', {
                   defaultMessage: 'Show details for {fieldName}',
-                  values: { fieldName: item[FIELD_NAME] },
+                  values: { fieldName: item.fieldName },
                 })
           }
-          iconType={expandedRowItemIds.includes(item[FIELD_NAME]) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown'}
         />
       );
     },
@@ -140,7 +142,7 @@ export const DataVisualizerDataGrid = ({
       'data-test-subj': 'mlDataVisualizerGridColumnId',
       width: '75px',
       sortable: true,
-      align: CENTER_ALIGNMENT,
+      align: CENTER_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'fieldName',
@@ -155,6 +157,7 @@ export const DataVisualizerDataGrid = ({
         </EuiText>
       ),
       'data-test-subj': 'mlDataVisualizerGridColumnJobs',
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'docCount',
@@ -168,6 +171,7 @@ export const DataVisualizerDataGrid = ({
       ),
       render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
       sortable: (item: FieldVisConfig) => item?.stats?.count,
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'stats.cardinality',
@@ -181,6 +185,7 @@ export const DataVisualizerDataGrid = ({
       ),
       render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
       sortable: true,
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       name: (
@@ -213,6 +218,7 @@ export const DataVisualizerDataGrid = ({
         }
         return null;
       },
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
   ];
 
