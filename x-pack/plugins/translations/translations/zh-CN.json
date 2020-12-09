@@ -17986,7 +17986,6 @@
     "xpack.securitySolution.timeline.autosave.warning.refresh.title": "刷新时间线",
     "xpack.securitySolution.timeline.autosave.warning.title": "刷新后才会启用自动保存",
     "xpack.securitySolution.timeline.body.actions.collapseAriaLabel": "折叠",
-    "xpack.securitySolution.timeline.body.actions.collapseEventTooltip": "折叠事件",
     "xpack.securitySolution.timeline.body.actions.expandAriaLabel": "展开",
     "xpack.securitySolution.timeline.body.actions.investigateInResolverTooltip": "分析事件",
     "xpack.securitySolution.timeline.body.copyToClipboardButtonLabel": "复制到剪贴板",
