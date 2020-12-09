@@ -28,11 +28,15 @@ describe('apiKeysManagementApp', () => {
 
   it('mount() works for the `grid` page', async () => {
     const { getStartServices } = coreMock.createSetup();
+
+    const startServices = await getStartServices();
+    const docTitle = startServices[0].chrome.docTitle;
+
     const container = document.createElement('div');
 
     const setBreadcrumbs = jest.fn();
     const unmount = await apiKeysManagementApp
-      .create({ getStartServices: getStartServices as any })
+      .create({ getStartServices: () => Promise.resolve(startServices) as any })
       .mount({
         basePath: '/some-base-path',
         element: container,
@@ -42,6 +46,8 @@ describe('apiKeysManagementApp', () => {
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API Keys' }]);
+    expect(docTitle.change).toHaveBeenCalledWith('API Keys');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         Page: {"notifications":{"toasts":{}},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
@@ -49,6 +55,7 @@ describe('apiKeysManagementApp', () => {
     `);
 
     unmount();
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
