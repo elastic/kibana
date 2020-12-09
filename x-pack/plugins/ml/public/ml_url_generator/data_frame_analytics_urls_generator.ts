@@ -13,8 +13,10 @@ import {
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsUrlState,
   ExplorationPageUrlState,
+  MlGenericUrlState,
   MlCommonGlobalState,
 } from '../../common/types/ml_url_generator';
+import { createGenericMlUrl } from './common';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
@@ -108,6 +110,16 @@ export function createDataFrameAnalyticsExplorationUrl(
   }
 
   return url;
+}
+
+/**
+ * Creates URL to the DataFrameAnalytics creation wizard
+ */
+export function createDataFrameAnalyticsCreateJobUrl(
+  appBasePath: string,
+  pageState: MlGenericUrlState['pageState']
+): string {
+  return createGenericMlUrl(appBasePath, ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB, pageState);
 }
 
 /**

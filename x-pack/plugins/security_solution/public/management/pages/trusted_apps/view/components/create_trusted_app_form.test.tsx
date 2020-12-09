@@ -164,7 +164,7 @@ describe('When showing the Trusted App Create Form', () => {
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
         )
       ).map((button) => button.textContent);
-      expect(options).toEqual(['Hash', 'Path']);
+      expect(options).toEqual(['Hash', 'Path', 'Signature']);
     });
 
     it('should show the value field as required', () => {

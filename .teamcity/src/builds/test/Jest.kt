@@ -12,7 +12,7 @@ object Jest : BuildType({
   kibanaAgent(8)
 
   steps {
-    runbld("Jest Unit", "yarn run grunt run:test_jest")
+    runbld("Jest Unit", "./.ci/teamcity/oss/jest.sh")
   }
 
   addTestSettings()

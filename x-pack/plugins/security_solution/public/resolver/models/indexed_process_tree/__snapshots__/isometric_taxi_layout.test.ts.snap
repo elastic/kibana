@@ -12,34 +12,36 @@ exports[`resolver graph layout when rendering one node renders right 1`] = `
 Object {
   "ariaLevels": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "powershell.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "powershell.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 1,
   },
   "edgeLineSegments": Array [],
   "processNodePositions": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "powershell.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "powershell.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       0,
@@ -53,136 +55,145 @@ exports[`resolver graph layout when rendering two forks, and one fork has an ext
 Object {
   "ariaLevels": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "lsass.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 1,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "B",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "already_running",
-        "event_type_full": "process_event",
-        "unique_pid": 1,
-        "unique_ppid": 0,
-      },
-    } => 2,
-    Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
-      },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 2,
-        "unique_ppid": 0,
+      "id": "B",
+      "name": "lsass.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 2,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "C",
+        "process.name": "powershell.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "termination_event",
-        "event_type_full": "process_event",
-        "unique_pid": 8,
-        "unique_ppid": 0,
+      "id": "C",
+      "name": "powershell.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 2,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "I",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 3,
-        "unique_ppid": 1,
+      "id": "I",
+      "name": "lsass.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
+      },
+    } => 2,
+    Object {
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "D",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "B",
+      },
+      "id": "D",
+      "name": "notepad.exe",
+      "parent": "B",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 3,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "E",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "B",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 4,
-        "unique_ppid": 1,
-      },
-    } => 3,
-    Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
-      },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 5,
-        "unique_ppid": 2,
+      "id": "E",
+      "name": "notepad.exe",
+      "parent": "B",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 3,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "F",
+        "process.name": "explorer.exe",
+        "process.parent.entity_id": "C",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 6,
-        "unique_ppid": 2,
+      "id": "F",
+      "name": "explorer.exe",
+      "parent": "C",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 3,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "G",
+        "process.name": "explorer.exe",
+        "process.parent.entity_id": "C",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 7,
-        "unique_ppid": 6,
+      "id": "G",
+      "name": "explorer.exe",
+      "parent": "C",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
+      },
+    } => 3,
+    Object {
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "H",
+        "process.name": "mimikatz.exe",
+        "process.parent.entity_id": "G",
+      },
+      "id": "H",
+      "name": "mimikatz.exe",
+      "parent": "G",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 4,
   },
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
-        "reactKey": "parentToMidedge:0:1",
+        "reactKey": "parentToMidedge:A:B",
       },
       "points": Array [
         Array [
@@ -197,7 +208,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "reactKey": "midwayedge:0:1",
+        "reactKey": "midwayedge:A:B",
       },
       "points": Array [
         Array [
@@ -216,7 +227,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:0:1",
+        "reactKey": "edge:A:B",
       },
       "points": Array [
         Array [
@@ -235,7 +246,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:0:2",
+        "reactKey": "edge:A:C",
       },
       "points": Array [
         Array [
@@ -254,7 +265,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:0:8",
+        "reactKey": "edge:A:I",
       },
       "points": Array [
         Array [
@@ -269,7 +280,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "reactKey": "parentToMidedge:1:3",
+        "reactKey": "parentToMidedge:B:D",
       },
       "points": Array [
         Array [
@@ -284,7 +295,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "reactKey": "midwayedge:1:3",
+        "reactKey": "midwayedge:B:D",
       },
       "points": Array [
         Array [
@@ -303,7 +314,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:1:3",
+        "reactKey": "edge:B:D",
       },
       "points": Array [
         Array [
@@ -322,7 +333,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:1:4",
+        "reactKey": "edge:B:E",
       },
       "points": Array [
         Array [
@@ -337,7 +348,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "reactKey": "parentToMidedge:2:5",
+        "reactKey": "parentToMidedge:C:F",
       },
       "points": Array [
         Array [
@@ -352,7 +363,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "reactKey": "midwayedge:2:5",
+        "reactKey": "midwayedge:C:F",
       },
       "points": Array [
         Array [
@@ -371,7 +382,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:2:5",
+        "reactKey": "edge:C:F",
       },
       "points": Array [
         Array [
@@ -390,7 +401,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:2:6",
+        "reactKey": "edge:C:G",
       },
       "points": Array [
         Array [
@@ -409,7 +420,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:6:7",
+        "reactKey": "edge:G:H",
       },
       "points": Array [
         Array [
@@ -425,153 +436,162 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "lsass.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       0,
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "B",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "already_running",
-        "event_type_full": "process_event",
-        "unique_pid": 1,
-        "unique_ppid": 0,
+      "id": "B",
+      "name": "lsass.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       98.99494936611666,
       -400.8998212355134,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "C",
+        "process.name": "powershell.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 2,
-        "unique_ppid": 0,
+      "id": "C",
+      "name": "powershell.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       494.9747468305833,
       -172.28077857575016,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "I",
+        "process.name": "lsass.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "termination_event",
-        "event_type_full": "process_event",
-        "unique_pid": 8,
-        "unique_ppid": 0,
+      "id": "I",
+      "name": "lsass.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       791.9595949289333,
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "D",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "B",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 3,
-        "unique_ppid": 1,
+      "id": "D",
+      "name": "notepad.exe",
+      "parent": "B",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       395.9797974644666,
       -686.6736245602175,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "E",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "B",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 4,
-        "unique_ppid": 1,
+      "id": "E",
+      "name": "notepad.exe",
+      "parent": "B",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       593.9696961966999,
       -572.3641032303359,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "F",
+        "process.name": "explorer.exe",
+        "process.parent.entity_id": "C",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 5,
-        "unique_ppid": 2,
+      "id": "F",
+      "name": "explorer.exe",
+      "parent": "C",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       791.9595949289333,
       -458.05458190045425,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "G",
+        "process.name": "explorer.exe",
+        "process.parent.entity_id": "C",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 6,
-        "unique_ppid": 2,
+      "id": "G",
+      "name": "explorer.exe",
+      "parent": "C",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       989.9494936611666,
       -343.7450605705726,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "H",
+        "process.name": "mimikatz.exe",
+        "process.parent.entity_id": "G",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "unique_pid": 7,
-        "unique_ppid": 6,
+      "id": "H",
+      "name": "mimikatz.exe",
+      "parent": "G",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       1187.9393923933999,
@@ -585,31 +605,33 @@ exports[`resolver graph layout when rendering two nodes, one being the parent of
 Object {
   "ariaLevels": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "iexlorer.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "iexlorer.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 1,
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "B",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "already_running",
-        "event_type_full": "process_event",
-        "unique_pid": 1,
-        "unique_ppid": 0,
+      "id": "B",
+      "name": "notepad.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => 2,
   },
@@ -620,7 +642,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "reactKey": "edge:0:1",
+        "reactKey": "edge:A:B",
       },
       "points": Array [
         Array [
@@ -636,34 +658,36 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "A",
+        "process.name": "iexlorer.exe",
+        "process.parent.entity_id": "",
       },
-      "endgame": Object {
-        "event_subtype_full": "creation_event",
-        "event_type_full": "process_event",
-        "process_name": "",
-        "unique_pid": 0,
+      "id": "A",
+      "name": "iexlorer.exe",
+      "parent": undefined,
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       0,
       -0.8164965809277259,
     ],
     Object {
-      "@timestamp": 1582233383000,
-      "agent": Object {
-        "id": "",
-        "type": "",
-        "version": "",
+      "data": Object {
+        "@timestamp": 1606234833273,
+        "process.entity_id": "B",
+        "process.name": "notepad.exe",
+        "process.parent.entity_id": "A",
       },
-      "endgame": Object {
-        "event_subtype_full": "already_running",
-        "event_type_full": "process_event",
-        "unique_pid": 1,
-        "unique_ppid": 0,
+      "id": "B",
+      "name": "notepad.exe",
+      "parent": "A",
+      "stats": Object {
+        "byCategory": Object {},
+        "total": 0,
       },
     } => Array [
       197.9898987322333,
