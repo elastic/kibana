@@ -42,6 +42,7 @@ import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { SavedObjectsRawDoc } from '..';
 
+export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
 type ActionMap = ReturnType<typeof nextActionMap>;
 
 /**
@@ -54,10 +55,7 @@ export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (
-  client: ElasticsearchClient,
-  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>
-) => {
+export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
@@ -100,32 +98,29 @@ export const nextActionMap = (
   };
 };
 
-export const next = (
-  client: ElasticsearchClient,
-  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>,
-  state: State
-) => {
-  const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-    return () => {
-      return state.retryDelay > 0
-        ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-        : fn();
-    };
-  };
-
+export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   const map = nextActionMap(client, transformRawDocs);
+  return (state: State) => {
+    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
+      return () => {
+        return state.retryDelay > 0
+          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
+          : fn();
+      };
+    };
 
-  if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
-    // Return null if we're in one of the terminating states
-    return null;
-  } else {
-    // Otherwise return the delayed action
-    // We use an explicit cast as otherwise TS infers `(state: never) => ...`
-    // here because state is inferred to be the intersection of all states
-    // instead of the union.
-    const nextAction = map[state.controlState] as (
-      state: State
-    ) => ReturnType<typeof map[AllActionStates]>;
-    return delay(nextAction(state));
-  }
+    if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
+      // Return null if we're in one of the terminating states
+      return null;
+    } else {
+      // Otherwise return the delayed action
+      // We use an explicit cast as otherwise TS infers `(state: never) => ...`
+      // here because state is inferred to be the intersection of all states
+      // instead of the union.
+      const nextAction = map[state.controlState] as (
+        state: State
+      ) => ReturnType<typeof map[AllActionStates]>;
+      return delay(nextAction(state));
+    }
+  };
 };
