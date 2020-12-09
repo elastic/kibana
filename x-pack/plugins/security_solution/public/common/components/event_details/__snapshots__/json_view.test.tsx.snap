@@ -1,18 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JSON View rendering should match snapshot 1`] = `
-<JsonEditor
+<Styled(EuiCodeEditor)
   data-test-subj="jsonView"
->
-  <EuiCodeEditor
-    isReadOnly={true}
-    mode="javascript"
-    setOptions={
-      Object {
-        "fontSize": "12px",
-      }
+  height="100%"
+  isReadOnly={true}
+  mode="javascript"
+  setOptions={
+    Object {
+      "fontSize": "12px",
     }
-    value="{
+  }
+  value="{
   \\"_id\\": \\"pEMaMmkBUV60JmNWmWVi\\",
   \\"_index\\": \\"filebeat-8.0.0-2019.02.19-000001\\",
   \\"_type\\": \\"_doc\\",
@@ -46,7 +45,6 @@ exports[`JSON View rendering should match snapshot 1`] = `
     \\"port\\": 902
   }
 }"
-    width="100%"
-  />
-</JsonEditor>
+  width="100%"
+/>
 `;

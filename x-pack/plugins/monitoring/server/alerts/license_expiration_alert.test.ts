@@ -24,14 +24,29 @@ jest.mock('moment', () => {
   };
 });
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+      config: {
+        ui: {
+          show_license_expiration: true,
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('LicenseExpirationAlert', () => {
   it('should have defaults', () => {
     const alert = new LicenseExpirationAlert();
-    expect(alert.type).toBe(ALERT_LICENSE_EXPIRATION);
-    expect(alert.label).toBe('License expiration');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_LICENSE_EXPIRATION);
+    expect(alert.alertOptions.name).toBe('License expiration');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       { name: 'expiredDate', description: 'The date when the license expires.' },
       { name: 'clusterName', description: 'The cluster to which the license belong.' },
       {
@@ -67,22 +82,6 @@ describe('LicenseExpirationAlert', () => {
         time: 1,
       },
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        show_license_expiration: true,
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -121,19 +120,10 @@ describe('LicenseExpirationAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new LicenseExpirationAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -169,7 +159,6 @@ describe('LicenseExpirationAlert', () => {
                 ],
               },
               severity: 'warning',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -194,118 +183,11 @@ describe('LicenseExpirationAlert', () => {
         return [];
       });
       const alert = new LicenseExpirationAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      expect(replaceState).not.toHaveBeenCalledWith({});
-      expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...legacyAlert,
-            resolved_timestamp: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: undefined,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new LicenseExpirationAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: undefined,
-            ui: {
-              isFiring: false,
-              message: {
-                text: 'The license for this cluster is active.',
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: 'License expiration alert is resolved for testCluster.',
-        internalShortMessage: 'License expiration alert is resolved for testCluster.',
-        clusterName,
-        expiredDate: 'THE_DATE',
-        state: 'resolved',
-      });
-    });
-
-    it('should not fire actions if we are not showing license expiration', async () => {
-      const alert = new LicenseExpirationAlert();
-      const customConfig = {
-        ...config,
-        ui: {
-          ...config.ui,
-          show_license_expiration: false,
-        },
-      };
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        customConfig as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

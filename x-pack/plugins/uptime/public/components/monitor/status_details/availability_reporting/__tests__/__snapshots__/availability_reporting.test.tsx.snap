@@ -105,7 +105,7 @@ Array [
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#d3dae6;color:#000"
+                    style="background-color:#6dccb1;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -113,13 +113,7 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--default"
-                        >
-                          <h4>
-                            au-heartbeat
-                          </h4>
-                        </span>
+                        au-heartbeat
                       </span>
                     </span>
                   </span>
@@ -182,7 +176,7 @@ Array [
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#d3dae6;color:#000"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -190,13 +184,7 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            nyc-heartbeat
-                          </h4>
-                        </span>
+                        nyc-heartbeat
                       </span>
                     </span>
                   </span>
@@ -259,7 +247,7 @@ Array [
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#d3dae6;color:#000"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -267,13 +255,7 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            spa-heartbeat
-                          </h4>
-                        </span>
+                        spa-heartbeat
                       </span>
                     </span>
                   </span>

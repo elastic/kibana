@@ -39,11 +39,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       ? JSON.parse(decodeURIComponent(pagination))
       : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
 
-    const {
-      summaries,
-      nextPagePagination,
-      prevPagePagination,
-    } = await libs.requests.getMonitorStates({
+    const result = await libs.requests.getMonitorStates({
       uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
@@ -56,10 +52,6 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       statusFilter: statusFilter || undefined,
     });
 
-    return {
-      summaries,
-      nextPagePagination,
-      prevPagePagination,
-    };
+    return result;
   },
 });

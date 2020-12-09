@@ -174,18 +174,6 @@ describe('DocViewTable at Discover', () => {
         });
       }
     });
-
-    (['noMappingWarning'] as const).forEach((element) => {
-      const elementExist = check[element];
-
-      if (typeof elementExist === 'boolean') {
-        const el = findTestSubject(rowComponent, element);
-
-        it(`renders ${element} for '${check._property}' correctly`, () => {
-          expect(el.length).toBe(elementExist ? 1 : 0);
-        });
-      }
-    });
   });
 });
 

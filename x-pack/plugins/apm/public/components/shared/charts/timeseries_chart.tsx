@@ -24,7 +24,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
@@ -71,20 +71,13 @@ export function TimeseriesChart({
   anomalySeries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
   const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEventContext();
+  const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
   const { start, end } = urlParams;
-
-  useEffect(() => {
-    if (pointerEvent && pointerEvent?.chartId !== id && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [pointerEvent, chartRef, id]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();

@@ -60,12 +60,14 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any) {
+  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any, asResponse = false) {
     const debugEnabled =
       sessionStorage.getItem('uptime_debug') === 'true' && startsWith(apiUrl, '/api/uptime');
 
-    const response = await this._http!.get(apiUrl, {
+    const response = await this._http!.fetch({
+      path: apiUrl,
       query: { ...params, ...(debugEnabled ? { _debug: true } : {}) },
+      asResponse,
     });
 
     if (decodeType) {

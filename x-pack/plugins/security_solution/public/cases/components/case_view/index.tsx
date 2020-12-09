@@ -57,10 +57,8 @@ export interface OnUpdateFields {
 }
 
 const MyWrapper = styled.div`
-  padding: ${({
-    theme,
-  }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
-  ${theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
