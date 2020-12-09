@@ -10,6 +10,7 @@ import { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { CountAggField } from './count_agg_field';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { ESDocField } from '../es_doc_field';
+import { getOrdinalSuffix } from '../../util/ordinal_suffix';
 
 export interface PercentileAggParams extends CountAggFieldParams {
   esDocField?: ESDocField;
@@ -34,7 +35,7 @@ export class PercentileAggField extends CountAggField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
-    const suffix = this._percentile === 1 ? 'st' : this._percentile === 2 ? 'nd' : 'th';
+    const suffix = getOrdinalSuffix(this._percentile);
     return this._label
       ? this._label
       : `${this._percentile}${suffix} ${this._source.getAggLabel(

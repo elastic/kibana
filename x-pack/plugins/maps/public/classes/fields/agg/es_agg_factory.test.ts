@@ -48,4 +48,26 @@ describe('esAggFieldsFactory', () => {
     );
     expect(fields.length).toBe(2);
   });
+
+  describe('percentile-fields', () => {
+    test('Should create percentile agg fields with default', () => {
+      const fields = esAggFieldsFactory(
+        { type: AGG_TYPE.PERCENTILE, field: 'myField' },
+        mockEsAggSource,
+        FIELD_ORIGIN.SOURCE
+      );
+      expect(fields.length).toBe(1);
+      expect(fields[0].getName()).toBe('agg_key_50');
+    });
+
+    test('Should create percentile agg fields with param', () => {
+      const fields = esAggFieldsFactory(
+        { type: AGG_TYPE.PERCENTILE, field: 'myField', percentile: 90 },
+        mockEsAggSource,
+        FIELD_ORIGIN.SOURCE
+      );
+      expect(fields.length).toBe(1);
+      expect(fields[0].getName()).toBe('agg_key_90');
+    });
+  });
 });
