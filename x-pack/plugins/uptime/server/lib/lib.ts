@@ -84,7 +84,7 @@ export function createUptimeESClient({
       const startTime = process.hrtime();
 
       try {
-        res = await esClient.search(esParams);
+        res = await esClient.count(esParams);
       } catch (e) {
         esError = e;
       }
