@@ -20,7 +20,7 @@ import {
   AlertInstanceContext,
   ActionGroup,
 } from './types';
-import { getBuiltinActionGroups, BuiltInActionGroupIds } from '../common';
+import { getBuiltinActionGroups } from '../common';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -73,9 +73,8 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = string
-  >(alertType: AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds>) {
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -91,17 +90,8 @@ export class AlertTypeRegistry {
 
     const alertTypeWithBuiltIns = {
       ...alertType,
-      actionGroups: [
-        ...alertType.actionGroups,
-        ..._.cloneDeep(getBuiltinActionGroups<ActionGroupIds>()),
-      ],
-    } as AlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds | BuiltInActionGroupIds
-    >;
+      actionGroups: [...alertType.actionGroups, ..._.cloneDeep(getBuiltinActionGroups())],
+    } as AlertType<Params, State, InstanceState, InstanceContext>;
 
     this.alertTypes.set(
       alertIdSchema.validate(alertType.id),
@@ -120,9 +110,8 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = string
-  >(id: string): AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds> {
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(id: string): AlertType<Params, State, InstanceState, InstanceContext> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -142,8 +131,7 @@ export class AlertTypeRegistry {
       Params,
       State,
       InstanceState,
-      InstanceContext,
-      ActionGroupIds
+      InstanceContext
     >;
   }
 

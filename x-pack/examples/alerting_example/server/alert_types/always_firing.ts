@@ -39,8 +39,7 @@ export const alertType: AlertType<
   AlwaysFiringParams,
   { count?: number },
   { triggerdOnCycle: number },
-  never,
-  ActionGroups
+  never
 > = {
   id: 'example.always-firing',
   name: 'Always firing',

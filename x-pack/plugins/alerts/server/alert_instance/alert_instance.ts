@@ -15,10 +15,9 @@ import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  Context extends AlertInstanceContext
 > {
-  actionGroup: ActionGroupIds;
+  actionGroup: string;
   subgroup?: string;
   context: Context;
   state: State;
@@ -26,19 +25,17 @@ interface ScheduledExecutionOptions<
 
 export type PublicAlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  Context extends AlertInstanceContext = AlertInstanceContext
 > = Pick<
-  AlertInstance<State, Context, ActionGroupIds>,
+  AlertInstance<State, Context>,
   'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
 >;
 
 export class AlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  Context extends AlertInstanceContext = AlertInstanceContext
 > {
-  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
+  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context>;
   private meta: AlertInstanceMeta;
   private state: State;
 
@@ -75,14 +72,14 @@ export class AlertInstance<
 
   private scheduledActionGroupIsUnchanged(
     lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
   ) {
     return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
   }
 
   private scheduledActionSubgroupIsUnchanged(
     lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
   ) {
     return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
       ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
@@ -106,7 +103,7 @@ export class AlertInstance<
     return this.state;
   }
 
-  scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
+  scheduleActions(actionGroup: string, context: Context = {} as Context) {
     this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
@@ -117,7 +114,7 @@ export class AlertInstance<
   }
 
   scheduleActionsWithSubGroup(
-    actionGroup: ActionGroupIds,
+    actionGroup: string,
     subgroup: string,
     context: Context = {} as Context
   ) {
