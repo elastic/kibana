@@ -178,8 +178,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
   };
 }
 
-function isBoom(response: any): response is Boom {
-  return response instanceof Boom;
+function isBoom(response: any): response is Boom.Boom {
+  return response instanceof Boom.Boom;
 }
 
 function setHeaders(response: ResponseObject, headers: ResponseHeaders) {

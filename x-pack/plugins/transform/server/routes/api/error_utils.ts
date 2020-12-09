@@ -144,7 +144,7 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
   // Otherwise, use the custom message to create a Boom error response and
   // return it
   const message = statusCodeToMessageMap[statusCode];
-  return new Boom(message, { statusCode });
+  return new Boom.Boom(message, { statusCode });
 }
 
 interface EsError {
