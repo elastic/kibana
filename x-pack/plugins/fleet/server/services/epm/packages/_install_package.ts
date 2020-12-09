@@ -30,6 +30,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { saveArchiveEntries } from '../archive/save_to_es';
+import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -131,6 +132,13 @@ export async function _installPackage({
   // per data stream and we should then save them
   await installILMPolicy(paths, callCluster);
 
+  const installedDataStreamIlm = await installIlmForDataStream(
+    packageInfo,
+    paths,
+    callCluster,
+    savedObjectsClient
+  );
+
   // installs versionized pipelines without removing currently installed ones
   const installedPipelines = await installPipelines(
     packageInfo,
@@ -209,6 +217,7 @@ export async function _installPackage({
   return [
     ...installedKibanaAssetsRefs,
     ...installedPipelines,
+    ...installedDataStreamIlm,
     ...installedTemplateRefs,
     ...installedTransforms,
   ];
