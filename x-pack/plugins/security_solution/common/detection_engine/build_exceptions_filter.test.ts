@@ -36,7 +36,7 @@ import {
   createOrClauses,
   chunkExceptions,
   buildExceptionFilter,
-  ExceptionItemSansLargeValueLIsts,
+  ExceptionItemSansLargeValueLists,
 } from './build_exceptions_filter';
 import { EntryMatchAny, ExceptionListItemSchema } from '../../common/shared_imports';
 import { hasLargeValueList } from './utils';
@@ -47,11 +47,11 @@ const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   value: ['some "host" name', 'some other host name'],
 });
 
-const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLIsts[] => {
+const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLists[] => {
   const items = getExceptionListItemSchemaXMock(num);
   return items.filter(
     ({ entries }) => !hasLargeValueList(entries)
-  ) as ExceptionItemSansLargeValueLIsts[];
+  ) as ExceptionItemSansLargeValueLists[];
 };
 
 describe('build_exceptions_filter', () => {
@@ -444,7 +444,7 @@ describe('build_exceptions_filter', () => {
     });
 
     test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const exceptions = getExceptionListItemsWoValueLists(1) as ExceptionItemSansLargeValueLIsts[];
+      const exceptions = getExceptionListItemsWoValueLists(1) as ExceptionItemSansLargeValueLists[];
       const chunks = chunkExceptions(exceptions, 2);
       expect(chunks).toHaveLength(1);
     });

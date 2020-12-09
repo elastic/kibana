@@ -29,20 +29,20 @@ interface CreateExceptionListItemNonLargeList extends CreateExceptionListItemSch
   entries: NonListEntry[];
 }
 
-export type ExceptionItemSansLargeValueLIsts =
+export type ExceptionItemSansLargeValueLists =
   | ExceptionListItemNonLargeList
   | CreateExceptionListItemNonLargeList;
 
 export const chunkExceptions = (
-  exceptions: ExceptionItemSansLargeValueLIsts[],
+  exceptions: ExceptionItemSansLargeValueLists[],
   chunkSize: number
-): ExceptionItemSansLargeValueLIsts[][] => {
+): ExceptionItemSansLargeValueLists[][] => {
   if (exceptions.length === 0) {
     return [];
   } else if (exceptions.length <= chunkSize) {
     return [exceptions];
   } else {
-    const chunkedFilters: ExceptionItemSansLargeValueLIsts[][] = [];
+    const chunkedFilters: ExceptionItemSansLargeValueLists[][] = [];
     for (let index = 0; index < exceptions.length; index += chunkSize) {
       const exceptionsChunks = exceptions.slice(index, index + chunkSize);
       chunkedFilters.push(exceptionsChunks);
@@ -52,7 +52,7 @@ export const chunkExceptions = (
 };
 
 export const buildExceptionItemFilter = (
-  exceptionItem: ExceptionItemSansLargeValueLIsts
+  exceptionItem: ExceptionItemSansLargeValueLists
 ): BooleanFilter | NestedFilter => {
   const { entries } = exceptionItem;
 
@@ -68,7 +68,7 @@ export const buildExceptionItemFilter = (
 };
 
 export const createOrClauses = (
-  exceptionItems: ExceptionItemSansLargeValueLIsts[]
+  exceptionItems: ExceptionItemSansLargeValueLists[]
 ): Array<BooleanFilter | NestedFilter> => {
   return exceptionItems.map((exceptionItem) => buildExceptionItemFilter(exceptionItem));
 };
@@ -86,7 +86,7 @@ export const buildExceptionFilter = ({
   // elsewhere for the moment being.
   const exceptionsWithoutLargeValueLists = lists.filter(
     ({ entries }) => !hasLargeValueList(entries)
-  ) as ExceptionItemSansLargeValueLIsts[];
+  ) as ExceptionItemSansLargeValueLists[];
 
   const exceptionFilter: Filter = {
     meta: {
@@ -110,7 +110,7 @@ export const buildExceptionFilter = ({
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
 
-    const filters: Filter[] = chunks.map((exceptionsChunk) => {
+    const filters = chunks.map<Filter>((exceptionsChunk) => {
       const orClauses = createOrClauses(exceptionsChunk);
 
       return {
@@ -127,7 +127,7 @@ export const buildExceptionFilter = ({
       };
     });
 
-    const clauses: BooleanFilter[] = filters.map(({ query }) => query);
+    const clauses = filters.map<BooleanFilter>(({ query }) => query);
 
     return {
       meta: {
@@ -298,6 +298,6 @@ export const createInnerAndClauses = (
   } else if (entriesNested.is(entry)) {
     return buildNestedClause(entry);
   } else {
-    throw new Error(`Unexpected exception entry: ${entry}`);
+    throw new TypeError(`Unexpected exception entry: ${entry}`);
   }
 };
