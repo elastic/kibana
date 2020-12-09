@@ -65,20 +65,22 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
       fields[ROLLOVER_FORM_PATHS.maxSize]?.value
     )
   ) {
-    return path === ROLLOVER_FORM_PATHS.maxAge
-      ? {
-          code: ROLLOVER_EMPTY_VALIDATION,
-          message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
-        }
-      : path === ROLLOVER_FORM_PATHS.maxDocs
-      ? {
-          code: ROLLOVER_EMPTY_VALIDATION,
-          message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
-        }
-      : {
-          code: ROLLOVER_EMPTY_VALIDATION,
-          message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
-        };
+    if (path === ROLLOVER_FORM_PATHS.maxAge) {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
+      };
+    } else if (path === ROLLOVER_FORM_PATHS.maxDocs) {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
+      };
+    } else {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
+      };
+    }
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
     fields[ROLLOVER_FORM_PATHS.maxDocs].clearErrors(ROLLOVER_EMPTY_VALIDATION);
