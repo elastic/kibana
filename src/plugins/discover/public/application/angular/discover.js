@@ -414,7 +414,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-    return {
+    const defaultState = {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
@@ -425,6 +425,11 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
     };
+    if (savedSearch.grid) {
+      defaultState.grid = savedSearch.grid;
+    }
+
+    return defaultState;
   }
 
   $scope.state.index = $scope.indexPattern.id;

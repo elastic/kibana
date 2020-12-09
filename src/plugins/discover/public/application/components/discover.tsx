@@ -84,7 +84,6 @@ export function Discover({
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
-
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
@@ -98,7 +97,7 @@ export function Discover({
       : undefined;
   const contentCentered = resultState === 'uninitialized';
   const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
-
+  const columns = state.columns && state.columns.length > 0 ? state.columns : ['_source'];
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -263,7 +262,8 @@ export function Discover({
                           <div className="dscDiscoverGrid">
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
-                              columns={state.columns || []}
+                              columns={columns}
+                              defaultColumns={columns[0] === '_source'}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}

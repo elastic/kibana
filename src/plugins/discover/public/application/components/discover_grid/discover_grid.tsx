@@ -55,6 +55,7 @@ interface SortObj {
 export interface DiscoverGridProps {
   ariaLabelledBy: string;
   columns: string[];
+  defaultColumns: boolean;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
@@ -79,6 +80,7 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
+  defaultColumns,
   indexPattern,
   onAddColumn,
   onFilter,
@@ -156,8 +158,8 @@ export const DiscoverGrid = ({
 
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const euiGridColumns = useMemo(
-    () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol),
-    [columns, indexPattern, showTimeCol, settings]
+    () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, defaultColumns),
+    [columns, indexPattern, showTimeCol, settings, defaultColumns]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const popoverContents = useMemo(() => getPopoverContents(), []);
@@ -200,25 +202,32 @@ export const DiscoverGrid = ({
     >
       <>
         <EuiDataGridMemoized
-          aria-labelledby={ariaLabelledBy}
           aria-describedby={randomId}
-          data-test-subj="docTable"
-          sorting={sorting as EuiDataGridSorting}
-          rowCount={rowCount}
+          aria-labelledby={ariaLabelledBy}
           columns={euiGridColumns}
-          renderCellValue={renderCellValue}
-          leadingControlColumns={lead}
           columnVisibility={columnsVisibility}
-          pagination={paginationObj}
-          toolbarVisibility={toolbarVisibility}
+          data-test-subj="docTable"
           gridStyle={gridStyle as EuiDataGridStyle}
-          schemaDetectors={schemaDetectors}
-          popoverContents={popoverContents}
+          leadingControlColumns={lead}
           onColumnResize={(col: { columnId: string; width: number }) => {
             if (onResize) {
               onResize(col);
             }
           }}
+          pagination={paginationObj}
+          popoverContents={popoverContents}
+          renderCellValue={renderCellValue}
+          rowCount={rowCount}
+          schemaDetectors={schemaDetectors}
+          sorting={sorting as EuiDataGridSorting}
+          toolbarVisibility={
+            defaultColumns
+              ? {
+                  ...toolbarVisibility,
+                  showColumnSelector: false,
+                }
+              : toolbarVisibility
+          }
         />
 
         {showDisclaimer && (

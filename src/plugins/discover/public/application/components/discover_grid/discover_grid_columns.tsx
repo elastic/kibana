@@ -40,7 +40,6 @@ export function getLeadControlColumns() {
         </EuiScreenReaderOnly>
       ),
       rowCellRender: ViewButton,
-      cellActions: [],
     },
   ];
 }
@@ -48,7 +47,8 @@ export function getLeadControlColumns() {
 export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  defaultColumns: boolean
 ) {
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
@@ -60,11 +60,15 @@ export function buildEuiGridColumn(
     isSortable: indexPatternField?.sortable,
     display: indexPatternField?.displayName,
     actions: {
-      showHide: {
-        label: i18n.translate('discover.removeColumnLabel', {
-          defaultMessage: 'Remove column',
-        }),
-      },
+      showHide: defaultColumns
+        ? false
+        : {
+            label: i18n.translate('discover.removeColumnLabel', {
+              defaultMessage: 'Remove column',
+            }),
+          },
+      showMoveLeft: !defaultColumns,
+      showMoveRight: !defaultColumns,
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };
@@ -83,7 +87,8 @@ export function getEuiGridColumns(
   columns: string[],
   settings: DiscoverGridSettings | undefined,
   indexPattern: IndexPattern,
-  showTimeCol: boolean
+  showTimeCol: boolean,
+  defaultColumns: boolean
 ) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -91,11 +96,13 @@ export function getEuiGridColumns(
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern)
+      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
     );
   }
 
-  return columns.map((column) => buildEuiGridColumn(column, getColWidth(column), indexPattern));
+  return columns.map((column) =>
+    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
+  );
 }
 
 export function getVisibleColumns(
