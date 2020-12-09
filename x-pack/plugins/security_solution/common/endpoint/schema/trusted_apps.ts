@@ -58,7 +58,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, F extends Con
 
           for (const entry of entries) {
             // unfortunately combination of generics and Type<...> for "field" causes type errors
-            const { field, value } = entry as ConditionEntry<ConditionEntryField>;
+            const { field, value } = entry as ConditionEntry;
 
             if (usedFields.has(field)) {
               return `[${entryFieldLabels[field]}] field can only be used once`;

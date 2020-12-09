@@ -18,9 +18,8 @@ import {
 } from '@elastic/eui';
 import { Status } from './status';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertsCallout } from '../../../alerts/callout';
 
-export function ApmServerInstance({ summary, metrics, alerts, ...props }) {
+export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
     metrics.apm_requests,
     metrics.apm_responses_valid,
@@ -59,18 +58,9 @@ export function ApmServerInstance({ summary, metrics, alerts, ...props }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Status stats={summary} alerts={alerts} />
+          <Status stats={summary} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout
-          alerts={alerts}
-          nextStepsFilter={(nextStep) => {
-            if (nextStep.text.includes('APM servers')) {
-              return false;
-            }
-            return true;
-          }}
-        />
         <EuiPageContent>
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
