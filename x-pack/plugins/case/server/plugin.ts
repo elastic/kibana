@@ -34,6 +34,7 @@ import {
   CaseUserActionService,
   CaseUserActionServiceSetup,
   AlertService,
+  AlertServiceContract,
 } from './services';
 import { createCaseClient } from './client';
 import { registerConnectors } from './connectors';
@@ -108,6 +109,7 @@ export class CasePlugin {
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
       userActionService: this.userActionService,
+      alertsService: this.alertsService,
     });
   }
 
@@ -146,7 +148,7 @@ export class CasePlugin {
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
     userActionService: CaseUserActionServiceSetup;
-    alertsService: AlertService;
+    alertsService: AlertServiceContract;
   }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();

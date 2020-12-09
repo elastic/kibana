@@ -8,7 +8,6 @@ import Boom from '@hapi/boom';
 import { CaseClientUpdateAlertsStatus, CaseClientFactoryArguments } from '../types';
 
 export const updateAlertsStatus = ({
-  savedObjectsClient,
   alertsService,
   request,
   context,

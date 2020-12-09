@@ -106,6 +106,9 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -144,6 +147,9 @@ describe('create', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       };
 
@@ -323,6 +329,9 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -346,6 +355,9 @@ describe('create', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       };
       const savedObjectsClient = createMockSavedObjectsRepository({

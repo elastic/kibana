@@ -8,7 +8,7 @@ import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createCaseClient } from '../../../client';
-import { CaseService, CaseConfigureService } from '../../../services';
+import { CaseService, CaseConfigureService, AlertService } from '../../../services';
 import { getActions } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 
@@ -24,6 +24,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const alertsService = new AlertService();
   const caseClient = createCaseClient({
     savedObjectsClient: client,
     request: {} as KibanaRequest,
@@ -33,6 +34,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       postUserActions: jest.fn(),
       getUserActions: jest.fn(),
     },
+    alertsService,
   });
 
   return ({

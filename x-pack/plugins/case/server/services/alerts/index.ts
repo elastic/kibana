@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { IClusterClient, KibanaRequest } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
+
+export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
   request: KibanaRequest;

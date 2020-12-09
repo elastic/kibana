@@ -11,6 +11,7 @@ import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
+  createAlertServiceMock,
 } from '../services/mocks';
 
 import { create } from './cases/create';
@@ -24,6 +25,7 @@ jest.mock('./comments/add');
 const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();
 const userActionService = createUserActionServiceMock();
+const alertsService = createAlertServiceMock();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 
@@ -39,6 +41,7 @@ describe('createCaseClient()', () => {
       caseConfigureService,
       caseService,
       userActionService,
+      alertsService,
     });
 
     expect(createMock).toHaveBeenCalledWith({

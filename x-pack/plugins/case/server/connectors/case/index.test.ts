@@ -14,6 +14,7 @@ import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
+  createAlertServiceMock,
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
@@ -35,11 +36,13 @@ describe('case connector', () => {
     const caseService = createCaseServiceMock();
     const caseConfigureService = createConfigureServiceMock();
     const userActionService = createUserActionServiceMock();
+    const alertsService = createAlertServiceMock();
     caseActionType = getActionType({
       logger,
       caseService,
       caseConfigureService,
       userActionService,
+      alertsService,
     });
   });
 
@@ -789,6 +792,9 @@ describe('case connector', () => {
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.create.mockReturnValue(Promise.resolve(createReturn));
@@ -879,6 +885,9 @@ describe('case connector', () => {
               username: 'awesome',
             },
             version: 'WzE3LDFd',
+            settings: {
+              syncAlerts: true,
+            },
           },
         ];
 
@@ -960,6 +969,9 @@ describe('case connector', () => {
               version: 'WzksMV0=',
             },
           ],
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.addComment.mockReturnValue(Promise.resolve(commentReturn));

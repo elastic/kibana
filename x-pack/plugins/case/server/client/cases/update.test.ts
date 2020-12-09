@@ -38,7 +38,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -115,7 +118,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -160,7 +166,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -210,7 +219,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -328,7 +340,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(406);
@@ -358,7 +370,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(404);
@@ -385,7 +397,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(409);
