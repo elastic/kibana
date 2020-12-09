@@ -568,12 +568,7 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
-        readonly ml: {
-            readonly guide: string;
-            readonly anomalyDetection: string;
-            readonly anomalyDetectionJobs: string;
-            readonly dataFrameAnalytics: string;
-        };
+        readonly ml: Record<string, string>;
         readonly visualize: Record<string, string>;
     };
 }
