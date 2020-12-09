@@ -5,20 +5,20 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
-import { IField } from '../field';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { CountAggField } from './count_agg_field';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
+import { ESDocField } from '../es_doc_field';
 
 export interface PercentileAggParams extends CountAggFieldParams {
-  esDocField?: IField;
+  esDocField?: ESDocField;
   percentile: number;
 }
 
 export class PercentileAggField extends CountAggField implements IESAggField {
   private readonly _percentile: number;
-  private readonly _esDocField?: IField;
+  private readonly _esDocField?: ESDocField;
   constructor(params: PercentileAggParams) {
     super(params);
     this._esDocField = params.esDocField;
@@ -64,12 +64,18 @@ export class PercentileAggField extends CountAggField implements IESAggField {
     return AGG_TYPE.PERCENTILE;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
-    return this._esDocField ? await this._esDocField.getOrdinalFieldMetaRequest() : null;
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+    return this._esDocField ? await this._esDocField.getExtendedStatsFieldMetaRequest() : null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(size: number): Promise<unknown | null> {
     return this._esDocField ? await this._esDocField.getCategoricalFieldMetaRequest(size) : null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+    return this._esDocField
+      ? await this._esDocField.getPercentilesFieldMetaRequest(percentiles)
+      : null;
   }
 
   isValid(): boolean {
