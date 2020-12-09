@@ -6,9 +6,15 @@
 
 import { from, combineLatest, of } from 'rxjs';
 import { map, takeUntil, first } from 'rxjs/operators';
-import { SavedObjectsFindOptionsReference } from 'src/core/server';
+import { SavedObjectsFindOptionsReference, ISavedObjectTypeRegistry } from 'src/core/server';
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
+
+const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) =>
+  typeRegistry
+    .getVisibleTypes()
+    .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
+    .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
 
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
@@ -23,10 +29,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         savedObjects: { client, typeRegistry },
       } = core;
 
-      const searchableTypes = typeRegistry
-        .getVisibleTypes()
-        .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
-        .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
+      const searchableTypes = getSearchableTypes(typeRegistry, types);
 
       const searchFields = uniq(
         searchableTypes.map((type) => type.management!.defaultSearchField!)
@@ -55,10 +58,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
       const {
         savedObjects: { typeRegistry },
       } = core;
-      return typeRegistry
-        .getVisibleTypes()
-        .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl)
-        .map((type) => type.name);
+      return getSearchableTypes(typeRegistry).map((type) => type.name);
     },
   };
 };
