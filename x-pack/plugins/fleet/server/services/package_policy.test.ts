@@ -348,6 +348,7 @@ describe('Package policy service', () => {
 
     // Callback one adds an input that includes a `config` property
     const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+      callbackCallingOrder.push('one');
       return {
         ...ds,
         inputs: [
@@ -367,6 +368,7 @@ describe('Package policy service', () => {
 
     // Callback two adds an additional `input[0].config` property
     const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+      callbackCallingOrder.push('two');
       return {
         ...ds,
         inputs: [
@@ -391,6 +393,7 @@ describe('Package policy service', () => {
 
     afterEach(() => {
       appContextService.stop();
+      jest.clearAllMocks();
       callbackCallingOrder.length = 0;
     });
 
