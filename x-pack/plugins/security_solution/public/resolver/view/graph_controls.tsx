@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react/button-has-type */
 
-import React, { useCallback, useMemo, useContext, useState, HTMLAttributes } from 'react';
+import React, { useCallback, useMemo, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
