@@ -33,7 +33,7 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  DOC_TABLE_LEGACY_TABLE,
+  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../common';
 
@@ -166,7 +166,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
-  [DOC_TABLE_LEGACY_TABLE]: {
+  [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
       defaultMessage: 'Use legacy table',
     }),

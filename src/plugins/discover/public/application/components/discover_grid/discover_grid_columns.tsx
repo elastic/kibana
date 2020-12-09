@@ -86,12 +86,7 @@ export function getEuiGridColumns(
   showTimeCol: boolean
 ) {
   const timeFieldName = indexPattern.timeFieldName;
-  const getColWidth = (column: string) => {
-    if (settings?.columns && settings.columns[column]) {
-      return settings.columns[column].width || 0;
-    }
-    return 0;
-  };
+  const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];

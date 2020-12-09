@@ -19,20 +19,20 @@
 import React, { ReactNode } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { geoPoint, kibanaJSON } from './constants';
+import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency
-  // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
   switch (kbnType) {
-    case 'date':
+    case KBN_FIELD_TYPES.DATE:
       return 'datetime';
-    case 'number':
+    case KBN_FIELD_TYPES.NUMBER:
       return 'numeric';
-    case '_source':
+    case KBN_FIELD_TYPES._SOURCE:
       return kibanaJSON;
-    case 'object':
+    case KBN_FIELD_TYPES.OBJECT:
       return 'json';
-    case 'geo_point':
+    case KBN_FIELD_TYPES.GEO_POINT:
       return geoPoint;
     default:
       return 'json';

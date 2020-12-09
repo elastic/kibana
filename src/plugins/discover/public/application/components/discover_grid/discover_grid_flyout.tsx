@@ -57,13 +57,9 @@ export function DiscoverGridFlyout({
   onAddColumn,
   services,
 }: Props) {
-  if (!hit) {
-    return null;
-  }
-
   return (
     <EuiPortal>
-      <EuiFlyout onClose={() => onClose()} size="m" data-test-subj="docTableDetailsFlyout">
+      <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
             <EuiFlexItem>
