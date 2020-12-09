@@ -12,6 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiInMemoryTable,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 
 import { get, getOr } from 'lodash/fp';
@@ -62,7 +63,8 @@ const fields = [
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
 ];
 
-const StyledEuiInMemoryTable = styled(EuiInMemoryTable)`
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableHeaderCell {
     border: none;
   }
@@ -138,17 +140,19 @@ const getSummary = ({
     : [];
 };
 
-const summaryColumns = [
+const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = [
   {
     field: 'title',
     truncateText: false,
     render: getTitle,
-    width: 120,
+    width: '120px',
+    name: '',
   },
   {
     field: 'description',
     truncateText: false,
     render: getDescription,
+    name: '',
   },
 ];
 

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString, isEmpty } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -33,12 +33,8 @@ import {
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
 } from './constants';
-import {
-  RenderRuleName,
-  renderEventModule,
-  renderUrl,
-  getSingalStatusBadge,
-} from './formatted_field_helpers';
+import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
+import { RuleStatus } from './rule_status';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -53,8 +49,6 @@ const FormattedFieldValueComponent: React.FC<{
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
 }> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value, linkValue }) => {
-  const signalStatusBadgeColor = useMemo(() => getSingalStatusBadge(value), [value]);
-
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -118,6 +112,10 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
+    return (
+      <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+    );
   } else if (
     [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
   ) {
@@ -147,7 +145,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else {
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
-    const defaultDraggable = (
+    return (
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -161,10 +159,6 @@ const FormattedFieldValueComponent: React.FC<{
         {content}
       </DefaultDraggable>
     );
-    if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
-      return <EuiBadge color={signalStatusBadgeColor}>{defaultDraggable}</EuiBadge>;
-    }
-    return defaultDraggable;
   }
 };
 

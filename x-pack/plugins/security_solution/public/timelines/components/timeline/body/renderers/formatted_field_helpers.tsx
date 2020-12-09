@@ -196,12 +196,3 @@ export const renderUrl = ({
     getEmptyTagValue()
   );
 };
-
-export const getSingalStatusBadge = (status: string | number | null | undefined) => {
-  const mapping = {
-    open: 'primary',
-    'in progress': 'warnging',
-  };
-
-  return status ? getOr('default', status, mapping) : 'default';
-};

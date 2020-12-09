@@ -32,7 +32,7 @@ import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy
 import * as i18n from './translations';
 import { LineClamp } from '../../../../common/components/line_clamp';
 
-export type OnEventDetailsClose = () => void;
+export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -45,7 +45,7 @@ interface Props {
 interface ExpandableEventTitleProps {
   isAlert: boolean;
   loading: boolean;
-  onEventDetailsClose?: OnEventDetailsClose;
+  handleOnEventClosed?: HandleOnEventClosed;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -53,16 +53,16 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ExpandableEventTitle = React.memo(
-  ({ isAlert, loading, onEventDetailsClose }: ExpandableEventTitleProps) => (
+  ({ isAlert, loading, handleOnEventClosed }: ExpandableEventTitleProps) => (
     <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
         </EuiTitle>
       </EuiFlexItem>
-      {onEventDetailsClose && (
+      {handleOnEventClosed && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={onEventDetailsClose} />
+          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
         </EuiFlexItem>
       )}
     </StyledEuiFlexGroup>

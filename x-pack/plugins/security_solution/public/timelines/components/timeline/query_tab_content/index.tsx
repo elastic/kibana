@@ -13,11 +13,11 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, pick } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -32,7 +32,7 @@ import { combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -45,6 +45,8 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { activeTimeline } from '../../../containers/active_timeline_context';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -250,9 +252,42 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { expandedEvent } = useDeepEqualSelector((state) =>
+    pick(['expandedEvent'], getTimeline(state, timelineId) ?? timelineDefaults)
+  );
+
+  const handleOnEventClosed = useCallback(() => {
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        event: {},
+      })
+    );
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({
+        eventId: expandedEvent.eventId,
+        indexName: expandedEvent.indexName,
+        loading: false,
+      });
+    }
+
+    if (onEventDetailsClose) {
+      onEventDetailsClose();
+    }
+  }, [dispatch, timelineId, expandedEvent.indexName, expandedEvent.eventId, onEventDetailsClose]);
+
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+
+  useEffect(() => {
+    if (isQueryLoading && expandedEvent) {
+      handleOnEventClosed();
+    }
+  }, [isQueryLoading, expandedEvent, handleOnEventClosed]);
 
   return (
     <>
@@ -335,7 +370,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 timelineId={timelineId}
-                onEventDetailsClose={onEventDetailsClose}
+                handleOnEventClosed={handleOnEventClosed}
               />
             </ScrollableFlexItem>
           </>

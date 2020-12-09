@@ -87,13 +87,6 @@ export const COLLAPSE = i18n.translate(
   }
 );
 
-export const COLLAPSE_EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.collapseEventTooltip',
-  {
-    defaultMessage: 'Collapse event',
-  }
-);
-
 export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.investigateInResolverTooltip',
   {

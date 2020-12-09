@@ -215,7 +215,7 @@ describe('field_items', () => {
               aggregatable: true,
               category: 'signal',
               description: 'rule name',
-              example: '2016-05-23T08:05:34.853Z',
+              example: '',
               format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'signal.rule.name',
@@ -259,8 +259,6 @@ describe('field_items', () => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
           id: 'signal.rule.name',
-          label: 'Rule',
-          linkField: 'signal.rule.id',
           width: 180,
         });
       });
