@@ -161,12 +161,7 @@ function extractErrorMessage({ type, reason, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {
-    message +=
-      ', ' +
-      i18n.translate('xpack.transform.models.transformService.withColAndLineMessage', {
-        defaultMessage: 'with line={line} & col={col}',
-        values: { line, col },
-      });
+    message += `, with line=${line} & col=${col}`;
   }
 
   return message;
