@@ -30,7 +30,7 @@ function generator({
   ubiImageFlavor,
   architecture,
 }: TemplateContext) {
-  const fileArchitecture = scope.architecture === 'aarch64' ? 'arm64' : 'amd64';
+  const fileArchitecture = architecture === 'aarch64' ? 'arm64' : 'amd64';
   return dedent(`
   #!/usr/bin/env bash
   #
