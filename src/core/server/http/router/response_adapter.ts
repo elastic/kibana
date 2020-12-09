@@ -143,8 +143,7 @@ export class HapiResponseAdapter {
 
     const headers = kibanaResponse.options.headers;
     if (headers) {
-      // Hapi typings for header accept only strings, although string[] is a valid value
-      error.output.headers = headers as any;
+      error.output.headers = headers;
     }
 
     return error;
