@@ -32,7 +32,7 @@ interface Props {
   path: string;
   /** Callback function to invoke when the user wants to set their default route to the current page */
   onSetDefaultRoute?: (event: MouseEvent) => void;
-  /** Callback function to invoke when the user wants to change their default route button is changed */
+  /** Callback function to invoke when the user wants to change their default route button is changed */
   onChangeDefaultRoute?: (event: MouseEvent) => void;
 }
 
@@ -53,7 +53,7 @@ export const OverviewPageFooter: FC<Props> = ({
   const { show, save } = application.capabilities.advancedSettings;
   if (!show && !save) return <></>;
 
-  const defaultRoutebutton = defaultRoute.includes(path) ? (
+  const defaultRouteButton = defaultRoute.includes(path) ? (
     <RedirectAppLinks application={application}>
       <EuiButtonEmpty
         className="kbnOverviewPageFooter__button"
@@ -102,7 +102,7 @@ export const OverviewPageFooter: FC<Props> = ({
     <footer className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <div>{defaultRoutebutton}</div>
+          <div>{defaultRouteButton}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </footer>
