@@ -19,7 +19,7 @@ export const HelpMenu = React.memo(() => {
       links: [
         {
           content: i18n.translate('xpack.ml.chrome.helpMenu.documentation', {
-            defaultMessage: 'Machine learning documentation',
+            defaultMessage: 'Documentation',
           }),
           href: docLinks.links.ml.guide,
           iconType: 'documents',
