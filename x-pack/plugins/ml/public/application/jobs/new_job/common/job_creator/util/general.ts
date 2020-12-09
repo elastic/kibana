@@ -13,7 +13,11 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../../common/constants/aggregation_types';
-import { MLCATEGORY, DOC_COUNT } from '../../../../../../../common/constants/field_types';
+import {
+  MLCATEGORY,
+  DOC_COUNT,
+  _DOC_COUNT,
+} from '../../../../../../../common/constants/field_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
@@ -113,7 +117,11 @@ export function createDocCountFieldOption(usingAggregations: boolean) {
           label: DOC_COUNT,
         },
       ]
-    : [];
+    : [
+        {
+          label: _DOC_COUNT,
+        },
+      ];
 }
 
 function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {

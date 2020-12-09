@@ -5,6 +5,7 @@
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
@@ -21,6 +22,14 @@ export function newJobCapsProvider(client: IScopedClusterClient) {
     const fieldService = fieldServiceProvider(indexPattern, isRollup, client, savedObjectsClient);
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
+
+    // Remove the _doc_count field as we don't want to display this in the fields lists in the UI
+    const docCountIndex = fields.findIndex((f: Field) => {
+      return f.id === _DOC_COUNT;
+    });
+    if (docCountIndex > -1) {
+      fields.splice(docCountIndex, 1);
+    }
 
     return {
       [indexPattern]: {
