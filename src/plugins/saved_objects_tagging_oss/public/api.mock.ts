@@ -18,10 +18,10 @@
  */
 
 import { ITagsClient } from '../common';
-import { SavedObjectsTaggingApiUi, SavedObjectsTaggingApiUiComponent } from './api';
+import { SavedObjectsTaggingApiUi, SavedObjectsTaggingApiUiComponent, ITagsCache } from './api';
 
-const createClientMock = (): jest.Mocked<ITagsClient> => {
-  const mock = {
+const createClientMock = () => {
+  const mock: jest.Mocked<ITagsClient> = {
     create: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
@@ -32,14 +32,25 @@ const createClientMock = (): jest.Mocked<ITagsClient> => {
   return mock;
 };
 
+const createCacheMock = () => {
+  const mock: jest.Mocked<ITagsCache> = {
+    getState: jest.fn(),
+    getState$: jest.fn(),
+  };
+
+  return mock;
+};
+
 interface SavedObjectsTaggingApiMock {
   client: jest.Mocked<ITagsClient>;
+  cache: jest.Mocked<ITagsCache>;
   ui: SavedObjectsTaggingApiUiMock;
 }
 
 const createApiMock = (): SavedObjectsTaggingApiMock => {
-  const mock = {
+  const mock: SavedObjectsTaggingApiMock = {
     client: createClientMock(),
+    cache: createCacheMock(),
     ui: createApiUiMock(),
   };
 
@@ -50,8 +61,8 @@ type SavedObjectsTaggingApiUiMock = Omit<jest.Mocked<SavedObjectsTaggingApiUi>, 
   components: SavedObjectsTaggingApiUiComponentMock;
 };
 
-const createApiUiMock = (): SavedObjectsTaggingApiUiMock => {
-  const mock = {
+const createApiUiMock = () => {
+  const mock: SavedObjectsTaggingApiUiMock = {
     components: createApiUiComponentsMock(),
     // TS is very picky with type guards
     hasTagDecoration: jest.fn() as any,
@@ -69,8 +80,8 @@ const createApiUiMock = (): SavedObjectsTaggingApiUiMock => {
 
 type SavedObjectsTaggingApiUiComponentMock = jest.Mocked<SavedObjectsTaggingApiUiComponent>;
 
-const createApiUiComponentsMock = (): SavedObjectsTaggingApiUiComponentMock => {
-  const mock = {
+const createApiUiComponentsMock = () => {
+  const mock: SavedObjectsTaggingApiUiComponentMock = {
     TagList: jest.fn(),
     TagSelector: jest.fn(),
     SavedObjectSaveModalTagSelector: jest.fn(),
@@ -82,6 +93,7 @@ const createApiUiComponentsMock = (): SavedObjectsTaggingApiUiComponentMock => {
 export const taggingApiMock = {
   create: createApiMock,
   createClient: createClientMock,
+  createCache: createCacheMock,
   createUi: createApiUiMock,
   createComponents: createApiUiComponentsMock,
 };

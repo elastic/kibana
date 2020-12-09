@@ -38,6 +38,8 @@ interface OwnProps {
   onRuleChange?: () => void;
 }
 
+const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
+
 export const hasAdditionalActions = (id: TimelineId): boolean =>
   [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
     id
@@ -127,7 +129,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(id as TimelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(id as TimelineId)
+            ? DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
+            : 0
         ),
       [isEventViewer, showCheckboxes, id]
     );
