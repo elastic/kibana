@@ -12,7 +12,11 @@ export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorC
   if (accessorConfig.triggerIcon !== 'colorBy' || !accessorConfig.palette) return null;
   return (
     <div className="lnsLayerPanel__paletteContainer">
-      <EuiColorPaletteDisplay size="xs" palette={accessorConfig.palette} />
+      <EuiColorPaletteDisplay
+        className="lnsLayerPanel__palette"
+        size="xs"
+        palette={accessorConfig.palette}
+      />
     </div>
   );
 }
