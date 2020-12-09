@@ -317,4 +317,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';

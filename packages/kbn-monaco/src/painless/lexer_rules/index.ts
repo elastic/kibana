@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { lexerRules } from './painless';
+export { lexerRules, languageConfiguration } from './painless';

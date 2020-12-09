@@ -16,14 +16,13 @@ import {
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   CASE,
   CLOSE_TIMELINE_BTN,
-  CLOSE_NOTES_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
   HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
-  NOTES_BUTTON,
+  NOTES_TAB_BUTTON,
   NOTES_TEXT_AREA,
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
@@ -34,7 +33,7 @@ import {
   SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
   TIMELINE_CHANGES_IN_PROGRESS,
-  TIMELINE_DESCRIPTION,
+  TIMELINE_DESCRIPTION_INPUT,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_FILTER_FIELD,
   TIMELINE_FILTER_OPERATOR,
@@ -49,6 +48,7 @@ import {
   OPEN_TIMELINE_TEMPLATE_ICON,
   TIMELINE_EDIT_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
+  QUERY_TAB_BUTTON,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -57,8 +57,11 @@ import { drag, drop } from '../tasks/common';
 export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
-  cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
-  cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', description);
+  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(`${description}{enter}`);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
 export const addNameToTimeline = (name: string) => {
@@ -66,12 +69,14 @@ export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
 export const addNotesToTimeline = (notes: string) => {
-  cy.get(NOTES_BUTTON).click();
+  cy.get(NOTES_TAB_BUTTON).click();
   cy.get(NOTES_TEXT_AREA).type(notes);
   cy.get(ADD_NOTE_BUTTON).click();
+  cy.get(QUERY_TAB_BUTTON).click();
 };
 
 export const addFilter = (filter: TimelineFilter) => {
@@ -107,10 +112,6 @@ export const checkIdToggleField = () => {
   });
 };
 
-export const closeNotes = () => {
-  cy.get(CLOSE_NOTES_BTN).click();
-};
-
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
@@ -119,7 +120,6 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
 
 export const createNewTimelineTemplate = () => {
@@ -149,7 +149,7 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
   cy.get(OPEN_TIMELINE_ICON).click({ force: true });
 };
 

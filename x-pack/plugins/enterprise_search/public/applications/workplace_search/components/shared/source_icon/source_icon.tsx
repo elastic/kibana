@@ -8,7 +8,7 @@ import React from 'react';
 
 import { camelCase } from 'lodash';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, IconSize } from '@elastic/eui';
 
 import './source_icon.scss';
 
@@ -21,6 +21,7 @@ interface SourceIconProps {
   className?: string;
   wrapped?: boolean;
   fullBleed?: boolean;
+  size?: IconSize;
 }
 
 export const SourceIcon: React.FC<SourceIconProps> = ({
@@ -29,13 +30,14 @@ export const SourceIcon: React.FC<SourceIconProps> = ({
   className,
   wrapped,
   fullBleed = false,
+  size = 'xxl',
 }) => {
   const icon = (
     <EuiIcon
       type={fullBleed ? imagesFull[camelCase(serviceType)] : images[camelCase(serviceType)]}
       title={name}
       className={className}
-      size="xxl"
+      size={size}
     />
   );
   return wrapped ? (

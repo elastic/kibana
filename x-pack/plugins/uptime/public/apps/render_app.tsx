@@ -21,7 +21,7 @@ export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  { element, history }: AppMountParameters
+  appMountParameters: AppMountParameters
 ) {
   const {
     application: { capabilities },
@@ -47,7 +47,6 @@ export function renderApp(
     basePath: basePath.get(),
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
-    history,
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
@@ -68,12 +67,13 @@ export function renderApp(
         ],
       }),
     setBadge,
+    appMountParameters,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
 
-  ReactDOM.render(<UptimeApp {...props} />, element);
+  ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(appMountParameters.element);
   };
 }

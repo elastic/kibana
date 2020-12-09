@@ -15,11 +15,11 @@ import {
   EuiProgress,
   EuiCallOut,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
 import { Description, Name } from '../properties/helpers';
@@ -62,9 +62,10 @@ const usePrevious = (value: unknown) => {
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({ timelineId, toggleSaveTimeline, showWarning }) => {
-    const timeline = useShallowEqualSelector((state) =>
-      timelineSelectors.selectTimeline(state, timelineId)
-    );
+    // TODO: Refactor to use useForm() instead
+    const [isFormSubmitted, setFormSubmitted] = useState(false);
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const timeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
 
     const { isSaving, savedObjectId, title, timelineType } = timeline;
 
@@ -76,10 +77,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     );
 
     const handleClick = useCallback(() => {
+      // TODO: Refactor action to take only title and description as params not the whole timeline
       onSaveTimeline({
         ...timeline,
         id: timelineId,
       });
+      setFormSubmitted(true);
     }, [onSaveTimeline, timeline, timelineId]);
 
     const { getButton } = useCreateTimelineButton({ timelineId, timelineType });
@@ -99,10 +102,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     );
 
     useEffect(() => {
-      if (!isSaving && prevIsSaving) {
+      if (isFormSubmitted && !isSaving && prevIsSaving) {
         toggleSaveTimeline();
       }
-    }, [isSaving, prevIsSaving, toggleSaveTimeline]);
+    }, [isFormSubmitted, isSaving, prevIsSaving, toggleSaveTimeline]);
 
     const modalHeader =
       savedObjectId == null

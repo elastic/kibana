@@ -24,6 +24,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import './alert_instances.scss';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -46,6 +47,7 @@ export const alertInstancesTableColumns = (
     ),
     sortable: false,
     truncateText: true,
+    width: '45%',
     'data-test-subj': 'alertInstancesTableCell-instance',
     render: (value: string) => {
       return (
@@ -61,10 +63,10 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
-    width: '100px',
+    width: '15%',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return (
-        <EuiHealth color={value.healthColor}>
+        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
           {value.label}
           {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
@@ -75,7 +77,7 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'start',
-    width: '200px',
+    width: '190px',
     render: (value: Date | undefined, instance: AlertInstanceListItem) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
@@ -88,7 +90,6 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'duration',
-    align: CENTER_ALIGNMENT,
     render: (value: number, instance: AlertInstanceListItem) => {
       return value ? durationAsString(moment.duration(value)) : '';
     },
@@ -97,7 +98,7 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
-    width: '100px',
+    width: '80px',
     'data-test-subj': 'alertInstancesTableCell-duration',
   },
   {
@@ -192,6 +193,7 @@ export function AlertInstances({
         columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
         tableLayout="fixed"
+        className="alertInstancesList"
       />
     </Fragment>
   );

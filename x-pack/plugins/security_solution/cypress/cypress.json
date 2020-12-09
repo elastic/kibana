@@ -1,7 +1,6 @@
 {
   "baseUrl": "http://localhost:5601",
-  "defaultCommandTimeout": 120000,
-  "experimentalNetworkStubbing": true,
+  "defaultCommandTimeout": 60000,
   "retries": {
     "runMode": 2
   },
