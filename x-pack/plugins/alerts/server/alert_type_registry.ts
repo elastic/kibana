@@ -19,7 +19,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
 } from './types';
-import { RecoveredActionGroup, getBuiltinActionGroups, LicenseTypeValues } from '../common';
+import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
 
@@ -124,7 +124,7 @@ export class AlertTypeRegistry {
       },
     });
     // No need to notify usage on basic alert types
-    if (alertType.minimumLicenseRequired !== LicenseTypeValues.Basic) {
+    if (alertType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
         getAlertTypeFeatureUsageName(alertType.name),
         alertType.minimumLicenseRequired

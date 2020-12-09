@@ -6,7 +6,6 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { LicenseTypeValues } from '../../alerts/common';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -138,7 +137,7 @@ export class ActionTypeRegistry {
       },
     });
     // No need to notify usage on basic action types
-    if (actionType.minimumLicenseRequired !== LicenseTypeValues.Basic) {
+    if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
         getActionTypeFeatureUsageName(actionType as ActionType),
         actionType.minimumLicenseRequired

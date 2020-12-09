@@ -13,7 +13,7 @@ import { LicensingPluginStart } from '../../../licensing/server';
 import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
-import { AlertType, LicenseTypeValues } from '../types';
+import { AlertType } from '../types';
 import { AlertTypeDisabledError } from './errors/alert_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
@@ -83,7 +83,7 @@ export class LicenseState {
 
   private notifyUsage(alertTypeName: string, minimumLicenseRequired: LicenseType) {
     // No need to notify usage on basic alert types
-    if (this._notifyUsage && minimumLicenseRequired !== LicenseTypeValues.Basic) {
+    if (this._notifyUsage && minimumLicenseRequired !== 'basic') {
       this._notifyUsage(getAlertTypeFeatureUsageName(alertTypeName));
     }
   }

@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
 import { assertNever } from '@kbn/std';
-import { LicenseTypeValues } from '../../../alerts/common';
 import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
@@ -81,7 +80,7 @@ export class LicenseState {
 
   private notifyUsage(actionType: ActionType) {
     // No need to notify usage on basic action types
-    if (this._notifyUsage && actionType.minimumLicenseRequired !== LicenseTypeValues.Basic) {
+    if (this._notifyUsage && actionType.minimumLicenseRequired !== 'basic') {
       this._notifyUsage(getActionTypeFeatureUsageName(actionType));
     }
   }

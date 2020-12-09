@@ -33,6 +33,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       id: 'recovered',
       name: 'Recovered',
     },
+    enabledInLicense: true,
   };
 
   const expectedRestrictedNoOpType = {
