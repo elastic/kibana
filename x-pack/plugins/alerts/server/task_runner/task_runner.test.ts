@@ -853,6 +853,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
