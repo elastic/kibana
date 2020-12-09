@@ -4,7 +4,7 @@
 
 ## SavedObjectsUtils.isRandomId() method
 
-Validates that a saved object ID matches UUID format.
+Validates that a saved object ID has been randomly generated.
 
 <b>Signature:</b>
 

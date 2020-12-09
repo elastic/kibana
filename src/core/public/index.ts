@@ -66,7 +66,7 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
+import { DocLinksSetup, DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import {
   IContextContainer,
@@ -218,6 +218,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link DocLinksSetup} */
+  docLinks: DocLinksSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -318,6 +320,7 @@ export {
   HandlerParameters,
   IContextProvider,
   ContextSetup,
+  DocLinksSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,

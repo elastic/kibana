@@ -8,6 +8,7 @@
 
 ```typescript
 readonly links: {
+        readonly settings: string;
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;

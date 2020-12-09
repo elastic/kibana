@@ -18,16 +18,19 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
+
+interface SetupDeps {
+  injectedMetadata: InjectedMetadataSetup;
+}
 
 interface StartDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 /** @internal */
 export class DocLinksService {
-  public setup() {}
-  public start({ injectedMetadata }: StartDeps): DocLinksStart {
+  public setup({ injectedMetadata }: SetupDeps): DocLinksSetup {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
@@ -36,6 +39,7 @@ export class DocLinksService {
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         dashboard: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
           drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
@@ -148,13 +152,24 @@ export class DocLinksService {
       },
     });
   }
+
+  public start({ injectedMetadata }: StartDeps): DocLinksStart {
+    return this.setup({ injectedMetadata });
+  }
 }
+
+/**
+ * See {@link DocLinksStart}
+ * @public
+ */
+export type DocLinksSetup = DocLinksStart;
 
 /** @public */
 export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly settings: string;
     readonly dashboard: {
       readonly guide: string;
       readonly drilldowns: string;

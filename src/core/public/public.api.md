@@ -405,6 +405,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
+    docLinks: DocLinksSetup;
+    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -467,6 +469,9 @@ export class CoreSystem {
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
+// @public
+export type DocLinksSetup = DocLinksStart;
+
 // @public (undocumented)
 export interface DocLinksStart {
     // (undocumented)
@@ -475,6 +480,7 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly settings: string;
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -1488,6 +1494,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:186:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
