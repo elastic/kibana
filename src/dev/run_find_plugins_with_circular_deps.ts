@@ -39,7 +39,6 @@ const allowedList: CircularDepList = new Set([
   'src/plugins/embeddable -> src/plugins/ui_actions',
   'src/plugins/expressions -> src/plugins/visualizations',
   'src/plugins/vis_default_editor -> src/plugins/visualizations',
-  'src/plugins/vis_default_editor -> src/plugins/visualize',
   'src/plugins/visualizations -> src/plugins/visualize',
   'x-pack/plugins/actions -> x-pack/plugins/case',
   'x-pack/plugins/apm -> x-pack/plugins/infra',
