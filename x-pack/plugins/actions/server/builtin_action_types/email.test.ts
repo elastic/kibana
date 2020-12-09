@@ -214,7 +214,7 @@ describe('params validation', () => {
           "bob@example.com",
         ],
         "viewInKibanaPath": "/",
-        "viewInKibanaText": "View in Kibana",
+        "viewInKibanaText": "Go to Kibana",
       }
     `);
   });
@@ -277,7 +277,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by a Kibana connector. [Open Kibana](https://localhost:5601).",
+      This message was sent by Kibana.",
           "subject": "the subject",
         },
         "hasAuth": true,
@@ -343,7 +343,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by a Kibana connector. [Open Kibana](https://localhost:5601).",
+      This message was sent by Kibana.",
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -410,6 +410,106 @@ describe('execute()', () => {
         "serviceMessage": "wops",
         "status": "error",
       }
+    `);
+  });
+
+  test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
+    const actionTypeWithPublicUrl = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+    const config: ActionTypeConfigType = {
+      service: '__json',
+      host: 'a host',
+      port: 42,
+      secure: true,
+      from: 'bob@example.com',
+      hasAuth: true,
+    };
+    const secrets: ActionTypeSecretsType = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const params: ActionParamsType = {
+      to: ['jim@example.com'],
+      cc: ['james@example.com'],
+      bcc: ['jimmy@example.com'],
+      subject: 'the subject',
+      message: 'a message to you',
+      viewInKibanaPath: '/',
+      viewInKibanaText: 'Go to Kibana',
+    };
+
+    const actionId = 'some-id';
+    const executorOptions: EmailActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+
+    await actionTypeWithPublicUrl.executor(executorOptions);
+
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`
+      "a message to you
+
+      --
+
+      This message was sent by Kibana. [Go to Kibana](https://localhost:1234/foo/bar)."
+    `);
+  });
+
+  test('allows to generate a deep link into Kibana', async () => {
+    const actionTypeWithPublicUrl = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+    const config: ActionTypeConfigType = {
+      service: '__json',
+      host: 'a host',
+      port: 42,
+      secure: true,
+      from: 'bob@example.com',
+      hasAuth: true,
+    };
+    const secrets: ActionTypeSecretsType = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const params: ActionParamsType = {
+      to: ['jim@example.com'],
+      cc: ['james@example.com'],
+      bcc: ['jimmy@example.com'],
+      subject: 'the subject',
+      message: 'a message to you',
+      viewInKibanaPath: '/my/app',
+      viewInKibanaText: 'View this in Kibana',
+    };
+
+    const actionId = 'some-id';
+    const executorOptions: EmailActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+
+    await actionTypeWithPublicUrl.executor(executorOptions);
+
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`
+      "a message to you
+
+      --
+
+      This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
     `);
   });
 });

@@ -15,8 +15,6 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
-const DEFAULT_VIEW_IN_KIBANA_PATH = '/';
-
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
@@ -103,7 +101,7 @@ const ParamsSchema = schema.object(
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
-    viewInKibanaPath: schema.string({ defaultValue: DEFAULT_VIEW_IN_KIBANA_PATH }),
+    viewInKibanaPath: schema.string({ defaultValue: '/' }),
     viewInKibanaText: schema.string({
       defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
         defaultMessage: 'Go to Kibana',
@@ -264,20 +262,11 @@ function getViewInKibanaMessage({
     });
   }
 
-  if (viewInKibanaPath === DEFAULT_VIEW_IN_KIBANA_PATH) {
-    return i18n.translate('xpack.actions.builtin.email.defaultViewInKibanaMessage', {
-      defaultMessage: 'This message was sent by Kibana. [Go to Kibana]({link}).',
-      values: {
-        link: publicBaseUrl,
-      },
-    });
-  }
-
   return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
     defaultMessage: 'This message was sent by Kibana. [{viewInKibanaText}]({link}).',
     values: {
       viewInKibanaText,
-      link: `${publicBaseUrl}${viewInKibanaPath}`,
+      link: `${publicBaseUrl}${viewInKibanaPath === '/' ? '' : viewInKibanaPath}`,
     },
   });
 }
