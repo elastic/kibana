@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const getColorSpec = (outliers = true, color?: string) => {
+import { TopLevelSpec } from 'vega-lite';
+
+export type LegendType = 'nominal' | 'quantitative';
+
+const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
   if (outliers) {
     return {
       condition: {
@@ -15,8 +19,8 @@ const getColorSpec = (outliers = true, color?: string) => {
     };
   }
 
-  if (color !== undefined) {
-    return { field: color, type: 'nominal' };
+  if (color !== undefined && legendType !== undefined) {
+    return { field: color, type: legendType };
   }
 
   return { value: '#369' };
@@ -26,8 +30,10 @@ export const getScatterplotMatrixVegaLiteSpec = (
   values: any[],
   columns: string[],
   outliers = true,
-  color?: string
-) => {
+  color?: string,
+  legendType?: LegendType,
+  dynamicSize?: boolean
+): TopLevelSpec => {
   const transform = columns.map((column) => ({
     calculate: `datum['${column}']`,
     as: column,
@@ -56,32 +62,39 @@ export const getScatterplotMatrixVegaLiteSpec = (
       data: { values },
       mark: 'point',
       encoding: {
-        color: getColorSpec(outliers, color),
+        color: getColorSpec(outliers, color, legendType),
         opacity: {
-          value: 0.25,
           ...(outliers
             ? {
                 condition: {
                   value: 0.75,
                   test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
                 },
+                value: 0.25,
               }
-            : {}),
+            : { value: 0.9 }),
         },
         size: {
-          value: 2,
-          ...(outliers
+          ...(outliers && dynamicSize
             ? {
-                condition: {
-                  value: 28,
-                  test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+                type: 'quantitative',
+                field: 'outlier_score',
+                scale: {
+                  type: 'linear',
+                  range: [2, 100],
+                  domain: [0, 1],
                 },
               }
-            : {}),
+            : { value: 2 }),
         },
         tooltip: { type: 'quantitative', field: 'outlier_score' },
         x: { type: 'quantitative', field: { repeat: 'column' } },
         y: { type: 'quantitative', field: { repeat: 'row' } },
+        ...(outliers
+          ? {
+              order: { field: 'outlier_score' },
+            }
+          : {}),
       },
       ...(outliers
         ? {
@@ -96,14 +109,14 @@ export const getScatterplotMatrixVegaLiteSpec = (
                   name: 'Outlier score threshold:',
                   step: 0.01,
                 },
-                init: { cutoff: 0.8 },
+                init: { cutoff: 0.99 },
               },
             },
           }
         : {}),
       transform,
-      width: 150,
-      height: 150,
+      width: 125,
+      height: 125,
     },
   };
 };

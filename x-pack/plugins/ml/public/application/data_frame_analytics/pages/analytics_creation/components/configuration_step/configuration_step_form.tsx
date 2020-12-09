@@ -10,6 +10,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiPanel,
   EuiRange,
   EuiSpacer,
   EuiText,
@@ -29,6 +30,7 @@ import {
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
+  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -50,6 +52,17 @@ import { ExplorationQueryBarProps } from '../../../analytics_exploration/compone
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+
+const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
+  switch (jobType) {
+    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
+      return 'nominal';
+    case ANALYSIS_CONFIG_TYPE.REGRESSION:
+      return 'quantitative';
+    default:
+      return undefined;
+  }
+};
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -448,7 +461,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       {includes.length >= 2 && (
         <>
           <EuiFormRow
-            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrix"
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
             label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
               defaultMessage: 'Scatterplot matrix',
             })}
@@ -463,11 +476,23 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           >
             <Fragment />
           </EuiFormRow>
-          <ScatterplotMatrix
-            fields={includes}
-            index={currentIndexPattern.title}
-            color={jobType === 'classification' ? dependentVariable : undefined}
-          />
+          <EuiPanel
+            paddingSize="m"
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
+          >
+            <ScatterplotMatrix
+              fields={includes}
+              index={currentIndexPattern.title}
+              color={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+                jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+                  ? dependentVariable
+                  : undefined
+              }
+              legendType={getScatterplotMatrixLegendType(jobType)}
+            />
+          </EuiPanel>
+          <EuiSpacer />
         </>
       )}
       {isJobTypeWithDepVar && (
