@@ -77,7 +77,7 @@ import {
   HandlerParameters,
 } from './context';
 
-export { PackageInfo, EnvironmentMode } from '../server/types';
+export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
@@ -165,6 +165,7 @@ export {
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
+  IExternalUrl,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,

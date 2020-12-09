@@ -17,10 +17,17 @@
  * under the License.
  */
 
-/** This module is intended for consumption by public to avoid import issues with server-side code */
-export { PluginOpaqueId } from './plugins/types';
-export * from './saved_objects/types';
-export * from './ui_settings/types';
-export * from './legacy/types';
-export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { ExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+import crypto, { HexBase64Latin1Encoding } from 'crypto';
+
+export const createSHA256Hash = (
+  input: string | Buffer,
+  outputEncoding: HexBase64Latin1Encoding = 'hex'
+) => {
+  let data: Buffer;
+  if (typeof input === 'string') {
+    data = Buffer.from(input, 'utf8');
+  } else {
+    data = input;
+  }
+  return crypto.createHash('sha256').update(data).digest(outputEncoding);
+};
