@@ -22,7 +22,10 @@ describe('ConfigureOauth', () => {
   const onFormCreated = jest.fn();
   const getPreContentSourceConfigData = jest.fn();
   const setSelectedGithubOrganizations = jest.fn();
-  const createContentSource = jest.fn();
+  const createContentSource = jest.fn((_, formSubmitSuccess, handleFormSubmitError) => {
+    formSubmitSuccess();
+    handleFormSubmitError();
+  });
 
   const values = {
     currentServiceType: 'github',
