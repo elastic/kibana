@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { ApplicationStart } from 'kibana/public';
 import {
   AgentPolicy,
   PackageInfo,
@@ -49,6 +50,7 @@ import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { PLUGIN_ID } from '../../../../../../common/constants';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -57,10 +59,7 @@ const StepsWithLessPadding = styled(EuiSteps)`
 `;
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
-  const {
-    notifications,
-    application: { navigateToApp },
-  } = useStartServices();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -69,6 +68,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ policyId: string; pkgkey: string }>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
+  const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
 
@@ -221,10 +221,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     (ev) => {
       if (routeState && routeState.onCancelNavigateTo) {
         ev.preventDefault();
-        navigateToApp(...routeState.onCancelNavigateTo);
+        handleNavigateTo(routeState.onCancelNavigateTo);
       }
     },
-    [routeState, navigateToApp]
+    [routeState, handleNavigateTo]
   );
 
   // Save package policy
@@ -247,10 +247,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     const { error, data } = await savePackagePolicy();
     if (!error) {
       if (routeState && routeState.onSaveNavigateTo) {
-        navigateToApp(
-          ...(typeof routeState.onSaveNavigateTo === 'function'
+        handleNavigateTo(
+          typeof routeState.onSaveNavigateTo === 'function'
             ? routeState.onSaveNavigateTo(data!.item)
-            : routeState.onSaveNavigateTo)
+            : routeState.onSaveNavigateTo
         );
       } else {
         history.push(getPath('policy_details', { policyId: agentPolicy?.id || policyId }));
@@ -476,4 +476,30 @@ const IntegrationBreadcrumb: React.FunctionComponent<{
 }> = ({ pkgTitle, pkgkey }) => {
   useBreadcrumbs('add_integration_to_policy', { pkgTitle, pkgkey });
   return null;
+};
+
+const useNavigateToCallback = () => {
+  const history = useHistory();
+  const {
+    application: { navigateToApp },
+  } = useStartServices();
+
+  return useCallback(
+    (navigateToProps: Parameters<ApplicationStart['navigateToApp']>) => {
+      // If navigateTo appID is `fleet`, then don't use Kibana's navigateTo method, because that
+      // uses BrowserHistory but within fleet, we are using HashHistory.
+      // This temporary workaround hook can be removed once this issue is addressed:
+      // https://github.com/elastic/kibana/issues/70358
+      if (navigateToProps[0] === PLUGIN_ID) {
+        const { path = '', state } = navigateToProps[1] || {};
+        history.push({
+          pathname: path.charAt(0) === '#' ? path.substr(1) : path,
+          state,
+        });
+      }
+
+      return navigateToApp(...navigateToProps);
+    },
+    [history, navigateToApp]
+  );
 };

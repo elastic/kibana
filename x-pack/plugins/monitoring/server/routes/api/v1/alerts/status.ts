@@ -32,11 +32,7 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
     async (context, request, response) => {
       try {
         const { clusterUuid } = request.params;
-        const {
-          alertTypeIds,
-          timeRange: { min, max },
-          filters,
-        } = request.body;
+        const { alertTypeIds, filters } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
         if (!alertsClient) {
           return response.ok({ body: undefined });
@@ -47,8 +43,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
           npRoute.licenseService,
           alertTypeIds,
           clusterUuid,
-          min,
-          max,
           filters as CommonAlertFilter[]
         );
         return response.ok({ body: status });
