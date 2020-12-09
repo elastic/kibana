@@ -118,4 +118,77 @@ describe('group_fields', function () {
       }
     `);
   });
+  it('should group fields in selected, popular, unpopular group if they contain multifields', function () {
+    const category = {
+      name: 'category',
+      type: 'string',
+      esTypes: ['text'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currency = {
+      name: 'currency',
+      displayName: 'currency',
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        esTypes: ['text'],
+        name: 'category',
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currencyKeyword = {
+      name: 'currency.keyword',
+      displayName: 'currency.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'category.keyword',
+        readFromDocValues: true,
+        searchable: true,
+        shortDotsEnable: false,
+        subType: {
+          multi: {
+            parent: 'currency',
+          },
+        },
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    };
+    const fields = [category, currency, currencyKeyword];
+
+    const fieldCounts = {
+      category: 1,
+      currency: 1,
+      customer_birth_date: 1,
+    };
+
+    const fieldFilterState = getDefaultFieldFilter();
+
+    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts, fieldFilterState, true);
+    expect(actual.popular).toEqual([category]);
+    expect(actual.selected).toEqual([currency]);
+    expect(actual.unpopular).toEqual([]);
+  });
 });
