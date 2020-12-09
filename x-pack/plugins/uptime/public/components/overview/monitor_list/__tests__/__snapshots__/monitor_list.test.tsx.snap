@@ -1013,7 +1013,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_state.url.full_2"
               role="columnheader"
               scope="col"
-              style="width:35%"
+              style="width:30%"
             >
               <div
                 class="euiTableCellContent"
@@ -1030,6 +1030,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_state.monitor.name_3"
               role="columnheader"
               scope="col"
+              style="width:12%"
             >
               <div
                 class="euiTableCellContent"
@@ -1226,7 +1227,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:35%"
+              style="width:30%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1244,6 +1245,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:12%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1477,7 +1479,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:35%"
+              style="width:30%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1495,6 +1497,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:12%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
