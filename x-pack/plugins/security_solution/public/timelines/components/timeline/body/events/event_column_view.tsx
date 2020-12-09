@@ -29,6 +29,7 @@ import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { inputsModel } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
+import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
 
 interface Props {
   id: string;
@@ -135,6 +136,19 @@ export const EventColumnView = React.memo<Props>(
                 noteIds={eventIdToNoteIds[id] || emptyNotes}
                 eventIsPinned={isEventPinned}
                 timelineType={timelineType}
+              />,
+            ]
+          : []),
+        ...([
+          TimelineId.detectionsPage,
+          TimelineId.detectionsRulesDetailsPage,
+          TimelineId.active,
+        ].includes(timelineId as TimelineId)
+          ? [
+              <AddToCaseAction
+                key="attach-to-case"
+                ecsRowData={ecsData}
+                disabled={eventType !== 'signal'}
               />,
             ]
           : []),
