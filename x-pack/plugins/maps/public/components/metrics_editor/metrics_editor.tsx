@@ -7,11 +7,17 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
-import { isMetricInvalid, MetricEditor } from './metric_editor';
+import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
+
+export function isMetricValid(aggDescriptor: AggDescriptor) {
+  return aggDescriptor.type === AGG_TYPE.COUNT
+    ? true
+    : (aggDescriptor as FieldedAggDescriptor).field !== undefined;
+}
 
 interface Props {
   allowMultipleMetrics: boolean;
@@ -36,7 +42,9 @@ export class MetricsEditor extends Component<Props, State> {
   }
 
   _onSubmit() {
-    const hasInvalidMetric = this.state.metrics.some(isMetricInvalid);
+    const hasInvalidMetric = this.state.metrics.some((metric) => {
+      return !isMetricValid(metric);
+    });
     if (!hasInvalidMetric) {
       this.props.onChange(this.state.metrics);
     }
