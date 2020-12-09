@@ -46,6 +46,7 @@ describe('filterByAgent', () => {
         'capture_body',
         'capture_headers',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
