@@ -6,14 +6,8 @@
 
 import { Action } from 'redux';
 
-import { TrustedApp } from '../../../../../common/endpoint/types';
-import {
-  AsyncResourceState,
-  TrustedAppCreateFailure,
-  TrustedAppCreatePending,
-  TrustedAppCreateSuccess,
-  TrustedAppsListData,
-} from '../state';
+import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
+import { AsyncResourceState, TrustedAppsListData } from '../state';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
 
@@ -38,20 +32,27 @@ export type TrustedAppDeletionDialogConfirmed = Action<'trustedAppDeletionDialog
 
 export type TrustedAppDeletionDialogClosed = Action<'trustedAppDeletionDialogClosed'>;
 
-export interface UserClickedSaveNewTrustedAppButton {
-  type: 'userClickedSaveNewTrustedAppButton';
-  payload: TrustedAppCreatePending;
-}
+export type TrustedAppCreationSubmissionResourceStateChanged = ResourceStateChanged<
+  'trustedAppCreationSubmissionResourceStateChanged',
+  TrustedApp
+>;
 
-export interface ServerReturnedCreateTrustedAppSuccess {
-  type: 'serverReturnedCreateTrustedAppSuccess';
-  payload: TrustedAppCreateSuccess;
-}
+export type TrustedAppCreationDialogStarted = Action<'trustedAppCreationDialogStarted'> & {
+  payload: {
+    entry: NewTrustedApp;
+  };
+};
 
-export interface ServerReturnedCreateTrustedAppFailure {
-  type: 'serverReturnedCreateTrustedAppFailure';
-  payload: TrustedAppCreateFailure;
-}
+export type TrustedAppCreationDialogFormStateUpdated = Action<'trustedAppCreationDialogFormStateUpdated'> & {
+  payload: {
+    entry: NewTrustedApp;
+    isValid: boolean;
+  };
+};
+
+export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialogConfirmed'>;
+
+export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
 
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
@@ -60,6 +61,8 @@ export type TrustedAppsPageAction =
   | TrustedAppDeletionDialogStarted
   | TrustedAppDeletionDialogConfirmed
   | TrustedAppDeletionDialogClosed
-  | UserClickedSaveNewTrustedAppButton
-  | ServerReturnedCreateTrustedAppSuccess
-  | ServerReturnedCreateTrustedAppFailure;
+  | TrustedAppCreationSubmissionResourceStateChanged
+  | TrustedAppCreationDialogStarted
+  | TrustedAppCreationDialogFormStateUpdated
+  | TrustedAppCreationDialogConfirmed
+  | TrustedAppCreationDialogClosed;

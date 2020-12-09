@@ -22,7 +22,7 @@ import {
 import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
-export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
+export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;
 
 /**
  * globalSearch route handler context.
@@ -37,6 +37,10 @@ export interface RouteHandlerGlobalSearchContext {
     params: GlobalSearchFindParams,
     options: GlobalSearchFindOptions
   ): Observable<GlobalSearchBatchedResults>;
+  /**
+   * See {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}
+   */
+  getSearchableTypes: () => Promise<string[]>;
 }
 
 /**
@@ -114,4 +118,10 @@ export interface GlobalSearchResultProvider {
     options: GlobalSearchProviderFindOptions,
     context: GlobalSearchProviderContext
   ): Observable<GlobalSearchProviderResult[]>;
+
+  /**
+   * Method that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that
+   * this provider can return.
+   */
+  getSearchableTypes: (context: GlobalSearchProviderContext) => string[] | Promise<string[]>;
 }
