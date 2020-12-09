@@ -8,15 +8,10 @@ import { merge } from 'lodash/fp';
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse, transformError } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
-export const readPrivilegesRoute = (
-  router: IRouter,
-  security: SetupPlugins['security'],
-  usingEphemeralEncryptionKey: boolean
-) => {
+export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey: boolean) => {
   router.get(
     {
       path: DETECTION_ENGINE_PRIVILEGES_URL,
@@ -39,7 +34,7 @@ export const readPrivilegesRoute = (
         const index = siemClient.getSignalsIndex();
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
         const privileges = merge(clusterPrivileges, {
-          is_authenticated: security?.authc.isAuthenticated(request) ?? false,
+          is_authenticated: request.auth.isAuthenticated ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
 
