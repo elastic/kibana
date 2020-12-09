@@ -228,3 +228,31 @@ export const CONFIGURED_SOURCES_EMPTY_BODY = i18n.translate(
     defaultMessage: 'Configured and ready for connection.',
   }
 );
+
+export const OAUTH_SAVE_CONFIG_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.button',
+  {
+    defaultMessage: 'Save configuration',
+  }
+);
+
+export const OAUTH_REMOVE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.remove.button',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const OAUTH_BACK_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.back.button',
+  {
+    defaultMessage: ' Go back',
+  }
+);
+
+export const OAUTH_STEP_2 = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep2',
+  {
+    defaultMessage: 'Provide the appropriate configuration information',
+  }
+);

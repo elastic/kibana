@@ -7,6 +7,7 @@
 import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -28,6 +29,13 @@ import {
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
 } from '../../../../constants';
+
+import {
+  OAUTH_SAVE_CONFIG_BUTTON,
+  OAUTH_REMOVE_BUTTON,
+  OAUTH_BACK_BUTTON,
+  OAUTH_STEP_2,
+} from './constants';
 
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
@@ -85,17 +93,17 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
-      Save configuration
+      {OAUTH_SAVE_CONFIG_BUTTON}
     </EuiButton>
   );
 
   const deleteButton = (
     <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      Remove
+      {OAUTH_REMOVE_BUTTON}
     </EuiButton>
   );
 
-  const backButton = <EuiButtonEmpty onClick={goBackStep}>&nbsp;Go back</EuiButtonEmpty>;
+  const backButton = <EuiButtonEmpty onClick={goBackStep}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
   const showSaveButton = hasPlatinumLicense || !accountContextOnly;
 
   const formActions = (
@@ -189,7 +197,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
                 type="text"
                 autoComplete="off"
                 onChange={(e) => setBaseUrlValue(e.target.value)}
-                name="base-uri"
+                name="base-url"
               />
             </EuiFormRow>
           )}
@@ -201,8 +209,11 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   );
 
   const oauthSteps = (sourceName: string) => [
-    `Create an OAuth app in your organization's ${sourceName}\u00A0account`,
-    'Provide the appropriate configuration information',
+    i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep1', {
+      defaultMessage: "Create an OAuth app in your organization's {sourceName} account",
+      values: { sourceName },
+    }),
+    OAUTH_STEP_2,
   ];
 
   const configSteps = [
