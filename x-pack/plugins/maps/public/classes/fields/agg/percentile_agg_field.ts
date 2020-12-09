@@ -5,6 +5,7 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
+import { i18n } from '@kbn/i18n';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
@@ -38,13 +39,22 @@ export class PercentileAggField extends AggField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
+    if (this._label) {
+      return this._label;
+    }
+
+    if (this._percentile === 50) {
+      const median = i18n.translate('xpack.maps.fields.percentileMedianLabek', {
+        defaultMessage: 'median',
+      });
+      return `${median} ${this.getRootName()}`;
+    }
+
     const suffix = getOrdinalSuffix(this._percentile);
-    return this._label
-      ? this._label
-      : `${this._percentile}${suffix} ${this._source.getAggLabel(
-          this._getAggType(),
-          this.getRootName()
-        )}`;
+    return `${this._percentile}${suffix} ${this._source.getAggLabel(
+      this._getAggType(),
+      this.getRootName()
+    )}`;
   }
 
   getName() {

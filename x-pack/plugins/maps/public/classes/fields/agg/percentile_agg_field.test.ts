@@ -81,4 +81,15 @@ describe('percentile agg field', () => {
 
     expect(await field.getLabel()).toEqual('80th agg_label');
   });
+
+  test('label (median)', async () => {
+    const field = new PercentileAggField({
+      ...defaultParams,
+      label: '',
+      esDocField: mockEsDocField as ESDocField,
+      percentile: 50,
+    });
+
+    expect(await field.getLabel()).toEqual('median foobar');
+  });
 });
