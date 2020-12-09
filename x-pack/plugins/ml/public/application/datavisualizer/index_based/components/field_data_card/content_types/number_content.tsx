@@ -177,7 +177,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup justifyContent="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <MetricDistributionChart
                 width={METRIC_DISTRIBUTION_CHART_WIDTH}
                 height={METRIC_DISTRIBUTION_CHART_HEIGHT}

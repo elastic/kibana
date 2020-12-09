@@ -121,7 +121,6 @@ export const MetricDistributionChart: FC<Props> = ({
           position={Position.Bottom}
           tickFormat={(d) => kibanaFieldFormat(d, fieldFormat)}
           hide={hideXAxis === true}
-          ticks={1}
         />
         <Axis id="left" position={Position.Left} tickFormat={(d) => d.toFixed(3)} hide={true} />
         <AreaSeries
