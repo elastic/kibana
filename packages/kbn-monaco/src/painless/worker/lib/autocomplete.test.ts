@@ -25,6 +25,7 @@ import {
   getClassMemberSuggestions,
   getConstructorSuggestions,
   getKeywords,
+  getTypeSuggestions,
   Suggestion,
 } from './autocomplete';
 
@@ -93,6 +94,7 @@ describe('Autocomplete lib', () => {
             label: 'ArithmeticException',
           },
           ...keywords,
+          ...getTypeSuggestions(),
         ],
       });
     });
