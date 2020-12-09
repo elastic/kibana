@@ -7,6 +7,7 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
@@ -143,7 +144,7 @@ export const mergeBrowserFieldsWithDefaultCategory = (
   }),
 });
 
-export const getAlertColumnHeader = (fieldId: string) =>
-  alertsHeaders.find(
-    (c) => c.id === fieldId && defaultHeaders.find((d) => d.id === c.id) == null
-  ) ?? {};
+export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
+  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+    ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
+    : {};

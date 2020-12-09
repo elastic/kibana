@@ -6,13 +6,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
+  EuiTitle,
   EuiDescriptionList,
   EuiSpacer,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 
 import { get, getOr } from 'lodash/fp';
+import styled from 'styled-components';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import * as i18n from './translations';
@@ -30,7 +33,18 @@ import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../networ
 import { LineClamp } from '../line_clamp';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 
-type Summary = Array<{ title: string; description: JSX.Element }>;
+interface SummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    value: string;
+    fieldType: string;
+    linkValue: string | undefined;
+  };
+}
+type Summary = SummaryRow[];
 
 const fields = [
   { id: 'signal.status' },
@@ -48,6 +62,21 @@ const fields = [
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
 ];
 
+const StyledEuiInMemoryTable = styled(EuiInMemoryTable)`
+  .euiTableHeaderCell {
+    border: none;
+  }
+  .euiTableRowCell {
+    border: none;
+  }
+`;
+
+const getTitle = (title: SummaryRow['title']) => (
+  <EuiTitle size="xxs">
+    <h5>{title}</h5>
+  </EuiTitle>
+);
+
 const getDescription = ({
   contextId,
   eventId,
@@ -55,25 +84,16 @@ const getDescription = ({
   value,
   fieldType = '',
   linkValue,
-}: {
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  value?: string | null;
-  fieldType?: string;
-  linkValue?: string;
-}) => {
-  return (
-    <FormattedFieldValue
-      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-      eventId={eventId}
-      fieldName={fieldName}
-      fieldType={fieldType}
-      value={value}
-      linkValue={linkValue}
-    />
-  );
-};
+}: SummaryRow['description']) => (
+  <FormattedFieldValue
+    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
+    eventId={eventId}
+    fieldName={fieldName}
+    fieldType={fieldType}
+    value={value}
+    linkValue={linkValue}
+  />
+);
 
 const getSummary = ({
   data,
@@ -98,14 +118,14 @@ const getSummary = ({
         const value = getOr(null, 'originalValue', field);
         const category = field.category;
         const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
-        const description = getDescription({
+        const description = {
           contextId: timelineId,
           eventId,
           fieldName: item.id,
           value,
           fieldType: item.fieldType ?? fieldType,
           linkValue: linkValue ?? undefined,
-        });
+        };
 
         return [
           ...acc,
@@ -117,6 +137,20 @@ const getSummary = ({
       }, [])
     : [];
 };
+
+const summaryColumns = [
+  {
+    field: 'title',
+    truncateText: false,
+    render: getTitle,
+    width: 120,
+  },
+  {
+    field: 'description',
+    truncateText: false,
+    render: getDescription,
+  },
+];
 
 export const SummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -151,10 +185,10 @@ export const SummaryViewComponent: React.FC<{
 
   return (
     <>
-      <EuiDescriptionList
+      <StyledEuiInMemoryTable
         data-test-subj="summary-view"
-        type="responsiveColumn"
-        listItems={summaryList}
+        items={summaryList}
+        columns={summaryColumns}
         compressed
       />
       {investigationGuide && (

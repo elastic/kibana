@@ -13,12 +13,6 @@ import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 
-jest.mock('../../../timelines/components/timeline/body/renderers/formatted_field', () => {
-  return {
-    FormattedFieldValue: jest.fn(() => <div />),
-  };
-});
-
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
   return {
     useRuleAsync: jest.fn(),

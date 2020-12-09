@@ -6,7 +6,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 
@@ -58,8 +58,10 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
     <>
       {isExpanded ? (
         <p>{content}</p>
-      ) : (
+      ) : isOverflow == null || isOverflow === true ? (
         <StyledLineClamp ref={descriptionRef}>{content}</StyledLineClamp>
+      ) : (
+        <EuiText>{content}</EuiText>
       )}
       {isOverflow && (
         <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">

@@ -128,7 +128,7 @@ export const getFieldItems = ({
                           columnHeaderType: defaultColumnHeaderType,
                           id: field.name || '',
                           width: DEFAULT_COLUMN_MIN_WIDTH,
-                          ...getAlertColumnHeader(field.name || ''),
+                          ...getAlertColumnHeader(timelineId, field.name || ''),
                         })
                       }
                     />
