@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
-  const deployment = getService('deployment')
+  const deployment = getService('deployment');
 
   describe('security', () => {
     before(async () => {
@@ -73,6 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],
           });
+        }
       });
     });
   });
