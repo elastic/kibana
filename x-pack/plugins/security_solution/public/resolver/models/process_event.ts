@@ -7,18 +7,23 @@
 import { firstNonNullValue } from '../../../common/endpoint/models/ecs_safety_helpers';
 
 import * as eventModel from '../../../common/endpoint/models/event';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import * as nodeModel from '../../../common/endpoint/models/node';
+import { ResolverEvent, SafeResolverEvent, ResolverNode } from '../../../common/endpoint/types';
 import { ResolverProcessType } from '../types';
 
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
  * Resolver will only render 'graphable' process events.
+ *
  */
 export function isGraphableProcess(passedEvent: SafeResolverEvent) {
   return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
-export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
+/**
+ * Returns true if the process was terminated.
+ */
+export function isTerminatedProcess(passedEvent: SafeResolverEvent): boolean {
   return eventType(passedEvent) === 'processTerminated';
 }
 
@@ -26,8 +31,8 @@ export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
  * ms since Unix epoc, based on timestamp.
  * may return NaN if the timestamp wasn't present or was invalid.
  */
-export function datetime(passedEvent: SafeResolverEvent): number | null {
-  const timestamp = eventModel.timestampSafeVersion(passedEvent);
+export function datetime(node: ResolverNode): number | null {
+  const timestamp = nodeModel.nodeDataTimestamp(node);
 
   const time = timestamp === undefined ? 0 : new Date(timestamp).getTime();
 
@@ -146,15 +151,13 @@ export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
 /**
  * used to sort events
  */
-export function orderByTime(first: SafeResolverEvent, second: SafeResolverEvent): number {
+export function orderByTime(first: ResolverNode, second: ResolverNode): number {
   const firstDatetime: number | null = datetime(first);
   const secondDatetime: number | null = datetime(second);
 
   if (firstDatetime === secondDatetime) {
-    // break ties using an arbitrary (stable) comparison of `eventId` (which should be unique)
-    return String(eventModel.eventIDSafeVersion(first)).localeCompare(
-      String(eventModel.eventIDSafeVersion(second))
-    );
+    // break ties using an arbitrary (stable) comparison of `nodeID` (which should be unique)
+    return String(nodeModel.nodeID(first)).localeCompare(String(nodeModel.nodeID(second)));
   } else if (firstDatetime === null || secondDatetime === null) {
     // sort `null`'s as higher than numbers
     return (firstDatetime === null ? 1 : 0) - (secondDatetime === null ? 1 : 0);
