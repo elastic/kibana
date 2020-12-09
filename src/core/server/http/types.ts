@@ -316,7 +316,12 @@ export interface InternalHttpServiceStart extends HttpServiceStart {
   isListening: () => boolean;
 }
 
-/** @public */
+/**
+ * Information about what hostname, port, and protocol the server process is
+ * running on. Note that this may not match the URL that end-users access
+ * Kibana at. For the public URL, see {@link BasePath.publicBaseUrl}.
+ * @public
+ */
 export interface HttpServerInfo {
   /** The name of the Kibana server */
   name: string;

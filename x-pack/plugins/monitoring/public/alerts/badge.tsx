@@ -18,7 +18,7 @@ import { CommonAlertStatus, CommonAlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertMessage, AlertState } from '../../common/types/alerts';
+import { AlertState } from '../../common/types/alerts';
 import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
@@ -40,13 +40,12 @@ interface AlertInPanel {
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { stateFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
-  const alerts = Object.values(props.alerts).filter(Boolean);
+  const alerts = Object.values(props.alerts).filter((alertItem) => Boolean(alertItem?.rawAlert));
 
   if (alerts.length === 0) {
     return null;
@@ -70,9 +69,9 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         title: i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
           defaultMessage: 'Alerts',
         }),
-        items: alerts.map(({ alert }, index) => {
+        items: alerts.map(({ rawAlert }, index) => {
           return {
-            name: <EuiText>{alert.label}</EuiText>,
+            name: <EuiText>{rawAlert.name}</EuiText>,
             panel: index + 1,
           };
         }),
@@ -80,9 +79,9 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       ...alerts.map((alertStatus, index) => {
         return {
           id: index + 1,
-          title: alertStatus.alert.label,
+          title: alertStatus.rawAlert.name,
           width: 400,
-          content: <AlertPanel alert={alertStatus} nextStepsFilter={nextStepsFilter} />,
+          content: <AlertPanel alert={alertStatus} />,
         };
       }),
     ];
@@ -147,7 +146,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
                   <EuiText size="s">
                     <h4>{getDateFromState(alertState)}</h4>
                   </EuiText>
-                  <EuiText>{alert.alert.label}</EuiText>
+                  <EuiText>{alert.rawAlert.name}</EuiText>
                 </Fragment>
               ),
               panel: index + 1,
@@ -159,13 +158,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
             id: index + 1,
             title: getDateFromState(alertStatus.alertState),
             width: 400,
-            content: (
-              <AlertPanel
-                alert={alertStatus.alert}
-                alertState={alertStatus.alertState}
-                nextStepsFilter={nextStepsFilter}
-              />
-            ),
+            content: <AlertPanel alert={alertStatus.alert} alertState={alertStatus.alertState} />,
           };
         }),
       ];

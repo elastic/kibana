@@ -108,7 +108,8 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           const newPackagePolicy = {
             ...restOfPackagePolicy,
             inputs: inputs.map((input) => {
-              const { streams, ...restOfInput } = input;
+              // Remove `compiled_input` from all input info, we assign this after saving
+              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
               return {
                 ...restOfInput,
                 streams: streams.map((stream) => {

@@ -77,7 +77,7 @@ describe('AddComment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
+      expect(postComment).toBeCalledWith(addCommentProps.caseId, sampleData, onCommentPosted);
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });

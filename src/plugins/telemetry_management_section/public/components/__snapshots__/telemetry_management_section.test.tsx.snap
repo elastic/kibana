@@ -316,6 +316,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           "basePath": "",
           "get": [Function],
           "prepend": [Function],
+          "publicBaseUrl": undefined,
           "remove": [Function],
           "serverBasePath": "",
         },

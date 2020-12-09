@@ -6,5 +6,5 @@
 
 import { i18n } from '@kbn/i18n';
 export const SELECT_CASE_TITLE = i18n.translate('xpack.securitySolution.case.caseModal.title', {
-  defaultMessage: 'Select case to attach timeline',
+  defaultMessage: 'Select case',
 });

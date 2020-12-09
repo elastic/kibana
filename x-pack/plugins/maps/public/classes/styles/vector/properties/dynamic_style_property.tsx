@@ -11,16 +11,20 @@ import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
+  DEFAULT_PERCENTILES,
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
+  DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
   VECTOR_STYLES,
   RawValue,
   FieldFormatter,
 } from '../../../../../common/constants';
-import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
-import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
+import {
+  CategoricalDataMappingPopover,
+  OrdinalDataMappingPopover,
+} from '../components/data_mapping';
 import {
   CategoryFieldMeta,
   FieldMetaOptions,
@@ -40,11 +44,14 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): CategoryFieldMeta | null;
-  getNumberOfCategories(): number;
+  /*
+   * Returns hash that signals style meta needs to be re-fetched when value changes
+   */
+  getStyleMetaHash(): string;
   isFieldMetaEnabled(): boolean;
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
-  getFieldMetaRequest(): Promise<unknown>;
+  getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
@@ -119,6 +126,35 @@ export class DynamicStyleProperty<T>
     return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
 
+  getPercentilesFieldMeta() {
+    if (!this._field) {
+      return null;
+    }
+
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
+    if (!dataRequestId) {
+      return null;
+    }
+
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return null;
+    }
+
+    const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
+    const percentiles = styleMetaData[`${this._field.getRootName()}_percentiles`] as
+      | undefined
+      | { values?: { [key: string]: number } };
+    return percentiles !== undefined && percentiles.values !== undefined
+      ? Object.keys(percentiles.values).map((key) => {
+          return {
+            percentile: key,
+            value: percentiles.values![key],
+          };
+        })
+      : null;
+  }
+
   getCategoryFieldMeta() {
     const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
@@ -168,6 +204,24 @@ export class DynamicStyleProperty<T>
     return 0;
   }
 
+  getStyleMetaHash(): string {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    const parts: string[] = [fieldMetaOptions.isEnabled.toString()];
+    if (this.isOrdinal()) {
+      const dataMappingFunction = this.getDataMappingFunction();
+      parts.push(dataMappingFunction);
+      if (
+        dataMappingFunction === DATA_MAPPING_FUNCTION.PERCENTILES &&
+        fieldMetaOptions.percentiles
+      ) {
+        parts.push(fieldMetaOptions.percentiles.join(''));
+      }
+    } else if (this.isCategorical()) {
+      parts.push(this.getNumberOfCategories().toString());
+    }
+    return parts.join('');
+  }
+
   isComplete() {
     return !!this._field;
   }
@@ -191,13 +245,21 @@ export class DynamicStyleProperty<T>
     }
 
     if (this.isOrdinal()) {
-      return this._field.getOrdinalFieldMetaRequest();
-    } else if (this.isCategorical()) {
+      return this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.INTERPOLATE
+        ? this._field.getExtendedStatsFieldMetaRequest()
+        : this._field.getPercentilesFieldMetaRequest(
+            this.getFieldMetaOptions().percentiles !== undefined
+              ? this.getFieldMetaOptions().percentiles
+              : DEFAULT_PERCENTILES
+          );
+    }
+
+    if (this.isCategorical()) {
       const numberOfCategories = this.getNumberOfCategories();
       return this._field.getCategoricalFieldMetaRequest(numberOfCategories);
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   supportsMbFeatureState() {
@@ -212,6 +274,12 @@ export class DynamicStyleProperty<T>
 
   getFieldMetaOptions() {
     return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+  }
+
+  getDataMappingFunction() {
+    return 'dataMappingFunction' in this._options
+      ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
+      : DATA_MAPPING_FUNCTION.INTERPOLATE;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]) {
@@ -279,7 +347,7 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const stats = styleMetaData[this._field.getRootName()];
+    const stats = styleMetaData[`${this._field.getRootName()}_range`];
     if (!stats || !('avg' in stats)) {
       return null;
     }
@@ -303,7 +371,7 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const fieldMeta = styleMetaData[this._field.getRootName()];
+    const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
       return null;
     }
@@ -328,7 +396,11 @@ export class DynamicStyleProperty<T>
     }
   }
 
-  renderFieldMetaPopover(onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void) {
+  _getSupportedDataMappingFunctions(): DATA_MAPPING_FUNCTION[] {
+    return [DATA_MAPPING_FUNCTION.INTERPOLATE];
+  }
+
+  renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
     if (!this.supportsFieldMeta()) {
       return null;
     }
@@ -336,17 +408,19 @@ export class DynamicStyleProperty<T>
     const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
 
     return this.isCategorical() ? (
-      <CategoricalFieldMetaPopover
+      <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
-        onChange={onFieldMetaOptionsChange}
+        onChange={onChange}
         switchDisabled={switchDisabled}
       />
     ) : (
-      <OrdinalFieldMetaPopover
+      <OrdinalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
-        onChange={onFieldMetaOptionsChange}
+        onChange={onChange}
         switchDisabled={switchDisabled}
+        dataMappingFunction={this.getDataMappingFunction()}
+        supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
       />
     );
   }

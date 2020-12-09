@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../alerts/common';
+import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
-export interface CommonBaseAlert {
-  type: string;
-  label: string;
-  paramDetails: CommonAlertParamDetails;
-  rawAlert: Alert;
-  isLegacy: boolean;
-}
-
 export interface CommonAlertStatus {
-  exists: boolean;
-  enabled: boolean;
   states: CommonAlertState[];
-  alert: CommonBaseAlert;
+  rawAlert: Alert | SanitizedAlert;
 }
 
 export interface CommonAlertState {
@@ -32,14 +22,6 @@ export interface CommonAlertFilter {
   nodeUuid?: string;
 }
 
-export interface CommonAlertNodeUuidFilter extends CommonAlertFilter {
-  nodeUuid: string;
-}
-
-export interface CommonAlertStackProductFilter extends CommonAlertFilter {
-  stackProduct: string;
-}
-
 export interface CommonAlertParamDetail {
   label: string;
   type?: AlertParamType;
@@ -50,7 +32,9 @@ export interface CommonAlertParamDetails {
 }
 
 export interface CommonAlertParams {
-  [name: string]: string | number;
+  duration: string;
+  threshold?: number;
+  limit?: string;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
@@ -65,7 +49,11 @@ export interface AlertEnableAction {
 
 export interface AlertInstanceState {
   alertStates: Array<
-    AlertState | AlertCpuUsageState | AlertDiskUsageState | AlertThreadPoolRejectionsState
+    | AlertState
+    | AlertCpuUsageState
+    | AlertDiskUsageState
+    | AlertThreadPoolRejectionsState
+    | AlertNodeState
   >;
   [x: string]: unknown;
 }
@@ -74,11 +62,13 @@ export interface AlertState {
   cluster: AlertCluster;
   ccs?: string;
   ui: AlertUiState;
+  [key: string]: unknown;
 }
 
 export interface AlertNodeState extends AlertState {
   nodeId: string;
   nodeName?: string;
+  [key: string]: unknown;
 }
 
 export interface AlertCpuUsageState extends AlertNodeState {
@@ -87,13 +77,6 @@ export interface AlertCpuUsageState extends AlertNodeState {
 
 export interface AlertDiskUsageState extends AlertNodeState {
   diskUsage: number;
-}
-
-export interface AlertMissingDataState extends AlertState {
-  stackProduct: string;
-  stackProductUuid: string;
-  stackProductName: string;
-  gapDuration: number;
 }
 
 export interface AlertMemoryUsageState extends AlertNodeState {
@@ -109,9 +92,9 @@ export interface AlertThreadPoolRejectionsState extends AlertState {
 
 export interface AlertUiState {
   isFiring: boolean;
+  resolvedMS?: number;
   severity: AlertSeverity;
   message: AlertMessage | null;
-  resolvedMS: number;
   lastCheckedMS: number;
   triggeredMS: number;
 }
@@ -177,17 +160,13 @@ export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
   memoryUsage: number;
 }
 
-export interface AlertMissingData {
-  stackProduct: string;
-  stackProductUuid: string;
-  stackProductName: string;
-  clusterUuid: string;
+export interface AlertMissingData extends AlertNodeStats {
   gapDuration: number;
-  ccs?: string;
 }
 
 export interface AlertData {
-  instanceKey: string;
+  nodeName?: string;
+  nodeId?: string;
   clusterUuid: string;
   ccs?: string;
   shouldFire?: boolean;
