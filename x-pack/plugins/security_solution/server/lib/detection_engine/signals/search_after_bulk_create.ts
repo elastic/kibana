@@ -156,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
+            createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
           } = await singleBulkCreate({
@@ -183,6 +184,7 @@ export const searchAfterAndBulkCreate = async ({
             createSearchAfterReturnType({
               success: bulkSuccess,
               createdSignalsCount: createdCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
               errors: bulkErrors,
             }),
