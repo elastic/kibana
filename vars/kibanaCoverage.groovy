@@ -59,7 +59,7 @@ def uploadBaseWebsiteFiles(prefix) {
 def uploadCoverageHtmls(prefix) {
   [
     'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
+    // 'target/kibana-coverage/jest-combined', skipped due to failures
     'target/kibana-coverage/mocha-combined',
   ].each { uploadWithVault(prefix, it) }
 }
