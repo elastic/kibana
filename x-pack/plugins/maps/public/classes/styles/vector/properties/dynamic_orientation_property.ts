@@ -23,6 +23,10 @@ export class DynamicOrientationProperty extends DynamicStyleProperty<Orientation
     }
   }
 
+  supportsFieldMeta() {
+    return false;
+  }
+
   supportsMbFeatureState(): boolean {
     return false;
   }

@@ -248,11 +248,9 @@ export const Overview: React.FC = () => {
     };
 
     return !groups.length ? null : (
-      <EuiPanel>
-        <EuiText size="s">
-          <h6>
-            <EuiTextColor color="subdued">Group Access</EuiTextColor>
-          </h6>
+      <>
+        <EuiText>
+          <h4>Group Access</h4>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -275,35 +273,36 @@ export const Overview: React.FC = () => {
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      </EuiPanel>
+      </>
     );
   };
 
   const detailsSummary = (
-    <EuiPanel>
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">Configuration</EuiTextColor>
-        </h6>
+    <>
+      <EuiSpacer size="l" />
+      <EuiText>
+        <h4>Configuration</h4>
       </EuiText>
-      <EuiSpacer />
-      <EuiText size="s">
-        {details.map((detail, index) => (
-          <EuiFlexGroup
-            wrap
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            key={index}
-          >
-            <EuiFlexItem grow={false}>
-              <strong>{detail.title}</strong>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{detail.description}</EuiFlexItem>
-          </EuiFlexGroup>
-        ))}
-      </EuiText>
-    </EuiPanel>
+      <EuiSpacer size="s" />
+      <EuiPanel>
+        <EuiText size="s">
+          {details.map((detail, index) => (
+            <EuiFlexGroup
+              wrap
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              key={index}
+            >
+              <EuiFlexItem grow={false}>
+                <strong>{detail.title}</strong>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{detail.description}</EuiFlexItem>
+            </EuiFlexGroup>
+          ))}
+        </EuiText>
+      </EuiPanel>
+    </>
   );
 
   const documentPermissions = (
@@ -472,10 +471,9 @@ export const Overview: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source overview" />
-      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xl" direction="column">
+          <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem>
               <DocumentSummary />
             </EuiFlexItem>
@@ -525,7 +523,6 @@ export const Overview: React.FC = () => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiEmptyPrompt />
       </EuiFlexGroup>
     </>
   );

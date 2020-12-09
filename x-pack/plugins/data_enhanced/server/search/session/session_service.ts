@@ -74,7 +74,7 @@ export class BackgroundSessionService implements ISessionService {
    */
   private sessionSearchMap = new Map<string, SessionInfo>();
   private internalSavedObjectsClient!: SavedObjectsClientContract;
-  private monitorInterval!: NodeJS.Timeout;
+  private monitorTimer!: NodeJS.Timeout;
 
   constructor(private readonly logger: Logger) {}
 
@@ -88,7 +88,7 @@ export class BackgroundSessionService implements ISessionService {
 
   public stop() {
     this.sessionSearchMap.clear();
-    clearInterval(this.monitorInterval);
+    clearTimeout(this.monitorTimer);
   }
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
@@ -98,14 +98,14 @@ export class BackgroundSessionService implements ISessionService {
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
       const internalRepo = core.savedObjects.createInternalRepository([BACKGROUND_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
-      this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
+      this.monitorMappedIds();
     }
   };
 
   /**
    * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
-   *	   *
+   *
    * @remarks
    * Uses `internalSavedObjectsClient` as this is called asynchronously, not within the
    * context of a user's session.
@@ -142,37 +142,41 @@ export class BackgroundSessionService implements ISessionService {
     });
   };
 
-  public async monitorMappedIds() {
-    try {
-      this.clearSessions();
+  private async monitorMappedIds() {
+    this.monitorTimer = setTimeout(async () => {
+      try {
+        this.clearSessions();
 
-      if (!this.sessionSearchMap.size) return;
-      this.logger.debug(`monitorMappedIds | Map contains ${this.sessionSearchMap.size} items`);
+        if (!this.sessionSearchMap.size) return;
+        this.logger.debug(`monitorMappedIds | Map contains ${this.sessionSearchMap.size} items`);
 
-      const savedSessions = await this.getAllMappedSavedObjects();
-      const updatedSessions = await this.updateAllSavedObjects(savedSessions);
+        const savedSessions = await this.getAllMappedSavedObjects();
+        const updatedSessions = await this.updateAllSavedObjects(savedSessions);
 
-      updatedSessions.forEach((updatedSavedObject) => {
-        const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
-        if (updatedSavedObject.error) {
-          // Retry next time
-          sessionInfo.retryCount++;
-        } else if (updatedSavedObject.attributes.idMapping) {
-          // Delete the ids that we just saved, avoiding a potential new ids being lost.
-          Object.keys(updatedSavedObject.attributes.idMapping).forEach((key) => {
-            sessionInfo.ids.delete(key);
-          });
-          // If the session object is empty, delete it as well
-          if (!sessionInfo.ids.entries.length) {
-            this.sessionSearchMap.delete(updatedSavedObject.id);
-          } else {
-            sessionInfo.retryCount = 0;
+        updatedSessions.forEach((updatedSavedObject) => {
+          const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
+          if (updatedSavedObject.error) {
+            // Retry next time
+            sessionInfo.retryCount++;
+          } else if (updatedSavedObject.attributes.idMapping) {
+            // Delete the ids that we just saved, avoiding a potential new ids being lost.
+            Object.keys(updatedSavedObject.attributes.idMapping).forEach((key) => {
+              sessionInfo.ids.delete(key);
+            });
+            // If the session object is empty, delete it as well
+            if (!sessionInfo.ids.entries.length) {
+              this.sessionSearchMap.delete(updatedSavedObject.id);
+            } else {
+              sessionInfo.retryCount = 0;
+            }
           }
-        }
-      });
-    } catch (e) {
-      this.logger.error(`monitorMappedIds | Error fetching sessions. ${e}`);
-    }
+        });
+      } catch (e) {
+        this.logger.error(`monitorMappedIds | Error while updating sessions. ${e}`);
+      } finally {
+        this.monitorMappedIds();
+      }
+    }, INMEM_TRACKING_INTERVAL);
   }
 
   private async updateAllSavedObjects(
@@ -182,7 +186,7 @@ export class BackgroundSessionService implements ISessionService {
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
     const updatedSessions = activeMappingObjects
-      ?.filter((so) => !so.error)
+      .filter((so) => !so.error)
       .map((sessionSavedObject) => {
         const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
         const idMapping = sessionInfo ? Object.fromEntries(sessionInfo.ids.entries()) : {};
@@ -245,7 +249,6 @@ export class BackgroundSessionService implements ISessionService {
 
     this.logger.debug(`save | ${sessionId}`);
 
-    // Get the mapping of request hash/search ID for this session
     const attributes = {
       name,
       created,
