@@ -87,140 +87,145 @@ export const DataVisualizerDataGrid = ({
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  const expanderColumn: EuiTableComputedColumnType<FieldVisConfig> = {
-    name: (
-      <EuiButtonIcon
-        onClick={() => toggleExpandAll(!expandAll)}
-        aria-label={
-          !expandAll
-            ? i18n.translate('xpack.ml.datavisualizer.dataGrid.expandDetailsForAllAriaLabel', {
-                defaultMessage: 'Expand details for all fields',
-              })
-            : i18n.translate('xpack.ml.datavisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
-                defaultMessage: 'Collapse details for all fields',
-              })
-        }
-        iconType={expandAll ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
-    align: RIGHT_ALIGNMENT,
-    width: '40px',
-    isExpander: true,
-    render: (item: FieldVisConfig) => {
-      if (item.fieldName === undefined) return null;
-      return (
+  const columns = useMemo(() => {
+    const expanderColumn: EuiTableComputedColumnType<FieldVisConfig> = {
+      name: (
         <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
+          onClick={() => toggleExpandAll(!expandAll)}
           aria-label={
-            expandedRowItemIds.includes(item.fieldName)
-              ? i18n.translate('xpack.ml.datavisualizer.dataGrid.rowCollapse', {
-                  defaultMessage: 'Hide details for {fieldName}',
-                  values: { fieldName: item.fieldName },
+            !expandAll
+              ? i18n.translate('xpack.ml.datavisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                  defaultMessage: 'Expand details for all fields',
                 })
-              : i18n.translate('xpack.ml.datavisualizer.dataGrid.rowExpand', {
-                  defaultMessage: 'Show details for {fieldName}',
-                  values: { fieldName: item.fieldName },
+              : i18n.translate('xpack.ml.datavisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                  defaultMessage: 'Collapse details for all fields',
                 })
           }
-          iconType={expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandAll ? 'arrowUp' : 'arrowDown'}
         />
-      );
-    },
-    'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
-  };
-
-  const columns = [
-    expanderColumn,
-    {
-      field: 'type',
-      name: i18n.translate('xpack.ml.datavisualizer.dataGrid.typeColumnName', {
-        defaultMessage: 'Type',
-      }),
-      render: (fieldType: ML_JOB_FIELD_TYPES) => {
-        return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
-      },
-      'data-test-subj': 'mlDataVisualizerGridColumnId',
-      width: '75px',
-      sortable: true,
-      align: CENTER_ALIGNMENT as HorizontalAlignment,
-    },
-    {
-      field: 'fieldName',
-      name: i18n.translate('xpack.ml.datavisualizer.dataGrid.nameColumnName', {
-        defaultMessage: 'Name',
-      }),
-      sortable: true,
-      truncateText: true,
-      render: (fieldName: string) => (
-        <EuiText size="s">
-          <b>{fieldName}</b>
-        </EuiText>
       ),
-      'data-test-subj': 'mlDataVisualizerGridColumnJobs',
-      align: LEFT_ALIGNMENT as HorizontalAlignment,
-    },
-    {
-      field: 'docCount',
-      name: (
-        <div>
-          <EuiIcon type={'document'} style={{ paddingRight: 5 }} />
-          {i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsColumnName', {
-            defaultMessage: 'Documents (%)',
-          })}
-        </div>
-      ),
-      render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
-      sortable: (item: FieldVisConfig) => item?.stats?.count,
-      align: LEFT_ALIGNMENT as HorizontalAlignment,
-    },
-    {
-      field: 'stats.cardinality',
-      name: (
-        <div>
-          <EuiIcon type={'database'} style={{ paddingRight: 5 }} />
-          {i18n.translate('xpack.ml.datavisualizer.dataGrid.distinctValuesColumnName', {
-            defaultMessage: 'Distinct values',
-          })}
-        </div>
-      ),
-      render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
-      sortable: true,
-      align: LEFT_ALIGNMENT as HorizontalAlignment,
-    },
-    {
-      name: (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <EuiIcon type={'visBarVertical'} style={{ paddingRight: 5 }} />
-          {i18n.translate('xpack.ml.datavisualizer.dataGrid.distributionsColumnName', {
-            defaultMessage: 'Distributions',
-          })}
-          <EuiButtonIcon
-            size={'s'}
-            iconType={showDistributions ? 'eye' : 'eyeClosed'}
-            onClick={() => toggleShowDistribution()}
-            aria-label={i18n.translate(
-              'xpack.ml.datavisualizer.dataGrid.showDistributionsAriaLabel',
-              {
-                defaultMessage: 'Show distributions',
-              }
-            )}
-          />
-        </div>
-      ),
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
       render: (item: FieldVisConfig) => {
-        if (item === undefined || showDistributions === false) return null;
-        if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
-          return <TopValuesPreview config={item} />;
-        }
-
-        if (item.type === 'number' && item.stats?.distribution !== undefined) {
-          return <NumberContentPreview config={item} />;
-        }
-        return null;
+        if (item.fieldName === undefined) return null;
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              expandedRowItemIds.includes(item.fieldName)
+                ? i18n.translate('xpack.ml.datavisualizer.dataGrid.rowCollapse', {
+                    defaultMessage: 'Hide details for {fieldName}',
+                    values: { fieldName: item.fieldName },
+                  })
+                : i18n.translate('xpack.ml.datavisualizer.dataGrid.rowExpand', {
+                    defaultMessage: 'Show details for {fieldName}',
+                    values: { fieldName: item.fieldName },
+                  })
+            }
+            iconType={expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown'}
+          />
+        );
       },
-      align: LEFT_ALIGNMENT as HorizontalAlignment,
-    },
-  ];
+      'data-test-subj': 'mlDataVisualizerGridDetailsToggleColumn',
+    };
+
+    return [
+      expanderColumn,
+      {
+        field: 'type',
+        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.typeColumnName', {
+          defaultMessage: 'Type',
+        }),
+        render: (fieldType: ML_JOB_FIELD_TYPES) => {
+          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+        },
+        width: '75px',
+        sortable: true,
+        align: CENTER_ALIGNMENT as HorizontalAlignment,
+        'data-test-subj': 'mlDataVisualizerGridTypeColumn',
+      },
+      {
+        field: 'fieldName',
+        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.nameColumnName', {
+          defaultMessage: 'Name',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (fieldName: string) => (
+          <EuiText size="s">
+            <b>{fieldName}</b>
+          </EuiText>
+        ),
+        align: LEFT_ALIGNMENT as HorizontalAlignment,
+        'data-test-subj': 'mlDataVisualizerGridNameColumn',
+      },
+      {
+        field: 'docCount',
+        name: (
+          <div>
+            <EuiIcon type={'document'} style={{ paddingRight: 5 }} />
+            {i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
+              defaultMessage: 'Documents (%)',
+            })}
+          </div>
+        ),
+        render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
+        sortable: (item: FieldVisConfig) => item?.stats?.count,
+        align: LEFT_ALIGNMENT as HorizontalAlignment,
+        'data-test-subj': 'mlDataVisualizerGridDocumentsCountColumn',
+      },
+      {
+        field: 'stats.cardinality',
+        name: (
+          <div>
+            <EuiIcon type={'database'} style={{ paddingRight: 5 }} />
+            {i18n.translate('xpack.ml.datavisualizer.dataGrid.distinctValuesColumnName', {
+              defaultMessage: 'Distinct values',
+            })}
+          </div>
+        ),
+        render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
+        sortable: true,
+        align: LEFT_ALIGNMENT as HorizontalAlignment,
+        'data-test-subj': 'mlDataVisualizerGridDistinctValuesColumn',
+      },
+      {
+        name: (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <EuiIcon type={'visBarVertical'} style={{ paddingRight: 5 }} />
+            {i18n.translate('xpack.ml.datavisualizer.dataGrid.distributionsColumnName', {
+              defaultMessage: 'Distributions',
+            })}
+            <EuiButtonIcon
+              size={'s'}
+              iconType={showDistributions ? 'eye' : 'eyeClosed'}
+              onClick={() => toggleShowDistribution()}
+              aria-label={i18n.translate(
+                'xpack.ml.datavisualizer.dataGrid.showDistributionsAriaLabel',
+                {
+                  defaultMessage: 'Show distributions',
+                }
+              )}
+            />
+          </div>
+        ),
+        render: (item: FieldVisConfig) => {
+          if (item === undefined || showDistributions === false) return null;
+          if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
+            return <TopValuesPreview config={item} />;
+          }
+
+          if (item.type === 'number' && item.stats?.distribution !== undefined) {
+            return <NumberContentPreview config={item} />;
+          }
+          return null;
+        },
+        align: LEFT_ALIGNMENT as HorizontalAlignment,
+        'data-test-subj': 'mlDataVisualizerGridDistributionColumn',
+      },
+    ];
+  }, [expandAll, showDistributions, updatePageState]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     let itemIds = expandedRowItemIds;
@@ -231,7 +236,7 @@ export const DataVisualizerDataGrid = ({
   }, [expandAll, items, expandedRowItemIds]);
 
   return (
-    <div data-test-subj="mlCalendarTableContainer">
+    <div data-test-subj="mlDataVisualizerTableContainer">
       <EuiInMemoryTable<FieldVisConfig>
         items={items}
         itemId={FIELD_NAME}
