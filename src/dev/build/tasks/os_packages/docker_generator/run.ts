@@ -140,5 +140,5 @@ export async function runDockerGeneratorForUBI(config: Config, log: ToolingLog, 
     return;
   }
 
-  await runDockerGenerator(config, log, build, true, 'amd64');
+  await runDockerGenerator(config, log, build, true, 'x64');
 }
