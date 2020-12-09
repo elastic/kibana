@@ -8,7 +8,6 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
 export type LegendProps = {
@@ -24,8 +23,8 @@ export interface IStyleProperty<T> {
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null;
   getDisplayStyleName(): string;
 }
@@ -75,8 +74,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return null;
   }
 
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null {
     return null;
   }
