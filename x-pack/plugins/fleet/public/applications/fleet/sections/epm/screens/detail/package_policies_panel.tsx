@@ -36,6 +36,7 @@ const IntegrationDetailsLink = memo<{
   return (
     <EuiLink
       className="eui-textTruncate"
+      data-test-subj="integrationNameLink"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
