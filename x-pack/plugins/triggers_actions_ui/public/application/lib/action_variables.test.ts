@@ -230,6 +230,85 @@ describe('transformActionVariables', () => {
       ]
     `);
   });
+
+  test('should return useWithTripleBracesInTemplates with action variables if specified', () => {
+    const alertType = getAlertType({
+      context: [
+        { name: 'fooC', description: 'fooC-description', useWithTripleBracesInTemplates: true },
+        { name: 'barC', description: 'barC-description' },
+      ],
+      state: [
+        { name: 'fooS', description: 'fooS-description' },
+        { name: 'barS', description: 'barS-description', useWithTripleBracesInTemplates: true },
+      ],
+      params: [
+        {
+          name: 'fooP',
+          description: 'fooP-description',
+          useWithTripleBracesInTemplates: true,
+        },
+      ],
+    });
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "The id of the alert.",
+          "name": "alertId",
+        },
+        Object {
+          "description": "The name of the alert.",
+          "name": "alertName",
+        },
+        Object {
+          "description": "The spaceId of the alert.",
+          "name": "spaceId",
+        },
+        Object {
+          "description": "The tags of the alert.",
+          "name": "tags",
+        },
+        Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
+          "description": "The alert instance id that scheduled actions for the alert.",
+          "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "fooC-description",
+          "name": "context.fooC",
+          "useWithTripleBracesInTemplates": true,
+        },
+        Object {
+          "description": "barC-description",
+          "name": "context.barC",
+        },
+        Object {
+          "description": "fooP-description",
+          "name": "params.fooP",
+          "useWithTripleBracesInTemplates": true,
+        },
+        Object {
+          "description": "fooS-description",
+          "name": "state.fooS",
+        },
+        Object {
+          "description": "barS-description",
+          "name": "state.barS",
+          "useWithTripleBracesInTemplates": true,
+        },
+      ]
+    `);
+  });
 });
 
 function getAlertType(actionVariables: ActionVariables): AlertType {

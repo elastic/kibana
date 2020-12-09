@@ -28,6 +28,7 @@
     ],
     "maps_legacy": "src/plugins/maps_legacy",
     "monaco": "packages/kbn-monaco/src",
+    "presentationUtil": "src/plugins/presentation_util",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
     "kibana_legacy": "src/plugins/kibana_legacy",

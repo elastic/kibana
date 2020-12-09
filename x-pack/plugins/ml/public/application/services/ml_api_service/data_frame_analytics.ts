@@ -13,7 +13,10 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
-import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
+import {
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  AnalyticsMapReturnType,
+} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -83,7 +86,11 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  getDataFrameAnalyticsMap(id: string, treatAsRoot: boolean, type?: string) {
+  getDataFrameAnalyticsMap(
+    id: string,
+    treatAsRoot: boolean,
+    type?: string
+  ): Promise<AnalyticsMapReturnType> {
     const idString = id !== undefined ? `/${id}` : '';
     return http({
       path: `${basePath()}/data_frame/analytics/map${idString}`,

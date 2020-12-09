@@ -6,6 +6,7 @@
 import {
   getColorRampCenterColor,
   getOrdinalMbColorRampStops,
+  getPercentilesMbColorRampStops,
   getColorPalette,
 } from './color_palettes';
 
@@ -54,5 +55,29 @@ describe('getOrdinalMbColorRampStops', () => {
 
   it('Should snap to end of color stops for identical range', () => {
     expect(getOrdinalMbColorRampStops('Blues', 23, 23)).toEqual([23, '#6092c0']);
+  });
+});
+
+describe('getPercentilesMbColorRampStops', () => {
+  it('Should create color stops for custom range', () => {
+    const percentiles = [
+      { percentile: '50.0', value: 5567.83 },
+      { percentile: '75.0', value: 8069 },
+      { percentile: '90.0', value: 9581.13 },
+      { percentile: '95.0', value: 11145.5 },
+      { percentile: '99.0', value: 16958.18 },
+    ];
+    expect(getPercentilesMbColorRampStops('Blues', percentiles)).toEqual([
+      5567.83,
+      '#e0e8f2',
+      8069,
+      '#c2d2e6',
+      9581.13,
+      '#a2bcd9',
+      11145.5,
+      '#82a7cd',
+      16958.18,
+      '#6092c0',
+    ]);
   });
 });
