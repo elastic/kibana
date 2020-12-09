@@ -9,11 +9,13 @@ experimental[] Create {kib} saved objects.
 [[saved-objects-api-create-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/saved_objects/<type>` +
+`POST <kibana host>:<port>/api/saved_objects/<type>`
 
 `POST <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-`POST <kibana host>:<port>/s/<space_id>/saved_objects/<type>`
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>`
+
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
 [[saved-objects-api-create-path-params]]
 ==== Path parameters

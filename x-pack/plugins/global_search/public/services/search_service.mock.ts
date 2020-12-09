@@ -7,17 +7,21 @@
 import { SearchServiceSetup, SearchServiceStart } from './search_service';
 import { of } from 'rxjs';
 
-const createSetupMock = (): jest.Mocked<SearchServiceSetup> => {
-  return {
+const createSetupMock = () => {
+  const mock: jest.Mocked<SearchServiceSetup> = {
     registerResultProvider: jest.fn(),
   };
+
+  return mock;
 };
 
-const createStartMock = (): jest.Mocked<SearchServiceStart> => {
-  const mock = {
+const createStartMock = () => {
+  const mock: jest.Mocked<SearchServiceStart> = {
     find: jest.fn(),
+    getSearchableTypes: jest.fn(),
   };
   mock.find.mockReturnValue(of({ results: [] }));
+  mock.getSearchableTypes.mockResolvedValue([]);
 
   return mock;
 };
