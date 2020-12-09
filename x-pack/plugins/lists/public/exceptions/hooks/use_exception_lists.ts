@@ -10,8 +10,7 @@ import { fetchExceptionLists } from '../api';
 import { Pagination, UseExceptionListsProps } from '../types';
 import { ExceptionListSchema } from '../../../common/schemas';
 
-type Func = () => void;
-export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, Func | null];
+export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, () => void | null];
 
 /**
  * Hook for fetching ExceptionLists
@@ -40,7 +39,7 @@ export const useExceptionLists = ({
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
-  const fetchExceptionListsRef = useRef<Func | null>(null);
+  const fetchExceptionListsRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
   const filterAsString: string = filterOptions.map(({ filter }) => filter).join(',');

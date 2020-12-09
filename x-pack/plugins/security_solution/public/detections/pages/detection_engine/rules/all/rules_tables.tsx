@@ -13,9 +13,9 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 import { debounce } from 'lodash/fp';
+import { History } from 'history';
 
 import {
   useRules,
@@ -27,6 +27,7 @@ import {
   exportRules,
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
+import { FormatUrl } from '../../../../../common/components/link_to';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
@@ -46,8 +47,6 @@ import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
-import { SecurityPageName } from '../../../../../app/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
 import { LastUpdatedAt } from '../../../../../common/components/last_updated';
@@ -77,6 +76,8 @@ const initialState: State = {
 };
 
 interface RulesTableProps {
+  history: History;
+  formatUrl: FormatUrl;
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasNoPermissions: boolean;
   loading: boolean;
@@ -100,6 +101,8 @@ interface RulesTableProps {
  */
 export const RulesTables = React.memo<RulesTableProps>(
   ({
+    history,
+    formatUrl,
     createPrePackagedRules,
     hasNoPermissions,
     loading,
@@ -146,10 +149,8 @@ export const RulesTables = React.memo<RulesTableProps>(
       isRefreshOn: defaultAutoRefreshSetting.on,
     });
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
-    const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
-    const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);

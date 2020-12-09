@@ -6,9 +6,12 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useExceptionLists } from '../../../../../shared_imports';
+import { SecurityPageName } from '../../../../../app/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
@@ -73,6 +76,8 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesNotUpdated,
     setRefreshRulesData,
   }) => {
+    const history = useHistory();
+    const { formatUrl } = useFormatUrl(SecurityPageName.detections);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const {
       services: { http },
@@ -112,6 +117,8 @@ export const AllRules = React.memo<AllRulesProps>(
 
         {(allRulesTab === AllRulesTabs.rules || allRulesTab === AllRulesTabs.monitoring) && (
           <RulesTables
+            history={history}
+            formatUrl={formatUrl}
             selectedTab={allRulesTab}
             createPrePackagedRules={createPrePackagedRules}
             hasNoPermissions={hasNoPermissions}
@@ -127,7 +134,9 @@ export const AllRules = React.memo<AllRulesProps>(
         )}
         {allRulesTab === AllRulesTabs.exceptions && (
           <ExceptionListsTable
+            formatUrl={formatUrl}
             data={data}
+            history={history}
             pagination={pagination}
             onRefresh={refreshExceptions}
             loadingTableInfo={loadingTableInfo}

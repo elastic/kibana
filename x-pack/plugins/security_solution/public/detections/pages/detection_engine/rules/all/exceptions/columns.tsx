@@ -7,16 +7,22 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn } from '@elastic/eui';
+import { History } from 'history';
 
+import { FormatUrl } from '../../../../../../common/components/link_to';
+import { LinkAnchor } from '../../../../../../common/components/links';
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
+import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
 export type Func = (listId: string) => () => void;
 
 export const getAllExceptionListsColumns = (
   onExport: Func,
-  onDelete: Func
+  onDelete: Func,
+  history: History,
+  formatUrl: FormatUrl
 ): AllExceptionListsColumns[] => [
   {
     align: 'left',
@@ -45,7 +51,25 @@ export const getAllExceptionListsColumns = (
     dataType: 'string',
     width: '14%',
     render: (value: ExceptionListInfo['rules']) => {
-      return <p>{value.map((a) => a.name).join(', ')}</p>;
+      return (
+        <>
+          {value.map(({ id, name }, index) => (
+            <>
+              <LinkAnchor
+                data-test-subj="ruleName"
+                onClick={(ev: { preventDefault: () => void }) => {
+                  ev.preventDefault();
+                  history.push(getRuleDetailsUrl(id));
+                }}
+                href={formatUrl(getRuleDetailsUrl(id))}
+              >
+                {name}
+              </LinkAnchor>
+              {index !== value.length - 1 ? ', ' : ''}
+            </>
+          ))}
+        </>
+      );
     },
   },
   {

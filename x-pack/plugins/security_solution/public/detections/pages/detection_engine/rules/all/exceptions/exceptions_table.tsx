@@ -13,7 +13,9 @@ import {
   EuiFieldSearch,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { History } from 'history';
 
+import { FormatUrl } from '../../../../../../common/components/link_to';
 import { Pagination } from '../../../../../../lists_plugin_deps';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
@@ -29,17 +31,21 @@ import { ExceptionListInfo } from './use_all_exception_lists';
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 interface ExceptionListsTableProps {
+  history: History;
   hasNoPermissions: boolean;
   loading: boolean;
   loadingExceptions: boolean;
   loadingTableInfo: boolean;
   data: ExceptionListInfo[];
   pagination: Pagination;
+  formatUrl: FormatUrl;
   onRefresh: () => void | null;
 }
 
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
   ({
+    formatUrl,
+    history,
     hasNoPermissions,
     loading,
     loadingExceptions,
@@ -56,8 +62,8 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const handleExport = useCallback((id: string) => () => {}, []);
 
     const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-      return getAllExceptionListsColumns(handleExport, handleDelete);
-    }, [handleExport, handleDelete]);
+      return getAllExceptionListsColumns(handleExport, handleDelete, history, formatUrl);
+    }, [handleExport, handleDelete, history, formatUrl]);
 
     const handleRefresh = useCallback((): void => {
       if (onRefresh != null) {
