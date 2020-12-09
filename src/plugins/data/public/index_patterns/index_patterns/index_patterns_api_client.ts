@@ -70,6 +70,12 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
-    }).then((resp: any) => resp.fields);
+    })
+      .then((resp: any) => resp.fields || [])
+      .catch(() => {
+        // note, only want to do this in specific circumstances
+        // console.log('caught!');
+        return [];
+      });
   }
 }

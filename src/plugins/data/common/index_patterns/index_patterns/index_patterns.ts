@@ -289,7 +289,7 @@ export class IndexPatternsService {
       /*
        * Only update field list if field caps finds fields. To support beats creating index pattern and dashboard before docs
        */
-      if (newFields.length) {
+      if (newFields && newFields.length) {
         updatedFieldList = [...newFields, ...scriptedFields];
       } else {
         updatedFieldList = fieldsAsArr;
