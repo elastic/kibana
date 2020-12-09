@@ -40,6 +40,8 @@ export const ActionTypeMenu = ({
          * Hidden action types will be hidden only on Alerts & Actions.
          * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
          * can use the hidden action types. For example, Cases or Detections of Security Solution.
+         *
+         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
          *  */
         const availableActionTypes =
           actionTypes ??
