@@ -47,21 +47,20 @@ export function ErrorCountAlertTrigger(props: Props) {
   const { threshold, windowSize, windowUnit, environment } = alertParams;
 
   const { data } = useFetcher(() => {
-    if (threshold && windowSize && windowUnit) {
+    if (windowSize && windowUnit) {
       return callApmApi({
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
         params: {
           query: {
             environment,
             serviceName,
-            threshold,
             windowSize,
             windowUnit,
           },
         },
       });
     }
-  }, [threshold, windowSize, windowUnit, environment, serviceName]);
+  }, [windowSize, windowUnit, environment, serviceName]);
 
   const defaults = {
     threshold: 25,
@@ -87,14 +86,14 @@ export function ErrorCountAlertTrigger(props: Props) {
       unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
         defaultMessage: ' errors',
       })}
-      onChange={(value) => setAlertParams('threshold', value)}
+      onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(_windowSize) =>
-        setAlertParams('windowSize', _windowSize || '')
+      onChangeWindowSize={(timeWindowSize) =>
+        setAlertParams('windowSize', timeWindowSize || '')
       }
-      onChangeWindowUnit={(_windowUnit) =>
-        setAlertParams('windowUnit', _windowUnit)
+      onChangeWindowUnit={(timeWindowUnit) =>
+        setAlertParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}

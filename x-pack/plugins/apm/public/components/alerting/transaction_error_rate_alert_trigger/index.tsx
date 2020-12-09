@@ -60,23 +60,21 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
         params: {
           query: {
-            windowSize,
-            windowUnit,
-            threshold: thresholdAsPercent,
             environment,
             serviceName,
-            transactionType,
+            transactionType: alertParams.transactionType,
+            windowSize,
+            windowUnit,
           },
         },
       });
     }
   }, [
-    windowSize,
-    windowUnit,
+    alertParams.transactionType,
     environment,
     serviceName,
-    transactionType,
-    thresholdAsPercent,
+    windowSize,
+    windowUnit,
   ]);
 
   if (serviceName && !transactionTypes.length) {
@@ -111,7 +109,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     <IsAboveField
       value={params.threshold}
       unit="%"
-      onChange={(value) => setAlertParams('threshold', value)}
+      onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>

@@ -49,9 +49,13 @@ export function ChartPreview({
 
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);
-  const min = moment.utc(getMax(timestamps)).valueOf();
-  const max = moment.utc(getMin(timestamps)).valueOf();
-  const xFormatter = niceTimeFormatter([min, max]);
+  const xMin = moment.utc(getMax(timestamps)).valueOf();
+  const xMax = moment.utc(getMin(timestamps)).valueOf();
+  const xFormatter = niceTimeFormatter([xMin, xMax]);
+
+  // Make the maximum Y value either the actual max or 20% more than the threshold
+  const values = data.map((d) => d.y ?? 0);
+  const yMax = Math.max(Math.max(...values), threshold * 1.2);
 
   const style = {
     fill: theme.eui.euiColorVis9,
@@ -102,6 +106,8 @@ export function ChartPreview({
           id="chart_preview_y_axis"
           position={Position.Left}
           tickFormat={yTickFormat}
+          ticks={5}
+          domain={{ max: yMax }}
         />
         <BarSeries
           color={theme.eui.euiColorVis1}

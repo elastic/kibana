@@ -17,7 +17,6 @@ const alertParamsRt = t.intersection([
   t.type({
     windowSize: typeNumber,
     windowUnit: t.string,
-    threshold: typeNumber,
   }),
   t.partial({
     aggregationType: t.union([
