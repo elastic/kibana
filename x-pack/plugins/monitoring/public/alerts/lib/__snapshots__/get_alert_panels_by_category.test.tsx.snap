@@ -49,16 +49,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:1"
+            delay="regular"
+            position="top"
           >
-            triggered:1
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_jvm_memory_usage_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:1
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -72,16 +73,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_jvm_memory_usage_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -312,16 +314,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:1"
+            delay="regular"
+            position="top"
           >
-            triggered:1
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_nodes_changed_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:1
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -335,16 +338,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_nodes_changed_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -364,16 +368,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_disk_usage_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -393,16 +398,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:1"
+            delay="regular"
+            position="top"
           >
-            triggered:1
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_license_expiration_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:1
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -416,16 +422,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
-          <EuiText
-            size="s"
-          >
-            monitoring_alert_license_expiration_label
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >

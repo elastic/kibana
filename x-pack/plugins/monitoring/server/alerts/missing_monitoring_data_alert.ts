@@ -100,6 +100,10 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     return super.filterAlertInstance(alertInstance, filters, true);
   }
 
+  protected getUuidFromAlertMeta(meta: AlertMissingData) {
+    return meta.nodeId;
+  }
+
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     const stat = item.meta as AlertMissingData;
     const base = super.getDefaultAlertState(cluster, item);

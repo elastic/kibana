@@ -8,6 +8,14 @@ import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
 export type CommonAlert = Alert | SanitizedAlert;
+export type AlertMeta =
+  | LegacyAlert
+  | AlertCpuUsageNodeStats
+  | AlertDiskUsageNodeStats
+  | AlertMemoryUsageNodeStats
+  | AlertMissingData
+  | AlertThreadPoolRejectionsStats
+  | {};
 
 export interface CommonAlertStatus {
   states: CommonAlertState[];
@@ -17,7 +25,7 @@ export interface CommonAlertStatus {
 export interface CommonAlertState {
   firing: boolean;
   state: any;
-  meta: any;
+  meta: AlertMeta;
 }
 
 export interface CommonAlertFilter {
@@ -166,7 +174,7 @@ export interface AlertData {
   ccs?: string;
   shouldFire?: boolean;
   severity: AlertSeverity;
-  meta: any;
+  meta: AlertMeta;
 }
 
 export interface LegacyAlert {

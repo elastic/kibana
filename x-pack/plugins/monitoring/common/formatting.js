@@ -11,6 +11,7 @@ export const SMALL_FLOAT = '0.[00]';
 export const LARGE_BYTES = '0,0.0 b';
 export const SMALL_BYTES = '0.0 b';
 export const LARGE_ABBREVIATED = '0,0.[0]a';
+export const ROUNDED_FLOAT = '00.[00]';
 
 /**
  * Format the {@code date} in the user's expected date/time format using their <em>guessed</em> local time zone.

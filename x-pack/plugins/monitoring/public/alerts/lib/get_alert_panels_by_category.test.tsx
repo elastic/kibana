@@ -37,6 +37,11 @@ jest.mock('./get_formatted_date_for_alert_state', () => ({
     `triggered:${alertState.state.ui.triggeredMS}`,
 }));
 
+jest.mock('./get_date_from_now_for_alert_state', () => ({
+  getDateFromNowForAlertState: (alertState: CommonAlertState) =>
+    `triggered:${alertState.state.ui.triggeredMS}`,
+}));
+
 function getAllAlerts() {
   return ALERTS.reduce((accum: AlertsByName, alertType) => {
     accum[alertType] = {

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { ALERT_PANEL_MENU } from '../../../common/constants';
 import { IAlertsContext } from '../context';
 import { AlertMessage, AlertState, CommonAlertStatus } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
 import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
+import { getDateFromNowForAlertState } from './get_date_from_now_for_alert_state';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 
 export function getAlertPanelsByCategory(
@@ -175,8 +176,9 @@ export function getAlertPanelsByCategory(
           items.push({
             name: (
               <Fragment>
-                <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
-                <EuiText size="s">{alert.name}</EuiText>
+                <EuiToolTip position="top" content={getFormattedDateForAlertState(alertState)}>
+                  <EuiText size="s">{getDateFromNowForAlertState(alertState)}</EuiText>
+                </EuiToolTip>
                 <EuiText size="s">{alertState.state.stackProductName}</EuiText>
               </Fragment>
             ),

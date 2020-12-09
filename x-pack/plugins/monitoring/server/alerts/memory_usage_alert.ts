@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -26,6 +27,8 @@ import {
   ALERT_DETAILS,
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
+// @ts-ignore
+import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -102,6 +105,10 @@ export class MemoryUsageAlert extends BaseAlert {
     return super.filterAlertInstance(alertInstance, filters, true);
   }
 
+  protected getUuidFromAlertMeta(meta: AlertMemoryUsageNodeStats) {
+    return meta.nodeId;
+  }
+
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     const stat = item.meta as AlertMemoryUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
@@ -125,7 +132,7 @@ export class MemoryUsageAlert extends BaseAlert {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting JVM memory usage of {memoryUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          memoryUsage: stat.memoryUsage,
+          memoryUsage: numeral(stat.memoryUsage).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [

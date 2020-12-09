@@ -73,11 +73,11 @@ export const Node = ({
           <NodeDetailStatus
             stats={nodeSummary}
             alerts={alerts}
-            alertsStateFilter={(state) => state.nodeId === nodeId}
+            alertsStateFilter={(state) => state.stackProductUuid === nodeId}
           />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout alerts={alerts} stateFilter={(state) => state.nodeId === nodeId} />
+        <AlertsCallout alerts={alerts} stateFilter={(state) => state.stackProductUuid === nodeId} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

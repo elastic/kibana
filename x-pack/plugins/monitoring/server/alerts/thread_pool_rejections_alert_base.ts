@@ -15,6 +15,7 @@ import {
   AlertMessageLinkToken,
   CommonAlertFilter,
   ThreadPoolRejectionsAlertParams,
+  AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
@@ -101,6 +102,10 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
     return super.filterAlertInstance(alertInstance, filters, true);
+  }
+
+  protected getUuidFromAlertMeta(meta: AlertThreadPoolRejectionsStats) {
+    return meta.nodeId;
   }
 
   protected getUiMessage(alertState: AlertThreadPoolRejectionsState): AlertMessage {

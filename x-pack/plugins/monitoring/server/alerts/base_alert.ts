@@ -25,6 +25,7 @@ import {
   CommonAlertFilter,
   CommonAlertParams,
   LegacyAlert,
+  AlertMeta,
 } from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -224,7 +225,9 @@ export class BaseAlert {
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
       return true;
     }
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    const nodeAlerts = alertInstanceStates.filter(
+      ({ stackProductUuid }) => stackProductUuid === nodeFilter.nodeUuid
+    );
     return Boolean(nodeAlerts.length);
   }
 
@@ -336,11 +339,11 @@ export class BaseAlert {
         continue;
       }
 
-      const firingNodeUuids = nodes
+      const firingUuids = nodes
         .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId)
+        .map((node) => this.getUuidFromAlertMeta(node.meta))
         .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
+      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
       const newAlertStates: AlertState[] = [];
       for (const node of nodes) {
@@ -414,6 +417,10 @@ export class BaseAlert {
 
   protected getVersions(legacyAlert: LegacyAlert) {
     return `[${legacyAlert.message.match(/(?<=Versions: \[).+?(?=\])/)}]`;
+  }
+
+  protected getUuidFromAlertMeta(meta: AlertMeta) {
+    throw new Error('Child classes must implement `getUuidFromAlertMeta`');
   }
 
   protected getUiMessage(

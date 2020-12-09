@@ -45,6 +45,13 @@ export async function fetchStatus(
 
       // Now that we have the id, we can get the state
       const states = await alert.getStates(alertsClient, id, filters);
+      // console.log({ type, id  });
+      // console.log(JSON.stringify(states))
+      // console.log('====================')
+      // console.log('====================')
+      // console.log('====================')
+      // console.log('====================')
+      // console.log('====================')
       if (!states) {
         return result;
       }

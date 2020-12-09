@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -26,6 +27,8 @@ import {
   ALERT_CPU_USAGE,
   ALERT_DETAILS,
 } from '../../common/constants';
+// @ts-ignore
+import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -103,6 +106,10 @@ export class CpuUsageAlert extends BaseAlert {
     return super.filterAlertInstance(alertInstance, filters, true);
   }
 
+  protected getUuidFromAlertMeta(meta: AlertCpuUsageNodeStats) {
+    return meta.nodeId;
+  }
+
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     const stat = item.meta as AlertCpuUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
@@ -126,7 +133,7 @@ export class CpuUsageAlert extends BaseAlert {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {cpuUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          cpuUsage: stat.cpuUsage,
+          cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [
