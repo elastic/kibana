@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(kqlMode).to.be(timelineObject.kqlMode);
         expect(kqlQuery).to.eql(timelineObject.kqlQuery);
         expect(savedObjectId).to.not.be.empty();
-        expect(sort).to.eql(timelineObject.sort);
+        expect(sort).to.eql([timelineObject.sort]);
         expect(title).to.be(timelineObject.title);
         expect(version).to.not.be.empty();
       });
