@@ -6,9 +6,20 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
@@ -68,10 +79,28 @@ function getValue(obj: Record<string, unknown>, path: string[]) {
   }
   return currentPolicyConfig[path[path.length - 1]];
 }
+const calloutTitle = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.advanced.calloutTitle',
+  {
+    defaultMessage: 'Proceed with caution!',
+  }
+);
+const warningMessage = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.advanced.warningMessage',
+  {
+    defaultMessage: `This section contains policy values that support advanced use cases. If not configured
+    properly, these values can cause unpredictable behavior. Please consult documentation
+    carefully or contact support before editing these values.`,
+  }
+);
 
 export const AdvancedPolicyForms = React.memo(() => {
   return (
     <>
+      <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
+        <p>{warningMessage}</p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiText size="xs" color="subdued">
         <h4>
           <FormattedMessage
@@ -89,6 +118,7 @@ export const AdvancedPolicyForms = React.memo(() => {
               configPath={configPath}
               firstSupportedVersion={advancedField.first_supported_version}
               lastSupportedVersion={advancedField.last_supported_version}
+              documentation={advancedField.documentation}
             />
           );
         })}
@@ -104,10 +134,12 @@ const PolicyAdvanced = React.memo(
     configPath,
     firstSupportedVersion,
     lastSupportedVersion,
+    documentation,
   }: {
     configPath: string[];
     firstSupportedVersion: string;
     lastSupportedVersion?: string;
+    documentation: string;
   }) => {
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -137,7 +169,16 @@ const PolicyAdvanced = React.memo(
       <>
         <EuiFormRow
           fullWidth
-          label={configPath.join('.')}
+          label={
+            <EuiFlexGroup>
+              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+              {documentation && (
+                <EuiFlexItem>
+                  <EuiIconTip content={documentation} position="right" />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          }
           labelAppend={
             <EuiText size="xs">
               {lastSupportedVersion
