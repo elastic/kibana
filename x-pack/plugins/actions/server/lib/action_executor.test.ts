@@ -105,6 +105,8 @@ test('successfully executes', async () => {
     },
     params: { foo: true },
   });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {

@@ -745,4 +745,34 @@ describe('<EditPolicy />', () => {
       });
     });
   });
+  describe('without rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+      await act(async () => {
+        testBed = await setup({
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'basic' } }),
+          },
+        });
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+    test('hiding and disabling searchable snapshot field', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleRollover(false);
+      await actions.cold.enable(true);
+
+      expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
+    });
+  });
 });

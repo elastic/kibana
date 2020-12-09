@@ -24,14 +24,28 @@ jest.mock('moment', () => {
   };
 });
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
     const alert = new NodesChangedAlert();
-    expect(alert.type).toBe(ALERT_NODES_CHANGED);
-    expect(alert.label).toBe('Nodes changed');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_NODES_CHANGED);
+    expect(alert.alertOptions.name).toBe('Nodes changed');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       { name: 'added', description: 'The list of nodes added to the cluster.' },
       { name: 'removed', description: 'The list of nodes removed from the cluster.' },
       { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
@@ -74,21 +88,6 @@ describe('NodesChangedAlert', () => {
         },
       },
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -127,19 +126,11 @@ describe('NodesChangedAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new NodesChangedAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -152,7 +143,6 @@ describe('NodesChangedAlert', () => {
                 text: "Elasticsearch nodes 'test' restarted in this cluster.",
               },
               severity: 'warning',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -179,88 +169,14 @@ describe('NodesChangedAlert', () => {
         return [];
       });
       const alert = new NodesChangedAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
     });
-
-    // This doesn't work because this watch is weird where it sets the resolved timestamp right away
-    // It is not really worth fixing as this watch will go away in 8.0
-    // it('should resolve with a resolved message', async () => {
-    //   (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-    //     return [];
-    //   });
-    //   (getState as jest.Mock).mockImplementation(() => {
-    //     return {
-    //       alertStates: [
-    //         {
-    //           cluster: {
-    //             clusterUuid,
-    //             clusterName,
-    //           },
-    //           ccs: undefined,
-    //           ui: {
-    //             isFiring: true,
-    //             message: null,
-    //             severity: 'danger',
-    //             resolvedMS: 0,
-    //             triggeredMS: 1,
-    //             lastCheckedMS: 0,
-    //           },
-    //         },
-    //       ],
-    //     };
-    //   });
-    //   const alert = new NodesChangedAlert();
-    //   alert.initializeAlertType(
-    //     getUiSettingsService as any,
-    //     monitoringCluster as any,
-    //     getLogger as any,
-    //     config as any,
-    //     kibanaUrl
-    //   );
-    //   const type = alert.getAlertType();
-    //   await type.executor({
-    //     ...executorOptions,
-    //     // @ts-ignore
-    //     params: alert.defaultParams,
-    //   } as any);
-    //   expect(replaceState).toHaveBeenCalledWith({
-    //     alertStates: [
-    //       {
-    //         cluster: { clusterUuid, clusterName },
-    //         ccs: undefined,
-    //         ui: {
-    //           isFiring: false,
-    //           message: {
-    //             text: "The license for this cluster is active.",
-    //           },
-    //           severity: 'danger',
-    //           resolvedMS: 1,
-    //           triggeredMS: 1,
-    //           lastCheckedMS: 0,
-    //         },
-    //       },
-    //     ],
-    //   });
-    //   expect(scheduleActions).toHaveBeenCalledWith('default', {
-    //     clusterName,
-    //     expiredDate: 'THE_DATE',
-    //     state: 'resolved',
-    //   });
-    // });
   });
 });

@@ -5,7 +5,7 @@
  */
 import './filter_popover.scss';
 
-import React, { MouseEventHandler, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,23 +19,24 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: Function;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
 
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const closePopover = () => {
-    if (isOpenByCreation) {
-      setIsOpenByCreation(false);
-    }
     if (isPopoverOpen) {
       setIsPopoverOpen(false);
     }
@@ -59,15 +60,12 @@ export const FilterPopover = ({
       data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       ownFocus
       closePopover={() => closePopover()}
       button={
         <Button
           onClick={() => {
-            if (isOpenByCreation) {
-              setIsOpenByCreation(false);
-            }
             setIsPopoverOpen((open) => !open);
           }}
         />

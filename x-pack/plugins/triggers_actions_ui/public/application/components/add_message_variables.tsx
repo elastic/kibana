@@ -14,11 +14,12 @@ import {
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  onSelectEventHandler: (variable: string) => void;
+  onSelectEventHandler: (variable: ActionVariable) => void;
 }
 
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
@@ -35,12 +36,14 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         data-test-subj={`variableMenuButton-${variable.name}`}
         icon="empty"
         onClick={() => {
-          onSelectEventHandler(variable.name);
+          onSelectEventHandler(variable);
           setIsVariablesPopoverOpen(false);
         }}
       >
         <>
-          <EuiText size="m">{`{{${variable.name}}}`}</EuiText>
+          <EuiText size="m" data-test-subj={`variableMenuButton-${i}-templated-name`}>
+            {templateActionVariable(variable)}
+          </EuiText>
           <EuiText size="m" color="subdued">
             <div className="euiTextColor--subdued">{variable.description}</div>
           </EuiText>
