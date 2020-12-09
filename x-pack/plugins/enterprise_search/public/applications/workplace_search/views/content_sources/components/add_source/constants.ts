@@ -185,3 +185,46 @@ export const CONFIG_OAUTH_BUTTON = i18n.translate(
     defaultMessage: 'Complete connection',
   }
 );
+
+export const CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.unConnectedTooltip',
+  {
+    defaultMessage: 'No connected sources',
+  }
+);
+
+export const CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.accountOnlyTooltip',
+  {
+    defaultMessage:
+      'Private content source. Each user must add the content source from their own personal dashboard.',
+  }
+);
+
+export const CONFIGURED_SOURCES_CONNECT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
+  {
+    defaultMessage: 'Connect',
+  }
+);
+
+export const CONFIGURED_SOURCES_EMPTY_STATE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.emptyState',
+  {
+    defaultMessage: 'There are no configured sources matching your query.',
+  }
+);
+
+export const CONFIGURED_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.title',
+  {
+    defaultMessage: 'Configured content sources',
+  }
+);
+
+export const CONFIGURED_SOURCES_EMPTY_BODY = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
+  {
+    defaultMessage: 'Configured and ready for connection.',
+  }
+);

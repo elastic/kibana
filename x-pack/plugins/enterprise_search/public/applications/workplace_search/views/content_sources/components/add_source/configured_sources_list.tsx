@@ -23,6 +23,15 @@ import { SourceIcon } from '../../../../components/shared/source_icon';
 import { SourceDataItem } from '../../../../types';
 import { getSourcesPath } from '../../../../routes';
 
+import {
+  CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
+  CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP,
+  CONFIGURED_SOURCES_CONNECT_BUTTON,
+  CONFIGURED_SOURCES_EMPTY_STATE,
+  CONFIGURED_SOURCES_TITLE,
+  CONFIGURED_SOURCES_EMPTY_BODY,
+} from './constants';
+
 interface ConfiguredSourcesProps {
   sources: SourceDataItem[];
   isOrganization: boolean;
@@ -34,7 +43,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
 }) => {
   const unConnectedTooltip = (
     <span className="source-card-configured__not-connected-tooltip">
-      <EuiToolTip position="top" content="No connected sources">
+      <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP}>
         <EuiToken iconType="tokenException" color="orange" shape="circle" fill="light" />
       </EuiToolTip>
     </span>
@@ -42,10 +51,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
 
   const accountOnlyTooltip = (
     <span className="source-card-configured__not-connected-tooltip">
-      <EuiToolTip
-        position="top"
-        content="Private content source. Each user must add the content source from their own personal dashboard."
-      >
+      <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP}>
         <EuiToken iconType="tokenException" color="green" shape="circle" fill="light" />
       </EuiToolTip>
     </span>
@@ -89,7 +95,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 {(!isOrganization || (isOrganization && !accountContextOnly)) && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                      Connect
+                      {CONFIGURED_SOURCES_CONNECT_BUTTON}
                     </EuiButtonEmptyTo>
                   </EuiFlexItem>
                 )}
@@ -101,15 +107,15 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     </EuiFlexGrid>
   );
 
-  const emptyState = <p>There are no configured sources matching your query.</p>;
+  const emptyState = <p>{CONFIGURED_SOURCES_EMPTY_STATE}</p>;
 
   return (
     <>
       <EuiTitle size="s">
-        <h2>Configured content sources</h2>
+        <h2>{CONFIGURED_SOURCES_TITLE}</h2>
       </EuiTitle>
       <EuiText>
-        <p>Configured and ready for connection.</p>
+        <p>{CONFIGURED_SOURCES_EMPTY_BODY}</p>
       </EuiText>
       <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}
