@@ -24,7 +24,7 @@ import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { Alert } from '../case_view';
-import { AlertRuleLink } from './user_action_rule_link';
+import { AlertCommentEvent } from './user_action_alert_comment_event';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -204,7 +204,7 @@ export const getAlertComment = ({
     ),
     className: 'comment-alert',
     type: 'update',
-    event: <AlertRuleLink alert={alert} />,
+    event: <AlertCommentEvent alert={alert} />,
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',

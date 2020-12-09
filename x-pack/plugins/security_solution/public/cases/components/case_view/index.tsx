@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
@@ -113,6 +113,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
+    const init = useRef(true);
 
     const {
       caseUserActions,
@@ -359,16 +360,19 @@ export const CaseComponent = React.memo<CaseProps>(
       [dispatch]
     );
 
+    // useEffect used for component's initialization
     useEffect(() => {
-      dispatch(
-        timelineActions.toggleExpandedEvent({
-          timelineId: TimelineId.active,
-          event: {},
-        })
-      );
-      // We need to close the EventFlyout on component mount in case it was open before in detections
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+      if (init.current) {
+        init.current = false;
+        // We need to close the EventFlyout on component initialization in case it was open before in detections.
+        dispatch(
+          timelineActions.toggleExpandedEvent({
+            timelineId: TimelineId.active,
+            event: {},
+          })
+        );
+      }
+    }, [dispatch]);
 
     return (
       <>
