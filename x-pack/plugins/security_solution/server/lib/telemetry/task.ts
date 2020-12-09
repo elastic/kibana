@@ -64,7 +64,7 @@ export class TelemetryDiagTask {
       return moment(executeTo).subtract(5, 'minutes').toISOString();
     }
 
-    if (moment(lastExecutionTimestamp).diff(executeTo) >= 10) {
+    if (moment(executeTo).diff(lastExecutionTimestamp) >= 10) {
       this.logger.debug(`last execution timestamp was greater than 10 minutes`);
       return moment(executeTo).subtract(10, 'minutes').toISOString();
     }

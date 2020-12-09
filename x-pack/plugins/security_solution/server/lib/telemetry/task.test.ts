@@ -114,7 +114,7 @@ describe('test', () => {
     const executeFrom = undefined;
     const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
 
-    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(5, 'minutes'));
+    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(5, 'minutes').toISOString());
   });
 
   test('test -6 mins is returned when there was a previous task run', async () => {
