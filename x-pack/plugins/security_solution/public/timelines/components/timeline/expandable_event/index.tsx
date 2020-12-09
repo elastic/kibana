@@ -52,7 +52,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   flex: 0;
 `;
 
-export const ExpandableEventTitle = React.memo(
+export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
   ({ isAlert, loading, handleOnEventClosed }: ExpandableEventTitleProps) => (
     <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
