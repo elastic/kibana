@@ -344,6 +344,7 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      alertTypeRegistry: this.alertTypeRegistry!,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

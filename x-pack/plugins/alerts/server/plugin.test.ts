@@ -168,6 +168,7 @@ describe('Alerting Plugin', () => {
             },
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
             features: mockFeatures(),
+            licensing: licensingMock.createStart(),
           } as unknown) as AlertingPluginsStart
         );
 
@@ -222,6 +223,7 @@ describe('Alerting Plugin', () => {
             },
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
             features: mockFeatures(),
+            licensing: licensingMock.createStart(),
           } as unknown) as AlertingPluginsStart
         );
 

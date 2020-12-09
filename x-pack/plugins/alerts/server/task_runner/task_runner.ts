@@ -30,6 +30,7 @@ import {
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
+  AlertTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -59,6 +60,7 @@ export class TaskRunner {
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType;
+  private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
     alertType: NormalizedAlertType,
@@ -69,6 +71,7 @@ export class TaskRunner {
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.alertTypeRegistry = context.alertTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -313,6 +316,11 @@ export class TaskRunner {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
+    try {
+      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+    } catch (err) {
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+    }
     return {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert, event)

@@ -10,6 +10,7 @@ import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '../../licensing/server/mocks';
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let alertTypeRegistryParams: ConstructorOptions;
 
@@ -22,6 +23,7 @@ beforeEach(() => {
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
+    licensing: licensingMock.createSetup(),
   };
 });
 

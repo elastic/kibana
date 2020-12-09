@@ -29,6 +29,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 const alertType = {
   id: 'test',
   name: 'My test alert',
@@ -86,6 +87,7 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry: alertTypeRegistryMock.create(),
   };
 
   const mockedAlertTypeSavedObject: Alert = {
