@@ -21,7 +21,7 @@ describe('Export rules', () => {
   before(() => {
     cy.intercept(
       'POST',
-      'api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
+      '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
