@@ -4,29 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ExceptionListSchema } from '../../../../../../../../lists/common';
 
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 
+export interface ExceptionListInfo extends ExceptionListSchema {
+  rules: Array<{ name: string; id: string }>;
+}
+
+export type UseAllExceptionListsReturn = [boolean, ExceptionListInfo[]];
+
 /**
- * Hook for fetching ExceptionLists
+ * Hook for preparing exception lists table info. For now, we need to do a table scan
+ * of all rules to figure out which exception lists are used in what rules. This is very
+ * slow, however, there is an issue open that would push all this work to Kiaban/ES and
+ * speed things up a ton - https://github.com/elastic/kibana/issues/85173
  *
- * @param showDetectionsListsOnly boolean, if true, only detection lists are searched
+ * @param exceptionLists ExceptionListSchema(s) to evaluate
  *
  */
-export const useAllExceptionLists = ({ exceptionLists }) => {
+export const useAllExceptionLists = ({
+  exceptionLists,
+}: {
+  exceptionLists: ExceptionListSchema[];
+}): UseAllExceptionListsReturn => {
   const [loading, setLoading] = useState(true);
-  const [exceptionsListInfo, setExceptionsListInfo] = useState([]);
-  const { ids, idsMap } = useMemo((): string => {
-    const listsMap = {};
-    const lists = exceptionLists
-      .map(({ id }) => {
-        listsMap[id] = [];
-        return id;
-      })
-      .join(' or');
-    return { ids: lists, idsMap: listsMap };
-  }, [exceptionLists]);
+  const [exceptionsListInfo, setExceptionsListInfo] = useState<ExceptionListInfo[]>([]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -35,6 +39,19 @@ export const useAllExceptionLists = ({ exceptionLists }) => {
     const fetchData = async (): Promise<void> => {
       try {
         setLoading(true);
+
+        const listsSkeleton = exceptionLists.reduce<Record<string, ExceptionListInfo>>(
+          (acc, { id, ...rest }) => {
+            acc[id] = {
+              ...rest,
+              id,
+              rules: [],
+            };
+
+            return acc;
+          },
+          {}
+        );
 
         const { data: rules } = await fetchRules({
           filterOptions: {
@@ -53,34 +70,29 @@ export const useAllExceptionLists = ({ exceptionLists }) => {
           signal: abortCtrl.signal,
         });
 
-        console.log('------->', ids, rules);
-
-        const result = rules.reduce((acc, rule) => {
+        const updatedLists = rules.reduce<Record<string, ExceptionListInfo>>((acc, rule) => {
           const exceptions = rule.exceptions_list;
 
           if (exceptions != null && exceptions.length > 0) {
             exceptions.forEach((ex) => {
-              const match = acc[ex.id];
-              if (match != null) {
-                acc[ex.id] = [...match, { ruleId: rule.id, ruleName: rule.name }];
+              const list = acc[ex.id];
+              if (list != null) {
+                acc[ex.id] = {
+                  ...list,
+                  rules: [...list.rules, { id: rule.id, name: rule.name }],
+                };
               }
             });
           }
 
           return acc;
-        }, idsMap);
+        }, listsSkeleton);
 
-        console.log('=---->', result);
+        const lists = Object.keys(updatedLists).map<ExceptionListInfo>(
+          (listKey) => updatedLists[listKey]
+        );
 
-        const a = exceptionLists.map((li) => {
-          if (result[li.id] !== null) {
-            return { ...li, rules: result[li.id] };
-          } else {
-            return { ...li, rules: [] };
-          }
-        });
-
-        setExceptionsListInfo(a);
+        setExceptionsListInfo(lists);
 
         if (isSubscribed) {
           setLoading(false);
@@ -91,7 +103,7 @@ export const useAllExceptionLists = ({ exceptionLists }) => {
         }
       }
     };
-    console.log(exceptionLists.length);
+
     if (exceptionLists.length > 0) {
       fetchData();
     }
@@ -100,7 +112,7 @@ export const useAllExceptionLists = ({ exceptionLists }) => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [ids, exceptionLists.length, idsMap]);
+  }, [exceptionLists.length, exceptionLists]);
 
   return [loading, exceptionsListInfo];
 };

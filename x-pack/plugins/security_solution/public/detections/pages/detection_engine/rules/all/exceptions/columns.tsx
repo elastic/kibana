@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn } from '@elastic/eui';
-import { ExceptionListSchema } from '../../../../../../shared_imports';
 
-export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListSchema>;
+import * as i18n from './translations';
+import { ExceptionListInfo } from './use_all_exception_lists';
+
+export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
+export type Func = (listId: string) => () => void;
 
 export const getAllExceptionListsColumns = (
   onExport: Func,
@@ -18,37 +21,37 @@ export const getAllExceptionListsColumns = (
   {
     align: 'left',
     field: 'list_id',
-    name: 'Exception ID',
+    name: i18n.EXCEPTION_LIST_ID_TITLE,
     truncateText: true,
     dataType: 'string',
     width: '100px',
   },
   {
-    align: 'left',
+    align: 'center',
     field: 'rules',
-    name: 'Number of rules applied to',
+    name: i18n.NUMBER_RULES_ASSIGNED_TO_TITLE,
     truncateText: true,
     dataType: 'number',
     width: '14%',
-    render: (value) => {
+    render: (value: ExceptionListInfo['rules']) => {
       return <p>{value.length}</p>;
     },
   },
   {
     align: 'left',
     field: 'rules',
-    name: 'Rules applied to',
+    name: i18n.RULES_ASSIGNED_TO_TITLE,
     truncateText: true,
     dataType: 'string',
     width: '14%',
-    render: (value) => {
-      return <p>{value.map((a) => a.ruleName).join(', ')}</p>;
+    render: (value: ExceptionListInfo['rules']) => {
+      return <p>{value.map((a) => a.name).join(', ')}</p>;
     },
   },
   {
     align: 'left',
     field: 'created_at',
-    name: 'Date created',
+    name: i18n.LIST_DATE_CREATED_TITLE,
     truncateText: true,
     dataType: 'date',
     width: '14%',
@@ -56,7 +59,7 @@ export const getAllExceptionListsColumns = (
   {
     align: 'left',
     field: 'updated_at',
-    name: 'Last edited',
+    name: i18n.LIST_DATE_UPDATED_TITLE,
     truncateText: true,
     width: '14%',
   },
@@ -64,9 +67,9 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     isExpander: false,
     width: '20px',
-    render: () => (
+    render: (list: ExceptionListInfo) => (
       <EuiButtonIcon
-        onClick={onExport}
+        onClick={onExport(list.id)}
         aria-label="Export exception list"
         iconType="exportAction"
       />
@@ -76,10 +79,10 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     width: '20px',
     isExpander: false,
-    render: () => (
+    render: (list: ExceptionListInfo) => (
       <EuiButtonIcon
         color="danger"
-        onClick={onDelete}
+        onClick={onDelete(list.id)}
         aria-label="Delete exception list"
         iconType="trash"
       />

@@ -7,10 +7,13 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useExceptionLists } from '../../../../../shared_imports';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
 import { ExceptionListsTable } from './exceptions/exceptions_table';
+import { useAllExceptionLists } from './exceptions/use_all_exception_lists';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
@@ -71,6 +74,15 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
+    const {
+      services: { http },
+    } = useKibana();
+    const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
+      http,
+    });
+    const [loadingTableInfo, data] = useAllExceptionLists({
+      exceptionLists: exceptions ?? [],
+    });
 
     const tabs = useMemo(
       () => (
@@ -114,7 +126,15 @@ export const AllRules = React.memo<AllRulesProps>(
           />
         )}
         {allRulesTab === AllRulesTabs.exceptions && (
-          <ExceptionListsTable hasNoPermissions={hasNoPermissions} loading={loading} />
+          <ExceptionListsTable
+            data={data}
+            pagination={pagination}
+            onRefresh={refreshExceptions}
+            loadingTableInfo={loadingTableInfo}
+            loadingExceptions={loadingExceptions}
+            hasNoPermissions={hasNoPermissions}
+            loading={loading}
+          />
         )}
       </>
     );

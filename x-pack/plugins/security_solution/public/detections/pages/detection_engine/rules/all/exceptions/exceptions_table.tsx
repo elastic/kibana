@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
@@ -14,8 +14,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { useExceptionLists } from '../../../../../../shared_imports';
+import { Pagination } from '../../../../../../lists_plugin_deps';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
@@ -23,39 +22,57 @@ import * as i18n from '../../translations';
 import { AllRulesUtilityBar } from '../utility_bar';
 import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
-import { useAllExceptionLists } from './use_all_exception_lists';
+import { ExceptionListInfo } from './use_all_exception_lists';
 
-// EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
-// after few hours of fight with typescript !!!! I lost :(
+// Known lost battle with Eui :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 interface ExceptionListsTableProps {
   hasNoPermissions: boolean;
   loading: boolean;
+  loadingExceptions: boolean;
+  loadingTableInfo: boolean;
+  data: ExceptionListInfo[];
+  pagination: Pagination;
+  onRefresh: () => void | null;
 }
 
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
-  ({ hasNoPermissions, loading }) => {
+  ({
+    hasNoPermissions,
+    loading,
+    loadingExceptions,
+    loadingTableInfo,
+    data,
+    pagination,
+    onRefresh,
+  }) => {
     const [initLoading, setInitLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(Date.now());
-    const tableRef = useRef<EuiBasicTable>();
-    const { services } = useKibana();
-    const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
-      http: services.http,
-    });
-    const [loadingTableInfo, data] = useAllExceptionLists({
-      exceptionLists: exceptions ?? [],
-    });
+
+    const handleDelete = useCallback((id: string) => () => {}, []);
+
+    const handleExport = useCallback((id: string) => () => {}, []);
 
     const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-      return getAllExceptionListsColumns(
-        () => {},
-        () => {}
-      );
-    }, []);
+      return getAllExceptionListsColumns(handleExport, handleDelete);
+    }, [handleExport, handleDelete]);
 
-    const emptyPrompt = useMemo(() => {
+    const handleRefresh = useCallback((): void => {
+      if (onRefresh != null) {
+        setLastUpdated(Date.now());
+        onRefresh();
+      }
+    }, [onRefresh]);
+
+    useEffect(() => {
+      if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
+        setInitLoading(false);
+      }
+    }, [initLoading, loading, loadingExceptions, loadingTableInfo]);
+
+    const emptyPrompt = useMemo((): JSX.Element => {
       return (
         <EuiEmptyPrompt
           title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
@@ -67,9 +84,9 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     return (
       <>
-        <Panel loading={loadingExceptions} data-test-subj="allRulesPanel">
+        <Panel loading={loadingTableInfo} data-test-subj="allRulesPanel">
           <>
-            {loadingExceptions && (
+            {loadingTableInfo && (
               <EuiProgress
                 data-test-subj="loadingRulesInfoProgress"
                 size="xs"
@@ -93,7 +110,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               />
             </HeaderSection>
 
-            {loadingExceptions && !initLoading && (
+            {loadingTableInfo && !initLoading && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
             {initLoading && (
@@ -104,6 +121,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               userHasNoPermissions={hasNoPermissions}
               paginationTotal={pagination.total ?? 0}
               numberSelectedItems={0}
+              onRefresh={handleRefresh}
             />
             <MyEuiBasicTable
               data-test-subj="exceptions-table"
