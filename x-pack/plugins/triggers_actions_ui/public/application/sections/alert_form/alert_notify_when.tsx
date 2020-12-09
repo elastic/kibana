@@ -42,7 +42,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions will run when the alert status changes."
+              defaultMessage="Actions run when the alert status changes."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -65,7 +65,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions will run with every active alert execution."
+              defaultMessage="Actions run with every active alert interval."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -88,7 +88,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Set a custom interval for the actions to run when the alert is active."
+              defaultMessage="Actions run using the interval you set."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onThrottleInterval.description"
             />
           </p>
