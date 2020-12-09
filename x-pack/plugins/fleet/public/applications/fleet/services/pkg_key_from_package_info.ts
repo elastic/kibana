@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type CreatePackagePolicyFrom = 'package' | 'package-edit' | 'policy' | 'edit';
-export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';
+export const pkgKeyFromPackageInfo = <T extends { name: string; version: string }>(
+  packageInfo: T
+): string => {
+  return `${packageInfo.name}-${packageInfo.version}`;
+};

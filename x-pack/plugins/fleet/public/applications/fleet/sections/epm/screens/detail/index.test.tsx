@@ -10,17 +10,26 @@ import React, { lazy, memo } from 'react';
 import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import { Route } from 'react-router-dom';
 import {
+  GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
+  GetPackagePoliciesResponse,
 } from '../../../../../../../common/types/rest_spec';
 import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
-import { epmRouteService, fleetSetupRouteService } from '../../../../../../../common/services';
-import { act } from '@testing-library/react';
+import {
+  agentPolicyRouteService,
+  epmRouteService,
+  fleetSetupRouteService,
+  packagePolicyRouteService,
+} from '../../../../../../../common/services';
+import { act, cleanup } from '@testing-library/react';
 
 describe('when on integration detail', () => {
-  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7' });
+  const pkgkey = 'nginx-0.3.7';
+  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
+  let mockedApi: MockedApi;
   const render = () =>
     (renderResult = testRenderer.render(
       <Route path={PAGE_ROUTING_PATHS.integration_details}>
@@ -30,8 +39,13 @@ describe('when on integration detail', () => {
 
   beforeEach(() => {
     testRenderer = createTestRendererMock();
-    mockApiCalls(testRenderer.startServices.http);
+    mockedApi = mockApiCalls(testRenderer.startServices.http);
     testRenderer.history.push(detailPageUrlPath);
+  });
+
+  afterEach(() => {
+    cleanup();
+    window.location.hash = '#/';
   });
 
   describe('and a custom UI extension is NOT registered', () => {
@@ -137,9 +151,48 @@ describe('when on integration detail', () => {
       });
     });
   });
+
+  describe('and on the Policies Tab', () => {
+    const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
+    beforeEach(() => {
+      testRenderer.history.push(policiesTabURLPath);
+      render();
+    });
+
+    it('should display policies list', () => {
+      const table = renderResult.getByTestId('integrationPolicyTable');
+      expect(table).not.toBeNull();
+    });
+
+    it('should link to integration policy detail when an integration policy is clicked', async () => {
+      await mockedApi.waitForApi();
+      const firstPolicy = renderResult.getByTestId('integrationNameLink') as HTMLAnchorElement;
+      expect(firstPolicy.href).toEqual(
+        'http://localhost/mock/app/fleet#/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+      );
+    });
+  });
 });
 
-const mockApiCalls = (http: MockedFleetStartServices['http']) => {
+interface MockedApi {
+  /** Will return a promise that resolves when triggered APIs are complete */
+  waitForApi: () => Promise<void>;
+}
+
+const mockApiCalls = (http: MockedFleetStartServices['http']): MockedApi => {
+  let inflightApiCalls = 0;
+  const apiDoneListeners: Array<() => void> = [];
+  const markApiCallAsHandled = async () => {
+    inflightApiCalls++;
+    await new Promise((r) => setTimeout(r, 1));
+    inflightApiCalls--;
+
+    // If no more pending API calls, then notify listeners
+    if (inflightApiCalls === 0 && apiDoneListeners.length > 0) {
+      apiDoneListeners.splice(0).forEach((listener) => listener());
+    }
+  };
+
   // @ts-ignore
   const epmPackageResponse: GetInfoResponse = {
     response: {
@@ -369,7 +422,7 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
       owner: { github: 'elastic/integrations-services' },
       latestVersion: '0.3.7',
       removable: true,
-      status: 'not_installed',
+      status: 'installed',
     },
   } as GetInfoResponse;
 
@@ -388,24 +441,162 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
 
   const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
 
+  const packagePoliciesResponse: GetPackagePoliciesResponse = {
+    items: [
+      {
+        id: 'e8a37031-2907-44f6-89d2-98bd493f60dc',
+        version: 'WzgzMiwxXQ==',
+        name: 'nginx-1',
+        description: '',
+        namespace: 'default',
+        policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
+        enabled: true,
+        output_id: '',
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.access' },
+                vars: { paths: { value: ['/var/log/nginx/access.log*'], type: 'text' } },
+                id: 'logfile-nginx.access-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  paths: ['/var/log/nginx/access.log*'],
+                  exclude_files: ['.gz$'],
+                  processors: [{ add_locale: null }],
+                },
+              },
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.error' },
+                vars: { paths: { value: ['/var/log/nginx/error.log*'], type: 'text' } },
+                id: 'logfile-nginx.error-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  paths: ['/var/log/nginx/error.log*'],
+                  exclude_files: ['.gz$'],
+                  multiline: {
+                    pattern: '^\\d{4}\\/\\d{2}\\/\\d{2} ',
+                    negate: true,
+                    match: 'after',
+                  },
+                  processors: [{ add_locale: null }],
+                },
+              },
+              {
+                enabled: false,
+                data_stream: { type: 'logs', dataset: 'nginx.ingress_controller' },
+                vars: { paths: { value: ['/var/log/nginx/ingress.log*'], type: 'text' } },
+                id: 'logfile-nginx.ingress_controller-e8a37031-2907-44f6-89d2-98bd493f60dc',
+              },
+            ],
+          },
+          {
+            type: 'nginx/metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+                vars: {
+                  period: { value: '10s', type: 'text' },
+                  server_status_path: { value: '/nginx_status', type: 'text' },
+                },
+                id: 'nginx/metrics-nginx.stubstatus-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  metricsets: ['stubstatus'],
+                  hosts: ['http://127.0.0.1:80'],
+                  period: '10s',
+                  server_status_path: '/nginx_status',
+                },
+              },
+            ],
+            vars: { hosts: { value: ['http://127.0.0.1:80'], type: 'text' } },
+          },
+        ],
+        package: { name: 'nginx', title: 'Nginx', version: '0.3.7' },
+        revision: 1,
+        created_at: '2020-12-09T13:46:31.013Z',
+        created_by: 'elastic',
+        updated_at: '2020-12-09T13:46:31.013Z',
+        updated_by: 'elastic',
+      },
+    ],
+    total: 1,
+    page: 1,
+    perPage: 20,
+  };
+
+  const agentPoliciesResponse: GetAgentPoliciesResponse = {
+    items: [
+      {
+        id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
+        name: 'Default',
+        namespace: 'default',
+        description: 'Default agent policy created by Kibana',
+        status: 'active',
+        package_policies: [
+          '4d09bd78-b0ad-4238-9fa3-d87d3c887c73',
+          '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
+          'e8a37031-2907-44f6-89d2-98bd493f60dc',
+        ],
+        is_default: true,
+        monitoring_enabled: ['logs', 'metrics'],
+        revision: 6,
+        updated_at: '2020-12-09T13:46:31.840Z',
+        updated_by: 'elastic',
+        agents: 0,
+      },
+    ],
+    total: 1,
+    page: 1,
+    perPage: 100,
+  };
+
   http.get.mockImplementation(async (path) => {
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
+        markApiCallAsHandled();
         return epmPackageResponse;
       }
 
       if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
+        markApiCallAsHandled();
         return packageReadMe;
       }
 
       if (path === fleetSetupRouteService.getFleetSetupPath()) {
+        markApiCallAsHandled();
         return agentsSetupResponse;
+      }
+
+      if (path === packagePolicyRouteService.getListPath()) {
+        markApiCallAsHandled();
+        return packagePoliciesResponse;
+      }
+
+      if (path === agentPolicyRouteService.getListPath()) {
+        markApiCallAsHandled();
+        return agentPoliciesResponse;
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);
       // eslint-disable-next-line no-console
-      console.log(err);
+      console.error(err);
       throw err;
     }
   });
+
+  return {
+    waitForApi() {
+      return new Promise((resolve) => {
+        if (inflightApiCalls > 0) {
+          apiDoneListeners.push(resolve);
+        } else {
+          resolve();
+        }
+      });
+    },
+  };
 };
