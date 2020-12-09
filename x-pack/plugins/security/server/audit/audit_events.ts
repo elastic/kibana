@@ -8,8 +8,11 @@ import { KibanaRequest } from 'src/core/server';
 import { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
- * Audit event schema using ECS format.
- * https://www.elastic.co/guide/en/ecs/1.6/index.html
+ * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html
+ *
+ * If you add additional fields to the schema ensure you update the Kibana Filebeat module:
+ * https://github.com/elastic/beats/tree/master/filebeat/module/kibana
+ *
  * @public
  */
 export interface AuditEvent {
@@ -37,20 +40,45 @@ export interface AuditEvent {
   };
   kibana?: {
     /**
-     * Current space id of the request.
+     * The ID of the space associated with this event.
      */
     space_id?: string;
     /**
-     * Saved object that was created, changed, deleted or accessed as part of the action.
+     * The ID of the user session associated with this event. Each login attempt
+     * results in a unique session id.
+     */
+    session_id?: string;
+    /**
+     * Saved object that was created, changed, deleted or accessed as part of this event.
      */
     saved_object?: {
       type: string;
       id: string;
     };
     /**
-     * Any additional event specific fields.
+     * Name of authentication provider associated with a login event.
      */
-    [x: string]: any;
+    authentication_provider?: string;
+    /**
+     * Type of authentication provider associated with a login event.
+     */
+    authentication_type?: string;
+    /**
+     * Name of Elasticsearch realm that has authenticated the user.
+     */
+    authentication_realm?: string;
+    /**
+     * Name of Elasticsearch realm where the user details were retrieved from.
+     */
+    lookup_realm?: string;
+    /**
+     * Set of space IDs that a saved object was shared to.
+     */
+    add_to_spaces?: readonly string[];
+    /**
+     * Set of space IDs that a saved object was removed from.
+     */
+    delete_from_spaces?: readonly string[];
   };
   error?: {
     code?: string;

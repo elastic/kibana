@@ -56,6 +56,20 @@ describe('Session', () => {
     });
   });
 
+  describe('#getSID', () => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    it('returns `undefined` if session cookie does not exist', async () => {
+      mockSessionCookie.get.mockResolvedValue(null);
+      await expect(session.getSID(mockRequest)).resolves.toBeUndefined();
+    });
+
+    it('returns session id', async () => {
+      mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue());
+      await expect(session.getSID(mockRequest)).resolves.toEqual('some-long-sid');
+    });
+  });
+
   describe('#get', () => {
     const mockAAD = Buffer.from([2, ...Array(255).keys()]).toString('base64');
 

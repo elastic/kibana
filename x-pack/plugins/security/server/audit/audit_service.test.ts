@@ -27,6 +27,7 @@ const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });
 const getSpaceId = jest.fn().mockReturnValue('default');
+const getSessionId = jest.fn().mockResolvedValue('SESSION_ID');
 
 beforeEach(() => {
   logger.info.mockClear();
@@ -45,6 +46,7 @@ describe('#setup', () => {
         http,
         getCurrentUser,
         getSpaceId,
+        getSID: getSessionId,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -70,6 +72,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
   });
@@ -82,6 +85,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
     expect(http.registerOnPostAuth).toHaveBeenCalledWith(expect.any(Function));
   });
@@ -96,16 +100,17 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
       ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
-      kibana: { space_id: 'default' },
+      kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       message: 'MESSAGE',
       trace: { id: 'REQUEST_ID' },
       user: { name: 'jdoe', roles: ['admin'] },
@@ -123,12 +128,13 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
   });
 
@@ -143,12 +149,13 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log(undefined);
+    await audit.asScoped(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
   });
 });
@@ -368,6 +375,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -398,6 +406,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -436,6 +445,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -464,6 +474,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -493,6 +504,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID: getSessionId,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
