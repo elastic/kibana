@@ -125,7 +125,7 @@ describe('test', () => {
     );
 
     const executeTo = moment().utc().toISOString();
-    const executeFrom = moment(executeTo).subtract(6, 'minutes');
+    const executeFrom = moment(executeTo).subtract(6, 'minutes').toISOString();
     const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(executeFrom);
@@ -141,7 +141,7 @@ describe('test', () => {
     );
 
     const executeTo = moment().utc().toISOString();
-    const executeFrom = moment(executeTo).subtract(142, 'minutes');
+    const executeFrom = moment(executeTo).subtract(142, 'minutes').toISOString();
     const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes'));
