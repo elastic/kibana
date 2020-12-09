@@ -73,7 +73,7 @@ async function searchLatency({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        latency: {
+        latencyTimeseries: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
@@ -99,7 +99,7 @@ async function searchLatency({
   return apmEventClient.search(params);
 }
 
-export async function getLatencyCharts({
+export async function getLatencyTimeseries({
   serviceName,
   transactionType,
   transactionName,
@@ -122,7 +122,7 @@ export async function getLatencyCharts({
 
   if (!response.aggregations) {
     return {
-      latency: { avg: [], p95: [], p99: [] },
+      latencyTimeseries: { avg: [], p95: [], p99: [] },
       overallAvgDuration: null,
     };
   }
@@ -130,8 +130,8 @@ export async function getLatencyCharts({
   return {
     overallAvgDuration:
       response.aggregations.overall_avg_duration.value || null,
-    latency: convertLatencyBucketsToCoordinates(
-      response.aggregations.latency.buckets
+    latencyTimeseries: convertLatencyBucketsToCoordinates(
+      response.aggregations.latencyTimeseries.buckets
     ),
   };
 }

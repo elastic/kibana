@@ -30,9 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         expect(response.body.overallAvgDuration).to.be(null);
-        expect(response.body.latency.avg.length).to.be(0);
-        expect(response.body.latency.p95.length).to.be(0);
-        expect(response.body.latency.p99.length).to.be(0);
+        expect(response.body.latencyTimeseries.avg.length).to.be(0);
+        expect(response.body.latencyTimeseries.p95.length).to.be(0);
+        expect(response.body.latencyTimeseries.p99.length).to.be(0);
       });
     });
 
@@ -52,9 +52,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         expect(response.body.overallAvgDuration).not.to.be(null);
-        expect(response.body.latency.avg.length).to.be.greaterThan(0);
-        expect(response.body.latency.p95.length).to.be.greaterThan(0);
-        expect(response.body.latency.p99.length).to.be.greaterThan(0);
+        expect(response.body.latencyTimeseries.avg.length).to.be.greaterThan(0);
+        expect(response.body.latencyTimeseries.p95.length).to.be.greaterThan(0);
+        expect(response.body.latencyTimeseries.p99.length).to.be.greaterThan(0);
       });
     });
   });

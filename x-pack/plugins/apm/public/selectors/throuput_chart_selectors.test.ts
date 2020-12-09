@@ -24,7 +24,7 @@ const theme = {
 } as EuiTheme;
 
 const throughputData = {
-  throughput: [
+  throughputTimeseries: [
     { key: 'HTTP 2xx', avg: 1, dataPoints: [{ x: 1, y: 2 }] },
     { key: 'HTTP 4xx', avg: 1, dataPoints: [{ x: 1, y: 2 }] },
     { key: 'HTTP 5xx', avg: 1, dataPoints: [{ x: 1, y: 2 }] },

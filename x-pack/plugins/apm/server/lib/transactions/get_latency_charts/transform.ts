@@ -8,7 +8,7 @@ import { isNumber } from 'lodash';
 import { LatencyChartsSearchResponse } from '.';
 import { Coordinate } from '../../../../typings/timeseries';
 
-type LatencyBuckets = Required<LatencyChartsSearchResponse>['aggregations']['latency']['buckets'];
+type LatencyBuckets = Required<LatencyChartsSearchResponse>['aggregations']['latencyTimeseries']['buckets'];
 
 export function convertLatencyBucketsToCoordinates(
   latencyBuckets: LatencyBuckets = []

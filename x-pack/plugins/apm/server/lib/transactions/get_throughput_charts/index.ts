@@ -123,7 +123,7 @@ export async function getThroughputCharts({
   });
 
   return {
-    throughput: getThroughputBuckets({
+    throughputTimeseries: getThroughputBuckets({
       throughputResultBuckets: response.aggregations?.throughput.buckets,
       bucketSize,
       durationAsMinutes,

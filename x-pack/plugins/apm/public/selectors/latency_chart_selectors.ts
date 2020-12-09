@@ -57,7 +57,7 @@ function getLatencyTimeseries({
   theme: EuiTheme;
 }) {
   const { overallAvgDuration } = latencyChart;
-  const { avg, p95, p99 } = latencyChart.latency;
+  const { avg, p95, p99 } = latencyChart.latencyTimeseries;
 
   const series = [
     {

@@ -17,7 +17,7 @@ import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
-import { getLatencyCharts } from '../lib/transactions/get_latency_charts';
+import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 
 /**
@@ -149,17 +149,20 @@ export const transactionLatencyChatsRoute = createRoute({
       searchAggregatedTransactions,
     };
 
-    const { latency, overallAvgDuration } = await getLatencyCharts(options);
+    const {
+      latencyTimeseries,
+      overallAvgDuration,
+    } = await getLatencyTimeseries(options);
 
-    const anomalyTimeseries = latency
+    const anomalyTimeseries = latencyTimeseries
       ? await getAnomalySeries({
           ...options,
           logger,
-          timeSeriesDates: latency.avg.map(({ x }) => x),
+          timeSeriesDates: latencyTimeseries.avg.map(({ x }) => x),
         })
       : null;
 
-    return { latency, overallAvgDuration, anomalyTimeseries };
+    return { latencyTimeseries, overallAvgDuration, anomalyTimeseries };
   },
 });
 

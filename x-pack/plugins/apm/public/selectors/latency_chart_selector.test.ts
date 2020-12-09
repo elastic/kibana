@@ -21,7 +21,7 @@ const theme = {
 
 const latencyChartData = {
   overallAvgDuration: 1,
-  latency: {
+  latencyTimeseries: {
     avg: [{ x: 1, y: 10 }],
     p95: [{ x: 2, y: 5 }],
     p99: [{ x: 3, y: 8 }],
