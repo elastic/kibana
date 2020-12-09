@@ -5,7 +5,7 @@
  */
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { isString, isEmpty, getOr } from 'lodash/fp';
+import { isString, isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
