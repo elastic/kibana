@@ -184,6 +184,8 @@ describe('migration actions', () => {
   });
 
   describe('waitForReindexTask', () => {
+    it.todo('resolves right when reindex succeeds without reindex script');
+    it.todo('resolves right when reindex succeeds with reindex script');
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       const res = (await reindex(
         client,

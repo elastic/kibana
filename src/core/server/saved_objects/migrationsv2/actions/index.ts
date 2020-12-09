@@ -39,11 +39,6 @@ export const isRetryableEsClientResponse = (
   return Either.isLeft(res) && res.left.type === 'retryable_es_client_error';
 };
 
-export type FetchIndexResponse = Record<
-  string,
-  { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
->;
-
 /**
  * Batch size for updateByQuery, reindex & search operations. Smaller batches
  * reduce the memory pressure on Elasticsearch and Kibana so are less likely
@@ -59,6 +54,11 @@ const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
 const INDEX_NUMBER_OF_SHARDS = 1;
 /** Wait for all shards to be active before starting an operation */
 const WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE = 'all';
+
+export type FetchIndexResponse = Record<
+  string,
+  { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
+>;
 
 /**
  * Fetches information about the given indices including aliases, mappings and
@@ -355,10 +355,10 @@ export const reindex = (
           // Don't override existing documents, only create if missing
           op_type: 'create',
         },
-        script: Option.fold(
+        script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
           () => undefined,
-          () => ({
-            source: reindexScript,
+          (script) => ({
+            source: script,
             lang: 'painless',
           })
         )(reindexScript),
