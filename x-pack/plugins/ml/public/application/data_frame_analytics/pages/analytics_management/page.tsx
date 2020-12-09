@@ -92,13 +92,15 @@ export const Page: FC = () => {
             <EuiPageHeaderSection>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 {selectedTabId !== 'map' && (
-                  <EuiFlexItem grow={false}>
-                    <RefreshAnalyticsListButton />
-                  </EuiFlexItem>
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <RefreshAnalyticsListButton />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <DatePickerWrapper />
+                    </EuiFlexItem>
+                  </>
                 )}
-                <EuiFlexItem grow={false}>
-                  <DatePickerWrapper />
-                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageHeader>

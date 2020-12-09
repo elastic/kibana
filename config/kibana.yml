@@ -18,6 +18,10 @@
 # default to `true` starting in Kibana 7.0.
 #server.rewriteBasePath: false
 
+# Specifies the public URL at which Kibana is available for end users. If
+# `server.basePath` is configured this URL should end with the same basePath.
+#server.publicBaseUrl: ""
+
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
 

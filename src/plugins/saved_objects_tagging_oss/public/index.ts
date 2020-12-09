@@ -26,6 +26,7 @@ export {
   SavedObjectsTaggingApi,
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
+  ITagsCache,
   TagListComponentProps,
   TagSelectorComponentProps,
   GetSearchBarFilterOptions,
