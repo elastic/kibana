@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
@@ -59,7 +58,9 @@ export function createExecutionHandler({
   request,
   alertParams,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
+  const alertTypeActionGroups = new Map(
+    alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+  );
   return async ({
     actionGroup,
     actionSubgroup,
@@ -83,6 +84,7 @@ export function createExecutionHandler({
             tags,
             alertInstanceId,
             alertActionGroup: actionGroup,
+            alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
             alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,

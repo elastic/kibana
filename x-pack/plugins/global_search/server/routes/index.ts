@@ -6,7 +6,9 @@
 
 import { IRouter } from 'src/core/server';
 import { registerInternalFindRoute } from './find';
+import { registerInternalSearchableTypesRoute } from './get_searchable_types';
 
 export const registerRoutes = (router: IRouter) => {
   registerInternalFindRoute(router);
+  registerInternalSearchableTypesRoute(router);
 };

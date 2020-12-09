@@ -243,6 +243,7 @@ exports[`Header renders 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -4753,12 +4754,11 @@ exports[`Header renders 1`] = `
                         hasArrow={true}
                         id="headerHelpMenu"
                         isOpen={false}
-                        ownFocus={true}
+                        ownFocus={false}
                         panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <EuiOutsideClickDetector
-                          isDisabled={true}
                           onOutsideClick={[Function]}
                         >
                           <div
@@ -5355,6 +5355,7 @@ exports[`Header renders 1`] = `
           "basePath": "/test",
           "get": [Function],
           "prepend": [Function],
+          "publicBaseUrl": undefined,
           "remove": [Function],
           "serverBasePath": "/test",
         }
