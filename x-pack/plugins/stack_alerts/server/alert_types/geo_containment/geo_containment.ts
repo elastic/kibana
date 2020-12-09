@@ -153,8 +153,12 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    // Cycle through new alert statuses and set active
-    currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
+    // Combine newly active with previously active entries
+    const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
+      ...Object.entries(state.prevLocationMap || {}),
+      ...currLocationMap,
+    ]);
+    allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
@@ -166,7 +170,9 @@ export const getGeoContainmentExecutor = (log: Logger) =>
         containingBoundaryName,
       };
       const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-      if (shapeLocationId !== OTHER_CATEGORY) {
+      if (shapeLocationId === OTHER_CATEGORY) {
+        allActiveEntriesMap.delete(entityName);
+      } else {
         services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
@@ -174,5 +180,6 @@ export const getGeoContainmentExecutor = (log: Logger) =>
     return {
       shapesFilters,
       shapesIdsNamesMap,
+      prevLocationMap: Object.fromEntries(allActiveEntriesMap),
     };
   };
