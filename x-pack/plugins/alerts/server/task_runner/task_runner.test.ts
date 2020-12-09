@@ -73,6 +73,7 @@ describe('Task Runner', () => {
   const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const alertTypeRegistry = alertTypeRegistryMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -87,7 +88,7 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-    alertTypeRegistry: alertTypeRegistryMock.create(),
+    alertTypeRegistry,
   };
 
   const mockedAlertTypeSavedObject: Alert = {
@@ -1067,6 +1068,73 @@ describe('Task Runner', () => {
               "action": "execute",
               "outcome": "failure",
               "reason": "decrypt",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "error",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: execution failed",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
+    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType as NormalizedAlertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "state": Object {},
+      }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "error": Object {
+              "message": "OMG",
+            },
+            "event": Object {
+              "action": "execute",
+              "outcome": "failure",
+              "reason": "license",
             },
             "kibana": Object {
               "alerting": Object {
