@@ -22,22 +22,18 @@ import { buildCommentUserActionItem } from '../../services/user_actions/helpers'
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT } from '../../saved_object_types';
-import { updateAlertsStatus as alertsFactory } from '../alerts/update_status';
 
 export const addComment = ({
   savedObjectsClient,
   caseService,
-  alertsService,
-  caseConfigureService,
   userActionService,
   request,
-  context,
 }: CaseClientFactoryArguments) => async ({
+  caseClient,
   caseId,
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
-    // TODO: Excess CommentRequestRt when the excess() function supports union types
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
@@ -82,20 +78,12 @@ export const addComment = ({
     }),
   ]);
 
-  // Is this gonna create memory issues on multiple requests?
-  const updateAlertsStatus = alertsFactory({
-    savedObjectsClient,
-    request,
-    alertsService,
-    caseService,
-    caseConfigureService,
-    userActionService,
-    context,
-  });
-
   // If the case is synced with alerts the newly attached alert must match the status of the case.
   if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
-    updateAlertsStatus({ ids: [newComment.attributes.alertId], status: myCase.attributes.status });
+    caseClient.updateAlertsStatus({
+      ids: [newComment.attributes.alertId],
+      status: myCase.attributes.status,
+    });
   }
 
   const totalCommentsFindByCases = await caseService.getAllCaseComments({

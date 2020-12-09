@@ -25,10 +25,12 @@ export interface CaseClientCreate {
 }
 
 export interface CaseClientUpdate {
+  caseClient: CaseClient;
   cases: CasesPatchRequest;
 }
 
 export interface CaseClientAddComment {
+  caseClient: CaseClient;
   caseId: string;
   comment: CommentRequest;
 }

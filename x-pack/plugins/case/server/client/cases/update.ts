@@ -29,17 +29,16 @@ import {
 } from '../../routes/api/cases/helpers';
 
 import { CaseClientUpdate, CaseClientFactoryArguments } from '../types';
-import { updateAlertsStatus as alertsFactory } from '../alerts/update_status';
 
 export const update = ({
   savedObjectsClient,
   caseService,
-  alertsService,
-  caseConfigureService,
   userActionService,
   request,
-  context,
-}: CaseClientFactoryArguments) => async ({ cases }: CaseClientUpdate): Promise<CasesResponse> => {
+}: CaseClientFactoryArguments) => async ({
+  caseClient,
+  cases,
+}: CaseClientUpdate): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -155,16 +154,6 @@ export const update = ({
       );
     });
 
-    const updateAlertsStatus = alertsFactory({
-      savedObjectsClient,
-      request,
-      alertsService,
-      caseService,
-      caseConfigureService,
-      userActionService,
-      context,
-    });
-
     for (const theCase of [
       ...casesWithSyncSettingChangedToOn,
       ...casesWithStatusChangedAndSynced,
@@ -193,7 +182,7 @@ export const update = ({
         // The filter guarantees that the comments will be of type alert
       })) as SavedObjectsFindResponse<{ alertId: string }>;
 
-      updateAlertsStatus({
+      caseClient.updateAlertsStatus({
         ids: caseComments.saved_objects.map(({ attributes: { alertId } }) => alertId),
         // Either there is a status update or the syncAlerts got turned on.
         status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
