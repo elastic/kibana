@@ -30,6 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/+([A-Z_]).mdx',
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',

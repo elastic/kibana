@@ -4,32 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from '@hapi/hapi';
-import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
+import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
+import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
-import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
+import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
+import { registerAlertTypes } from './lib/alerting';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
+import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { InfraSources } from './lib/sources';
-import { InfraServerPluginDeps } from './lib/adapters/framework';
-import { METRICS_FEATURE, LOGS_FEATURE } from './features';
-import { UsageCollector } from './usage/usage_collector';
-import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
-import { registerAlertTypes } from './lib/alerting';
-import { infraSourceConfigurationSavedObjectType } from './lib/sources';
-import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
-import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
+import { LogEntriesService } from './services/log_entries';
 import { InfraRequestHandlerContext } from './types';
+import { UsageCollector } from './usage/usage_collector';
 
 export const config = {
   schema: schema.object({
@@ -87,7 +87,7 @@ export class InfraServerPlugin {
     this.config$ = context.config.create<InfraConfig>();
   }
 
-  async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
+  async setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
     await new Promise<void>((resolve) => {
       this.config$.subscribe((configValue) => {
         this.config = configValue;
@@ -166,6 +166,9 @@ export class InfraServerPlugin {
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    const logEntriesService = new LogEntriesService();
+    logEntriesService.setup(core, { ...plugins, sources });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

@@ -20,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -39,7 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { ResolvedActionGroup } from '../../common';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -58,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -218,37 +218,61 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
+    const recoveredAlertInstances = pickBy(
+      alertInstances,
+      (alertInstance: AlertInstance) => !alertInstance.hasScheduledActions()
+    );
 
-    generateNewAndResolvedInstanceEvents({
+    logActiveAndRecoveredInstances({
+      logger: this.logger,
+      activeAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
+      alertLabel,
+    });
+
+    generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
       alertId,
       alertLabel,
       namespace,
     });
 
     if (!muteAll) {
-      scheduleActionsForResolvedInstances(
-        alertInstances,
-        executionHandler,
-        originalAlertInstances,
-        instancesWithScheduledActions,
-        alert.mutedInstanceIds
-      );
-
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
+
+      scheduleActionsForRecoveredInstances({
+        recoveryActionGroup: this.alertType.recoveryActionGroup,
+        recoveredAlertInstances,
+        executionHandler,
+        mutedInstanceIdsSet,
+        logger: this.logger,
+        alertLabel,
+      });
 
       await Promise.all(
         Object.entries(instancesWithScheduledActions)
-          .filter(
-            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
-              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
-          )
+          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+            const throttled = alertInstance.isThrottled(throttle);
+            const muted = mutedInstanceIdsSet.has(alertInstanceName);
+            const shouldExecuteAction = !throttled && !muted;
+            if (!shouldExecuteAction) {
+              this.logger.debug(
+                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                  muted ? 'muted' : 'throttled'
+                }`
+              );
+            }
+            return shouldExecuteAction;
+          })
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
           )
       );
+    } else {
+      this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
     }
 
     return {
@@ -332,12 +356,15 @@ export class TaskRunner {
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    const runDate = new Date().toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': runDate,
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
         saved_objects: [
@@ -436,27 +463,37 @@ export class TaskRunner {
   }
 }
 
-interface GenerateNewAndResolvedInstanceEventsParams {
+interface GenerateNewAndRecoveredInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstances: Dictionary<AlertInstance>;
   currentAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
 }
 
-function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
+function generateNewAndRecoveredInstanceEvents(
+  params: GenerateNewAndRecoveredInstanceEventsParams
+) {
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstances,
+    originalAlertInstances,
+    recoveredAlertInstances,
+  } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
-  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
-  for (const id of resolvedIds) {
+  for (const id of recoveredAlertInstanceIds) {
     const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
-    const message = `${params.alertLabel} resolved instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message, actionGroup);
+    const message = `${params.alertLabel} instance '${id}' has recovered`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
   }
 
   for (const id of newIds) {
@@ -496,31 +533,72 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   }
 }
 
-function scheduleActionsForResolvedInstances(
-  alertInstancesMap: Record<string, AlertInstance>,
-  executionHandler: ReturnType<typeof createExecutionHandler>,
-  originalAlertInstances: Record<string, AlertInstance>,
-  currentAlertInstances: Dictionary<AlertInstance>,
-  mutedInstanceIds: string[]
-) {
-  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
-  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
-  const resolvedIds = without(
-    originalAlertInstanceIds,
-    ...currentAlertInstanceIds,
-    ...mutedInstanceIds
-  );
-  for (const id of resolvedIds) {
-    const instance = alertInstancesMap[id];
-    instance.updateLastScheduledActions(ResolvedActionGroup.id);
-    instance.unscheduleActions();
-    executionHandler({
-      actionGroup: ResolvedActionGroup.id,
-      context: {},
-      state: {},
-      alertInstanceId: id,
-    });
-    instance.scheduleActions(ResolvedActionGroup.id);
+interface ScheduleActionsForRecoveredInstancesParams {
+  logger: Logger;
+  recoveryActionGroup: ActionGroup;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  executionHandler: ReturnType<typeof createExecutionHandler>;
+  mutedInstanceIdsSet: Set<string>;
+  alertLabel: string;
+}
+
+function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecoveredInstancesParams) {
+  const {
+    logger,
+    recoveryActionGroup,
+    recoveredAlertInstances,
+    executionHandler,
+    mutedInstanceIdsSet,
+    alertLabel,
+  } = params;
+  const recoveredIds = Object.keys(recoveredAlertInstances);
+  for (const id of recoveredIds) {
+    if (mutedInstanceIdsSet.has(id)) {
+      logger.debug(
+        `skipping scheduling of actions for '${id}' in alert ${alertLabel}: instance is muted`
+      );
+    } else {
+      const instance = recoveredAlertInstances[id];
+      instance.updateLastScheduledActions(recoveryActionGroup.id);
+      instance.unscheduleActions();
+      executionHandler({
+        actionGroup: recoveryActionGroup.id,
+        context: {},
+        state: {},
+        alertInstanceId: id,
+      });
+      instance.scheduleActions(recoveryActionGroup.id);
+    }
+  }
+}
+
+interface LogActiveAndRecoveredInstancesParams {
+  logger: Logger;
+  activeAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  alertLabel: string;
+}
+
+function logActiveAndRecoveredInstances(params: LogActiveAndRecoveredInstancesParams) {
+  const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
+  const activeInstanceIds = Object.keys(activeAlertInstances);
+  const recoveredInstanceIds = Object.keys(recoveredAlertInstances);
+  if (activeInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${activeInstanceIds.length} active alert instances: ${JSON.stringify(
+        activeInstanceIds.map((instanceId) => ({
+          instanceId,
+          actionGroup: activeAlertInstances[instanceId].getScheduledActionOptions()?.actionGroup,
+        }))
+      )}`
+    );
+  }
+  if (recoveredInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${
+        recoveredInstanceIds.length
+      } recovered alert instances: ${JSON.stringify(recoveredInstanceIds)}`
+    );
   }
 }
 

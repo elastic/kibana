@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
@@ -72,7 +73,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   // Track component loaded
   useEffect(() => {
-    trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
+    trackMetric(METRIC_TYPE.LOADED, UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
 
   useEffect(() => {

@@ -8,6 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { getInvalidFieldMessage } from './helpers';
+import {
+  adjustTimeScaleLabelSuffix,
+  adjustTimeScaleOnOtherColumnChange,
+} from '../time_scale_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -25,10 +30,12 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: field.displayName,
+      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
       sourceField: field.name,
     };
   },
@@ -41,15 +48,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  getDefaultLabel: () => countLabel,
+  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
   buildColumn({ field, previousColumn }) {
     return {
-      label: countLabel,
+      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
+      timeScale: previousColumn?.timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -59,6 +67,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
           : undefined,
     };
   },
+  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
@@ -69,4 +78,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   isTransferable: () => {
     return true;
   },
+  timeScalingMode: 'optional',
 };

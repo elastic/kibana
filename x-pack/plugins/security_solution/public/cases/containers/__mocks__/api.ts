@@ -35,6 +35,7 @@ import {
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   User,
+  CaseStatuses,
 } from '../../../../../case/common/api';
 
 export const getCase = async (
@@ -62,7 +63,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: 'open',
+    status: CaseStatuses.open,
     tags: [],
   },
   queryParams = {

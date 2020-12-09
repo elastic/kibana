@@ -18,3 +18,10 @@ export interface ListNodesRouteResponse {
    */
   isUsingDeprecatedDataRoleConfig: boolean;
 }
+
+export interface ListSnapshotReposResponse {
+  /**
+   * An array of repository names
+   */
+  repositories: string[];
+}

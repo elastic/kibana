@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { aggBucketAvgFnName } from './bucket_avg_fn';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
@@ -43,6 +44,7 @@ export const getBucketAvgMetricAgg = () => {
 
   return new MetricAggType({
     name: METRIC_TYPES.AVG_BUCKET,
+    expressionName: aggBucketAvgFnName,
     title: averageBucketTitle,
     makeLabel: (agg) => makeNestedLabel(agg, overallAverageLabel),
     subtype,

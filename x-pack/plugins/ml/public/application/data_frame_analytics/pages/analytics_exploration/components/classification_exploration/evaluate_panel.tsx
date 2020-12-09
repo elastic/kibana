@@ -29,7 +29,7 @@ import {
   DataFrameAnalyticsConfig,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,
   isClassificationEvaluateResponse,
@@ -49,7 +49,7 @@ import {
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   searchQuery: ResultsSearchQuery;
 }
 
@@ -286,6 +286,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   return (
     <>
       <ExpandableSection
+        urlStateKey={'evaluation'}
         dataTestId="ClassificationEvaluation"
         title={
           <FormattedMessage

@@ -76,6 +76,12 @@ export function getSort(sort: SortPair[] | SortPair, indexPattern: IndexPattern)
  * compared to getSort it doesn't return an array of objects, it returns an array of arrays
  * [[fieldToSort: directionToSort]]
  */
-export function getSortArray(sort: SortPair[], indexPattern: IndexPattern) {
-  return getSort(sort, indexPattern).map((sortPair) => Object.entries(sortPair).pop());
+export function getSortArray(sort: SortPair[], indexPattern: IndexPattern): SortPairArr[] {
+  return getSort(sort, indexPattern).reduce((acc: SortPairArr[], sortPair) => {
+    const entries = Object.entries(sortPair);
+    if (entries && entries[0]) {
+      acc.push(entries[0]);
+    }
+    return acc;
+  }, []);
 }

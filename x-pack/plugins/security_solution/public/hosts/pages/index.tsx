@@ -45,7 +45,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
         )}
       />
       <Route path={getHostsTabPath()}>
-        <Hosts hostsPagePath={hostsPagePath} />
+        <Hosts />
       </Route>
       <Route
         path={getHostDetailsTabPath(hostsPagePath)}

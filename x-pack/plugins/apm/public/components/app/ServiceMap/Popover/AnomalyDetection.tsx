@@ -18,7 +18,7 @@ import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,
 } from '../../../../../common/service_health_status';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { fontSize, px } from '../../../../style/variables';
 import { asInteger, asDuration } from '../../../../../common/utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
