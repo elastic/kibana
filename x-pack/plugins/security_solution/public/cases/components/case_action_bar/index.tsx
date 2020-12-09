@@ -13,8 +13,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from '../case_view/translations';
@@ -109,9 +108,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                       <span>{i18n.STATUS}</span>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip content={i18n.SYNC_ALERTS_HELP}>
-                        <EuiIcon type="questionInCircle" color="subdued" />
-                      </EuiToolTip>
+                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiDescriptionListTitle>
