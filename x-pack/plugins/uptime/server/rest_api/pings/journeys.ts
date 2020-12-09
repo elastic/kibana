@@ -39,18 +39,16 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
       checkGroups: schema.arrayOf(schema.string()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroups } = request.query;
     const result = await libs.requests.getJourneyFailedSteps({
       uptimeEsClient,
       checkGroups,
     });
 
-    return response.ok({
-      body: {
-        checkGroups,
-        steps: result,
-      },
-    });
+    return {
+      checkGroups,
+      steps: result,
+    };
   },
 });

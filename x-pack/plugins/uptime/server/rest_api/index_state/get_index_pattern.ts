@@ -12,10 +12,9 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
   method: 'GET',
   path: API_URLS.INDEX_PATTERN,
   validate: false,
-  handler: async ({ uptimeEsClient, dynamicSettings }): Promise<any> => {
+  handler: async ({ uptimeEsClient }): Promise<any> => {
     return await libs.requests.getIndexPattern({
       uptimeEsClient,
-      dynamicSettings,
     });
   },
 });

@@ -39,7 +39,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     const direction = request.query?.direction ?? DEFAULT_DIRECTION;
     const { search } = request.query;
 
-    const result = await libs.requests.getCerts({
+    return await libs.requests.getCerts({
       uptimeEsClient,
       index,
       search,
