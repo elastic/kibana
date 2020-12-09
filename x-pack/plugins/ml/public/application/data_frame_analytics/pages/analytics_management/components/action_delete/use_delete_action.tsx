@@ -40,6 +40,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { savedObjects } = useMlKibana().services;
   const savedObjectsClient = savedObjects.client;
@@ -65,8 +66,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       } else {
         setIndexPatternExists(false);
       }
+      setIsLoading(false);
     } catch (e) {
       const error = extractErrorMessage(e);
+      setIsLoading(false);
 
       toastNotificationService.displayDangerToast(
         i18n.translate(
@@ -88,6 +91,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       }
     } catch (e) {
       const error = extractErrorMessage(e);
+      setIsLoading(false);
 
       toastNotificationService.displayDangerToast(
         i18n.translate(
@@ -103,10 +107,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     // Check if an index pattern exists corresponding to current DFA job
     // if pattern does exist, show it to user
     checkIndexPatternExists();
-
     // Check if an user has permission to delete the index & index pattern
     checkUserIndexPermission();
   }, [isModalVisible]);
@@ -166,6 +170,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     deleteItem,
     indexPatternExists,
     isModalVisible,
+    isLoading,
     item,
     openModal,
     toggleDeleteIndex,
