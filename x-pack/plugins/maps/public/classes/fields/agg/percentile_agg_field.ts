@@ -12,7 +12,7 @@ import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { ESDocField } from '../es_doc_field';
 import { getOrdinalSuffix } from '../../util/ordinal_suffix';
 
-export interface PercentileAggParams extends CountAggFieldParams {
+interface PercentileAggParams extends CountAggFieldParams {
   esDocField?: ESDocField;
   percentile: number;
 }
