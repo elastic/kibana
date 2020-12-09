@@ -107,8 +107,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
   if (options.createDockerPackage) {
     // control w/ --docker or --skip-docker-ubi or --skip-os-packages
-    await run(Tasks.CreateDockerAMD64Package);
-    await run(Tasks.CreateDockerARM64Package);
+    await run(Tasks.CreateDockerX64Package);
+    await run(Tasks.CreateDockerAArch64Package);
     if (options.createDockerUbiPackage) {
       await run(Tasks.CreateDockerUbiPackage);
     }

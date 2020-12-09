@@ -60,21 +60,21 @@ export const CreateRpmPackage: Task = {
   },
 };
 
-export const CreateDockerAMD64Package: Task = {
-  description: 'Creating docker amd64 package',
+export const CreateDockerX64Package: Task = {
+  description: 'Creating docker x64 package',
 
   async run(config, log, build) {
     // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build, false, 'amd64');
+    await runDockerGenerator(config, log, build, false, 'x64');
   },
 };
 
-export const CreateDockerARM64Package: Task = {
-  description: 'Creating docker arm64 package',
+export const CreateDockerAArch64Package: Task = {
+  description: 'Creating docker aarch64 package',
 
   async run(config, log, build) {
     // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build, false, 'arm64');
+    await runDockerGenerator(config, log, build, false, 'aarch64');
   },
 };
 

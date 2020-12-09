@@ -38,7 +38,7 @@ export async function runDockerGenerator(
   log: ToolingLog,
   build: Build,
   ubi: boolean = false,
-  architecture: 'amd64' | 'arm64'
+  architecture: 'x64' | 'aarch64'
 ) {
   // UBI var config
   const baseOSImage = ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
@@ -50,7 +50,7 @@ export async function runDockerGenerator(
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
-  const artifactArchitecture = architecture === 'amd64' ? 'x86_64' : 'aarch64';
+  const artifactArchitecture = architecture === 'x64' ? 'x86_64' : 'aarch64';
   const artifactTarball = `kibana${imageFlavor}-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
@@ -122,12 +122,7 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-  type HostArchitectureToDocker = Record<string, string>;
-  const hostTarget: HostArchitectureToDocker = {
-    x64: 'amd64',
-    arm64: 'arm64',
-  };
-  const buildImage = hostTarget[process.arch] === architecture;
+  const buildImage = process.arch === architecture;
   if (buildImage) {
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,

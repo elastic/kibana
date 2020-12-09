@@ -29,7 +29,8 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   log.info(
     `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
   );
-  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-${scope.architecture}-docker-build-context`;
+  const fileArchitecture = scope.architecture === 'aarch64' ? 'arm64' : 'amd64';
+  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-${fileArchitecture}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 
