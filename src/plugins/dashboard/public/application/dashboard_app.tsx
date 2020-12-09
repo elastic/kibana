@@ -43,16 +43,18 @@ import {
 
 import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { EmbeddablePackageState, EmbeddableRenderer } from '../services/embeddable';
 
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
+  incomingEmbeddable?: EmbeddablePackageState;
 }
 
 export function DashboardApp({
+  incomingEmbeddable,
   savedDashboardId,
   embedSettings,
   redirectTo,
@@ -72,7 +74,12 @@ export function DashboardApp({
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
   const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
-  const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
+  const dashboardContainer = useDashboardContainer(
+    dashboardStateManager,
+    history,
+    false,
+    incomingEmbeddable
+  );
 
   const refreshDashboardContainer = useCallback(
     (lastReloadRequestTime?: number) => {

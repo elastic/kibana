@@ -84,6 +84,10 @@ export async function mountApp({
     savedObjectsTaggingOss,
   } = pluginsStart;
 
+  const incomingEmbeddable = embeddableStart
+    .getStateTransfer(scopedHistory)
+    .getIncomingEmbeddablePackage();
+
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
@@ -158,6 +162,7 @@ export async function mountApp({
       <DashboardApp
         history={routeProps.history}
         embedSettings={embedSettings}
+        incomingEmbeddable={incomingEmbeddable}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
       />

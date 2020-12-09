@@ -26,6 +26,7 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  EmbeddablePackageState,
   isErrorEmbeddable,
   ViewMode,
 } from '../../services/embeddable';
@@ -39,7 +40,8 @@ import { DASHBOARD_CONTAINER_TYPE } from '..';
 export const useDashboardContainer = (
   dashboardStateManager: DashboardStateManager | null,
   history: History,
-  isEmbeddedExternally: boolean
+  isEmbeddedExternally: boolean,
+  incomingEmbeddable?: EmbeddablePackageState
 ) => {
   const {
     dashboardCapabilities,
@@ -78,11 +80,6 @@ export const useDashboardContainer = (
     if (searchSessionIdFromURL) {
       searchSession.restore(searchSessionIdFromURL);
     }
-
-    // get incoming embeddable from the state transfer service.
-    const incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage();
 
     (async function createContainer() {
       const newContainer = await dashboardFactory.create(
@@ -124,12 +121,13 @@ export const useDashboardContainer = (
   }, [
     dashboardCapabilities,
     dashboardStateManager,
+    isEmbeddedExternally,
+    incomingEmbeddable,
+    searchSession,
+    scopedHistory,
     embeddable,
     history,
-    isEmbeddedExternally,
     query,
-    scopedHistory,
-    searchSession,
   ]);
 
   return dashboardContainer;
