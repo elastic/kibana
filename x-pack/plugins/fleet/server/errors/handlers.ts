@@ -52,8 +52,8 @@ export const isLegacyESClientError = (error: any): error is LegacyESClientError 
   return error instanceof LegacyESErrors._Abstract;
 };
 
-export function isESClientError(error: any): error is ResponseError {
-  return Boolean(error.body && error.statusCode && error.headers);
+export function isESClientError(error: unknown): error is ResponseError {
+  return error instanceof ResponseError;
 }
 
 const getHTTPResponseCode = (error: IngestManagerError): number => {
