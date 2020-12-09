@@ -13,6 +13,7 @@ import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
 import { UpgradeWarning } from '../components/upgrade';
+import { HelpMenu } from '../components/help_menu';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -37,6 +38,7 @@ export const OverviewPage: FC = () => {
           </EuiFlexGroup>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu />
     </Fragment>
   );
 };
