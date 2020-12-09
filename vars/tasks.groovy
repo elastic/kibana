@@ -75,7 +75,7 @@ def functionalOss(Map params = [:]) {
     }
 
     if (config.serverIntegration) {
-      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
     }
   }
 }

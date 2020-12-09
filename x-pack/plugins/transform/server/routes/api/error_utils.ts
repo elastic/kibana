@@ -76,7 +76,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
 }
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const boom = Boom.isBoom(error) ? error : Boom.boomify(error, { statusCode: error.status });
+  const boom = Boom.isBoom(error) ? error : Boom.boomify(error, { statusCode: error.statusCode });
   return {
     body: boom,
     headers: boom.output.headers,
@@ -109,14 +109,16 @@ function extractCausedByChain(
  * @return Object Boom error response
  */
 export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any> = {}) {
-  const { statusCode, response } = err;
+  const {
+    meta: { body, statusCode },
+  } = err;
 
   const {
     error: {
       root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
       caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
-  } = JSON.parse(response);
+  } = body;
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it
@@ -130,6 +132,12 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
 
     // @ts-expect-error cause is not defined on payload type
     boomError.output.payload.cause = causedByChain.length ? causedByChain : defaultCause;
+
+    // Set error message based on the root cause
+    if (root_cause?.[0]) {
+      boomError.message = extractErrorMessage(root_cause[0]);
+    }
+
     return boomError;
   }
 
@@ -137,4 +145,24 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
   // return it
   const message = statusCodeToMessageMap[statusCode];
   return new Boom(message, { statusCode });
+}
+
+interface EsError {
+  type: string;
+  reason: string;
+  line?: number;
+  col?: number;
+}
+
+/**
+ * Returns an error message based on the root cause
+ */
+function extractErrorMessage({ type, reason, line, col }: EsError): string {
+  let message = `[${type}] ${reason}`;
+
+  if (line !== undefined && col !== undefined) {
+    message += `, with line=${line} & col=${col}`;
+  }
+
+  return message;
 }

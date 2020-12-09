@@ -7,12 +7,10 @@
 import { Duration } from 'moment';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { Tag, TagAttributes } from '../../../common/types';
 
-export interface ITagsCache {
-  getState(): Tag[];
-  getState$(): Observable<Tag[]>;
-}
+export { ITagsCache };
 
 export interface ITagsChangeListener {
   onDelete: (id: string) => void;

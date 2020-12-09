@@ -16,9 +16,10 @@ import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import { getCreateCaseUrl } from '../../../../common/components/link_to';
+import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { Case } from '../../../../cases/containers/types';
 import * as i18n from '../../timeline/properties/translations';
 
 interface Props {
@@ -42,7 +43,26 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     )
   );
   const [isPopoverOpen, setPopover] = useState(false);
-  const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
+
+  const onRowClick = useCallback(
+    async (theCase?: Case) => {
+      await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
+      });
+
+      dispatch(
+        setInsertTimeline({
+          graphEventId,
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle,
+        })
+      );
+    },
+    [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
+  );
+
+  const { modal: allCasesModal, openModal: openCaseModal } = useAllCasesModal({ onRowClick });
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -79,8 +99,8 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleExistingCaseClick = useCallback(() => {
     handlePopoverClose();
-    onOpenCaseModal();
-  }, [onOpenCaseModal, handlePopoverClose]);
+    openCaseModal();
+  }, [openCaseModal, handlePopoverClose]);
 
   const closePopover = useCallback(() => {
     setPopover(false);
@@ -135,7 +155,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      <AllCasesModal />
+      {allCasesModal}
     </>
   );
 };
