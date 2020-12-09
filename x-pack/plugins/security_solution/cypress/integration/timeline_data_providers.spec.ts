@@ -20,12 +20,11 @@ import {
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import { createNewTimeline } from '../tasks/timeline';
+import { closeTimeline, createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/62060
-describe.skip('timeline data providers', () => {
+describe('timeline data providers', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
@@ -33,6 +32,7 @@ describe.skip('timeline data providers', () => {
 
   afterEach(() => {
     createNewTimeline();
+    closeTimeline();
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
