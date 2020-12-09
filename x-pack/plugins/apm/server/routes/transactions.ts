@@ -154,13 +154,11 @@ export const transactionLatencyChatsRoute = createRoute({
       overallAvgDuration,
     } = await getLatencyTimeseries(options);
 
-    const anomalyTimeseries = latencyTimeseries
-      ? await getAnomalySeries({
-          ...options,
-          logger,
-          timeSeriesDates: latencyTimeseries.avg.map(({ x }) => x),
-        })
-      : null;
+    const anomalyTimeseries = await getAnomalySeries({
+      ...options,
+      logger,
+      latencyTimeseries,
+    });
 
     return { latencyTimeseries, overallAvgDuration, anomalyTimeseries };
   },
