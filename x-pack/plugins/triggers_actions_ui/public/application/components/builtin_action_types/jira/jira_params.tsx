@@ -49,21 +49,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [actionParams.subActionParams]
   );
 
-  useEffect(() => {
-    return () => {
-      // clear subActionParams when connector is changed
-      editAction(
-        'subActionParams',
-        {
-          incident: {},
-          comments: [],
-        },
-        index
-      );
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector]);
-
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
     toastNotifications: toasts,
@@ -130,21 +115,23 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   );
 
   useEffect(() => {
+    return () => {
+      // clear subActionParams when connector is changed
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector]);
+  useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    return () => {
-      if (actionParams.subActionParams != null) {
-        editAction(
-          'subActionParams',
-          {
-            incident: {},
-            comments: [],
-          },
-          index
-        );
-      }
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

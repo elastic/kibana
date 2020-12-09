@@ -152,7 +152,11 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
         keyof AlertAction,
         SavedObjectAttribute
       >;
-      if (index === undefined || isEqual(alert.actions[index][key], value)) {
+      if (
+        index === undefined ||
+        alert.actions.length === 0 ||
+        isEqual(alert.actions[index][key], value)
+      ) {
         return state;
       } else {
         const oldAction = alert.actions.splice(index, 1)[0];

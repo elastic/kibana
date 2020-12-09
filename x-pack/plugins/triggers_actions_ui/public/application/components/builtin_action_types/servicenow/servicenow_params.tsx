@@ -56,6 +56,20 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
+  const editSubActionProperty = useCallback(
+    (key: string, value: any) => {
+      const newProps =
+        key !== 'comments'
+          ? {
+              incident: { ...incident, [key]: value },
+              comments,
+            }
+          : { incident, [key]: value };
+      editAction('subActionParams', newProps, index);
+    },
+    [comments, editAction, incident, index]
+  );
+
   useEffect(() => {
     return () => {
       // clear subActionParams when connector is changed
@@ -70,36 +84,10 @@ const ServiceNowParamsFields: React.FunctionComponent<
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
-
-  const editSubActionProperty = useCallback(
-    (key: string, value: any) => {
-      const newProps =
-        key !== 'comments'
-          ? {
-              incident: { ...incident, [key]: value },
-              comments,
-            }
-          : { incident, [key]: value };
-      editAction('subActionParams', newProps, index);
-    },
-    [comments, editAction, incident, index]
-  );
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    return () => {
-      if (actionParams.subActionParams != null) {
-        editAction(
-          'subActionParams',
-          {
-            incident: {},
-            comments: [],
-          },
-          index
-        );
-      }
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
