@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react/button-has-type */
 
-import React, { useCallback, useMemo, useContext, useState, HTMLAttributes } from 'react';
+import React, { useCallback, useMemo, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -119,7 +119,7 @@ export const GraphControls = React.memo(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
-    const [activePopover, setPopover] = useState<null | 'schemaInfo' | 'nodesLegend'>(null);
+    const [activePopover, setPopover] = useState<null | 'schemaInfo' | 'nodeLegend'>(null);
     const colorMap = useColors();
 
     const setActivePopover = useCallback(
@@ -199,9 +199,9 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'schemaInfo'}
             setActivePopover={setActivePopover}
           />
-          <CubeLegend
+          <NodeLegend
             closePopover={closePopover}
-            isOpen={activePopover === 'nodesLegend'}
+            isOpen={activePopover === 'nodeLegend'}
             setActivePopover={setActivePopover}
           />
         </StyledGraphControlsColumn>
@@ -329,14 +329,13 @@ const SchemaInformation = ({
   return (
     <EuiPopover
       ownFocus
-      onScroll={closePopover}
-      repositionOnScroll={false}
-      onClick={setAsActivePopover}
       button={
         <StyledEuiButtonIcon
+          data-test-subj="resolver:graph-controls:schema-info-button"
           size="m"
           title={schemaInfoButtonTitle}
           aria-label={schemaInfoButtonTitle}
+          onClick={setAsActivePopover}
           iconType="iInCircle"
           $backgroundColor={colorMap.graphControlsBackground}
           $iconColor={colorMap.graphControls}
@@ -366,47 +365,52 @@ const SchemaInformation = ({
         style={{ maxWidth: '256px' }}
       >
         <StyledDescriptionList
-          data-test-subj="resolver:schema-info"
+          data-test-subj="resolver:graph-controls:schema-info"
           type="column"
           align="left"
-          titleProps={
-            {
-              'data-test-subj': 'resolver:schema-info:title',
-              style: { width: '30%' },
-              // Casting this to allow data attribute
-            } as HTMLAttributes<HTMLElement>
-          }
-          descriptionProps={
-            {
-              'data-test-subj': 'resolver:schema-info:description',
-              style: { width: '70%' },
-            } as HTMLAttributes<HTMLElement>
-          }
           compressed
         >
           <>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:schema-info:title"
+              style={{ width: '30%' }}
+            >
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
                 defaultMessage: 'source',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:schema-info:description"
+              style={{ width: '70%' }}
+            >
               <GeneratedText>{sourceAndSchema?.dataSource ?? unknownSchemaValue}</GeneratedText>
             </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:schema-info:title"
+              style={{ width: '30%' }}
+            >
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
                 defaultMessage: 'id',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:schema-info:description"
+              style={{ width: '70%' }}
+            >
               <GeneratedText>{sourceAndSchema?.schema.id ?? unknownSchemaValue}</GeneratedText>
             </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:schema-info:title"
+              style={{ width: '30%' }}
+            >
               {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
                 defaultMessage: 'edge',
               })}
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:schema-info:description"
+              style={{ width: '70%' }}
+            >
               <GeneratedText>{sourceAndSchema?.schema.parent ?? unknownSchemaValue}</GeneratedText>
             </StyledEuiDescriptionListDescription>
           </>
@@ -416,24 +420,24 @@ const SchemaInformation = ({
   );
 };
 
-const CubeLegend = ({
+// This component defines the cube legend that allows users to identify the meaning of the cubes
+// Should be updated to be dynamic if and when non process based resolvers are possible
+const NodeLegend = ({
   closePopover,
   setActivePopover,
   isOpen,
 }: {
   closePopover: () => void;
-  setActivePopover: (value: 'nodesLegend') => void;
+  setActivePopover: (value: 'nodeLegend') => void;
   isOpen: boolean;
 }) => {
-  // This component defines the cube legend that allows users to identify the meaning of the cubes
-  // Should be updated to be dynamic if and when non process based resolvers are possible
-  const setAsActivePopover = useCallback(() => setActivePopover('nodesLegend'), [setActivePopover]);
+  const setAsActivePopover = useCallback(() => setActivePopover('nodeLegend'), [setActivePopover]);
   const colorMap = useColors();
 
-  const nodesLegendButtonTitle = i18n.translate(
-    'xpack.securitySolution.resolver.graphControls.nodesLegendButtonTitle',
+  const nodeLegendButtonTitle = i18n.translate(
+    'xpack.securitySolution.resolver.graphControls.nodeLegendButtonTitle',
     {
-      defaultMessage: 'Nodes Legend',
+      defaultMessage: 'Node Legend',
     }
   );
 
@@ -442,18 +446,17 @@ const CubeLegend = ({
       ownFocus
       button={
         <StyledEuiButtonIcon
+          data-test-subj="resolver:graph-controls:node-legend-button"
           size="m"
-          title={nodesLegendButtonTitle}
-          aria-label={nodesLegendButtonTitle}
+          title={nodeLegendButtonTitle}
+          aria-label={nodeLegendButtonTitle}
+          onClick={setAsActivePopover}
           iconType="node"
           $backgroundColor={colorMap.graphControlsBackground}
           $iconColor={colorMap.graphControls}
           $borderColor={colorMap.graphControlsBorderColor}
         />
       }
-      onScroll={closePopover}
-      repositionOnScroll={false}
-      onClick={setAsActivePopover}
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
@@ -468,35 +471,26 @@ const CubeLegend = ({
         style={{ maxWidth: '212px' }}
       >
         <StyledDescriptionList
-          data-test-subj="resolver:graph-controls:legend"
+          data-test-subj="resolver:graph-controls:node-legend"
           type="column"
           align="left"
-          titleProps={
-            {
-              'data-test-subj': 'resolver:graph-controls:legend:title',
-              className: 'legend-desc-title',
-              style: { width: '20%' },
-              // Casting this to allow data attribute
-            } as HTMLAttributes<HTMLElement>
-          }
-          descriptionProps={
-            {
-              'data-test-subj': 'resolver:graph-controls:legend:description',
-              className: 'legend-description',
-              style: { width: '80%', lineHeight: '2.2em' }, // lineHeight to align center vertically
-            } as HTMLAttributes<HTMLElement>
-          }
           compressed
         >
           <>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:node-legend:title"
+              style={{ width: '20% ' }}
+            >
               <CubeForProcess
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="running"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:node-legend:description"
+              style={{ width: '80%', lineHeight: '2.2em' }} // lineHeight to align center vertically
+            >
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.runningProcessCube',
@@ -506,14 +500,20 @@ const CubeLegend = ({
                 )}
               </GeneratedText>
             </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:node-legend:title"
+              style={{ width: '20% ' }}
+            >
               <CubeForProcess
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="terminated"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:node-legend:description"
+              style={{ width: '80%', lineHeight: '2.2em' }}
+            >
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.terminatedProcessCube',
@@ -523,14 +523,20 @@ const CubeLegend = ({
                 )}
               </GeneratedText>
             </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:node-legend:title"
+              style={{ width: '20% ' }}
+            >
               <CubeForProcess
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="loading"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:node-legend:description"
+              style={{ width: '80%', lineHeight: '2.2em' }}
+            >
               <GeneratedText>
                 {i18n.translate(
                   'xpack.securitySolution.resolver.graphControls.currentlyLoadingCube',
@@ -540,14 +546,20 @@ const CubeLegend = ({
                 )}
               </GeneratedText>
             </StyledEuiDescriptionListDescription>
-            <StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListTitle
+              data-test-subj="resolver:graph-controls:node-legend:title"
+              style={{ width: '20% ' }}
+            >
               <CubeForProcess
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="error"
               />
             </StyledEuiDescriptionListTitle>
-            <StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListDescription
+              data-test-subj="resolver:graph-controls:node-legend:description"
+              style={{ width: '80%', lineHeight: '2.2em' }}
+            >
               <GeneratedText>
                 {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
                   defaultMessage: 'Error',
