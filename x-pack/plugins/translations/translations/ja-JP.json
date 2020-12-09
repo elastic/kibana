@@ -17925,7 +17925,6 @@
     "xpack.securitySolution.resolver.eventDescription.networkEventLabel": "{ networkDirection } { forwardedIP }",
     "xpack.securitySolution.resolver.eventDescription.registryKeyLabel": "{ registryKey }",
     "xpack.securitySolution.resolver.eventDescription.registryPathLabel": "{ registryPath }",
-    "xpack.securitySolution.resolver.node_icon": "{running, select, true {実行中のプロセス} false {終了したプロセス}}",
     "xpack.securitySolution.resolver.panel.copyToClipboard": "クリップボードにコピー",
     "xpack.securitySolution.resolver.panel.eventDetail.requestError": "イベント詳細を取得できませんでした",
     "xpack.securitySolution.resolver.panel.nodeList.title": "すべてのプロセスイベント",

@@ -5,11 +5,18 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
-
+import {
+  ResolverEntityIndex,
+  ResolverNode,
+  NewResolverTree,
+  ResolverSchema,
+} from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
+import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
+import { createRange } from './../../models/time_range';
+
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -22,7 +29,6 @@ export function ResolverTreeFetcher(
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let lastRequestAbortController: AbortController | undefined;
-
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
   // if the entityID changes while
@@ -35,7 +41,10 @@ export function ResolverTreeFetcher(
       // calling abort will cause an action to be fired
     } else if (databaseParameters !== null) {
       lastRequestAbortController = new AbortController();
-      let result: ResolverTree | undefined;
+      let entityIDToFetch: string | undefined;
+      let dataSource: string | undefined;
+      let dataSourceSchema: ResolverSchema | undefined;
+      let result: ResolverNode[] | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch({
@@ -45,7 +54,7 @@ export function ResolverTreeFetcher(
       try {
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
           _id: databaseParameters.databaseDocumentID,
-          indices: databaseParameters.indices ?? [],
+          indices: databaseParameters.indices,
           signal: lastRequestAbortController.signal,
         });
         if (matchingEntities.length < 1) {
@@ -56,11 +65,31 @@ export function ResolverTreeFetcher(
           });
           return;
         }
-        const entityIDToFetch = matchingEntities[0].id;
-        result = await dataAccessLayer.resolverTree(
-          entityIDToFetch,
-          lastRequestAbortController.signal
-        );
+        ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
+
+        result = await dataAccessLayer.resolverTree({
+          dataId: entityIDToFetch,
+          schema: dataSourceSchema,
+          timeRange: createRange(),
+          indices: databaseParameters.indices,
+          ancestors: ancestorsRequestAmount(dataSourceSchema),
+          descendants: descendantsRequestAmount(),
+        });
+
+        const resolverTree: NewResolverTree = {
+          originID: entityIDToFetch,
+          nodes: result,
+        };
+
+        api.dispatch({
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema: dataSourceSchema,
+            parameters: databaseParameters,
+          },
+        });
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
@@ -74,15 +103,6 @@ export function ResolverTreeFetcher(
             payload: databaseParameters,
           });
         }
-      }
-      if (result !== undefined) {
-        api.dispatch({
-          type: 'serverReturnedResolverData',
-          payload: {
-            result,
-            parameters: databaseParameters,
-          },
-        });
       }
     }
   };
