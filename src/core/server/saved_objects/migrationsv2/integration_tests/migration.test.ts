@@ -25,37 +25,48 @@ import { getEnvOptions } from '@kbn/config/target/mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { SavedObjectsRawDoc } from '../../serialization';
+import { InternalCoreStart } from '../../../internal_types';
+import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kibanaServer: kbnTestServer.TestKibanaUtils;
+  let root: Root;
+  let coreStart: InternalCoreStart;
   let esClient: ElasticsearchClient;
 
-  const startServers = async (dataArchivePath: string) => {
-    const { startES, startKibana } = kbnTestServer.createTestServers({
+  const startServers = async ({ dataArchive, oss }: { dataArchive: string; oss: boolean }) => {
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'oss',
-          dataArchive: dataArchivePath,
-        },
-        kbn: {
-          migrations: {
-            skip: false,
-            enableV2: true,
-          },
+          license: oss ? 'oss' : 'trial',
+          dataArchive,
         },
       },
     });
+
+    root = kbnTestServer.createRootWithCorePlugins(
+      {
+        migrations: {
+          skip: false,
+          enableV2: true,
+        },
+      },
+      {
+        oss,
+      }
+    );
+
     esServer = await startES();
-    kibanaServer = await startKibana();
-    esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+    await root.setup();
+    coreStart = await root.start();
+    esClient = coreStart.elasticsearch.client.asInternalUser;
   };
 
   const getExpectedVersionPerType = () =>
-    kibanaServer.coreStart.savedObjects
+    coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
       .reduce((versionMap, type) => {
@@ -83,8 +94,8 @@ describe('migration v2', () => {
   };
 
   const stopServers = async () => {
-    if (kibanaServer) {
-      await kibanaServer.stop();
+    if (root) {
+      await root.shutdown();
     }
     if (esServer) {
       await esServer.stop();
@@ -95,7 +106,10 @@ describe('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
-      await startServers(join(__dirname, 'archives', 'sample_data_only_8.0.zip'));
+      await startServers({
+        oss: true,
+        dataArchive: join(__dirname, 'archives', 'sample_data_only_8.0.zip'),
+      });
     });
 
     afterAll(async () => {
