@@ -11325,7 +11325,6 @@
     "xpack.maps.source.emsTile.settingsTitle": "Basemap",
     "xpack.maps.source.emsTileDescription": "Elastic 地图服务的地图磁贴",
     "xpack.maps.source.emsTileTitle": "磁贴",
-    "xpack.maps.source.esAggSource.topTermLabel": "热门{fieldName}",
     "xpack.maps.source.esGeoGrid.geofieldLabel": "地理空间字段",
     "xpack.maps.source.esGeoGrid.geofieldPlaceholder": "选择地理字段",
     "xpack.maps.source.esGeoGrid.gridRectangleDropdownOption": "网格",
