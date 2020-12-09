@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { moment } from 'moment';
+import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
