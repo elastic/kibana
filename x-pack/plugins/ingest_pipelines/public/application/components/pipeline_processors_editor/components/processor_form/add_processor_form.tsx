@@ -52,11 +52,11 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
       defaultMessage="Configure on-failure processor"
     />
   ) : (
-      <FormattedMessage
-        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
-        defaultMessage="Configure processor"
-      />
-    );
+    <FormattedMessage
+      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
+      defaultMessage="Configure processor"
+    />
+  );
 };
 
 export const AddProcessorForm: FunctionComponent<Props> = ({
