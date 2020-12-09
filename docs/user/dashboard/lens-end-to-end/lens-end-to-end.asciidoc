@@ -17,7 +17,6 @@ You’ll be able to respond to some key questions regarding website traffic:
 * What's the percentage of small vs big files transfer?
 * How does website traffic look like hour by hour?
 * Where does the traffic come from for top three countries?
-// * What’s the traffic distribution of my visitors by operating system in custom defined key countries?
 
 By the end of this tutorial you will have a good working knowledge of how to use Lens to work on your data. 
 
@@ -80,9 +79,6 @@ The steps above already give you a fully configured donut chart, but let's go a 
 
 [role="screenshot"]
 image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
-
-
-
 
 [float]
 [[mixed-multiaxis]]
@@ -216,7 +212,7 @@ image::images/lens_end_to_end_5_2.png[Create custom ranges]
 
 [float]
 [[custom-ranges]]
-====  What's the percentage of small vs big files transfer? Pie chart
+====  What's the percentage of small vs big files transfer? A pie chart
 
 Another interesting option for *intervals* function is using custom ranges. Let's say you want to compare what's the percentage of small (<10KB) and big (>=10KB) files in over traffic on your page. _Side note: you can also use filters function to achieve the same result with KQL/Lucene filters_
 
@@ -275,7 +271,7 @@ image::images/lens_end_to_end_7_3.png[Group other values as Other]
 
 ==== The result dashboard
 
-Here's the final result after some repositioning and rescaling some visualizations:
+Here's the final result after repositioning and rescaling some of the visualizations:
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis] 
