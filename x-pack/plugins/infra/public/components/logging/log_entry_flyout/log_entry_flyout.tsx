@@ -27,7 +27,7 @@ import { LogEntryFieldsTable } from './log_entry_fields_table';
 
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
-  onCloseFlyout?: () => void;
+  onCloseFlyout: () => void;
   onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
   sourceId: string | null | undefined;
 }
@@ -58,7 +58,7 @@ export const LogEntryFlyout = ({
   }, [fetchLogEntry, sourceId, logEntryId]);
 
   return (
-    <EuiFlyout onClose={onCloseFlyout ?? noop} size="m">
+    <EuiFlyout onClose={onCloseFlyout} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -140,5 +140,3 @@ const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMess
 const loadingErrorCalloutTitle = i18n.translate('xpack.infra.logFlyout.loadingErrorCalloutTitle', {
   defaultMessage: 'Error while searching the log entry',
 });
-
-const noop = () => {};
