@@ -23,6 +23,7 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
+import { removeArchiveEntries } from '../archive/save_to_es';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -48,7 +49,7 @@ export async function removeInstallation(options: {
       `unable to remove package with existing package policy(s) in use by agent(s)`
     );
 
-  // Delete the installed assets
+  // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
   await deleteAssets(installation, savedObjectsClient, callCluster);
 
@@ -66,8 +67,9 @@ export async function removeInstallation(options: {
   deletePackageCache({
     name: pkgName,
     version: pkgVersion,
-    installSource: installation.install_source,
   });
+
+  await removeArchiveEntries({ savedObjectsClient, refs: installation.package_assets });
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;

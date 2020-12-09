@@ -10,8 +10,9 @@ import { migratePackagePolicyToV7110 } from './to_v7_11.0';
 
 describe('7.11.0 Endpoint Package Policy migration', () => {
   const migration = migratePackagePolicyToV7110;
-  it('adds malware notification checkbox and optional message', () => {
+  it('adds malware notification checkbox and optional message and adds AV registration config', () => {
     const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+      id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -77,6 +78,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
+                    antivirus_registration: { enabled: false },
                     popup: {
                       malware: {
                         message: '',
@@ -99,11 +101,13 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         ],
       },
       type: ' nested',
+      id: 'mock-saved-object-id',
     });
   });
 
   it('does not modify non-endpoint package policies', () => {
     const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+      id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -163,6 +167,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         ],
       },
       type: ' nested',
+      id: 'mock-saved-object-id',
     });
   });
 });

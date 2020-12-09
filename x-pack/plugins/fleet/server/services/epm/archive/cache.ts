@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ArchiveEntry } from './index';
-import { InstallSource, ArchivePackage, RegistryPackage } from '../../../../common';
+import { ArchivePackage, RegistryPackage } from '../../../../common';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -16,7 +16,6 @@ export const deleteArchiveEntry = (key: string) => archiveEntryCache.delete(key)
 export interface SharedKey {
   name: string;
   version: string;
-  installSource: InstallSource;
 }
 type SharedKeyString = string;
 
@@ -31,18 +30,10 @@ export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.delete(sharedKey(keyArgs));
 
 const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
-const sharedKey = ({ name, version, installSource }: SharedKey) =>
-  `${name}-${version}-${installSource}`;
+const sharedKey = ({ name, version }: SharedKey) => `${name}-${version}`;
 
 export const getPackageInfo = (args: SharedKey) => {
-  const packageInfo = packageInfoCache.get(sharedKey(args));
-  if (args.installSource === 'registry') {
-    return packageInfo as RegistryPackage;
-  } else if (args.installSource === 'upload') {
-    return packageInfo as ArchivePackage;
-  } else {
-    throw new Error(`Unknown installSource: ${args.installSource}`);
-  }
+  return packageInfoCache.get(sharedKey(args));
 };
 
 export const getArchivePackage = (args: SharedKey) => {
@@ -57,10 +48,9 @@ export const getArchivePackage = (args: SharedKey) => {
 export const setPackageInfo = ({
   name,
   version,
-  installSource,
   packageInfo,
 }: SharedKey & { packageInfo: ArchivePackage | RegistryPackage }) => {
-  const key = sharedKey({ name, version, installSource });
+  const key = sharedKey({ name, version });
   return packageInfoCache.set(key, packageInfo);
 };
 

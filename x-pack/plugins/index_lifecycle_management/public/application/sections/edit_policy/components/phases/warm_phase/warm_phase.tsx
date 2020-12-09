@@ -4,30 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { EuiSpacer, EuiDescribedFormGroup } from '@elastic/eui';
+import { EuiSpacer, EuiDescribedFormGroup, EuiAccordion } from '@elastic/eui';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { Phases } from '../../../../../../../common/types';
 
+import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useConfigurationIssues } from '../../../form';
+
+import { ActiveBadge, DescribedFormRow } from '../../';
+
 import {
   useRolloverPath,
   MinAgeInputField,
-  Forcemerge,
-  SetPriorityInput,
+  ForcemergeField,
+  SetPriorityInputField,
+  DataTierAllocationField,
   ShrinkField,
 } from '../shared_fields';
-
-import { useEditPolicyContext } from '../../../edit_policy_context';
-
-import { ActiveBadge, DescribedFormField } from '../../';
-
-import { DataTierAllocationField } from '../shared_fields';
 
 const i18nTexts = {
   dataTierAllocation: {
@@ -46,6 +46,7 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
@@ -71,7 +72,7 @@ export const WarmPhase: FunctionComponent = () => {
           }
           titleSize="s"
           description={
-            <Fragment>
+            <>
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
@@ -90,13 +91,13 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </Fragment>
+            </>
           }
           fullWidth
         >
-          <Fragment>
+          <>
             {enabled && (
-              <Fragment>
+              <>
                 {hotPhaseRolloverEnabled && (
                   <UseField
                     path={formFieldPaths.warmPhaseOnRollover}
@@ -115,20 +116,23 @@ export const WarmPhase: FunctionComponent = () => {
                     <MinAgeInputField phase="warm" />
                   </>
                 )}
-              </Fragment>
+              </>
             )}
-          </Fragment>
+          </>
         </EuiDescribedFormGroup>
 
         {enabled && (
-          <Fragment>
-            {/* Data tier allocation section */}
-            <DataTierAllocationField
-              description={i18nTexts.dataTierAllocation.description}
-              phase={warmProperty}
-            />
-
-            <DescribedFormField
+          <EuiAccordion
+            id="ilmWarmPhaseAdvancedSettings"
+            buttonContent={i18n.translate(
+              'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
+              {
+                defaultMessage: 'Advanced settings',
+              }
+            )}
+            paddingSize="m"
+          >
+            <DescribedFormRow
               title={
                 <h3>
                   {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
@@ -149,7 +153,7 @@ export const WarmPhase: FunctionComponent = () => {
                   'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
                 ),
-                initialValue: Boolean(policy.phases.warm?.actions?.allocate?.number_of_replicas),
+                initialValue: policy.phases.warm?.actions?.allocate?.number_of_replicas != null,
               }}
               fullWidth
             >
@@ -164,14 +168,18 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </DescribedFormField>
+            </DescribedFormRow>
 
-            <ShrinkField phase="warm" />
+            {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
-            <Forcemerge phase="warm" />
-
-            <SetPriorityInput phase="warm" />
-          </Fragment>
+            {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={i18nTexts.dataTierAllocation.description}
+              phase={warmProperty}
+            />
+            <SetPriorityInputField phase="warm" />
+          </EuiAccordion>
         )}
       </>
     </div>

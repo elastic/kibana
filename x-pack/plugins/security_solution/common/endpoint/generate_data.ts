@@ -317,6 +317,8 @@ export interface Tree {
    * All events from children, ancestry, origin, and the alert in a single array
    */
   allEvents: Event[];
+  startTime: Date;
+  endTime: Date;
 }
 
 export interface TreeOptions {
@@ -529,6 +531,7 @@ export class EndpointDocGenerator {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
+        code: 'malicious_file',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -718,6 +721,35 @@ export class EndpointDocGenerator {
     };
   }
 
+  private static getStartEndTimes(events: Event[]): { startTime: Date; endTime: Date } {
+    let startTime: number;
+    let endTime: number;
+    if (events.length > 0) {
+      startTime = timestampSafeVersion(events[0]) ?? new Date().getTime();
+      endTime = startTime;
+    } else {
+      startTime = new Date().getTime();
+      endTime = startTime;
+    }
+
+    for (const event of events) {
+      const eventTimestamp = timestampSafeVersion(event);
+      if (eventTimestamp !== undefined) {
+        if (eventTimestamp < startTime) {
+          startTime = eventTimestamp;
+        }
+
+        if (eventTimestamp > endTime) {
+          endTime = eventTimestamp;
+        }
+      }
+    }
+    return {
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    };
+  }
+
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
@@ -815,12 +847,17 @@ export class EndpointDocGenerator {
     const childrenByParent = groupNodesByParent(childrenNodes);
     const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
+    const allEvents = [...ancestry, ...children];
+    const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
+
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
-      allEvents: [...ancestry, ...children],
+      allEvents,
       origin,
       childrenLevels: levels,
+      startTime,
+      endTime,
     };
   }
 
@@ -1262,7 +1299,7 @@ export class EndpointDocGenerator {
       title: 'Elastic Endpoint',
       version: '0.5.0',
       description: 'This is the Elastic Endpoint package.',
-      type: 'solution',
+      type: 'integration',
       download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
       path: '/package/endpoint/0.5.0',
       icons: [
@@ -1274,6 +1311,7 @@ export class EndpointDocGenerator {
         },
       ],
       status: 'installed',
+      release: 'ga',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
@@ -1300,6 +1338,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',
