@@ -7,7 +7,6 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState, useCallback } from 'react';
-import { HttpHandler } from 'src/core/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../../../common/graphql/types';
 import {
@@ -30,11 +29,10 @@ export function useMetricsExplorerData(
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null | Record<string, string | null>,
   signal: any,
-  fetch?: HttpHandler,
   shouldLoadImmediately = true
 ) {
   const kibana = useKibana();
-  const fetchFn = fetch ? fetch : kibana.services.http?.fetch;
+  const fetchFn = kibana.services.http?.fetch;
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<MetricsExplorerResponse | null>(null);

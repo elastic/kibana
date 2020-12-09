@@ -26,6 +26,7 @@ import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kiban
 import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
+import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -82,6 +83,9 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
                 title={feature.title}
                 url={addBasePath(feature.path)}
                 wrapInPanel
+                onClick={() => {
+                  trackUiMetric(METRIC_TYPE.CLICK, `ingest_data_card_${feature.id}`);
+                }}
               />
             </RedirectAppLinks>
           </EuiFlexItem>

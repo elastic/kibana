@@ -4,6 +4,7 @@
 
 ## HttpServerInfo interface
 
+Information about what hostname, port, and protocol the server process is running on. Note that this may not match the URL that end-users access Kibana at. For the public URL, see [BasePath.publicBaseUrl](./kibana-plugin-core-server.basepath.publicbaseurl.md)<!-- -->.
 
 <b>Signature:</b>
 
