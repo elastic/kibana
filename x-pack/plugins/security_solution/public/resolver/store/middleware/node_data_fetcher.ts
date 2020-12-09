@@ -10,6 +10,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
+import { createRange } from './../../models/time_range';
 
 /**
  * Max number of nodes to request from the server
@@ -57,22 +58,11 @@ export function NodeDataFetcher(
       },
     });
 
-    // TODO: Get timeline from selector. @kqualters
-    const today = new Date();
-    const from = new Date();
-    from.setDate(today.getDate() - 2);
-    const to = new Date();
-    to.setDate(today.getDate() + 14);
-    const timeRange = {
-      from,
-      to,
-    };
-
     let results: SafeResolverEvent[] | undefined;
     try {
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timeRange,
+        timeRange: createRange(),
         indexPatterns: indices,
         limit: nodeDataLimit,
       });

@@ -11,6 +11,7 @@ import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
+import { createRange } from './../../models/time_range';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
@@ -41,16 +42,6 @@ export function RelatedEventsFetcher(
       eventCategory: string;
       cursor: string | null;
     }) {
-      // TODO: Get timeline from selector. @kqualters
-      const today = new Date();
-      const from = new Date();
-      from.setDate(today.getDate() - 2);
-      const to = new Date();
-      to.setDate(today.getDate() + 14);
-      const timeRange = {
-        from,
-        to,
-      };
       let result: ResolverPaginatedEvents | null = null;
       try {
         if (cursor) {
@@ -59,14 +50,14 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             after: cursor,
             indexPatterns: indices,
-            timeRange,
+            timeRange: createRange(),
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
             entityID: nodeID,
             category: eventCategory,
             indexPatterns: indices,
-            timeRange,
+            timeRange: createRange(),
           });
         }
       } catch (error) {
