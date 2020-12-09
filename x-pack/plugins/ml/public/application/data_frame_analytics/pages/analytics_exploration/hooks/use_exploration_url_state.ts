@@ -19,6 +19,7 @@ export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
     evaluation: true,
     feature_importance: true,
     results: true,
+    splom: true,
   };
 }
 

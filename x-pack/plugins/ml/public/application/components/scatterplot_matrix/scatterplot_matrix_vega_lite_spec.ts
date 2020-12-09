@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TopLevelSpec } from 'vega-lite';
+// There is still an issue with Vega Lite's typings with the strict mode we're using.
+// @ts-ignore
+import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
 export type LegendType = 'nominal' | 'quantitative';
+
+const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
   if (outliers) {
     return {
       condition: {
         value: '#bd271e',
-        test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
       },
       value: 'gray',
     };
@@ -39,8 +43,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
     as: column,
   }));
   transform.push({
-    calculate: `datum['ml.outlier_score']`,
-    as: 'outlier_score',
+    calculate: `datum['ml.${OUTLIER_SCORE_FIELD}']`,
+    as: OUTLIER_SCORE_FIELD,
   });
 
   return {
@@ -68,7 +72,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
             ? {
                 condition: {
                   value: 0.75,
-                  test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+                  test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
                 },
                 value: 0.25,
               }
@@ -78,7 +82,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
           ...(outliers && dynamicSize
             ? {
                 type: 'quantitative',
-                field: 'outlier_score',
+                field: OUTLIER_SCORE_FIELD,
                 scale: {
                   type: 'linear',
                   range: [2, 100],
@@ -87,12 +91,12 @@ export const getScatterplotMatrixVegaLiteSpec = (
               }
             : { value: 2 }),
         },
-        tooltip: { type: 'quantitative', field: 'outlier_score' },
+        tooltip: { type: 'quantitative', field: OUTLIER_SCORE_FIELD },
         x: { type: 'quantitative', field: { repeat: 'column' } },
         y: { type: 'quantitative', field: { repeat: 'row' } },
         ...(outliers
           ? {
-              order: { field: 'outlier_score' },
+              order: { field: OUTLIER_SCORE_FIELD },
             }
           : {}),
       },

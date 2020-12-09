@@ -6,8 +6,10 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import * as vegaLite from 'vega-lite';
-import * as vega from 'vega';
+// There is still an issue with Vega Lite's typings with the strict mode we're using.
+// @ts-ignore
+import { compile } from 'vega-lite/build-es5/vega-lite';
+import { parse, View, Warn } from 'vega';
 import { Handler } from 'vega-tooltip';
 
 import {
@@ -173,10 +175,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       dynamicSize
     );
 
-    const vgSpec = vegaLite.compile(vegaSpec).spec;
+    const vgSpec = compile(vegaSpec).spec;
 
-    const view = new vega.View(vega.parse(vgSpec))
-      .logLevel(vega.Warn) // set view logging level
+    const view = new View(parse(vgSpec))
+      .logLevel(Warn) // set view logging level
       .renderer('canvas') // set render type (defaults to 'canvas')
       .tooltip(new Handler().call)
       .initialize(`#${htmlId}`); // set parent DOM element
