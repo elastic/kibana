@@ -119,7 +119,7 @@ export class HttpServer {
     await this.server.register([HapiStaticFiles]);
     this.config = config;
 
-    const basePathService = new BasePath(config.basePath);
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupRequestStateAssignment(config);
