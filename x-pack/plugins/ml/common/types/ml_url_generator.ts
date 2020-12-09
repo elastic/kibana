@@ -60,6 +60,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
   | typeof ML_PAGES.CALENDARS_NEW
@@ -175,6 +176,7 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 >;
 
 export interface DataFrameAnalyticsQueryState {
+  analysisType?: DataFrameAnalysisConfigType;
   jobId?: JobId | JobId[];
   modelId?: string;
   groupIds?: string[];
@@ -182,7 +184,9 @@ export interface DataFrameAnalyticsQueryState {
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
-  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
   DataFrameAnalyticsQueryState | undefined
 >;
 

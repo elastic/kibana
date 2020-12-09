@@ -36,6 +36,7 @@ monaco.languages.setMonarchTokensProvider(XJsonLang.ID, XJsonLang.lexerRules);
 monaco.languages.setLanguageConfiguration(XJsonLang.ID, XJsonLang.languageConfiguration);
 monaco.languages.register({ id: PainlessLang.ID });
 monaco.languages.setMonarchTokensProvider(PainlessLang.ID, PainlessLang.lexerRules);
+monaco.languages.setLanguageConfiguration(PainlessLang.ID, PainlessLang.languageConfiguration);
 monaco.languages.register({ id: EsqlLang.ID });
 monaco.languages.setMonarchTokensProvider(EsqlLang.ID, EsqlLang.lexerRules);
 
