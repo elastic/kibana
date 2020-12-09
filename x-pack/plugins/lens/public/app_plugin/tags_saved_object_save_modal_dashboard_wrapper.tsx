@@ -5,27 +5,32 @@
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
+import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import {
-  OriginSaveModalProps,
-  SavedObjectSaveModalOrigin,
-  OnSaveProps,
-  SaveModalState,
-} from '../../../../../src/plugins/saved_objects/public';
+  DashboardSaveModalProps,
+  SavedObjectSaveModalDashboard,
+} from '../../../../../src/plugins/presentation_util/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
-export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
-
-export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalProps, 'onSave'> & {
-  initialTags: string[];
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: OriginSaveProps) => void;
+export type DashboardSaveProps = OnSaveProps & {
+  returnToOrigin: boolean;
+  dashboardId?: string | null;
+  newTags?: string[];
 };
 
-export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSaveModalOriginProps> = ({
+export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
+  DashboardSaveModalProps,
+  'onSave'
+> & {
+  initialTags: string[];
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  onSave: (props: DashboardSaveProps) => void;
+};
+
+export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
   initialTags,
   onSave,
   savedObjectsTagging,
-  options,
   ...otherProps
 }) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
@@ -41,27 +46,13 @@ export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSav
     [savedObjectsTagging, initialTags]
   );
 
-  const tagEnhancedOptions =
-    typeof options === 'function' ? (
-      (state: SaveModalState) => {
-        return (
-          <>
-            {tagSelectorOption}
-            {options(state)}
-          </>
-        );
-      }
-    ) : (
-      <>
-        {tagSelectorOption}
-        {options}
-      </>
-    );
+  const tagEnhancedOptions = <>{tagSelectorOption}</>;
 
-  const tagEnhancedOnSave: OriginSaveModalProps['onSave'] = useCallback(
+  const tagEnhancedOnSave: DashboardSaveModalProps['onSave'] = useCallback(
     (saveOptions) => {
       onSave({
         ...saveOptions,
+        returnToOrigin: false,
         newTags: selectedTags,
       });
     },
@@ -69,10 +60,10 @@ export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSav
   );
 
   return (
-    <SavedObjectSaveModalOrigin
+    <SavedObjectSaveModalDashboard
       {...otherProps}
       onSave={tagEnhancedOnSave}
-      options={tagEnhancedOptions}
+      tagOptions={tagEnhancedOptions}
     />
   );
 };
