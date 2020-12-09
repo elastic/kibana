@@ -43,7 +43,7 @@ export interface ExceptionList extends ExceptionListSchema {
   totalItems: number;
 }
 
-export interface UseExceptionListSuccess {
+export interface UseExceptionListItemsSuccess {
   exceptions: ExceptionListItemSchema[];
   pagination: Pagination;
 }
@@ -57,7 +57,7 @@ export interface UseExceptionListProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   matchFilters: boolean;
-  onSuccess?: (arg: UseExceptionListSuccess) => void;
+  onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
 }
 
 export interface ExceptionListIdentifiers {
@@ -97,7 +97,29 @@ export interface ApiCallFindListsItemsMemoProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   onError: (arg: string[]) => void;
-  onSuccess: (arg: UseExceptionListSuccess) => void;
+  onSuccess: (arg: UseExceptionListItemsSuccess) => void;
+}
+
+export interface ApiCallFetchExceptionListsProps {
+  http: HttpStart;
+  namespaceType: NamespaceType;
+  pagination: Partial<Pagination>;
+  signal: AbortSignal;
+}
+
+export interface UseExceptionListsSuccess {
+  loading: boolean;
+  exceptions: ExceptionListSchema[];
+  pagination: Pagination;
+}
+
+export interface UseExceptionListsProps {
+  http: HttpStart;
+  filterOptions?: FilterExceptionsOptions[];
+  matchFilters?: boolean;
+  onError?: (arg: string[]) => void;
+  onSuccess?: (arg: UseExceptionListsSuccess) => void;
+  pagination?: Pagination;
 }
 
 export interface AddExceptionListProps {

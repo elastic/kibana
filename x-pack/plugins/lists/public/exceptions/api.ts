@@ -15,6 +15,7 @@ import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   createEndpointListSchema,
   createExceptionListItemSchema,
   createExceptionListSchema,
@@ -24,6 +25,7 @@ import {
   exceptionListSchema,
   findExceptionListItemSchema,
   foundExceptionListItemSchema,
+  foundExceptionListSchema,
   readExceptionListItemSchema,
   readExceptionListSchema,
   updateExceptionListItemSchema,
@@ -37,6 +39,7 @@ import {
   AddExceptionListProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
+  ApiCallFetchExceptionListsProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -187,6 +190,58 @@ export const updateExceptionListItem = async ({
       });
 
       const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
+
+      if (errorsResponse != null || validatedResponse == null) {
+        return Promise.reject(errorsResponse);
+      } else {
+        return Promise.resolve(validatedResponse);
+      }
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  } else {
+    return Promise.reject(errorsRequest);
+  }
+};
+
+/**
+ * Fetch all ExceptionLists (optionally by namespaceType)
+ *
+ * @param http Kibana http service
+ * @param namespaceType ExceptionList namespace_type
+ * @param pagination optional
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchExceptionLists = async ({
+  http,
+  namespaceType,
+  pagination,
+  signal,
+}: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
+  const [validatedRequest, errorsRequest] = validate(
+    { namespace_type: namespaceType },
+    readExceptionListSchema
+  );
+
+  const query = {
+    // namespace_type: 'single',
+    page: pagination.page ? `${pagination.page}` : '1',
+    per_page: pagination.perPage ? `${pagination.perPage}` : '20',
+    // sort_field: 'exception-list.created_at',
+    // sort_order: 'desc',
+  };
+
+  if (validatedRequest != null) {
+    try {
+      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
+        method: 'GET',
+        query,
+        signal,
+      });
+
+      const [validatedResponse, errorsResponse] = validate(response, foundExceptionListSchema);
 
       if (errorsResponse != null || validatedResponse == null) {
         return Promise.reject(errorsResponse);

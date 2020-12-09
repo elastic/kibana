@@ -16,7 +16,11 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../saved_objects';
 
 import { getSavedObjectType, transformSavedObjectsToFoundExceptionList } from './utils';
 
@@ -46,7 +50,7 @@ export const findExceptionList = async ({
     perPage,
     sortField,
     sortOrder,
-    type: savedObjectType,
+    type: [exceptionListAgnosticSavedObjectType, exceptionListSavedObjectType],
   });
   return transformSavedObjectsToFoundExceptionList({ savedObjectsFindResponse });
 };

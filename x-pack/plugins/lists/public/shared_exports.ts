@@ -11,7 +11,8 @@ export { useAsync } from './common/hooks/use_async';
 export { useApi } from './exceptions/hooks/use_api';
 export { usePersistExceptionItem } from './exceptions/hooks/persist_exception_item';
 export { usePersistExceptionList } from './exceptions/hooks/persist_exception_list';
-export { useExceptionList } from './exceptions/hooks/use_exception_list';
+export { useExceptionListItems } from './exceptions/hooks/use_exception_list_items';
+export { useExceptionLists } from './exceptions/hooks/use_exception_lists';
 export { useFindLists } from './lists/hooks/use_find_lists';
 export { useImportList } from './lists/hooks/use_import_list';
 export { useDeleteList } from './lists/hooks/use_delete_list';
@@ -32,5 +33,6 @@ export {
   ExceptionList,
   ExceptionListIdentifiers,
   Pagination,
-  UseExceptionListSuccess,
+  UseExceptionListItemsSuccess,
+  UseExceptionListsSuccess,
 } from './exceptions/types';

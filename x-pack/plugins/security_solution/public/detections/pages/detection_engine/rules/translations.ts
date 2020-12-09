@@ -181,6 +181,13 @@ export const ALL_RULES = i18n.translate(
   }
 );
 
+export const ALL_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
+  {
+    defaultMessage: 'Exception Lists',
+  }
+);
+
 export const SEARCH_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchAriaLabel',
   {
@@ -374,7 +381,14 @@ export const RULES_TAB = i18n.translate(
 export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
-    defaultMessage: 'Monitoring',
+    defaultMessage: 'Rule Monitoring',
+  }
+);
+
+export const EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
+  {
+    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -589,3 +603,23 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
     defaultMessage: 'Refresh settings',
   }
 );
+
+export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.search.placeholder',
+  {
+    defaultMessage: 'Search exception lists',
+  }
+);
+
+export const NO_EXCEPTION_LISTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.filters.noExceptionsTitle',
+  {
+    defaultMessage: 'No exception lists found',
+  }
+);
+
+export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
+    values: { totalLists },
+    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
+  });
