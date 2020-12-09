@@ -83,20 +83,7 @@ export class Listing extends PureComponent {
         field: 'isOnline',
         width: '175px',
         sortable: true,
-        render: () => {
-          return (
-            <AlertsStatus
-              showBadge={true}
-              alerts={alerts}
-              nextStepsFilter={(nextStep) => {
-                if (nextStep.text.includes('Logstash nodes')) {
-                  return false;
-                }
-                return true;
-              }}
-            />
-          );
-        },
+        render: () => <AlertsStatus showBadge={true} alerts={alerts} />,
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {

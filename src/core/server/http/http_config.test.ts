@@ -119,36 +119,104 @@ test('can specify max payload as string', () => {
   expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
 });
 
-test('throws if basepath is missing prepended slash', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: 'foo',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+describe('basePath', () => {
+  test('throws if missing prepended slash', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: 'foo',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if appends a slash', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: '/foo/',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if is an empty string', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: '',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if not specified, but rewriteBasePath is set', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      rewriteBasePath: true,
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
 });
 
-test('throws if basepath appends a slash', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: '/foo/',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-});
+describe('publicBaseUrl', () => {
+  test('throws if invalid HTTP(S) URL', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: '//myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'ftp://myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+  });
 
-test('throws if basepath is an empty string', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: '',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-});
+  test('throws if includes hash, query, or auth', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/?a=b' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/#a' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://user:pass@myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+  });
 
-test('throws if basepath is not specified, but rewriteBasePath is set', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    rewriteBasePath: true,
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  test('throws if basePath and publicBaseUrl are specified, but do not match', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({
+        basePath: '/foo',
+        publicBaseUrl: 'https://myhost.com/',
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] must contain the [basePath]: / !== /foo"`
+    );
+  });
+
+  test('does not throw if valid URL and matches basePath', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com' })).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com/' })).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'https://myhost.com' })).not.toThrow();
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'https://myhost.com/foo', basePath: '/foo' })
+    ).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com:8080' })).not.toThrow();
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com:4/foo', basePath: '/foo' })
+    ).not.toThrow();
+  });
 });
 
 test('accepts only valid uuids for server.uuid', () => {

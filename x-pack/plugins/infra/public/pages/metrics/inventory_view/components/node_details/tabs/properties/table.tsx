@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import {
+  EuiText,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiBasicTable,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { euiStyled } from '../../../../../../../../../observability/public';
 
 interface Row {
   name: string;
@@ -51,15 +53,19 @@ export const Table = (props: Props) => {
         render: (_name: string, item: Row) => {
           return (
             <span>
-              <EuiToolTip
-                content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
-                  defaultMessage: 'View event with filter',
-                })}
-              >
-                <EuiFlexGroup gutterSize={'xs'}>
-                  <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip',
+                      {
+                        defaultMessage: 'View event with filter',
+                      }
+                    )}
+                  >
                     <EuiButtonIcon
-                      color="text"
+                      color="subdued"
+                      size="s"
                       iconType="filter"
                       aria-label={i18n.translate(
                         'xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel',
@@ -69,13 +75,13 @@ export const Table = (props: Props) => {
                       )}
                       onClick={() => onClick(item)}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    {!Array.isArray(item.value) && item.value}
-                    {Array.isArray(item.value) && <ArrayValue values={item.value} />}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiToolTip>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {!Array.isArray(item.value) && item.value}
+                  {Array.isArray(item.value) && <ArrayValue values={item.value} />}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </span>
           );
         },
@@ -86,19 +92,20 @@ export const Table = (props: Props) => {
 
   return (
     <>
-      <TitleWrapper>
-        <EuiText>
-          <h3>{title}</h3>
-        </EuiText>
-      </TitleWrapper>
-      <TableWithoutHeader tableLayout="fixed" compressed columns={columns} items={rows} />
+      <EuiText>
+        <h4>{title}</h4>
+      </EuiText>
+      <EuiSpacer size={'s'} />
+      <TableWithoutHeader
+        tableLayout={'fixed'}
+        compressed
+        responsive={false}
+        columns={columns}
+        items={rows}
+      />
     </>
   );
 };
-
-const TitleWrapper = euiStyled.div`
-  margin-bottom: 10px
-`;
 
 class TableWithoutHeader extends EuiBasicTable {
   renderTableHead() {
@@ -123,7 +130,7 @@ const ArrayValue = (props: MoreProps) => {
   return (
     <>
       {!isExpanded && (
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize={'xs'} responsive={false} alignItems={'baseline'} wrap={true}>
           <EuiFlexItem grow={false}>
             {first(values)}
             {' ... '}
@@ -148,7 +155,7 @@ const ArrayValue = (props: MoreProps) => {
           ))}
           <EuiLink onClick={collapse}>
             {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-              defaultMessage: 'See less',
+              defaultMessage: 'Show less',
             })}
           </EuiLink>
         </div>

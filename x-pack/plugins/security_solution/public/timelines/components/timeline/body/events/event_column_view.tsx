@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import uuid from 'uuid';
 
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { AssociateNote } from '../../../notes/helpers';
+import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';
@@ -30,8 +29,7 @@ import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { inputsModel } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
-
-import { TimelineModel } from '../../../../store/timeline/model';
+import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
 
 interface Props {
   id: string;
@@ -43,11 +41,9 @@ interface Props {
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
-  getNotesByIds: (noteIds: string[]) => Note[];
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
@@ -59,10 +55,7 @@ interface Props {
   showNotes: boolean;
   timelineId: string;
   toggleShowNotes: () => void;
-  updateNote: UpdateNote;
 }
-
-export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
 
@@ -77,11 +70,9 @@ export const EventColumnView = React.memo<Props>(
     ecsData,
     eventIdToNoteIds,
     expanded,
-    getNotesByIds,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
-    onColumnResized,
     onEventToggled,
     onPinEvent,
     onRowSelected,
@@ -93,10 +84,9 @@ export const EventColumnView = React.memo<Props>(
     showNotes,
     timelineId,
     toggleShowNotes,
-    updateNote,
   }) => {
-    const { timelineType, status } = useShallowEqualSelector<TimelineModel>(
-      (state) => state.timeline.timelineById[timelineId]
+    const { timelineType, status } = useDeepEqualSelector((state) =>
+      pick(['timelineType', 'status'], state.timeline.timelineById[timelineId])
     );
 
     const handlePinClicked = useCallback(
@@ -134,11 +124,9 @@ export const EventColumnView = React.memo<Props>(
               <AddEventNoteAction
                 key="add-event-note"
                 associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
                 noteIds={eventIdToNoteIds[id] || emptyNotes}
                 showNotes={showNotes}
                 toggleShowNotes={toggleShowNotes}
-                updateNote={updateNote}
                 status={status}
                 timelineType={timelineType}
               />,
@@ -148,6 +136,19 @@ export const EventColumnView = React.memo<Props>(
                 noteIds={eventIdToNoteIds[id] || emptyNotes}
                 eventIsPinned={isEventPinned}
                 timelineType={timelineType}
+              />,
+            ]
+          : []),
+        ...([
+          TimelineId.detectionsPage,
+          TimelineId.detectionsRulesDetailsPage,
+          TimelineId.active,
+        ].includes(timelineId as TimelineId)
+          ? [
+              <AddToCaseAction
+                key="attach-to-case"
+                ecsRowData={ecsData}
+                disabled={eventType !== 'signal'}
               />,
             ]
           : []),
@@ -166,7 +167,6 @@ export const EventColumnView = React.memo<Props>(
         ecsData,
         eventIdToNoteIds,
         eventType,
-        getNotesByIds,
         handlePinClicked,
         id,
         isEventPinned,
@@ -178,7 +178,6 @@ export const EventColumnView = React.memo<Props>(
         timelineId,
         timelineType,
         toggleShowNotes,
-        updateNote,
       ]
     );
 
@@ -203,7 +202,6 @@ export const EventColumnView = React.memo<Props>(
           columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
-          onColumnResized={onColumnResized}
           timelineId={timelineId}
         />
       </EventsTrData>

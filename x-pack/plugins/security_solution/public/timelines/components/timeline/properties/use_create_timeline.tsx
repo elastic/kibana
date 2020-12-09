@@ -15,28 +15,26 @@ import {
   TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-export const useCreateTimelineButton = ({
-  timelineId,
-  timelineType,
-  closeGearMenu,
-}: {
+interface Props {
   timelineId?: string;
   timelineType: TimelineTypeLiteral;
   closeGearMenu?: () => void;
-}) => {
+}
+
+export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
   const existingIndexNamesSelector = useMemo(
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
     []
   );
-  const existingIndexNames = useShallowEqualSelector<string[]>(existingIndexNamesSelector);
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
   const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
-  const globalTimeRange = useShallowEqualSelector(inputsSelectors.globalTimeRangeSelector);
+  const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
       if (id === TimelineId.active && timelineFullScreen) {
@@ -85,12 +83,22 @@ export const useCreateTimelineButton = ({
     ]
   );
 
-  const handleButtonClick = useCallback(() => {
+  const handleCreateNewTimeline = useCallback(() => {
     createTimeline({ id: timelineId, show: true, timelineType });
     if (typeof closeGearMenu === 'function') {
       closeGearMenu();
     }
   }, [createTimeline, timelineId, timelineType, closeGearMenu]);
+
+  return handleCreateNewTimeline;
+};
+
+export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMenu }: Props) => {
+  const handleCreateNewTimeline = useCreateTimeline({
+    timelineId,
+    timelineType,
+    closeGearMenu,
+  });
 
   const getButton = useCallback(
     ({
@@ -108,11 +116,12 @@ export const useCreateTimelineButton = ({
     }) => {
       const buttonProps = {
         iconType,
-        onClick: handleButtonClick,
+        onClick: handleCreateNewTimeline,
         fill,
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
+
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}
@@ -123,7 +132,7 @@ export const useCreateTimelineButton = ({
         </EuiButtonEmpty>
       );
     },
-    [handleButtonClick, timelineType]
+    [handleCreateNewTimeline, timelineType]
   );
 
   return { getButton };
