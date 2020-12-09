@@ -81,6 +81,20 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     });
   });
 
+  it('should display the legend and schema popover buttons', async () => {
+    await expect(
+      simulator.map(() => ({
+        schemaInfoButton: simulator.testSubject('resolver:graph-controls:schema-info-button')
+          .length,
+        nodeLegendButton: simulator.testSubject('resolver:graph-controls:node-legend-button')
+          .length,
+      }))
+    ).toYieldEqualTo({
+      schemaInfoButton: 1,
+      nodeLegendButton: 1,
+    });
+  });
+
   it("should show the origin node in it's original position", async () => {
     await expect(originNodeStyle()).toYieldObjectEqualTo(originalPositionStyle);
   });
@@ -216,6 +230,68 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
       await expect(originNodeStyle()).toYieldObjectEqualTo({
         width: '201.60000000000002px',
         height: '67.2px',
+      });
+    });
+  });
+
+  describe('when the schema information button is clicked', () => {
+    beforeEach(async () => {
+      (await simulator.resolve('resolver:graph-controls:schema-info-button'))!.simulate('click', {
+        button: 0,
+      });
+    });
+
+    it('should show the schema information table with the expected values', async () => {
+      await expect(
+        simulator.map(() =>
+          simulator
+            .testSubject('resolver:graph-controls:schema-info:description')
+            .map((description) => description.text())
+        )
+      ).toYieldEqualTo(['endpoint', 'process.entity_id', 'process.parent.entity_id']);
+    });
+  });
+
+  describe('when the node legend button is clicked', () => {
+    beforeEach(async () => {
+      (await simulator.resolve('resolver:graph-controls:node-legend-button'))!.simulate('click', {
+        button: 0,
+      });
+    });
+
+    it('should show the node legend table with the expected values', async () => {
+      await expect(
+        simulator.map(() =>
+          simulator
+            .testSubject('resolver:graph-controls:node-legend:description')
+            .map((description) => description.text())
+        )
+      ).toYieldEqualTo(['Running Process', 'Terminated Process', 'Loading Process', 'Error']);
+    });
+  });
+
+  describe('when the node legend button is clicked while the schema info button is open', () => {
+    beforeEach(async () => {
+      (await simulator.resolve('resolver:graph-controls:schema-info-button'))!.simulate('click', {
+        button: 0,
+      });
+    });
+
+    it('should close the schema information table and open the node legend table', async () => {
+      expect(simulator.testSubject('resolver:graph-controls:schema-info').length).toBe(1);
+
+      await simulator
+        .testSubject('resolver:graph-controls:node-legend-button')!
+        .simulate('click', { button: 0 });
+
+      await expect(
+        simulator.map(() => ({
+          nodeLegend: simulator.testSubject('resolver:graph-controls:node-legend').length,
+          schemaInfo: simulator.testSubject('resolver:graph-controls:schema-info').length,
+        }))
+      ).toYieldObjectEqualTo({
+        nodeLegend: 1,
+        schemaInfo: 0,
       });
     });
   });

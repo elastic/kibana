@@ -6,7 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { CommentRequestUserType } from '../../../../case/common/api';
+import { CommentRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
 import { postComment } from './api';
@@ -42,10 +42,10 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 };
 
 export interface UsePostComment extends NewCommentState {
-  postComment: (data: CommentRequestUserType, updateCase: (newCase: Case) => void) => void;
+  postComment: (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => void;
 }
 
-export const usePostComment = (caseId: string): UsePostComment => {
+export const usePostComment = (): UsePostComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -53,7 +53,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
   const [, dispatchToaster] = useStateToaster();
 
   const postMyComment = useCallback(
-    async (data: CommentRequestUserType, updateCase: (newCase: Case) => void) => {
+    async (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => {
       let cancel = false;
       const abortCtrl = new AbortController();
 
@@ -62,7 +62,9 @@ export const usePostComment = (caseId: string): UsePostComment => {
         const response = await postComment(data, caseId, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS' });
-          updateCase(response);
+          if (updateCase) {
+            updateCase(response);
+          }
         }
       } catch (error) {
         if (!cancel) {
@@ -79,8 +81,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
         cancel = true;
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseId]
+    [dispatchToaster]
   );
 
   return { ...state, postComment: postMyComment };
