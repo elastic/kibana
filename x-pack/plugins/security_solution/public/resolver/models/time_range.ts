@@ -9,6 +9,8 @@ import { TimeRange } from '../types';
 /**
  * This is the maximum millisecond value that can be used with a Date object. If you use a number greater than this it
  * will result in an invalid date.
+ *
+ * See https://stackoverflow.com/questions/11526504/minimum-and-maximum-date for more details.
  */
 export const maxDate = 8640000000000000;
 
