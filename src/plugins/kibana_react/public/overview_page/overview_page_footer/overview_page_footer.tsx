@@ -51,7 +51,7 @@ export const OverviewPageFooter: FC<Props> = ({
   } = useKibana<CoreStart>();
 
   const { show, save } = application.capabilities.advancedSettings;
-  const isAdvancedSettingsEnabled = show && save;
+  if (!show && !save) return <></>;
 
   const defaultRoutebutton = defaultRoute.includes(path) ? (
     <RedirectAppLinks application={application}>
@@ -98,18 +98,13 @@ export const OverviewPageFooter: FC<Props> = ({
     </EuiButtonEmpty>
   );
 
-  let kbnOverviewFooter;
-  if (isAdvancedSettingsEnabled) {
-    kbnOverviewFooter = (
-      <footer className="kbnOverviewPageFooter">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <div>{defaultRoutebutton}</div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </footer>
-    );
-  }
-
-  return kbnOverviewFooter;
+  return (
+    <footer className="kbnOverviewPageFooter">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <div>{defaultRoutebutton}</div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </footer>
+  );
 };
