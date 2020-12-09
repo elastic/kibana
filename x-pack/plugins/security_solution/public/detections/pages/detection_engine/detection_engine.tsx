@@ -152,7 +152,7 @@ const DetectionEnginePageComponent = () => {
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
+      <NoWriteAlertsCallOut />
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />

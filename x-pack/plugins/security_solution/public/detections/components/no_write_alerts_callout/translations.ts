@@ -21,6 +21,7 @@ export const NO_WRITE_ALERTS_CALLOUT_MSG = i18n.translate(
   }
 );
 
+// TODO: del
 export const DISMISS_CALLOUT = i18n.translate(
   'xpack.securitySolution.detectionEngine.dismissNoWriteAlertButton',
   {

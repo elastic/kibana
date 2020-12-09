@@ -155,7 +155,7 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ReadOnlyCallOut />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}

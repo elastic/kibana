@@ -427,8 +427,8 @@ const RuleDetailsPageComponent = () => {
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <NoWriteAlertsCallOut />
+      <ReadOnlyCallOut />
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />

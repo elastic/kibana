@@ -4,33 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useMessagesStorage } from '../../../../common/containers/local_storage/use_messages_storage';
+import React, { memo } from 'react';
+import { CallOutMessage, CallOutSwitcher } from '../../callouts';
+import { useUserData } from '../../user_info';
 
 import * as i18n from './translations';
 
-const MESSAGE_PLUGIN = 'security-detections';
-const MESSAGE_ID = 'dismiss-ReadOnlyCallOut';
+const readOnlyAccessToRulesMessage: CallOutMessage = {
+  type: 'primary',
+  id: 'read-only-access-to-rules',
+  title: i18n.READ_ONLY_CALLOUT_TITLE,
+  description: <>{i18n.READ_ONLY_CALLOUT_MSG}</>,
+};
 
 const ReadOnlyCallOutComponent = () => {
-  const { addMessage, hasMessage } = useMessagesStorage();
+  const [{ canUserCRUD }] = useUserData();
 
-  const wasDismissed = useMemo<boolean>(() => hasMessage(MESSAGE_PLUGIN, MESSAGE_ID), [hasMessage]);
-
-  const [isVisible, setIsVisible] = useState<boolean>(!wasDismissed);
-
-  const dismiss = useCallback(() => {
-    setIsVisible(false);
-    addMessage(MESSAGE_PLUGIN, MESSAGE_ID);
-  }, [setIsVisible, addMessage]);
-
-  return isVisible ? (
-    <EuiCallOut title={i18n.READ_ONLY_CALLOUT_TITLE} iconType="iInCircle">
-      <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>
-      <EuiButton onClick={dismiss}>{i18n.DISMISS_CALLOUT}</EuiButton>
-    </EuiCallOut>
-  ) : null;
+  return (
+    <CallOutSwitcher
+      namespace="detections"
+      condition={canUserCRUD != null && !canUserCRUD}
+      message={readOnlyAccessToRulesMessage}
+    />
+  );
 };
 
 export const ReadOnlyCallOut = memo(ReadOnlyCallOutComponent);
