@@ -7,7 +7,7 @@
 import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { wait } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
@@ -70,7 +70,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await wait(() => {
+    await waitFor(() => {
       wrapper.update();
       expect(wrapper.find('input[name="name"]')).toHaveLength(1);
     });
@@ -132,7 +132,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await wait(() => {
+    await waitFor(() => {
       wrapper.update();
       expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
     });
@@ -185,7 +185,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await wait(() => {
+    await waitFor(() => {
       wrapper.update();
       expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
         title: 'Error loading available features',
@@ -223,7 +223,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await wait(() => {
+    await waitFor(() => {
       wrapper.update();
       expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
     });
@@ -285,7 +285,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await wait(() => {
+    await waitFor(() => {
       wrapper.update();
       expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
     });

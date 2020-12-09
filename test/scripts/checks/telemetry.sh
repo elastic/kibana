@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:telemetryCheck
+checks-reporter-with-killswitch "Check Telemetry Schema" \
+  node scripts/telemetry_check

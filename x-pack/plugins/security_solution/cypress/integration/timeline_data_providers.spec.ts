@@ -24,7 +24,9 @@ import { closeTimeline, createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('timeline data providers', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/85098
+// FLAKY: https://github.com/elastic/kibana/issues/62060
+describe.skip('timeline data providers', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
