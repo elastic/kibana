@@ -35,19 +35,28 @@ export const destSchema = schema.object({
   index: schema.string(),
   pipeline: schema.maybe(schema.string()),
 });
+
 export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
 });
+
+export const latestFunctionSchema = schema.object({
+  unique_key: schema.arrayOf(schema.string()),
+  sort: schema.string(),
+});
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
+
 export const sourceSchema = schema.object({
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
+
 export const syncSchema = schema.object({
   time: schema.object({
     delay: schema.maybe(schema.string()),
@@ -56,18 +65,37 @@ export const syncSchema = schema.object({
 });
 
 // PUT transforms/{transformId}
-export const putTransformsRequestSchema = schema.object({
-  description: schema.maybe(schema.string()),
-  dest: destSchema,
-  frequency: schema.maybe(schema.string()),
-  pivot: pivotSchema,
-  settings: schema.maybe(settingsSchema),
-  source: sourceSchema,
-  sync: schema.maybe(syncSchema),
-});
+export const putTransformsRequestSchema = schema.object(
+  {
+    description: schema.maybe(schema.string()),
+    dest: destSchema,
+    frequency: schema.maybe(schema.string()),
+    /**
+     * Pivot and latest are mutually exclusive, i.e. exactly one must be specified in the transform configuration
+     */
+    pivot: schema.maybe(pivotSchema),
+    /**
+     * Latest and pivot are mutually exclusive, i.e. exactly one must be specified in the transform configuration
+     */
+    latest: schema.maybe(latestFunctionSchema),
+    settings: schema.maybe(settingsSchema),
+    source: sourceSchema,
+    sync: schema.maybe(syncSchema),
+  },
+  {
+    validate: (value) => {
+      if (!value.pivot || !value.latest) {
+        return 'pivot or latest is required for transform configuration';
+      }
+      if (value.pivot && value.latest) {
+        return 'pivot and latest are not allowed together';
+      }
+    },
+  }
+);
 
 export interface PutTransformsRequestSchema extends TypeOf<typeof putTransformsRequestSchema> {
-  pivot: {
+  pivot?: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
