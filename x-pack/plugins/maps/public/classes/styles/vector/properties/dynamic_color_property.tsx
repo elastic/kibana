@@ -178,7 +178,6 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         this._options.color ? this._options.color : null,
         percentilesFieldMeta
       );
-
       if (!colorStops) {
         return null;
       }
