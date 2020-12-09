@@ -230,37 +230,38 @@ describe('params validation', () => {
 });
 
 describe('execute()', () => {
-  test('ensure parameters are as expected', async () => {
-    const config: ActionTypeConfigType = {
-      service: '__json',
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: true,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: 'bob',
-      password: 'supersecret',
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-      viewInKibanaPath: '/',
-      viewInKibanaText: 'View in Kibana',
-    };
+  const config: ActionTypeConfigType = {
+    service: '__json',
+    host: 'a host',
+    port: 42,
+    secure: true,
+    from: 'bob@example.com',
+    hasAuth: true,
+  };
+  const secrets: ActionTypeSecretsType = {
+    user: 'bob',
+    password: 'supersecret',
+  };
+  const params: ActionParamsType = {
+    to: ['jim@example.com'],
+    cc: ['james@example.com'],
+    bcc: ['jimmy@example.com'],
+    subject: 'the subject',
+    message: 'a message to you',
+    viewInKibanaPath: '/',
+    viewInKibanaText: 'Go to Kibana',
+  };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
+  const actionId = 'some-id';
+  const executorOptions: EmailActionTypeExecutorOptions = {
+    actionId,
+    config,
+    params,
+    secrets,
+    services,
+  };
+
+  test('ensure parameters are as expected', async () => {
     sendEmailMock.mockReset();
     const result = await actionType.executor(executorOptions);
     expect(result).toMatchInlineSnapshot(`
@@ -304,38 +305,22 @@ describe('execute()', () => {
   });
 
   test('parameters are as expected with no auth', async () => {
-    const config: ActionTypeConfigType = {
-      service: null,
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: false,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: null,
-      password: null,
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-      viewInKibanaPath: '/',
-      viewInKibanaText: 'View in Kibana',
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        service: null,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
     };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
     sendEmailMock.mockReset();
-    await actionType.executor(executorOptions);
+    await actionType.executor(customExecutorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -370,39 +355,23 @@ describe('execute()', () => {
   });
 
   test('returns expected result when an error is thrown', async () => {
-    const config: ActionTypeConfigType = {
-      service: null,
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: false,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: null,
-      password: null,
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-      viewInKibanaPath: '/',
-      viewInKibanaText: 'View in Kibana',
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        service: null,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
     };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
     sendEmailMock.mockReset();
     sendEmailMock.mockRejectedValue(new Error('wops'));
-    const result = await actionType.executor(executorOptions);
+    const result = await actionType.executor(customExecutorOptions);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
@@ -419,36 +388,6 @@ describe('execute()', () => {
       configurationUtilities: actionsConfigMock.create(),
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
-    const config: ActionTypeConfigType = {
-      service: '__json',
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: true,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: 'bob',
-      password: 'supersecret',
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-      viewInKibanaPath: '/',
-      viewInKibanaText: 'Go to Kibana',
-    };
-
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
 
     await actionTypeWithPublicUrl.executor(executorOptions);
 
@@ -463,44 +402,23 @@ describe('execute()', () => {
     `);
   });
 
-  test('allows to generate a deep link into Kibana', async () => {
+  test('allows to generate a deep link into Kibana when publicBaseUrl is defined', async () => {
     const actionTypeWithPublicUrl = getActionType({
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
-    const config: ActionTypeConfigType = {
-      service: '__json',
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: true,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: 'bob',
-      password: 'supersecret',
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-      viewInKibanaPath: '/my/app',
-      viewInKibanaText: 'View this in Kibana',
+
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        viewInKibanaPath: '/my/app',
+        viewInKibanaText: 'View this in Kibana',
+      },
     };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
-
-    await actionTypeWithPublicUrl.executor(executorOptions);
+    await actionTypeWithPublicUrl.executor(customExecutorOptions);
 
     expect(sendEmailMock).toHaveBeenCalledTimes(1);
     const sendMailCall = sendEmailMock.mock.calls[0][1];
