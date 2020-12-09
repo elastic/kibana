@@ -128,6 +128,7 @@ export function createExecutionHandler({
           alerting: {
             instance_id: alertInstanceId,
             action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
@@ -136,7 +137,11 @@ export function createExecutionHandler({
         },
       };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };

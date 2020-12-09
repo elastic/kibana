@@ -344,7 +344,10 @@ function getValidationAlertType() {
 
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
-    pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.boolean())),
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
@@ -389,8 +392,13 @@ function getPatternFiringAlertType() {
 
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
-        if (instancePattern[patternIndex]) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
           services.alertInstanceFactory(instanceId).scheduleActions('default');
+        } else if (typeof scheduleByPattern === 'string') {
+          services
+            .alertInstanceFactory(instanceId)
+            .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
       }
 
