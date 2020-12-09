@@ -19,6 +19,8 @@ import { SpacesPluginSetup } from '../../../spaces/server';
 import { AuditEvent, httpRequestEvent } from './audit_events';
 import { SecurityPluginSetup } from '..';
 
+export const ECS_VERSION = '1.6.0';
+
 /**
  * @deprecated
  */
@@ -31,6 +33,9 @@ export interface AuditLogger {
 }
 
 interface AuditLogMeta extends AuditEvent {
+  ecs: {
+    version: string;
+  };
   session?: {
     id: string;
   };
@@ -119,7 +124,7 @@ export class AuditService {
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
        *     action: 'saved_object_update',
-       *     outcome: 'unknown'
+       *     outcome: EventOutcome.UNKNOWN
        *   },
        *   kibana: {
        *     saved_object: { type: 'dashboard', id: '123' }
@@ -134,6 +139,7 @@ export class AuditService {
         const user = getCurrentUser(request);
         const spaceId = getSpaceId(request);
         const meta: AuditLogMeta = {
+          ecs: { version: ECS_VERSION },
           ...event,
           user:
             (user && {
