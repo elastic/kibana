@@ -1,14 +1,12 @@
 [[lens-end-to-end]]
-=== Try it: Build a dashboard with Lens
+== Try it: Analyze the web logs data on a dashboard
 
-Learn to use Kibana Lens, an intuitive and easy-to-use UI that simplifies the process of data visualization.
-
-This guide will walk you through the features of Kibana Lens version 7.11. You will create an example analytical dashboard with all visualizations done in Lens. 
+With the web logs data, you want to find the answers to some key questions about website traffic. 
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis] 
 
-You’ll be able to respond to some key questions regarding website traffic:
+When you're finished, you know the answers to the following questions:
 
 * How many users have visited my website?
 * What’s the distribution of visitors by operating system?
@@ -18,127 +16,193 @@ You’ll be able to respond to some key questions regarding website traffic:
 * How does website traffic look like hour by hour?
 * Where does the traffic come from for top three countries?
 
-By the end of this tutorial you will have a good working knowledge of how to use Lens to work on your data. 
+[float]
+[[add-the-sample-web-logs-data]]
+== Add the web logs data
 
-You’ll be using the _Sample web logs_ data set that is available in Kibana. Before getting started, <<gs-get-data-into-kibana, load the sample web logs data set>>. You can set up your own cluster or use a 14-day free trial of https://www.elastic.co/elasticsearch/service[Elasticsearch Service]. 
+To analyze the website traffic data, add the data set to {kib}.
 
-Once you have your data loaded, create a dashboard to display your visualizations. Open side navigation and click on *Dashboard*. Then click on *Create new dashboard*.  
+. From the {kib} *Home* page, click *Try our sample data*.
+
+. From *Sample web logs*, click *Add data*.
 
 [float]
-[[metric-vis]]
-==== How many users have visited my website? A metric visualization
+[[end-to-end-create-the-dashboard]]
+== Create the dashboard
 
-To create your first Lens visualization, click on the *create new* button and choose Lens. 
+Open the dashboard, then open the visualization builder. 
 
+. Open the main menu, click *Dashboard*.
+
+. Click *Create dashboard*.
+
+. Click *Create panel*, then click *Lens* on the *New visualization* window.
++
 [role="screenshot"]
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
-After being redirected to Lens, make sure you have the correct index pattern active (_kibana_sample_data_logs_) and that you picked up the time range that interests you.
+[float]
+[[metric-vis]]
+== View the number of website visitors
 
+To view the number of users that have visited your website within the last 90 days, create a metric visualization.
+
+. Make sure the *kibana_sample_data_logs* index appears, then <<set-time-filter,set the time filter>> to *Last 90 days*.
++
 [role="screenshot"]
 image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
 
-. To create a metric visualization, switch the chart type from *Stacked bar* to *Metric* on the top of the workspace.
-. Find a field *clientip* in the fields panel on the left and drag and drop it to the workspace.
+. From the *Chart Type* dropdown, select *Metric*.
+
+. From the *Available fields* list, drag and drop *clientip* on to the visualization builder.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
-+
-. Click on the *Unique count of clientip* on the left. This will open a configuration panel for metric.
-. Change display name to `Unique visitors`.
+
+. From the editor, click *Unique count of clientip*, then enter `Unique visitors` in the *Display name* field. 
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
-. Click on the *Save* button and give the visualization a title `Unique visitors`. 
-. Clicking on *Save and return* will take you back to the dashboard.
+. From the toolbar, click *Save*.
+
+..  In the *Title* field, enter `Unique visitors`. 
+
+.. Select *Add to dashboard after saving*.
+
+.. Click *Save and return*.
+
 [float]
 [[donut-vis]]
+== Visualize the distribution of visitors by operating system
 
-==== What’s the distribution of visitors by operating system? A donut chart
+To visualize the top operating systems your visitors use, create a donut chart, then use the chart help you find the answers the following questions: 
 
-Now that you have our first visualization created, you’ll create a donut chart. Checking top values of operating system could help you answer some business questions, for example:
+* Should you continue to support Windows 7?
 
-* Should you keep providing Windows 7 support for your customers?
 * How important is mobile traffic from iOS devices for your business? 
 
-Start by creating a new visualization from the dashboard.
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
 
-===== Configuring the donut chart
+. Make sure the *kibana_sample_data_logs* index appears, and the <<set-time-filter,time filter>> is set to *Last 90 days*.
 
-. Switch the chart type to *Donut*.
-. Drag and drop a field *clientip* to *Size by* dimension.
-. Drag and drop a field *machine.os.keyword* to *Slice by* dimension.
+. From the *Chart Type* dropdown, select *Donut*.
 
-===== Changing the color palette
-The steps above already give you a fully configured donut chart, but let's go a step further and change the color palette. 
+. From the *Available fields* list, drag and drop *clientip* to the *Size by* field in the editor.
 
-. Click on the *Top values of machine.os.keyword* in the config panel 
-. Change a color palette to `Compability`.
-. Save the visualization as `Visitors by OS` and go back to the dashboard.
+. From the *Available fields* list, drag and drop *machine.os.keyword* to the *Slice by* field in the editor.
 
+. Change the color palette. 
+
+.. From the editor, click *Top values of machine.os.keyword*. 
+
+.. From the *Color palette* dropdown, select *Compability*.
++
 [role="screenshot"]
 image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
+. From the toolbar, click *Save*.
+
+..  In the *Title* field, enter `Visitors by OS`. 
+
+.. Select *Add to dashboard after saving*.
+
+.. Click *Save and return*.
+
 [float]
 [[mixed-multiaxis]]
-====  What’s the average bytes transfer per day? How does it relate to the number of visitors? A mixed type multiaxis chart
+==  Visualize the average bytes transfer per day
 
-Knowing how the traffic of your page grows or drops can help you optimise the cost of page maintainance and prevent from server unresponsiveness in case of increased unpredicted needs.
+Visualize the average bytes transfer per day, then compare the data to the number of visitors to your website using a mixed-type, multi-axis chart.
 
-===== Configuring a chart with custom time interval
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
 
-. Drag and drop *bytes* field to the workspace. 
-. Click on *timestamp* in the config panel 
-. Toggle on *Customize time interval* and change the interval to `1 days`.
+. Make sure the *kibana_sample_data_logs* index appears, and the <<set-time-filter,time filter>> is set to *Last 90 days*.
+
+. From the *Available fields* list, drag and drop *bytes* to the visualization builder.
+
+. From the editor, click *timestamp*.
+
+.. Select *Customize time interval*.
+
+.. Change the *Minimum interval* to `1 days`.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_1.png[Customize time interval]
-. Close the *Horizontal axis configuration*.
-. Change the type of the chart to *Area*.
 
-===== Adding a second layer
+. From the *Chart Type* dropdown, select *Area*.
 
-Now you'll add number of visitors to your visualization as a line. It has to be configured as a separate layer because of it different chart type.
+[float]
+[[add-a-data-layer]]
+=== Add a layer
 
-. To add a new layer, click on the plus symbol under the existing layer.
+To visualize the number of visitors to your website, add a line chart layer.
+
+. To add a layer, click *+* in the editor.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_2.png[Add new layer button]
-. Change layer type by clicking on the button on the top of the layer. Notice than the type of the chart in the main chart type switch changed to *Mixed XY*.
+
+. To change the visualization type for the layer, click the *Chart type* dropdown, then click the line chart.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_3.png[Change layer type]
-. Move *timestamp* field to the second layer's horizontal axis drop and customize the time interval like for the first layer.
-. Move *clientip* to the second layer's Vertical axis drop. 
-. Open the settings for *Unique count of clientip* and:
-.. Change the label to *Unique visitors*.
-.. Change a *Series color* to something more contrasting, for example: *#CA8EAE*.
++
+The chart type for the visualization changes to *Mixed XY*.
 
-===== Configuring the multiaxis chart
+. From the *Available fields* list, drag and drop *timestamp* to the *Horizontal axis*.
 
-The significant difference in value ranges for both verical axes series makes the values for  *Unique visitors* hard to read. To avoid this problem, let's add a separate axis for *Unique visitors*. 
+. From the *Available fields* list, drag and drop *clientip* to the *Vertical axis*.
 
-. Click on *Unique visitors*.
-. Choose *Axis side*: *Right*.
+. From the editor, click *timestamp*.
 
-Hint: Having two different formatting on functions will lead to creating separate axes by default. Change the formatting for *Average of bytes* to *Bytes (1024)* in *Value format*. It will automatically split the axes.
+.. Select *Customize time interval*.
+
+.. Change the *Minimum interval* to `1 days`.
+
+. From the editor, click *Unique count of clientip*.
+
+.. In the *Display name* field, enter `Unique visitors`.
+
+.. From the *Series color* dropdown, enter *#CA8EAE*.
+
+//. Something about zooming in on the visualization. 
+
+[float]
+[[configure-the-multiaxis-chart]]
+=== Configuring the axis
+
+The significant difference in value ranges for both verical axes series makes the values for *Unique visitors* hard to read. To avoid this problem, add a separate axis for *Unique visitors*. 
+
+. From the editor, click *Unique visitors*.
+
+. For *Axis side*, click *Right*.
+
+TIP: Having two different formatting on functions will lead to creating separate axes by default. Change the formatting for *Average of bytes* to *Bytes (1024)* in *Value format*. It will automatically split the axes.
 
 [role="screenshot"]
 image::images/lens_end_to_end_3_4.png[Multiaxis chart]
 
+[float]
 [[lens-legend-position]]
-===== Modifying the legend position
+=== Change the legend position and save the visualization
 
-The chart is now clear and functional, but the legend takes a lot of space. Let's change its position to the top of the chart.
+The visualization is complete, but the legend uses a lot of space. Change the position to the top of the chart, then save the visualization.
 
-. Click on the *legend* icon on the top of the visualization pane.
-. Choose the *top* position.
-
+. From the *Legend* dropdown, select the top position.
++
 [role="screenshot"]
 image::images/lens_end_to_end_3_5.png[legend position]
 
-Save your chart as `Average Bytes vs. Unique Visitors` and go back to the dashboard.
+. From the toolbar, click *Save*.
+
+..  In the *Title* field, enter `Average Bytes vs. Unique Visitors`. 
+
+.. Select *Add to dashboard after saving*.
+
+.. Click *Save and return*.
+
+Knowing how the traffic of your page grows or drops can help you optimise the cost of page maintainance and prevent from server unresponsiveness in case of increased unpredicted needs. 
 
 [role="screenshot"]
 image::images/lens_end_to_end_3_6.png[Multiaxis chart legend position]

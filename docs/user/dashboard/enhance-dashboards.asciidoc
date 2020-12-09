@@ -38,9 +38,9 @@ To configure *Controls* for your dashboard:
 [[add-markdown]]
 === Add Markdown
 
-*Markdown* is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard. 
+Add markdown panels when you want to provide context to the other panels on your dashboard, such as important information, instructions, and images.
 
-Use Markdown when you want to add context to the other panels on your dashboard, such as important information, instructions and images.
+*Markdown* is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard. 
 
 For information about GitHub-flavored Markdown text, click *Help*.
 

@@ -4,112 +4,82 @@
 [partintro]
 --
 
-A _dashboard_ is a collection of panels that you use to analyze your data. On a dashboard, add a variety of panels, then rearrange 
-the panels to tell a story about your data. Panels contain everything you need, including visualizations,
-interactive controls, markdown, and more.
-
-With *Dashboard*, you can:
-
-* Add multiple types of panels and view various aspects of your data in one place, then arrange the panels to compare your data. 
-
-* Add text and images to provide context to the panels.
-
-* Create and apply filters to focus in on the data you want to display.
-
-* Control who can use your data, and share the dashboard with a small or large audience.
-
-* Generate reports based on your findings.
-
-To begin, open the main menu, then click *Dashboard*.
+Dashboards are collections of panels that you configure and arrange to visualize and analyze your data. Each panel contains data from one or more index patterns, which allows 
+you to create a complete overview of your data on a single dashboard. To gain insights into your data, {kib} supports many types of panels that enable you to see your data from multiple perspectives. 
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[float]
-[[dashboard-read-only-access]]
-=== [xpack]#Read only access#
-If you see
-the read-only icon in the application header,
-then you don't have sufficient privileges to create and save dashboards. The buttons to create and edit
-dashboards are not visible. For more information, see <<xpack-security-authorization>>.
-
-[role="screenshot"]
-image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in Kibana header]
+To create visualization panels of your data, {kib} provides you with a visualization builder where you drag and drop 
+data fields, then {kib} uses heuristics to apply each field and automatically create visualizations for you.
 
 [float]
-[[add-panels]]
-== Add visualization panels
+== Prerequisites
 
-Create panels with visualizations of your data. 
+To build dashboards, you must meet the minimum criteria. 
 
-. Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-. Click *Create new*, then click *Lens* on the *New visualization* window.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
 
-[float]
-[[fiter-the-data-fields]]
-=== Change the list of fields
+* Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
-The fields that appear are based on the selected index pattern, time filter, and filters.
-
-. To view the fields in a different <<index-patterns,index pattern>>, click the *Change Index Pattern* dropdown, then select the index pattern you want to view.
-
-. To view the fields within a different time range, change the <<set-time-filter,time filter>>.
-
-. To filter the fields, use the following options:
-
-* Enter the field name in *Search field names*.
-* Click *Field filters*, then select the filter.
+* When the read-only indicator appears, you have insufficient privileges
+to create or save dashboards. The options to create and save dashboards are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
-[[view-data-summaries]]
-=== View summaries of the fields
+[[create-the-dashboard]]
+== Create the dashboard
 
-To explore the data, get a quick summary of each field. The summary shows the distribution of
-values within the specified time range.
+Open the dashboard, then open the visualization builder. 
 
-To view the data summary, click *i* next to a field.
+. Open the main menu, click *Dashboard*.
 
-[role="screenshot"]
-image::images/lens_data_info.png[Data summary window]
+. To create a dashboard, click *Create dashboard*.
++
+To open an existing dashboard, click the dashboard you want to view.
+
+. To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
++
+To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
 [float]
-[[create-the-lens-visualization]]
-=== Create the visualization
+[[create-the-visualization]]
+== Create the visualization
 
-Drag and drop the fields onto the visualization builder. *Lens* using heuristics to apply each field and create the visualization.
+Drag and drop the fields onto the visualization builder. The fields that appear are based on the selected <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters.
 
 . From the *Avialable fields* list, drag and drop the fields onto the visualization builder. 
 +
-[role="screenshot"]
-image::images/lens_drag_drop.gif[Drag and drop]
+To preview a field, click *i* next to the field.
+
+. To change the visualization type, use the following options:
+
+* Click the *Suggestions*.
+
+* Click the visualization type dropdown, then select the visualization you want to use.
 +
-Drag-and-drop capabilities are available only when *Lens* knows how to use the data.
+When there is an exclamation point (!) next to a visualization, {kib} is unable to transfer your data, but still allows you to change the visualization.
 
-. To change the visualization, use the following options:
-
-* Click one of the *Suggestions*.
-
-* Click the visualization type dropdown, then select the visualization you want to view.
-+
-When there is an exclamation point (!) next to a visualization, *Lens* is unable to transfer your data, but still allows you to change the visualization.
+. To customize the data, click the fields in the editor, then change the options. The options available depend on the visualization type. 
 
 [float]
-[[add-layers-and-indices]]
-=== Add layers and indices
+[[add-layers]]
+=== Add layers
 
-To compare and analyze data from different sources, visualize multiple data layers and indices. Multiple layers and indices are
-supported in area, line, and bar charts.
+To compare and analyze data from multiple indices, add layers. Area, line, and bar charts support layers.
 
-. To add a layer, click *+*, then drag and drop the data fields for the new layer.
-+
-[role="screenshot"]
-image::images/lens_layers.png[Add layers]
+. To add a layer, click *+*.
 
-. To view a different index, click the index name in the editor, then select a new one.
+. Drag and drop the fields to *Drop a field here*.
+
+. From the *Change index pattern* dropdown, select the index pattern you want to visualize.
 +
 [role="screenshot"]
 image::images/lens_index_pattern.png[Add index pattern]
+
+. To customize the data, click the fields in the editor, then change the options. The options available depend on the visualization type.   
 
 [float]
 [[save-the-panel]]
@@ -117,9 +87,13 @@ image::images/lens_index_pattern.png[Add index pattern]
 
 Save and add the visualization panel to the dashboard.
 
-. In the toolbar, click *Save*.
+. From the toolbar, click *Save*.
 
 . Add the *Title* and optional *Description*.
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
 
 . Click *Save and return*.
 
@@ -127,44 +101,59 @@ Save and add the visualization panel to the dashboard.
 [[save-dashboards]]
 == Save the dashboard
 
-When you have completed your changes, save the dashboard.
+When you have finished adding and arranging panels, save the dashboard.
 
-. In the toolbar, click *Save*.
+. From the toolbar, click *Save*.
 
-. Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
+. Enter the dashboard *Title* and optional *Description*.
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. To save the specified time filter, select *Store time with dashboard*. 
+
+. Click *Save*.
 
 [float]
 [[share-the-dashboard]]
+[[embedding-dashboards]]
 == Share the dashboard
 
-[[embedding-dashboards]]
-Share your dashboard outside of {kib}.
+Share the dashboard with a larger audience.
 
-From the *Share* menu, you can:
+. From the toolbar, click *Share*. 
 
-* Embed the code in a web page. Users must have {kib} access
-to view an embedded dashboard.
-* Share a direct link to a {kib} dashboard
-* Generate a PDF report
-* Generate a PNG report
+. Choose one of the following options:
+
+* *Embed code* &mdash; Embed the code in a web page. To view the embedded dashboard, users must have {kib} access.
+
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard.
++
+TIP: When you share a link to a dashboard snapshot, select *Short URL*. Snapshot
+URLs are long and can be problematic for Internet Explorer and other
+tools. To create a short URL, you must have write access to {kib}.
+
+* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
+
+* PNG Reports &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
 TIP: To create a link to a dashboard by title, use: +
 `${domain}/${basepath?}/app/dashboards#/list?title=${yourdashboardtitle}`
-
-TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
-URLs are long and can be problematic for Internet Explorer and other
-tools. To create a short URL, you must have write access to {kib}.
 
 [float]
 [[import-dashboards]]
 === Export the dashboard
 
-To export the dashboard, open the main menu, then click *Stack Management > Saved Objects*. For more information,
-refer to <<managing-saved-objects, Managing saved objects>>.
+Export the dashboard outside of {kib}.
 
-[float]
-[[try-it-lens]]
-== Try it: Build a dashboard with panels of visualizations
+. Open the main menu, then click *Stack Management > Saved Objects*. 
+
+. Select the dashboard you want to export, then click *Export*.
+
+For more information, refer to <<managing-saved-objects, Managing saved objects>>.
+
+//[float]
+//[[try-it-lens]]
+//== Try it: Build a dashboard with panels of visualizations
 
 include::lens-end-to-end/lens-end-to-end.asciidoc[]
 
@@ -172,11 +161,15 @@ include::lens-end-to-end/lens-end-to-end.asciidoc[]
 [[lens-tutorial-next-steps]]
 == What's next?
 
-* Add different types of panels with the <<add-panels-with-advanced-editors,advanced editors>>
+To add different types of panel to your dashboard, refer to the following:
 
-* Add <<add-aggregation-based-visualization-panels,aggregation-based visualization panels>> 
+* Create a <<maps,Maps>> panel with your geographical data. 
 
-* Take a deeper dive into your data and add the panels to a <<canvas,Canvas workpad>>.
+* Manually create panels with the <<add-panels-with-advanced-editors,advanced editors>> or <<add-aggregation-based-visualization-panels,aggregation-based visualization panels>>.
+
+* Add a <<save-your-search,saved search>> from *Discover*.
+
+* Create a panel with your <<xpack-ml-anomalies,machine learning anomaly detection>> data.
 
 --
 include::advanced-editors.asciidoc[]
