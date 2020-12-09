@@ -56,6 +56,8 @@ export const Node = class extends React.PureComponent<Props, State> {
       values: { nodeName: node.name },
     });
 
+    const nodeBorder = this.state.isOverlayOpen ? {border: 'solid 4px #000'} : undefined;
+
     return (
       <>
         <NodeContextMenu
@@ -81,7 +83,7 @@ export const Node = class extends React.PureComponent<Props, State> {
               style={{ width: squareSize || 0, height: squareSize || 0 }}
               onClick={this.togglePopover}
             >
-              <SquareOuter color={color}>
+              <SquareOuter color={color} style={nodeBorder}>
                 <SquareInner color={color}>
                   {valueMode ? (
                     <ValueInner aria-label={nodeAriaLabel}>
