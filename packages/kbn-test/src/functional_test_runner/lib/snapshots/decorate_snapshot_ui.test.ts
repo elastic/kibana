@@ -130,4 +130,33 @@ describe('decorateSnapshotUi', () => {
       }).not.toThrow();
     });
   });
+
+  describe('when running on ci', () => {
+    let lifecycle: Lifecycle;
+    beforeEach(() => {
+      lifecycle = new Lifecycle();
+      const ci = process.env.CI;
+      process.env.CI = 'true';
+      decorateSnapshotUi(lifecycle, true);
+      process.env.CI = ci;
+    });
+
+    it('throws on new snapshots', async () => {
+      const test: Test = {
+        title: 'Test',
+        file: 'foo.ts',
+        parent: {
+          file: 'foo.ts',
+          tests: [],
+          suites: [],
+        },
+      } as any;
+
+      await lifecycle.beforeEachTest.trigger(test);
+
+      expect(() => {
+        expectSnapshot('bar').toMatchInline();
+      }).toThrow();
+    });
+  });
 });

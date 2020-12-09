@@ -32,6 +32,8 @@ import { Test, Suite } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
+type SnapshotUpdateState = 'all' | 'new' | 'none';
+
 interface SnapshotContext {
   snapshotState: ISnapshotState;
   currentTestName: string;
@@ -102,6 +104,18 @@ export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolea
 
   registered = true;
 
+  const isCi = !!process.env.CI;
+
+  let updateSnapshot: SnapshotUpdateState;
+
+  if (isCi) {
+    // make sure snapshots that have not been committed
+    // are not written to file on CI, passing the test
+    updateSnapshot = 'none';
+  } else {
+    updateSnapshot = updateSnapshots ? 'all' : 'new';
+  }
+
   modifyStackTracePrepareOnce();
 
   addSerializer({
@@ -120,7 +134,7 @@ export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolea
     const { file, snapshotTitle } = getSnapshotMeta(currentTest);
 
     if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshots);
+      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshot);
     }
 
     testContext = {
@@ -178,7 +192,7 @@ function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
   return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
 }
 
-function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
+function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpdateState) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
@@ -195,7 +209,7 @@ function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
-      updateSnapshot: updateSnapshots ? 'all' : 'new',
+      updateSnapshot,
       // @ts-expect-error
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,
