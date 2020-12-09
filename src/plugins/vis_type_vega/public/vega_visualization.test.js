@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import 'jest-canvas-mock';
+
 import $ from 'jquery';
 
 import 'leaflet/dist/leaflet.js';

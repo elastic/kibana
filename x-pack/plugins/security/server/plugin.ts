@@ -7,7 +7,6 @@
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
@@ -25,7 +24,11 @@ import {
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 
-import { Authentication, setupAuthentication } from './authentication';
+import {
+  AuthenticationService,
+  AuthenticationServiceSetup,
+  AuthenticationServiceStart,
+} from './authentication';
 import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
 import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
@@ -53,22 +56,30 @@ export type FeaturesService = Pick<
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface SecurityPluginSetup {
-  authc: Pick<
-    Authentication,
-    | 'isAuthenticated'
-    | 'getCurrentUser'
-    | 'areAPIKeysEnabled'
-    | 'createAPIKey'
-    | 'invalidateAPIKey'
-    | 'grantAPIKeyAsInternalUser'
-    | 'invalidateAPIKeyAsInternalUser'
-  >;
+  /**
+   * @deprecated Use `authc` methods from the `SecurityServiceStart` contract instead.
+   */
+  authc: Pick<AuthenticationServiceSetup, 'getCurrentUser'>;
+  /**
+   * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
+   */
   authz: Pick<
     AuthorizationServiceSetup,
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
   license: SecurityLicense;
   audit: AuditServiceSetup;
+}
+
+/**
+ * Describes public Security plugin contract returned at the `start` stage.
+ */
+export interface SecurityPluginStart {
+  authc: Pick<AuthenticationServiceStart, 'apiKeys' | 'getCurrentUser'>;
+  authz: Pick<
+    AuthorizationServiceSetup,
+    'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
+  >;
 }
 
 export interface PluginSetupDependencies {
@@ -93,7 +104,8 @@ export interface PluginStartDependencies {
 export class Plugin {
   private readonly logger: Logger;
   private securityLicenseService?: SecurityLicenseService;
-  private authc?: Authentication;
+  private authenticationStart?: AuthenticationServiceStart;
+  private authorizationSetup?: AuthorizationServiceSetup;
 
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
@@ -111,6 +123,9 @@ export class Plugin {
   );
   private readonly sessionManagementService = new SessionManagementService(
     this.initializerContext.logger.get('session')
+  );
+  private readonly authenticationService = new AuthenticationService(
+    this.initializerContext.logger.get('authentication')
   );
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -179,7 +194,7 @@ export class Plugin {
       logging: core.logging,
       http: core.http,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
-      getCurrentUser: (request) => this.authc?.getCurrentUser(request),
+      getCurrentUser: (request) => authenticationSetup.getCurrentUser(request),
     });
     const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
 
@@ -191,7 +206,7 @@ export class Plugin {
       taskManager,
     });
 
-    this.authc = await setupAuthentication({
+    const authenticationSetup = this.authenticationService.setup({
       legacyAuditLogger,
       audit,
       getFeatureUsageService: this.getFeatureUsageService,
@@ -203,7 +218,7 @@ export class Plugin {
       session,
     });
 
-    const authz = this.authorizationService.setup({
+    this.authorizationSetup = this.authorizationService.setup({
       http: core.http,
       capabilities: core.capabilities,
       getClusterClient: () =>
@@ -215,19 +230,19 @@ export class Plugin {
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: () => spaces?.spacesService,
       features,
-      getCurrentUser: this.authc.getCurrentUser,
+      getCurrentUser: authenticationSetup.getCurrentUser,
     });
 
     setupSpacesClient({
       spaces,
       audit,
-      authz,
+      authz: this.authorizationSetup,
     });
 
     setupSavedObjects({
       legacyAuditLogger,
       audit,
-      authz,
+      authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getSpacesService: () => spaces?.spacesService,
     });
@@ -238,36 +253,35 @@ export class Plugin {
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       config,
-      authc: this.authc,
-      authz,
+      authz: this.authorizationSetup,
       license,
       session,
       getFeatures: () =>
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
+      getAuthenticationService: () => {
+        if (!this.authenticationStart) {
+          throw new Error('Authentication service is not started!');
+        }
+
+        return this.authenticationStart;
+      },
     });
 
-    return deepFreeze<SecurityPluginSetup>({
+    return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: audit.asScoped,
         getLogger: audit.getLogger,
       },
 
-      authc: {
-        isAuthenticated: this.authc.isAuthenticated,
-        getCurrentUser: this.authc.getCurrentUser,
-        areAPIKeysEnabled: this.authc.areAPIKeysEnabled,
-        createAPIKey: this.authc.createAPIKey,
-        invalidateAPIKey: this.authc.invalidateAPIKey,
-        grantAPIKeyAsInternalUser: this.authc.grantAPIKeyAsInternalUser,
-        invalidateAPIKeyAsInternalUser: this.authc.invalidateAPIKeyAsInternalUser,
-      },
+      authc: { getCurrentUser: authenticationSetup.getCurrentUser },
 
       authz: {
-        actions: authz.actions,
-        checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: authz.checkPrivilegesDynamicallyWithRequest,
-        mode: authz.mode,
+        actions: this.authorizationSetup.actions,
+        checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup
+          .checkPrivilegesDynamicallyWithRequest,
+        mode: this.authorizationSetup.mode,
       },
 
       license,
@@ -281,13 +295,29 @@ export class Plugin {
       featureUsage: licensing.featureUsage,
     });
 
+    const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
 
     this.sessionManagementService.start({ online$: watchOnlineStatus$(), taskManager });
-    this.authorizationService.start({
-      features,
-      clusterClient: core.elasticsearch.client,
-      online$: watchOnlineStatus$(),
+    this.authenticationStart = this.authenticationService.start({
+      http: core.http,
+      clusterClient,
+    });
+
+    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
+
+    return Object.freeze<SecurityPluginStart>({
+      authc: {
+        apiKeys: this.authenticationStart.apiKeys,
+        getCurrentUser: this.authenticationStart.getCurrentUser,
+      },
+      authz: {
+        actions: this.authorizationSetup!.actions,
+        checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup!
+          .checkPrivilegesDynamicallyWithRequest,
+        mode: this.authorizationSetup!.mode,
+      },
     });
   }
 
