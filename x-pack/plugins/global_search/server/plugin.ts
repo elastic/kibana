@@ -59,6 +59,7 @@ export class GlobalSearchPlugin
     core.http.registerRouteHandlerContext('globalSearch', (_, req) => {
       return {
         find: (term, options) => this.searchServiceStart!.find(term, options, req),
+        getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),
       };
     });
 
@@ -75,6 +76,7 @@ export class GlobalSearchPlugin
     });
     return {
       find: this.searchServiceStart.find,
+      getSearchableTypes: this.searchServiceStart.getSearchableTypes,
     };
   }
 
