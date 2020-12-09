@@ -43,6 +43,7 @@ import { Content } from './content';
 import './index.scss';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PLUGIN_ID } from '../../../../../../../common/constants';
+import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -315,7 +316,7 @@ export function Detail() {
           isSelected: panelId === panel,
           'data-test-subj': `tab-${panelId}`,
           href: getHref('integration_details', {
-            pkgkey: `${packageInfo?.name}-${packageInfo?.version}`,
+            pkgkey: pkgKeyFromPackageInfo(packageInfo || {}),
             panel: panelId,
           }),
         };
