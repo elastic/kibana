@@ -207,3 +207,22 @@ export const mergedConfiguredSources = mergeServerAndStaticData(
   staticSourceData,
   contentSources
 );
+
+export const sourceConfigData = {
+  serviceType: 'confluence_cloud',
+  name: 'Confluence',
+  configured: true,
+  needsPermissions: true,
+  accountContextOnly: false,
+  supportedByLicense: true,
+  privateSourcesEnabled: false,
+  categories: ['wiki', 'atlassian', 'intranet'],
+  configuredFields: {
+    clientId: 'CyztADsSECRETCSAUCEh1a',
+    clientSecret: 'GSjJxqSECRETCSAUCEksHk',
+    baseUrl: 'https://mine.atlassian.net',
+    privateKey: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
+    publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
+    consumerKey: 'elastic_enterprise_search_123',
+  },
+};
