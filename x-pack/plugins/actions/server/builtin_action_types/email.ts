@@ -15,8 +15,6 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
-// TODO: Change once https://github.com/elastic/kibana/issues/45815 is complete
-const KIBANA_ROOT = 'https://localhost:5601';
 const DEFAULT_VIEW_IN_KIBANA_PATH = '/';
 
 export type EmailActionType = ActionType<
@@ -131,12 +129,13 @@ function validateParams(paramsObject: unknown): string | void {
 
 interface GetActionTypeParams {
   logger: Logger;
+  publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
 // action type definition
 export function getActionType(params: GetActionTypeParams): EmailActionType {
-  const { logger, configurationUtilities } = params;
+  const { logger, publicBaseUrl, configurationUtilities } = params;
   return {
     id: '.email',
     minimumLicenseRequired: 'gold',
@@ -150,14 +149,17 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, publicBaseUrl }),
   };
 }
 
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    publicBaseUrl,
+  }: { logger: GetActionTypeParams['logger']; publicBaseUrl: GetActionTypeParams['publicBaseUrl'] },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -195,7 +197,11 @@ async function executor(
       subject: params.subject,
       message:
         params.message +
-        `\n\n--\n\n${getViewInKibanaMessage(params.viewInKibanaPath, params.viewInKibanaText)}`,
+        `\n\n--\n\n${getViewInKibanaMessage({
+          publicBaseUrl,
+          viewInKibanaPath: params.viewInKibanaPath,
+          viewInKibanaText: params.viewInKibanaText,
+        })}`,
     },
     proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
@@ -243,20 +249,35 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   return false;
 }
 
-function getViewInKibanaMessage(viewInKibanaPath: string, viewInKibanaText: string) {
+function getViewInKibanaMessage({
+  viewInKibanaPath,
+  viewInKibanaText,
+  publicBaseUrl,
+}: {
+  viewInKibanaPath: string;
+  viewInKibanaText: string;
+  publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+}) {
+  if (!publicBaseUrl) {
+    return i18n.translate('xpack.actions.builtin.email.sentByKibanaMessage', {
+      defaultMessage: 'This message was sent by Kibana.',
+    });
+  }
+
   if (viewInKibanaPath === DEFAULT_VIEW_IN_KIBANA_PATH) {
     return i18n.translate('xpack.actions.builtin.email.defaultViewInKibanaMessage', {
       defaultMessage: 'This message was sent by Kibana. [Go to Kibana]({link}).',
       values: {
-        link: KIBANA_ROOT,
+        link: publicBaseUrl,
       },
     });
   }
+
   return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
     defaultMessage: 'This message was sent by Kibana. [{viewInKibanaText}]({link}).',
     values: {
       viewInKibanaText,
-      link: KIBANA_ROOT + viewInKibanaPath,
+      link: `${publicBaseUrl}${viewInKibanaPath}`,
     },
   });
 }
