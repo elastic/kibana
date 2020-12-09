@@ -35,6 +35,7 @@ export class LicenseState {
   }
 
   private updateInformation(license: ILicense | undefined) {
+    this.license = license;
     this.licenseInformation = this.checkLicense(license);
   }
 
@@ -44,6 +45,10 @@ export class LicenseState {
 
   public getLicenseInformation() {
     return this.licenseInformation;
+  }
+
+  public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
+    this._notifyUsage = notifyUsage;
   }
 
   public isLicenseValidForAlertType(
@@ -126,18 +131,17 @@ export class LicenseState {
   }
 
   public ensureLicenseForAlertType(alertType: AlertType) {
-    this.notifyUsage(alertType.name, alertType.minimumLicenseRequired!); // TODO: remove !
+    this.notifyUsage(alertType.name, alertType.minimumLicenseRequired);
 
     const check = this.isLicenseValidForAlertType(
       alertType.id,
       alertType.name,
-      alertType.minimumLicenseRequired!
+      alertType.minimumLicenseRequired
     );
 
     if (check.isValid) {
       return;
     }
-
     switch (check.reason) {
       case 'unavailable':
         throw new AlertTypeDisabledError(

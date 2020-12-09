@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -20,11 +21,13 @@ import {
 } from './types';
 import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
 import { ILicenseState } from './lib/license_state';
+import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
 
 export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
+  licensing: LicensingPluginSetup;
 }
 
 export interface RegistryAlertType
@@ -75,11 +78,13 @@ export class AlertTypeRegistry {
   private readonly alertTypes: Map<string, NormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
+  private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory, licenseState }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
+    this.licensing = licensing;
   }
 
   public has(id: string) {
@@ -118,6 +123,13 @@ export class AlertTypeRegistry {
           this.taskRunnerFactory.create(normalizedAlertType, context),
       },
     });
+    // No need to notify usage on basic alert types
+    if (alertType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getAlertTypeFeatureUsageName(alertType.name),
+        alertType.minimumLicenseRequired
+      );
+    }
   }
 
   public get<
@@ -168,7 +180,7 @@ export class AlertTypeRegistry {
           producer,
           minimumLicenseRequired,
           enabledInLicense:
-            this.licenseState.isLicenseValidForAlertType(id, name, minimumLicenseRequired!)
+            this.licenseState.isLicenseValidForAlertType(id, name, minimumLicenseRequired)
               .isValid === true,
         })
       )

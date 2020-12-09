@@ -19,7 +19,7 @@ import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertsClientFactory } from './alerts_client_factory';
-import { LicenseState } from './lib/license_state';
+import { ILicenseState, LicenseState } from './lib/license_state';
 import {
   KibanaRequest,
   Logger,
@@ -54,7 +54,7 @@ import {
   unmuteAlertInstanceRoute,
   healthRoute,
 } from './routes';
-import { LICENSE_TYPE, LicensingPluginSetup } from '../../licensing/server';
+import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
@@ -130,6 +130,7 @@ export interface AlertingPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
+  licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -138,7 +139,7 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
-  private licenseState: LicenseState | null = null;
+  private licenseState: ILicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
@@ -197,6 +198,7 @@ export class AlertingPlugin {
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
+      licensing: plugins.licensing,
     });
     this.alertTypeRegistry = alertTypeRegistry;
 
@@ -289,7 +291,10 @@ export class AlertingPlugin {
       alertTypeRegistry,
       alertsClientFactory,
       security,
+      licenseState,
     } = this;
+
+    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: ['alert'],

@@ -17,6 +17,7 @@ export const createLicenseStateMock = () => {
     checkLicense: jest.fn().mockResolvedValue({
       state: 'valid',
     }),
+    setNotifyUsage: jest.fn(),
   };
   return licenseState;
 };
