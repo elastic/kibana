@@ -29,7 +29,7 @@ describe('Kuery value suggestions', () => {
         if (field.type === 'boolean') {
           res = [true, false];
         } else if (field.name === 'machine.os') {
-          res = ['Windo"ws', "Mac'", 'Linux'];
+          res = ['Windo"ws', "Mac'", 'Linux', 'C:\\path\\to\\dir\\'];
         } else if (field.name === 'nestedField.child') {
           res = ['foo'];
         } else {
@@ -160,6 +160,7 @@ describe('Kuery value suggestions', () => {
       expect(suggestions[0].text).toEqual('"Windo\\"ws" ');
       expect(suggestions[1].text).toEqual('"Mac\'" ');
       expect(suggestions[2].text).toEqual('"Linux" ');
+      expect(suggestions[3].text).toEqual('"C:\\\\path\\\\to\\\\dir\\\\" ');
     });
 
     test('should filter out string suggestions', async () => {

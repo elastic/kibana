@@ -14,6 +14,13 @@ describe('Kuery escape', () => {
     expect(escapeQuotes(value)).toBe(expected);
   });
 
+  test('should escape backslashes and quotes', () => {
+    const value = 'Backslashes \\" in the middle and ends with quotes \\"';
+    const expected = 'Backslashes \\\\\\" in the middle and ends with quotes \\\\\\"';
+
+    expect(escapeQuotes(value)).toBe(expected);
+  });
+
   test('should escape special characters', () => {
     const value = `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`;
     const expected = `This \\\\ has \\(a lot of\\) \\<special\\> characters, don't you \\*think\\*? \\"Yes.\\"`;
