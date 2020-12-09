@@ -50,7 +50,7 @@ const templateHtml = `
       <%= ' ' %>
     <% }); %>
   </dl>`;
-export const doTemplate = template(noWhiteSpace(templateHtml));
+const doTemplate = template(noWhiteSpace(templateHtml));
 
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;

@@ -177,9 +177,8 @@ export function DiscoverLegacy({
     if (index !== -1) {
       columns = removeElFromColumns(column, columns);
     }
-    if (columns.length === 0) {
-      const defaultColumn = column === '_source' ? 'fields' : '_source';
-      columns = [defaultColumn];
+    if (columns.length === 0 && column === 'fields') {
+      columns = ['_source'];
     }
     return columns;
   };

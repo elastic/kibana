@@ -26,12 +26,10 @@
 function buildColumns(columns: string[], useNewFieldsApi = false) {
   if (columns.length > 1 && columns.indexOf('_source') !== -1) {
     return columns.filter((col) => col !== '_source');
-  } else if (columns.length > 1 && useNewFieldsApi && columns.indexOf('fields') !== -1) {
-    return columns.filter((col) => col !== 'fields');
   } else if (columns.length !== 0) {
     return columns;
   }
-  return useNewFieldsApi ? ['fields'] : ['_source'];
+  return useNewFieldsApi ? [] : ['_source'];
 }
 
 export function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {

@@ -37,7 +37,6 @@ export {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  FieldsFormat,
 } from './converters';
 
 export { getHighlightRequest } from './utils';

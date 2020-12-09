@@ -33,7 +33,6 @@ import {
   StringFormat,
   TruncateFormat,
   UrlFormat,
-  FieldsFormat,
 } from '../converters';
 
 export const baseFormatters: FieldFormatInstanceType[] = [
@@ -50,5 +49,4 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StringFormat,
   TruncateFormat,
   UrlFormat,
-  FieldsFormat,
 ];
