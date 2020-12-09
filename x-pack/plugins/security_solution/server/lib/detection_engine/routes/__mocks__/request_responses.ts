@@ -129,10 +129,11 @@ export const getDeleteAsPostBulkRequest = () =>
     body: [{ rule_id: 'rule-1' }],
   });
 
-export const getPrivilegeRequest = () =>
+export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
   requestMock.create({
     method: 'get',
     path: DETECTION_ENGINE_PRIVILEGES_URL,
+    ...options,
   });
 
 export const addPrepackagedRulesRequest = () =>

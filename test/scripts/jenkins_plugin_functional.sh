@@ -10,6 +10,6 @@ cd -;
 
 pwd
 
-yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-yarn run grunt run:exampleFunctionalTestsRelease --from=source;
-yarn run grunt run:interpreterFunctionalTestsRelease;
+./test/scripts/test/plugin_functional.sh
+./test/scripts/test/example_functional.sh
+./test/scripts/test/interpreter_functional.sh
