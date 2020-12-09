@@ -3,27 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
-import { LatencyAggregationTypes } from '../../../../common/latency_aggregation_types';
-
-export const latencyAggregationTypeRt = t.union([
-  t.literal('avg'),
-  t.literal('p95'),
-  t.literal('p99'),
-]);
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 export function getLatencyAggregation(
-  latencyAggregationType: LatencyAggregationTypes,
+  latencyAggregationType: LatencyAggregationType,
   field: string
 ) {
   return {
     latency: {
-      ...(latencyAggregationType === 'avg'
+      ...(latencyAggregationType === LatencyAggregationType.avg
         ? { avg: { field } }
         : {
             percentiles: {
               field,
-              percents: [latencyAggregationType === 'p95' ? 95 : 99],
+              percents: [
+                latencyAggregationType === LatencyAggregationType.p95 ? 95 : 99,
+              ],
             },
           }),
     },

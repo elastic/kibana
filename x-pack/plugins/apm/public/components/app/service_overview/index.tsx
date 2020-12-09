@@ -21,11 +21,11 @@ import { TransactionBreakdownChart } from '../../shared/charts/transaction_break
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { SearchBar } from '../../shared/search_bar';
-import { LatencyChart } from './latency_chart';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { TableLinkFlexItem } from './table_link_flex_item';
+import { LatencyChart } from '../../shared/charts/latency_chart';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.

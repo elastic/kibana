@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { LocalUIFilterName } from '../../../common/ui_filter';
 
 export type IUrlParams = {
@@ -29,5 +28,5 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
-  latencyAggregationType?: LatencyAggregationType;
+  latencyAggregationType?: string;
 } & Partial<Record<LocalUIFilterName, string>>;

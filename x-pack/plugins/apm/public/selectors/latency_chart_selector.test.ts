@@ -5,6 +5,7 @@
  */
 
 import { EuiTheme } from '../../../xpack_legacy/common';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   getLatencyChartSelector,
   LatencyChartsResponse,
@@ -21,11 +22,7 @@ const theme = {
 
 const latencyChartData = {
   overallAvgDuration: 1,
-  latencyTimeseries: {
-    avg: [{ x: 1, y: 10 }],
-    p95: [{ x: 2, y: 5 }],
-    p99: [{ x: 3, y: 8 }],
-  },
+  latencyTimeseries: [{ x: 1, y: 10 }],
   anomalyTimeseries: {
     jobId: '1',
     anomalyBoundaries: [{ x: 1, y: 2 }],
@@ -38,41 +35,63 @@ describe('getLatencyChartSelector', () => {
     it('returns default values when data is undefined', () => {
       const latencyChart = getLatencyChartSelector({ theme });
       expect(latencyChart).toEqual({
-        latencyTimeseries: [],
+        latencyTimeseries: undefined,
         mlJobId: undefined,
         anomalyTimeseries: undefined,
       });
     });
-    it('returns latency time series', () => {
+
+    it('returns average timeseries', () => {
       const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
         theme,
+        latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyTimeseries).toEqual({
-        latencyTimeseries: [
-          {
-            title: 'Avg.',
-            data: [{ x: 1, y: 10 }],
-            legendValue: '1 μs',
-            type: 'linemark',
-            color: 'blue',
-          },
-          {
-            title: '95th percentile',
-            titleShort: '95th',
-            data: [{ x: 2, y: 5 }],
-            type: 'linemark',
-            color: 'red',
-          },
-          {
-            title: '99th percentile',
-            titleShort: '99th',
-            data: [{ x: 3, y: 8 }],
-            type: 'linemark',
-            color: 'black',
-          },
-        ],
+        latencyTimeseries: {
+          title: 'Average',
+          data: [{ x: 1, y: 10 }],
+          legendValue: '1 μs',
+          type: 'linemark',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('returns 95th percentile timeseries', () => {
+      const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
+      const latencyTimeseries = getLatencyChartSelector({
+        latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
+        theme,
+        latencyAggregationType: LatencyAggregationType.p95,
+      });
+      expect(latencyTimeseries).toEqual({
+        latencyTimeseries: {
+          title: '95th percentile',
+          data: [{ x: 1, y: 10 }],
+          titleShort: '95th',
+          type: 'linemark',
+          color: 'red',
+        },
+      });
+    });
+
+    it('returns 99th percentile timeseries', () => {
+      const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
+      const latencyTimeseries = getLatencyChartSelector({
+        latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
+        theme,
+        latencyAggregationType: LatencyAggregationType.p99,
+      });
+      expect(latencyTimeseries).toEqual({
+        latencyTimeseries: {
+          title: '99th percentile',
+          data: [{ x: 1, y: 10 }],
+          titleShort: '99th',
+          type: 'linemark',
+          color: 'black',
+        },
       });
     });
   });
@@ -82,31 +101,16 @@ describe('getLatencyChartSelector', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
         theme,
+        latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
-        latencyTimeseries: [
-          {
-            title: 'Avg.',
-            data: [{ x: 1, y: 10 }],
-            legendValue: '1 μs',
-            type: 'linemark',
-            color: 'blue',
-          },
-          {
-            title: '95th percentile',
-            titleShort: '95th',
-            data: [{ x: 2, y: 5 }],
-            type: 'linemark',
-            color: 'red',
-          },
-          {
-            title: '99th percentile',
-            titleShort: '99th',
-            data: [{ x: 3, y: 8 }],
-            type: 'linemark',
-            color: 'black',
-          },
-        ],
+        latencyTimeseries: {
+          title: '99th percentile',
+          titleShort: '99th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'black',
+        },
         mlJobId: '1',
         anomalyTimeseries: {
           bounderies: {

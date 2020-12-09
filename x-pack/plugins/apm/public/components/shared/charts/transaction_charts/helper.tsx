@@ -24,12 +24,19 @@ export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
   };
 }
 
-export function getMaxY(timeSeries: TimeSeries[]) {
-  const coordinates = flatten(
-    timeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-  );
+export function getMaxY(timeSeries?: TimeSeries[] | TimeSeries) {
+  if (timeSeries) {
+    const coordinates = Array.isArray(timeSeries)
+      ? flatten(
+          timeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
+        )
+      : (timeSeries.data as Coordinate[]);
 
-  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
+    const numbers: number[] = coordinates.map((c: Coordinate) =>
+      c.y ? c.y : 0
+    );
 
-  return Math.max(...numbers, 0);
+    return Math.max(...numbers, 0);
+  }
+  return 0;
 }
