@@ -1486,11 +1486,13 @@ describe('helpers', () => {
         notes: [
           {
             created: new Date('2020-03-26T14:35:56.356Z'),
+            eventId: null,
             id: 'note-id',
             lastEdit: new Date('2020-03-26T14:35:56.356Z'),
             note: 'I am a note',
             user: 'unknown',
             saveObjectId: 'note-id',
+            timelineId: null,
             version: undefined,
           },
         ],
