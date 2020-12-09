@@ -28,9 +28,9 @@ import { isFullScreen } from '../timeline/body/column_headers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 
-import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import * as i18n from './translations';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -72,7 +72,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineFullScreen,
   toggleFullScreen,
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
+  <EuiFlexGroup alignItems="flexStart" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
         {i18n.CLOSE_ANALYZER}

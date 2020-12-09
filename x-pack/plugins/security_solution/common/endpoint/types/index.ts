@@ -29,7 +29,6 @@ export interface PolicyDetailsRouteState {
  * Object that allows you to maintain stateful information in the location object across navigation events
  *
  */
-
 export interface AppLocation {
   pathname: string;
   search: string;
@@ -62,6 +61,9 @@ type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+/**
+ * Stats for related events for a particular node in a resolver graph.
+ */
 export interface EventStats {
   /**
    * The total number of related events (all events except process and alerts) that exist for a node.
@@ -129,7 +131,17 @@ export interface ResolverNode {
 }
 
 /**
+ * The structure for a resolver graph that is generic and data type agnostic. The nodes in the graph do not conform
+ * to a specific document type. The format of the nodes is defined by the schema used to query for the graph.
+ */
+export interface NewResolverTree {
+  originID: string;
+  nodes: ResolverNode[];
+}
+
+/**
  * Statistical information for a node in a resolver tree.
+ * @deprecated use {@link EventStats} instead to model the stats for a node
  */
 export interface ResolverNodeStats {
   /**
@@ -144,6 +156,8 @@ export interface ResolverNodeStats {
 
 /**
  * A child node can also have additional children so we need to provide a pagination cursor.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverChildNode extends ResolverLifecycleNode {
   /**
@@ -165,6 +179,8 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
 
 /**
  * Safe version of `ResolverChildNode`.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
   /**
@@ -187,6 +203,8 @@ export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
 /**
  * The response structure for the children route. The structure is an array of nodes where each node
  * has an array of lifecycle events.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverChildren {
   childNodes: ResolverChildNode[];
@@ -205,6 +223,8 @@ export interface ResolverChildren {
 
 /**
  * Safe version of `ResolverChildren`.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface SafeResolverChildren {
   childNodes: SafeResolverChildNode[];
@@ -223,6 +243,8 @@ export interface SafeResolverChildren {
 
 /**
  * A flattened tree representing the nodes in a resolver graph.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverTree {
   /**
@@ -240,6 +262,8 @@ export interface ResolverTree {
 
 /**
  * Safe version of `ResolverTree`.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface SafeResolverTree {
   /**
@@ -256,6 +280,8 @@ export interface SafeResolverTree {
 
 /**
  * The lifecycle events (start, end etc) for a node.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverLifecycleNode {
   entityID: string;
@@ -268,6 +294,8 @@ export interface ResolverLifecycleNode {
 
 /**
  * Safe version of `ResolverLifecycleNode`.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface SafeResolverLifecycleNode {
   entityID: string;
@@ -280,6 +308,8 @@ export interface SafeResolverLifecycleNode {
 
 /**
  * The response structure when searching for ancestors of a node.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverAncestry {
   /**
@@ -295,6 +325,8 @@ export interface ResolverAncestry {
 
 /**
  * Safe version of `ResolverAncestry`.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface SafeResolverAncestry {
   /**
@@ -310,6 +342,8 @@ export interface SafeResolverAncestry {
 
 /**
  * Response structure for the related events route.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverRelatedEvents {
   entityID: string;
@@ -453,6 +487,7 @@ type DllFields = Partial<{
 export type AlertEvent = Partial<{
   event: Partial<{
     action: ECSField<string>;
+    code: ECSField<string>;
     dataset: ECSField<string>;
     module: ECSField<string>;
   }>;
@@ -749,7 +784,17 @@ export type ECSField<T> = T | null | undefined | Array<T | null>;
  * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
  * Prefer this over `ResolverEvent`.
  */
-export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
+export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent | WinlogEvent;
+
+/**
+ * A type for describing a winlog event until we can leverage runtime fields.
+ */
+export type WinlogEvent = Partial<{
+  winlog: Partial<{
+    record_id: ECSField<string>;
+  }>;
+}> &
+  SafeEndpointEvent;
 
 /**
  * Safer version of ResolverEvent. Please use this going forward.

@@ -11,6 +11,7 @@ import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
+import { createRange } from './../../models/time_range';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
@@ -26,6 +27,8 @@ export function RelatedEventsFetcher(
 
     const newParams = selectors.panelViewAndParameters(state);
     const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
+    const indices = selectors.treeParameterIndices(state);
+
     const oldParams = last;
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
@@ -42,13 +45,20 @@ export function RelatedEventsFetcher(
       let result: ResolverPaginatedEvents | null = null;
       try {
         if (cursor) {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(
-            nodeID,
-            eventCategory,
-            cursor
-          );
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory({
+            entityID: nodeID,
+            category: eventCategory,
+            after: cursor,
+            indexPatterns: indices,
+            timeRange: createRange(),
+          });
         } else {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory({
+            entityID: nodeID,
+            category: eventCategory,
+            indexPatterns: indices,
+            timeRange: createRange(),
+          });
         }
       } catch (error) {
         api.dispatch({

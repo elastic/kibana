@@ -15,6 +15,7 @@ type ResolverColorNames =
   | 'full'
   | 'graphControls'
   | 'graphControlsBackground'
+  | 'graphControlsBorderColor'
   | 'linkColor'
   | 'resolverBackground'
   | 'resolverEdge'
@@ -38,6 +39,7 @@ export function useColors(): ColorMap {
       full: theme.euiColorFullShade,
       graphControls: theme.euiColorDarkestShade,
       graphControlsBackground: theme.euiColorEmptyShade,
+      graphControlsBorderColor: theme.euiColorLightShade,
       processBackingFill: `${theme.euiColorPrimary}${isDarkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
       resolverBackground: theme.euiColorEmptyShade,
       resolverEdge: isDarkMode ? theme.euiColorLightShade : theme.euiColorLightestShade,

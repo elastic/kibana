@@ -95,24 +95,20 @@ export const SourceContent: React.FC = () => {
 
   const emptyState = (
     <EuiPanel className="euiPanel--inset">
-      <EuiSpacer size="xxl" />
-      <EuiPanel className="euiPanel--inset">
-        <EuiEmptyPrompt
-          title={<h2>{emptyMessage}</h2>}
-          iconType="documents"
-          body={
-            isCustomSource ? (
-              <p>
-                Learn more about adding content in our{' '}
-                <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
-                  documentation
-                </EuiLink>
-              </p>
-            ) : null
-          }
-        />
-      </EuiPanel>
-      <EuiSpacer size="l" />
+      <EuiEmptyPrompt
+        title={<h2>{emptyMessage}</h2>}
+        iconType="documents"
+        body={
+          isCustomSource ? (
+            <p>
+              Learn more about adding content in our{' '}
+              <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                documentation
+              </EuiLink>
+            </p>
+          ) : null
+        }
+      />
     </EuiPanel>
   );
 
@@ -185,7 +181,6 @@ export const SourceContent: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source content" />
-      <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
