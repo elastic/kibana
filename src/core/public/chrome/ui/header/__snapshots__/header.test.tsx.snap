@@ -243,6 +243,7 @@ exports[`Header renders 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -5354,6 +5355,7 @@ exports[`Header renders 1`] = `
           "basePath": "/test",
           "get": [Function],
           "prepend": [Function],
+          "publicBaseUrl": undefined,
           "remove": [Function],
           "serverBasePath": "/test",
         }
