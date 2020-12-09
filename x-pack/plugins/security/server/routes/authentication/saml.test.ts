@@ -5,21 +5,24 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLogin } from '../../authentication';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { AuthenticationResult, AuthenticationServiceStart, SAMLLogin } from '../../authentication';
 import { defineSAMLRoutes } from './saml';
-import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
+import type { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     defineSAMLRoutes(routeParamsMock);
   });
