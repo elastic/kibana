@@ -42,7 +42,10 @@ function* getHostHashes(actualHost: string) {
 }
 
 const isHostMatch = (actualHost: string, ruleHostHash: string) => {
-  for (const hash of getHostHashes(actualHost)) {
+  // If the host contains a `[`, then it's likely an IPv6 address. Otherwise, append a `.` if it doesn't already contain one
+  const hostToHash =
+    !actualHost.includes('[') && !actualHost.endsWith('.') ? `${actualHost}.` : actualHost;
+  for (const hash of getHostHashes(hostToHash)) {
     if (hash === ruleHostHash) {
       return true;
     }

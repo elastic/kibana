@@ -85,9 +85,14 @@ export class ExternalUrlConfig implements IExternalUrlConfig {
   constructor(rawConfig: IExternalUrlConfig) {
     this.policy = rawConfig.policy.map((entry) => {
       if (entry.host) {
+        // If the host contains a `[`, then it's likely an IPv6 address. Otherwise, append a `.` if it doesn't already contain one
+        const hostToHash =
+          entry.host && !entry.host.includes('[') && !entry.host.endsWith('.')
+            ? `${entry.host}.`
+            : entry.host;
         return {
           ...entry,
-          host: createSHA256Hash(entry.host),
+          host: createSHA256Hash(hostToHash),
         };
       }
       return entry;

@@ -33,10 +33,17 @@ const setupService = ({
   serverBasePath: string;
   policy: ExternalUrlConfig['policy'];
 }) => {
-  const hashedPolicies = policy.map((entry) => ({
-    ...entry,
-    host: entry.host ? new Sha256().update(entry.host, 'utf8').digest('hex') : undefined,
-  }));
+  const hashedPolicies = policy.map((entry) => {
+    // If the host contains a `[`, then it's likely an IPv6 address. Otherwise, append a `.` if it doesn't already contain one
+    const hostToHash =
+      entry.host && !entry.host.includes('[') && !entry.host.endsWith('.')
+        ? `${entry.host}.`
+        : entry.host;
+    return {
+      ...entry,
+      host: hostToHash ? new Sha256().update(hostToHash, 'utf8').digest('hex') : undefined,
+    };
+  });
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
   injectedMetadata.getExternalUrlConfig.mockReturnValue({ policy: hashedPolicies });
   injectedMetadata.getServerBasePath.mockReturnValue(serverBasePath);
@@ -326,6 +333,63 @@ describe('External Url Service', () => {
           ],
         });
         const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('allows external urls with a partially matching host and protocol in the allow list when the URL includes the root domain', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              host: 'google.com',
+              protocol: 'https',
+            },
+          ],
+        });
+        const urlCandidate = `https://www.google.com./foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('allows external urls with an IPv4 address', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              host: '192.168.10.12',
+              protocol: 'https',
+            },
+          ],
+        });
+        const urlCandidate = `https://192.168.10.12/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('allows external urls with an IPv6 address', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              host: '[2001:db8:85a3:8d3:1319:8a2e:370:7348]',
+              protocol: 'https',
+            },
+          ],
+        });
+        const urlCandidate = `https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]/foo?bar=baz`;
         const result = setup.validateUrl(urlCandidate);
 
         expect(result).toBeInstanceOf(URL);
