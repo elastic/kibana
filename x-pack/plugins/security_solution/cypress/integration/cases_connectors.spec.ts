@@ -40,19 +40,11 @@ describe('Cases connectors', () => {
   before(() => {
     cy.intercept('POST', '/api/actions/action').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
-      console.log('one', req.body);
-      const connector = JSON.parse(req.body).connector;
-      console.log('two');
+      const connector = req.body.connector;
       req.reply((res) => {
-        res.send({ fixture: JSON.stringify({ ...configureResult, connector }) });
+        res.send(200, { ...configureResult, connector });
       });
     }).as('saveConnector');
-    // cy.server();
-    // cy.route('POST', '**/api/actions/action').as('createConnector');
-    // cy.route2('POST', `**/api/cases/configure`, (req) => {
-    //   const connector = JSON.parse(req.body).connector;
-    //   req.reply(JSON.stringify({ ...configureResult, connector }));
-    // });
   });
 
   it('Configures a new connector', () => {
