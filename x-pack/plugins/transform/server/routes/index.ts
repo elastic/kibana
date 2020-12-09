@@ -20,7 +20,4 @@ export class ApiRoutes {
     registerPrivilegesRoute(dependencies);
     registerTransformsRoutes(dependencies);
   }
-
-  start() {}
-  stop() {}
 }

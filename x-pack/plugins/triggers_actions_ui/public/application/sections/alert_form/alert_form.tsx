@@ -55,7 +55,12 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import { AlertActionParam, ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import {
+  AlertActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
@@ -192,6 +197,7 @@ export const AlertForm = ({
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
+
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
 
@@ -330,6 +336,18 @@ export const AlertForm = ({
   );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
+
+  const isActionGroupDisabledForActionType = useCallback(
+    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+      return isActionGroupDisabledForActionTypeId(
+        actionGroupId === alertType?.recoveryActionGroup?.id
+          ? RecoveredActionGroup.id
+          : actionGroupId,
+        actionTypeId
+      );
+    },
+    []
+  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
@@ -513,6 +531,9 @@ export const AlertForm = ({
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+          }
           actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
             actionGroup.id === selectedAlertType.recoveryActionGroup.id
               ? {

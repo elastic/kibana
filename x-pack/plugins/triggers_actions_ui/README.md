@@ -1463,9 +1463,9 @@ interface ActionAccordionFormProps {
 |actionTypeRegistry|Registry for action types.|
 |toastNotifications|Toast messages  Plugin Setup Contract.|
 |docLinks|Documentation links Plugin Start Contract.|
-|actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
-|actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
-|defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+|actionTypes|Optional property, which allows to define a list of available actions specific for a current plugin.|
+|messageVariables|Optional property, which allows to define a list of variables for action 'message' property. Set `useWithTripleBracesInTemplates` to true if you don't want the variable escaped when rendering.|
+|defaultActionMessage|Optional property, which allows to define a message value for action with 'message' property.|
 |capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
 
 |Property|Description|

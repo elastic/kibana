@@ -200,11 +200,14 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
+    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
-      searchableSnapshotDisabled: () => exists(licenseCalloutSelector),
+      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
+      searchableSnapshotDisabled: () =>
+        exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
       searchableSnapshotsExists: () => exists(fieldSelector),
       findSearchableSnapshotToggle: () => find(toggleSelector),
       searchableSnapshotDisabledDueToLicense: () =>
