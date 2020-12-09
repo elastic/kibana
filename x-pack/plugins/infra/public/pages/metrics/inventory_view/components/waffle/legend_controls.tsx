@@ -186,9 +186,8 @@ export const LegendControls = ({
         button={buttonComponent}
       >
         <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-        <EuiForm style={{ width: 500 }}>
+        <EuiForm style={{ minWidth: 500 }}>
           <EuiFormRow
-            fullWidth
             display="columnCompressed"
             label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
               defaultMessage: 'Color palette',
@@ -211,7 +210,6 @@ export const LegendControls = ({
             </>
           </EuiFormRow>
           <EuiFormRow
-            fullWidth
             display="columnCompressed"
             label={i18n.translate('xpack.infra.legendControls.stepsLabel', {
               defaultMessage: 'Number of colors',
