@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-export const SELECT_CASE_TITLE = i18n.translate('xpack.securitySolution.case.caseModal.title', {
-  defaultMessage: 'Select case to attach timeline',
-});
+export { CategoricalDataMappingPopover } from './categorical_data_mapping_popover';
+export { OrdinalDataMappingPopover } from './ordinal_data_mapping_popover';
