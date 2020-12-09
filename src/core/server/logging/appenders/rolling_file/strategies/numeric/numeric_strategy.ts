@@ -72,7 +72,7 @@ export const numericRollingStrategyConfigSchema = schema.object({
       }
     },
   }),
-  max: schema.number({ min: 1, defaultValue: 7 }),
+  max: schema.number({ min: 1, max: 100, defaultValue: 7 }),
 });
 
 /**
@@ -144,6 +144,9 @@ export class NumericRollingStrategy implements RollingStrategy {
     await rollCurrentFile({ pattern, logFileBaseName, logFileFolder });
 
     // updates the context file info to mirror the new size and date
+    // this is required for the time based policy, as the next time check
+    // will be performed before the file manager updates the context itself by reopening
+    // a writer to the new file.
     this.context.refreshFileInfo();
   }
 }
