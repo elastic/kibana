@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export * from './cron';
-export * from './humanized_numbers';
+export { cronExpressionToParts, cronPartsToExpression } from './cron';
+export {
+  getOrdinalValue,
+  getDayName,
+  getMonthName,
+  DayOrdinal,
+  MonthOrdinal,
+} from './humanized_numbers';
