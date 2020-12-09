@@ -37,6 +37,7 @@ export const getMetrics = async ({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: true,
       size: 0,
       query: {
         bool: {

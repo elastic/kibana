@@ -134,4 +134,32 @@ describe('joinByKey', () => {
       joined.find((item) => item.serviceName === 'opbeans-node')?.values
     ).toEqual(['a', 'b', 'c']);
   });
+
+  it('deeply merges objects', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            foo: '',
+          },
+        },
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            bar: '',
+          },
+        },
+      ],
+      'serviceName'
+    );
+
+    expect(joined[0]).toEqual({
+      serviceName: 'opbeans-node',
+      properties: {
+        foo: '',
+        bar: '',
+      },
+    });
+  });
 });

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keyBy } from 'lodash';
+import { isEqual, keyBy, mapValues } from 'lodash';
+import { pickKeys } from '../../../../common/utils/pick_keys';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
@@ -89,7 +90,7 @@ export const getDestinationMap = async ({
         [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
           bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
         ),
-        id: String(doc.fields[SPAN_ID]?.[0]),
+        [SPAN_ID]: String(doc.fields[SPAN_ID]?.[0]),
         [SPAN_TYPE]: String(doc.fields[SPAN_TYPE]?.[0] ?? ''),
         [SPAN_SUBTYPE]: String(doc.fields[SPAN_SUBTYPE]?.[0] ?? ''),
       };
@@ -106,7 +107,7 @@ export const getDestinationMap = async ({
             {
               terms: {
                 [PARENT_ID]: outgoingConnections.map(
-                  (connection) => connection.id
+                  (connection) => connection[SPAN_ID]
                 ),
               },
             },
@@ -126,7 +127,7 @@ export const getDestinationMap = async ({
   });
 
   const incomingConnections = transactionResponse.hits.hits.map((hit) => ({
-    id: String(hit.fields[PARENT_ID]![0]),
+    [SPAN_ID]: String(hit.fields[PARENT_ID]![0]),
     service: {
       name: String(hit.fields[SERVICE_NAME]![0]),
       environment: String(hit.fields[SERVICE_ENVIRONMENT]?.[0] ?? ''),
@@ -134,16 +135,49 @@ export const getDestinationMap = async ({
     },
   }));
 
+  // merge outgoing spans with transactions by span.id/parent.id
   const joinedBySpanId = joinByKey(
-    [...outgoingConnections, ...joinByKey(incomingConnections, 'service')],
-    'id'
+    [...outgoingConnections, ...incomingConnections],
+    SPAN_ID
   );
 
-  const connections = joinByKey(
+  // we could have multiple connections per address because
+  // of multiple event outcomes
+  const dedupedConnectionsByAddress = joinByKey(
     joinedBySpanId,
     SPAN_DESTINATION_SERVICE_RESOURCE
-  ).map((connection) => {
-    const info = {
+  );
+
+  // identify a connection by either service.name, service.environment, agent.name
+  // OR span.destination.service.resource
+
+  const connectionsWithId = dedupedConnectionsByAddress.map((connection) => {
+    const id =
+      'service' in connection
+        ? { service: connection.service }
+        : pickKeys(connection, SPAN_DESTINATION_SERVICE_RESOURCE);
+
+    return {
+      ...connection,
+      id,
+    };
+  });
+
+  const dedupedConnectionsById = joinByKey(connectionsWithId, 'id');
+
+  const connectionsByAddress = keyBy(
+    connectionsWithId,
+    SPAN_DESTINATION_SERVICE_RESOURCE
+  );
+
+  // per span.destination.service.resource, return merged/deduped item
+  return mapValues(connectionsByAddress, ({ id }) => {
+    const connection = dedupedConnectionsById.find((dedupedConnection) =>
+      isEqual(id, dedupedConnection.id)
+    )!;
+
+    return {
+      id,
       span: {
         type: connection[SPAN_TYPE],
         subtype: connection[SPAN_SUBTYPE],
@@ -153,10 +187,6 @@ export const getDestinationMap = async ({
           },
         },
       },
-    };
-
-    return {
-      ...info,
       ...('service' in connection && connection.service
         ? {
             service: {
@@ -170,9 +200,4 @@ export const getDestinationMap = async ({
         : {}),
     };
   });
-
-  // map span.destination.service.resource to an instrumented service (service.name, service.environment)
-  // or an external service (span.type, span.subtype)
-
-  return keyBy(connections, SPAN_DESTINATION_SERVICE_RESOURCE);
 };
