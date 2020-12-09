@@ -47,11 +47,10 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fields = (
-          ((await data.indexPatterns.getFieldsForWildcard({
-            pattern: INDEX_NAME,
-          })) as IFieldType[]) || []
-        ).filter((field) => {
+        const _fields: IFieldType[] = await data.indexPatterns.getFieldsForWildcard({
+          pattern: INDEX_NAME,
+        });
+        const fields = (_fields || []).filter((field) => {
           if (fieldPrefix && field.name.startsWith(fieldPrefix)) {
             for (const hiddenField of HIDDEN_FIELDS) {
               if (field.name.startsWith(hiddenField)) {

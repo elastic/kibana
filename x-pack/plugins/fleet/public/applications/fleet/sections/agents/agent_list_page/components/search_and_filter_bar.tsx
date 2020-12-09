@@ -49,7 +49,7 @@ const statusFilters = [
       defaultMessage: 'Inactive',
     }),
   },
-] as Array<{ label: string; status: string }>;
+];
 
 export const SearchAndFilterBar: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
