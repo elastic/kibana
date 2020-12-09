@@ -70,7 +70,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     ReactDOM.render(
       <I18nProvider>
         <SearchBar
-          globalSearch={globalSearch.find}
+          globalSearch={globalSearch}
           navigateToUrl={navigateToUrl}
           taggingApi={savedObjectsTagging}
           basePathUrl={basePathUrl}

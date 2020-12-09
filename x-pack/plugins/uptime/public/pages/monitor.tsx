@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { monitorStatusSelector } from '../state/selectors';
-import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
 import { useMonitorId } from '../hooks';
@@ -61,22 +60,23 @@ export const MonitorPage: React.FC = () => {
 
   const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
   useBreadcrumbs([{ text: nameOrId }]);
+
   return (
     <>
-      <PageHeader
-        headingText={
-          <EuiFlexGroup wrap={false}>
-            <EuiFlexItem grow={false}>{nameOrId}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EnableMonitorAlert
-                monitorId={monitorId}
-                monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        datePicker={true}
-      />
+      <EuiFlexGroup wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h1 className="eui-textNoWrap">{nameOrId}</h1>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EnableMonitorAlert
+            monitorId={monitorId}
+            monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
