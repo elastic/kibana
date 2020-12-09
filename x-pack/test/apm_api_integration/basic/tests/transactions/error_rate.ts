@@ -65,13 +65,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has the correct start date', () => {
           expectSnapshot(
             new Date(first(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-29T14:30:00.000Z"`);
+          ).toMatchInline(`"2020-12-08T13:57:30.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
             new Date(last(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-29T15:00:00.000Z"`);
+          ).toMatchInline(`"2020-12-08T14:27:30.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.average).toMatchInline(`0.152173913043478`);
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.16`);
         });
 
         it('has the correct error rate', () => {

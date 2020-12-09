@@ -163,6 +163,51 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 |===
 
 [float]
+[[anonymous-authentication-provider-settings]]
+===== Anonymous authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[NOTE]
+============
+You can configure only one anonymous provider per {kib} instance.
+============
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`anonymous.<provider-name>.credentials` {ess-icon}
+| Credentials that {kib} should use internally to authenticate anonymous requests to {es}. Possible values are: username and password, API key, or the constant `elasticsearch_anonymous_user` if you want to leverage {ref}/anonymous-access.html[{es} anonymous access].
+
+2+a| For example:
+
+[source,yaml]
+----------------------------------------
+# Username and password credentials
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    username: "anonymous_service_account"
+    password: "anonymous_service_account_password"
+
+# API key (concatenated and base64-encoded)
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    apiKey: "VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=="
+
+# API key (as returned from Elasticsearch API)
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    apiKey.id: "VuaCfGcBCdbkQm-e5aOx"
+    apiKey.key: "ui2lp2axTNmsyakw9tvNnw"
+
+# Elasticsearch anonymous access
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials: "elasticsearch_anonymous_user"
+----------------------------------------
+
+|===
+
+[float]
 [[http-authentication-settings]]
 ===== HTTP authentication settings
 

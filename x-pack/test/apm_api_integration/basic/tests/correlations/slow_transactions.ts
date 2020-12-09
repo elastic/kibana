@@ -57,19 +57,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns significant terms', () => {
-          expectSnapshot(response.body?.significantTerms?.map((term) => term.fieldName))
+          expectSnapshot(response.body?.significantTerms?.map((term) => term.fieldName).sort())
             .toMatchInline(`
             Array [
+              "container.id",
+              "container.id",
+              "host.ip",
               "host.ip",
               "service.node.name",
-              "container.id",
+              "service.node.name",
+              "url.domain",
               "url.domain",
               "user_agent.name",
-              "user.id",
-              "host.ip",
-              "service.node.name",
-              "container.id",
-              "user.id",
+              "user_agent.name",
             ]
           `);
         });
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns a distribution per term', () => {
           // @ts-ignore
           expectSnapshot(response.body?.significantTerms[0].distribution.length).toMatchInline(
-            `11`
+            `42`
           );
         });
 
@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns overall distribution', () => {
           // @ts-ignore
-          expectSnapshot(response.body?.overall.distribution.length).toMatchInline(`11`);
+          expectSnapshot(response.body?.overall.distribution.length).toMatchInline(`42`);
         });
       });
     });

@@ -234,9 +234,11 @@ export const HotPhase: FunctionComponent = () => {
             </>
           )}
         </ToggleFieldWithDescribedFormRow>
-        {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-        {isRolloverEnabled && !isUsingSearchableSnapshotInHotPhase && (
-          <ForcemergeField phase="hot" />
+        {isRolloverEnabled && (
+          <>
+            {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+            {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="hot" />}
+          </>
         )}
         <SetPriorityInputField phase={hotProperty} />
       </EuiAccordion>
