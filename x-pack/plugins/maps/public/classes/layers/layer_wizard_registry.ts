@@ -28,7 +28,9 @@ export type LayerWizard = {
   categories: LAYER_WIZARD_CATEGORY[];
   checkVisibility?: () => Promise<boolean>;
   description: string;
+  disabledReason?: string;
   icon: string | FunctionComponent<any>;
+  getIsDisabled?: () => boolean;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;

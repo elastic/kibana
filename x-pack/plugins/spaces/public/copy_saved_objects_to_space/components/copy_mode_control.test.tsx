@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { CopyModeControl, CopyModeControlProps } from './copy_mode_control';
 
 describe('CopyModeControl', () => {
-  const initialValues = { createNewCopies: false, overwrite: true }; // some test cases below make assumptions based on these initial values
+  const initialValues = { createNewCopies: true, overwrite: true }; // some test cases below make assumptions based on these initial values
   const updateSelection = jest.fn();
 
   const getOverwriteRadio = (wrapper: ReactWrapper) =>
@@ -34,21 +34,23 @@ describe('CopyModeControl', () => {
     const wrapper = mountWithIntl(<CopyModeControl {...props} />);
 
     expect(updateSelection).not.toHaveBeenCalled();
-    const { createNewCopies } = initialValues;
+    // need to disable `createNewCopies` first
+    getCreateNewCopiesDisabled(wrapper).simulate('change');
+    const createNewCopies = false;
 
     getOverwriteDisabled(wrapper).simulate('change');
-    expect(updateSelection).toHaveBeenNthCalledWith(1, { createNewCopies, overwrite: false });
+    expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies, overwrite: false });
 
     getOverwriteEnabled(wrapper).simulate('change');
-    expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies, overwrite: true });
+    expect(updateSelection).toHaveBeenNthCalledWith(3, { createNewCopies, overwrite: true });
   });
 
-  it('should disable the Overwrite switch when `createNewCopies` is enabled', async () => {
+  it('should enable the Overwrite switch when `createNewCopies` is disabled', async () => {
     const wrapper = mountWithIntl(<CopyModeControl {...props} />);
 
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(false);
-    getCreateNewCopiesEnabled(wrapper).simulate('change');
     expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(true);
+    getCreateNewCopiesDisabled(wrapper).simulate('change');
+    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(false);
   });
 
   it('should allow the user to toggle `createNewCopies`', async () => {
@@ -57,10 +59,10 @@ describe('CopyModeControl', () => {
     expect(updateSelection).not.toHaveBeenCalled();
     const { overwrite } = initialValues;
 
-    getCreateNewCopiesEnabled(wrapper).simulate('change');
-    expect(updateSelection).toHaveBeenNthCalledWith(1, { createNewCopies: true, overwrite });
-
     getCreateNewCopiesDisabled(wrapper).simulate('change');
-    expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies: false, overwrite });
+    expect(updateSelection).toHaveBeenNthCalledWith(1, { createNewCopies: false, overwrite });
+
+    getCreateNewCopiesEnabled(wrapper).simulate('change');
+    expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies: true, overwrite });
   });
 });

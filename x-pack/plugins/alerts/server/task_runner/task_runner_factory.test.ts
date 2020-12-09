@@ -22,6 +22,10 @@ const alertType = {
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };

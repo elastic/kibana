@@ -16,16 +16,11 @@ import { UiMetricService } from './application/services/ui_metric';
 import { setExtensionsService } from './application/store/selectors';
 import { setUiMetricService } from './application/services/api';
 
-import {
-  IndexManagementPluginSetup,
-  IndexMgmtMetricsType,
-  SetupDependencies,
-  StartDependencies,
-} from './types';
+import { IndexManagementPluginSetup, SetupDependencies, StartDependencies } from './types';
 import { ExtensionsService } from './services';
 
 export class IndexMgmtUIPlugin {
-  private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
+  private uiMetricService = new UiMetricService(UIM_APP_NAME);
   private extensionsService = new ExtensionsService();
 
   constructor() {

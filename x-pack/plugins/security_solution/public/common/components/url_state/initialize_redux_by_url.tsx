@@ -97,6 +97,7 @@ export const dispatchSetInitialStateFromUrl = (
       const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
       if (timeline != null && timeline.id !== '') {
         queryTimelineById({
+          activeTimelineTab: timeline.activeTab,
           apolloClient,
           duplicate: false,
           graphEventId: timeline.graphEventId,

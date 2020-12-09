@@ -46,10 +46,8 @@ describe('getSharingData', () => {
         ],
         "searchRequest": Object {
           "body": Object {
-            "_source": Object {
-              "includes": Array [],
-            },
-            "docvalue_fields": Array [],
+            "_source": Object {},
+            "fields": undefined,
             "query": Object {
               "bool": Object {
                 "filter": Array [],
@@ -60,7 +58,7 @@ describe('getSharingData', () => {
             },
             "script_fields": Object {},
             "sort": Array [],
-            "stored_fields": Array [],
+            "stored_fields": undefined,
           },
           "index": "the-index-pattern-title",
         },
