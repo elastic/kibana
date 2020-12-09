@@ -23,6 +23,7 @@
     "kibanaReact",
     "home",
     "discover",
-    "visDefaultEditor"
+    "visDefaultEditor",
+    "presentationUtil"
   ]
 }
