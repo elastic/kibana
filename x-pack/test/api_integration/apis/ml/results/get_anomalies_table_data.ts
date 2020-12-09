@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.interval).to.eql('hour');
-      expect(body.anomalies.length).to.eql(12);
+      expect(body.anomalies.length).to.eql(13);
     });
 
     it('should validate request body', async () => {

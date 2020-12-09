@@ -103,6 +103,7 @@ describe('#asScoped', () => {
 
     audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
       kibana: { space_id: 'default' },
       message: 'MESSAGE',
