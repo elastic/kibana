@@ -21,7 +21,8 @@ import { useEffect, useState } from 'react';
 import { History } from 'history';
 import _ from 'lodash';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '../../services/kibana_react';
+
 import { DashboardConstants } from '../..';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getDashboard60Warning } from '../../dashboard_strings';

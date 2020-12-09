@@ -22,16 +22,16 @@ import { History } from 'history';
 import _ from 'lodash';
 import { map } from 'rxjs/operators';
 
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../../kibana_utils/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../services/kibana_utils';
+import { useKibana } from '../../services/kibana_react';
 import {
   connectToQueryState,
   esFilters,
   QueryState,
   syncQueryStateWithUrl,
-} from '../../../../data/public';
-import { SavedObject } from '../../../../saved_objects/public';
-import type { TagDecoratedSavedObject } from '../../../../saved_objects_tagging_oss/public';
+} from '../../services/data';
+import { SavedObject } from '../../services/saved_objects';
+import type { TagDecoratedSavedObject } from '../../services/saved_objects_tagging_oss';
 
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { migrateLegacyQuery } from '../lib/migrate_legacy_query';

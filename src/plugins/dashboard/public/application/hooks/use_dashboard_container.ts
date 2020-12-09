@@ -21,14 +21,14 @@ import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { History } from 'history';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '../../services/kibana_react';
 import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   isErrorEmbeddable,
   ViewMode,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
