@@ -333,3 +333,56 @@ export const SAVE_CUSTOM_FEATURES_BUTTON = i18n.translate(
     defaultMessage: 'Learn about Platinum features',
   }
 );
+
+export const SOURCE_FEATURES_SEARCHABLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.searchable.text',
+  {
+    defaultMessage: 'The following items are searchable:',
+  }
+);
+
+export const SOURCE_FEATURES_REMOTE_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.remote.text',
+  {
+    defaultMessage:
+      'Message data and other information is searchable in real-time from the Workplace Search experience.',
+  }
+);
+
+export const SOURCE_FEATURES_PRIVATE_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.private.text',
+  {
+    defaultMessage:
+      'Results returned are specific and relevant to you. Connecting this source does not expose your personal data to other search users - only you.',
+  }
+);
+
+export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.globalAccessPermissions.text',
+  {
+    defaultMessage:
+      'All documents accessible to the connecting service user will be synchronized and made available to the organization’s users, or group’s users. Documents are immediately available for search',
+  }
+);
+
+export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.documentLevelPermissions.text',
+  {
+    defaultMessage:
+      'Document-level permissions manage user content access based on defined rules. Allow or deny access to certain documents for individuals and groups.',
+  }
+);
+
+export const SOURCE_FEATURES_EXPLORE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.explore.button',
+  {
+    defaultMessage: 'Explore Platinum features',
+  }
+);
+
+export const SOURCE_FEATURES_INCLUDED_FEATURES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.included.title',
+  {
+    defaultMessage: 'Included features',
+  }
+);
