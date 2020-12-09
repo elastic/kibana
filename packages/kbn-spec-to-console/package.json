@@ -7,7 +7,6 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "../../node_modules/.bin/jest",
     "format": "../../node_modules/.bin/prettier **/*.js --write"
   },
   "author": "",

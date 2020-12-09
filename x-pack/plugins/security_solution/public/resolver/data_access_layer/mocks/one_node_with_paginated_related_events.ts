@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -37,7 +38,10 @@ export function oneNodeWithPaginatedEvents(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin' },
   };
-  const tree = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  const mockTree: {
+    nodes: ResolverNode[];
+    events: SafeResolverEvent[];
+  } = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     originID: metadata.entityIDs.origin,
   });
 
@@ -47,11 +51,19 @@ export function oneNodeWithPaginatedEvents(): {
       /**
        * Fetch related events for an entity ID
        */
-      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents({
+        entityID,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
-        const events = entityID === metadata.entityIDs.origin ? tree.relatedEvents.events : [];
+        const events = entityID === metadata.entityIDs.origin ? mockTree.events : [];
 
         return {
           entityID,
@@ -63,13 +75,21 @@ export function oneNodeWithPaginatedEvents(): {
       /**
        * If called with an "after" cursor, return the 2nd page, else return the first.
        */
-      async eventsWithEntityIDAndCategory(
-        entityID: string,
-        category: string,
-        after?: string
-      ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
+      async eventsWithEntityIDAndCategory({
+        entityID,
+        category,
+        after,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         let events: SafeResolverEvent[] = [];
-        const eventsOfCategory = tree.relatedEvents.events.filter(
+        const eventsOfCategory = mockTree.events.filter(
           (event) => event.event?.category === category
         );
         if (after === undefined) {
@@ -86,17 +106,59 @@ export function oneNodeWithPaginatedEvents(): {
       /**
        * Any of the origin's related events by event.id
        */
-      async event(eventID: string): Promise<SafeResolverEvent | null> {
-        return (
-          tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
-        );
+      async event({
+        nodeID,
+        eventID,
+        eventCategory,
+        eventTimestamp,
+        winlogRecordID,
+        timeRange,
+        indexPatterns,
+      }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
+        eventID?: string | number;
+        winlogRecordID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
+        return mockTree.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
+      },
+
+      async nodeData({
+        ids,
+        timeRange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timeRange: TimeRange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return [];
       },
 
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
-        return tree;
+      async resolverTree({
+        dataId,
+        schema,
+        timeRange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: ResolverSchema;
+        timeRange: TimeRange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
+        return mockTree.nodes;
       },
 
       /**

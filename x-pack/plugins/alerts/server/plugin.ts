@@ -8,7 +8,7 @@ import { first, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -132,6 +132,7 @@ export interface AlertingPluginsStart {
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class AlertingPlugin {
@@ -222,8 +223,7 @@ export class AlertingPlugin {
       this.logger,
       core.getStartServices(),
       plugins.taskManager,
-      this.config,
-      this.security
+      this.config
     );
 
     core.getStartServices().then(async ([, startPlugins]) => {
@@ -311,6 +311,7 @@ export class AlertingPlugin {
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
+      securityPluginStart: plugins.security,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
