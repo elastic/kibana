@@ -45,6 +45,8 @@ export function Correlations() {
         View significant terms
       </EuiButton>
 
+      <EuiSpacer size="s" />
+
       {isFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
@@ -81,8 +83,8 @@ export function Correlations() {
               >
                 <p>
                   Significant terms is an experimental feature and in active
-                  development. Bugs and surprises are to be expected but your
-                  feedback is very welcome so we can improve it.
+                  development. Bugs and surprises are to be expected but let us
+                  know your feedback so we can improve it.
                 </p>
               </EuiCallOut>
 

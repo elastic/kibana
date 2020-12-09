@@ -13,7 +13,7 @@ import { EuiCode } from '@elastic/eui';
 import { asInteger, asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { createHref } from '../../shared/Links/url_helpers';
+import { createHref, push } from '../../shared/Links/url_helpers';
 
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -65,8 +65,39 @@ export function SignificantTermsTable<T extends SignificantTerm>({
     },
     {
       width: '100px',
-      field: 'filter',
-      name: 'Filter',
+      actions: [
+        {
+          name: 'Focus',
+          description: 'Focus on this term',
+          icon: 'magnifyWithPlus',
+          type: 'icon',
+          onClick: (term: T) => {
+            push(history, {
+              query: {
+                kuery: `${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+          },
+        },
+        {
+          name: 'Exclude',
+          description: 'Exclude this term',
+          icon: 'magnifyWithMinus',
+          type: 'icon',
+          onClick: (term: T) => {
+            push(history, {
+              query: {
+                kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+          },
+        },
+      ],
+      name: 'Actions',
       render: (_: any, term: T) => {
         return (
           <>
