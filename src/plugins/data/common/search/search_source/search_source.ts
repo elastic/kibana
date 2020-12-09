@@ -408,7 +408,12 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        // uses new Fields API
+        // This will pass the passed in parameters to the new fields API.
+        // Also if will only return scripted fields that are part of the specified
+        // array of fields. If you specify the wildcard `*` as an array element
+        // the fields API will return all fields, and all scripted fields will be returned.
+        // NOTE: While the fields API supports wildcards within names, e.g. `user.*`
+        //       scripted fields won't be considered for this.
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
