@@ -11,6 +11,7 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 import {
   JobType,
+  CanDeleteJobResponse,
   SyncSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
@@ -39,12 +40,20 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
-
   syncSavedObjects(simulate: boolean = false) {
     return httpService.http<SyncSavedObjectResponse>({
       path: `${basePath()}/saved_objects/sync`,
       method: 'GET',
       query: { simulate },
+    });
+  },
+
+  canDeleteJob(jobType: JobType, jobIds: string[]) {
+    const body = JSON.stringify({ jobIds });
+    return httpService.http<CanDeleteJobResponse>({
+      path: `${basePath()}/saved_objects/can_delete_job/${jobType}`,
+      method: 'POST',
+      body,
     });
   },
 });

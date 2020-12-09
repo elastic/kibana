@@ -18,6 +18,13 @@ export interface SyncSavedObjectResponse {
   datafeedsRemoved: SavedObjectResult;
 }
 
+export interface CanDeleteJobResponse {
+  [key: string]: {
+    canDelete: boolean;
+    canUnTag: boolean;
+  };
+}
+
 export type JobsSpacesResponse = {
   [jobType in JobType]: { [jobId: string]: string[] };
 };
