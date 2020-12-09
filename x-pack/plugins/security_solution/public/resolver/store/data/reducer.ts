@@ -10,6 +10,7 @@ import { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
+import * as nodeDataModel from '../../models/node_data';
 
 const initialState: DataState = {
   currentRelatedEvent: {
@@ -86,6 +87,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
          */
         lastResponse: {
           result: action.payload.result,
+          dataSource: action.payload.dataSource,
+          schema: action.payload.schema,
           parameters: action.payload.parameters,
           successful: true,
         },
@@ -183,6 +186,41 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
+  } else if (action.type === 'serverReturnedNodeData') {
+    const updatedNodeData = nodeDataModel.updateWithReceivedNodes({
+      storedNodeInfo: state.nodeData,
+      receivedEvents: action.payload.nodeData,
+      requestedNodes: action.payload.requestedIDs,
+      numberOfRequestedEvents: action.payload.numberOfRequestedEvents,
+    });
+
+    return {
+      ...state,
+      nodeData: updatedNodeData,
+    };
+  } else if (action.type === 'userReloadedResolverNode') {
+    const updatedNodeData = nodeDataModel.setReloadedNodes(state.nodeData, action.payload);
+    return {
+      ...state,
+      nodeData: updatedNodeData,
+    };
+  } else if (action.type === 'appRequestingNodeData') {
+    const updatedNodeData = nodeDataModel.setRequestedNodes(
+      state.nodeData,
+      action.payload.requestedIDs
+    );
+
+    return {
+      ...state,
+      nodeData: updatedNodeData,
+    };
+  } else if (action.type === 'serverFailedToReturnNodeData') {
+    const updatedData = nodeDataModel.setErrorNodes(state.nodeData, action.payload.requestedIDs);
+
+    return {
+      ...state,
+      nodeData: updatedData,
+    };
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {
       ...state,
