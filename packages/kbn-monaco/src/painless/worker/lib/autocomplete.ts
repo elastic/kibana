@@ -27,7 +27,7 @@ import {
 } from '../../types';
 
 import {
-  painlessTestContext,
+  commonContext,
   scoreContext,
   filterContext,
   booleanScriptFieldScriptFieldContext,
@@ -91,7 +91,7 @@ const runtimeContexts: PainlessContext[] = [
 ];
 
 const mapContextToData: { [key: string]: { suggestions: any[] } } = {
-  painless_test: painlessTestContext,
+  painless_test: commonContext,
   score: scoreContext,
   filter: filterContext,
   boolean_script_field_script_field: booleanScriptFieldScriptFieldContext,
@@ -224,7 +224,14 @@ export const getAutocompleteSuggestions = (
   words: string[],
   fields?: PainlessAutocompleteField[]
 ): PainlessCompletionResult => {
-  const suggestions = mapContextToData[painlessContext].suggestions;
+  // Unique suggestions based on context
+  const contextSuggestions = mapContextToData[painlessContext].suggestions;
+  // Enhance suggestions with common classes that exist in all contexts
+  // "painless_test" is the exception since it equals the common suggestions
+  const suggestions =
+    painlessContext === 'painless_test'
+      ? contextSuggestions
+      : contextSuggestions.concat(commonContext.suggestions);
   // What the user is currently typing
   const activeTyping = words[words.length - 1];
   const primitives = getPrimitives(suggestions);
