@@ -169,7 +169,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       maxBars: params.maxBars === AUTO_BARS ? undefined : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
-      min_doc_count: true,
+      min_doc_count: false,
       extended_bounds: JSON.stringify({ min: '', max: '' }),
     }).toAst();
   },

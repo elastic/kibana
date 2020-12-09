@@ -154,11 +154,54 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern
       );
+      expect(esAggsFn).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "extended_bounds": Array [
+              "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+            ],
+            "field": Array [
+              "MyField",
+            ],
+            "has_extended_bounds": Array [
+              false,
+            ],
+            "id": Array [
+              "col1",
+            ],
+            "interval": Array [
+              "auto",
+            ],
+            "min_doc_count": Array [
+              false,
+            ],
+            "schema": Array [
+              "segment",
+            ],
+          },
+          "function": "aggHistogram",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('should set maxBars param if provided', () => {
+      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern
+      );
+
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           function: 'aggHistogram',
           arguments: expect.objectContaining({
-            field: [sourceField],
+            maxBars: [10],
           }),
         })
       );
