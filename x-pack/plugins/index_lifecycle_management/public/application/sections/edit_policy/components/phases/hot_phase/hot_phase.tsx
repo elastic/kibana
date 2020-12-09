@@ -236,8 +236,8 @@ export const HotPhase: FunctionComponent = () => {
         {isRolloverEnabled && (
           <>
             {<ForcemergeField phase="hot" />}
-            {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
             <ShrinkField phase="hot" />
+            {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           </>
         )}
         <SetPriorityInputField phase={hotProperty} />

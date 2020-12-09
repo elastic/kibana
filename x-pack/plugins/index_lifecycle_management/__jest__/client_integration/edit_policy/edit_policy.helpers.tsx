@@ -192,7 +192,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     await createFormSetValueAction(`${phase}-selectedPrimaryShardCount`)(value);
   };
 
-  const shrinkExists = () => exists('shrinkSwitch');
+  const shrinkExists = (phase: Phases) => () => exists(`${phase}-shrinkSwitch`);
 
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
@@ -238,6 +238,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         ...createForceMergeActions('hot'),
         setIndexPriority: setIndexPriority('hot'),
         setShrink: setShrink('hot'),
+        shrinkExists: shrinkExists('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
@@ -249,7 +250,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         setShrink: setShrink('warm'),
-        shrinkExists,
+        shrinkExists: shrinkExists('warm'),
         ...createForceMergeActions('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
