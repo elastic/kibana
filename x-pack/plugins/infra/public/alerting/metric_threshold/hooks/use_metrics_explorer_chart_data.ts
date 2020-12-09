@@ -7,15 +7,12 @@
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useMemo } from 'react';
 import { InfraSource } from '../../../../common/http_api/source_api';
-import { AlertContextMeta, MetricExpression } from '../types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
+import { MetricExpression } from '../types';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
-  context: AlertsContextValue<AlertContextMeta>,
   derivedIndexPattern: IIndexPattern,
   source: InfraSource | null,
   filterQuery?: string,
@@ -54,7 +51,6 @@ export const useMetricsExplorerChartData = (
     derivedIndexPattern,
     timerange,
     null,
-    null,
-    context.http.fetch
+    null
   );
 };
