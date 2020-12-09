@@ -12,7 +12,7 @@ import { UseField, NumericField } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { i18nTexts } from '../../../i18n_texts';
 
-import { LearnMoreLink, DescribedFormField } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../../';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -22,7 +22,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
   const path = `phases.${phase}.actions.shrink.number_of_shards`;
   const { policy } = useEditPolicyContext();
   return (
-    <DescribedFormField
+    <DescribedFormRow
       title={
         <h3>
           <FormattedMessage
@@ -68,6 +68,6 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
         </EuiFlexGroup>
         <EuiSpacer />
       </div>
-    </DescribedFormField>
+    </DescribedFormRow>
   );
 };
