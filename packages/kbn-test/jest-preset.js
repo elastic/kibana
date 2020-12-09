@@ -85,7 +85,7 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
-    '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
+    '<rootDir>/packages/kbn-ui-framework/dist/',
     '<rootDir>/packages/kbn-pm/dist/',
     `integration_tests/`,
   ],
