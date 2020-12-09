@@ -40,6 +40,15 @@ export const contentSources = [
 
 export const configuredSources = [
   {
+    serviceType: 'gmail',
+    name: 'Gmail',
+    configured: false,
+    needsPermissions: false,
+    accountContextOnly: true,
+    supportedByLicense: false,
+    privateSourcesEnabled: false,
+  },
+  {
     serviceType: 'confluence_cloud',
     name: 'Confluence',
     configured: true,
@@ -87,15 +96,6 @@ export const configuredSources = [
 ];
 
 export const availableSources = [
-  {
-    serviceType: 'gmail',
-    name: 'Gmail',
-    configured: false,
-    needsPermissions: false,
-    accountContextOnly: true,
-    supportedByLicense: false,
-    privateSourcesEnabled: false,
-  },
   {
     serviceType: 'google_drive',
     name: 'Google Drive',
