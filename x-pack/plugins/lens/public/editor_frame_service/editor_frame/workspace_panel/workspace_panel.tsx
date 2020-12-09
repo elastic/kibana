@@ -378,7 +378,7 @@ export const InnerVisualizationWrapper = ({
       if (inspectorAdapters && inspectorAdapters.tables) {
         dispatch({
           type: 'UPDATE_ACTIVE_DATA',
-          tables: inspectorAdapters.tables,
+          tables: inspectorAdapters.tables.tables,
         });
       }
     },

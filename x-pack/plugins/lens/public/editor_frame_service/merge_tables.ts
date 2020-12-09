@@ -48,17 +48,14 @@ export const mergeTables: ExpressionFunctionDefinition<
   },
   inputTypes: ['kibana_context', 'null'],
   fn(input, { layerIds, tables }, context) {
-    if (!context.inspectorAdapters) {
-      context.inspectorAdapters = {};
-    }
-    if (!context.inspectorAdapters.tables) {
-      context.inspectorAdapters.tables = {};
-    }
     const resultTables: Record<string, Datatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
       // adapter is always defined at that point because we make sure by the beginning of the function
-      context.inspectorAdapters.tables![layerIds[index]] = table;
+      if (context.inspectorAdapters.tables) {
+        context.inspectorAdapters.tables.lens = true;
+        context.inspectorAdapters.tables.logDatatable(layerIds[index], table);
+      }
     });
     return {
       type: 'lens_multitable',
