@@ -37,6 +37,50 @@ describe('SavedObjectSaveModal', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('should render matching snapshot when given options', () => {
+    const wrapper = shallow(
+      <SavedObjectSaveModal
+        onSave={() => void 0}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        showCopyOnSave={false}
+        objectType="visualization"
+        showDescription={true}
+        options={<div>Hello! Main options</div>}
+        rightOptions={<div>Hey there! Options on the right</div>}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should render matching snapshot when custom isValid is set', () => {
+    const falseWrapper = shallow(
+      <SavedObjectSaveModal
+        onSave={() => void 0}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        showCopyOnSave={false}
+        objectType="visualization"
+        showDescription={true}
+        isValid={false}
+      />
+    );
+    expect(falseWrapper).toMatchSnapshot();
+
+    const trueWrapper = shallow(
+      <SavedObjectSaveModal
+        onSave={() => void 0}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        showCopyOnSave={false}
+        objectType="visualization"
+        showDescription={true}
+        isValid={true}
+      />
+    );
+    expect(trueWrapper).toMatchSnapshot();
+  });
+
   it('allows specifying custom save button label', () => {
     const wrapper = mountWithIntl(
       <SavedObjectSaveModal

@@ -503,6 +503,7 @@ export const AllRules = React.memo<AllRulesProps>(
                 onFilterChanged={onFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
+                currentFilterTags={filterOptions.tags ?? []}
               />
             </HeaderSection>
 
