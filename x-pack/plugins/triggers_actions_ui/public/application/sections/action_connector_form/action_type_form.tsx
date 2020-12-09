@@ -154,9 +154,16 @@ export const ActionTypeForm = ({
   ): string =>
     isActionGroupDisabledForActionType
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
-        ? `${actionGroupName} (Not Currently Supported)`
+        ? i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            {
+              defaultMessage: '{actionGroupName} (Not Currently Supported)',
+              values: { actionGroupName },
+            }
+          )
         : actionGroupName
       : actionGroupName;
+
   const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
     isActionGroupDisabledForActionType
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
