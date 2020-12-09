@@ -256,3 +256,80 @@ export const OAUTH_STEP_2 = i18n.translate(
     defaultMessage: 'Provide the appropriate configuration information',
   }
 );
+
+export const SAVE_CUSTOM_BODY1 = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body1',
+  {
+    defaultMessage: 'Your endpoints are ready to accept requests.',
+  }
+);
+
+export const SAVE_CUSTOM_BODY2 = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body2',
+  {
+    defaultMessage: 'Be sure to copy your API keys below.',
+  }
+);
+
+export const SAVE_CUSTOM_RETURN_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.return.button',
+  {
+    defaultMessage: 'Return to Sources',
+  }
+);
+
+export const SAVE_CUSTOM_API_KEYS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKeys.title',
+  {
+    defaultMessage: 'API Keys',
+  }
+);
+
+export const SAVE_CUSTOM_API_KEYS_BODY = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKeys.body',
+  {
+    defaultMessage: "You'll need these keys to sync documents for this custom source.",
+  }
+);
+
+export const SAVE_CUSTOM_ACCESS_TOKEN_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.accessToken.label',
+  {
+    defaultMessage: 'Access Token',
+  }
+);
+
+export const SAVE_CUSTOM_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKey.label',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.title',
+  {
+    defaultMessage: 'Visual Walkthrough',
+  }
+);
+
+export const SAVE_CUSTOM_STYLING_RESULTS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.stylingResults.title',
+  {
+    defaultMessage: 'Styling Results',
+  }
+);
+
+export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
+  {
+    defaultMessage: 'Set document-level permissions',
+  }
+);
+
+export const SAVE_CUSTOM_FEATURES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.features.button',
+  {
+    defaultMessage: 'Learn about Platinum features',
+  }
+);
