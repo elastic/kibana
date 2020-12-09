@@ -8,9 +8,9 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout } from '../types';
-import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
+import { EventStats } from '../../../common/endpoint/types';
+import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -54,31 +54,6 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
- * Whether or not a given entity id is in the set of termination events.
- */
-export const isProcessTerminated = composeSelectors(
-  dataStateSelector,
-  dataSelectors.isProcessTerminated
-);
-
-/**
- * Retrieve an event from memory using the event's ID.
- */
-export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
-
-/**
- * Given a nodeID (aka entity_id) get the indexed process event.
- * Legacy functions take process events instead of nodeID, use this to get
- * process events for them.
- */
-export const processEventForID: (
-  state: ResolverState
-) => (nodeID: string) => SafeResolverEvent | null = composeSelectors(
-  dataStateSelector,
-  dataSelectors.processEventForID
-);
-
-/**
  * The position of nodes and edges.
  */
 export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSelectors(
@@ -99,24 +74,27 @@ export const treeRequestParametersToAbort = composeSelectors(
   dataSelectors.treeRequestParametersToAbort
 );
 
+/**
+ * This should be the siem default indices to pass to the backend for querying data.
+ */
+export const treeParameterIndices = composeSelectors(
+  dataStateSelector,
+  dataSelectors.treeParamterIndices
+);
+
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID
 );
 
-export const terminatedProcesses = composeSelectors(
-  dataStateSelector,
-  dataSelectors.terminatedProcesses
-);
-
 /**
- * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
+ * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
-export const relatedEventsStats: (
+export const nodeStats: (
   state: ResolverState
-) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
+) => (nodeID: string) => EventStats | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventsStats
+  dataSelectors.nodeStats
 );
 
 /**
@@ -152,25 +130,6 @@ export const isCurrentRelatedEventLoading = composeSelectors(
 export const currentRelatedEventData = composeSelectors(
   dataStateSelector,
   dataSelectors.currentRelatedEventData
-);
-
-/**
- * Map of related events... by entity id
- * @deprecated
- */
-export const relatedEventsByEntityId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsByEntityId
-);
-
-/**
- * Returns a function that returns a function (when supplied with an entity id for a node)
- * that returns related events for a node that match an event.category (when supplied with the category)
- * @deprecated
- */
-export const relatedEventsByCategory = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsByCategory
 );
 
 /**
@@ -221,22 +180,27 @@ export const hadErrorLoadingTree = composeSelectors(
 );
 
 /**
- * True if the children cursor is not null
+ * True there might be more descendants to retrieve in the resolver graph.
  */
 export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
 
 /**
- * True if the ancestor cursor is not null
+ * True if there might be more ancestors to retrieve in the resolver graph.
  */
 export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
 
 /**
+ * True if there might be more generations to retrieve in the resolver graph.
+ */
+export const hasMoreGenerations = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hasMoreGenerations
+);
+
+/**
  * An array containing all the processes currently in the Resolver than can be graphed
  */
-export const graphableProcesses = composeSelectors(
-  dataStateSelector,
-  dataSelectors.graphableProcesses
-);
+export const graphableNodes = composeSelectors(dataStateSelector, dataSelectors.graphableNodes);
 
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
@@ -246,9 +210,9 @@ const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.node
  * Total count of related events for a process.
  * @deprecated
  */
-export const relatedEventTotalForProcess = composeSelectors(
+export const statsTotalForNode = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventTotalForProcess
+  dataSelectors.statsTotalForNode
 );
 
 /**
@@ -301,8 +265,8 @@ export const ariaFlowtoNodeID: (
       // get a `Set` containing their node IDs
       const nodesVisibleAtTime: Set<string> = new Set();
       // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
-      for (const visibleEvent of processNodePositions.keys()) {
-        const nodeID = entityIDSafeVersion(visibleEvent);
+      for (const visibleNode of processNodePositions.keys()) {
+        const nodeID = nodeModel.nodeID(visibleNode);
         if (nodeID !== undefined) {
           nodesVisibleAtTime.add(nodeID);
         }
@@ -393,6 +357,57 @@ export const isLoadingNodeEventsInCategory = composeSelectors(
 export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.isLoadingMoreNodeEventsInCategory
+);
+
+/**
+ * Returns the state of the node, loading, running, or terminated.
+ */
+export const nodeDataStatus = composeSelectors(dataStateSelector, dataSelectors.nodeDataStatus);
+
+/**
+ * Returns the node data object for a specific node ID.
+ */
+export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
+
+/**
+ * Returns the graph node for a given ID
+ */
+export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.graphNodeForID);
+
+/**
+ * Returns a Set of node IDs representing the visible nodes in the view that we do no have node data for already.
+ */
+export const newIDsToRequest: (
+  state: ResolverState
+) => (time: number) => Set<string> = createSelector(
+  composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
+  visibleNodesAndEdgeLines,
+  function (nodeData, visibleNodesAndEdgeLinesAtTime) {
+    return defaultMemoize((time: number) => {
+      const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
+
+      const nodes: Set<string> = new Set();
+      // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
+      for (const node of nodesInView.keys()) {
+        const id = nodeModel.nodeID(node);
+        // if the node has a valid ID field, and we either don't have any node data currently, or
+        // the map doesn't have info for this particular node, then add it to the set so it'll be requested
+        // by the middleware
+        if (id !== undefined && (!nodeData || !nodeData.has(id))) {
+          nodes.add(id);
+        }
+      }
+      return nodes;
+    });
+  }
+);
+
+/**
+ * Returns the schema for the current resolver tree. Currently, only used in the graph controls panel.
+ */
+export const resolverTreeSourceAndSchema = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverTreeSourceAndSchema
 );
 
 /**
