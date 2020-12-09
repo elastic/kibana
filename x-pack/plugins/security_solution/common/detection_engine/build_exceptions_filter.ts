@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { chunk } from 'lodash/fp';
 
 import { Filter } from '../../../../../src/plugins/data/common';
 import {
@@ -37,18 +38,7 @@ export const chunkExceptions = (
   exceptions: ExceptionItemSansLargeValueLists[],
   chunkSize: number
 ): ExceptionItemSansLargeValueLists[][] => {
-  if (exceptions.length === 0) {
-    return [];
-  } else if (exceptions.length <= chunkSize) {
-    return [exceptions];
-  } else {
-    const chunkedFilters: ExceptionItemSansLargeValueLists[][] = [];
-    for (let index = 0; index < exceptions.length; index += chunkSize) {
-      const exceptionsChunks = exceptions.slice(index, index + chunkSize);
-      chunkedFilters.push(exceptionsChunks);
-    }
-    return chunkedFilters;
-  }
+  return chunk(chunkSize, exceptions);
 };
 
 export const buildExceptionItemFilter = (
@@ -85,8 +75,8 @@ export const buildExceptionFilter = ({
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
   const exceptionsWithoutLargeValueLists = lists.filter(
-    ({ entries }) => !hasLargeValueList(entries)
-  ) as ExceptionItemSansLargeValueLists[];
+    (item): item is ExceptionItemSansLargeValueLists => !hasLargeValueList(item.entries)
+  );
 
   const exceptionFilter: Filter = {
     meta: {

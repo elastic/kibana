@@ -7,7 +7,6 @@
 import {
   Filter,
   IIndexPattern,
-  isFilterDisabled,
   buildEsQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
@@ -47,15 +46,18 @@ export const getQueryFilter = (
     excludeExceptions,
     chunkSize: 1024,
   });
-
-  const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
-
-  if (exceptionFilter != null) {
-    enabledFilters.push(exceptionFilter);
-  }
   const initialQuery = { query, language };
+  const allFilters = getAllFilters((filters as unknown) as Filter[], exceptionFilter);
 
-  return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
+  return buildEsQuery(indexPattern, initialQuery, allFilters, config);
+};
+
+export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undefined): Filter[] => {
+  if (exceptionFilter != null) {
+    return [...filters, exceptionFilter];
+  } else {
+    return [...filters];
+  }
 };
 
 interface EqlSearchRequest {
