@@ -156,6 +156,7 @@ export const TableVisBasic = memo(
           pagination={pagination}
           sorting={{ columns: sortingColumns, onSort }}
           onColumnResize={onColumnResize}
+          minSizeForControls={1}
         />
       </>
     );
