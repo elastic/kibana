@@ -1,0 +1,21 @@
+//TODO add these overrides to EUI so that search behaves the same globally
+.kbnSearchBar {
+  width: 400px;
+  max-width: 100%;
+  will-change: width;
+}
+
+@include euiBreakpoint('l', 'xl') {
+  .kbnSearchBar:focus {
+    animation: kbnAnimateSearchBar $euiAnimSpeedFast forwards;
+  }
+}
+
+@keyframes kbnAnimateSearchBar {
+  from {
+    width: 400px;
+  }
+  to {
+    width: 600px;
+  }
+}

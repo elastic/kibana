@@ -1,202 +1,66 @@
 # Cypress Tests
 
-The `security_solution/cypress` directory contains end to end tests, (plus a few tests
-that rely on mocked API calls), that execute via [Cypress](https://www.cypress.io/).
+The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
-Cypress tests may be run against:
+## Folder Structure
 
-- A local Kibana instance, interactively or via the command line. Credentials
-are specified via `kibana.dev.yml` or environment variables.
-- A remote Elastic Cloud instance (override `baseUrl`), interactively or via
-the command line. Again, credentials are specified via `kibana.dev.yml` or
-environment variables.
-- As part of CI (override `baseUrl` and pass credentials via the
-`CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
-environment variables), via command line.
+### Fixtures (Cypress native folder)
 
-At present, Cypress tests are only executed manually. They are **not** yet
-integrated in the Kibana CI infrastructure, and therefore do **not** run
-automatically when you submit a PR.
+Fixtures are used as external pieces of static data when we stub responses.
 
-## Smoke Tests
+### Integration (Cypress native folder)
 
-Smoke Tests are located in `security_solution/cypress/integration/smoke_tests`
+Contains the specs that are going to be executed.
 
-## Structure
+### Objects
 
-### Tasks
+Objects are a representation of data used accross different tests.
 
-_Tasks_ are functions that my be re-used across tests. Inside the _tasks_ folder there are some other folders that represents 
-the page to which we will perform the actions. For each folder we are going to create a file for each one of the sections that
- has the page.
+### Pluggins (Cypress native folder)
 
-i.e.
-- tasks
-  - hosts
-    - events.ts
+By default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs. They do this purely as a convenience mechanism so you don’t have to import this that in every single one of your spec files.
 
 ### Screens
 
-In _screens_ folder we are going to find all the elements we want to interact in our tests. Inside _screens_ fonder there
-are some other folders that represents the page that contains the elements the tests are going to interact with. For each 
-folder we are going to create a file for each one of the sections that the page has.
+In _screens_ folder we are going to find all the elements we want to interact in our tests.
+
+Each file inside the tasks folder represents a screen of our application. When the screens are complex i.e. Hosts contains multiple tabs, the page is represented by a folder and the different important parts are represented by files.
 
 i.e.
 - tasks
   - hosts
-    - events.ts      
+    - all_hosts.ts
+    - authentications.ts 
+    - events.ts
+    - main.ts
+    - uncommon_processes.ts  
 
-## Mock Data
+### Tasks
 
-We prefer not to mock API responses in most of our smoke tests, but sometimes
-it's necessary because a test must assert that a specific value is rendered,
-and it's not possible to derive that value based on the data in the
-environment where tests are running.
+_Tasks_ are functions that my be re-used across tests. 
 
-Mocked responses API from the server are located in `security_solution/cypress/fixtures`.
+Each file inside the tasks folder represents a screen of our application. When the screens are complex i.e. Hosts contains multiple tabs, the page is represented by a folder and the different important parts are represented by files.
 
-## Speeding up test execution time
+i.e.
+- tasks
+  - hosts
+    - all_hosts.ts
+    - authentications.ts 
+    - events.ts
+    - main.ts
+    - uncommon_processes.ts
 
-Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
-taken into consideration until another solution is implemented:
+### URLs
 
-- Don't refresh the page for every test to clean the state of it.
-- Instead, group the tests that are similar in different contexts.
-- For every context login only once, clean the state between tests if needed without re-loading the page.
-- All tests in a spec file must be order-independent. 
-    - If you need to reload the page to make the tests order-independent, consider to create a new context.
+Represents all the URLs used during the tests execution.
 
-Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
+## Test data
 
-## Authentication
+The data the tests need:
+- Is generated on the fly using our application APIs (preferred way)
+- Is ingested on the ELS instance using es_archive
 
-When running tests, there are two ways to specify the credentials used to
-authenticate with Kibana:
-
-- Via `kibana.dev.yml` (recommended for developers)
-- Via the `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
-environment variables (recommended for CI), or when testing a remote Kibana
-instance, e.g. in Elastic Cloud.
-
-Note: Tests that use the `login()` test helper function for authentication will
-automatically use the `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
-environment variables when they are defined, and fall back to the values in
-`config/kibana.dev.yml` when they are unset.
-
-### Content Security Policy (CSP) Settings
-
-Your local or cloud Kibana server must have the `csp.strict: false` setting
-configured in `kibana.dev.yml`, or `kibana.yml`, as shown in the example below:
-
-```yaml
-csp.strict: false
-```
-
-The above setting is required to prevent the _Please upgrade
-your browser_ / _This Kibana installation has strict security requirements
-enabled that your current browser does not meet._ warning that's displayed for
-unsupported user agents, like the one reported by Cypress when running tests.
-
-### Example `kibana.dev.yml`
-
-If you're a developer running tests interactively or on the command line, the
-easiset way to specify the credentials used for authentication is to update
- `kibana.dev.yml` per the following example:
-
-```yaml
-csp.strict: false
-elasticsearch:
-  username: 'elastic'
-  password: '<password>'
-  hosts: ['https://<server>:9200']
-```
-
-## Running (Headless) Tests on the Command Line as a Jenkins execution (The preferred way)
-
-To run (headless) tests as a Jenkins execution.
-
-1. First bootstrap kibana changes from the Kibana root directory:
-
-```sh
-yarn kbn bootstrap
-```
-
-2. Launch Cypress command line test runner:
-
-```sh 
-cd x-pack/plugins/security_solution
-yarn cypress:run-as-ci
-```
-
-Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
- the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed data 
- found in: `x-pack/test/security_solution_cypress/es_archives`
- 
-As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
-in this case does not make sense to override Cypress environment variables. 
-
-Note: To `run-as-ci` with the Cypress UI, update [x-pack/test/security_solution_cypress/runner.ts](https://github.com/elastic/kibana/blob/master/x-pack/test/security_solution_cypress/runner.ts#L25) from 
-``` ts
-args: ['cypress:run'],
-```
-to 
-``` ts
-args: ['cypress:open'],
-```
-This is helpful for debugging specific failed tests from CI without having to run the entire suite.
-
-Note: Please don't commit this change.
-### Test data
-
-As mentioned above, when running the tests as Jenkins the tests are populated with data ("archives") found in: `x-pack/test/security_solution_cypress/es_archives`.
-
-By default, each test is populated with some base data: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
-
-#### Running tests with additional archives
-
-When the base data is insufficient, one can specify additional archives. Use `esArchiverLoad` to load the necessary archive, and `esArchiverUnload` to remove the archive from elasticsearch:
-
-```typescript
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-
-describe('This are going to be a set of tests', () => {
-  before(() => {
-    esArchiverLoad('name_of_the_data_set_you_want_to_load');
-  });
-
-  after(() => {
-    esArchiverUnload('name_of_the_data_set_you_want_to_unload');
-  });
-
-  it('Going to test something awesome', () => {
-    hereGoesYourAwesomeTestcode     
-  });
-});
-
-```
-
-Note that loading and unloading data take a significant amount of time, so try to minimize their use.
-
-### Current archives
-
-The current archives can be found in `x-pack/test/security_solution_cypress/es_archives/`.
-
-- auditbeat
-  - Auditbeat data generated in Sep, 2019 with the following hosts present: 
-    - suricata-iowa
-    - siem-kibana
-    - siem-es
-    - jessie
-- closed_alerts
-  - Set of data with 108 closed alerts linked to "Alerts test" custom rule.
-- custome_rules
-  - Set if data with just 4 custom activated rules. 
-- empty_kibana
-  - Empty kibana board.
-- prebuilt_rules_loaded
-  - Elastic prebuilt loaded rules and deactivated. 
-- alerts
-  - Set of data with 108 opened alerts linked to "Alerts test" custom rule.
+By default when running the tests on Jenkins mode a base set of data is ingested on the ELS instance: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
 
 ### How to generate a new archive
 
@@ -217,109 +81,129 @@ node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  -
 
 Note that the command is going to create the folder if does not exist in the directory with the imported data.
 
+## Running the tests
 
-## Running Tests Interactively
+You can run the tests in interactive or headless mode, emulating the Jenkins pipeline or using your own instances.
 
-Use the Cypress interactive test runner to develop and debug specific tests
-by adding a `.only` to the test you're developing, or click on a specific
-spec in the interactive test runner to run just the tests in that spec.
+### Interactive vs Headless mode
 
-To run and debug tests in interactively via the Cypress test runner:
+#### Interactive
 
-1. Disable CSP on the local or remote Kibana instance, as described in the
-_Content Security Policy (CSP) Settings_ section above.
+When you run the Cypress on interactive mode, an interactive runner is displayed that allows you to see commands as they execute while also viewing the application under test.
 
-2. To specify the credentials required for authentication, configure
-`config/kibana.dev.yml`, as described in the _Server and Authentication
-Requirements_ section above, or specify them via environment variables
-as described later in this section.
+For more information, please visit: https://docs.cypress.io/guides/core-concepts/test-runner.html#Overview
 
-3. Start a local instance of the Kibana development server (only if testing against a
-local host):
+#### Headless mode
+
+A headless browser is a browser simulation program that does not have a user interface. These programs operate like any other browser, but do not display any UI. This is why meanwhile you are executing the tests on this mode you are not going to see the application under test. Just the output of the test is displayed on the terminal once the execution is finished.
+
+### Emulating Jenkins vs your own instances
+
+#### Emulating Jenkins
+
+With this mode we use the FTR to run the Cypress tests and automatically, a Kibana instance (http://localhost:5620) and Elastic Search instance (http://localhost:9220) with a preloaded minimum set of data.
+
+You can find the configuration of this mode in `x-pack/test/security_solution_cypress`
+
+#### Your own instances
+
+When using your own instances you need to take into account that if you already have data on it, the tests may fail, as well as, they can put your instances in an undesired state, since our tests uses es_archive to populate data.
+
+
+### Running Cypress in Headless mode as a Jenkins execution (The preferred way when running regressions on your machine)
+
+1. First bootstrap kibana changes from the Kibana root directory:
 
 ```sh
-yarn start --no-base-path
+yarn kbn bootstrap
 ```
 
-4. Launch the Cypress interactive test runner via one of the following options:
+2. Build the plugins
 
-- To run tests interactively against the default (local) host specified by
-`baseUrl`, as configured in `plugins/security_solution/cypress.json`:
+```sh
+node scripts/build_kibana_platform_plugins
+```
+
+3. Launch Cypress command line test runner:
+
+```sh 
+cd x-pack/plugins/security_solution
+yarn cypress:run-as-ci
+```
+
+As explained previously, this type of execution you don't need to have running a kibana and elasticsearch instance. This is because the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed data found in: `x-pack/test/security_solution_cypress/es_archives`
+ 
+### Running Cypress in Interactive mode as a Jenkins execution (The preferred way when developing new cypress tests)
+
+1. First bootstrap kibana changes from the Kibana root directory:
+
+```sh
+yarn kbn bootstrap
+```
+
+2. Build the plugins
+
+```sh
+node scripts/build_kibana_platform_plugins
+```
+
+3. Launch Cypress command line test runner:
+
+```sh 
+cd x-pack/plugins/security_solution
+yarn cypress:open-as-ci
+```
+
+As explained previously, this type of execution you don't need to have running a kibana and elasticsearch instance. This is because the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed data found in: `x-pack/test/security_solution_cypress/es_archives`
+ 
+### Running Cypress in your own instances (Recommended just for releases regressions)
+
+1. First bootstrap kibana changes from the Kibana root directory:
+
+```sh
+yarn kbn bootstrap
+```
+
+2. Load the initial auditbeat set of data needed for the test execution:
 
 ```sh
 cd x-pack/plugins/security_solution
-yarn cypress:open
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
 ```
 
-- To (optionally) run tests interactively against a different host, pass the
-`CYPRESS_baseUrl` environment variable on the command line when launching the
-test runner, as shown in the following example:
+3. Launch Cypress overriden some of the environment variables:
 
 ```sh
-cd x-pack/plugins/security_solution
-CYPRESS_baseUrl=http://localhost:5601 yarn cypress:open
+CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
 ```
 
-- To (optionally) override username and password via environment variables when
-running tests interactively:
+## Best Practices
 
-```sh
-cd x-pack/plugins/security_solution
-CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:open
-```
+### Clean up the state between tests
 
-5. Click the `Run all specs` button in the Cypress test runner (after adding
-a `.only` to an `it` or `describe` block).
+Remember to clean up the state of the test after its execution.
 
-## Running (Headless) Tests on the Command Line
+### Minimize the use of es_archive
 
-To run (headless) tests on the command line:
+When possible, create all the data that you need for executing the tests using the application APIS.
 
-1. Disable CSP on the local or remote Kibana instance, as described in the
-_Content Security Policy (CSP) Settings_ section above.
+### Speed up test execution time
 
-2. To specify the credentials required for authentication, configure
-`config/kibana.dev.yml`, as described in the _Server and Authentication
-Requirements_ section above, or specify them via environment variables
-as described later in this section.
+Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
+taken into consideration until another solution is implemented:
 
-3. Start a local instance of the Kibana development server (only if testing against a
-local host):
+- Don't refresh the page for every test to clean the state of it.
+- Instead, group the tests that are similar in different contexts.
+- For every context login only once, clean the state between tests if needed without re-loading the page.
+- All tests in a spec file must be order-independent. 
+    - If you need to reload the page to make the tests order-independent, consider to create a new context.
 
-```sh
-yarn start --no-base-path
-```
+Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
-4. Launch the Cypress command line test runner via one of the following options:
-
-- To run tests on the command line against the default (local) host specified by
-`baseUrl`, as configured in `plugins/security_solution/cypress.json`:
-
-```sh
-cd x-pack/plugins/security_solution
-yarn cypress:run
-```
-
-- To (optionally) run tests on the command line against a different host, pass
-`CYPRESS_baseUrl` as an environment variable on the command line, as shown in
-the following example:
-
-```sh
-cd x-pack/plugins/security_solution
-CYPRESS_baseUrl=http://localhost:5601 yarn cypress:run
-```
-
-- To (optionally) override username and password via environment variables when
-running via the command line:
-
-```sh
-cd x-pack/plugins/security_solution
-CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run
-```
 
 ## Reporting
 
-When Cypress tests are run on the command line via `yarn cypress:run`,
+When Cypress tests are run on the command line via non visual mode
 reporting artifacts are generated under the `target` directory in the root
 of the Kibana, as detailed for each artifact type in the sections below.
 

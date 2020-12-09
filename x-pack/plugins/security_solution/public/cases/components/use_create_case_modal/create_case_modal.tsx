@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
   EuiModal,
@@ -21,8 +21,9 @@ import { Case } from '../../containers/types';
 import * as i18n from '../../translations';
 
 export interface CreateCaseModalProps {
+  isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onCaseCreated: (theCase: Case) => void;
+  onSuccess: (theCase: Case) => void;
 }
 
 const Container = styled.div`
@@ -33,18 +34,11 @@ const Container = styled.div`
 `;
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
+  isModalOpen,
   onCloseCaseModal,
-  onCaseCreated,
+  onSuccess,
 }) => {
-  const onSuccess = useCallback(
-    (theCase) => {
-      onCaseCreated(theCase);
-      onCloseCaseModal();
-    },
-    [onCaseCreated, onCloseCaseModal]
-  );
-
-  return (
+  return isModalOpen ? (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>
         <EuiModalHeader>
@@ -60,7 +54,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
         </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
-  );
+  ) : null;
 };
 
 export const CreateCaseModal = memo(CreateModalComponent);

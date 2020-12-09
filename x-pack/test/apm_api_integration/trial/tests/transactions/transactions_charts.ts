@@ -28,14 +28,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload(archiveName));
 
       describe('and fetching transaction charts with uiFilters', () => {
-        const serviceName = 'opbeans-java';
         let response: PromiseReturnType<typeof supertest.get>;
 
         describe('without environment', () => {
           const uiFilters = encodeURIComponent(JSON.stringify({}));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/opbeans-java/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
           it('should return an error response', () => {
@@ -46,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('without uiFilters', () => {
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}`
+              `/api/apm/services/opbeans-java/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}`
             );
           });
           it('should return an error response', () => {
@@ -58,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/opbeans-java/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -70,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
-              `"apm-production-229a-high_mean_transaction_duration"`
+              `"apm-production-1369-high_mean_transaction_duration"`
             );
           });
 
@@ -87,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/opbeans-python/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -99,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
-              `"apm-environment_not_defined-7ed6-high_mean_transaction_duration"`
+              `"apm-environment_not_defined-5626-high_mean_transaction_duration"`
             );
           });
 
@@ -113,7 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'ENVIRONMENT_ALL' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/opbeans-java/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -132,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/opbeans-java/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -144,7 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
-              `"apm-production-229a-high_mean_transaction_duration"`
+              `"apm-production-1369-high_mean_transaction_duration"`
             );
           });
 

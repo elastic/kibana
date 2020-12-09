@@ -29,7 +29,9 @@ import {
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
+import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
+import { SavedObjectsClientContract } from '../../../../../core/public';
 
 import {
   VisualizeServices,
@@ -51,6 +53,7 @@ interface TopNavConfigParams {
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
+  savedObjectsClient: SavedObjectsClientContract;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
 }
@@ -65,6 +68,7 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
+    savedObjectsClient,
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
@@ -168,6 +172,7 @@ export const getTopNavConfig = (
     if (!originatingApp) {
       return;
     }
+
     const state = {
       input: {
         savedVis: vis.serialize(),
@@ -298,10 +303,12 @@ export const getTopNavConfig = (
                 onTitleDuplicate,
                 newDescription,
                 returnToOrigin,
-              }: OnSaveProps & { returnToOrigin: boolean }) => {
+                dashboardId,
+              }: OnSaveProps & { returnToOrigin?: boolean } & { dashboardId?: string | null }) => {
                 if (!savedVis) {
                   return;
                 }
+
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -318,16 +325,48 @@ export const getTopNavConfig = (
                   onTitleDuplicate,
                   returnToOrigin,
                 };
+
+                if (dashboardId) {
+                  const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
+
+                  // Manually insert a new url so the back button will open the saved visualization.
+                  history.replace(appPath);
+                  setActiveUrl(appPath);
+
+                  const state = {
+                    input: {
+                      savedVis: {
+                        ...vis.serialize(),
+                        title: newTitle,
+                        description: newDescription,
+                      },
+                    } as VisualizeInput,
+                    embeddableId,
+                    type: VISUALIZE_EMBEDDABLE_TYPE,
+                  };
+
+                  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+                    state,
+                    path,
+                  });
+
+                  // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
+                  return { id: true };
+                }
+
                 const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   savedVis.title = currentTitle;
                 }
+
                 return response;
               };
 
               let selectedTags: string[] = [];
-              let options: React.ReactNode | undefined;
+              let tagOptions: React.ReactNode | undefined;
 
               if (
                 savedVis &&
@@ -335,7 +374,7 @@ export const getTopNavConfig = (
                 savedObjectsTagging.ui.hasTagDecoration(savedVis)
               ) {
                 selectedTags = savedVis.getTags();
-                options = (
+                tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
                     onTagsSelected={(newSelection) => {
@@ -345,17 +384,29 @@ export const getTopNavConfig = (
                 );
               }
 
-              const saveModal = (
-                <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis || { title: '' }}
-                  onSave={onSave}
-                  options={options}
-                  getAppNameFromId={stateTransfer.getAppNameFromId}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                  originatingApp={originatingApp}
-                />
-              );
+              const saveModal =
+                !!originatingApp ||
+                !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables ? (
+                  <SavedObjectSaveModalOrigin
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    options={tagOptions}
+                    getAppNameFromId={stateTransfer.getAppNameFromId}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    originatingApp={originatingApp}
+                  />
+                ) : (
+                  <SavedObjectSaveModalDashboard
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    tagOptions={tagOptions}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    savedObjectsClient={savedObjectsClient}
+                  />
+                );
+
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
               onAppLeave((actions) => {
                 return actions.default();
