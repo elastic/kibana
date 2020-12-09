@@ -13,11 +13,11 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty, pick } from 'lodash/fp';
+import { isEmpty, findIndex } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -45,7 +45,6 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 
 const TimelineHeaderContainer = styled.div`
@@ -143,6 +142,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   dataProviders,
   end,
   eventType,
+  expandedEvent,
   filters,
   timelineId,
   isLive,
@@ -150,6 +150,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  onEventClosed,
   showCallOutUnauthorizedMsg,
   showEventDetails,
   start,
@@ -159,10 +160,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   updateEventTypeAndIndexesName,
 }) => {
   const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
-
-  const onEventDetailsClose = useCallback(() => {
-    setShowEventDetailsColumn(false);
-  }, [setShowEventDetailsColumn]);
 
   useEffect(() => {
     // it should changed only once to true and then stay visible till the component umount
@@ -252,42 +249,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { expandedEvent } = useDeepEqualSelector((state) =>
-    pick(['expandedEvent'], getTimeline(state, timelineId) ?? timelineDefaults)
-  );
-
   const handleOnEventClosed = useCallback(() => {
-    dispatch(
-      timelineActions.toggleExpandedEvent({
-        timelineId,
-        event: {},
-      })
-    );
-
-    if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({
-        eventId: expandedEvent.eventId,
-        indexName: expandedEvent.indexName,
-        loading: false,
-      });
-    }
-
-    if (onEventDetailsClose) {
-      onEventDetailsClose();
-    }
-  }, [dispatch, timelineId, expandedEvent.indexName, expandedEvent.eventId, onEventDetailsClose]);
+    onEventClosed({ indexName: expandedEvent.indexName, eventId: expandedEvent.eventId });
+    setShowEventDetailsColumn(false);
+  }, [expandedEvent.indexName, expandedEvent.eventId, onEventClosed]);
 
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (isQueryLoading && expandedEvent) {
+    if (findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
       handleOnEventClosed();
     }
-  }, [isQueryLoading, expandedEvent, handleOnEventClosed]);
+  }, [expandedEvent, handleOnEventClosed, events]);
 
   return (
     <>
@@ -414,6 +389,7 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
+      expandedEvent,
       filters: timelineFilter,
       timelineId,
       isLive: input.policy.kind === 'interval',
@@ -442,6 +418,22 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
         selectedPatterns: newIndexNames,
       })
     );
+  },
+  onEventClosed: ({ indexName, eventId }: { indexName: string; eventId: string }) => {
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        event: {},
+      })
+    );
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({
+        eventId,
+        indexName,
+        loading: false,
+      });
+    }
   },
 });
 

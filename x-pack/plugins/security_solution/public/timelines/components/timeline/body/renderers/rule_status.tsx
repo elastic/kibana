@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
+import styled from 'styled-components';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 const mapping = {
@@ -15,6 +16,10 @@ const mapping = {
   'in progress': 'warning',
   closed: 'default',
 };
+
+const StyledEuiBadge = styled(EuiBadge)`
+  text-transform: capitalize;
+`;
 
 interface Props {
   contextId: string;
@@ -26,16 +31,14 @@ interface Props {
 export const RenderRuleStatus: React.FC<Props> = ({ contextId, eventId, fieldName, value }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   return (
-    <EuiBadge color={color}>
-      <DefaultDraggable
-        field={fieldName}
-        id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        value={`${value}`}
-        tooltipContent={fieldName}
-      >
-        {value}
-      </DefaultDraggable>
-    </EuiBadge>
+    <DefaultDraggable
+      field={fieldName}
+      id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      value={`${value}`}
+      tooltipContent={fieldName}
+    >
+      <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
+    </DefaultDraggable>
   );
 };
 
