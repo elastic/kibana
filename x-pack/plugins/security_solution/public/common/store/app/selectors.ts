@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys } from 'lodash/fp';
+import { keys, values } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { Note } from '../../lib/note';
@@ -25,6 +25,17 @@ export const getNotes = memoizeOne((notesById: NotesById, noteIds: string[]): No
   }, [])
 );
 
+export const selectNotesByTimelineSavedObjectId = (
+  state: State,
+  timelineSavedObjectId: string
+): Note[] =>
+  values(state.app.notesById).reduce((acc: Note[], note: Note) => {
+    if (note.timelineId === timelineSavedObjectId) {
+      return [...acc, note];
+    }
+    return acc;
+  }, []);
+
 export const selectNotesByIdSelector = createSelector(
   selectNotesById,
   (notesById: NotesById) => notesById
@@ -32,5 +43,8 @@ export const selectNotesByIdSelector = createSelector(
 
 export const notesByIdsSelector = () =>
   createSelector(selectNotesById, (notesById: NotesById) => notesById);
+
+export const selectNotesByTimelineSavedObjectIdSelector = () =>
+  createSelector(selectNotesByTimelineSavedObjectId, (notes: Note[]) => notes);
 
 export const errorsSelector = () => createSelector(getErrors, (errors) => errors);

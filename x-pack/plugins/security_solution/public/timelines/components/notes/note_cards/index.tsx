@@ -12,7 +12,7 @@ import { appSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
-import { NotePreviews } from '../../open_timeline/note_previews';
+import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 
 const AddNoteContainer = styled.div``;
@@ -72,9 +72,11 @@ export const NoteCards = React.memo<Props>(
     return (
       <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
         {notes.length ? (
-          <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-            <NotePreviews notes={notes} />
-          </NotesContainer>
+          <NotePreviewsContainer data-test-subj="note-previews-container">
+            <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
+              <NotePreviews notes={notes} />
+            </NotesContainer>
+          </NotePreviewsContainer>
         ) : null}
 
         {showAddNote ? (

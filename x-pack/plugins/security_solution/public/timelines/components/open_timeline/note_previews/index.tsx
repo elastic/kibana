@@ -14,7 +14,7 @@ import { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
-const NotePreviewsContainer = styled.section`
+export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
 `;
 
@@ -53,11 +53,7 @@ export const NotePreviews = React.memo<{
     return null;
   }
 
-  return (
-    <NotePreviewsContainer data-test-subj="note-previews-container">
-      <EuiCommentList comments={notesList} />
-    </NotePreviewsContainer>
-  );
+  return <EuiCommentList comments={notesList} />;
 });
 
 NotePreviews.displayName = 'NotePreviews';

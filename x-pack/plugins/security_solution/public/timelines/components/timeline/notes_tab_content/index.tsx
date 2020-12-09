@@ -119,26 +119,32 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { createdBy, status: timelineStatus, noteIds } = useDeepEqualSelector((state) =>
-    pick(['createdBy', 'noteIds', 'status'], getTimeline(state, timelineId) ?? timelineDefaults)
+  const { createdBy, savedObjectId, status: timelineStatus } = useDeepEqualSelector((state) =>
+    pick(
+      ['createdBy', 'status', 'savedObjectId'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
-  const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
+  const getNotesByTimelineSavedObjectId = useMemo(
+    () => appSelectors.selectNotesByTimelineSavedObjectIdSelector(),
+    []
+  );
   const [newNote, setNewNote] = useState('');
   const isImmutable = timelineStatus === TimelineStatus.immutable;
-  const notesById = useDeepEqualSelector(getNotesByIds);
+  const notes: TimelineResultNote[] = useDeepEqualSelector((state) => {
+    const notesByTimelineId = getNotesByTimelineSavedObjectId(state, savedObjectId);
 
-  const notes: TimelineResultNote[] = useMemo(
-    () =>
-      appSelectors.getNotes(notesById, noteIds).map((note) => ({
-        savedObjectId: note.saveObjectId,
-        note: note.note,
-        noteId: note.id,
-        updated: (note.lastEdit ?? note.created).getTime(),
-        updatedBy: note.user,
-      })),
-    [notesById, noteIds]
-  );
+    console.error('aaa', notesByTimelineId);
+
+    return notesByTimelineId.map((note) => ({
+      savedObjectId: note.saveObjectId,
+      note: note.note,
+      noteId: note.id,
+      updated: (note.lastEdit ?? note.created).getTime(),
+      updatedBy: note.user,
+    }));
+  });
 
   const participants = useMemo(() => uniqBy('updatedBy', notes), [notes]);
 
