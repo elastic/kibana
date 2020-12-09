@@ -11,7 +11,11 @@ import { Paging, ResultsPerPage } from '@elastic/react-search-ui';
 import { PagingView, ResultsPerPageView } from './views';
 
 export const Pagination: React.FC<{ 'aria-label': string }> = ({ 'aria-label': ariaLabel }) => (
-  <EuiFlexGroup alignItems="center" className="documentsSearchExperience__pagingInfo">
+  <EuiFlexGroup
+    alignItems="center"
+    responsive={false}
+    className="documentsSearchExperience__pagingInfo"
+  >
     <EuiFlexItem>
       <Paging view={PagingView} aria-label={ariaLabel} />
     </EuiFlexItem>
