@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(400);
 
       expect(body.message).to.eql(
-        '[parsing_exception] Unknown aggregation type [value_countt] did you mean [value_count]?, with { line=1 & col=43 }'
+        '[parsing_exception] Unknown aggregation type [value_countt] did you mean [value_count]?, with line=1 & col=43'
       );
     });
 

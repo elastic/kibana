@@ -109,7 +109,9 @@ function extractCausedByChain(
  * @return Object Boom error response
  */
 export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any> = {}) {
-  const { statusCode, body } = err;
+  const {
+    meta: { body, statusCode },
+  } = err;
 
   const {
     error: {
@@ -130,6 +132,12 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
 
     // @ts-expect-error cause is not defined on payload type
     boomError.output.payload.cause = causedByChain.length ? causedByChain : defaultCause;
+
+    // Set error message based on the root cause
+    if (root_cause?.[0]) {
+      boomError.message = extractErrorMessage(root_cause[0]);
+    }
+
     return boomError;
   }
 
@@ -137,4 +145,29 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
   // return it
   const message = statusCodeToMessageMap[statusCode];
   return new Boom(message, { statusCode });
+}
+
+interface EsError {
+  type: string;
+  reason: string;
+  line?: number;
+  col?: number;
+}
+
+/**
+ * Returns an error message based on the root cause
+ */
+function extractErrorMessage({ type, reason, line, col }: EsError): string {
+  let message = `[${type}] ${reason}`;
+
+  if (line !== undefined && col !== undefined) {
+    message +=
+      ', ' +
+      i18n.translate('xpack.transform.models.transformService.withColAndLineMessage', {
+        defaultMessage: 'with line={line} & col={col}',
+        values: { line, col },
+      });
+  }
+
+  return message;
 }
