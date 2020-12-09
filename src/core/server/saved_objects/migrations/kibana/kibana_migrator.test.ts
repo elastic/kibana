@@ -234,7 +234,7 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
         return expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
-          `[Error: Unable to complete saved object migrations for the [.my-index] index. The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
+          `[Error: Unable to complete saved object migrations for the [.my-index] index: The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
         );
       });
       it('rejects when an unexpected exception occurs in an action', async () => {

@@ -869,7 +869,9 @@ describe('migrations v2 model', () => {
       });
 
       expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
-      expect(initialState.preMigrationScript).toEqual(preMigrationScript);
+      expect((initialState.preMigrationScript as Option.Some<string>).value).toEqual(
+        preMigrationScript
+      );
     });
     it('returns state without a preMigration script', () => {
       expect(

@@ -22,6 +22,57 @@ import { Logger, LogMeta } from '../../logging';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
+type ExecutionLog = Array<
+  | {
+      type: 'transition';
+      prevControlState: State['controlState'];
+      controlState: State['controlState'];
+      indexLogMessagePrefix: string;
+      state: State;
+    }
+  | {
+      type: 'response';
+      controlState: State['controlState'];
+      indexLogMessagePrefix: string;
+      res: unknown;
+    }
+>;
+
+// Since saved object index names usually start with a `.` and can be
+// configured by users to include several `.`'s we can't use a logger tag to
+// indicate which messages come from which index upgrade.
+const indexLogMessagePrefix = (state: State) => `[${state.indexPrefix}] `;
+
+const logStateTransition = (logger: Logger, oldState: State, newState: State) => {
+  if (newState.logs.length > oldState.logs.length) {
+    newState.logs
+      .slice(oldState.logs.length)
+      .forEach((log) => logger[log.level](indexLogMessagePrefix(newState) + log.message));
+  }
+
+  logger.info(
+    indexLogMessagePrefix(newState) + `${oldState.controlState} -> ${newState.controlState}`
+  );
+};
+
+const logActionResponse = (logger: Logger, state: State, res: unknown) => {
+  logger.debug(indexLogMessagePrefix(state) + `${state.controlState} RESPONSE`, res as LogMeta);
+};
+
+const dumpExecutionLog = (logger: Logger, executionLog: ExecutionLog) => {
+  executionLog.forEach((log) => {
+    if (log.type === 'transition') {
+      logger.info(
+        log.indexLogMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
+        log.state
+      );
+    }
+    if (log.type === 'response') {
+      logger.info(log.indexLogMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
+    }
+  });
+};
+
 /**
  * A specialized migrations-specific state-action machine that:
  *  - logs messages in state.logs
@@ -42,40 +93,36 @@ export async function migrationStateActionMachine({
   next: Next<State>;
   model: Model<State>;
 }) {
-  // Since saved object index names usually start with a `.` and can be
-  // configured by users to include several `.`'s we can't use a logger tag to
-  // indicate which messages come from which index upgrade.
-  const indexLogMsgPrefix = `[${initialState.indexPrefix}] `;
-  const logStateTransition = (oldState: State, newState: State) => {
-    if (newState.logs.length > oldState.logs.length) {
-      newState.logs
-        .slice(oldState.logs.length)
-        .forEach((log) => logger[log.level](indexLogMsgPrefix + log.message));
-    }
-
-    // Redact the state for logging by removing logs and documents which
-    // might contain sensitive information.
-    // @ts-expect-error outdatedDocuments don't exist in all states
-    const { logs, outdatedDocuments, ...redactedState } = newState;
-    logger.info(indexLogMsgPrefix + `${oldState.controlState} -> ${newState.controlState}`);
-    logger.debug(
-      indexLogMsgPrefix + `${oldState.controlState} -> ${newState.controlState}`,
-      redactedState
-    );
-  };
-
-  const logActionResponse = (state: State, res: unknown) => {
-    logger.debug(indexLogMsgPrefix + `${state.controlState} RESPONSE`, res as LogMeta);
-  };
-
+  const executionLog: ExecutionLog = [];
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),
       (state, res) => {
-        logActionResponse(state, res);
+        executionLog.push({
+          type: 'response',
+          res,
+          indexLogMessagePrefix: indexLogMessagePrefix(state),
+          controlState: state.controlState,
+        });
+        logActionResponse(logger, state, res);
         const newState = model(state, res);
-        logStateTransition(state, newState);
+        // Redact the state to reduce the memory consumption and so that we
+        // don't log sensitive information inside documents by only keeping
+        // the _id's of outdatedDocuments
+        const redactedNewState = {
+          ...newState,
+          // @ts-expect-error outdatedDocuments don't exist in all states
+          ...{ outdatedDocuments: (newState.outdatedDocuments ?? []).map((doc) => doc._id) },
+        };
+        executionLog.push({
+          type: 'transition',
+          state: redactedNewState,
+          controlState: newState.controlState,
+          prevControlState: state.controlState,
+          indexLogMessagePrefix: indexLogMessagePrefix(state),
+        });
+        logStateTransition(logger, state, redactedNewState as State);
         return newState;
       }
     );
@@ -96,6 +143,7 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
+      dumpExecutionLog(logger, executionLog);
       return Promise.reject(
         new Error(
           `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +

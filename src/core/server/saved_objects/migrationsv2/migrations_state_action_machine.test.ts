@@ -82,31 +82,6 @@ describe('migrationsStateActionMachine', () => {
             },
           ],
           Array [
-            "[.my-so-index] INIT -> LEGACY_REINDEX",
-            Object {
-              "controlState": "LEGACY_REINDEX",
-              "currentAlias": ".my-so-index",
-              "indexPrefix": ".my-so-index",
-              "kibanaVersion": "7.11.0",
-              "legacyIndex": ".my-so-index",
-              "outdatedDocumentsQuery": Object {
-                "bool": Object {
-                  "should": Array [],
-                },
-              },
-              "preMigrationScript": Object {
-                "_tag": "None",
-              },
-              "retryCount": 0,
-              "retryDelay": 0,
-              "targetMappings": Object {
-                "properties": Object {},
-              },
-              "versionAlias": ".my-so-index_7.11.0",
-              "versionIndex": ".my-so-index_7.11.0_001",
-            },
-          ],
-          Array [
             "[.my-so-index] LEGACY_REINDEX RESPONSE",
             Object {
               "_tag": "Right",
@@ -114,31 +89,6 @@ describe('migrationsStateActionMachine', () => {
             },
           ],
           Array [
-            "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
-            Object {
-              "controlState": "LEGACY_DELETE",
-              "currentAlias": ".my-so-index",
-              "indexPrefix": ".my-so-index",
-              "kibanaVersion": "7.11.0",
-              "legacyIndex": ".my-so-index",
-              "outdatedDocumentsQuery": Object {
-                "bool": Object {
-                  "should": Array [],
-                },
-              },
-              "preMigrationScript": Object {
-                "_tag": "None",
-              },
-              "retryCount": 0,
-              "retryDelay": 0,
-              "targetMappings": Object {
-                "properties": Object {},
-              },
-              "versionAlias": ".my-so-index_7.11.0",
-              "versionIndex": ".my-so-index_7.11.0_001",
-            },
-          ],
-          Array [
             "[.my-so-index] LEGACY_DELETE RESPONSE",
             Object {
               "_tag": "Right",
@@ -146,60 +96,10 @@ describe('migrationsStateActionMachine', () => {
             },
           ],
           Array [
-            "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE",
-            Object {
-              "controlState": "LEGACY_DELETE",
-              "currentAlias": ".my-so-index",
-              "indexPrefix": ".my-so-index",
-              "kibanaVersion": "7.11.0",
-              "legacyIndex": ".my-so-index",
-              "outdatedDocumentsQuery": Object {
-                "bool": Object {
-                  "should": Array [],
-                },
-              },
-              "preMigrationScript": Object {
-                "_tag": "None",
-              },
-              "retryCount": 0,
-              "retryDelay": 0,
-              "targetMappings": Object {
-                "properties": Object {},
-              },
-              "versionAlias": ".my-so-index_7.11.0",
-              "versionIndex": ".my-so-index_7.11.0_001",
-            },
-          ],
-          Array [
             "[.my-so-index] LEGACY_DELETE RESPONSE",
             Object {
               "_tag": "Right",
               "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> DONE",
-            Object {
-              "controlState": "DONE",
-              "currentAlias": ".my-so-index",
-              "indexPrefix": ".my-so-index",
-              "kibanaVersion": "7.11.0",
-              "legacyIndex": ".my-so-index",
-              "outdatedDocumentsQuery": Object {
-                "bool": Object {
-                  "should": Array [],
-                },
-              },
-              "preMigrationScript": Object {
-                "_tag": "None",
-              },
-              "retryCount": 0,
-              "retryDelay": 0,
-              "targetMappings": Object {
-                "properties": Object {},
-              },
-              "versionAlias": ".my-so-index_7.11.0",
-              "versionIndex": ".my-so-index_7.11.0_001",
             },
           ],
         ],
@@ -278,6 +178,112 @@ describe('migrationsStateActionMachine', () => {
     ).rejects.toMatchInlineSnapshot(
       `[Error: Unable to complete saved object migrations for the [.my-so-index] index: the fatal reason]`
     );
+  });
+  it('logs all state transitions and action responses when reaching the FATAL state', async () => {
+    await migrationStateActionMachine({
+      initialState: {
+        ...initialState,
+        reason: 'the fatal reason',
+        outdatedDocuments: [{ _id: '1234', password: 'sensitive password' }],
+      } as State,
+      logger: mockLogger.get(),
+      model: transitionModel(['LEGACY_DELETE', 'FATAL']),
+      next,
+    }).catch((err) => err);
+    // Ignore the first 4 log entries that come from our model
+    const executionLogLogs = loggingSystemMock.collect(mockLogger).info.slice(4);
+    expect(executionLogLogs).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "[.my-so-index] INIT RESPONSE",
+          Object {
+            "_tag": "Right",
+            "right": "response",
+          },
+        ],
+        Array [
+          "[.my-so-index] INIT -> LEGACY_DELETE",
+          Object {
+            "controlState": "LEGACY_DELETE",
+            "currentAlias": ".my-so-index",
+            "indexPrefix": ".my-so-index",
+            "kibanaVersion": "7.11.0",
+            "legacyIndex": ".my-so-index",
+            "logs": Array [
+              Object {
+                "level": "info",
+                "message": "Log from LEGACY_DELETE control state",
+              },
+            ],
+            "outdatedDocuments": Array [
+              "1234",
+            ],
+            "outdatedDocumentsQuery": Object {
+              "bool": Object {
+                "should": Array [],
+              },
+            },
+            "preMigrationScript": Object {
+              "_tag": "None",
+            },
+            "reason": "the fatal reason",
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetMappings": Object {
+              "properties": Object {},
+            },
+            "versionAlias": ".my-so-index_7.11.0",
+            "versionIndex": ".my-so-index_7.11.0_001",
+          },
+        ],
+        Array [
+          "[.my-so-index] LEGACY_DELETE RESPONSE",
+          Object {
+            "_tag": "Right",
+            "right": "response",
+          },
+        ],
+        Array [
+          "[.my-so-index] LEGACY_DELETE -> FATAL",
+          Object {
+            "controlState": "FATAL",
+            "currentAlias": ".my-so-index",
+            "indexPrefix": ".my-so-index",
+            "kibanaVersion": "7.11.0",
+            "legacyIndex": ".my-so-index",
+            "logs": Array [
+              Object {
+                "level": "info",
+                "message": "Log from LEGACY_DELETE control state",
+              },
+              Object {
+                "level": "info",
+                "message": "Log from FATAL control state",
+              },
+            ],
+            "outdatedDocuments": Array [
+              "1234",
+            ],
+            "outdatedDocumentsQuery": Object {
+              "bool": Object {
+                "should": Array [],
+              },
+            },
+            "preMigrationScript": Object {
+              "_tag": "None",
+            },
+            "reason": "the fatal reason",
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetMappings": Object {
+              "properties": Object {},
+            },
+            "versionAlias": ".my-so-index_7.11.0",
+            "versionIndex": ".my-so-index_7.11.0_001",
+          },
+        ],
+      ]
+    `);
   });
   it('rejects and logs the error when an action throws', async () => {
     await expect(
