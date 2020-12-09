@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
@@ -61,10 +62,11 @@ export const defaultIcon = defaultIconImport;
 
 export function getSpanIcon(type?: string, subtype?: string) {
   if (!type) {
-    return;
+    return defaultIcon;
   }
 
-  const types = type ? typeIcons[type] : {};
+  const types = maybe(typeIcons[type]);
+
   if (subtype && types && subtype in types) {
     return types[subtype];
   }

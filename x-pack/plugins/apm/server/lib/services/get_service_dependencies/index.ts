@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ValuesType } from 'utility-types';
+import { merge } from 'lodash';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { joinByKey } from '../../../../common/utils/join_by_key';
@@ -11,7 +12,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
 
-export interface ServiceDependencyItem {
+export type ServiceDependencyItem = {
   name: string;
   latency: {
     value: number | null;
@@ -26,12 +27,15 @@ export interface ServiceDependencyItem {
     timeseries: Array<{ x: number; y: number | null }>;
   };
   impact: number;
-  serviceName?: string;
-  environment?: string;
-  spanType?: string;
-  spanSubtype?: string;
-  agentName?: AgentName;
-}
+} & (
+  | {
+      type: 'service';
+      serviceName: string;
+      agentName: AgentName;
+      environment?: string;
+    }
+  | { type: 'external'; spanType?: string; spanSubtype?: string }
+);
 
 export async function getServiceDependencies({
   setup,
@@ -61,22 +65,12 @@ export async function getServiceDependencies({
   ]);
 
   const metricsWithMappedDestinations = allMetrics.map((metricItem) => {
-    const spanDestination = metricItem.key;
+    const spanDestination = metricItem.span.destination.service.resource;
 
     const destination = destinationMap[spanDestination];
 
-    const defaultInfo = {
-      span: {
-        destination: {
-          service: {
-            resource: metricItem.key,
-          },
-        },
-      },
-    };
-
     return {
-      destination: destination ? destination : defaultInfo,
+      destination: merge({ span: metricItem.span }, destination || {}),
       metrics: [metricItem],
     };
   }, []);
@@ -94,7 +88,7 @@ export async function getServiceDependencies({
   const metricsByResolvedAddress = metricsJoinedByDestination.map(
     ({ destination, metrics }) => {
       const mergedMetrics = metrics.reduce<
-        Omit<ValuesType<typeof metrics>, 'key'>
+        Omit<ValuesType<typeof metrics>, 'span'>
       >(
         (prev, current) => {
           return {
@@ -164,6 +158,7 @@ export async function getServiceDependencies({
       if ('service' in destination) {
         return {
           name: destination.service.name,
+          type: 'service' as const,
           serviceName: destination.service.name,
           environment: destination.service.environment,
           agentName: destination.agent.name,
@@ -172,13 +167,10 @@ export async function getServiceDependencies({
       }
 
       return {
-        name: destination.span.destination.service.resource!,
-        ...('span' in destination && 'type' in destination.span
-          ? {
-              spanType: destination.span.type,
-              spanSubtype: destination.span.subtype,
-            }
-          : {}),
+        name: destination.span.destination.service.resource,
+        type: 'external' as const,
+        spanType: destination.span.type,
+        spanSubtype: destination.span.subtype,
         ...destMetrics,
       };
     }

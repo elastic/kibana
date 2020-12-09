@@ -48,29 +48,26 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Backend',
         }
       ),
-      render: (
-        _,
-        { name, agentName, serviceName: itemServiceName, spanType, spanSubtype }
-      ) => {
+      render: (_, item) => {
         return (
           <TruncateWithTooltip
-            text={name}
+            text={item.name}
             content={
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  {agentName ? (
-                    <AgentIcon agentName={agentName} />
+                  {item.type === 'service' ? (
+                    <AgentIcon agentName={item.agentName} />
                   ) : (
-                    <SpanIcon type={spanType} subType={spanSubtype} />
+                    <SpanIcon type={item.spanType} subType={item.spanSubtype} />
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {itemServiceName ? (
-                    <ServiceOverviewLink serviceName={itemServiceName}>
-                      {name}
+                  {item.type === 'service' ? (
+                    <ServiceOverviewLink serviceName={item.serviceName}>
+                      {item.name}
                     </ServiceOverviewLink>
                   ) : (
-                    name
+                    item.name
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -81,7 +78,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
     {
-      field: 'latency_value',
+      field: 'latencyValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnLatency',
         {
@@ -150,7 +147,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Impact',
         }
       ),
-      width: px(unit * 4),
+      width: px(unit * 5),
       render: (_, { impact }) => {
         return <ImpactBar size="m" value={impact} />;
       },
@@ -232,6 +229,11 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               items={items}
               allowNeutralSort={false}
               loading={status === FETCH_STATUS.LOADING}
+              pagination={{
+                initialPageSize: 5,
+                pageSizeOptions: [5],
+                hidePerPageOptions: true,
+              }}
               sorting={{
                 sort: {
                   direction: 'desc',

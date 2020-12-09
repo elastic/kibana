@@ -98,7 +98,13 @@ export const getMetrics = async ({
 
   return (
     response.aggregations?.connections.buckets.map((bucket) => ({
-      key: bucket.key as string,
+      span: {
+        destination: {
+          service: {
+            resource: String(bucket.key),
+          },
+        },
+      },
       value: {
         count: sum(
           bucket.timeseries.buckets.map(
