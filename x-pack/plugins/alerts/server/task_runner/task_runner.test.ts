@@ -387,7 +387,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -497,7 +497,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
