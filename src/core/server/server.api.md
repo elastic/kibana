@@ -269,9 +269,10 @@ export interface AuthToolkit {
 // @public
 export class BasePath {
     // @internal
-    constructor(serverBasePath?: string);
+    constructor(serverBasePath?: string, publicBaseUrl?: string);
     get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
     set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
@@ -862,7 +863,7 @@ export interface HttpResponseOptions {
 // @public
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
-// @public (undocumented)
+// @public
 export interface HttpServerInfo {
     hostname: string;
     name: string;

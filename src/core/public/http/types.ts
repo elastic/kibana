@@ -102,6 +102,15 @@ export interface IBasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   readonly serverBasePath: string;
+
+  /**
+   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
+   * {@link IBasePath.serverBasePath}.
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  readonly publicBaseUrl?: string;
 }
 
 /**

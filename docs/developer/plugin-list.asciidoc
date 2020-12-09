@@ -47,7 +47,7 @@ as uiSettings within the code.
 - Adds a dashboard embeddable that can be used in other applications.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data/README.md[data]
+|{kib-repo}blob/{branch}/src/plugins/data/README.mdx[data]
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
@@ -158,6 +158,10 @@ It also provides a stateful version of it on the start contract.
 |{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
 |The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
 Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
+
+
+|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.md[presentationUtil]
+|Utilities and components used by the presentation-related plugins
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
