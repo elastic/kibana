@@ -73,6 +73,7 @@ const createApiUiMock = () => {
     getTagIdsFromReferences: jest.fn(),
     getTagIdFromName: jest.fn(),
     updateTagsReferences: jest.fn(),
+    getTag: jest.fn(),
   };
 
   return mock;
