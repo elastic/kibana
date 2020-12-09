@@ -105,7 +105,7 @@ export class Plugin {
   private readonly logger: Logger;
   private securityLicenseService?: SecurityLicenseService;
   private authenticationStart?: AuthenticationServiceStart;
-  private authz?: AuthorizationServiceSetup;
+  private authorizationSetup?: AuthorizationServiceSetup;
 
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
@@ -218,7 +218,7 @@ export class Plugin {
       session,
     });
 
-    this.authz = this.authorizationService.setup({
+    this.authorizationSetup = this.authorizationService.setup({
       http: core.http,
       capabilities: core.capabilities,
       getClusterClient: () =>
@@ -236,13 +236,13 @@ export class Plugin {
     setupSpacesClient({
       spaces,
       audit,
-      authz: this.authz,
+      authz: this.authorizationSetup,
     });
 
     setupSavedObjects({
       legacyAuditLogger,
       audit,
-      authz: this.authz,
+      authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getSpacesService: () => spaces?.spacesService,
     });
@@ -253,7 +253,7 @@ export class Plugin {
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       config,
-      authz: this.authz,
+      authz: this.authorizationSetup,
       license,
       session,
       getFeatures: () =>
@@ -277,10 +277,11 @@ export class Plugin {
       authc: { getCurrentUser: authenticationSetup.getCurrentUser },
 
       authz: {
-        actions: this.authz.actions,
-        checkPrivilegesWithRequest: this.authz.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authz.checkPrivilegesDynamicallyWithRequest,
-        mode: this.authz.mode,
+        actions: this.authorizationSetup.actions,
+        checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup
+          .checkPrivilegesDynamicallyWithRequest,
+        mode: this.authorizationSetup.mode,
       },
 
       license,
@@ -311,10 +312,11 @@ export class Plugin {
         getCurrentUser: this.authenticationStart.getCurrentUser,
       },
       authz: {
-        actions: this.authz!.actions,
-        checkPrivilegesWithRequest: this.authz!.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authz!.checkPrivilegesDynamicallyWithRequest,
-        mode: this.authz!.mode,
+        actions: this.authorizationSetup!.actions,
+        checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup!
+          .checkPrivilegesDynamicallyWithRequest,
+        mode: this.authorizationSetup!.mode,
       },
     });
   }

@@ -45,7 +45,7 @@ interface AuthenticationServiceStartParams {
 
 export interface AuthenticationServiceSetup {
   /**
-   * @deprecated
+   * @deprecated use `getCurrentUser` from the start contract instead
    */
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
@@ -89,7 +89,7 @@ export class AuthenticationService {
         return null;
       }
 
-      return (http.auth.get(request).state ?? null) as AuthenticatedUser | null;
+      return http.auth.get<AuthenticatedUser>(request).state ?? null;
     };
 
     this.authenticator = new Authenticator({
@@ -104,8 +104,6 @@ export class AuthenticationService {
       license,
       session,
     });
-
-    this.logger.debug('Successfully initialized authenticator.');
 
     http.registerAuth(async (request, response, t) => {
       // If security is disabled continue with no user credentials and delete the client cookie as well.
@@ -200,7 +198,7 @@ export class AuthenticationService {
         if (!this.license.isEnabled()) {
           return null;
         }
-        return (http.auth.get(request).state ?? null) as AuthenticatedUser | null;
+        return http.auth.get<AuthenticatedUser>(request).state ?? null;
       },
     };
   }
