@@ -341,6 +341,21 @@ describe('SearchSource', () => {
         const request = await searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
       });
+
+      test('returns all scripted fields when one fields entry is *', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['timestamp', '*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({ hello: {}, world: {} });
+      });
     });
 
     describe('handling for when specific fields are provided', () => {

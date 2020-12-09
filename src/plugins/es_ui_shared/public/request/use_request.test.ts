@@ -101,8 +101,9 @@ describe('useRequest hook', () => {
         const { setupSuccessRequest, completeRequest, hookResult } = helpers;
         setupSuccessRequest();
         expect(hookResult.isInitialRequest).toBe(true);
-
-        hookResult.resendRequest();
+        act(() => {
+          hookResult.resendRequest();
+        });
         await completeRequest();
         expect(hookResult.isInitialRequest).toBe(false);
       });

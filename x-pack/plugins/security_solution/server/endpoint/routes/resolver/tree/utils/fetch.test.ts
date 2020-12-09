@@ -80,7 +80,7 @@ describe('fetcher test', () => {
         descendantLevels: 1,
         descendants: 5,
         ancestors: 0,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -100,7 +100,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -163,7 +163,7 @@ describe('fetcher test', () => {
         descendantLevels: 2,
         descendants: 5,
         ancestors: 0,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -188,7 +188,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 5,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -211,7 +211,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -249,7 +249,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -292,7 +292,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },
@@ -342,7 +342,7 @@ describe('fetcher test', () => {
         descendantLevels: 0,
         descendants: 0,
         ancestors: 3,
-        timerange: {
+        timeRange: {
           from: '',
           to: '',
         },

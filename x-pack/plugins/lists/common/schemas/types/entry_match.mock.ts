@@ -14,3 +14,8 @@ export const getEntryMatchMock = (): EntryMatch => ({
   type: MATCH,
   value: ENTRY_VALUE,
 });
+
+export const getEntryMatchExcludeMock = (): EntryMatch => ({
+  ...getEntryMatchMock(),
+  operator: 'excluded',
+});
