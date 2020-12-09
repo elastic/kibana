@@ -14,6 +14,19 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
+export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+/**
+ * TIMELINE BODY
+ */
 export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector

@@ -19,6 +19,18 @@ export const getFieldCategory = (field: string): string => {
   return fieldCategory;
 };
 
+export const formatGeoLocation = (item: unknown[]) => {
+  const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
+  if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
+    try {
+      return toStringArray({ long: itemGeo.coordinates[0], lat: itemGeo.coordinates[1] });
+    } catch {
+      return toStringArray(item);
+    }
+  }
+  return toStringArray(item);
+};
+
 export const getDataFromHits = (fields: Record<string, unknown[]>): TimelineEventsDetailsItem[] =>
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
@@ -28,7 +40,7 @@ export const getDataFromHits = (fields: Record<string, unknown[]>): TimelineEven
       {
         category: fieldCategory,
         field,
-        values: toStringArray(item),
+        values: field.includes('geo.location') ? formatGeoLocation(item) : toStringArray(item),
         originalValue: item,
       } as TimelineEventsDetailsItem,
     ];

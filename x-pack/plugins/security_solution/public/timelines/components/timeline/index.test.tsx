@@ -20,6 +20,7 @@ import {
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -56,7 +57,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    timelineId: 'id',
+    timelineId: 'timeline-test',
   };
 
   beforeEach(() => {
@@ -70,5 +71,19 @@ describe('StatefulTimeline', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
+  });
+
+  test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulTimeline {...props} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .first()
+        .exists()
+    ).toEqual(true);
   });
 });

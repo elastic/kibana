@@ -19,7 +19,7 @@ import { allowTopN } from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../../../timelines/components/timeline/styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 
@@ -230,7 +230,7 @@ export const useGetTimelineId = function (
         if (
           myElem != null &&
           myElem.classList != null &&
-          myElem.classList.contains(SELECTOR_TIMELINE_BODY_CLASS_NAME) &&
+          myElem.classList.contains(SELECTOR_TIMELINE_GLOBAL_CONTAINER) &&
           myElem.hasAttribute('data-timeline-id')
         ) {
           setTimelineId(myElem.getAttribute('data-timeline-id'));

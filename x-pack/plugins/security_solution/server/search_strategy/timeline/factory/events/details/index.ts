@@ -28,7 +28,7 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
     const fieldsData = cloneDeep(response.rawResponse.hits.hits[0].fields ?? {});
-    const hitsData = response.rawResponse.hits.hits[0] ?? {};
+    const hitsData = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
     delete hitsData._source;
     delete hitsData.fields;
     const inspect = {
