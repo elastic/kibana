@@ -29,10 +29,10 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.or
 
 ### Unit tests
 
-From `kibana-root-folder/x-pack`, run:
+From `kibana-root-folder/x-pack/plugins/enterprise_search`, run:
 
 ```bash
-yarn test:jest plugins/enterprise_search
+yarn test:jest
 ```
 
 ### E2E tests
