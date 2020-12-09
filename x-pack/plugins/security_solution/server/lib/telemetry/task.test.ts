@@ -144,6 +144,6 @@ describe('test', () => {
     const executeFrom = moment(executeTo).subtract(142, 'minutes').toISOString();
     const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
 
-    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes'));
+    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes').toISOString());
   });
 });
