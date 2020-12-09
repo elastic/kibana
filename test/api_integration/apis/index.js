@@ -33,6 +33,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
+    loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
   });
 }

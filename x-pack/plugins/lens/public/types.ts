@@ -167,6 +167,11 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  updateStateOnCloseDimension?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+  }) => T | undefined;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -235,7 +240,8 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
-  setState: StateSetter<T>;
+  // Not a StateSetter because we have this unique use case of determining valid columns
+  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -597,6 +603,11 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: FramePublicAPI
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 export interface LensFilterEvent {

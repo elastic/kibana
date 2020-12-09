@@ -12,11 +12,10 @@ import { useHistory } from 'react-router-dom';
 
 import { AppLogic } from '../../../../app_logic';
 import { Loading } from '../../../../../../applications/shared/loading';
-import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourceLogic } from '../../source_logic';
-import { SourceDataItem, FeatureIds } from '../../../../types';
+import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
@@ -90,7 +89,6 @@ export const AddSource: React.FC<AddSourceProps> = ({
   }, []);
 
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-  const isRemote = features?.platinumPrivateContext.includes(FeatureIds.Remote);
 
   const getFirstStep = () => {
     if (isCustom) return Steps.ConfigureCustomStep;
@@ -121,61 +119,10 @@ export const AddSource: React.FC<AddSourceProps> = ({
     history.push(`${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`);
   };
 
-  const pageTitle = () => {
-    if (currentStep === Steps.ConnectInstanceStep || currentStep === Steps.ConfigureOauthStep) {
-      return 'Connect';
-    }
-    if (currentStep === Steps.ReAuthenticateStep) {
-      return 'Re-authenticate';
-    }
-    if (currentStep === Steps.ConfigureCustomStep || currentStep === Steps.SaveCustomStep) {
-      return 'Create a';
-    }
-    return 'Configure';
-  };
-
-  const CREATE_CUSTOM_SOURCE_SIDEBAR_BLURB =
-    'Custom API Sources provide a set of feature-rich endpoints for indexing data from any content repository.';
-  const CONFIGURE_ORGANIZATION_SOURCE_SIDEBAR_BLURB =
-    'Follow the configuration flow to add a new content source to Workplace Search. First, create an OAuth application in the content source. After that, connect as many instances of the content source that you need.';
-  const CONFIGURE_PRIVATE_SOURCE_SIDEBAR_BLURB =
-    'Follow the configuration flow to add a new private content source to Workplace Search. Private content sources are added by each person via their own personal dashboards. Their data stays safe and visible only to them.';
-  const CONNECT_ORGANIZATION_SOURCE_SIDEBAR_BLURB = `Upon successfully connecting ${name}, source content will be synced to your organization and will be made available and searchable.`;
-  const CONNECT_PRIVATE_REMOTE_SOURCE_SIDEBAR_BLURB = (
-    <>
-      {name} is a <strong>remote source</strong>, which means that each time you search, we reach
-      out to the content source and get matching results directly from {name}&apos;s servers.
-    </>
-  );
-  const CONNECT_PRIVATE_STANDARD_SOURCE_SIDEBAR_BLURB = (
-    <>
-      {name} is a <strong>standard source</strong> for which content is synchronized on a regular
-      basis, in a relevant and secure way.
-    </>
-  );
-
-  const CONNECT_PRIVATE_SOURCE_SIDEBAR_BLURB = isRemote
-    ? CONNECT_PRIVATE_REMOTE_SOURCE_SIDEBAR_BLURB
-    : CONNECT_PRIVATE_STANDARD_SOURCE_SIDEBAR_BLURB;
-  const CONFIGURE_SOURCE_SIDEBAR_BLURB = accountContextOnly
-    ? CONFIGURE_PRIVATE_SOURCE_SIDEBAR_BLURB
-    : CONFIGURE_ORGANIZATION_SOURCE_SIDEBAR_BLURB;
-
-  const CONFIG_SIDEBAR_BLURB = isCustom
-    ? CREATE_CUSTOM_SOURCE_SIDEBAR_BLURB
-    : CONFIGURE_SOURCE_SIDEBAR_BLURB;
-  const CONNECT_SIDEBAR_BLURB = isOrganization
-    ? CONNECT_ORGANIZATION_SOURCE_SIDEBAR_BLURB
-    : CONNECT_PRIVATE_SOURCE_SIDEBAR_BLURB;
-
-  const PAGE_DESCRIPTION =
-    currentStep === Steps.ConnectInstanceStep ? CONNECT_SIDEBAR_BLURB : CONFIG_SIDEBAR_BLURB;
-
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
   return (
     <>
-      <ViewContentHeader title={pageTitle()} description={PAGE_DESCRIPTION} />
       {currentStep === Steps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}

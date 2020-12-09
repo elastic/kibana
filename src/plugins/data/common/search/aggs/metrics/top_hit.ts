@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { aggTopHitFnName } from './top_hit_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -41,6 +42,7 @@ const isNumericFieldSelected = (agg: IMetricAggConfig) => {
 export const getTopHitMetricAgg = () => {
   return new MetricAggType({
     name: METRIC_TYPES.TOP_HITS,
+    expressionName: aggTopHitFnName,
     title: i18n.translate('data.search.aggs.metrics.topHitTitle', {
       defaultMessage: 'Top Hit',
     }),

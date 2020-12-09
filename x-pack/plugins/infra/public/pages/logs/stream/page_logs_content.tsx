@@ -37,6 +37,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     surroundingLogsId,
     setSurroundingLogsId,
     flyoutItem,
+    flyoutError,
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
@@ -80,6 +81,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           setFilter={setFilter}
           setFlyoutVisibility={setFlyoutVisibility}
           flyoutItem={flyoutItem}
+          flyoutError={flyoutError}
           loading={isLoading}
         />
       ) : null}

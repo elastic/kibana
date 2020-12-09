@@ -7,13 +7,13 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> 
+export declare class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> 
 ```
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [setup(core)](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
+|  [setup(core, { expressions })](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
 |  [start(core, { fieldFormats, logger })](./kibana-plugin-plugins-data-server.indexpatternsservice.start.md) |  |  |
 

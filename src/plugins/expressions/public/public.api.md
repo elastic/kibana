@@ -9,6 +9,7 @@ import { CoreStart } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
+import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { PersistedState } from 'src/plugins/visualizations/public';
@@ -136,6 +137,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
+    getKibanaRequest?: () => KibanaRequest;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;

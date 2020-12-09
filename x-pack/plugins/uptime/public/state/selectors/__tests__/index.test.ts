@@ -65,7 +65,6 @@ describe('state selectors', () => {
       loading: false,
       pingList: {
         total: 0,
-        locations: [],
         pings: [],
       },
     },
@@ -79,7 +78,6 @@ describe('state selectors', () => {
         prevPagePagination: null,
         nextPagePagination: null,
         summaries: [],
-        totalSummaryCount: 0,
       },
       loading: false,
     },

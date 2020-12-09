@@ -276,19 +276,19 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
-export function updateMetricsProp(layerId, value) {
+function updateMetricsProp(layerId: string, value: unknown) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
+    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName: 'metrics',
       value,
     });
-    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
     dispatch(syncDataForLayerId(layerId));
   };
@@ -447,7 +447,7 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-export function updateStyleProperties(layerId: string, previousFields: IField[]) {
+function updateStyleProperties(layerId: string, previousFields: IField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

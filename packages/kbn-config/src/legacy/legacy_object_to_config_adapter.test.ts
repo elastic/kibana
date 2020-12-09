@@ -90,13 +90,14 @@ describe('#get', () => {
         keepaliveTimeout: 5000,
         socketTimeout: 2000,
         port: 1234,
+        publicBaseUrl: 'https://myhost.com/abc',
         rewriteBasePath: false,
         ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
         compression: { enabled: true },
         someNotSupportedValue: 'val',
         xsrf: {
           disableProtection: false,
-          whitelist: [],
+          allowlist: [],
         },
       },
     });
@@ -113,13 +114,14 @@ describe('#get', () => {
         keepaliveTimeout: 5000,
         socketTimeout: 2000,
         port: 1234,
+        publicBaseUrl: 'http://myhost.com/abc',
         rewriteBasePath: false,
         ssl: { enabled: false, certificate: 'cert', key: 'key' },
         compression: { enabled: true },
         someNotSupportedValue: 'val',
         xsrf: {
           disableProtection: false,
-          whitelist: [],
+          allowlist: [],
         },
       },
     });
