@@ -437,7 +437,44 @@ describe('AllCases', () => {
     );
     await waitFor(() => {
       wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
-      expect(onRowClick).toHaveBeenCalledWith('1');
+      expect(onRowClick).toHaveBeenCalledWith({
+        closedAt: null,
+        closedBy: null,
+        comments: [],
+        connector: { fields: null, id: '123', name: 'My Connector', type: '.none' },
+        createdAt: '2020-02-19T23:06:33.798Z',
+        createdBy: {
+          email: 'leslie.knope@elastic.co',
+          fullName: 'Leslie Knope',
+          username: 'lknope',
+        },
+        description: 'Security banana Issue',
+        externalService: {
+          connectorId: '123',
+          connectorName: 'connector name',
+          externalId: 'external_id',
+          externalTitle: 'external title',
+          externalUrl: 'basicPush.com',
+          pushedAt: '2020-02-20T15:02:57.995Z',
+          pushedBy: {
+            email: 'leslie.knope@elastic.co',
+            fullName: 'Leslie Knope',
+            username: 'lknope',
+          },
+        },
+        id: '1',
+        status: 'open',
+        tags: ['coke', 'pepsi'],
+        title: 'Another horrible breach!!',
+        totalComment: 0,
+        updatedAt: '2020-02-20T15:02:57.995Z',
+        updatedBy: {
+          email: 'leslie.knope@elastic.co',
+          fullName: 'Leslie Knope',
+          username: 'lknope',
+        },
+        version: 'WzQ3LDFd',
+      });
     });
   });
 
