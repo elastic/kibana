@@ -42,9 +42,6 @@ import {
   getNoneConnector,
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SignalHit, Signal } from '../../../../server/lib/detection_engine/signals/types';
-import { BaseHit } from '../../../../common/detection_engine/types';
 import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
 import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
@@ -89,6 +86,21 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
+interface Signal {
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
+interface SignalHit {
+  _id: string;
+  _index: string;
+  _source: {
+    signal: Signal;
+  };
+}
+
 export type Alert = {
   _id: string;
   _index: string;
@@ -127,10 +139,10 @@ export const CaseComponent = React.memo<CaseProps>(
       SourcererScopeName.detections
     );
 
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<
-      BaseHit<SignalHit>,
-      unknown
-    >(alertsQuery, selectedPatterns[0]);
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
+      alertsQuery,
+      selectedPatterns[0]
+    );
 
     const alerts = useMemo(
       () =>
