@@ -19,7 +19,6 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
-import { Env } from '@kbn/config';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
@@ -50,7 +49,7 @@ export class LoggingSystem implements LoggerFactory {
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
 
-  constructor(private readonly env: Env) {}
+  constructor() {}
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
@@ -69,13 +68,12 @@ export class LoggingSystem implements LoggerFactory {
 
   /**
    * Updates all current active loggers with the new config values.
-   * @param rawConfig New config instance.
+   * @param rawConfig New config instance. if unspecified, the default logging configuration
+   *                  will be used.
    */
-  public async upgrade(rawConfig: LoggingConfigType) {
-    // We only want the console appender for the CLI process,
-    // so we use the 'default' configuration as defined by the schema.
-    const usedConfig = this.env.isDevCliParent ? loggingConfig.schema.validate({}) : rawConfig;
-    const config = new LoggingConfig(usedConfig)!;
+  public async upgrade(rawConfig?: LoggingConfigType) {
+    const usedConfig = rawConfig ?? loggingConfig.schema.validate({});
+    const config = new LoggingConfig(usedConfig);
     await this.applyBaseConfig(config);
   }
 

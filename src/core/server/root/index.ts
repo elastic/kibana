@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ConnectableObservable, Subscription } from 'rxjs';
+import { ConnectableObservable, Subscription, of } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
 import { Env, RawConfigurationProvider } from '../config';
@@ -36,10 +36,10 @@ export class Root {
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
-    env: Env,
+    private readonly env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingSystem = new LoggingSystem(env);
+    this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);
@@ -98,7 +98,10 @@ export class Root {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
+      // except for the CLI process where we only apply the default logging config once
+      switchMap(() =>
+        this.env.isDevCliParent ? of(undefined) : configService.atPath<LoggingConfigType>('logging')
+      ),
       concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
