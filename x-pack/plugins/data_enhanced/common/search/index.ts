@@ -6,3 +6,4 @@
 
 export * from './types';
 export * from './poll_search';
+export * from './session';
