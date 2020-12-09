@@ -107,97 +107,86 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
+      <div
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        TestingHeading
-      </h1>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Overview
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Certificates
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Settings
+          </span>
+        </a>
+      </div>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow"
+        class="euiPopover euiPopover--anchorDownCenter"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <div
-            class="euiPopover euiPopover--anchorDownCenter"
-          >
-            <div
-              class="euiPopover__anchor"
-            >
-              <button
-                aria-label="Open alert context menu"
-                class="euiButtonEmpty euiButtonEmpty--primary"
-                data-test-subj="xpack.uptime.alertsPopover.toggleButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonContent__icon"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Alerts
-                  </span>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
-            data-test-subj="settings-page-link"
-            href="/settings"
-            rel="noreferrer"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                data-euiicon-type="gear"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              >
-                Settings
-              </span>
-            </span>
-          </a>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiPopover__anchor"
         >
           <button
+            aria-label="Open alert context menu"
             class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
               <span
                 class="euiButtonContent__icon"
-                data-euiicon-type="plusInCircle"
+                data-euiicon-type="arrowDown"
               />
               <span
                 class="euiButtonEmpty__text"
               >
-                Add data
+                Alerts
               </span>
             </span>
           </button>
@@ -308,7 +297,7 @@ Array [
 }
 
 <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
   />,
 ]
 `;
@@ -420,16 +409,91 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
+      <div
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        TestingHeading
-      </h1>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Overview
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Certificates
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Settings
+          </span>
+        </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open alert context menu"
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Alerts
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero c0"
@@ -535,14 +599,22 @@ Array [
 }
 
 <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
   />,
 ]
 `;
 
 exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiCallOut euiCallOut--primary"
   >
     <div
@@ -608,24 +680,228 @@ Array [
       </div>
     </div>
   </div>,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiSpacer euiSpacer--s"
   />,
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+    width: 500px;
+  }
+}
+
+@media only screen and (max-width:880px) {
+  .c0.c0.c0 {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+  }
+
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+    width: calc(100% + 8px);
+  }
+}
+
+<div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
+      <div
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        TestingHeading
-      </h1>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Overview
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Certificates
+          </span>
+        </a>
+        <a
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
+          role="tab"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Settings
+          </span>
+        </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open alert context menu"
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Alerts
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero c0"
+      style="flex-basis:485px"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+          >
+            <div
+              class="euiPopover euiPopover--anchorDownLeft"
+              id="QuickSelectPopover"
+            >
+              <div
+                class="euiPopover__anchor euiQuickSelectPopover__anchor"
+              >
+                <button
+                  aria-label="Date quick select"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                  data-test-subj="superDatePickerToggleQuickMenuButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+                    >
+                      <span
+                        data-euiicon-type="clock"
+                      />
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <div
+                class="euiDatePickerRange euiDatePickerRange--inGroup"
+              >
+                <button
+                  class="euiSuperDatePicker__prettyFormat"
+                  data-test-subj="superDatePickerShowDatesButton"
+                >
+                  Last 15 minutes
+                  <span
+                    class="euiSuperDatePicker__prettyFormatLink"
+                  >
+                    Show dates
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+              data-test-subj="superDatePickerApplyTimeButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  data-euiicon-type="refresh"
+                />
+                <span
+                  class="euiButton__text euiSuperUpdateButton__text"
+                >
+                  Refresh
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+      </div>
     </div>
   </div>,
-  <div
-    class="euiSpacer euiSpacer--s"
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--m"
   />,
 ]
 `;

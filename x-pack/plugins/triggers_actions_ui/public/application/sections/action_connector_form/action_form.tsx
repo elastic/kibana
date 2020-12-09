@@ -59,6 +59,7 @@ export interface ActionAccordionFormProps {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   getDefaultActionParams?: DefaultActionParamsGetter;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +82,7 @@ export const ActionForm = ({
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
   getDefaultActionParams,
+  isActionGroupDisabledForActionType,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -345,6 +347,7 @@ export const ActionForm = ({
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
                 setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });

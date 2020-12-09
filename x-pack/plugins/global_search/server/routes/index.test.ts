@@ -14,7 +14,6 @@ describe('registerRoutes', () => {
     registerRoutes(router);
 
     expect(router.post).toHaveBeenCalledTimes(1);
-
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/internal/global_search/find',
@@ -22,7 +21,14 @@ describe('registerRoutes', () => {
       expect.any(Function)
     );
 
-    expect(router.get).toHaveBeenCalledTimes(0);
+    expect(router.get).toHaveBeenCalledTimes(1);
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/internal/global_search/searchable_types',
+      }),
+      expect.any(Function)
+    );
+
     expect(router.delete).toHaveBeenCalledTimes(0);
     expect(router.put).toHaveBeenCalledTimes(0);
   });
