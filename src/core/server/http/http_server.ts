@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from '@hapi/hapi';
+import { Server, ServerRoute } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -167,8 +167,6 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
         const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
@@ -182,7 +180,7 @@ export class HttpServer {
         // real socket timeout.
         const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
 
-        this.server.route({
+        const routeOpts: ServerRoute = {
           handler: route.handler,
           method: route.method,
           path: route.path,
@@ -206,11 +204,6 @@ export class HttpServer {
               },
             },
             tags: tags ? Array.from(tags) : undefined,
-            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-            // validation applied in ./http_tools#getServerOptions
-            // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate,
             payload: [allow, maxBytes, output, parse, timeout?.payload].some(
               (v) => typeof v !== 'undefined'
             )
@@ -226,7 +219,22 @@ export class HttpServer {
               socket: fakeSocketTimeout,
             },
           },
-        });
+        };
+
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        if (!isSafeMethod(route.method)) {
+          // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+          // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+          // validation applied in ./http_tools#getServerOptions
+          // (All NP routes are already required to specify their own validation in order to access the payload)
+          // TODO: Move the setting of the validate option back up to being set at `routeOpts` creation-time once
+          // https://github.com/hapijs/hoek/pull/365 is merged and released in @hapi/hoek v9.1.1. At that point I
+          // imagine the ts-error below will go away as well.
+          // @ts-expect-error "Property 'validate' does not exist on type 'RouteOptions'" <-- ehh?!? yes it does!
+          routeOpts.options!.validate = { payload: true };
+        }
+
+        this.server.route(routeOpts);
       }
     }
 
