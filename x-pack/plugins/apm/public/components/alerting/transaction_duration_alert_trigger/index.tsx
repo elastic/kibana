@@ -25,6 +25,8 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useFetcher } from '../../../../../observability/public';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
+import { useFormatter } from '../../shared/charts/transaction_charts/use_formatter';
+import { getResponseTimeTickFormatter } from '../../shared/charts/transaction_charts/helper';
 
 interface AlertParams {
   windowSize: number;
@@ -109,6 +111,13 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowUnit,
   ]);
 
+  const { formatter } = useFormatter([{ data: data ?? [] }]);
+  const yTickFormat = getResponseTimeTickFormatter(formatter);
+
+  const chartPreview = (
+    <ChartPreview data={data} threshold={threshold} yTickFormat={yTickFormat} />
+  );
+
   if (!transactionTypes.length || !serviceName) {
     return null;
   }
@@ -179,8 +188,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
       }}
     />,
   ];
-
-  const chartPreview = <ChartPreview data={data} threshold={threshold} />;
 
   return (
     <ServiceAlertTrigger

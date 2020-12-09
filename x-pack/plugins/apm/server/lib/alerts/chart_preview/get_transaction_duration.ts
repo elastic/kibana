@@ -93,6 +93,7 @@ export async function getTransactionDurationChartPreview({
         : (bucket.agg as { values: Record<string, number | null> }).values[
             percentilesKey
           ];
-    return { x, y: y === null ? null : y / 1000 };
+
+    return { x, y };
   });
 }
