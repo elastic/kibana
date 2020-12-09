@@ -129,6 +129,7 @@ describe('data generator', () => {
     const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event?.action).not.toBeNull();
+    expect(alert.event?.code).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
