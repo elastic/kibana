@@ -12,39 +12,31 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { Setup } from '../../helpers/setup_request';
-
-const BUCKET_SIZE = 20;
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
   setup,
 }: {
   alertParams: AlertParams;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { apmEventClient } = setup;
+  const { apmEventClient, start, end } = setup;
   const {
     aggregationType,
     environment,
     serviceName,
     transactionType,
-    windowSize,
-    windowUnit,
   } = alertParams;
 
   const query = {
     bool: {
       filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${windowSize * BUCKET_SIZE}${windowUnit}`,
-            },
-          },
-        },
+        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
@@ -55,11 +47,13 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
+  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+
   const aggs = {
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: `${windowSize}${windowUnit}`,
+        fixed_interval: intervalString,
       },
       aggs: {
         agg:

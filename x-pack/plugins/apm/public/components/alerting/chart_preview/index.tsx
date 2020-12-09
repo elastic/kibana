@@ -42,11 +42,6 @@ export function ChartPreview({
   threshold,
 }: ChartPreviewProps) {
   const theme = useTheme();
-
-  if (!data.length) {
-    return null;
-  }
-
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);
   const xMin = moment.utc(getMax(timestamps)).valueOf();

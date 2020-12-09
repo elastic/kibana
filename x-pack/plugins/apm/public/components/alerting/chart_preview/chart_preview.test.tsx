@@ -16,10 +16,10 @@ describe('ChartPreview', () => {
   });
 
   describe('with no data', () => {
-    it('renders nothing', () => {
+    it('renders empty', () => {
       const { queryByTestId } = renderWithTheme(<ChartPreview threshold={1} />);
 
-      expect(queryByTestId('ChartPreview')).not.toBeInTheDocument();
+      expect(queryByTestId('ChartPreview')).toBeInTheDocument();
     });
   });
 });

@@ -10,42 +10,30 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { Setup } from '../../helpers/setup_request';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 
-const BUCKET_SIZE = 20;
-
 export async function getTransactionErrorRateChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient } = setup;
-  const {
-    windowSize,
-    windowUnit,
-    serviceName,
-    environment,
-    transactionType,
-  } = alertParams;
+  const { apmEventClient, start, end } = setup;
+  const { serviceName, environment, transactionType } = alertParams;
 
   const query = {
     bool: {
       filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${windowSize * BUCKET_SIZE}${windowUnit}`,
-            },
-          },
-        },
+        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
@@ -60,12 +48,14 @@ export async function getTransactionErrorRateChartPreview({
     searchAggregatedTransactions: false,
   });
 
+  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+
   const aggs = {
     outcomes,
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: `${windowSize}${windowUnit}`,
+        fixed_interval: intervalString,
       },
       aggs: { outcomes },
     },

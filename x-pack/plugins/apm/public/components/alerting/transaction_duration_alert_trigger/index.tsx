@@ -26,6 +26,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
+import { windowToTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
@@ -91,12 +92,11 @@ export function TransactionDurationAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
         params: {
           query: {
+            ...windowToTimeRange(windowSize, windowUnit),
             aggregationType,
             environment,
             serviceName,
             transactionType: alertParams.transactionType,
-            windowSize,
-            windowUnit,
           },
         },
       });
