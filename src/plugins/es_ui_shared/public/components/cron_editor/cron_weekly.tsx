@@ -18,44 +18,52 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+interface Props {
+  minute?: string;
+  minuteOptions: EuiSelectOption[];
+  hour?: string;
+  hourOptions: EuiSelectOption[];
+  day?: string;
+  dayOptions: EuiSelectOption[];
+  onChange: ({ minute, hour, day }: { minute?: string; hour?: string; day?: string }) => void;
+}
 
-export const CronMonthly = ({
+export const CronWeekly: React.FunctionComponent<Props> = ({
   minute,
   minuteOptions,
   hour,
   hourOptions,
-  date,
-  dateOptions,
+  day,
+  dayOptions,
   onChange,
 }) => (
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldDateLabel" defaultMessage="Date" />
+        <FormattedMessage id="esUi.cronEditor.cronWeekly.fieldDateLabel" defaultMessage="Day" />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
       <EuiSelect
-        options={dateOptions}
-        value={date}
-        onChange={(e) => onChange({ date: e.target.value })}
+        options={dayOptions}
+        value={day}
+        onChange={(e) => onChange({ day: e.target.value })}
         fullWidth
-        prepend={i18n.translate('esUi.cronEditor.cronMonthly.textOnTheLabel', {
-          defaultMessage: 'On the',
+        prepend={i18n.translate('esUi.cronEditor.cronWeekly.textOnLabel', {
+          defaultMessage: 'On',
         })}
-        data-test-subj="cronFrequencyMonthlyDateSelect"
+        data-test-subj="cronFrequencyWeeklyDaySelect"
       />
     </EuiFormRow>
 
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage id="esUi.cronEditor.cronWeekly.fieldTimeLabel" defaultMessage="Time" />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -65,15 +73,15 @@ export const CronMonthly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.hourSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronWeekly.hourSelectLabel', {
               defaultMessage: 'Hour',
             })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={i18n.translate('esUi.cronEditor.cronMonthly.fieldHour.textAtLabel', {
+            prepend={i18n.translate('esUi.cronEditor.cronWeekly.fieldHour.textAtLabel', {
               defaultMessage: 'At',
             })}
-            data-test-subj="cronFrequencyMonthlyHourSelect"
+            data-test-subj="cronFrequencyWeeklyHourSelect"
           />
         </EuiFlexItem>
 
@@ -81,26 +89,16 @@ export const CronMonthly = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
-            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.minuteSelectLabel', {
+            onChange={(e) => onChange({ minute: e.target.value })}
+            aria-label={i18n.translate('esUi.cronEditor.cronWeekly.minuteSelectLabel', {
               defaultMessage: 'Minute',
             })}
-            onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
-            data-test-subj="cronFrequencyMonthlyMinuteSelect"
+            data-test-subj="cronFrequencyWeeklyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   </Fragment>
 );
-
-CronMonthly.propTypes = {
-  minute: PropTypes.string.isRequired,
-  minuteOptions: PropTypes.array.isRequired,
-  hour: PropTypes.string.isRequired,
-  hourOptions: PropTypes.array.isRequired,
-  date: PropTypes.string.isRequired,
-  dateOptions: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
