@@ -5,7 +5,7 @@
  */
 
 import { ApolloClient } from 'apollo-client';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React, { useMemo } from 'react';
 import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../observability/public';
@@ -13,20 +13,24 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
 import { ApolloClientContext } from '../utils/apollo_context';
+import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{
   apolloClient: ApolloClient<{}>;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-}> = ({ apolloClient, children, triggersActionsUI }) => {
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+}> = ({ apolloClient, children, triggersActionsUI, setHeaderActionMenu }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <ApolloClientContext.Provider value={apolloClient}>
         <EuiThemeProvider darkMode={darkMode}>
-          <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu}>
+            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+          </HeaderActionMenuProvider>
         </EuiThemeProvider>
       </ApolloClientContext.Provider>
     </TriggersActionsProvider>

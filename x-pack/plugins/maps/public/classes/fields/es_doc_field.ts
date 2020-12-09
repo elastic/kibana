@@ -60,6 +60,13 @@ export class ESDocField extends AbstractField implements IField {
     return indexPatternField ? indexPatternField.type : '';
   }
 
+  async getLabel(): Promise<string> {
+    const indexPatternField = await this._getIndexPatternField();
+    return indexPatternField && indexPatternField.displayName
+      ? indexPatternField.displayName
+      : super.getLabel();
+  }
+
   supportsFieldMeta(): boolean {
     return true;
   }

@@ -29,6 +29,7 @@ import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
+import * as nodeDataModel from '../../models/node_data';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -39,23 +40,24 @@ const eventDetailRequestError = i18n.translate(
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
-  eventID,
   eventCategory: eventType,
 }: {
   nodeID: string;
-  eventID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
+  const isTreeLoading = useSelector(selectors.isTreeLoading);
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
-  const isLoading = isEventLoading || isProcessTreeLoading;
+  const isNodeDataLoading = nodeStatus === 'loading';
+  const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
+
   return isLoading ? (
     <StyledPanel>
       <PanelLoading />
@@ -90,7 +92,7 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: SafeResolverEvent | null;
+  processEvent: SafeResolverEvent | undefined;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =
