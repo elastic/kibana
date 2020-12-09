@@ -137,6 +137,7 @@ export class HapiResponseAdapter {
 
     const attributes = getErrorAttributes(payload);
     if (attributes) {
+      // @ts-expect-error `attributes` does not exist on the `Payload` type, however it does exist in real life (https://github.com/hapijs/boom/issues/277)
       error.output.payload.attributes = attributes;
     }
 

@@ -154,6 +154,7 @@ async function fetchByObjects({
   const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
   if (erroredObjects.length) {
     const err = Boom.badRequest();
+    // @ts-expect-error `attributes` does not exist on the `Payload` type, however it does exist in real life (https://github.com/hapijs/boom/issues/277)
     err.output.payload.attributes = {
       objects: erroredObjects,
     };
