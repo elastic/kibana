@@ -19,3 +19,4 @@
 
 export { renderApp } from './error_application';
 export { setupUrlOverflowDetection, URL_MAX_LENGTH } from './url_overflow';
+export { setupPublicBaseUrlConfigWarning } from './public_base_url';
