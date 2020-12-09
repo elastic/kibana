@@ -16,11 +16,13 @@ import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
 import { getDocumentDetailRoute } from '../../routes';
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
+import { Schema } from '../../../shared/types';
 
 interface Props {
   result: ResultType;
   showScore?: boolean;
   shouldLinkToDetailPage?: boolean;
+  schemaForTypeHighlights?: Schema;
 }
 
 const RESULT_CUTOFF = 5;
@@ -29,6 +31,7 @@ export const Result: React.FC<Props> = ({
   result,
   showScore = false,
   shouldLinkToDetailPage = false,
+  schemaForTypeHighlights,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -40,6 +43,9 @@ export const Result: React.FC<Props> = ({
     [result]
   );
   const numResults = resultFields.length;
+  const typeForField = (fieldName: string) => {
+    if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
+  };
 
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
     if (!shouldLinkToDetailPage)
@@ -67,7 +73,13 @@ export const Result: React.FC<Props> = ({
             {resultFields
               .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
               .map(([field, value]: [string, FieldValue]) => (
-                <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
+                <ResultField
+                  key={field}
+                  field={field}
+                  raw={value.raw}
+                  snippet={value.snippet}
+                  type={typeForField(field)}
+                />
               ))}
           </div>
           {numResults > RESULT_CUTOFF && !isOpen && (

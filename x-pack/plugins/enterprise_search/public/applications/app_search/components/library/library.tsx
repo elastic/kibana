@@ -15,6 +15,7 @@ import {
 import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SchemaTypes } from '../../../shared/types';
 import { Result } from '../result/result';
 
 export const Library: React.FC = () => {
@@ -35,11 +36,17 @@ export const Library: React.FC = () => {
       description: {
         raw: 'A description',
       },
-      states: {
-        raw: ['Pennsylvania', 'Ohio'],
+      date_established: {
+        raw: '1968-10-02T05:00:00Z',
+      },
+      location: {
+        raw: '37.3,-113.05',
       },
       visitors: {
         raw: 1000,
+      },
+      states: {
+        raw: ['Pennsylvania', 'Ohio'],
       },
       size: {
         raw: 200,
@@ -48,6 +55,17 @@ export const Library: React.FC = () => {
         raw: 100,
       },
     },
+  };
+
+  const schema = {
+    title: 'text' as SchemaTypes,
+    description: 'text' as SchemaTypes,
+    date_established: 'date' as SchemaTypes,
+    location: 'geolocation' as SchemaTypes,
+    states: 'text' as SchemaTypes,
+    visitors: 'number' as SchemaTypes,
+    size: 'number' as SchemaTypes,
+    length: 'number' as SchemaTypes,
   };
 
   return (
@@ -177,6 +195,14 @@ export const Library: React.FC = () => {
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} shouldLinkToDetailPage={true} />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With field value type highlights</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} schemaForTypeHighlights={schema} />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>
