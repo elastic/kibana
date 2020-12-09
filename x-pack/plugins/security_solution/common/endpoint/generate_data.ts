@@ -31,6 +31,7 @@ import {
 import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
+import { EventOptions } from './types/generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -43,21 +44,6 @@ export type Event = AlertEvent | SafeEndpointEvent;
  * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
  */
 export const ANCESTRY_LIMIT: number = 2;
-
-interface EventOptions {
-  timestamp?: number;
-  entityID?: string;
-  parentEntityID?: string;
-  eventType?: string | string[];
-  eventCategory?: string | string[];
-  processName?: string;
-  ancestry?: string[];
-  ancestryArrayLimit?: number;
-  pid?: number;
-  parentPid?: number;
-  extensions?: object;
-  eventsDataStream?: DataStream;
-}
 
 const Windows: OSFields[] = [
   {
@@ -300,6 +286,10 @@ export interface TreeNode {
  */
 export interface Tree {
   /**
+   * Children grouped by the parent's ID
+   */
+  childrenByParent: Map<string, Map<string, TreeNode>>;
+  /**
    * Map of entity_id to node
    */
   children: Map<string, TreeNode>;
@@ -531,6 +521,7 @@ export class EndpointDocGenerator {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
+        code: 'malicious_file',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -647,7 +638,7 @@ export class EndpointDocGenerator {
     const ancestry: string[] =
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
 
-    const processName = options.processName ? options.processName : randomProcessName();
+    const processName = options.processName ? options.processName : this.randomProcessName();
     const detailRecordForEventType =
       options.extensions ||
       ((eventCategory) => {
@@ -760,16 +751,16 @@ export class EndpointDocGenerator {
   public generateTree(options: TreeOptions = {}): Tree {
     const optionsWithDef = getTreeOptionsWithDef(options);
     const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
-      const nodeId = entityIDSafeVersion(event);
-      if (!nodeId) {
+      const nodeID = entityIDSafeVersion(event);
+      if (!nodeID) {
         return nodeMap;
       }
 
       // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
       // and add the event to the right array.
-      let node = nodeMap.get(nodeId);
+      let node = nodeMap.get(nodeID);
       if (!node) {
-        node = { id: nodeId, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
+        node = { id: nodeID, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
       }
 
       // place the event in the right array depending on its category
@@ -783,7 +774,7 @@ export class EndpointDocGenerator {
         node.relatedAlerts.push(event);
       }
 
-      return nodeMap.set(nodeId, node);
+      return nodeMap.set(nodeID, node);
     };
 
     const groupNodesByParent = (children: Map<string, TreeNode>) => {
@@ -850,6 +841,7 @@ export class EndpointDocGenerator {
     const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
 
     return {
+      childrenByParent,
       children: childrenNodes,
       ancestry: ancestryNodes,
       allEvents,
@@ -1639,6 +1631,11 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.warning,
     ]);
   }
+
+  /** Return a random fake process name */
+  private randomProcessName(): string {
+    return this.randomChoice(fakeProcessNames);
+  }
 }
 
 const fakeProcessNames = [
@@ -1649,7 +1646,3 @@ const fakeProcessNames = [
   'iexlorer.exe',
   'explorer.exe',
 ];
-/** Return a random fake process name */
-function randomProcessName(): string {
-  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
-}
