@@ -655,6 +655,62 @@ describe('get_filter', () => {
       });
     });
 
+    test('it should work with an exception list that includes a nested typ', () => {
+      const esQuery = getQueryFilter(
+        'host.name: linux',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        [getExceptionListItemSchemaMock()]
+      );
+
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            { bool: { should: [{ match: { 'host.name': 'linux' } }], minimum_should_match: 1 } },
+          ],
+          should: [],
+          must_not: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                should: [
+                                  {
+                                    match_phrase: { 'some.parentField.nested.field': 'some value' },
+                                  },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    });
+
     test('it should work with an empty list', () => {
       const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
