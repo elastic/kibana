@@ -60,8 +60,12 @@ export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart>
   basePath: BasePathMocked;
 };
 
-const createBasePathMock = (serverBasePath = '/mock-server-basepath'): BasePathMocked => ({
+const createBasePathMock = (
+  serverBasePath = '/mock-server-basepath',
+  publicBaseUrl = 'http://myhost.com/mock-server-basepath'
+): BasePathMocked => ({
   serverBasePath,
+  publicBaseUrl,
   get: jest.fn().mockReturnValue(serverBasePath),
   set: jest.fn(),
   prepend: jest.fn(),
