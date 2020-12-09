@@ -138,7 +138,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   );
 
   return isEdit ? (
-    <span data-test-subj={'connector-settings-jira'}>
+    <div data-test-subj={'connector-settings-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
         <EuiSelect
           data-test-subj="issueTypeSelect"
@@ -189,7 +189,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           </>
         )}
       </>
-    </span>
+    </div>
   ) : (
     <ConnectorCard
       connectorType={ConnectorTypes.jira}
