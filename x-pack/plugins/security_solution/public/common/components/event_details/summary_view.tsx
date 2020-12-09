@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import {
   EuiTitle,
@@ -162,8 +162,6 @@ export const SummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ data, eventId, timelineId, browserFields }) => {
-  const [investigationGuide, setInvestigationGuide] = useState<string | null>(null);
-
   const ruleId = useMemo(
     () =>
       getOr(
@@ -181,12 +179,6 @@ export const SummaryViewComponent: React.FC<{
     timelineId,
   ]);
 
-  useEffect(() => {
-    if (maybeRule != null && maybeRule.note != null) {
-      setInvestigationGuide(maybeRule.note);
-    }
-  }, [maybeRule]);
-
   return (
     <>
       <StyledEuiInMemoryTable
@@ -195,13 +187,13 @@ export const SummaryViewComponent: React.FC<{
         columns={summaryColumns}
         compressed
       />
-      {investigationGuide && (
+      {maybeRule?.note && (
         <>
           <EuiSpacer />
           <EuiDescriptionList data-test-subj="summary-view-guide" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LineClamp content={investigationGuide} />
+              <LineClamp content={maybeRule.note} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>
