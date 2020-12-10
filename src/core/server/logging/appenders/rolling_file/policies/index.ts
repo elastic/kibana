@@ -18,6 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment-timezone';
 import { assertNever } from '@kbn/std';
 import { TriggeringPolicy } from './policy';
 import { RollingFileContext } from '../rolling_file_context';
@@ -43,10 +44,16 @@ export type TriggeringPolicyConfig =
   | SizeLimitTriggeringPolicyConfig
   | TimeIntervalTriggeringPolicyConfig;
 
-export const triggeringPolicyConfigSchema = schema.oneOf([
-  sizeLimitTriggeringPolicyConfigSchema,
-  timeIntervalTriggeringPolicyConfigSchema,
-]);
+const defaultPolicy: TimeIntervalTriggeringPolicyConfig = {
+  kind: 'time-interval',
+  interval: moment.duration(24, 'hour'),
+  modulate: true,
+};
+
+export const triggeringPolicyConfigSchema = schema.oneOf(
+  [sizeLimitTriggeringPolicyConfigSchema, timeIntervalTriggeringPolicyConfigSchema],
+  { defaultValue: defaultPolicy }
+);
 
 export const createTriggeringPolicy = (
   config: TriggeringPolicyConfig,

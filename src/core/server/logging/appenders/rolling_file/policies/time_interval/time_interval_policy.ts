@@ -54,7 +54,7 @@ export const timeIntervalTriggeringPolicyConfigSchema = schema.object({
     defaultValue: '24h',
     validate: (interval) => {
       if (!isValidRolloverInterval(interval)) {
-        return 'Interval value cannot overflow to a higher field.';
+        return 'Interval value cannot overflow to a higher time unit.';
       }
     },
   }),

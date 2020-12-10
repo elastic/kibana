@@ -39,12 +39,12 @@ export class RollingFileContext {
       this.currentFileTime = birthtime.getTime();
       this.currentFileSize = size;
     } catch (e) {
-      this.currentFileTime = Date.now();
-      this.currentFileSize = 0;
       if (e.code !== 'ENOENT') {
         // eslint-disable-next-line no-console
-        console.log('[RollingFileAppender] error accessing the log file', e);
+        console.error('[RollingFileAppender] error accessing the log file', e);
       }
+      this.currentFileTime = Date.now();
+      this.currentFileSize = 0;
     }
   }
 }

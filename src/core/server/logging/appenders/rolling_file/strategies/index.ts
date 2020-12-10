@@ -29,7 +29,15 @@ import { RollingFileContext } from '../rolling_file_context';
 export { RollingStrategy } from './strategy';
 export type RollingStrategyConfig = NumericRollingStrategyConfig;
 
-export const rollingStrategyConfigSchema = schema.oneOf([numericRollingStrategyConfigSchema]);
+const defaultStrategy: NumericRollingStrategyConfig = {
+  kind: 'numeric',
+  pattern: '-%i',
+  max: 7,
+};
+
+export const rollingStrategyConfigSchema = schema.oneOf([numericRollingStrategyConfigSchema], {
+  defaultValue: defaultStrategy,
+});
 
 export const createRollingStrategy = (
   config: RollingStrategyConfig,
