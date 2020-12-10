@@ -10,6 +10,20 @@ export const graphWorkspace: SavedObjectsType = {
   name: 'graph-workspace',
   namespaceType: 'single',
   hidden: false,
+  management: {
+    icon: 'graphApp',
+    defaultSearchField: 'title',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/app/graph#/workspace/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'graph.show',
+      };
+    },
+  },
   migrations: graphMigrations,
   mappings: {
     properties: {
@@ -37,6 +51,10 @@ export const graphWorkspace: SavedObjectsType = {
       },
       wsState: {
         type: 'text',
+      },
+      legacyIndexPatternRef: {
+        type: 'text',
+        index: false,
       },
     },
   },
