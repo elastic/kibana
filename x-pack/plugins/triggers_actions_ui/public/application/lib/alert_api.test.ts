@@ -52,6 +52,7 @@ describe('loadAlertTypes', () => {
         defaultActionGroupId: 'default',
         authorizedConsumers: {},
         minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
