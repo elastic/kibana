@@ -14,7 +14,7 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../actions
 import { AlertsClient } from './alerts_client';
 import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
@@ -28,6 +28,7 @@ export interface AlertsClientFactoryOpts {
   taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
+  securityPluginStart?: SecurityPluginStart;
   getSpaceId: (request: KibanaRequest) => string | undefined;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
@@ -44,6 +45,7 @@ export class AlertsClientFactory {
   private taskManager!: TaskManagerStartContract;
   private alertTypeRegistry!: AlertTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
+  private securityPluginStart?: SecurityPluginStart;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
@@ -64,6 +66,7 @@ export class AlertsClientFactory {
     this.taskManager = options.taskManager;
     this.alertTypeRegistry = options.alertTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
+    this.securityPluginStart = options.securityPluginStart;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.actions = options.actions;
@@ -73,10 +76,10 @@ export class AlertsClientFactory {
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
-    const { securityPluginSetup, actions, eventLog, features } = this;
+    const { securityPluginSetup, securityPluginStart, actions, eventLog, features } = this;
     const spaceId = this.getSpaceId(request);
     const authorization = new AlertsAuthorization({
-      authorization: securityPluginSetup?.authz,
+      authorization: securityPluginStart?.authz,
       request,
       getSpace: this.getSpace,
       alertTypeRegistry: this.alertTypeRegistry,
@@ -102,25 +105,22 @@ export class AlertsClientFactory {
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       async getUserName() {
-        if (!securityPluginSetup) {
+        if (!securityPluginStart) {
           return null;
         }
-        const user = await securityPluginSetup.authc.getCurrentUser(request);
+        const user = await securityPluginStart.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
       async createAPIKey(name: string) {
-        if (!securityPluginSetup) {
+        if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
+        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
           request,
-          {
-            name,
-            role_descriptors: {},
-          }
+          { name, role_descriptors: {} }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
