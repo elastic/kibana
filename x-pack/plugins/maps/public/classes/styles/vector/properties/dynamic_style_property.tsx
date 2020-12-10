@@ -28,6 +28,7 @@ import {
 import {
   CategoryFieldMeta,
   FieldMetaOptions,
+  PercentilesFieldMeta,
   RangeFieldMeta,
   StyleMetaData,
 } from '../../../../../common/descriptor_types';
