@@ -49,7 +49,7 @@ exports[`ML Flyout component renders without errors 1`] = `
       setTimeRange={[Function]}
       timeRange={
         Object {
-          "start": 1606387756729,
+          "start": 1606406439504,
         }
       }
     />
@@ -350,11 +350,11 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                                             class="react-datepicker__input-container"
                                           >
                                             <input
-                                              aria-label="11/26/2020 05:49 AM"
+                                              aria-label="Sept 4, 2020  9:31:38 AM"
                                               class="euiDatePicker euiFieldText euiFieldText--withIcon"
                                               placeholder="Start of heartbeat data"
                                               type="text"
-                                              value="11/26/2020 05:49 AM"
+                                              value="Sept 4, 2020  9:31:38 AM"
                                             />
                                           </div>
                                         </div>
