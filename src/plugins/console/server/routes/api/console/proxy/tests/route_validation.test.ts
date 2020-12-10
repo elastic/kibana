@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { routeValidationConfig } from '../../routes/api/console/proxy/validation_config';
+import { routeValidationConfig } from '../validation_config';
 
 const { query } = routeValidationConfig;
 
