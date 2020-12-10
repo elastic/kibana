@@ -144,7 +144,9 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
   return (
     <ActionIconItem
       ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
-      content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      content={
+        isDisabled ? i18n.INVESTIGATE_IN_RESOLVER_DISABLED : i18n.ACTION_INVESTIGATE_IN_RESOLVER
+      }
       dataTestSubj="investigate-in-resolver"
       iconType="node"
       id="investigateInResolver"
