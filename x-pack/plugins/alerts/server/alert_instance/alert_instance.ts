@@ -70,6 +70,31 @@ export class AlertInstance<
     return false;
   }
 
+  scheduledActionGroupOrSubgroupHasChanged(): boolean {
+    if (!this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
+      // it is considered a change when there are no previous scheduled actions
+      // and new scheduled actions
+      return true;
+    }
+
+    if (this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
+      // compare previous and new scheduled actions if both exist
+      return (
+        !this.scheduledActionGroupIsUnchanged(
+          this.meta.lastScheduledActions,
+          this.scheduledExecutionOptions
+        ) ||
+        !this.scheduledActionSubgroupIsUnchanged(
+          this.meta.lastScheduledActions,
+          this.scheduledExecutionOptions
+        )
+      );
+    }
+
+    // no previous and no new scheduled actions
+    return false;
+  }
+
   private scheduledActionGroupIsUnchanged(
     lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
     scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
