@@ -5,8 +5,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart } from 'kibana/public';
+import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
@@ -18,13 +21,18 @@ import {
   pagePathGetters,
 } from '../../../../../../../fleet/public';
 
+const LinkLabel = styled.span`
+  display: inline-block;
+  padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+`;
+
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   ({ pkgkey }) => {
     const {
       services: {
         application: { getUrlForApp },
       },
-    } = useKibana();
+    } = useKibana<{ application: ApplicationStart }>();
     const trustedAppsListUrlPath = getTrustedAppsListPath();
 
     const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
@@ -51,14 +59,34 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
 
     return (
       <EuiPanel paddingSize="l">
-        <LinkToApp
-          appId={MANAGEMENT_APP_ID}
-          href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
-          appPath={trustedAppsListUrlPath}
-          appState={trustedAppRouteState}
-        >
-          {'Trusted Application'}
-        </LinkToApp>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText>
+              <h4>
+                <FormattedMessage
+                  id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppLabel"
+                  defaultMessage="Trusted Applications"
+                />
+              </h4>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <LinkToApp
+              appId={MANAGEMENT_APP_ID}
+              href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
+              appPath={trustedAppsListUrlPath}
+              appState={trustedAppRouteState}
+            >
+              <LinkLabel>
+                <FormattedMessage
+                  id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
+                  defaultMessage="Manage trusted applications"
+                />
+              </LinkLabel>
+              <EuiIcon type="popout" />
+            </LinkToApp>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     );
   }
