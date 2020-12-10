@@ -190,7 +190,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
+const mapDispatchToProps = (
+  dispatch: Dispatch,
+  { defaultModel }: { defaultModel: SubsetTimelineModel }
+) => ({
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   onFlyoutCollapsed: () => {
@@ -198,6 +201,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
       timelineActions.toggleExpandedEvent({
         timelineId: TimelineId.detectionsPage,
         event: {},
+        defaultModel,
       })
     );
   },

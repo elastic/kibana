@@ -179,14 +179,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event }) => {
+  .case(toggleExpandedEvent, (state, { timelineId, event, defaultModel }) => {
     return {
       ...state,
       timelineById: {
         ...state.timelineById,
         [timelineId]: {
-          ...(state.timelineById[timelineId] ??
-            (timelineId === TimelineId.detectionsPage ? alertsDefaultModel : timelineDefaults)),
+          ...(state.timelineById[timelineId] ?? defaultModel ?? timelineDefaults),
           expandedEvent: event,
         },
       },
