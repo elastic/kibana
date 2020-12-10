@@ -18,8 +18,8 @@
  */
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client, RequestEvent } from '@elastic/elasticsearch';
-import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import { ApiError, Client, RequestEvent, errors } from '@elastic/elasticsearch';
+import type { RequestBody } from '@elastic/elasticsearch/lib/Transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
@@ -35,40 +35,6 @@ export const configureClient = (
   return client;
 };
 
-function isResponseError(error: any): boolean {
-  return Boolean(error.body && error.statusCode && error.headers);
-}
-
-const stringifyEventInfo = (event: RequestEvent) =>
-  `${event.statusCode} ${event.meta.request.params.method} ${event.meta.request.params.path}`;
-
-const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
-  client.on('response', (error, event) => {
-    if (error) {
-      const errorMessage =
-        // error details for response errors provided by elasticsearch
-        isResponseError(error)
-          ? `${stringifyEventInfo(event)} [${event.body.error.type}]: ${
-              event.body.error.reason ?? error.message
-            }`
-          : `[${error.name}]: ${error.message}`;
-
-      logger.error(errorMessage);
-    }
-    if (event && logQueries) {
-      const params = event.meta.request.params;
-
-      // definition is wrong, `params.querystring` can be either a string or an object
-      const querystring = convertQueryString(params.querystring);
-      const url = `${params.path}${querystring ? `?${querystring}` : ''}`;
-      const body = params.body ? `\n${ensureString(params.body)}` : '';
-      logger.debug(`${event.statusCode}\n${params.method} ${url}${body}`, {
-        tags: ['query'],
-      });
-    }
-  });
-};
-
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
   if (qs === undefined || typeof qs === 'string') {
     return qs ?? '';
@@ -82,3 +48,36 @@ function ensureString(body: RequestBody): string {
   if ('readable' in body && body.readable && typeof body._read === 'function') return '[stream]';
   return JSON.stringify(body);
 }
+
+function getErrorMessage(error: ApiError, event: RequestEvent): string {
+  if (error instanceof errors.ResponseError) {
+    return `${getResponseMessage(event)} [${event.body?.error?.type}]: ${
+      event.body?.error?.reason ?? error.message
+    }`;
+  }
+  return `[${error.name}]: ${error.message}`;
+}
+
+function getResponseMessage(event: RequestEvent) {
+  const params = event.meta.request.params;
+
+  // definition is wrong, `params.querystring` can be either a string or an object
+  const querystring = convertQueryString(params.querystring);
+  const url = `${params.path}${querystring ? `?${querystring}` : ''}`;
+  const body = params.body ? `\n${ensureString(params.body)}` : '';
+  return `${event.statusCode}\n${params.method} ${url}${body}`;
+}
+
+const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
+  client.on('response', (error, event) => {
+    if (event && logQueries) {
+      if (error) {
+        logger.error(getErrorMessage(error, event));
+      } else {
+        logger.debug(getResponseMessage(event), {
+          tags: ['query'],
+        });
+      }
+    }
+  });
+};
