@@ -32,7 +32,7 @@ import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
-import { ExpressionAstFunction } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup as HttpSetup_2 } from 'kibana/public';
