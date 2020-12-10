@@ -13,7 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { parseQueryParams } from '../../../../../../applications/shared/query_params';
 
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 
 interface SourceQueryParams {
   sourceId: string;
@@ -30,10 +30,10 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
   const { sourceId } = (parseQueryParams(search) as unknown) as SourceQueryParams;
   const [formLoading, setFormLoading] = useState(false);
 
-  const { getSourceReConnectData } = useActions(SourceLogic);
+  const { getSourceReConnectData } = useActions(AddSourceLogic);
   const {
     sourceConnectData: { oauthUrl },
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   useEffect(() => {
     getSourceReConnectData(sourceId);
