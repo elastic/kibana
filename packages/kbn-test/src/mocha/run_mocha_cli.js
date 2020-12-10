@@ -81,6 +81,7 @@ export function runMochaCli() {
             '**/__tests__/fixtures/**',
             'src/**/public/**',
             '**/_*.{js,ts,tsx}',
+            '**/*.test.*',
             'packages/**/target/**',
           ],
         }
