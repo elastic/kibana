@@ -121,3 +121,20 @@ export async function archiveEntryToBulkCreateObject(opts: {
     attributes: doc,
   };
 }
+
+export async function getAsset(opts: {
+  savedObjectsClient: SavedObjectsClientContract;
+  path: string;
+}) {
+  const { savedObjectsClient, path } = opts;
+  const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
+    ASSETS_SAVED_OBJECT_TYPE,
+    assetPathToObjectId(path)
+  );
+  const storedAsset = assetSavedObject?.attributes;
+  if (!storedAsset) {
+    return;
+  }
+
+  return storedAsset;
+}
