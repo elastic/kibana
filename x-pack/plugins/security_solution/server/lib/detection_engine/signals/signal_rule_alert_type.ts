@@ -67,6 +67,7 @@ import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 import { filterEventsAgainstList } from './filter_events_with_list';
+import { isOutdated } from '../migrations/helpers';
 
 export const signalRulesAlertType = ({
   logger,
@@ -509,10 +510,7 @@ export const signalRulesAlertType = ({
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
-            if (
-              signalIndexVersion === undefined ||
-              signalIndexVersion < MIN_EQL_RULE_INDEX_VERSION
-            ) {
+            if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
               throw new Error(
                 `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
               );
