@@ -23,7 +23,18 @@ describe('transform_elastic_named_search_to_list_item', () => {
     jest.clearAllMocks();
   });
 
-  test('if given an empty array, it returns an empty array', () => {
+  test('if given an empty array for values, it returns an empty array', () => {
+    const response = getSearchListItemMock();
+    const queryFilter = transformElasticNamedSearchToListItem({
+      response,
+      type: TYPE,
+      value: [],
+    });
+    const expected: SearchListItemArraySchema = [];
+    expect(queryFilter).toEqual(expected);
+  });
+
+  test('if given an empty array for hits, it returns an empty match', () => {
     const response = getSearchListItemMock();
     response.hits.hits = [];
     const queryFilter = transformElasticNamedSearchToListItem({
@@ -31,7 +42,8 @@ describe('transform_elastic_named_search_to_list_item', () => {
       type: TYPE,
       value: [VALUE],
     });
-    expect(queryFilter).toEqual([]);
+    const expected: SearchListItemArraySchema = [{ items: [], value: VALUE }];
+    expect(queryFilter).toEqual(expected);
   });
 
   test('it transforms a single elastic type to a search list item type', () => {
@@ -77,7 +89,10 @@ describe('transform_elastic_named_search_to_list_item', () => {
       type: TYPE,
       value: [VALUE, '127.0.0.2'],
     });
-    const expected: SearchListItemArraySchema = [getSearchListItemResponseMock()];
+    const expected: SearchListItemArraySchema = [
+      getSearchListItemResponseMock(),
+      { items: [], value: '127.0.0.2' },
+    ];
     expect(queryFilter).toEqual(expected);
   });
 

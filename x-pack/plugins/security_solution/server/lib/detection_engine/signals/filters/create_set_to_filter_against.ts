@@ -37,8 +37,10 @@ export const createSetToFilterAgainst = async <T>({
     return acc;
   }, new Set<unknown>());
 
-  buildRuleMessage(
-    `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
+  logger.debug(
+    buildRuleMessage(
+      `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
+    )
   );
 
   const matchedListItems = await listClient.searchListItemByValues({
@@ -47,9 +49,15 @@ export const createSetToFilterAgainst = async <T>({
     value: [...valuesFromSearchResultField],
   });
 
-  buildRuleMessage(
-    `number of matched items from list with id ${listId}: ${matchedListItems.length}`
+  logger.debug(
+    buildRuleMessage(
+      `number of matched items from list with id ${listId}: ${matchedListItems.length}`
+    )
   );
 
-  return new Set<unknown>(matchedListItems.map((item) => JSON.stringify(item.value)));
+  return new Set<unknown>(
+    matchedListItems
+      .filter((item) => item.items.length !== 0)
+      .map((item) => JSON.stringify(item.value))
+  );
 };

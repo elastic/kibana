@@ -5,7 +5,6 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { isEmpty } from 'lodash/fp';
 
 import { SearchEsListItemSchema, SearchListItemArraySchema, Type } from '../../../common/schemas';
 
@@ -31,7 +30,7 @@ export const transformElasticNamedSearchToListItem = ({
   type,
   value,
 }: TransformElasticMSearchToListItemOptions): SearchListItemArraySchema => {
-  return value.reduce<SearchListItemArraySchema>((accum, singleValue, index) => {
+  return value.map((singleValue, index) => {
     const matchingHits = response.hits.hits.filter((hit) => {
       if (hit.matched_queries != null) {
         return hit.matched_queries.some((matchedQuery) => {
@@ -42,18 +41,10 @@ export const transformElasticNamedSearchToListItem = ({
         return false;
       }
     });
-    if (!isEmpty(matchingHits)) {
-      const items = transformElasticHitsToListItem({ hits: matchingHits, type });
-      const reduced = [
-        ...accum,
-        {
-          items,
-          value: singleValue,
-        },
-      ];
-      return reduced;
-    } else {
-      return accum;
-    }
-  }, []);
+    const items = transformElasticHitsToListItem({ hits: matchingHits, type });
+    return {
+      items,
+      value: singleValue,
+    };
+  });
 };
