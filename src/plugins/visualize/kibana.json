@@ -22,6 +22,7 @@
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "presentationUtil"
+    "presentationUtil",
+    "discover"
   ]
 }
