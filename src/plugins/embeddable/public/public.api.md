@@ -28,10 +28,11 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
-import { ExpressionAstFunction } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup as HttpSetup_2 } from 'kibana/public';
@@ -73,6 +74,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SavedObjectsClientContract as SavedObjectsClientContract_3 } from 'src/core/public';
+import { SavedObjectsFindOptions as SavedObjectsFindOptions_3 } from 'kibana/public';
 import { SavedObjectsFindResponse as SavedObjectsFindResponse_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
@@ -88,7 +90,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
@@ -310,6 +312,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
+    getUpdated$(): Readonly<Rx.Observable<void>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)

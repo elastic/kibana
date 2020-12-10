@@ -26,7 +26,8 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { AlertActionParam, RecoveredActionGroup } from '../../../../../alerts/common';
+import { pick } from 'lodash';
+import { AlertActionParam } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -35,14 +36,14 @@ import {
   ActionVariables,
   ActionVariable,
   ActionTypeRegistryContract,
+  REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
+import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
-import { recoveredActionGroupMessage } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -58,6 +59,8 @@ export type ActionTypeFormProps = {
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
+  defaultParams: DefaultActionParams;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -92,26 +95,24 @@ export const ActionTypeForm = ({
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
+  isActionGroupDisabledForActionType,
+  defaultParams,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
-  const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<
-    string | undefined
-  >(undefined);
+  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
+  const selectedActionGroup =
+    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
   useEffect(() => {
-    setAvailableActionVariables(getAvailableActionVariables(messageVariables, actionItem.group));
-    const res =
-      actionItem.group === RecoveredActionGroup.id
-        ? recoveredActionGroupMessage
-        : defaultActionMessage;
-    setAvailableDefaultActionMessage(res);
-    const paramsDefaults = getDefaultsForActionParams(actionItem.actionTypeId, actionItem.group);
-    if (paramsDefaults) {
-      for (const [key, paramValue] of Object.entries(paramsDefaults)) {
+    setAvailableActionVariables(
+      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+    );
+    if (defaultParams) {
+      for (const [key, paramValue] of Object.entries(defaultParams)) {
         setActionParamsProperty(key, paramValue, index);
       }
     }
@@ -146,6 +147,28 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
+  const actionGroupDisplay = (
+    actionGroupId: string,
+    actionGroupName: string,
+    actionTypeId: string
+  ): string =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+        ? i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            {
+              defaultMessage: '{actionGroupName} (Not Currently Supported)',
+              values: { actionGroupName },
+            }
+          )
+        : actionGroupName
+      : actionGroupName;
+
+  const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+      : false;
+
   const optionsList = connectors
     .filter(
       (connectorItem) =>
@@ -166,10 +189,6 @@ export const ActionTypeForm = ({
     actionTypesIndex[actionConnector.actionTypeId],
     connectors.filter((connector) => connector.isPreconfigured)
   );
-
-  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
-  const selectedActionGroup =
-    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <Fragment>
@@ -196,7 +215,8 @@ export const ActionTypeForm = ({
                   data-test-subj={`addNewActionConnectorActionGroup-${index}`}
                   options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    inputDisplay: name,
+                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
                     'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
                   }))}
                   valueOfSelected={selectedActionGroup.id}
@@ -275,7 +295,7 @@ export const ActionTypeForm = ({
               errors={actionParamsErrors.errors}
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
-              defaultMessage={availableDefaultActionMessage}
+              defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
               actionConnector={actionConnector}
             />
           </Suspense>
@@ -367,18 +387,12 @@ export const ActionTypeForm = ({
 };
 
 function getAvailableActionVariables(
-  actionVariables: ActionVariables | undefined,
-  actionGroup: string
+  actionVariables: ActionVariables,
+  actionGroup?: ActionGroupWithMessageVariables
 ) {
-  if (!actionVariables) {
-    return [];
-  }
-  const filteredActionVariables =
-    actionGroup === RecoveredActionGroup.id
-      ? { params: actionVariables.params, state: actionVariables.state }
-      : actionVariables;
-
-  return transformActionVariables(filteredActionVariables).sort((a, b) =>
-    a.name.toUpperCase().localeCompare(b.name.toUpperCase())
-  );
+  return transformActionVariables(
+    actionGroup?.omitOptionalMessageVariables
+      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+      : actionVariables
+  ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
 }

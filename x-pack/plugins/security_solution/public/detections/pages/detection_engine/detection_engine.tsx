@@ -7,9 +7,10 @@
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -18,11 +19,9 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store/inputs';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { InputsRange } from '../../../common/store/inputs/model';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_callout';
@@ -43,17 +42,24 @@ import { Display } from '../../../hosts/pages/display';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
-  filters,
-  graphEventId,
-  query,
-  setAbsoluteRangeDatePicker,
-}) => {
+const DetectionEnginePageComponent = () => {
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const graphEventId = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).graphEventId
+  );
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const { globalFullScreen } = useFullScreen();
   const [
@@ -83,13 +89,15 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
     },
-    [setAbsoluteRangeDatePicker]
+    [dispatch]
   );
 
   const goToRules = useCallback(
@@ -215,31 +223,4 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  return (state: State) => {
-    const globalInputs: InputsRange = getGlobalInputs(state);
-    const { query, filters } = globalInputs;
-
-    const timeline: TimelineModel =
-      getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults;
-    const { graphEventId } = timeline;
-
-    return {
-      query,
-      filters,
-      graphEventId,
-    };
-  };
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const DetectionEnginePage = connector(React.memo(DetectionEnginePageComponent));
+export const DetectionEnginePage = React.memo(DetectionEnginePageComponent);

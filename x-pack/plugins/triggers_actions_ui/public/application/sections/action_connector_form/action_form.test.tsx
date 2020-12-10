@@ -10,9 +10,12 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerts/common';
+
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -54,6 +57,21 @@ describe('action_form', () => {
 
   const disabledByConfigActionType = {
     id: 'disabled-by-config',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+  };
+
+  const disabledByActionType = {
+    id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
     validateConnector: (): ValidationResult => {
@@ -114,7 +132,7 @@ describe('action_form', () => {
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
-    async function setup(customActions?: AlertAction[]) {
+    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
@@ -161,6 +179,14 @@ describe('action_form', () => {
           },
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: '.jira',
+          actionTypeId: disabledByActionType.id,
+          name: 'Connector with disabled action group',
+          config: {},
+          isPreconfigured: false,
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [
@@ -181,6 +207,7 @@ describe('action_form', () => {
         actionType,
         disabledByConfigActionType,
         disabledByLicenseActionType,
+        disabledByActionType,
         preconfiguredOnly,
         actionTypeWithoutParams,
       ]);
@@ -212,6 +239,7 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
+      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
@@ -224,23 +252,34 @@ describe('action_form', () => {
             context: [{ name: 'contextVar', description: 'context var1' }],
           }}
           defaultActionGroupId={'default'}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+            const recoveryActionGroupId = customRecoveredActionGroup
+              ? customRecoveredActionGroup
+              : 'recovered';
+            return isActionGroupDisabledForActionTypeId(
+              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+              actionTypeId
+            );
+          }}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
           actionGroups={[
-            { id: 'default', name: 'Default' },
-            { id: 'recovered', name: 'Recovered' },
+            { id: 'default', name: 'Default', defaultActionMessage },
+            {
+              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+            },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
           actionTypeRegistry={actionTypeRegistry}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
             {
               id: actionType.id,
@@ -281,6 +320,14 @@ describe('action_form', () => {
               enabledInConfig: true,
               enabledInLicense: false,
               minimumLicenseRequired: 'gold',
+            },
+            {
+              id: '.jira',
+              name: 'Disabled by action type',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
             {
               id: actionTypeWithoutParams.id,
@@ -344,11 +391,13 @@ describe('action_form', () => {
         Array [
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "disabled": false,
             "inputDisplay": "Default",
             "value": "default",
           },
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
+            "disabled": false,
             "inputDisplay": "Recovered",
             "value": "recovered",
           },
@@ -356,43 +405,75 @@ describe('action_form', () => {
       `);
     });
 
-    it('renders selected Recovered action group', async () => {
+    it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
-          group: RecoveredActionGroup.id,
+          group: 'recovered',
           id: 'test',
-          actionTypeId: actionType.id,
+          actionTypeId: disabledByActionType.id,
           params: {
             message: '',
           },
         },
       ]);
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
-      );
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
       );
       expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
         Array [
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
+            "disabled": false,
             "inputDisplay": "Default",
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
-            "inputDisplay": "Recovered",
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-recovered",
+            "disabled": true,
+            "inputDisplay": "Recovered (Not Currently Supported)",
             "value": "recovered",
           },
         ]
       `);
+    });
 
-      expect(actionGroupsSelect.first().find(EuiScreenReaderOnly).text()).toEqual(
-        'Select an option: Recovered, is selected'
+    it('renders disabled action groups for custom recovered action groups', async () => {
+      const wrapper = await setup(
+        [
+          {
+            group: 'iHaveRecovered',
+            id: 'test',
+            actionTypeId: disabledByActionType.id,
+            params: {
+              message: '',
+            },
+          },
+        ],
+        'iHaveRecovered'
       );
-      expect(actionGroupsSelect.first().find('button').first().text()).toEqual('Recovered');
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
+            "disabled": false,
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-iHaveRecovered",
+            "disabled": true,
+            "inputDisplay": "I feel better (Not Currently Supported)",
+            "value": "iHaveRecovered",
+          },
+        ]
+      `);
     });
 
     it('renders available connectors for the selected action type', async () => {

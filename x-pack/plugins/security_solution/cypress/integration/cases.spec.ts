@@ -8,10 +8,10 @@ import { case1 } from '../objects/case';
 
 import {
   ALL_CASES_CLOSE_ACTION,
-  ALL_CASES_CLOSED_CASES_COUNT,
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
   ALL_CASES_DELETE_ACTION,
+  ALL_CASES_IN_PROGRESS_CASES_STATS,
   ALL_CASES_NAME,
   ALL_CASES_OPEN_CASES_COUNT,
   ALL_CASES_OPEN_CASES_STATS,
@@ -70,8 +70,8 @@ describe('Cases', () => {
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', 'Closed cases0');
-    cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open cases (1)');
-    cy.get(ALL_CASES_CLOSED_CASES_COUNT).should('have.text', 'Closed cases (0)');
+    cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', 'In progress cases0');
+    cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', case1.name);
@@ -89,7 +89,7 @@ describe('Cases', () => {
 
     const expectedTags = case1.tags.join('');
     cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', case1.name);
-    cy.get(CASE_DETAILS_STATUS).should('have.text', 'open');
+    cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
     cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', case1.reporter);
     cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'added description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
@@ -103,8 +103,8 @@ describe('Cases', () => {
 
     openCaseTimeline();
 
-    cy.get(TIMELINE_TITLE).should('have.attr', 'value', case1.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', case1.timeline.description);
+    cy.get(TIMELINE_TITLE).contains(case1.timeline.title);
+    cy.get(TIMELINE_DESCRIPTION).contains(case1.timeline.description);
     cy.get(TIMELINE_QUERY).invoke('text').should('eq', case1.timeline.query);
   });
 });

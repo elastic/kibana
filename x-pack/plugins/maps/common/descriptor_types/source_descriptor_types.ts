@@ -72,6 +72,12 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   resolution: GRID_RESOLUTION;
 };
 
+export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  geoField: string;
+  splitField: string;
+  sortField: string;
+};
+
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
   filterByMapBounds?: boolean;

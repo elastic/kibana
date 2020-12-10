@@ -35,7 +35,7 @@ describe('Alerts timeline', () => {
       .invoke('text')
       .then((eventId) => {
         investigateFirstAlertInTimeline();
-        cy.get(PROVIDER_BADGE).should('have.text', `_id: "${eventId}"`);
+        cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', `_id: "${eventId}"`);
       });
   });
 });

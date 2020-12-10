@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
+  ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
@@ -167,9 +167,13 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
-  updateStateOnCloseDimension?: (props: { layerId: string; columnId: string; state: T }) => T;
+  updateStateOnCloseDimension?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+  }) => T | undefined;
 
-  toExpression: (state: T, layerId: string) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -236,7 +240,8 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
-  setState: StateSetter<T>;
+  // Not a StateSetter because we have this unique use case of determining valid columns
+  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -581,7 +586,7 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>,
     attributes?: Partial<{ title: string; description: string }>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
@@ -589,7 +594,7 @@ export interface Visualization<T = unknown> {
   toPreviewExpression?: (
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user

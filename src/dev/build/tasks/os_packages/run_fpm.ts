@@ -28,9 +28,10 @@ export async function runFpm(
   log: ToolingLog,
   build: Build,
   type: 'rpm' | 'deb',
+  architecture: 'arm64' | 'x64',
   pkgSpecificFlags: string[]
 ) {
-  const linux = config.getPlatform('linux', 'x64');
+  const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;

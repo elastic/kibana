@@ -20,7 +20,7 @@ import React, { useState } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiTitle,
   EuiHideFor,
@@ -98,7 +98,7 @@ export interface DiscoverSidebarResponsiveProps {
    * @param metricType
    * @param eventName
    */
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
    * Shows index pattern and a button that displays the sidebar in a flyout
    */

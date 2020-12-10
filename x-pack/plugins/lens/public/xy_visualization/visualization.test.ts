@@ -558,6 +558,30 @@ describe('xy_visualization', () => {
         const accessorConfig = breakdownConfig!.accessors[0];
         expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
       });
+
+      it('should respect the order of accessors coming from datasource', () => {
+        mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+          { columnId: 'c' },
+          { columnId: 'b' },
+        ]);
+        const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
+        // overrite palette with a palette returning first blue, then green as color
+        paletteGetter.mockReturnValue({
+          id: 'default',
+          title: '',
+          getColors: jest.fn(),
+          toExpression: jest.fn(),
+          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+        });
+
+        const yConfigs = callConfigForYConfigs({});
+        expect(yConfigs?.accessors[0].columnId).toEqual('c');
+        expect(yConfigs?.accessors[0].color).toEqual('blue');
+        expect(yConfigs?.accessors[1].columnId).toEqual('b');
+        expect(yConfigs?.accessors[1].color).toEqual('green');
+
+        paletteGetter.mockClear();
+      });
     });
   });
 

@@ -307,6 +307,7 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
       params: [],
     },
     defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: 'alerts',
     ...overloads,
