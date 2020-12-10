@@ -119,6 +119,10 @@ describe('geo_containment', () => {
   });
 
   describe('getActiveEntriesAndGenerateAlerts', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     const currLocationMap = new Map([
       [
         'a',
@@ -150,7 +154,7 @@ describe('geo_containment', () => {
     ]);
     const emptyShapesIdsNamesMap = {};
 
-    const scheduleActions = (x: string, y: Record<string, unknown>) => jest.fn();
+    const scheduleActions = jest.fn((x: string, y: Record<string, unknown>) => {});
     const alertInstanceFactory = (x: string) => ({ scheduleActions });
     const currentDateTime = new Date();
 
@@ -164,6 +168,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
     });
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = {
@@ -182,6 +187,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
     });
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = {
@@ -201,6 +207,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
+      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
     });
     it('should remove "other" entries and schedule the expected number of actions', () => {
       const emptyPrevLocationMap = {};
@@ -219,6 +226,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
     });
   });
 });
