@@ -86,7 +86,8 @@ const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
 const expectedTags = newOverrideRule.tags.join('');
 const expectedMitre = formatMitreAttackDescription(newOverrideRule.mitre);
 
-describe('Detection rules, override', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/84020
+describe.skip('Detection rules, override', () => {
   before(() => {
     esArchiverLoad('timeline');
   });
