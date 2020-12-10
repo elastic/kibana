@@ -147,13 +147,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     [dispatch, timelineId]
   );
 
-  // const setPinnedAsActiveTab = useCallback(
-  //   () =>
-  //     dispatch(
-  //       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
-  //     ),
-  //   [dispatch, timelineId]
-  // );
+  const setPinnedAsActiveTab = useCallback(
+    () =>
+      dispatch(
+        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
+      ),
+    [dispatch, timelineId]
+  );
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {
@@ -192,7 +192,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
         >
           {i18n.NOTES_TAB}
         </EuiTab>
-        {/* <EuiTab
+        <EuiTab
           data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
           onClick={setPinnedAsActiveTab}
           isSelected={activeTab === TimelineTabs.pinned}
@@ -200,7 +200,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           key={TimelineTabs.pinned}
         >
           {i18n.PINNED_TAB}
-        </EuiTab> */}
+        </EuiTab>
       </EuiTabs>
       <ActiveTimelineTab activeTimelineTab={activeTab} timelineId={timelineId} />
     </>
