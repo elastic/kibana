@@ -7,7 +7,7 @@
 import React, { memo, useCallback } from 'react';
 import { CommonProps, EuiText, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
+import { ConditionGroup, ConditionGroupProps } from '../condition_group';
 
 export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
