@@ -27,7 +27,7 @@ import {
 } from '../../types';
 
 import {
-  painlessTestContext,
+  commonContext,
   scoreContext,
   filterContext,
   booleanScriptFieldScriptFieldContext,
@@ -81,6 +81,17 @@ export const getKeywords = (): PainlessCompletionItem[] => {
   return allKeywords;
 };
 
+export const getTypeSuggestions = (): PainlessCompletionItem[] => {
+  return lexerRules.primitives.map((primitive) => {
+    return {
+      label: primitive,
+      kind: 'type',
+      documentation: `Type: ${primitive}`,
+      insertText: primitive,
+    };
+  });
+};
+
 const runtimeContexts: PainlessContext[] = [
   'boolean_script_field_script_field',
   'date_script_field',
@@ -91,7 +102,7 @@ const runtimeContexts: PainlessContext[] = [
 ];
 
 const mapContextToData: { [key: string]: { suggestions: any[] } } = {
-  painless_test: painlessTestContext,
+  painless_test: commonContext,
   score: scoreContext,
   filter: filterContext,
   boolean_script_field_script_field: booleanScriptFieldScriptFieldContext,
@@ -118,6 +129,7 @@ export const getStaticSuggestions = ({
   });
 
   const keywords = getKeywords();
+  const typeSuggestions = getTypeSuggestions();
 
   let keywordSuggestions: PainlessCompletionItem[] = hasFields
     ? [
@@ -156,12 +168,8 @@ export const getStaticSuggestions = ({
 
   return {
     isIncomplete: false,
-    suggestions: [...classSuggestions, ...keywordSuggestions],
+    suggestions: [...classSuggestions, ...keywordSuggestions, ...typeSuggestions],
   };
-};
-
-export const getPrimitives = (suggestions: Suggestion[]): string[] => {
-  return suggestions.filter((suggestion) => suggestion.kind === 'type').map((type) => type.label);
 };
 
 export const getClassMemberSuggestions = (
@@ -224,10 +232,16 @@ export const getAutocompleteSuggestions = (
   words: string[],
   fields?: PainlessAutocompleteField[]
 ): PainlessCompletionResult => {
-  const suggestions = mapContextToData[painlessContext].suggestions;
+  // Unique suggestions based on context
+  const contextSuggestions = mapContextToData[painlessContext].suggestions;
+  // Enhance suggestions with common classes that exist in all contexts
+  // "painless_test" is the exception since it equals the common suggestions
+  const suggestions =
+    painlessContext === 'painless_test'
+      ? contextSuggestions
+      : contextSuggestions.concat(commonContext.suggestions);
   // What the user is currently typing
   const activeTyping = words[words.length - 1];
-  const primitives = getPrimitives(suggestions);
   // This logic may end up needing to be more robust as we integrate autocomplete into more editors
   // For now, we're assuming there is a list of painless contexts that are only applicable in runtime fields
   const isRuntimeContext = runtimeContexts.includes(painlessContext);
@@ -247,7 +261,7 @@ export const getAutocompleteSuggestions = (
   } else if (isAccessingProperty(activeTyping)) {
     const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
     autocompleteSuggestions = getClassMemberSuggestions(suggestions, className);
-  } else if (showStaticSuggestions(activeTyping, words, primitives)) {
+  } else if (showStaticSuggestions(activeTyping, words, lexerRules.primitives)) {
     autocompleteSuggestions = getStaticSuggestions({ suggestions, hasFields, isRuntimeContext });
   }
   return autocompleteSuggestions;
