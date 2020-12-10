@@ -119,6 +119,7 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
 
+        await actions.hot.toggleDefaultRollover(false);
         await actions.hot.setMaxSize('123', 'mb');
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
@@ -175,6 +176,7 @@ describe('<EditPolicy />', () => {
 
       test('disabling rollover', async () => {
         const { actions } = testBed;
+        await actions.hot.toggleDefaultRollover(false);
         await actions.hot.toggleRollover(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];

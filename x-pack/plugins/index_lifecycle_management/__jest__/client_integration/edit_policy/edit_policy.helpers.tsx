@@ -111,6 +111,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
+
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
   const setMaxSize = async (value: string, units?: string) => {
@@ -235,6 +237,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxDocs,
         setMaxAge,
         toggleRollover,
+        toggleDefaultRollover,
         ...createForceMergeActions('hot'),
         setIndexPriority: setIndexPriority('hot'),
         setShrink: setShrink('hot'),
