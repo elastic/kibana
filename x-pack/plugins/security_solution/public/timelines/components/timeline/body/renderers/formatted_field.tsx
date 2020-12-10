@@ -5,19 +5,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isString, isEmpty } from 'lodash/fp';
+import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import {
-  getOrEmptyTagFromValue,
-  getEmptyTagValue,
-} from '../../../../../common/components/empty_value';
+import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../../components/formatted_ip';
-import { HostDetailsLink } from '../../../../../common/components/links';
 
 import { Port, PORT_NAMES } from '../../../../../network/components/port';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -36,6 +32,7 @@ import {
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
+import { HostName } from './host_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -82,22 +79,7 @@ const FormattedFieldValueComponent: React.FC<{
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
   } else if (fieldName === HOST_NAME_FIELD_NAME) {
-    const hostname = `${value}`;
-
-    return isString(value) && hostname.length > 0 ? (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        tooltipContent={value}
-        value={value}
-      >
-        <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
-          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
-        </HostDetailsLink>
-      </DefaultDraggable>
-    ) : (
-      getEmptyTagValue()
-    );
+    return <HostName contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />;
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
