@@ -221,7 +221,7 @@ export function savedObjectsRoutes(
             body: jobIds.map((id) => ({
               [id]: {
                 success: false,
-                error: 'CHANGE ME',
+                error: 'Cannot remove current space. Spaces plugin is disabled.',
               },
             })),
           });
