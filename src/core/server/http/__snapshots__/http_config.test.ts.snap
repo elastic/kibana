@@ -24,6 +24,14 @@ Object {
 }
 `;
 
+exports[`basePath throws if appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
+
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
@@ -88,14 +96,6 @@ Object {
   },
 }
 `;
-
-exports[`throws if basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
 
 exports[`throws if invalid hostname 1`] = `"[host]: value must be a valid hostname (see RFC 1123)."`;
 
