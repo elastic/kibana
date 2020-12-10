@@ -19,7 +19,6 @@
 import { EsQuerySortValue, IndexPattern } from '../../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
-import { getDefaultSort } from './get_default_sort';
 
 /**
  * Prepares sort for search source, that's sending the request to ES
@@ -33,10 +32,9 @@ export function getSortForSearchSource(
   indexPattern?: IndexPattern,
   defaultDirection: string = 'desc'
 ): EsQuerySortValue[] {
-  if (!sort || !indexPattern) {
-    return [];
-  } else if (Array.isArray(sort) && sort.length === 0) {
-    sort = getDefaultSort(indexPattern, defaultDirection);
+  if (!sort || !indexPattern || (Array.isArray(sort) && sort.length === 0)) {
+    // sorting by index order
+    return [{ _doc: defaultDirection } as EsQuerySortValue];
   }
   const { timeFieldName } = indexPattern;
   return getSort(sort, indexPattern).map((sortPair: Record<string, string>) => {
