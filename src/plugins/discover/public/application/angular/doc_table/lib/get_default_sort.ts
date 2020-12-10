@@ -17,7 +17,6 @@
  * under the License.
  */
 import { IndexPattern } from '../../../../kibana_services';
-// @ts-ignore
 import { isSortable } from './get_sort';
 import { SortOrder } from '../components/table_header/helpers';
 
