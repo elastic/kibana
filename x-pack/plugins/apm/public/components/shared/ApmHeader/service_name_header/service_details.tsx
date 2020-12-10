@@ -16,39 +16,40 @@ import { IconPopover } from './icon_popover';
 export type ServiceDetailsApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}'>;
 
 interface Props {
-  serviceDetails: ServiceDetailsApiResponse;
+  service: ServiceDetailsApiResponse['service'];
 }
 
-export function ServiceDetails({ serviceDetails }: Props) {
-  if (!serviceDetails) {
+export function ServiceDetails({ service }: Props) {
+  if (!service) {
     return null;
   }
 
   return (
     <IconPopover
-      icon={getAgentIcon(serviceDetails.agent.name) || 'node'}
+      icon={getAgentIcon(service.agent.name) || 'node'}
       title={i18n.translate('xpack.apm.serviceNameHeader.service', {
         defaultMessage: 'Service',
       })}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiStat
-            title={serviceDetails.service.version}
-            description={i18n.translate(
-              'xpack.apm.serviceNameHeader.service.version',
-              { defaultMessage: 'Service version' }
-            )}
-            titleSize="xxs"
-          />
+          {service.version && (
+            <EuiStat
+              title={service.version}
+              description={i18n.translate(
+                'xpack.apm.serviceNameHeader.service.version',
+                { defaultMessage: 'Service version' }
+              )}
+              titleSize="xxs"
+            />
+          )}
         </EuiFlexItem>
-        {serviceDetails.service.runtime && (
+        {service.runtime && (
           <EuiFlexItem>
             <EuiStat
               title={
                 <>
-                  {serviceDetails.service.runtime.name}{' '}
-                  {serviceDetails.service.runtime.version}
+                  {service.runtime.name} {service.runtime.version}
                 </>
               }
               description={i18n.translate(
@@ -59,10 +60,10 @@ export function ServiceDetails({ serviceDetails }: Props) {
             />
           </EuiFlexItem>
         )}
-        {serviceDetails.service.framework && (
+        {service.framework && (
           <EuiFlexItem>
             <EuiStat
-              title={serviceDetails.service.framework.name}
+              title={service.framework}
               description={i18n.translate(
                 'xpack.apm.serviceNameHeader.service.framework',
                 { defaultMessage: 'Framework name' }
@@ -71,12 +72,12 @@ export function ServiceDetails({ serviceDetails }: Props) {
             />
           </EuiFlexItem>
         )}
-        {serviceDetails.agent && (
+        {service.agent && (
           <EuiFlexItem>
             <EuiStat
               title={
                 <>
-                  {serviceDetails.agent.name} {serviceDetails.agent.version}
+                  {service.agent.name} {service.agent.version}
                 </>
               }
               description={i18n.translate(

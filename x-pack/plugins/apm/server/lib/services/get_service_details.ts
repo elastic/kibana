@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Container } from '../../../typings/es_schemas/raw/fields/container';
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
+  AGENT,
+  CLOUD,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_MACHINE_TYPE,
+  CONTAINER,
+  HOST,
+  KUBERNETES,
+  PROCESSOR_EVENT,
+  SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-  SERVICE,
-  AGENT,
-  HOST,
-  CONTAINER,
-  KUBERNETES,
-  CLOUD,
-  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
+import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -27,13 +28,32 @@ type ServiceDetails = Pick<
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-interface IContainer extends Container {
-  avgNumberInstances: number | null;
+interface ServiceDetailsResponse {
+  service?: {
+    version?: string;
+    runtime?: {
+      name: string;
+      version: string;
+    };
+    framework?: string;
+    agent: {
+      name: string;
+      version: string;
+    };
+  };
+  container?: {
+    os?: string;
+    isContainerized?: boolean;
+    avgNumberInstances?: number;
+    orchestration?: 'Kubernetes' | 'Docker';
+  };
+  cloud?: {
+    provider?: string;
+    availabilityZones?: string[];
+    machineTypes?: string[];
+    projectName?: string;
+  };
 }
-
-type ServiceDetailsResponse = Omit<ServiceDetails, 'container'> & {
-  container?: IContainer;
-};
 
 export async function getServiceDetails({
   serviceName,
@@ -41,7 +61,7 @@ export async function getServiceDetails({
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-}): Promise<ServiceDetailsResponse | undefined> {
+}): Promise<ServiceDetailsResponse> {
   const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
@@ -49,6 +69,7 @@ export async function getServiceDetails({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
+    ...setup.esFilter,
   ];
 
   const params = {
@@ -60,6 +81,18 @@ export async function getServiceDetails({
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter } },
       aggs: {
+        availabilityZones: {
+          terms: {
+            field: CLOUD_AVAILABILITY_ZONE,
+            size: 10,
+          },
+        },
+        machineTypes: {
+          terms: {
+            field: CLOUD_MACHINE_TYPE,
+            size: 10,
+          },
+        },
         histogram: {
           date_histogram: {
             field: '@timestamp',
@@ -81,17 +114,51 @@ export async function getServiceDetails({
   const response = await apmEventClient.search(params);
 
   if (response.hits.total.value === 0) {
-    return;
+    return {
+      service: undefined,
+      container: undefined,
+      cloud: undefined,
+    };
   }
 
-  const source = response.hits.hits[0]._source as ServiceDetails;
+  const { service, agent, host, kubernetes, container, cloud } = response.hits
+    .hits[0]._source as ServiceDetails;
+
+  const serviceDetails: ServiceDetailsResponse['service'] = {
+    version: service.version,
+    runtime: service.runtime,
+    framework: service.framework?.name,
+    agent,
+  };
 
   const avgNumberInstances =
-    response.aggregations?.avgNumberInstances.value ?? null;
+    response.aggregations?.avgNumberInstances.value || undefined;
+  const containerDetails: ServiceDetailsResponse['container'] =
+    host || container || avgNumberInstances || kubernetes
+      ? {
+          os: host?.os?.platform,
+          orchestration: !!kubernetes ? 'Kubernetes' : 'Docker',
+          isContainerized: !!container?.id,
+          avgNumberInstances,
+        }
+      : undefined;
 
-  const container = source.container
-    ? { ...source.container, avgNumberInstances }
+  const cloudDetails: ServiceDetailsResponse['cloud'] = cloud
+    ? {
+        provider: cloud.provider,
+        projectName: cloud.project.name,
+        availabilityZones: response.aggregations?.availabilityZones.buckets.map(
+          (bucket) => bucket.key as string
+        ),
+        machineTypes: response.aggregations?.machineTypes.buckets.map(
+          (bucket) => bucket.key as string
+        ),
+      }
     : undefined;
 
-  return { ...source, container };
+  return {
+    service: serviceDetails,
+    container: containerDetails,
+    cloud: cloudDetails,
+  };
 }

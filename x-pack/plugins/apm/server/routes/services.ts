@@ -48,7 +48,10 @@ export const servicesRoute = createRoute({
 
 export const serviceDetailsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}',
-  params: t.type({ path: t.type({ serviceName: t.string }), query: rangeRt }),
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);

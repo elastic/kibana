@@ -15,31 +15,30 @@ import { IconPopover } from './icon_popover';
 export type ServiceDetailsApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}'>;
 
 interface Props {
-  serviceDetails: ServiceDetailsApiResponse;
+  container: ServiceDetailsApiResponse['container'];
 }
 
-export function ContainerDetails({ serviceDetails }: Props) {
-  if (
-    !serviceDetails ||
-    (!serviceDetails.container && !serviceDetails.kubernetes)
-  ) {
+export function ContainerDetails({ container }: Props) {
+  if (!container) {
     return null;
   }
 
-  const isKubernetes = !!serviceDetails.kubernetes;
-
   return (
     <IconPopover
-      icon={isKubernetes ? 'logoKubernetes' : 'logoDocker'}
+      icon={
+        container.orchestration === 'Kubernetes'
+          ? 'logoKubernetes'
+          : 'logoDocker'
+      }
       title={i18n.translate('xpack.apm.serviceNameHeader.container', {
         defaultMessage: 'Container',
       })}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        {serviceDetails.host?.os?.platform && (
+        {container.os && (
           <EuiFlexItem>
             <EuiStat
-              title={serviceDetails.host.os?.platform}
+              title={container.os}
               description={i18n.translate(
                 'xpack.apm.serviceNameHeader.container.os',
                 { defaultMessage: 'OS' }
@@ -48,16 +47,14 @@ export function ContainerDetails({ serviceDetails }: Props) {
             />
           </EuiFlexItem>
         )}
-        {serviceDetails.container?.id && (
+        {container.isContainerized !== undefined && (
           <EuiFlexItem>
             <EuiStat
               title={
-                serviceDetails.container?.id
+                container.isContainerized
                   ? i18n.translate(
                       'xpack.apm.serviceNameHeader.container.yes',
-                      {
-                        defaultMessage: 'Yes',
-                      }
+                      { defaultMessage: 'Yes' }
                     )
                   : i18n.translate('xpack.apm.serviceNameHeader.container.no', {
                       defaultMessage: 'No',
@@ -72,10 +69,10 @@ export function ContainerDetails({ serviceDetails }: Props) {
           </EuiFlexItem>
         )}
 
-        {serviceDetails.container?.avgNumberInstances && (
+        {container.avgNumberInstances && (
           <EuiFlexItem>
             <EuiStat
-              title={serviceDetails.container?.avgNumberInstances}
+              title={Math.round(container.avgNumberInstances)}
               description={i18n.translate(
                 'xpack.apm.serviceNameHeader.container.avgNumberInstances',
                 { defaultMessage: 'Avg. number of instances' }
@@ -84,24 +81,17 @@ export function ContainerDetails({ serviceDetails }: Props) {
             />
           </EuiFlexItem>
         )}
-        <EuiStat
-          title={
-            isKubernetes
-              ? i18n.translate(
-                  'xpack.apm.serviceNameHeader.container.orchestration.kubernetes',
-                  { defaultMessage: 'Kubernetes' }
-                )
-              : i18n.translate(
-                  'xpack.apm.serviceNameHeader.container.orchestration.docker',
-                  { defaultMessage: 'Docker' }
-                )
-          }
-          description={i18n.translate(
-            'xpack.apm.serviceNameHeader.container.orchestration',
-            { defaultMessage: 'Orchestration' }
-          )}
-          titleSize="xxs"
-        />
+
+        {container.orchestration && (
+          <EuiStat
+            title={container.orchestration}
+            description={i18n.translate(
+              'xpack.apm.serviceNameHeader.container.orchestration',
+              { defaultMessage: 'Orchestration' }
+            )}
+            titleSize="xxs"
+          />
+        )}
       </EuiFlexGroup>
     </IconPopover>
   );

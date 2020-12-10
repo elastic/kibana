@@ -11,8 +11,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { ServiceDetails } from './service_details';
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export function ServiceNameHeader({ serviceName }: Props) {
-  const { urlParams } = useUrlParams();
+  const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
 
   const { data: serviceDetails, status: serviceDetailsStatus } = useFetcher(
@@ -30,11 +30,14 @@ export function ServiceNameHeader({ serviceName }: Props) {
       if (serviceName && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/services/{serviceName}',
-          params: { path: { serviceName }, query: { start, end } },
+          params: {
+            path: { serviceName },
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+          },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, uiFilters]
   );
 
   const isLoading =
@@ -53,13 +56,13 @@ export function ServiceNameHeader({ serviceName }: Props) {
         {serviceDetails && (
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <ServiceDetails serviceDetails={serviceDetails} />
+              <ServiceDetails service={serviceDetails?.service} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ContainerDetails serviceDetails={serviceDetails} />
+              <ContainerDetails container={serviceDetails?.container} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <CloudDetails serviceDetails={serviceDetails} />
+              <CloudDetails cloud={serviceDetails?.cloud} />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
