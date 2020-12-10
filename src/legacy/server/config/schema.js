@@ -69,6 +69,7 @@ export default () =>
       customResponseHeaders: HANDLED_IN_NEW_PLATFORM,
       keepaliveTimeout: HANDLED_IN_NEW_PLATFORM,
       maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
+      publicBaseUrl: HANDLED_IN_NEW_PLATFORM,
       socketTimeout: HANDLED_IN_NEW_PLATFORM,
       ssl: HANDLED_IN_NEW_PLATFORM,
       compression: HANDLED_IN_NEW_PLATFORM,

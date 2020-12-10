@@ -13,6 +13,7 @@ export * from './alert_task_instance';
 export * from './alert_navigation';
 export * from './alert_instance_summary';
 export * from './builtin_action_groups';
+export * from './disabled_action_groups';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
