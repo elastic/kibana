@@ -57,6 +57,30 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
+    it('should return a correct error for transform preview', async () => {
+      const { body } = await supertest
+        .post(`/api/transform/transforms/_preview`)
+        .auth(
+          USER.TRANSFORM_POWERUSER,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send({
+          ...getTransformPreviewConfig(),
+          pivot: {
+            group_by: { airline: { terms: { field: 'airline' } } },
+            aggregations: {
+              '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
+            },
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.eql(
+        '[parsing_exception] Unknown aggregation type [value_countt] did you mean [value_count]?, with line=1 & col=43'
+      );
+    });
+
     it('should return 403 for transform view-only user', async () => {
       await supertest
         .post(`/api/transform/transforms/_preview`)

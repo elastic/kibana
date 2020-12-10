@@ -79,7 +79,6 @@ export const mockStore = {
       prevPagePagination: null,
       nextPagePagination: null,
       summaries: [],
-      totalSummaryCount: 0,
     },
     loading: false,
   },

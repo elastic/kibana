@@ -117,7 +117,9 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
 };
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
-  get(['agent', 'type', 0], ecsData) === 'endpoint' &&
+  (get(['agent', 'type', 0], ecsData) === 'endpoint' ||
+    (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
+      get(['event', 'module', 0], ecsData) === 'sysmon')) &&
   get(['process', 'entity_id'], ecsData)?.length === 1 &&
   get(['process', 'entity_id', 0], ecsData) !== '';
 
@@ -142,9 +144,11 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
   return (
     <ActionIconItem
       ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
-      content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      content={
+        isDisabled ? i18n.INVESTIGATE_IN_RESOLVER_DISABLED : i18n.ACTION_INVESTIGATE_IN_RESOLVER
+      }
       dataTestSubj="investigate-in-resolver"
-      iconType="node"
+      iconType="analyzeEvent"
       id="investigateInResolver"
       isDisabled={isDisabled}
       onClick={handleClick}
