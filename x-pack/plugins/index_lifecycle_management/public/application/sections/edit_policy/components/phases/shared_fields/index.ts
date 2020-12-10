@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useRolloverPath } from '../../../constants';
-
 export { DataTierAllocationField } from './data_tier_allocation_field';
 
 export { ForcemergeField } from './forcemerge_field';

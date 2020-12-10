@@ -26,11 +26,11 @@ import { useFormData, UseField, SelectField, NumericField } from '../../../../..
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { ROLLOVER_FORM_PATHS } from '../../../constants';
+import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormRow } from '../../';
 
@@ -38,7 +38,6 @@ import {
   ForcemergeField,
   SetPriorityInputField,
   SearchableSnapshotField,
-  useRolloverPath,
   ShrinkField,
 } from '../shared_fields';
 
@@ -46,14 +45,12 @@ import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 const hotProperty: keyof Phases = 'hot';
 
-const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
-
 export const HotPhase: FunctionComponent = () => {
   const { license } = useEditPolicyContext();
   const [formData] = useFormData({
-    watch: [useRolloverPath, isUsingDefaultRolloverPath],
+    watch: isUsingDefaultRolloverPath,
   });
-  const isRolloverEnabled = get(formData, useRolloverPath);
+  const { isUsingRollover } = useConfigurationIssues();
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
@@ -175,7 +172,7 @@ export const HotPhase: FunctionComponent = () => {
                 </>
               )}
             </UseField>
-            {isRolloverEnabled && (
+            {isUsingRollover && (
               <>
                 <EuiSpacer size="m" />
                 {showEmptyRolloverFieldsError && (
@@ -287,7 +284,7 @@ export const HotPhase: FunctionComponent = () => {
             )}
           </div>
         </DescribedFormRow>
-        {isRolloverEnabled && (
+        {isUsingRollover && (
           <>
             {<ForcemergeField phase="hot" />}
             <ShrinkField phase="hot" />
