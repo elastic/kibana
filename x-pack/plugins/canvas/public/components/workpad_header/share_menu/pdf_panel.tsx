@@ -55,6 +55,7 @@ export const PDFPanel = ({ getPdfURL, onExport, onCopy }: Props) => {
               ? setReportLayout('preserve_layout')
               : setReportLayout('canvas')
           }
+          data-test-subj="reportModeToggle"
         />
       </EuiFormRow>
       <EuiButton
