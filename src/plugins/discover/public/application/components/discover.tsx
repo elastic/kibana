@@ -97,7 +97,17 @@ export function Discover({
       : undefined;
   const contentCentered = resultState === 'uninitialized';
   const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
-  const columns = state.columns && state.columns.length > 0 ? state.columns : ['_source'];
+  const columns =
+    state.columns &&
+    state.columns.length > 0 &&
+    // check if all columns where removed except the configured timeField (this can't be removed)
+    !(state.columns.length === 1 && state.columns[0] === indexPattern.timeFieldName)
+      ? state.columns
+      : ['_source'];
+  // if columns include _source this is considered as default view, so you can't remove columns
+  // until you add a column using Discover's sidebar
+  const defaultColumns = columns.includes('_source');
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -263,7 +273,7 @@ export function Discover({
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={columns}
-                              defaultColumns={columns[0] === '_source'}
+                              defaultColumns={defaultColumns}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}

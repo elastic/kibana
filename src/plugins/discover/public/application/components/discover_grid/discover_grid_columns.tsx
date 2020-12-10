@@ -60,13 +60,14 @@ export function buildEuiGridColumn(
     isSortable: indexPatternField?.sortable,
     display: indexPatternField?.displayName,
     actions: {
-      showHide: defaultColumns
-        ? false
-        : {
-            label: i18n.translate('discover.removeColumnLabel', {
-              defaultMessage: 'Remove column',
-            }),
-          },
+      showHide:
+        defaultColumns || columnName === indexPattern.timeFieldName
+          ? false
+          : {
+              label: i18n.translate('discover.removeColumnLabel', {
+                defaultMessage: 'Remove column',
+              }),
+            },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
     },
