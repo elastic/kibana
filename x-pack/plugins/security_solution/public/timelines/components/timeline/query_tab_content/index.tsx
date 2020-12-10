@@ -260,7 +260,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
+    if (!events || findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
       handleOnEventClosed();
     }
   }, [expandedEvent, handleOnEventClosed, events]);

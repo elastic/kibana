@@ -231,7 +231,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    if (findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
+    if (!events || findIndex((e) => e._id === expandedEvent?.eventId, events) < 0) {
       onFlyoutCollapsed({ indexName: expandedEvent.indexName, eventId: expandedEvent.eventId });
     }
   }, [expandedEvent, onFlyoutCollapsed, events]);
