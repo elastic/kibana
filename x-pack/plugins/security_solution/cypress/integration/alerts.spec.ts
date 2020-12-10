@@ -39,7 +39,6 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('alerts');
       removeSignalsIndex();
     });
@@ -170,7 +169,6 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('closed_alerts');
       removeSignalsIndex();
     });
@@ -223,7 +221,6 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('alerts');
       removeSignalsIndex();
     });
