@@ -8,7 +8,7 @@ This page discusses the breaking changes that you need to be aware of when migra
 your application to Kibana 7.6.
 
 * <<user-facing-changes, Breaking changes for users>>
-* <<general-plugin-API-changes, Breaking changes for plugin developers>>
+* <<general-plugin-API-changes-76, Breaking changes for plugin developers>>
 
 // The following section is re-used in the Installation and Upgrade Guide
 //tag::notable-breaking-changes[]
@@ -22,7 +22,7 @@ your application to Kibana 7.6.
 There are no user-facing breaking changes in 7.6.
 
 [float]
-[[general-plugin-API-changes]]
+[[general-plugin-API-changes-76]]
 === Breaking changes for plugin developers
 
 [float]
