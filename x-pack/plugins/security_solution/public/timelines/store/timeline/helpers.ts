@@ -179,7 +179,7 @@ interface AddNewTimelineParams {
     filterQuery: SerializedFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
@@ -762,7 +762,7 @@ export const updateTimelineRange = ({
 
 interface UpdateTimelineSortParams {
   id: string;
-  sort: Sort;
+  sort: Sort[];
   timelineById: TimelineById;
 }
 

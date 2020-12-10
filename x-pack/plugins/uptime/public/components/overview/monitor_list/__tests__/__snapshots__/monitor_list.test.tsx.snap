@@ -826,18 +826,12 @@ exports[`MonitorList component renders loading state 1`] = `
 `;
 
 exports[`MonitorList component renders the monitor list 1`] = `
-.c3 {
+.c2 {
   padding-right: 4px;
 }
 
-.c4 {
+.c3 {
   padding-top: 12px;
-}
-
-.c1 {
-  position: absolute;
-  right: 16px;
-  top: 16px;
 }
 
 .c0 {
@@ -845,7 +839,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 @media (max-width:574px) {
-  .c2 {
+  .c1 {
     min-width: 230px;
   }
 }
@@ -936,13 +930,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
         </button>
       </div>
     </div>
-    <a
-      class="c1"
-      data-test-subj="uptimeCertificatesLink"
-      href="/certificates"
-    >
-      Certificates status
-    </a>
   </div>
   <div
     class="euiSpacer euiSpacer--m"
@@ -1108,7 +1095,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               >
                 <div>
                   <div
-                    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c2"
+                    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
                   >
                     <div
                       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1134,7 +1121,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiText euiText--extraSmall c3 eui-textNoWrap"
+                        class="euiText euiText--extraSmall c2 eui-textNoWrap"
                       >
                         <div
                           class="euiTextColor euiTextColor--subdued"
@@ -1347,7 +1334,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               >
                 <div>
                   <div
-                    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c2"
+                    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
                   >
                     <div
                       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1373,7 +1360,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiText euiText--extraSmall c3 eui-textNoWrap"
+                        class="euiText euiText--extraSmall c2 eui-textNoWrap"
                       >
                         <div
                           class="euiTextColor euiTextColor--subdued"
@@ -1622,7 +1609,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c4"
+            class="euiButtonIcon euiButtonIcon--text c3"
             data-test-subj="xpack.uptime.monitorList.prevButton"
             disabled=""
             type="button"
@@ -1639,7 +1626,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c4"
+            class="euiButtonIcon euiButtonIcon--text c3"
             data-test-subj="xpack.uptime.monitorList.nextButton"
             disabled=""
             type="button"

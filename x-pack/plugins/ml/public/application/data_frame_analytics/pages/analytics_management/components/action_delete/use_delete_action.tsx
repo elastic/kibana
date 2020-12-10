@@ -29,11 +29,13 @@ import {
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
+type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
-  const [item, setItem] = useState<DataFrameAnalyticsListRow>();
+  const [item, setItem] = useState<DataFrameAnalyticsListRowEssentials>();
 
   const [isModalVisible, setModalVisible] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
@@ -111,25 +113,27 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
+    setDeleteItem(true);
     setModalVisible(false);
 
     if (item !== undefined) {
       if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteIndexPattern)) {
         deleteAnalyticsAndDestIndex(
-          item,
+          item.config,
+          item.stats,
           deleteTargetIndex,
           indexPatternExists && deleteIndexPattern,
           toastNotificationService
         );
       } else {
-        deleteAnalytics(item, toastNotificationService);
+        deleteAnalytics(item.config, item.stats, toastNotificationService);
       }
     }
   };
   const toggleDeleteIndex = () => setDeleteTargetIndex(!deleteTargetIndex);
   const toggleDeleteIndexPattern = () => setDeleteIndexPattern(!deleteIndexPattern);
 
-  const openModal = (newItem: DataFrameAnalyticsListRow) => {
+  const openModal = (newItem: DataFrameAnalyticsListRowEssentials) => {
     setItem(newItem);
     setModalVisible(true);
   };
@@ -159,6 +163,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     deleteAndCloseModal,
     deleteTargetIndex,
     deleteIndexPattern,
+    deleteItem,
     indexPatternExists,
     isModalVisible,
     item,
