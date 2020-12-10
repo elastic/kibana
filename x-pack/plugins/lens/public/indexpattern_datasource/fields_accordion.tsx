@@ -39,6 +39,7 @@ export interface FieldsAccordionProps {
   onToggle: (open: boolean) => void;
   id: string;
   label: string;
+  helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
   isFiltered: boolean;
@@ -55,6 +56,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   onToggle,
   id,
   label,
+  helpTooltip,
   hasLoaded,
   fieldsCount,
   isFiltered,
@@ -86,7 +88,22 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       id={id}
       buttonContent={
         <EuiText size="xs">
-          <strong>{label}</strong>
+          <p>
+            <strong>{label}</strong>
+            {!!helpTooltip && (
+              <EuiIconTip
+                aria-label={helpTooltip}
+                type="questionInCircle"
+                color="subdued"
+                size="s"
+                position="right"
+                content={helpTooltip}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+              />
+            )}
+          </p>
         </EuiText>
       }
       extraAction={
