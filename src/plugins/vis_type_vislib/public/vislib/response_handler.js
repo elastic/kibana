@@ -42,6 +42,7 @@ function tableResponseHandler(table, dimensions) {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           name: splitColumn.name,
           key: splitValue,
+          formattedKey: splitColumnFormatter.convert(splitValue),
           column: splitColumnIndex,
           row: rowIndex,
           table,
