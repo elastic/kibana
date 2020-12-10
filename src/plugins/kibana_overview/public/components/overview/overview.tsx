@@ -49,6 +49,7 @@ import { AddData } from '../add_data';
 import { GettingStarted } from '../getting_started';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
+import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
 const sortByOrder = (featureA: FeatureCatalogueEntry, featureB: FeatureCatalogueEntry) =>
   (featureA.order || Infinity) - (featureB.order || Infinity);
@@ -108,6 +109,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           <EuiCard
             description={app?.subtitle || ''}
             href={addBasePath(app.path)}
+            onClick={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
+            }}
             image={addBasePath(
               `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
             )}
@@ -222,6 +226,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                               title={title}
                               titleElement="h3"
                               titleSize="xs"
+                              onClick={() => {
+                                trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
+                              }}
                             />
                           </RedirectAppLinks>
                         </EuiFlexItem>
@@ -252,7 +259,16 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <OverviewPageFooter addBasePath={addBasePath} path={PLUGIN_PATH} />
+        <OverviewPageFooter
+          addBasePath={addBasePath}
+          path={PLUGIN_PATH}
+          onSetDefaultRoute={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, 'set_kibana_overview_as_default_route');
+          }}
+          onChangeDefaultRoute={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+          }}
+        />
       </div>
     </main>
   );

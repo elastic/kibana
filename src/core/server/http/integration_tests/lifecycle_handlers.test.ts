@@ -50,26 +50,40 @@ describe('core lifecycle handlers', () => {
 
   beforeEach(async () => {
     const configService = configServiceMock.create();
-    configService.atPath.mockReturnValue(
-      new BehaviorSubject({
-        hosts: ['localhost'],
-        maxPayload: new ByteSizeValue(1024),
-        autoListen: true,
-        ssl: {
-          enabled: false,
-        },
-        compression: { enabled: true },
-        name: kibanaName,
-        customResponseHeaders: {
-          'some-header': 'some-value',
-        },
-        xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
-        requestId: {
-          allowFromAnyIp: true,
-          ipAllowlist: [],
-        },
-      } as any)
-    );
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'server') {
+        return new BehaviorSubject({
+          hosts: ['localhost'],
+          maxPayload: new ByteSizeValue(1024),
+          autoListen: true,
+          ssl: {
+            enabled: false,
+          },
+          cors: {
+            enabled: false,
+          },
+          compression: { enabled: true },
+          name: kibanaName,
+          customResponseHeaders: {
+            'some-header': 'some-value',
+          },
+          xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+          requestId: {
+            allowFromAnyIp: true,
+            ipAllowlist: [],
+          },
+        } as any);
+      }
+      if (path === 'externalUrl') {
+        return new BehaviorSubject({
+          policy: [],
+        } as any);
+      }
+      if (path === 'csp') {
+        return new BehaviorSubject({} as any);
+      }
+      throw new Error(`Unexpected config path: ${path}`);
+    });
     server = createHttpServer({ configService });
 
     const serverSetup = await server.setup(setupDeps);

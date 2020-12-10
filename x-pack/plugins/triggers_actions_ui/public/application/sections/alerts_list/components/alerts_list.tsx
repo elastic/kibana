@@ -30,7 +30,6 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import { AlertsContextProvider } from '../../../context/alerts_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -80,10 +79,6 @@ export const AlertsList: React.FunctionComponent = () => {
     application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
-    uiSettings,
-    docLinks,
-    charts,
-    data,
     kibanaFeatures,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -619,7 +614,7 @@ export const AlertsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
-        onDeleted={async (deleted: string[]) => {
+        onDeleted={async () => {
           setAlertsToDelete([]);
           setSelectedIds([]);
           await loadAlertsData();
@@ -658,29 +653,14 @@ export const AlertsList: React.FunctionComponent = () => {
       ) : (
         noPermissionPrompt
       )}
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: loadAlertsData,
-          http,
-          actionTypeRegistry,
-          alertTypeRegistry,
-          toastNotifications: toasts,
-          uiSettings,
-          docLinks,
-          charts,
-          dataFieldsFormats: data.fieldFormats,
-          capabilities,
-          dataUi: data.ui,
-          dataIndexPatterns: data.indexPatterns,
-          kibanaFeatures,
-        }}
-      >
-        <AlertAdd
-          consumer={ALERTS_FEATURE_ID}
-          addFlyoutVisible={alertFlyoutVisible}
-          setAddFlyoutVisibility={setAlertFlyoutVisibility}
-        />
-      </AlertsContextProvider>
+      <AlertAdd
+        consumer={ALERTS_FEATURE_ID}
+        addFlyoutVisible={alertFlyoutVisible}
+        setAddFlyoutVisibility={setAlertFlyoutVisibility}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
+        reloadAlerts={loadAlertsData}
+      />
     </section>
   );
 };
