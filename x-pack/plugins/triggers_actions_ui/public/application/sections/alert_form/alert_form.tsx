@@ -794,19 +794,17 @@ export const AlertForm = ({
             labelAppend={
               hasDisabledByLicenseAlertTypes && (
                 <EuiTitle size="xxs">
-                  <h5>
-                    <EuiLink
-                      href={VIEW_LICENSE_OPTIONS_LINK}
-                      target="_blank"
-                      external
-                      className="actActionForm__getMoreActionsLink"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Get more alert types"
-                        id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
-                      />
-                    </EuiLink>
-                  </h5>
+                  <EuiLink
+                    href={VIEW_LICENSE_OPTIONS_LINK}
+                    target="_blank"
+                    external
+                    className="actActionForm__getMoreActionsLink"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Get more alert types"
+                      id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
+                    />
+                  </EuiLink>
                 </EuiTitle>
               )
             }

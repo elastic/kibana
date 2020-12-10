@@ -78,7 +78,7 @@ export const ALERT_ERROR_EXECUTION_REASON = i18n.translate(
 );
 
 export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonRunning',
+  'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonLicense',
   {
     defaultMessage: 'An error occurred when running the alert due to the expired license.',
   }

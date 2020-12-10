@@ -287,16 +287,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       {alert.executionStatus.error?.reason ===
                         AlertExecutionStatusErrorReasons.License && (
                         <EuiFlexItem grow={false}>
-                          <EuiButton
+                          <EuiButtonEmpty
                             href={`${http.basePath.get()}/app/management/stack/license_management`}
-                            iconType="gear"
+                            color="danger"
                             target="_blank"
                           >
                             <FormattedMessage
                               id="xpack.triggersActionsUI.sections.alertDetails.manageLicensePlanBannerLinkTitle"
                               defaultMessage="Manage license"
                             />
-                          </EuiButton>
+                          </EuiButtonEmpty>
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
