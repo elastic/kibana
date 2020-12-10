@@ -24,8 +24,7 @@ export const AppNavigation = ({ 'aria-label': label, children }: AppNavigationPr
 const Nav = euiStyled.nav`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  padding: ${(props) =>
-    `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`};
+  padding: ${(props) => `${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeL}`};
   .euiTabs {
     padding-left: 3px;
     margin-left: -3px;
