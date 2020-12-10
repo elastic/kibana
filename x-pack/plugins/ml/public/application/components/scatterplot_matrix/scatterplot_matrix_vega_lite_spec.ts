@@ -8,6 +8,8 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
+import { euiPaletteColorBlind, euiPalettePositive } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 export const LEGEND_TYPES = {
@@ -19,6 +21,10 @@ export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
+
+const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
+const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
 const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
   if (outliers) {
@@ -32,10 +38,16 @@ const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) 
   }
 
   if (color !== undefined && legendType !== undefined) {
-    return { field: color, type: legendType };
+    return {
+      field: color,
+      type: legendType,
+      scale: {
+        range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+      },
+    };
   }
 
-  return { value: '#369' };
+  return { value: DEFAULT_COLOR };
 };
 
 export const getScatterplotMatrixVegaLiteSpec = (
@@ -73,33 +85,53 @@ export const getScatterplotMatrixVegaLiteSpec = (
     },
     spec: {
       data: { values },
-      mark: 'point',
+      mark: {
+        ...(outliers && dynamicSize
+          ? {
+              type: 'circle',
+              strokeWidth: 1.2,
+              strokeOpacity: 0.75,
+              fillOpacity: 0.1,
+            }
+          : { type: 'circle', opacity: 0.75, size: 8 }),
+      },
       encoding: {
         color: getColorSpec(outliers, color, legendType),
-        opacity: {
-          ...(outliers
-            ? {
+        ...(dynamicSize
+          ? {
+              stroke: getColorSpec(outliers, color, legendType),
+              opacity: {
                 condition: {
-                  value: 0.75,
+                  value: 1,
                   test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
                 },
                 value: 0.25,
-              }
-            : { value: 0.9 }),
-        },
-        size: {
-          ...(outliers && dynamicSize
-            ? {
-                type: LEGEND_TYPES.QUANTITATIVE,
-                field: OUTLIER_SCORE_FIELD,
-                scale: {
-                  type: 'linear',
-                  range: [2, 100],
-                  domain: [0, 1],
-                },
-              }
-            : { value: 2 }),
-        },
+              },
+            }
+          : {}),
+        ...(outliers
+          ? {
+              size: {
+                ...(!dynamicSize
+                  ? {
+                      condition: {
+                        value: 40,
+                        test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
+                      },
+                      value: 8,
+                    }
+                  : {
+                      type: LEGEND_TYPES.QUANTITATIVE,
+                      field: OUTLIER_SCORE_FIELD,
+                      scale: {
+                        type: 'linear',
+                        range: [8, 200],
+                        domain: [0, 1],
+                      },
+                    }),
+              },
+            }
+          : {}),
         tooltip: { type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD },
         x: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'column' } },
         y: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'row' } },
