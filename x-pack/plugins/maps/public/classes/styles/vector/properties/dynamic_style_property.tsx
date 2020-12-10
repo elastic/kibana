@@ -144,15 +144,8 @@ export class DynamicStyleProperty<T>
     const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
     const percentiles = styleMetaData[`${this._field.getRootName()}_percentiles`] as
       | undefined
-      | { values?: { [key: string]: number } };
-    return percentiles !== undefined && percentiles.values !== undefined
-      ? Object.keys(percentiles.values).map((key) => {
-          return {
-            percentile: key,
-            value: percentiles.values![key],
-          };
-        })
-      : null;
+      | PercentilesValues;
+    return percentilesValuesToFieldMeta(percentiles);
   }
 
   getCategoryFieldMeta() {
@@ -498,4 +491,22 @@ export function getNumericalMbFeatureStateValue(value: RawValue) {
 
   const valueAsFloat = parseFloat(value);
   return isNaN(valueAsFloat) ? null : valueAsFloat;
+}
+
+interface PercentilesValues {
+  values?: { [key: string]: number };
+}
+export function percentilesValuesToFieldMeta(
+  percentiles?: PercentilesValues | undefined
+): PercentilesFieldMeta | null {
+  if (percentiles === undefined || percentiles.values === undefined) {
+    return null;
+  }
+  const percentilesFieldMeta = Object.keys(percentiles.values).map((key) => {
+    return {
+      percentile: key,
+      value: percentiles.values![key],
+    };
+  });
+  return _.uniqBy(percentilesFieldMeta, 'value');
 }
