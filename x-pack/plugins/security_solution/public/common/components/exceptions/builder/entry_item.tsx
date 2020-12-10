@@ -149,7 +149,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType),
+          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType)
         );
     const comboBox = (
       <OperatorComponent
