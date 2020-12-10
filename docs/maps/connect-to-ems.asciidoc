@@ -67,11 +67,11 @@ Once the server is running, follow instructions from the webpage served at `loca
 
 // TODO: to be replaced by an screenshot from another computer 😓
 [role="screenshot"]
-image::images/self-managed-instructions.png[Set-up instructions]
+image::images/elastic-maps-server-instructions.png[Set-up instructions]
 
 
 [float]
-[[self-managed-configuration]]
+[[elastic-maps-server-configuration]]
 ==== Configuration
 
 Elastic Maps Server reads properties from a configuration file in YAML format that will be validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/ems-server.yaml`.
@@ -147,7 +147,7 @@ All configuration settings can be overridden by environment variables that are n
 
 
 [float]
-[[self-managed-data]]
+[[elastic-maps-server-data]]
 ==== Data
 
 Boundaries:: World countries, global administrative regions, and countries regions datasets are available.
@@ -158,14 +158,14 @@ TIP: The available basemaps and boundaries can be explored from the `/maps` endp
 
 
 [float]
-[[self-managed-kibana]]
+[[elastic-maps-server-kibana]]
 ==== Kibana configuration
 
 Once the Elastic Maps Server is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
 
 
 [float]
-[[self-managed-check]]
+[[elastic-maps-server-check]]
 ==== Status check
 
 The self-managed Elastic Maps Service will run a status check periodically and it will be exposed in three different forms:
@@ -178,7 +178,7 @@ IMPORTANT: The server won't respond to any data request if the license validatio
 
 
 [float]
-[[self-managed-logging]]
+[[elastic-maps-server-logging]]
 ==== Logging
 
 Logs are generated in {ecs-ref}[ECS JSON format] and emitted to the standard output and to `/var/log/elastic-maps-server/elastic-maps-server.log`. The server won't rotate the logs automatically but the `logrotate` linux tool is installed in the image. Mount `/dev/null` to the default log path if you want to disable the output to that file. 
