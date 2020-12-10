@@ -174,12 +174,6 @@ export class HttpServer {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
 
-        // To work around https://github.com/hapijs/hapi/issues/4122 until v20, set the socket
-        // timeout on the route to a fake timeout only when the payload timeout is specified.
-        // Within the onPreAuth lifecycle of the route itself, we'll override the timeout with the
-        // real socket timeout.
-        const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
-
         const routeOpts: ServerRoute = {
           handler: route.handler,
           method: route.method,
@@ -187,26 +181,8 @@ export class HttpServer {
           options: {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteOptions,
-            ext: {
-              onPreAuth: {
-                method: (request, h) => {
-                  // At this point, the socket timeout has only been set to work-around the HapiJS bug.
-                  // We need to either set the real per-route timeout or use the default idle socket timeout
-                  if (timeout?.idleSocket) {
-                    request.raw.req.socket.setTimeout(timeout.idleSocket);
-                  } else if (fakeSocketTimeout) {
-                    // NodeJS uses a socket timeout of `0` to denote "no timeout"
-                    request.raw.req.socket.setTimeout(this.config!.socketTimeout ?? 0);
-                  }
-
-                  return h.continue;
-                },
-              },
-            },
             tags: tags ? Array.from(tags) : undefined,
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some(
-              (v) => typeof v !== 'undefined'
-            )
+            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,
                   maxBytes,
@@ -216,7 +192,7 @@ export class HttpServer {
                 }
               : undefined,
             timeout: {
-              socket: fakeSocketTimeout,
+              socket: timeout?.idleSocket ?? this.config!.socketTimeout ?? false, // TODO: Do we really want to fall back to NO timeout? Shouldn't we default to the default Node.js timeout of 2 minutes?
             },
           },
         };
