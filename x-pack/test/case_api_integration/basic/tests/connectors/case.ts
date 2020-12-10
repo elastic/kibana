@@ -391,6 +391,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -441,6 +444,9 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'Servicenow',
               type: '.servicenow',
               fields: {},
+            },
+            settings: {
+              syncAlerts: true,
             },
           },
         };
