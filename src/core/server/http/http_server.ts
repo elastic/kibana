@@ -182,6 +182,7 @@ export class HttpServer {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteOptions,
             tags: tags ? Array.from(tags) : undefined,
+            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
             payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,
@@ -189,6 +190,7 @@ export class HttpServer {
                   output,
                   parse,
                   timeout: timeout?.payload,
+                  multipart: true, // TODO: Figure out what the default value should be
                 }
               : undefined,
             timeout: {
