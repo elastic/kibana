@@ -45,6 +45,16 @@ interface DataSearchResponseDescriptor<Request extends IKibanaSearchRequest, Res
   abortController: AbortController;
 }
 
+export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
+  ...args: Args
+) =>
+  | {
+      request: Request;
+      options: ISearchOptions;
+    }
+  | null
+  | undefined;
+
 export const useDataSearch = <
   RequestFactoryArgs extends any[],
   Request extends IKibanaSearchRequest,
@@ -52,9 +62,7 @@ export const useDataSearch = <
 >({
   getRequest,
 }: {
-  getRequest: (
-    ...args: RequestFactoryArgs
-  ) => { request: Request; options: ISearchOptions } | null | undefined;
+  getRequest: DataSearchRequestFactory<RequestFactoryArgs, Request>;
 }) => {
   const { services } = useKibanaContextForPlugin();
   const request$ = useObservable(
