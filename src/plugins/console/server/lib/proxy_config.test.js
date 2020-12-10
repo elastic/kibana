@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-env mocha */
-
 import sinon from 'sinon';
 import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
