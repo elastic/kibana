@@ -15,8 +15,9 @@ import {
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+import 'maplibre-gl/dist/mapbox-gl.css';
+import mapboxgl from 'maplibre-gl/dist/mapbox-gl-csp';
+import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
