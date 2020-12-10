@@ -14,18 +14,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { isRumAgentName } from '../../../../common/agent_name';
-import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { SearchBar } from '../../shared/search_bar';
+import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
-import { TableLinkFlexItem } from './table_link_flex_item';
-import { LatencyChart } from '../../shared/charts/latency_chart';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -63,25 +59,6 @@ export function ServiceOverview({
                 </EuiFlexItem>
                 <EuiFlexItem grow={6}>
                   <EuiPanel>
-                    <ServiceOverviewTransactionsTable
-                      serviceName={serviceName}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                {!isRumAgentName(agentName) && (
-                  <EuiFlexItem grow={4}>
-                    <TransactionErrorRateChart
-                      height={chartHeight}
-                      showAnnotations={false}
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={6}>
-                  <EuiPanel>
                     <ServiceOverviewErrorsTable serviceName={serviceName} />
                   </EuiPanel>
                 </EuiFlexItem>
@@ -94,30 +71,9 @@ export function ServiceOverview({
                 </EuiFlexItem>
                 <EuiFlexItem grow={6}>
                   <EuiPanel>
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiTitle size="xs">
-                          <h2>
-                            {i18n.translate(
-                              'xpack.apm.serviceOverview.dependenciesTableTitle',
-                              {
-                                defaultMessage: 'Dependencies',
-                              }
-                            )}
-                          </h2>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <TableLinkFlexItem>
-                        <ServiceMapLink serviceName={serviceName}>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.dependenciesTableLinkText',
-                            {
-                              defaultMessage: 'View service map',
-                            }
-                          )}
-                        </ServiceMapLink>
-                      </TableLinkFlexItem>
-                    </EuiFlexGroup>
+                    <ServiceOverviewDependenciesTable
+                      serviceName={serviceName}
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
