@@ -32,6 +32,6 @@ export function getDefaultSort(
   if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [[indexPattern.timeFieldName, defaultSortOrder]];
   } else {
-    return [['_score', defaultSortOrder]];
+    return [];
   }
 }
