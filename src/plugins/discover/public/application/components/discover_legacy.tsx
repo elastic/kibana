@@ -367,6 +367,7 @@ export function DiscoverLegacy({
                               onMoveColumn={onMoveColumn}
                               onRemoveColumn={onRemoveColumn}
                               onSort={onSort}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                             {rows.length === opts.sampleSize ? (
                               <div
