@@ -32,7 +32,6 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
 import { getPopoverContents, getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -127,13 +126,7 @@ export const DiscoverGrid = ({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(() => {
-    return sort.length === 0
-      ? getDefaultSort(indexPattern).map(
-          ([id, direction]) => ({ id, direction } as { id: string; direction: 'asc' | 'desc' })
-        )
-      : sort.map(([id, direction]) => ({ id, direction }));
-  }, [sort, indexPattern]);
+  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
 
   const onTableSort = useCallback(
     (sortingColumnsData) => {
