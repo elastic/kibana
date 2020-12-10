@@ -17,10 +17,6 @@ import {
 } from '../../../../common';
 import { getArchiveEntry } from './index';
 
-// uuid v5 requires a SHA-1 UUID as a namespace
-// used to ensure same input produces the same id
-const ID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
-
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
 
@@ -32,6 +28,12 @@ export interface PackageAsset {
   media_type: string;
   data_utf8: string;
   data_base64: string;
+}
+
+export function assetPathToObjectId(assetPath: string): string {
+  // uuid v5 requires a SHA-1 UUID as a namespace
+  // used to ensure same input produces the same id
+  return uuidv5(assetPath, '71403015-cdd5-404b-a5da-6c43f35cad84');
 }
 
 export async function archiveEntryToESDocument(opts: {
@@ -114,7 +116,7 @@ export async function archiveEntryToBulkCreateObject(opts: {
   const { path, buffer, name, version, installSource } = opts;
   const doc = await archiveEntryToESDocument({ path, buffer, name, version, installSource });
   return {
-    id: uuidv5(doc.asset_path, ID_NAMESPACE),
+    id: assetPathToObjectId(doc.asset_path),
     type: ASSETS_SAVED_OBJECT_TYPE,
     attributes: doc,
   };
