@@ -7,6 +7,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTable,
   EuiTableHeader,
@@ -15,6 +16,9 @@ import {
   EuiTableRowCell,
   EuiLoadingChart,
   EuiEmptyPrompt,
+  EuiText,
+  EuiLink,
+  EuiButton,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -34,6 +38,7 @@ interface TableProps {
   isLoading: boolean;
   sortBy: SortBy;
   setSortBy: (s: SortBy) => void;
+  clearSearchBar: () => void;
 }
 
 function useSortableProperties<T>(
@@ -66,6 +71,7 @@ export const ProcessesTable = ({
   isLoading,
   sortBy,
   setSortBy,
+  clearSearchBar,
 }: TableProps) => {
   const { updateSortableProperties } = useSortableProperties<Process>(
     [
@@ -102,13 +108,42 @@ export const ProcessesTable = ({
   if (currentItems.length === 0)
     return (
       <EuiEmptyPrompt
-        iconType="tableDensityNormal"
+        iconType="search"
+        titleSize="s"
         title={
-          <h4>
+          <strong>
             {i18n.translate('xpack.infra.metrics.nodeDetails.noProcesses', {
-              defaultMessage: 'No processes matched these search terms',
+              defaultMessage: 'No processes found',
             })}
-          </h4>
+          </strong>
+        }
+        body={
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.infra.metrics.nodeDetails.noProcessesBody"
+              defaultMessage="Try modifying your filter. Only processes that are within the configured {metricbeatDocsLink} will display here."
+              values={{
+                metricbeatDocsLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText"
+                      defaultMessage="top N by CPU or Memory"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        }
+        actions={
+          <EuiButton onClick={clearSearchBar}>
+            {i18n.translate('xpack.infra.metrics.nodeDetails.noProcessesClearFilters', {
+              defaultMessage: 'Clear filters',
+            })}
+          </EuiButton>
         }
       />
     );

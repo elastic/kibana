@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:mocha
+checks-reporter-with-killswitch "Mocha Tests" \
+  node scripts/mocha
