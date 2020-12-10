@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeseriesFetcher should make the correct query 1`] = `
+exports[`get buckets should make the correct query 1`] = `
 Array [
   Array [
     Object {
