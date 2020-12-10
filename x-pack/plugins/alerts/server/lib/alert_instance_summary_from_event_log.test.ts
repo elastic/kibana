@@ -105,12 +105,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -205,6 +207,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -241,6 +244,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -276,6 +280,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -312,6 +317,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -348,6 +354,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -384,6 +391,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group B",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -419,6 +427,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "Active",
@@ -458,12 +467,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": true,
             "status": "Active",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -509,12 +520,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group B",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",

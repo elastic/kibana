@@ -61,7 +61,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/85105
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
