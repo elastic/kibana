@@ -76,6 +76,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete hotPhaseActions.set_priority;
       }
 
+      if (!updatedPolicy.phases.hot?.actions?.shrink) {
+        delete hotPhaseActions.shrink;
+      }
+
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
         delete hotPhaseActions.searchable_snapshot;
       }

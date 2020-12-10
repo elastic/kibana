@@ -187,6 +187,25 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+        shrink: {
+          number_of_shards: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+              defaultMessage: 'Number of primary shards',
+            }),
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: numberGreaterThanField({
+                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+                  than: 0,
+                }),
+              },
+            ],
+            serializer: serializers.stringToNumber,
+          },
+        },
         set_priority: {
           priority: {
             defaultValue: defaultSetPriority as any,
@@ -222,7 +241,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         shrink: {
           number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel', {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
               defaultMessage: 'Number of primary shards',
             }),
             validations: [

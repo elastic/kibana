@@ -38,6 +38,10 @@ export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) =>
 /** Invoked when a column is sorted */
 export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
 
+export type OnColumnsSorted = (
+  sorted: Array<{ columnId: ColumnId; sortDirection: SortDirection }>
+) => void;
+
 export type OnColumnRemoved = (columnId: ColumnId) => void;
 
 export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;

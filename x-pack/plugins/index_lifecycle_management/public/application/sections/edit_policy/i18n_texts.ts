@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+      defaultMessage: 'Shrink index',
+    }),
     searchableSnapshotInHotPhase: {
       searchableSnapshotDisallowed: {
         calloutTitle: i18n.translate(

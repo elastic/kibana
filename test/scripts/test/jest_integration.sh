@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:test_jest_integration
+checks-reporter-with-killswitch "Jest Integration Tests" \
+  node scripts/jest_integration
