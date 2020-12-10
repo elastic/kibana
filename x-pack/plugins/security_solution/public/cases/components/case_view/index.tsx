@@ -348,7 +348,7 @@ export const CaseComponent = React.memo<CaseProps>(
       (alertId: string, index: string) => {
         dispatch(
           timelineActions.toggleExpandedEvent({
-            timelineId: TimelineId.active,
+            timelineId: TimelineId.casePage,
             event: {
               eventId: alertId,
               indexName: index,
@@ -364,11 +364,14 @@ export const CaseComponent = React.memo<CaseProps>(
     useEffect(() => {
       if (init.current) {
         init.current = false;
-        // We need to close the EventFlyout on component initialization in case it was open before in detections.
+        // We need to create a timeline to show the details view
         dispatch(
-          timelineActions.toggleExpandedEvent({
-            timelineId: TimelineId.active,
-            event: {},
+          timelineActions.createTimeline({
+            id: TimelineId.casePage,
+            columns: [],
+            indexNames: [],
+            expandedEvent: {},
+            show: false,
           })
         );
       }
@@ -479,7 +482,7 @@ export const CaseComponent = React.memo<CaseProps>(
         <EventDetailsFlyout
           browserFields={browserFields}
           docValueFields={docValueFields}
-          timelineId={TimelineId.active}
+          timelineId={TimelineId.casePage}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>

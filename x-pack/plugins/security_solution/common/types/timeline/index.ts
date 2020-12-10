@@ -271,6 +271,7 @@ export enum TimelineId {
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
+  casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
 }
 
