@@ -323,7 +323,7 @@ describe('Policy Details', () => {
         const tooltip = policyView.find('EuiIconTip');
         expect(userNotificationCheckbox).toHaveLength(0);
         expect(userNotificationCustomMessageTextArea).toHaveLength(0);
-        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
+        expect(tooltip).toHaveLength(0);
       });
     });
   });
