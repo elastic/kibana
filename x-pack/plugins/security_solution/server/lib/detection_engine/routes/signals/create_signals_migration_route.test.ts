@@ -91,9 +91,7 @@ describe('query for signal', () => {
           status_code: 400,
         },
         index: 'my-index',
-        migration_index: null,
-        migration_task_id: null,
-        migration_token: null,
+        migration_id: null,
       },
     ]);
   });

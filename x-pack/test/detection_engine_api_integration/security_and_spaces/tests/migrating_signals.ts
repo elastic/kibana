@@ -158,12 +158,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const [index] = body.indices;
 
         expect(index.index).to.eql(legacySignalsIndexName);
-        expect(index.migration_token).to.be.a('string');
-        expect(index.migration_token.length).to.be.greaterThan(0);
+        expect(index.migration_id).to.be.a('string');
+        expect(index.migration_id.length).to.be.greaterThan(0);
         expect(index.migration_index).not.to.eql(legacySignalsIndexName);
         expect(index.migration_index).to.contain(legacySignalsIndexName);
-        expect(index.migration_task_id).to.be.a('string');
-        expect(index.migration_task_id.length).to.be.greaterThan(0);
       });
 
       it('creates a new index containing migrated signals', async () => {
@@ -173,9 +171,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({ index: [legacySignalsIndexName, outdatedSignalsIndexName] })
           .expect(200);
 
-        const indices = body.indices as Array<{ migration_token: string; migration_index: string }>;
+        const indices = body.indices as Array<{ migration_id: string; migration_index: string }>;
         expect(indices).length(2);
-        indices.forEach((index) => expect(index.migration_token).to.be.a('string'));
+        indices.forEach((index) => expect(index.migration_id).to.be.a('string'));
 
         const [{ migration_index: newIndex }] = indices;
         await waitForIndexToPopulate(es, newIndex);
@@ -248,8 +246,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(info).to.eql({
           index: legacySignalsIndexName,
           migration_index: null,
-          migration_task_id: null,
-          migration_token: null,
+          migration_id: null,
         });
         expect(error.status_code).to.eql(400);
         expect(error.message).to.contain('resource_already_exists_exception');

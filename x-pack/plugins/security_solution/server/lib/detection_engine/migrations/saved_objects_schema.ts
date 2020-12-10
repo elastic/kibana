@@ -25,6 +25,9 @@ const signalsMigrationSOGeneratedAttributes = {
   updatedBy: t.string,
 };
 
+/**
+ The attributes necessary to create a Signals Migration Saved Object
+ */
 export const signalsMigrationSOCreateAttributes = t.exact(
   t.type(signalsMigrationSOWriteAttributes)
 );
@@ -32,6 +35,9 @@ export type SignalsMigrationSOCreateAttributes = t.TypeOf<
   typeof signalsMigrationSOCreateAttributes
 >;
 
+/**
+ The attributes necessary to update a Signals Migration Saved Object
+ */
 export const signalsMigrationSOUpdateAttributes = t.exact(
   t.partial(signalsMigrationSOWriteAttributes)
 );
@@ -39,8 +45,8 @@ export type SignalsMigrationSOUpdateAttributes = t.TypeOf<
   typeof signalsMigrationSOUpdateAttributes
 >;
 
-/*
- * Attributes for our Signals Migration SO
+/**
+ The attributes of our Signals Migration Saved Object
  */
 export const signalsMigrationSOAttributes = t.exact(
   t.type({

@@ -12,9 +12,11 @@ import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { BadRequestError } from '../../errors/bad_request_error';
 import { getIndexCount } from '../../index/get_index_count';
-import { decodeMigrationToken } from '../../migrations/helpers';
+import { getMigrations } from '../../migrations/get_migration_status';
+import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
+import { signalsMigrationSOService } from '../../migrations/saved_objects_service';
 import { buildSiemResponse, transformError } from '../utils';
 
 interface TaskResponse {
@@ -37,67 +39,100 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const { migration_token: migrationToken } = request.body;
+      const soClient = context.core.savedObjects.client;
+      const { index: indices } = request.body;
 
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+        const migrationService = signalsMigrationSOService(soClient);
+        const migrationsByIndex = await getMigrations({ soClient, index: indices });
 
-        const { destinationIndex, sourceIndex, taskId } = decodeMigrationToken(migrationToken);
-        const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
+        const finalizeResults = await Promise.all(
+          indices.map(async (index) => {
+            try {
+              const migrations = migrationsByIndex[index];
+              if (migrations == null || migrations.length === 0) {
+                throw new BadRequestError('The specified index has no migrations');
+              }
 
-        if (!task.completed) {
-          return response.ok({
-            body: {
-              completed: false,
-              index: sourceIndex,
-              migration_index: destinationIndex,
-              migration_task_id: taskId,
-              migration_token: migrationToken,
-            },
-          });
-        }
+              const [migration] = migrations;
+              if (isMigrationFailed(migration)) {
+                throw new BadRequestError(
+                  "The specified index's latest migration was not successful."
+                );
+              }
+              if (isMigrationSuccess(migration)) {
+                return {
+                  index,
+                  completed: true,
+                  migration_id: migration.id,
+                  migration_index: migration.attributes.destinationIndex,
+                };
+              }
 
-        const { description } = task.task;
-        if (
-          !description ||
-          !description.includes(destinationIndex) ||
-          !description.includes(sourceIndex)
-        ) {
-          throw new BadRequestError(
-            `The specified task does not match the source and destination indexes. Task [${taskId}] did not specify source index [${sourceIndex}] and destination index [${destinationIndex}]`
-          );
-        }
+              const { destinationIndex, sourceIndex, taskId } = migration.attributes;
+              const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
 
-        const sourceCount = await getIndexCount({ esClient, index: sourceIndex });
-        const destinationCount = await getIndexCount({ esClient, index: destinationIndex });
-        if (sourceCount !== destinationCount) {
-          throw new Error(
-            `The source and destination indexes have different document counts. Source [${sourceIndex}] has [${sourceCount}] documents, while destination [${destinationIndex}] has [${destinationCount}] documents.`
-          );
-        }
+              if (!task.completed) {
+                return {
+                  index,
+                  completed: false,
+                  migration_id: migration.id,
+                  migration_index: migration.attributes.destinationIndex,
+                };
+              }
 
-        const signalsIndex = appClient.getSignalsIndex();
-        await replaceSignalsIndexAlias({
-          alias: signalsIndex,
-          esClient,
-          newIndex: destinationIndex,
-          oldIndex: sourceIndex,
-        });
+              const sourceCount = await getIndexCount({ esClient, index: sourceIndex });
+              const destinationCount = await getIndexCount({ esClient, index: destinationIndex });
+              if (sourceCount !== destinationCount) {
+                await migrationService.update(migration.id, { status: 'failure' });
+                throw new BadRequestError(
+                  `The source and destination indexes have different document counts. Source [${sourceIndex}] has [${sourceCount}] documents, while destination [${destinationIndex}] has [${destinationCount}] documents.`
+                );
+              }
 
-        await applyMigrationCleanupPolicy({ alias: signalsIndex, esClient, index: sourceIndex });
-        await esClient.delete({ index: '.tasks', id: taskId });
+              // all checks passed, we can finalize this migration
+              const signalsAlias = appClient.getSignalsIndex();
+              await replaceSignalsIndexAlias({
+                alias: signalsAlias,
+                esClient,
+                newIndex: destinationIndex,
+                oldIndex: sourceIndex,
+              });
+
+              await applyMigrationCleanupPolicy({
+                alias: signalsAlias,
+                esClient,
+                index: sourceIndex,
+              });
+              await esClient.delete({ index: '.tasks', id: taskId });
+              await migrationService.update(migration.id, { status: 'success' });
+              return {
+                index,
+                completed: true,
+                migration_id: migration.id,
+                migration_index: migration.attributes.destinationIndex,
+              };
+            } catch (err) {
+              const error = transformError(err);
+              return {
+                index,
+                error: {
+                  message: error.message,
+                  status_code: error.statusCode,
+                },
+                migration_id: null,
+                migration_index: null,
+              };
+            }
+          })
+        );
 
         return response.ok({
-          body: {
-            completed: true,
-            index: sourceIndex,
-            migration_index: destinationIndex,
-            migration_task_id: taskId,
-            migration_token: migrationToken,
-          },
+          body: { indices: finalizeResults },
         });
       } catch (err) {
         const error = transformError(err);

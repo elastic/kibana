@@ -28,7 +28,7 @@ export interface SignalsMigrationSOClient {
   delete: (id: string) => Promise<{}>;
 }
 
-export const signalsMigrationSOClientFactory = (
+export const signalsMigrationSOClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): SignalsMigrationSOClient => ({
   find: (options) =>

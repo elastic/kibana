@@ -27,7 +27,7 @@ import {
 } from './saved_objects_schema';
 import { validateEither, validateTaskEither } from '../../../../common/validate';
 import { toError, toPromise } from './fp_utils';
-import { signalsMigrationSOClientFactory } from './saved_objects_client';
+import { signalsMigrationSOClient } from './saved_objects_client';
 
 export interface SignalsMigrationSOService {
   find: (options?: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SignalsMigrationSO[]>;
@@ -46,11 +46,11 @@ const generateAttributes = (username: string) => {
   return { created: now, createdBy: username, updated: now, updatedBy: username };
 };
 
-export const signalsMigrationSOServiceFactory = (
+export const signalsMigrationSOService = (
   savedObjectsClient: SavedObjectsClientContract,
   username = 'system'
 ): SignalsMigrationSOService => {
-  const client = signalsMigrationSOClientFactory(savedObjectsClient);
+  const client = signalsMigrationSOClient(savedObjectsClient);
 
   return {
     find: async (options) =>
@@ -71,6 +71,7 @@ export const signalsMigrationSOServiceFactory = (
       chain((so) => validateTaskEither(signalsMigrationSO, so)),
       toPromise
     ),
+
     update: (id, attributes) =>
       pipe(
         attributes,

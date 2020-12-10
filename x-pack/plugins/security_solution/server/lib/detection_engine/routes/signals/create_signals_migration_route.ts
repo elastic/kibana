@@ -12,9 +12,10 @@ import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
-import { encodeMigrationToken, indexIsOutdated } from '../../migrations/helpers';
+import { indexIsOutdated } from '../../migrations/helpers';
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { BadRequestError } from '../../errors/bad_request_error';
+import { signalsMigrationSOService } from '../../migrations/saved_objects_service';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -29,10 +30,12 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const { index: indices, ...reindexOptions } = request.body;
 
       try {
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const soClient = context.core.savedObjects.client;
+        const migrationClient = signalsMigrationSOService(soClient);
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -54,7 +57,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
           );
         }
 
-        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
+        const migrationStatuses = await getMigrationStatus({ esClient, index: indices, soClient });
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
@@ -75,13 +78,16 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
                   version: currentVersion,
                   reindexOptions,
                 });
-                const migrationToken = encodeMigrationToken(migrationDetails);
+                const migrationSavedObject = await migrationClient.create({
+                  ...migrationDetails,
+                  status: 'pending',
+                  version: currentVersion,
+                });
 
                 return {
                   index,
+                  migration_id: migrationSavedObject.id,
                   migration_index: migrationDetails.destinationIndex,
-                  migration_task_id: migrationDetails.taskId,
-                  migration_token: migrationToken,
                 };
               } catch (err) {
                 const error = transformError(err);
@@ -91,17 +97,15 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
                     message: error.message,
                     status_code: error.statusCode,
                   },
+                  migration_id: null,
                   migration_index: null,
-                  migration_task_id: null,
-                  migration_token: null,
                 };
               }
             } else {
               return {
                 index,
+                migration_id: null,
                 migration_index: null,
-                migration_task_id: null,
-                migration_token: null,
               };
             }
           })

@@ -8,7 +8,7 @@ import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createSignalsMigrationIndex } from './create_signals_migration_index';
 
-describe('getMigrationStatus', () => {
+describe('createSignalsMigrationIndex', () => {
   let esClient: ElasticsearchClient;
 
   beforeEach(() => {

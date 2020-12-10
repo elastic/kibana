@@ -29,13 +29,13 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const soClient = context.core.savedObjects.client;
 
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-
         const { from } = request.query;
 
         const signalsAlias = appClient.getSignalsIndex();
@@ -47,7 +47,11 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
           index: signalsIndices,
           from,
         });
-        const migrationStatuses = await getMigrationStatus({ esClient, index: indicesInRange });
+        const migrationStatuses = await getMigrationStatus({
+          esClient,
+          index: indicesInRange,
+          soClient,
+        });
         const enrichedStatuses = migrationStatuses.map((status) => ({
           ...status,
           is_outdated: indexIsOutdated({ status, version: currentVersion }),
