@@ -19,7 +19,6 @@
 import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
-import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
@@ -98,6 +97,7 @@ export class SearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevSearchSessionId?: string;
 
   constructor(
     {
@@ -140,7 +140,7 @@ export class SearchEmbeddable
       .timefilter.getAutoRefreshFetch$()
       .subscribe(this.fetch);
 
-    this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+    this.subscription = this.getUpdated$().subscribe(() => {
       this.panelTitle = this.output.title || '';
 
       if (this.searchScope) {
@@ -262,7 +262,8 @@ export class SearchEmbeddable
   }
 
   public reload() {
-    this.fetch();
+    if (this.searchScope)
+      this.pushContainerStateParamsToScope(this.searchScope, { forceFetch: true });
   }
 
   private fetch = async () => {
@@ -326,12 +327,16 @@ export class SearchEmbeddable
     }
   };
 
-  private pushContainerStateParamsToScope(searchScope: SearchScope) {
+  private pushContainerStateParamsToScope(
+    searchScope: SearchScope,
+    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
+  ) {
     const isFetchRequired =
       !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);
+      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort) ||
+      this.prevSearchSessionId !== this.input.searchSessionId;
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -339,13 +344,14 @@ export class SearchEmbeddable
     searchScope.sort = this.input.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    if (isFetchRequired) {
+    if (forceFetch || isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
+
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
-
+      this.prevSearchSessionId = this.input.searchSessionId;
       this.fetch();
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated

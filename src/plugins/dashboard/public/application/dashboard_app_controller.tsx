@@ -633,9 +633,26 @@ export class DashboardAppController {
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
         }
 
+        // state keys change in which likely won't need a data fetch
+        const noRefetchKeys: Array<keyof DashboardContainerInput> = [
+          'viewMode',
+          'title',
+          'description',
+          'expandedPanelId',
+          'useMargins',
+          'isEmbeddedExternally',
+          'isFullScreenMode',
+          'isEmptyState',
+        ];
+
+        const shouldRefetch = Object.keys(changes).some(
+          (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
+        );
+
         dashboardContainer.updateInput({
           ...changes,
-          searchSessionId: searchService.session.start(),
+          // do not start a new session if this is irrelevant state change to prevent excessive searches
+          ...(shouldRefetch && { searchSessionId: searchService.session.start() }),
         });
       }
     };
