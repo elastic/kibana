@@ -23,6 +23,7 @@ import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
+import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -120,16 +121,7 @@ export function ServiceOverview({
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceOverview.instancesTableTitle',
-                        {
-                          defaultMessage: 'Instances',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
+                  <ServiceOverviewInstancesTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>

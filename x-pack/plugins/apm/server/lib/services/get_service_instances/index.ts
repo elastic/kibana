@@ -6,7 +6,6 @@
 
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getServiceInstanceErrorStats } from './get_service_instance_error_stats';
 import { getServiceInstanceSystemMetricStats } from './get_service_instance_system_metric_stats';
 import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
 
@@ -16,6 +15,7 @@ export interface ServiceInstanceParams {
   transactionType: string;
   searchAggregatedTransactions: boolean;
   size: number;
+  numBuckets: number;
 }
 
 export async function getServiceInstances(
@@ -26,14 +26,13 @@ export async function getServiceInstances(
     size: 50,
   };
 
-  const [errorStats, transactionStats, systemMetricStats] = await Promise.all([
-    getServiceInstanceErrorStats(paramsForSubQueries),
+  const [transactionStats, systemMetricStats] = await Promise.all([
     getServiceInstanceTransactionStats(paramsForSubQueries),
     getServiceInstanceSystemMetricStats(paramsForSubQueries),
   ]);
 
   const stats = joinByKey(
-    [...errorStats, ...transactionStats, ...systemMetricStats],
+    [...transactionStats, ...systemMetricStats],
     'serviceNodeName'
   );
 

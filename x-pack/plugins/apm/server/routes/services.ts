@@ -285,7 +285,7 @@ export const serviceInstancesRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string }),
+      t.type({ transactionType: t.string, numBuckets: toNumberRt }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -294,7 +294,7 @@ export const serviceInstancesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const { transactionType, numBuckets } = context.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -305,6 +305,7 @@ export const serviceInstancesRoute = createRoute({
       setup,
       transactionType,
       searchAggregatedTransactions,
+      numBuckets,
     });
   },
 });

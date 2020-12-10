@@ -10,11 +10,10 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { merge } from 'lodash';
 import { useChartTheme } from '../../../../../../observability/public';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { px } from '../../../../style/variables';
 
 interface Props {
@@ -28,18 +27,7 @@ export function SparkPlot(props: Props) {
   const chartTheme = useChartTheme();
 
   if (!series || series.every((point) => point.y === null)) {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="visLine" color="subdued" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {NOT_AVAILABLE_LABEL}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <EuiIcon type="visLine" color="subdued" />;
   }
 
   return (

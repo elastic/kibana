@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EventOutcome } from '../../../../common/event_outcome';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
+  EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
@@ -24,10 +26,11 @@ export async function getServiceInstanceTransactionStats({
   serviceName,
   size,
   searchAggregatedTransactions,
+  numBuckets,
 }: ServiceInstanceParams) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -42,6 +45,20 @@ export async function getServiceInstanceTransactionStats({
     avg_transaction_duration: {
       avg: {
         field,
+      },
+    },
+    failures: {
+      filter: {
+        term: {
+          [EVENT_OUTCOME]: EventOutcome.failure,
+        },
+      },
+      aggs: {
+        count: {
+          value_count: {
+            field,
+          },
+        },
       },
     },
   };
@@ -62,6 +79,7 @@ export async function getServiceInstanceTransactionStats({
             { range: rangeFilter(start, end) },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...esFilter,
           ],
         },
       },
@@ -96,27 +114,40 @@ export async function getServiceInstanceTransactionStats({
 
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-      (serviceNodeBucket) => ({
-        serviceNodeName: String(serviceNodeBucket.key),
-        throughput: {
-          value: serviceNodeBucket.count.value,
-          timeseries: serviceNodeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
+      (serviceNodeBucket) => {
+        const {
+          count,
+          avg_transaction_duration: avgTransactionDuration,
+          key,
+          failures,
+          timeseries,
+        } = serviceNodeBucket;
+
+        return {
+          serviceNodeName: String(key),
+          errorRate: {
+            value: failures.count.value / count.value,
+            timeseries: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.failures.count.value / dateBucket.count.value,
+            })),
+          },
+          throughput: {
+            value: count.value,
+            timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: dateBucket.count.value,
-            })
-          ),
-        },
-        latency: {
-          value: serviceNodeBucket.avg_transaction_duration.value,
-          timeseries: serviceNodeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
+            })),
+          },
+          latency: {
+            value: avgTransactionDuration.value,
+            timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: dateBucket.avg_transaction_duration.value,
-            })
-          ),
-        },
-      })
+            })),
+          },
+        };
+      }
     ) ?? []
   );
 }

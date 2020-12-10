@@ -27,10 +27,11 @@ export async function getServiceInstanceSystemMetricStats({
   setup,
   serviceName,
   size,
+  numBuckets,
 }: ServiceInstanceParams) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const subAggs = {
     memory_usage_cgroup: {
@@ -53,6 +54,7 @@ export async function getServiceInstanceSystemMetricStats({
           filter: [
             { range: rangeFilter(start, end) },
             { term: { [SERVICE_NAME]: serviceName } },
+            ...esFilter,
           ],
           should: [
             {
