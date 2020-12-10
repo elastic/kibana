@@ -114,8 +114,12 @@
   right: 0;
 }
 
-.lnsLayerPanel__paletteColor {
-  height: $euiSizeXS;
+.lnsLayerPanel__palette {
+  border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
+
+  &::after {
+    border: none;
+  }
 }
 
 .lnsLayerPanel__dimensionLink {
