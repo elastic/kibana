@@ -36,7 +36,7 @@ interface ModalContentReturnType {
 
 interface JobCheckRespSummary {
   canDelete: boolean;
-  canUnTag: boolean;
+  canUntag: boolean;
   canTakeAnyAction: boolean;
 }
 
@@ -44,26 +44,26 @@ function getRespSummary(resp: CanDeleteJobResponse): JobCheckRespSummary {
   const jobsChecked = Object.keys(resp);
   // Default to first job's permisions
   const canDelete = resp[jobsChecked[0]].canDelete;
-  const canUnTag = resp[jobsChecked[0]].canUnTag;
+  const canUntag = resp[jobsChecked[0]].canUntag;
   let canTakeAnyAction: boolean;
 
   if (jobsChecked.length > 1) {
     // Check all jobs and make sure they have the same permissions - otherwise no action can be taken
     canTakeAnyAction = jobsChecked.every(
-      (id) => resp[id].canDelete === canDelete && resp[id].canUnTag === canUnTag
+      (id) => resp[id].canDelete === canDelete && resp[id].canUntag === canUntag
     );
   } else {
     canTakeAnyAction = true;
   }
 
-  return { canDelete, canUnTag, canTakeAnyAction };
+  return { canDelete, canUntag, canTakeAnyAction };
 }
 
 function getModalContent(
   jobIds: string[],
   respSummary: JobCheckRespSummary
 ): ModalContentReturnType {
-  const { canDelete, canUnTag, canTakeAnyAction } = respSummary;
+  const { canDelete, canUntag, canTakeAnyAction } = respSummary;
 
   if (canTakeAnyAction === false) {
     return {
@@ -113,7 +113,7 @@ function getModalContent(
         />
       ),
     };
-  } else if (!canDelete && canUnTag) {
+  } else if (!canDelete && canUntag) {
     return {
       buttonText: (
         <FormattedMessage
@@ -130,7 +130,7 @@ function getModalContent(
         />
       ),
     };
-  } else if (!canDelete && !canUnTag) {
+  } else if (!canDelete && !canUntag) {
     return noActionContent;
   }
 
@@ -211,7 +211,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
         <EuiModalBody>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={true}>{modalContent}</EuiFlexItem>
-            {jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canUnTag && (
+            {jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canUntag && (
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   label={shouldUnTagLabel}
