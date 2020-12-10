@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export * from '../../../plugins/embeddable/public';
+export { NavigationPublicPluginStart } from '../../../navigation/public';

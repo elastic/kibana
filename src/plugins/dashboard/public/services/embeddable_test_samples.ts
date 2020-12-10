@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../plugins/ui_actions/public';
+export * from '../../../embeddable/public/lib/test_samples';

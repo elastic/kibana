@@ -29,7 +29,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { IUiSettingsClient, HttpStart } from 'kibana/public';
-import * as constants from './dashboard_empty_screen_constants';
+import { emptyScreenStrings } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;
@@ -52,6 +52,7 @@ export function DashboardEmptyScreen({
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
     : '/plugins/home/assets/welcome_graphic_light_2x.png';
+
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
@@ -60,9 +61,9 @@ export function DashboardEmptyScreen({
         iconType="plusInCircle"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
-        aria-label={constants.createNewVisualizationButtonAriaLabel}
+        aria-label={emptyScreenStrings.getCreateNewVisualizationButtonAriaLabel()}
       >
-        {constants.createNewVisualizationButton}
+        {emptyScreenStrings.getCreateNewVisualizationButton()}
       </EuiButton>
     </p>
   );
@@ -88,16 +89,16 @@ export function DashboardEmptyScreen({
     );
   };
   const enterEditModeParagraph = paragraph(
-    constants.howToStartWorkingOnNewDashboardDescription1,
-    constants.howToStartWorkingOnNewDashboardDescription2,
-    constants.howToStartWorkingOnNewDashboardEditLinkText,
-    constants.howToStartWorkingOnNewDashboardEditLinkAriaLabel
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription1(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription2(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkText(),
+    emptyScreenStrings.getHowToStartWorkingOnNewDashboardEditLinkAriaLabel()
   );
   const enterViewModeParagraph = paragraph(
     null,
-    constants.addNewVisualizationDescription,
-    constants.addExistingVisualizationLinkText,
-    constants.addExistingVisualizationLinkAriaLabel
+    emptyScreenStrings.getAddNewVisualizationDescription(),
+    emptyScreenStrings.getAddExistingVisualizationLinkText(),
+    emptyScreenStrings.getAddExistingVisualizationLinkAriaLabel()
   );
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
@@ -130,13 +131,13 @@ export function DashboardEmptyScreen({
     );
   };
   const readonlyMode = page(
-    constants.emptyDashboardTitle,
+    emptyScreenStrings.getEmptyDashboardTitle(),
     false,
-    constants.emptyDashboardAdditionalPrivilege
+    emptyScreenStrings.getEmptyDashboardAdditionalPrivilege()
   );
-  const viewMode = page(constants.fillDashboardTitle, true);
+  const viewMode = page(emptyScreenStrings.getFillDashboardTitle(), true);
   const editMode = (
-    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget testClass">
       {enterViewModeParagraph}
       <EuiSpacer size="l" />
       {linkToVisualizeParagraph}
