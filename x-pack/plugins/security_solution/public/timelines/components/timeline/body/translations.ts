@@ -93,3 +93,10 @@ export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
     defaultMessage: 'Analyze event',
   }
 );
+
+export const INVESTIGATE_IN_RESOLVER_DISABLED = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.investigateInResolverDisabledTooltip',
+  {
+    defaultMessage: 'This event cannot be analyzed since it has incompatible field mappings',
+  }
+);
