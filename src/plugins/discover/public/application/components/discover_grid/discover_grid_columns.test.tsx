@@ -92,9 +92,7 @@ describe('Discover grid columns ', function () {
       Array [
         Object {
           "actions": Object {
-            "showHide": Object {
-              "label": "Remove column",
-            },
+            "showHide": false,
             "showMoveLeft": true,
             "showMoveRight": true,
           },
