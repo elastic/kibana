@@ -13,7 +13,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { findIndex } from 'lodash/fp';
+import { some } from 'lodash/fp';
 
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import {
@@ -53,7 +53,7 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
 
   const isAlert = useMemo(() => {
     if (detailsData) {
-      return findIndex({ category: 'signal', field: 'signal.rule.id' }, detailsData) >= 0;
+      return some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
     }
     return false;
   }, [detailsData]);

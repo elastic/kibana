@@ -79,6 +79,8 @@ const getTitle = (title: SummaryRow['title']) => (
   </EuiTitle>
 );
 
+getTitle.displayName = 'getTitle';
+
 const getDescription = ({
   contextId,
   eventId,

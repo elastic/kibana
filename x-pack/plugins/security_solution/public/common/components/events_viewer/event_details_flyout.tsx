@@ -8,7 +8,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { findIndex } from 'lodash/fp';
+import { some } from 'lodash/fp';
 
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
@@ -52,7 +52,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
 
   const isAlert = useMemo(() => {
     if (detailsData) {
-      return findIndex({ category: 'signal', field: 'signal.rule.id' }, detailsData) >= 0;
+      return some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
     }
     return false;
   }, [detailsData]);
@@ -85,5 +85,6 @@ export const EventDetailsFlyout = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.handleCloseExpandedEvent === nextProps.handleCloseExpandedEvent
 );
