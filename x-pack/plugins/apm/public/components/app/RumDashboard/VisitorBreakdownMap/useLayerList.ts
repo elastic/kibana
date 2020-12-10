@@ -90,18 +90,6 @@ export function useLayerList() {
 
   const { serviceName } = urlParams;
 
-  const baseLayer: LayerDescriptor = {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: { type: 'TILE' },
-    type: 'VECTOR_TILE',
-  };
-
   ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
@@ -196,9 +184,5 @@ export function useLayerList() {
     type: 'VECTOR',
   };
 
-  return [
-    baseLayer,
-    pageLoadDurationByCountryLayer,
-    pageLoadDurationByAdminRegionLayer,
-  ];
+  return [pageLoadDurationByCountryLayer, pageLoadDurationByAdminRegionLayer];
 }
