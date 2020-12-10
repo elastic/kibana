@@ -26,7 +26,7 @@ interface IntervalValuesRange {
 }
 
 export interface CalculateHistogramIntervalParams {
-  interval: string;
+  interval: number | string;
   maxBucketsUiSettings: number;
   maxBucketsUserInput?: number | '';
   esTypes: ES_FIELD_TYPES[];
@@ -124,7 +124,11 @@ export const calculateHistogramInterval = ({
   esTypes,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
-  let calculatedInterval = isAuto ? 0 : parseFloat(interval);
+  let calculatedInterval = isAuto
+    ? 0
+    : typeof interval !== 'number'
+    ? parseFloat(interval)
+    : interval;
 
   // should return NaN on non-numeric or invalid values
   if (Number.isNaN(calculatedInterval)) {

@@ -103,7 +103,7 @@ export interface TimelineInput {
 
   savedQueryId?: Maybe<string>;
 
-  sort?: Maybe<SortTimelineInput>;
+  sort?: Maybe<SortTimelineInput[]>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -512,17 +512,17 @@ export interface CloudFields {
 
   machine?: Maybe<CloudMachine>;
 
-  provider?: Maybe<Maybe<string>[]>;
+  provider?: Maybe<(Maybe<string>)[]>;
 
-  region?: Maybe<Maybe<string>[]>;
+  region?: Maybe<(Maybe<string>)[]>;
 }
 
 export interface CloudInstance {
-  id?: Maybe<Maybe<string>[]>;
+  id?: Maybe<(Maybe<string>)[]>;
 }
 
 export interface CloudMachine {
-  type?: Maybe<Maybe<string>[]>;
+  type?: Maybe<(Maybe<string>)[]>;
 }
 
 export interface EndpointFields {
@@ -632,7 +632,7 @@ export interface TimelineResult {
 
   savedObjectId: string;
 
-  sort?: Maybe<SortTimelineResult>;
+  sort?: Maybe<ToAny>;
 
   status?: Maybe<TimelineStatus>;
 
@@ -775,14 +775,8 @@ export interface KueryFilterQueryResult {
   expression?: Maybe<string>;
 }
 
-export interface SortTimelineResult {
-  columnId?: Maybe<string>;
-
-  sortDirection?: Maybe<string>;
-}
-
 export interface ResponseTimelines {
-  timeline: Maybe<TimelineResult>[];
+  timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
 
@@ -1533,9 +1527,9 @@ export interface HostFields {
 
   id?: Maybe<string>;
 
-  ip?: Maybe<Maybe<string>[]>;
+  ip?: Maybe<(Maybe<string>)[]>;
 
-  mac?: Maybe<Maybe<string>[]>;
+  mac?: Maybe<(Maybe<string>)[]>;
 
   name?: Maybe<string>;
 
@@ -1551,7 +1545,7 @@ export interface IndexField {
   /** Example of field's value */
   example?: Maybe<string>;
   /** whether the field's belong to an alias index */
-  indexes: Maybe<string>[];
+  indexes: (Maybe<string>)[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -1749,7 +1743,7 @@ export namespace GetHostOverviewQuery {
     __typename?: 'AgentFields';
 
     id: Maybe<string>;
-  }
+  };
 
   export type Host = {
     __typename?: 'HostEcsFields';
@@ -1788,21 +1782,21 @@ export namespace GetHostOverviewQuery {
 
     machine: Maybe<Machine>;
 
-    provider: Maybe<Maybe<string>[]>;
+    provider: Maybe<(Maybe<string>)[]>;
 
-    region: Maybe<Maybe<string>[]>;
+    region: Maybe<(Maybe<string>)[]>;
   };
 
   export type Instance = {
     __typename?: 'CloudInstance';
 
-    id: Maybe<Maybe<string>[]>;
+    id: Maybe<(Maybe<string>)[]>;
   };
 
   export type Machine = {
     __typename?: 'CloudMachine';
 
-    type: Maybe<Maybe<string>[]>;
+    type: Maybe<(Maybe<string>)[]>;
   };
 
   export type Inspect = {
@@ -1985,7 +1979,7 @@ export namespace GetAllTimeline {
 
     favoriteCount: Maybe<number>;
 
-    timeline: Maybe<Timeline>[];
+    timeline: (Maybe<Timeline>)[];
   };
 
   export type Timeline = {
@@ -2240,7 +2234,7 @@ export namespace GetOneTimeline {
 
     savedQueryId: Maybe<string>;
 
-    sort: Maybe<Sort>;
+    sort: Maybe<ToAny>;
 
     created: Maybe<number>;
 
@@ -2494,14 +2488,6 @@ export namespace GetOneTimeline {
 
     version: Maybe<string>;
   };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId: Maybe<string>;
-
-    sortDirection: Maybe<string>;
-  };
 }
 
 export namespace PersistTimelineMutation {
@@ -2560,7 +2546,7 @@ export namespace PersistTimelineMutation {
 
     savedQueryId: Maybe<string>;
 
-    sort: Maybe<Sort>;
+    sort: Maybe<ToAny>;
 
     created: Maybe<number>;
 
@@ -2743,14 +2729,6 @@ export namespace PersistTimelineMutation {
     start: Maybe<ToAny>;
 
     end: Maybe<ToAny>;
-  };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId: Maybe<string>;
-
-    sortDirection: Maybe<string>;
   };
 }
 
