@@ -5,11 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { DetailParams } from '.';
-import { PackageInfo } from '../../../../types';
+import { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
@@ -35,7 +35,12 @@ const ContentFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function Content(props: ContentProps) {
-  const showRightColumn = props.panel !== 'policies';
+  const { panel } = props;
+  const showRightColumn = useMemo(() => {
+    const fullWidthContentPages: DetailViewPanelName[] = ['policies', 'custom'];
+    return !fullWidthContentPages.includes(panel!);
+  }, [panel]);
+
   return (
     <ContentFlexGroup>
       <LeftSideColumn {...(!showRightColumn ? { columnGrow: 1 } : undefined)} />
