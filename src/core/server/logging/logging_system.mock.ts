@@ -42,6 +42,7 @@ const createLoggingSystemMock = () => {
     context,
   }));
   mocked.asLoggerFactory.mockImplementation(() => mocked);
+  mocked.upgrade.mockResolvedValue(undefined);
   mocked.stop.mockResolvedValue();
   return mocked;
 };

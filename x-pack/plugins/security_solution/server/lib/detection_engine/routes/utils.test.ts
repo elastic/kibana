@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
@@ -94,6 +95,28 @@ describe('utils', () => {
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
+        statusCode: 400,
+      });
+    });
+
+    it('transforms a ResponseError returned by the elasticsearch client', () => {
+      const error: errors.ResponseError = {
+        name: 'ResponseError',
+        message: 'illegal_argument_exception',
+        headers: {},
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+            reason: 'detailed explanation',
+          },
+        },
+        meta: ({} as unknown) as errors.ResponseError['meta'],
+        statusCode: 400,
+      };
+      const transformed = transformError(error);
+
+      expect(transformed).toEqual({
+        message: 'illegal_argument_exception: detailed explanation',
         statusCode: 400,
       });
     });

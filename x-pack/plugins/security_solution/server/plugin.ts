@@ -316,7 +316,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
 
     return {};
   }
@@ -370,7 +370,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
-    this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
     this.licensing$ = plugins.licensing.license$;
     licenseService.start(this.licensing$);
     this.policyWatcher = new PolicyWatcher(
