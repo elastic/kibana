@@ -88,7 +88,7 @@ export interface SerializedDeletePhase extends SerializedPhase {
       policy: string;
     };
     delete?: {
-      delete_searchable_snapshot: boolean;
+      delete_searchable_snapshot?: boolean;
     };
   };
 }

@@ -17,7 +17,7 @@ import {
   positiveNumbersAboveZeroErrorMessage,
 } from './policy_validation';
 
-const hotPhaseInitialization: HotPhase = {
+export const hotPhaseInitialization: HotPhase = {
   phaseEnabled: false,
   rolloverEnabled: false,
   selectedMaxAge: '',

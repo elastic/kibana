@@ -13,7 +13,7 @@ import {
   positiveNumberRequiredMessage,
 } from './policy_validation';
 
-const deletePhaseInitialization: DeletePhase = {
+export const deletePhaseInitialization: DeletePhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
@@ -57,7 +57,7 @@ export const deletePhaseToES = (
     esPhase.min_age = `${phase.selectedMinimumAge}${phase.selectedMinimumAgeUnits}`;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
+  esPhase.actions = esPhase.actions ? { delete: {}, ...esPhase.actions } : { delete: {} };
 
   if (phase.waitForSnapshotPolicy) {
     esPhase.actions.wait_for_snapshot = {
