@@ -5,36 +5,42 @@
  */
 import { Logger } from 'kibana/server';
 import { isNumber } from 'lodash';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
 import { anomalySeriesTransform } from './transform';
-import { getMLJobIds } from '../../../service_map/get_service_anomalies';
+import { getMLJobIds } from '../../service_map/get_service_anomalies';
+import { getLatencyTimeseries } from '../get_latency_charts';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 
 export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
-  timeSeriesDates,
+  latencyTimeseries,
   setup,
   logger,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  timeSeriesDates: number[];
+  latencyTimeseries: PromiseReturnType<
+    typeof getLatencyTimeseries
+  >['latencyTimeseries'];
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
-  // don't fetch anomalies for transaction details page
-  if (transactionName) {
-    return;
-  }
+  const timeseriesDates = latencyTimeseries?.avg?.map(({ x }) => x);
 
-  // don't fetch anomalies without a type
-  if (!transactionType) {
+  /*
+   * don't fetch:
+   * - anomalies for transaction details page
+   * - anomalies without a type
+   * - timeseries is empty
+   */
+  if (transactionName || !transactionType || !timeseriesDates?.length) {
     return;
   }
 
@@ -94,7 +100,7 @@ export async function getAnomalySeries({
       esResponse,
       mlBucketSize,
       bucketSize,
-      timeSeriesDates,
+      timeseriesDates,
       jobId
     );
   }
