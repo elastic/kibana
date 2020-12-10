@@ -641,6 +641,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         aria-label="Add an existing visualization"
                         className="euiLink euiLink--primary"
                         data-test-subj=""
+                        disabled={false}
                         onClick={[MockFunction]}
                         type="button"
                       >
@@ -677,9 +678,11 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                 aria-label="Create new visualization button"
                 baseClassName="euiButton"
                 data-test-subj="addVisualizationButton"
+                disabled={false}
                 element="button"
                 iconSide="left"
                 iconType="plusInCircle"
+                isDisabled={false}
                 size="s"
                 type="button"
               >
@@ -687,6 +690,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                   aria-label="Create new visualization button"
                   className="euiButton euiButton--primary euiButton--small"
                   data-test-subj="addVisualizationButton"
+                  disabled={false}
                   style={
                     Object {
                       "minWidth": undefined,
@@ -1091,6 +1095,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                                       aria-label="Edit dashboard"
                                       className="euiLink euiLink--primary"
                                       data-test-subj=""
+                                      disabled={false}
                                       onClick={[MockFunction]}
                                       type="button"
                                     >

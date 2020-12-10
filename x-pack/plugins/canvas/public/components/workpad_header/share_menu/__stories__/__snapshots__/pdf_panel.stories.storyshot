@@ -19,6 +19,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
     />
     <button
       className="euiButton euiButton--primary euiButton--small euiButton--fill"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -61,6 +62,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
       <button
         aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Press Enter to copy the URL to clipboard."
         className="euiButton euiButton--primary euiButton--small"
+        disabled={false}
         style={
           Object {
             "minWidth": undefined,
