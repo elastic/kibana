@@ -22,8 +22,8 @@ import { Datatable } from '../../../../expressions';
 import { Trigger, RowClickContext } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
-export interface EmbeddableContext {
-  embeddable: IEmbeddable;
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
 }
 
 export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {

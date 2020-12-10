@@ -22,15 +22,21 @@ import { toMountPoint } from '../../../kibana_react/public';
 import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import type { IEmbeddable } from '../../../embeddable/public';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
+import type { IEmbeddable, EmbeddableInput } from '../../../embeddable/public';
+import { Filter, FilterManager, TimefilterContract, esFilters, Query, TimeRange } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+
+interface EmbeddableQueryInput extends EmbeddableInput {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
 
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  embeddable?: IEmbeddable;
+  embeddable?: IEmbeddable<EmbeddableQueryInput>;
 }
 
 async function isCompatible(context: ApplyGlobalFilterActionContext) {
