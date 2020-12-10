@@ -686,8 +686,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits;
-    console.dir($scope.rows);
-    console.dir('========');
 
     $scope.fieldCounts = calcFieldCounts(
       $scope.fieldCounts || {},
