@@ -19,6 +19,8 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  KueryNode,
+  nodeBuilder,
   tapFirst,
 } from '../../../../../../src/plugins/data/common';
 import {
@@ -82,6 +84,21 @@ export class BackgroundSessionService implements ISessionService {
   };
 
   /**
+   * Compiles a KQL Query to fetch sessions by ID.
+   * Done as a performance optimization workaround.
+   */
+  private sessionIdsAsFilters(sessionIds: string[]): KueryNode {
+    return nodeBuilder.or(
+      sessionIds.reduce<KueryNode[]>((filters, id) => {
+        filters.push(
+          nodeBuilder.or([nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id)])
+        );
+        return filters;
+      }, [])
+    );
+  }
+
+  /**
    * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
    *
@@ -90,14 +107,11 @@ export class BackgroundSessionService implements ISessionService {
    * context of a user's session.
    */
   private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.sessionSearchMap.keys())
-      .map((sessionId) => `"${sessionId}"`)
-      .join(' | ');
+    const filter = this.sessionIdsAsFilters(Array.from(this.sessionSearchMap.keys()));
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
       perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
-      search: activeMappingIds,
-      searchFields: ['sessionId'],
+      filter,
       namespaces: ['*'],
     });
     this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
