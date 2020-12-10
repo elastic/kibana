@@ -12,7 +12,13 @@ interface BuildSignalsSearchQuery {
   size?: number;
 }
 
-export const buildSignalsSearchQuery = ({ ruleId, index, from, to, size }: BuildSignalsSearchQuery) => ({
+export const buildSignalsSearchQuery = ({
+  ruleId,
+  index,
+  from,
+  to,
+  size,
+}: BuildSignalsSearchQuery) => ({
   index,
   body: {
     size,

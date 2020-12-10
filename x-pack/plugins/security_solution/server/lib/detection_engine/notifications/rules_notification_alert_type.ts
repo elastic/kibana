@@ -6,7 +6,11 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE, NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import {
+  DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
+  NOTIFICATIONS_ID,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { RuleAlertAttributes } from '../signals/types';

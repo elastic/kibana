@@ -10,7 +10,11 @@ import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { NotificationExecutorOptions } from './types';
-import { sampleDocSearchResultsNoSortIdNoVersion, sampleDocSearchResultsWithSortId, sampleEmptyDocSearchResults } from '../signals/__mocks__/es_results';
+import {
+  sampleDocSearchResultsNoSortIdNoVersion,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+} from '../signals/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
 jest.mock('./build_signals_query');
 
