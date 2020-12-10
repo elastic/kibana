@@ -54,7 +54,7 @@ export const getPolicyDataForUpdate = (
               },
             },
             mac: {
-              ...input.config.policy.value.windows,
+              ...input.config.policy.value.mac,
               popup: {
                 ...input.config.policy.value.mac.popup,
                 malware: {
