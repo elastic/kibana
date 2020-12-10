@@ -35,17 +35,18 @@ const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) 
 export const getScatterplotMatrixVegaLiteSpec = (
   values: any[],
   columns: string[],
-  outliers = true,
+  resultsField?: string,
   color?: string,
   legendType?: LegendType,
   dynamicSize?: boolean
 ): TopLevelSpec => {
+  const outliers = resultsField !== undefined;
   const transform = columns.map((column) => ({
     calculate: `datum['${column}']`,
     as: column,
   }));
   transform.push({
-    calculate: `datum['ml.${OUTLIER_SCORE_FIELD}']`,
+    calculate: `datum['${resultsField}.${OUTLIER_SCORE_FIELD}']`,
     as: OUTLIER_SCORE_FIELD,
   });
 

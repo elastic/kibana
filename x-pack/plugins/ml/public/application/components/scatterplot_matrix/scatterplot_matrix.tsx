@@ -128,7 +128,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         const queryFields = [
           ...fields,
           ...(color !== undefined ? [color] : []),
-          ...(legendType !== undefined ? [] : [`ml.${OUTLIER_SCORE_FIELD}`]),
+          ...(legendType !== undefined ? [] : [`${resultsField}.${OUTLIER_SCORE_FIELD}`]),
         ];
 
         const query = randomizeQuery
@@ -189,14 +189,14 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       resultsField !== undefined
         ? items
         : items.map((d) => {
-            d[`ml.${OUTLIER_SCORE_FIELD}`] = 0;
+            d[`${resultsField}.${OUTLIER_SCORE_FIELD}`] = 0;
             return d;
           });
 
     const vegaSpec = getScatterplotMatrixVegaLiteSpec(
       values,
       columns,
-      resultsField !== undefined,
+      resultsField,
       color,
       legendType,
       dynamicSize
@@ -205,10 +205,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     const vgSpec = compile(vegaSpec).spec;
 
     const view = new View(parse(vgSpec))
-      .logLevel(Warn) // set view logging level
-      .renderer('canvas') // set render type (defaults to 'canvas')
+      .logLevel(Warn)
+      .renderer('canvas')
       .tooltip(new Handler().call)
-      .initialize(`#${htmlId}`); // set parent DOM element
+      .initialize(`#${htmlId}`);
 
     view.runAsync(); // evaluate and render the view
   }, [resultsField, splom, color, legendType, dynamicSize]);
