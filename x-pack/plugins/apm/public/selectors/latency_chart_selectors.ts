@@ -18,7 +18,7 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 interface LatencyChart {
-  latencyTimeseries?: TimeSeries;
+  latencyTimeseries?: TimeSeries<Coordinate>;
   mlJobId?: string;
   anomalyTimeseries?: {
     bounderies: TimeSeries;

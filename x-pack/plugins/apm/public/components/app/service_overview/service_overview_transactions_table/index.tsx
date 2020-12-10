@@ -66,7 +66,9 @@ const StyledTransactionDetailLink = styled(TransactionDetailLink)`
   ${truncate('100%')}
 `;
 
-function getLatencyColumnName(latencyAggregationType?: LatencyAggregationType) {
+function getLatencyAggregationTypeLabel(
+  latencyAggregationType?: LatencyAggregationType
+) {
   switch (latencyAggregationType) {
     case 'p95': {
       return i18n.translate(
@@ -202,7 +204,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     },
     {
       field: 'latency',
-      name: getLatencyColumnName(latencyAggregationType),
+      name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
