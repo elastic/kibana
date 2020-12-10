@@ -50,12 +50,10 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const isAlert = useMemo(() => {
-    if (detailsData) {
-      return some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
-    }
-    return false;
-  }, [detailsData]);
+  const isAlert = useMemo(
+    () => some({ category: 'signal', field: 'signal.rule.id' }, detailsData),
+    [detailsData]
+  );
 
   if (!expandedEvent.eventId) {
     return null;
