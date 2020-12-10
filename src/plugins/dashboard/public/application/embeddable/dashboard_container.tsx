@@ -100,8 +100,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
 
-  private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
-
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
@@ -116,7 +114,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       options.embeddable.getEmbeddableFactory,
       parent
     );
-    this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
   protected createNewPanelState<
@@ -240,11 +237,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport
-            renderEmpty={this.renderEmpty}
-            container={this}
-            PanelComponent={this.embeddablePanel}
-          />
+          <DashboardViewport renderEmpty={this.renderEmpty} container={this} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { CoreStart, ScopedHistory } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EmbeddableFactory, EmbeddableStart } from '../../../../embeddable/public';
 import {
@@ -54,10 +54,7 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(
-    private readonly getStartServices: () => Promise<StartServices>,
-    private getHistory: () => ScopedHistory
-  ) {}
+  constructor(private readonly getStartServices: () => Promise<StartServices>) {}
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
@@ -84,7 +81,7 @@ export class DashboardContainerFactoryDefinition
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
-    const stateTransfer = services.embeddable.getStateTransfer(this.getHistory());
+    const stateTransfer = services.embeddable.getStateTransfer();
     return new DashboardContainer(initialInput, services, stateTransfer, parent);
   };
 }

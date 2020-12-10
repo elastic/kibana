@@ -242,10 +242,7 @@ export class DashboardPlugin
       };
     };
 
-    const factory = new DashboardContainerFactoryDefinition(
-      getStartServices,
-      () => this.currentHistory!
-    );
+    const factory = new DashboardContainerFactoryDefinition(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();

@@ -19,14 +19,13 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
+import { PanelState } from '../../../embeddable_plugin';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../kibana_react/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   renderEmpty?: () => React.ReactNode;
 }
 
@@ -121,7 +120,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   private renderContainerScreen() {
-    const { container, PanelComponent } = this.props;
+    const { container } = this.props;
     const {
       isEmbeddedExternally,
       isFullScreenMode,
@@ -144,7 +143,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             toggleChrome={!isEmbeddedExternally}
           />
         )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
+        <DashboardGrid container={container} />
       </div>
     );
   }

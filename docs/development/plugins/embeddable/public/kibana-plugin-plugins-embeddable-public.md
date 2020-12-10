@@ -17,7 +17,7 @@
 |  [EmbeddableFactoryNotFoundError](./kibana-plugin-plugins-embeddable-public.embeddablefactorynotfounderror.md) |  |
 |  [EmbeddablePanel](./kibana-plugin-plugins-embeddable-public.embeddablepanel.md) |  |
 |  [EmbeddableRoot](./kibana-plugin-plugins-embeddable-public.embeddableroot.md) |  |
-|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the state object in  which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
+|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the session storage which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
 |  [ErrorEmbeddable](./kibana-plugin-plugins-embeddable-public.errorembeddable.md) |  |
 |  [PanelNotFoundError](./kibana-plugin-plugins-embeddable-public.panelnotfounderror.md) |  |
 

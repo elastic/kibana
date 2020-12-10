@@ -190,9 +190,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    let incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage();
+    let incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
 
     // TS is picky with type guards, we can't just inline `() => false`
     function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
