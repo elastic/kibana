@@ -25,7 +25,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
-import { removeSignalsIndex } from '../tasks/api_calls';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
