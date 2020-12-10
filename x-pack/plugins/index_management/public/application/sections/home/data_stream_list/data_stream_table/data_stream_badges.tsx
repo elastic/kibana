@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiBadge } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataStream } from '../../../../../../common';
 import { isFleetManaged } from '../../../../lib/data_streams';
@@ -17,28 +17,25 @@ interface Props {
 export const DataStreamsBadges: React.FunctionComponent<Props> = ({ dataStream }) => {
   return (
     <>
-      {isFleetManaged(dataStream) ? (
-        <Fragment>
-          &nbsp;
+      &nbsp;
+      <EuiBadgeGroup>
+        {isFleetManaged(dataStream) ? (
           <EuiBadge color="hollow">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
               defaultMessage="Managed"
             />
           </EuiBadge>
-        </Fragment>
-      ) : null}
-      {dataStream.hidden ? (
-        <Fragment>
-          &nbsp;
+        ) : null}
+        {dataStream.hidden ? (
           <EuiBadge color="hollow">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.table.hiddenDataStreamBadge"
               defaultMessage="Hidden"
             />
           </EuiBadge>
-        </Fragment>
-      ) : null}
+        ) : null}
+      </EuiBadgeGroup>
     </>
   );
 };
