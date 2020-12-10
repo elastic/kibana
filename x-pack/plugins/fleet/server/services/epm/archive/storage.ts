@@ -23,7 +23,7 @@ import {
   RegistryDataStream,
 } from '../../../../common';
 import { getArchiveEntry } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+import { parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -226,7 +226,7 @@ export const getEsPackage = async (
       });
     })
   );
-  packageInfo.policy_templates = parseAndVerifyPolicyTemplates(packageInfo);
+  // packageInfo.policy_templates = parseAndVerifyPolicyTemplates(packageInfo);
   packageInfo.data_streams = dataStreams;
   return {
     paths,
