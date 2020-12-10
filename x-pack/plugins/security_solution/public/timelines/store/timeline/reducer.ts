@@ -102,8 +102,9 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { timelineDefaults } from './defaults';
+import { alertsDefaultModel } from '../../../detections/components/alerts_table/default_config';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -178,16 +179,19 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [timelineId]: {
-        ...(state.timelineById[timelineId] ?? timelineDefaults),
-        expandedEvent: event,
+  .case(toggleExpandedEvent, (state, { timelineId, event }) => {
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [timelineId]: {
+          ...(state.timelineById[timelineId] ??
+            (timelineId === TimelineId.detectionsPage ? alertsDefaultModel : timelineDefaults)),
+          expandedEvent: event,
+        },
       },
-    },
-  }))
+    };
+  })
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
