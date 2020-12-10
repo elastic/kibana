@@ -17,23 +17,26 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
+import moment, { Duration } from 'moment-timezone';
+import { getHighestTimeUnit } from './utils';
 
 /**
- * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
- * is implemented internally. It's supposed to be used by `Logger`.
- * @internal
+ * Return the next rollout time, given current time and rollout interval
  */
-export interface Appender {
-  append(record: LogRecord): void;
-}
-
-/**
- * This interface should be additionally implemented by the `Appender`'s if they are supposed
- * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
- * that interacts with `Appender` doesn't have control over appender lifetime.
- * @internal
- */
-export interface DisposableAppender extends Appender {
-  dispose: () => void | Promise<void>;
-}
+export const getNextRollingTime = (
+  currentTime: number,
+  interval: Duration,
+  modulate: boolean
+): number => {
+  if (modulate) {
+    const incrementedUnit = getHighestTimeUnit(interval);
+    const currentMoment = moment(currentTime);
+    const increment =
+      interval.get(incrementedUnit) -
+      (currentMoment.get(incrementedUnit) % interval.get(incrementedUnit));
+    const incrementInMs = moment.duration(increment, incrementedUnit).asMilliseconds();
+    return currentMoment.startOf(incrementedUnit).toDate().getTime() + incrementInMs;
+  } else {
+    return currentTime + interval.asMilliseconds();
+  }
+};
