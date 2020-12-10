@@ -1,9 +1,0 @@
-{
-  "ml.estimate_model_memory": {
-    "data_autocomplete_rules": {
-      "analysis_config": {},
-      "max_bucket_cardinality": {},
-      "overall_cardinality": {}
-    }
-  }
-}

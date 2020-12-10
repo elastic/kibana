@@ -13,8 +13,7 @@
       "_source": [],
       "_source_excludes": [],
       "_source_includes": [],
-      "pipeline": "",
-      "require_alias": "__flag__"
+      "pipeline": ""
     },
     "methods": [
       "POST",
