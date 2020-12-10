@@ -143,6 +143,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           disableDataTierOption={Boolean(
             isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
           )}
+          isLoading={isLoading}
         />
 
         {/* Data tier related warnings and call-to-action notices */}
