@@ -17,6 +17,7 @@ import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 const mockSort: Sort[] = [
   {
