@@ -14,7 +14,7 @@ export interface MapsStartApi {
       indexPatternId: string,
       indexPatternTitle: string
     ) => Promise<LayerDescriptor[]>;
-    createBasemapLayerDescriptor: () => Promise<LayerDescriptor>;
+    createBasemapLayerDescriptor: () => Promise<LayerDescriptor | null>;
   };
   registerLayerWizard(layerWizard: LayerWizard): Promise<void>;
   registerSource(entry: SourceRegistryEntry): Promise<void>;

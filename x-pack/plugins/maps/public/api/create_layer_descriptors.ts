@@ -15,7 +15,7 @@ export const createLayerDescriptors = {
     const mapModules = await lazyLoadMapModules();
     return mapModules.createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
   },
-  async createBasemapLayerDescriptor(): Promise<LayerDescriptor> {
+  async createBasemapLayerDescriptor(): Promise<LayerDescriptor | null> {
     const mapModules = await lazyLoadMapModules();
     return mapModules.createBasemapLayerDescriptor();
   },
