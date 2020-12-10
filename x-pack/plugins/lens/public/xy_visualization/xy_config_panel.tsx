@@ -271,7 +271,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const valueLabelsDisabledReason = getValueLabelDisableReason({
     isAreaPercentage,
     isHistogramSeries,
-    isFittingEnabled,
   });
 
   return (
