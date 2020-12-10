@@ -20,9 +20,9 @@
 import { duration } from 'moment';
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import { kibanaResponseFactory } from '../../../../../core/server';
-import { createHandler } from '../../routes/api/console/proxy/create_handler';
-import * as requestModule from '../../lib/proxy_request';
+import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import * as requestModule from '../../../../../lib/proxy_request';
+import { createHandler } from '../create_handler';
 
 describe('Console Proxy Route', () => {
   afterEach(async () => {

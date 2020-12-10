@@ -21,9 +21,9 @@ import { getProxyRouteHandlerDeps } from './mocks';
 import expect from '@kbn/expect';
 import { Readable } from 'stream';
 
-import { kibanaResponseFactory } from '../../../../../core/server';
-import { createHandler } from '../../routes/api/console/proxy/create_handler';
-import * as requestModule from '../../lib/proxy_request';
+import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { createHandler } from '../create_handler';
+import * as requestModule from '../../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
