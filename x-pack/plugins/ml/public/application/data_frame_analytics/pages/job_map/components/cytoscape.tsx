@@ -26,6 +26,8 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
+  itemsDeleted: boolean;
+  resetCy: boolean;
   style?: CSSProperties;
   width: number;
 }
@@ -63,7 +65,15 @@ function getLayoutOptions(width: number, height: number) {
   };
 }
 
-export function Cytoscape({ children, elements, height, style, width }: CytoscapeProps) {
+export function Cytoscape({
+  children,
+  elements,
+  height,
+  itemsDeleted,
+  resetCy,
+  style,
+  width,
+}: CytoscapeProps) {
   const [ref, cy] = useCytoscape({
     ...cytoscapeOptions,
     elements,
@@ -76,7 +86,8 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
       if (cy && height > 0) {
-        cy.layout(getLayoutOptions(width, height)).run();
+        // temporary workaround for single 'row' maps showing up outside of the graph bounds
+        setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
       }
     },
     [cy, height, width]
@@ -98,10 +109,23 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy) {
-      cy.add(elements);
+      if (itemsDeleted === false) {
+        cy.add(elements);
+      } else {
+        cy.elements().remove();
+        cy.add(elements);
+      }
+
       cy.trigger('data');
     }
   }, [cy, elements]);
+
+  // Reset the graph to original zoom and pan
+  useEffect(() => {
+    if (cy) {
+      cy.reset();
+    }
+  }, [cy, resetCy]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

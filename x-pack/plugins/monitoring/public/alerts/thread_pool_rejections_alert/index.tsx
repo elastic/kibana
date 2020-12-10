@@ -23,11 +23,11 @@ interface ThreadPoolRejectionAlertDetails {
 }
 
 export function createThreadPoolRejectionsAlertType(
-  alertType: string,
+  alertId: string,
   threadPoolAlertDetails: ThreadPoolRejectionAlertDetails
 ): AlertTypeModel {
   return {
-    id: alertType,
+    id: alertId,
     name: threadPoolAlertDetails.label,
     description: threadPoolAlertDetails.description,
     iconClass: 'bell',
