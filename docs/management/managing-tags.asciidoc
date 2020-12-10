@@ -1,0 +1,103 @@
+[role="xpack"]
+[[managing-tags]]
+== Tags
+
+The *tags* management section allows you to manage your tags, and assign them
+to existing saved objects.
+
+Assigning tags to objects helps to categorize them, and allows to easily find
+the objects by filtering by tag(s) in the <<managing-saved-objects, Saved Objects management section>>
+or from the other applications.
+
+To access the tags management page, open the main menu, then click on *Stack Management > Tags*.
+
+[role="screenshot"]
+image::images/tags/tag-management-section.png[Tags management section]
+
+[float]
+=== Required permissions
+
+The `Tag Management` {kib} privilege is required to access the *Tags* management section.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+Having the `read` privilege allows a user to:
+- Access the `tags` management section
+- Assign tags to saved objects he has `write` permission for
+
+Having the `write` privilege allows a user to additionally:
+- Create tags
+- Delete tags
+- Edit existing tags
+
+NOTE: having the `Tag Management` {kib} privilege is not required to
+see tags assigned on objects the user can see, or to filter objects by tags
+in {kib} applications or from the navigational search.
+
+NOTE: having `write` `Tag Management` privilege is not sufficient
+to assign tags to saved objects. The user also needs to have `write` permission
+on the objects he wants to assign tags to.
+
+[float]
+[[settings-create-tag]]
+=== Create a tag
+
+This action creates a new tag to be assigned to your saved objects.
+
+To create a tag:
+
+. Click on the `create tag` button
+
+. Choose the name and a color for the new tag
+
+. Click `save`
+
+[role="screenshot"]
+image::images/tags/create-tag.png[Tag creation popin]
+
+NOTE: A tag's name is limited to 50 characters, and can only be composed of alphanumeric characters,
+`:`, `-`, `_` and whitespaces.
+
+[float]
+[[settings-assign-tag]]
+=== Manage a tag assignments to saved objects
+
+This action allows assigning or unassigning a tag to a list of saved object.
+
+[role="screenshot"]
+image::images/tags/manage-assignments-action.png[Assign action]
+
+To manage a tag's assignments:
+
+. Click on the `manage assignments` action in the tag's row
+. Search for the saved objects you want to assign or unassign to the tag
+. Add or remove the objects from the assignments
+. Click on `Save tag assignments`
+
+[role="screenshot"]
+image::images/tags/manage-assignments-flyout.png[Assign flyout]
+
+NOTE: it is also possible to assign multiple tags to objects at once, by selecting them in the listing
+and then using the `Manage tag assignments` action from the action menu.
+
+[float]
+[[settings-delete-tag]]
+=== Delete a tag
+
+This action deletes a tag, and unassign it from any saved objects it was currently
+assigned to.
+
+[role="screenshot"]
+image::images/tags/delete-tag-action.png[Delete action]
+
+To delete a tag:
+
+. Click on the `delete` action in the tag's row
+
+. Click `delete` in the confirmation modal
+
+[role="screenshot"]
+image::images/tags/delete-tag-modal.png[Delete modal]
+
+NOTE: it is also possible to delete multiple tags at once, by selecting them in the listing
+and then using the `delete` action from the action menu.
