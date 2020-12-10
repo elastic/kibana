@@ -549,7 +549,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -643,7 +643,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -685,7 +685,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {

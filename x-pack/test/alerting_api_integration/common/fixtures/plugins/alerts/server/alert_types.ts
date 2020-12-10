@@ -68,34 +68,32 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     updatedBy,
   } = alertExecutorOptions;
   let group: string | null = 'default';
-      let subgroup: string | null = null;
+  let subgroup: string | null = null;
   const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
-        const [scheduledGroup, scheduledSubgroup] = (
-          params.groupsToScheduleActionsInSeries[index] ?? ''
-        ).split(':');
+    const [scheduledGroup, scheduledSubgroup] = (
+      params.groupsToScheduleActionsInSeries[index] ?? ''
+    ).split(':');
 
-        group = scheduledGroup;
-        subgroup = scheduledSubgroup;
+    group = scheduledGroup;
+    subgroup = scheduledSubgroup;
   }
 
-      if (group) {
-        const instance = services
-          .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true });
+  if (group) {
+    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
 
-        if (subgroup) {
-          instance.scheduleActionsWithSubGroup(group, subgroup, {
-            instanceContextValue: true,
-          });
-        } else {
-          instance.scheduleActions(group, {
-            instanceContextValue: true,
-          });
-        }
-      }
+    if (subgroup) {
+      instance.scheduleActionsWithSubGroup(group, subgroup, {
+        instanceContextValue: true,
+      });
+    } else {
+      instance.scheduleActions(group, {
+        instanceContextValue: true,
+      });
+    }
+  }
 
   await services.scopedClusterClient.index({
     index: params.index,
