@@ -214,11 +214,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [columns]);
 
   const timelineQuerySortField = useMemo(
-    () => ({
-      field: sort.columnId,
-      direction: sort.sortDirection as Direction,
-    }),
-    [sort.columnId, sort.sortDirection]
+    () =>
+      sort.map(({ columnId, sortDirection }) => ({
+        field: columnId,
+        direction: sortDirection as Direction,
+      })),
+    [sort]
   );
 
   const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();

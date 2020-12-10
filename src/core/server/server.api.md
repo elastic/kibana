@@ -7,6 +7,7 @@
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -47,6 +48,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { Duration as Duration_2 } from 'moment-timezone';
 import { EnvironmentMode } from '@kbn/config';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -177,9 +179,10 @@ export interface AppCategory {
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
@@ -932,6 +935,18 @@ export interface ICspConfig {
 // @public
 export interface ICustomClusterClient extends IClusterClient {
     close: () => Promise<void>;
+}
+
+// @public
+export interface IExternalUrlConfig {
+    readonly policy: IExternalUrlPolicy[];
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
 }
 
 // @public
