@@ -47,7 +47,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   location: { search },
   history,
 }) => {
-  const { isDeepLink } = extractQueryParams(search);
+  const { isDeepLink, includeHidden } = extractQueryParams(search);
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
@@ -71,7 +71,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewHiddenLabel', {
         defaultMessage: 'Hidden data streams',
       }),
-      checked: 'off',
+      checked: includeHidden ? 'on' : 'off',
     },
   });
 
