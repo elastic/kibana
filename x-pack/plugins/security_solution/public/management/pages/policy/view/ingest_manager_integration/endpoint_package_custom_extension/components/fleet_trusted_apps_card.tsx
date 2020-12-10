@@ -65,22 +65,24 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
             </h4>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <TrustedAppItemsSummary />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <LinkWithIcon
-            appId={MANAGEMENT_APP_ID}
-            href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
-            appPath={trustedAppsListUrlPath}
-            appState={trustedAppRouteState}
-            data-test-subj="linkToTrustedApps"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-              defaultMessage="Manage trusted applications"
-            />
-          </LinkWithIcon>
+        <EuiFlexItem grow={false}>
+          <span>
+            <LinkWithIcon
+              appId={MANAGEMENT_APP_ID}
+              href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
+              appPath={trustedAppsListUrlPath}
+              appState={trustedAppRouteState}
+              data-test-subj="linkToTrustedApps"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
+                defaultMessage="Manage trusted applications"
+              />
+            </LinkWithIcon>
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
