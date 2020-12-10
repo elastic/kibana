@@ -195,7 +195,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   );
   $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
 
-  const FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE = 3;
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -425,17 +424,14 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     return removeElFromColumns('_source', columns);
   }
 
-  function removeFieldsFromColumns(columns) {
-    return removeElFromColumns('fields', columns);
-  }
-
   function getDefaultColumns() {
     const columns = [...savedSearch.columns];
 
     if ($scope.useNewFieldsApi) {
       return removeSourceFromColumns(columns);
-    } else if (columns.length > 0) {
-      return removeFieldsFromColumns(columns);
+    }
+    if (columns.length > 0) {
+      return columns;
     }
     return config.get(DEFAULT_COLUMNS_SETTING).slice();
   }
@@ -689,18 +685,9 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     }
 
     $scope.hits = resp.hits.total;
-    $scope.rows = resp.hits.hits.map((hit) => {
-      if ($scope.useNewFieldsApi) {
-        const fields = {};
-        Object.keys(hit.fields)
-          .splice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE)
-          .forEach((key) => {
-            fields[key] = hit.fields[key];
-          });
-        return { ...hit };
-      }
-      return hit;
-    });
+    $scope.rows = resp.hits.hits;
+    console.dir($scope.rows);
+    console.dir('========');
 
     $scope.fieldCounts = calcFieldCounts(
       $scope.fieldCounts || {},

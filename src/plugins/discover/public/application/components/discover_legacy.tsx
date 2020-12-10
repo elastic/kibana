@@ -171,13 +171,15 @@ export function DiscoverLegacy({
     return columns;
   };
 
-  const getDefaultColumns = (column: string, cols: string[]) => {
+  const getDefaultColumns = (cols: string[]) => {
     let columns = [...cols];
-    const index = columns.indexOf(column);
-    if (index !== -1) {
-      columns = removeElFromColumns(column, columns);
+    if (useNewFieldsApi) {
+      const index = columns.indexOf('_source');
+      if (index !== -1) {
+        columns = removeElFromColumns('_source', columns);
+      }
     }
-    if (columns.length === 0 && column === 'fields') {
+    if (columns.length === 0 && !useNewFieldsApi) {
       columns = ['_source'];
     }
     return columns;
@@ -187,10 +189,7 @@ export function DiscoverLegacy({
     if (!state.columns) {
       return [];
     }
-    if (useNewFieldsApi) {
-      return getDefaultColumns('_source', state.columns);
-    }
-    return getDefaultColumns('fields', state.columns);
+    return getDefaultColumns(state.columns);
   };
 
   return (

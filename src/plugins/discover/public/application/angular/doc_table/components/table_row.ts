@@ -59,6 +59,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       row: '=kbnTableRow',
       onAddColumn: '=?',
       onRemoveColumn: '=?',
+      useNewFieldsApi: '=',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
@@ -140,7 +141,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           );
         }
 
-        if ($scope.columns.length === 0) {
+        if ($scope.columns.length === 0 && $scope.useNewFieldsApi) {
           // TODO: don't use field formatter here, but inline the formatting function into a discover utility
           //   (this also needs to do the truncating we skip now below).
           const formatted = formatRow(row, indexPattern);
@@ -161,7 +162,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
             newHtmls.push(
               cellTemplate({
                 timefield: false,
-                sourcefield: column === '_source' || column === 'fields',
+                sourcefield: column === '_source',
                 formatted: _displayField(row, column, true),
                 filterable: isFilterable,
                 column,

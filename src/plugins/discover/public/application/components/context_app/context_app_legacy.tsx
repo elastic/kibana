@@ -46,6 +46,7 @@ export interface ContextAppProps {
   onChangeSuccessorCount: (count: number) => void;
   predecessorStatus: string;
   successorStatus: string;
+  useNewFieldsApi?: boolean;
 }
 
 const PREDECESSOR_TYPE = 'predecessors';
@@ -85,7 +86,15 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const docTableProps = () => {
-    const { hits, filter, sorting, columns, indexPattern, minimumVisibleRows } = renderProps;
+    const {
+      hits,
+      filter,
+      sorting,
+      columns,
+      indexPattern,
+      minimumVisibleRows,
+      useNewFieldsApi,
+    } = renderProps;
     return {
       columns,
       indexPattern,
@@ -93,6 +102,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       rows: hits,
       onFilter: filter,
       sort: sorting.map((el) => [el]),
+      useNewFieldsApi,
     } as DocTableLegacyProps;
   };
 

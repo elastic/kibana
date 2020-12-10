@@ -245,6 +245,7 @@ export function DiscoverField({
             fieldIcon={getDscFieldIcon(entry.field)}
             fieldAction={getActionButton(entry.field, entry.isSelected)}
             fieldName={getFieldName(entry.field)}
+            key={entry.field.name}
           />
         ))}
       </React.Fragment>
