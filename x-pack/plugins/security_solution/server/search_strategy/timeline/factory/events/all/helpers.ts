@@ -7,7 +7,7 @@
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
 import { toStringArray } from '../../../../helpers/to_array';
-import { formatGeoLocation } from '../details/helpers';
+import { formatGeoLocation, isGeoField } from '../details/helpers';
 
 export const formatTimelineData = (
   dataFields: readonly string[],
@@ -57,7 +57,7 @@ const mergeTimelineFieldsWithHit = <T>(
                   field: fieldName,
                   value: specialFields.includes(fieldName)
                     ? toStringArray(get(fieldName, hit))
-                    : fieldName.includes('geo.location')
+                    : isGeoField(fieldName)
                     ? formatGeoLocation(hit.fields[fieldName])
                     : toStringArray(hit.fields[fieldName]),
                 },

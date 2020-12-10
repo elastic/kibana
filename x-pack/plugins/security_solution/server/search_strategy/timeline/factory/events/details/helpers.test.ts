@@ -54,7 +54,7 @@ describe('#getDataFromHits', () => {
         originalValue: ['process'],
         values: ['process'],
       },
-      { category: 'process', field: 'process.ppid', originalValue: [3977], values: ['3977'] },
+      { category: 'process', field: 'process.ppid', originalValue: ['3977'], values: ['3977'] },
       { category: 'user', field: 'user.name', originalValue: ['jenkins'], values: ['jenkins'] },
       {
         category: 'process',
@@ -68,7 +68,7 @@ describe('#getDataFromHits', () => {
         originalValue: ['Process go (PID: 4313) by user jenkins STARTED'],
         values: ['Process go (PID: 4313) by user jenkins STARTED'],
       },
-      { category: 'process', field: 'process.pid', originalValue: [4313], values: ['4313'] },
+      { category: 'process', field: 'process.pid', originalValue: ['4313'], values: ['4313'] },
       {
         category: 'process',
         field: 'process.working_directory',

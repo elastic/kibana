@@ -31,6 +31,9 @@ export const formatGeoLocation = (item: unknown[]) => {
   return toStringArray(item);
 };
 
+export const isGeoField = (field: string) =>
+  field.includes('geo.location') || field.includes('geoip.location');
+
 export const getDataFromHits = (fields: Record<string, unknown[]>): TimelineEventsDetailsItem[] =>
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
@@ -40,8 +43,8 @@ export const getDataFromHits = (fields: Record<string, unknown[]>): TimelineEven
       {
         category: fieldCategory,
         field,
-        values: field.includes('geo.location') ? formatGeoLocation(item) : toStringArray(item),
-        originalValue: item,
+        values: isGeoField(field) ? formatGeoLocation(item) : toStringArray(item),
+        originalValue: toStringArray(item),
       } as TimelineEventsDetailsItem,
     ];
   }, []);
