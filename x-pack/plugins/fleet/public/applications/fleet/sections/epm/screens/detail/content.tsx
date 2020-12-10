@@ -52,7 +52,10 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { panel, name, version, assets, title, removable, latestVersion } = props;
+  const { panel, ...packageInfo } = props;
+  const { name, version, assets, title, removable, latestVersion } = props;
+  const pkgkey = `${name}-${version}`; // FIXME:PT adjust once master is merged in
+
   const CustomView = useUIExtension(name, 'package-detail-custom');
   const { getPath } = useLink();
 
@@ -73,7 +76,7 @@ export function ContentPanel(props: ContentPanelProps) {
     case 'custom':
       return CustomView ? (
         <ExtensionWrapper>
-          <CustomView />
+          <CustomView pkgkey={pkgkey} packageInfo={packageInfo} />
         </ExtensionWrapper>
       ) : (
         <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />
