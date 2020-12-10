@@ -107,9 +107,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       onFlyoutCollapsed({
         timelineId: id,
         event: {},
+        defaultModel,
       })
     );
-  }, [dispatch, id, onFlyoutCollapsed]);
+  }, [dispatch, id, onFlyoutCollapsed, defaultModel]);
 
   return (
     <>

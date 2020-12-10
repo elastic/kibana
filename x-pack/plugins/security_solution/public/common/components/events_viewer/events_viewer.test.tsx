@@ -100,7 +100,6 @@ describe('EventsViewer', () => {
     id: 'test-stateful-events-viewer',
     start: from,
     scopeId: SourcererScopeName.timeline,
-    onFlyoutCollapsed: jest.fn(),
   };
 
   beforeEach(() => {
