@@ -138,12 +138,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
 
