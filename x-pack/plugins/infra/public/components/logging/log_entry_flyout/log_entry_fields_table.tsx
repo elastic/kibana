@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import {
@@ -38,33 +38,28 @@ export const LogEntryFieldsTable: React.FC<{
         sortable: true,
       },
       {
+        actions: [
+          {
+            type: 'icon',
+            icon: 'filter',
+            name: setFilterButtonLabel,
+            description: setFilterButtonDescription,
+            available: () => !!createSetFilterHandler,
+            onClick: (item) => createSetFilterHandler?.(item)(),
+          },
+        ],
+      },
+      {
         field: 'value',
         name: i18n.translate('xpack.infra.logFlyout.valueColumnLabel', {
           defaultMessage: 'Value',
         }),
         render: (_name: string, item: LogEntryField) => (
-          <span>
-            <EuiToolTip
-              content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
-                defaultMessage: 'View event with filter',
-              })}
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="filter"
-                aria-label={i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
-                  defaultMessage: 'Filter',
-                })}
-                onClick={createSetFilterHandler?.(item)}
-                disabled={!!createSetFilterHandler}
-              />
-            </EuiToolTip>
-            <FieldValue
-              highlightTerms={emptyHighlightTerms}
-              isActiveHighlight={false}
-              value={item.value}
-            />
-          </span>
+          <FieldValue
+            highlightTerms={emptyHighlightTerms}
+            isActiveHighlight={false}
+            value={item.value}
+          />
         ),
       },
     ],
@@ -96,3 +91,11 @@ const searchOptions = {
     schema: true,
   },
 };
+
+const setFilterButtonLabel = i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
+  defaultMessage: 'Filter',
+});
+
+const setFilterButtonDescription = i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
+  defaultMessage: 'View event with filter',
+});
