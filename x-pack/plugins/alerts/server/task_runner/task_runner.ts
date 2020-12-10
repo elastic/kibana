@@ -491,7 +491,7 @@ function generateNewAndRecoveredInstanceEvents(
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
   for (const id of recoveredAlertInstanceIds) {
-    const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
+    const actionGroup = recoveredAlertInstances[id].getLastScheduledActions()?.group;
     const message = `${params.alertLabel} instance '${id}' has recovered`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
   }
