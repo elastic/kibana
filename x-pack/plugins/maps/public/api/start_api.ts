@@ -9,10 +9,13 @@ import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 
 export interface MapsStartApi {
-  createSecurityLayerDescriptors: (
-    indexPatternId: string,
-    indexPatternTitle: string
-  ) => Promise<LayerDescriptor[]>;
+  createLayerDescriptors: {
+    createSecurityLayerDescriptors: (
+      indexPatternId: string,
+      indexPatternTitle: string
+    ) => Promise<LayerDescriptor[]>;
+    createBasemapLayerDescriptor: () => Promise<LayerDescriptor>;
+  };
   registerLayerWizard(layerWizard: LayerWizard): Promise<void>;
   registerSource(entry: SourceRegistryEntry): Promise<void>;
 }

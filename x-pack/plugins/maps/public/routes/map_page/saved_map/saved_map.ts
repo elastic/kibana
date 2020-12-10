@@ -41,10 +41,10 @@ import {
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { getInitialLayers } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
+import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -151,7 +151,18 @@ export class SavedMap {
       );
     }
 
-    const layerList = getInitialLayers(this._attributes.layerListJSON, this._defaultLayers);
+    let layerList: LayerDescriptor[] = [];
+    if (this._attributes.layerListJSON) {
+      layerList = JSON.parse(layerListJSON);
+    } else {
+      const basemapLayerDescriptor = createBasemapLayerDescriptor();
+      if (basemapLayerDescriptor) {
+        layerList.push(basemapLayerDescriptor);
+      }
+      if (this._defaultLayers.length) {
+        layerList.push(...this._defaultLayers);
+      }
+    }
     this._store.dispatch<any>(replaceLayerList(layerList));
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
