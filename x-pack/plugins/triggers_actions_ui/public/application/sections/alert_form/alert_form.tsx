@@ -167,7 +167,7 @@ export const AlertForm = ({
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
