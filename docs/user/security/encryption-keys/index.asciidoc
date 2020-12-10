@@ -1,8 +1,8 @@
 [[kibana-encryption-keys]]
 === Set up encryptions keys to protect sensitive information
 
-The `kibana-encryption-keys` command helps setup encryption keys used by {kib}
-to protect sensitive information during normal operations.
+The `kibana-encryption-keys` command helps you set up encryption keys that {kib} uses
+to protect sensitive information.
 
 [discrete]
 === Synopsis
@@ -17,21 +17,21 @@ bin/kibana-encryption-keys generate
 [discrete]
 === Description
 
-{kib} makes use of encryption keys in several areas, ranging from encrypting data
+{kib} uses encryption keys in several areas, ranging from encrypting data
 in {kib} associated indices to storing session information.  By defining these
-encryption keys in your configuration you'll be ensuring consistent operations
+encryption keys in your configuration, you'll ensure consistent operations
 across restarts.
 
 [discrete]
 [[encryption-key-parameters]]
 === Parameters
 
-`generate`::  Generates randomly-generated passwords to the console.
+`generate`::  Randomly generates passwords to the console.
 
 `-i, --interactive`:: Prompts you for which encryption keys to set and optionally
-save output to a sample configuration file
+where to save a sample configuration file.
 
-`-q, --quiet`:: Outputs the encryption keys without helper information
+`-q, --quiet`:: Outputs the encryption keys without helper information.
 
 `-f, --force`:: Shows help information.
 
