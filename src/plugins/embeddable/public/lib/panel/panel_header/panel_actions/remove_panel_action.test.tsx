@@ -21,6 +21,7 @@ import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
 import { EmbeddableStart } from '../../../../plugin';
 import {
+  MockFilter,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
@@ -29,7 +30,6 @@ import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/f
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
 import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -39,8 +39,8 @@ let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
 
 beforeEach(async () => {
-  const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };
