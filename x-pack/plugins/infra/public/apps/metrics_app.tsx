@@ -25,14 +25,20 @@ import { prepareMountElement } from './common_styles';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
-  { element, history }: AppMountParameters
+  { element, history, setHeaderActionMenu }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
 
   prepareMountElement(element);
 
   ReactDOM.render(
-    <MetricsApp apolloClient={apolloClient} core={core} history={history} plugins={plugins} />,
+    <MetricsApp
+      apolloClient={apolloClient}
+      core={core}
+      history={history}
+      plugins={plugins}
+      setHeaderActionMenu={setHeaderActionMenu}
+    />,
     element
   );
 
@@ -46,7 +52,8 @@ const MetricsApp: React.FC<{
   core: CoreStart;
   history: History<unknown>;
   plugins: InfraClientStartDeps;
-}> = ({ apolloClient, core, history, plugins }) => {
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+}> = ({ apolloClient, core, history, plugins, setHeaderActionMenu }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
@@ -54,6 +61,7 @@ const MetricsApp: React.FC<{
       <CommonInfraProviders
         apolloClient={apolloClient}
         triggersActionsUI={plugins.triggersActionsUi}
+        setHeaderActionMenu={setHeaderActionMenu}
       >
         <Router history={history}>
           <Switch>
