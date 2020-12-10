@@ -34,10 +34,12 @@ export const SchemaFieldsTable: React.FC = () => {
   const { filteredSchemaFields, filterValue } = useValues(SchemaLogic);
 
   return Object.keys(filteredSchemaFields).length > 0 ? (
-    <EuiTable>
+    <EuiTable tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER}</EuiTableHeaderCell>
-        <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}</EuiTableHeaderCell>
+        <EuiTableHeaderCell align="right">
+          {SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}
+        </EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableBody>
         {Object.keys(filteredSchemaFields).map((fieldName) => (
@@ -49,7 +51,7 @@ export const SchemaFieldsTable: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell>
+            <EuiTableRowCell align="right">
               <SchemaExistingField
                 disabled={fieldName === 'id'}
                 key={fieldName}

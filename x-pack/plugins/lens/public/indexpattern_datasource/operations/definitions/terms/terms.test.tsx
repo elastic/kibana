@@ -71,21 +71,21 @@ describe('terms', () => {
     };
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
-      const esAggsConfig = termsOperation.toEsAggsConfig(
+      const esAggsFn = termsOperation.toEsAggsFn(
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            orderBy: '_key',
-            field: 'category',
-            size: 3,
-            otherBucket: true,
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
+            field: ['category'],
+            size: [3],
+            otherBucket: [true],
           }),
         })
       );
@@ -93,7 +93,7 @@ describe('terms', () => {
 
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
-      const esAggsConfig = termsOperation.toEsAggsConfig(
+      const esAggsFn = termsOperation.toEsAggsFn(
         {
           ...termsColumn,
           params: { ...termsColumn.params, otherBucket: false, missingBucket: true },
@@ -101,11 +101,11 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            otherBucket: false,
-            missingBucket: false,
+          arguments: expect.objectContaining({
+            otherBucket: [false],
+            missingBucket: [false],
           }),
         })
       );

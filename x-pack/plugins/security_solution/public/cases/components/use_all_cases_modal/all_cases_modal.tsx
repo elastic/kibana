@@ -14,18 +14,25 @@ import {
 } from '@elastic/eui';
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
+import { Case } from '../../containers/types';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
 
 export interface AllCasesModalProps {
+  isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onRowClick: (id?: string) => void;
+  onRowClick: (theCase?: Case) => void;
 }
 
-const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({ onCloseCaseModal, onRowClick }) => {
+const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({
+  isModalOpen,
+  onCloseCaseModal,
+  onRowClick,
+}) => {
   const userPermissions = useGetUserSavedObjectPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
-  return (
+
+  return isModalOpen ? (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>
         <EuiModalHeader>
@@ -36,7 +43,7 @@ const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({ onCloseCaseModal
         </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
-  );
+  ) : null;
 };
 
 export const AllCasesModal = memo(AllCasesModalComponent);

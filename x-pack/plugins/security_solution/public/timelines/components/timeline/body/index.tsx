@@ -33,10 +33,12 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
-  sort: Sort;
+  sort: Sort[];
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
 }
+
+const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
   [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
@@ -127,7 +129,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(id as TimelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(id as TimelineId)
+            ? DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
+            : 0
         ),
       [isEventViewer, showCheckboxes, id]
     );
@@ -140,7 +144,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" data-timeline-id={id}>
+        <TimelineBody data-test-subj="timeline-body">
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}

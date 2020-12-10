@@ -43,12 +43,20 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
       if (hotPhaseActions.rollover && _meta.hot.useRollover) {
-        if (hotPhaseActions.rollover.max_age) {
+        if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
           hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+        } else {
+          delete hotPhaseActions.rollover.max_age;
         }
 
-        if (hotPhaseActions.rollover.max_size) {
+        if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+          delete hotPhaseActions.rollover.max_docs;
+        }
+
+        if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
           hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+        } else {
+          delete hotPhaseActions.rollover.max_size;
         }
 
         if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
@@ -67,6 +75,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
+      }
+
+      if (!updatedPolicy.phases.hot?.actions?.shrink) {
+        delete hotPhaseActions.shrink;
       }
 
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
@@ -95,7 +107,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       warmPhase.actions = serializeMigrateAndAllocateActions(
         _meta.warm,
         warmPhase.actions,
-        originalPolicy?.phases.warm?.actions
+        originalPolicy?.phases.warm?.actions,
+        updatedPolicy.phases.warm?.actions?.allocate?.number_of_replicas
       );
 
       if (!updatedPolicy.phases.warm?.actions?.forcemerge) {
@@ -129,7 +142,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       coldPhase.actions = serializeMigrateAndAllocateActions(
         _meta.cold,
         coldPhase.actions,
-        originalPolicy?.phases.cold?.actions
+        originalPolicy?.phases.cold?.actions,
+        updatedPolicy.phases.cold?.actions?.allocate?.number_of_replicas
       );
 
       if (_meta.cold.freezeEnabled) {
