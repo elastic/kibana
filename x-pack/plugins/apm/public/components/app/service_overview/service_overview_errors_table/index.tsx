@@ -14,8 +14,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, truncate, unit } from '../../../../style/variables';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
@@ -66,7 +67,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
-
+  const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -152,7 +153,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !transactionType) {
       return;
     }
 
@@ -169,6 +170,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
         },
       },
     }).then((response) => {
@@ -192,6 +194,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
   ]);
 
   const {

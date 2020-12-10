@@ -34,6 +34,7 @@ import { TableLinkFlexItem } from '../table_link_flex_item';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewTable } from '../service_overview_table';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
@@ -43,7 +44,7 @@ interface Props {
   serviceName: string;
 }
 
-type SortField = 'latency' | 'throughput' | 'errorRate' | 'impact';
+type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
 
 const PAGE_SIZE = 5;
@@ -66,7 +67,7 @@ const StyledTransactionDetailLink = styled(TransactionDetailLink)`
 
 export function ServiceOverviewTransactionsTable(props: Props) {
   const { serviceName } = props;
-
+  const { transactionType } = useApmServiceContext();
   const {
     uiFilters,
     urlParams: { start, end },
@@ -94,7 +95,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !transactionType) {
       return;
     }
 
@@ -112,6 +113,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
         },
       },
     }).then((response) => {
@@ -135,6 +137,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
   ]);
 
   const {
@@ -152,14 +155,14 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           defaultMessage: 'Name',
         }
       ),
-      render: (_, { name, transactionType }) => {
+      render: (_, { name, transactionType: type }) => {
         return (
           <TransactionGroupLinkWrapper>
             <EuiToolTip delay="long" content={name}>
               <StyledTransactionDetailLink
                 serviceName={serviceName}
                 transactionName={name}
-                transactionType={transactionType}
+                transactionType={type}
               >
                 {name}
               </StyledTransactionDetailLink>
@@ -209,7 +212,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       },
     },
     {
-      field: 'error_rate',
+      field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         {

@@ -14,6 +14,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../timeseries_chart';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -38,8 +39,8 @@ export function TransactionErrorRateChart({
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, transactionType, transactionName } = urlParams;
+  const { transactionType } = useApmServiceContext();
+  const { start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(() => {
     if (serviceName && start && end) {

@@ -224,6 +224,7 @@ export const serviceErrorGroupsRoute = createRoute({
           t.literal('occurrences'),
           t.literal('name'),
         ]),
+        transactionType: t.string,
       }),
     ]),
   }),
@@ -233,7 +234,14 @@ export const serviceErrorGroupsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+      query: {
+        numBuckets,
+        pageIndex,
+        size,
+        sortDirection,
+        sortField,
+        transactionType,
+      },
     } = context.params;
     return getServiceErrorGroups({
       serviceName,
@@ -243,6 +251,7 @@ export const serviceErrorGroupsRoute = createRoute({
       pageIndex,
       sortDirection,
       sortField,
+      transactionType,
     });
   },
 });

@@ -36,6 +36,7 @@ export async function getTimeseriesDataForTransactionGroups({
   searchAggregatedTransactions,
   size,
   numBuckets,
+  transactionType,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -46,6 +47,7 @@ export async function getTimeseriesDataForTransactionGroups({
   searchAggregatedTransactions: boolean;
   size: number;
   numBuckets: number;
+  transactionType: string;
 }) {
   const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -64,6 +66,7 @@ export async function getTimeseriesDataForTransactionGroups({
           filter: [
             { terms: { [TRANSACTION_NAME]: transactionNames } },
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
             ...esFilter,
           ],
