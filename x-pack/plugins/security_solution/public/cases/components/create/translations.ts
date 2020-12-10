@@ -23,7 +23,7 @@ export const STEP_TWO_TITLE = i18n.translate(
 );
 
 export const STEP_THREE_TITLE = i18n.translate(
-  'xpack.securitySolution.components.create.stepTwoTitle',
+  'xpack.securitySolution.components.create.stepThreeTitle',
   {
     defaultMessage: 'External Connector Fields',
   }
