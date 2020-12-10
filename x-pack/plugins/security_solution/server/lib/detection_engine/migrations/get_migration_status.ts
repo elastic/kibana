@@ -6,7 +6,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { SignalsMigrationSO } from './saved_objects_schema';
-import { signalsMigrationSOService } from './saved_objects_service';
+import { signalsMigrationService } from './migration_service';
 import {
   Bucket,
   IndexMappingsResponse,
@@ -86,7 +86,7 @@ export const getMigrations = async ({
   index: string[];
   soClient: SavedObjectsClientContract;
 }): Promise<MigrationsByIndex> => {
-  const migrations = await signalsMigrationSOService(soClient).find({
+  const migrations = await signalsMigrationService(soClient).find({
     search: index.join(' OR '),
     searchFields: ['sourceIndex'],
     sortField: 'updated',

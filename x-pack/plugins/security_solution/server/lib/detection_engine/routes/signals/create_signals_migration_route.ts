@@ -15,7 +15,7 @@ import { getMigrationStatus } from '../../migrations/get_migration_status';
 import { indexIsOutdated } from '../../migrations/helpers';
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { BadRequestError } from '../../errors/bad_request_error';
-import { signalsMigrationSOService } from '../../migrations/saved_objects_service';
+import { signalsMigrationService } from '../../migrations/migration_service';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -35,7 +35,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;
-        const migrationClient = signalsMigrationSOService(soClient);
+        const migrationService = signalsMigrationService(soClient);
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -78,7 +78,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
                   version: currentVersion,
                   reindexOptions,
                 });
-                const migrationSavedObject = await migrationClient.create({
+                const migrationSavedObject = await migrationService.create({
                   ...migrationDetails,
                   status: 'pending',
                   version: currentVersion,
@@ -113,7 +113,6 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
 
         return response.ok({ body: { indices: migrationResults } });
       } catch (err) {
-        console.log('ERRRRRRRRRRRRR', err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,

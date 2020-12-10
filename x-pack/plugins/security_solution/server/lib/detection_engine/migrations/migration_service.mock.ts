@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { SignalsMigrationSOService } from './saved_objects_service';
+import { signalsMigrationService } from './migration_service';
 import { SignalsMigrationSO, SignalsMigrationSOAttributes } from './saved_objects_schema';
 import { signalsMigrationType } from './saved_objects';
 
@@ -40,6 +40,6 @@ const create = () =>
     delete: jest.fn(),
     find: jest.fn(),
     update: jest.fn(),
-  } as unknown) as jest.Mocked<SignalsMigrationSOService>);
+  } as unknown) as jest.Mocked<SignalsMigrationService>);
 
 export const savedObjectServiceMock = { create };

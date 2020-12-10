@@ -16,7 +16,7 @@ import { getMigrations } from '../../migrations/get_migration_status';
 import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
-import { signalsMigrationSOService } from '../../migrations/saved_objects_service';
+import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
 
 interface TaskResponse {
@@ -47,7 +47,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const migrationService = signalsMigrationSOService(soClient);
+        const migrationService = signalsMigrationService(soClient);
         const migrationsByIndex = await getMigrations({ soClient, index: indices });
 
         const finalizeResults = await Promise.all(
@@ -135,7 +135,6 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
           body: { indices: finalizeResults },
         });
       } catch (err) {
-        console.log('ERRRRRRRR', err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,

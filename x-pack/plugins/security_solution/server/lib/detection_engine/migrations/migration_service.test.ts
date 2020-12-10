@@ -5,11 +5,11 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { signalsMigrationSOService } from './saved_objects_service';
+import { signalsMigrationService } from './migration_service';
 import {
   getSavedObjectFindResponseMock,
   getSavedObjectResponseMock,
-} from './saved_objects_service.mock';
+} from './migration_service.mock';
 
 const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 describe('signals migration SO service', () => {
@@ -23,7 +23,7 @@ describe('signals migration SO service', () => {
     it('resolves an array of objects, if valid', () => {
       const migration = getSavedObjectResponseMock();
       soClient.find.mockResolvedValue(getSavedObjectFindResponseMock([{ ...migration }]));
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
 
       return expect(client.find({})).resolves.toEqual([
         expect.objectContaining(getSavedObjectResponseMock()),
@@ -33,7 +33,7 @@ describe('signals migration SO service', () => {
     it('rejects if SO client throws', () => {
       const error = new Error('whoops');
       soClient.find.mockRejectedValue(error);
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
 
       return expect(client.find({})).rejects.toEqual(error);
     });
@@ -48,7 +48,7 @@ describe('signals migration SO service', () => {
         page: 1,
         saved_objects: [{ ...badSavedObject, score: 0, type: '', references: [] }],
       });
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
 
       return expect(client.find({})).rejects.toThrow(
         'Invalid value "4" supplied to "attributes,destinationIndex"'
@@ -60,7 +60,7 @@ describe('signals migration SO service', () => {
     it('returns the response if valid', () => {
       // @ts-expect-error response mock is missing a few fields
       soClient.create.mockResolvedValue(getSavedObjectResponseMock());
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
 
       return expect(client.create(attributes)).resolves.toEqual(getSavedObjectResponseMock());
@@ -68,7 +68,7 @@ describe('signals migration SO service', () => {
 
     it('rejects if attributes are invalid', () => {
       const { attributes } = getSavedObjectResponseMock();
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       // @ts-expect-error intentionally breaking the type
       attributes.destinationIndex = null;
 
@@ -81,7 +81,7 @@ describe('signals migration SO service', () => {
       const { attributes } = getSavedObjectResponseMock();
       // @ts-expect-error intentionally breaking the type
       soClient.create.mockResolvedValue({ ...getSavedObjectResponseMock(), id: null });
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
 
       return expect(client.create(attributes)).rejects.toThrow(
         'Invalid value "null" supplied to "id"'
@@ -91,7 +91,7 @@ describe('signals migration SO service', () => {
     it('does not pass excess fields', async () => {
       // @ts-expect-error response mock is missing a few fields
       soClient.create.mockResolvedValue(getSavedObjectResponseMock());
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
       const attributesWithExtra = { ...attributes, extra: true };
 
@@ -112,7 +112,7 @@ describe('signals migration SO service', () => {
     });
 
     it('returns the response if valid', () => {
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
 
       return expect(client.update('my-id', attributes)).resolves.toEqual(
@@ -122,7 +122,7 @@ describe('signals migration SO service', () => {
 
     it('rejects if attributes are invalid', () => {
       const { attributes } = getSavedObjectResponseMock();
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       // @ts-expect-error intentionally breaking the type
       attributes.destinationIndex = 4;
 
@@ -132,7 +132,7 @@ describe('signals migration SO service', () => {
     });
 
     it('succeeds if an attribute is omitted', () => {
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
       // @ts-expect-error intentionally breaking the type
       attributes.destinationIndex = undefined;
@@ -143,7 +143,7 @@ describe('signals migration SO service', () => {
     });
 
     it('updates our updated* fields', async () => {
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
 
       await client.update('my-id', attributes);
@@ -159,7 +159,7 @@ describe('signals migration SO service', () => {
     });
 
     it('does not pass excess fields', async () => {
-      const client = signalsMigrationSOService(soClient);
+      const client = signalsMigrationService(soClient);
       const { attributes } = getSavedObjectResponseMock();
 
       await client.update('my-id', attributes);
