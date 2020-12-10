@@ -72,7 +72,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineFullScreen,
   toggleFullScreen,
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
+  <EuiFlexGroup alignItems="flexStart" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
         {i18n.CLOSE_ANALYZER}

@@ -143,10 +143,15 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 /*
  *  Sort Types
  */
-const SavedSortRuntimeType = runtimeTypes.partial({
+
+const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
+const SavedSortRuntimeType = runtimeTypes.union([
+  runtimeTypes.array(SavedSortObject),
+  SavedSortObject,
+]);
 
 /*
  *  Timeline Statuses

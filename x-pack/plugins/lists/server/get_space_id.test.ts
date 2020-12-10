@@ -23,13 +23,13 @@ describe('get_space_id', () => {
   });
 
   test('it returns "default" as the space id given a space id of "default"', () => {
-    const spaces = spacesServiceMock.createSetupContract();
+    const spaces = spacesServiceMock.createStartContract();
     const space = getSpaceId({ request, spaces });
     expect(space).toEqual('default');
   });
 
   test('it returns "another-space" as the space id given a space id of "another-space"', () => {
-    const spaces = spacesServiceMock.createSetupContract('another-space');
+    const spaces = spacesServiceMock.createStartContract('another-space');
     const space = getSpaceId({ request, spaces });
     expect(space).toEqual('another-space');
   });
