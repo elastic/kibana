@@ -57,7 +57,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
           );
         }
 
-        const migrationStatuses = await getMigrationStatus({ esClient, index: indices, soClient });
+        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
@@ -113,6 +113,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
 
         return response.ok({ body: { indices: migrationResults } });
       } catch (err) {
+        console.log('ERRRRRRRRRRRRR', err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,

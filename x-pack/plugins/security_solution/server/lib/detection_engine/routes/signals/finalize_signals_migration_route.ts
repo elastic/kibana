@@ -135,6 +135,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
           body: { indices: finalizeResults },
         });
       } catch (err) {
+        console.log('ERRRRRRRR', err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,

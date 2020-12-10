@@ -10,7 +10,6 @@ export interface Bucket {
 }
 
 export interface MigrationStatus {
-  migrations: string[];
   name: string;
   signal_versions: Bucket[];
   version: number;

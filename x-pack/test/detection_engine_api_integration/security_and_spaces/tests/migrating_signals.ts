@@ -13,7 +13,6 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { encodeMigrationToken } from '../../../../plugins/security_solution/server/lib/detection_engine/migrations/helpers';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -24,6 +23,22 @@ import {
   waitForIndexToPopulate,
 } from '../../utils';
 import { createUserAndRole } from '../roles_users_utils';
+
+interface StatusResponse {
+  name: string;
+  is_outdated: boolean;
+}
+
+interface CreateResponse {
+  index: string;
+  migration_index: string;
+  migration_id: string;
+}
+
+interface FinalizeResponse extends CreateResponse {
+  completed?: boolean;
+  error?: unknown;
+}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -36,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('Migrating signals', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
+      // TODO delete saved objects between tests
     });
 
     afterEach(async () => {
@@ -93,6 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             name: legacySignalsIndexName,
             is_outdated: true,
+            migrations: [],
             signal_versions: [
               {
                 doc_count: 1,
@@ -104,6 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             is_outdated: true,
             name: outdatedIndexName,
+            migrations: [],
             signal_versions: [
               {
                 doc_count: 1,
@@ -170,12 +188,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName, outdatedSignalsIndexName] })
           .expect(200);
+        const createResponses: CreateResponse[] = body.indices;
 
-        const indices = body.indices as Array<{ migration_id: string; migration_index: string }>;
-        expect(indices).length(2);
-        indices.forEach((index) => expect(index.migration_id).to.be.a('string'));
+        expect(createResponses).length(2);
+        createResponses.forEach((response) => expect(response.migration_id).to.be.a('string'));
 
-        const [{ migration_index: newIndex }] = indices;
+        const [{ migration_index: newIndex }] = createResponses;
         await waitForIndexToPopulate(es, newIndex);
         const { body: migrationResults } = await es.search({ index: newIndex });
 
@@ -267,7 +285,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('finalizing signals migrations', async () => {
       let legacySignalsIndexName: string;
       let outdatedSignalsIndexName: string;
-      let migratingIndices: any[];
+      let createResponse: CreateResponse;
 
       beforeEach(async () => {
         legacySignalsIndexName = getIndexNameFromLoad(
@@ -278,11 +296,13 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         ({
-          body: { indices: migratingIndices },
+          body: {
+            indices: [createResponse],
+          },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [legacySignalsIndexName, outdatedSignalsIndexName] })
+          .send({ index: [legacySignalsIndexName] })
           .expect(200));
       });
 
@@ -292,29 +312,74 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('replaces the original index alias with the migrated one', async () => {
-        const [migratingIndex] = migratingIndices;
-
         const { body } = await supertest
           .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .query({ from: '2020-10-10' })
           .set('kbn-xsrf', 'true')
           .expect(200);
-        const indicesBefore = (body.indices as Array<{ name: string }>).map((index) => index.name);
+        const statusResponses: StatusResponse[] = body.indices;
+        const indicesBefore = statusResponses.map((index) => index.name);
 
-        expect(indicesBefore).to.contain(migratingIndex.index);
-        expect(indicesBefore).not.to.contain(migratingIndex.migration_index);
+        expect(indicesBefore).to.contain(createResponse.index);
+        expect(indicesBefore).not.to.contain(createResponse.migration_index);
 
         await waitFor(async () => {
           const {
-            body: { completed },
+            body: {
+              indices: [{ completed }],
+            },
           } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
             .set('kbn-xsrf', 'true')
-            .send({ migration_token: migratingIndex.migration_token })
+            .send({ index: [createResponse.index] })
             .expect(200);
 
-          return completed;
+          return completed === true;
         }, `polling finalize_migration until complete`);
+
+        let statusAfter: StatusResponse[] = [];
+        await waitFor(async () => {
+          ({
+            body: { indices: statusAfter },
+          } = await supertest
+            .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+            .query({ from: '2020-10-10' })
+            .set('kbn-xsrf', 'true')
+            .expect(200));
+          return statusAfter.some((s) => !s.is_outdated);
+        }, `polling finalize_migration until complete`);
+
+        const indicesAfter = statusAfter.map((s) => s.name);
+
+        expect(indicesAfter).to.contain(createResponse.migration_index);
+        expect(indicesAfter).not.to.contain(createResponse.index);
+      });
+
+      it('finalizes an arbitrary number of indices', async () => {
+        // start our second migration
+        const {
+          body: {
+            indices: [secondCreateResponse],
+          },
+        } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ index: [outdatedSignalsIndexName] })
+          .expect(200);
+        const createResponses = [createResponse, secondCreateResponse as CreateResponse];
+
+        let finalizeResponse: FinalizeResponse[];
+        await waitFor(async () => {
+          ({
+            body: { indices: finalizeResponse },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ index: createResponses.map((c) => c.index) })
+            .expect(200));
+
+          return finalizeResponse.every((index) => index.completed);
+        }, `polling finalize_migration until all complete`);
 
         const { body: bodyAfter } = await supertest
           .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -322,68 +387,64 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        const indicesAfter = (bodyAfter.indices as Array<{ name: string }>).map(
-          (index) => index.name
+        const statusAfter: StatusResponse[] = bodyAfter.indices;
+        expect(statusAfter.map((s) => s.name)).to.eql(
+          createResponses.map((c) => c.migration_index)
         );
-
-        expect(indicesAfter).to.contain(migratingIndex.migration_index);
-        expect(indicesAfter).not.to.contain(migratingIndex.index);
+        expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
       });
 
       it('marks the original index for deletion by applying our cleanup policy', async () => {
-        const [migratingIndex] = migratingIndices;
-
         await waitFor(async () => {
           const {
-            body: { completed },
+            body: {
+              indices: [{ completed }],
+            },
           } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
             .set('kbn-xsrf', 'true')
-            .send({ migration_token: migratingIndex.migration_token })
+            .send({ index: [createResponse.index] })
             .expect(200);
 
           return completed;
         }, `polling finalize_migration until complete`);
 
-        const { body } = await es.indices.getSettings({ index: migratingIndex.index });
-        const indexSettings = body[migratingIndex.index].settings.index;
+        const { body } = await es.indices.getSettings({ index: createResponse.index });
+        const indexSettings = body[createResponse.index].settings.index;
         expect(indexSettings.lifecycle.name).to.eql(
           `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
         );
       });
 
-      it('deletes the original index for deletion by applying our cleanup policy', async () => {
-        const [migratingIndex] = migratingIndices;
-
+      it.skip('deletes the underlying migration task', async () => {
         await waitFor(async () => {
           const {
             body: { completed },
           } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
             .set('kbn-xsrf', 'true')
-            .send({ migration_token: migratingIndex.migration_token })
+            .send({ index: [createResponse.index] })
             .expect(200);
 
           return completed;
         }, `polling finalize_migration until complete`);
 
-        const { statusCode } = await es.tasks.get(
-          { task_id: migratingIndex.migration_task_id },
-          { ignore: [404] }
-        );
-        expect(statusCode).to.eql(404);
+        // const [{ taskId }] = await getMigration({ id: migration.migration_id });
+        // expect(taskId.length).greaterThan(0);
+        // const { statusCode } = await es.tasks.get({ task_id: taskId }, { ignore: [404] });
+        // expect(statusCode).to.eql(404);
       });
 
-      it('subsequent attempts at finalization are 404s', async () => {
-        const [migratingIndex] = migratingIndices;
-
+      it('subsequent attempts at finalization are idempotent', async () => {
         await waitFor(async () => {
           const {
-            body: { completed },
+            body: {
+              indices: [{ completed }],
+            },
           } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
             .set('kbn-xsrf', 'true')
-            .send({ migration_token: migratingIndex.migration_token })
+            .send({ index: [createResponse.index] })
             .expect(200);
 
           return completed;
@@ -392,11 +453,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ migration_token: migratingIndex.migration_token })
-          .expect(404);
-
-        expect(body.status_code).to.eql(404);
-        expect(body.message).to.contain('resource_not_found_exception');
+          .send({ index: [createResponse.index] })
+          .expect(200);
+        const finalizeResponse: FinalizeResponse = body.indices[0];
+        expect(finalizeResponse.completed).to.eql(true);
+        expect(finalizeResponse.index).to.eql(createResponse.index);
 
         const { body: bodyAfter } = await supertest
           .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -404,114 +465,63 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        const indicesAfter = (bodyAfter.indices as Array<{ name: string }>).map(
-          (index) => index.name
-        );
+        const statusAfter: StatusResponse[] = bodyAfter.indices;
+        const indicesAfter = statusAfter.map((index) => index.name);
 
-        expect(indicesAfter).to.contain(migratingIndex.migration_index);
-        expect(indicesAfter).not.to.contain(migratingIndex.index);
+        expect(indicesAfter).to.contain(createResponse.migration_index);
+        expect(indicesAfter).not.to.contain(createResponse.index);
       });
 
-      it('rejects if the provided token is invalid', async () => {
-        const requestBody = { migration_token: 'invalid_token' };
+      it('rejects inline if the index does not exist', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send(requestBody)
-          .expect(400);
+          .send({ index: ['dne-index'] })
+          .expect(200);
+        const finalizeResponse: FinalizeResponse = body.indices[0];
 
-        expect(body).to.eql({
-          message: 'An error occurred while decoding the migration token: [invalid_token]',
+        expect(finalizeResponse.completed).not.to.eql(true);
+        expect(finalizeResponse.error).to.eql({
+          message: 'The specified index has no migrations',
           status_code: 400,
         });
       });
 
-      it('rejects if the specified indexes do not match the task', async () => {
-        const [
-          { migration_index: destinationIndex, index: sourceIndex, migration_task_id: taskId },
-        ] = migratingIndices;
-        const migrationDetails = { destinationIndex, sourceIndex, taskId };
-        const invalidToken = encodeMigrationToken({
-          ...migrationDetails,
-          sourceIndex: 'bad-index',
-        });
-        const requestBody = { migration_token: invalidToken };
-
-        let finalizeResponse: any;
-
-        await waitFor(async () => {
-          const { body, status } = await supertest
-            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-            .set('kbn-xsrf', 'true')
-            .send(requestBody);
-          finalizeResponse = body;
-
-          return status !== 200;
-        }, `polling finalize_migration until task is complete (with error)`);
-
-        expect(finalizeResponse).to.eql({
-          message: `The specified task does not match the source and destination indexes. Task [${taskId}] did not specify source index [bad-index] and destination index [${destinationIndex}]`,
-          status_code: 400,
-        });
-      });
-
-      it('rejects if the task is malformed', async () => {
-        const [
-          { migration_index: destinationIndex, index: sourceIndex, migration_task_id: taskId },
-        ] = migratingIndices;
-        const migrationDetails = { destinationIndex, sourceIndex, taskId };
-        const invalidToken = encodeMigrationToken({
-          ...migrationDetails,
-          taskId: 'bad-task-id',
-        });
-        const requestBody = { migration_token: invalidToken };
-
+      it('rejects inline if the index has no migrations', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send(requestBody)
-          .expect(400);
+          .send({ index: [outdatedSignalsIndexName] })
+          .expect(200);
+        const finalizeResponse: FinalizeResponse = body.indices[0];
 
-        expect(body).to.eql({
-          message: 'illegal_argument_exception: malformed task id bad-task-id',
+        expect(finalizeResponse.index).to.eql(outdatedSignalsIndexName);
+        expect(finalizeResponse.completed).not.to.eql(true);
+        expect(finalizeResponse.error).to.eql({
+          message: 'The specified index has no migrations',
           status_code: 400,
-        });
-      });
-
-      it('rejects if the task does not exist', async () => {
-        const [
-          { migration_index: destinationIndex, index: sourceIndex, migration_task_id: taskId },
-        ] = migratingIndices;
-        const migrationDetails = { destinationIndex, sourceIndex, taskId };
-        const invalidToken = encodeMigrationToken({
-          ...migrationDetails,
-          taskId: 'oTUltX4IQMOUUVeiohTt8A:124',
-        });
-        const requestBody = { migration_token: invalidToken };
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send(requestBody)
-          .expect(404);
-
-        expect(body).to.eql({
-          message:
-            "resource_not_found_exception: task [oTUltX4IQMOUUVeiohTt8A:124] belongs to the node [oTUltX4IQMOUUVeiohTt8A] which isn't part of the cluster and there is no record of the task",
-          status_code: 404,
         });
       });
 
       it('rejects the request if the user does not have sufficient privileges', async () => {
-        const [migratingIndex] = migratingIndices;
         await createUserAndRole(security, ROLES.t1_analyst);
 
-        await supertestWithoutAuth
+        const { body } = await supertestWithoutAuth
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ migration_token: migratingIndex.migration_token })
+          .send({ index: [createResponse.index] })
           .auth(ROLES.t1_analyst, 'changeme')
-          .expect(403);
+          .expect(200);
+
+        const finalizeResponse: FinalizeResponse = body.indices[0];
+
+        expect(finalizeResponse.index).to.eql(createResponse.index);
+        expect(finalizeResponse.completed).not.to.eql(true);
+        expect(finalizeResponse.error).to.eql({
+          message:
+            'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst]',
+          status_code: 403,
+        });
       });
     });
   });

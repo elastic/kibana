@@ -18,6 +18,17 @@ interface SignalsVersionsByIndex {
   [indexName: string]: Bucket[] | undefined;
 }
 
+/**
+ * Retrieves a breakdown of signals version for each
+ * given signals index.
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param index name(s) of the signals index(es)
+ *
+ * @returns a {@link SignalsVersionsByIndex} object
+ *
+ * @throws if SO client returns an error
+ */
 export const getSignalsVersions = async ({
   esClient,
   index,
@@ -57,6 +68,17 @@ interface MigrationsByIndex {
   [indexName: string]: SignalsMigrationSO[] | undefined;
 }
 
+/**
+ * Retrieves a list of migrations SOs for each
+ * given signals index.
+ *
+ * @param soClient An {@link SavedObjectsClientContract}
+ * @param index name(s) of the signals index(es)
+ *
+ * @returns a {@link MigrationsByIndex} object
+ *
+ * @throws if SO client returns an error
+ */
 export const getMigrations = async ({
   index,
   soClient,
@@ -68,6 +90,7 @@ export const getMigrations = async ({
     search: index.join(' OR '),
     searchFields: ['sourceIndex'],
     sortField: 'updated',
+    sortOrder: 'desc',
   });
 
   return migrations.reduce<MigrationsByIndex>((agg, migration) => {
@@ -98,11 +121,9 @@ export const getMigrations = async ({
 export const getMigrationStatus = async ({
   esClient,
   index,
-  soClient,
 }: {
   esClient: ElasticsearchClient;
   index: string[];
-  soClient: SavedObjectsClientContract;
 }): Promise<MigrationStatus[]> => {
   if (index.length === 0) {
     return [];
@@ -112,13 +133,11 @@ export const getMigrationStatus = async ({
     index,
   });
   const signalsVersionsByIndex = await getSignalsVersions({ esClient, index });
-  const migrationsByIndex = await getMigrations({ index, soClient });
 
   return index.reduce<MigrationStatus[]>(
     (statuses, name) => [
       ...statuses,
       {
-        migrations: migrationsByIndex[name]?.map((m) => m.id) ?? [],
         name,
         signal_versions: signalsVersionsByIndex[name] ?? [],
         version: indexVersions[name]?.mappings?._meta?.version ?? 0,
