@@ -26,6 +26,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     // TODO: we should not have a service overview.
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/dependencies'));
     });
 
     describe('Settings', function () {
@@ -45,7 +46,8 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     describe('Transactions', function () {
       loadTestFile(require.resolve('./transactions/top_transaction_groups'));
-      loadTestFile(require.resolve('./transactions/transaction_charts'));
+      loadTestFile(require.resolve('./transactions/latency'));
+      loadTestFile(require.resolve('./transactions/throughput'));
       loadTestFile(require.resolve('./transactions/error_rate'));
       loadTestFile(require.resolve('./transactions/breakdown'));
       loadTestFile(require.resolve('./transactions/distribution'));

@@ -15,9 +15,10 @@ import { loadFields, selectedFieldsSelector } from './fields';
 import { updateSettings, settingsSelector } from './advanced_settings';
 import { loadTemplates, templatesSelector } from './url_templates';
 import {
-  lookupIndexPattern,
+  migrateLegacyIndexPatternRef,
   savedWorkspaceToAppState,
   appStateToSavedWorkspace,
+  lookupIndexPatternId,
 } from '../services/persistence';
 import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
@@ -43,23 +44,28 @@ export const loadingSaga = ({
   indexPatternProvider,
 }: GraphStoreDependencies) => {
   function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
-    const selectedIndex = lookupIndexPattern(action.payload, indexPatterns);
-    if (!selectedIndex) {
+    const workspacePayload = action.payload;
+    const migrationStatus = migrateLegacyIndexPatternRef(workspacePayload, indexPatterns);
+    if (!migrationStatus.success) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern not found',
+          defaultMessage: 'Index pattern "{name}" not found',
+          values: {
+            name: migrationStatus.missingIndexPattern,
+          },
         })
       );
       return;
     }
 
-    const indexPattern = yield call(indexPatternProvider.get, selectedIndex.id);
+    const selectedIndexPatternId = lookupIndexPatternId(workspacePayload);
+    const indexPattern = yield call(indexPatternProvider.get, selectedIndexPatternId);
     const initialSettings = settingsSelector(yield select());
 
-    createWorkspace(selectedIndex.attributes.title, initialSettings);
+    createWorkspace(indexPattern.title, initialSettings);
 
     const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
-      action.payload,
+      workspacePayload,
       indexPattern,
       // workspace won't be null because it's created in the same call stack
       getWorkspace()!
@@ -68,16 +74,16 @@ export const loadingSaga = ({
     // put everything in the store
     yield put(
       updateMetaData({
-        title: action.payload.title,
-        description: action.payload.description,
-        savedObjectId: action.payload.id,
+        title: workspacePayload.title,
+        description: workspacePayload.description,
+        savedObjectId: workspacePayload.id,
       })
     );
     yield put(
       setDatasource({
         type: 'indexpattern',
-        id: selectedIndex.id,
-        title: selectedIndex.attributes.title,
+        id: indexPattern.id,
+        title: indexPattern.title,
       })
     );
     yield put(loadFields(allFields));

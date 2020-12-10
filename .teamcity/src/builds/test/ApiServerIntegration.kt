@@ -9,8 +9,8 @@ object ApiServerIntegration : BuildType({
   description = "Executes API and Server Integration Tests"
 
   steps {
-    runbld("API Integration", "yarn run grunt run:apiIntegrationTests")
-    runbld("Server Integration", "yarn run grunt run:serverIntegrationTests")
+    runbld("API Integration", "./.ci/teamcity/oss/api_integration.sh")
+    runbld("Server Integration", "./.ci/teamcity/oss/server_integration.sh")
   }
 
   addTestSettings()

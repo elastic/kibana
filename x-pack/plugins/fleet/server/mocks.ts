@@ -15,7 +15,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    security: securityMock.createSetup(),
+    security: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     kibanaVersion: '8.0.0',

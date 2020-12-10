@@ -23,6 +23,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -67,6 +74,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -110,6 +124,13 @@ Object {
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
@@ -159,6 +180,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
@@ -202,6 +230,13 @@ Object {
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
