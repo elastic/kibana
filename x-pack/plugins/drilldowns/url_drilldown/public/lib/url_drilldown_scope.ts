@@ -28,8 +28,6 @@ import {
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
-type ContextScopeInput = ActionContext | ActionFactoryContext;
-
 /**
  * Part of context scope extracted from an embeddable
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`

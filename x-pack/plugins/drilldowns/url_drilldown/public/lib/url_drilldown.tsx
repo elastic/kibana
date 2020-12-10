@@ -101,7 +101,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
-    const scope = this.buildRuntimeScope(context);
+    const scope = this.getRuntimeVariables(context);
     const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
 
     if (!isValid) {
@@ -115,12 +115,12 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly getHref = async (config: Config, context: ActionContext) => {
-    const scope = this.buildRuntimeScope(context);
+    const scope = this.getRuntimeVariables(context);
     return urlDrilldownCompileUrl(config.url.template, scope);
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {
@@ -128,15 +128,17 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     }
   };
 
-  private buildRuntimeScope = (context: ActionContext) => {
+  public readonly getRuntimeVariables = (context: ActionContext) => {
     return {
       ...this.deps.getGlobalScope(),
-      panel: getPanelVariables(context),
+      context: {
+        panel: getPanelVariables(context),
+      },
       event: getEventScope(context),
     };
   };
 
-  private getVariableList = (context: ActionFactoryContext): string[] => {
+  private readonly getVariableList = (context: ActionFactoryContext): string[] => {
     return [
       ...getEventVariableList(context).sort(),
       ...Object.keys(getFlattenedObject(getPanelVariables(context))).sort(),

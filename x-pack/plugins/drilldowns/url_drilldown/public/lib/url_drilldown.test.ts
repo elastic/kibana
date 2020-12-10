@@ -7,6 +7,7 @@
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
+import { rowClickData, TestEmbeddable } from './test/data';
 
 const mockDataPoints = [
   {
@@ -99,7 +100,8 @@ describe('UrlDrilldown', () => {
         embeddable: mockEmbeddable,
       };
 
-      await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(true);
+      const result = urlDrilldown.isCompatible(config, context);
+      await expect(result).resolves.toBe(true);
     });
 
     test('not compatible if url is invalid', async () => {
@@ -166,6 +168,82 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.getHref(config, context)).rejects.toThrowError();
       await expect(urlDrilldown.execute(config, context)).rejects.toThrowError();
       expect(mockNavigateToUrl).not.toBeCalled();
+    });
+  });
+
+  describe('getRuntimeVariables()', () => {
+    test('builds runtime variables VALUE_CLICK_TRIGGER trigger', () => {
+      const embeddable = new TestEmbeddable(
+        {
+          id: 'the-id',
+          query: {
+            language: 'C++',
+            query: 'std::cout << 123;',
+          },
+          timeRange: {
+            from: 'FROM',
+            to: 'TO',
+          },
+          filters: [
+            {
+              meta: {
+                alias: 'asdf',
+                disabled: false,
+                negate: false,
+              },
+            },
+          ],
+          savedObjectId: 'SAVED_OBJECT_ID',
+        },
+        {
+          title: 'The Title',
+          indexPatterns: [
+            { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+            { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+          ],
+        }
+      );
+      const variables = urlDrilldown.getRuntimeVariables({ embeddable, data: rowClickData as any });
+
+      expect(variables).toMatchObject({
+        kibanaUrl: 'http://localhost:5601/',
+        context: {
+          panel: {
+            id: 'the-id',
+            title: 'The Title',
+            savedObjectId: 'SAVED_OBJECT_ID',
+            query: {
+              language: 'C++',
+              query: 'std::cout << 123;',
+            },
+            timeRange: {
+              from: 'FROM',
+              to: 'TO',
+            },
+            filters: [
+              {
+                meta: {
+                  alias: 'asdf',
+                  disabled: false,
+                  negate: false,
+                },
+              },
+            ],
+          },
+        },
+        event: {
+          rowIndex: 1,
+          values: ['IT', '2.25', 3, 0, 2],
+          keys: ['DestCountry', 'FlightTimeHour', '', 'DistanceMiles', 'OriginAirportID'],
+          columnNames: [
+            'Top values of DestCountry',
+            'Top values of FlightTimeHour',
+            'Count of records',
+            'Average of DistanceMiles',
+            'Unique count of OriginAirportID',
+          ],
+        },
+      });
     });
   });
 });
