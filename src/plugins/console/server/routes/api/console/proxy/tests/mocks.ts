@@ -17,15 +17,15 @@
  * under the License.
  */
 
-jest.mock('../../lib/proxy_request', () => ({
+jest.mock('../../../../../lib/proxy_request', () => ({
   proxyRequest: jest.fn(),
 }));
 
 import { duration } from 'moment';
-import { ProxyConfigCollection } from '../../lib';
-import { RouteDependencies, ProxyDependencies } from '../../routes';
-import { EsLegacyConfigService, SpecDefinitionsService } from '../../services';
-import { coreMock, httpServiceMock } from '../../../../../core/server/mocks';
+import { ProxyConfigCollection } from '../../../../../lib';
+import { RouteDependencies, ProxyDependencies } from '../../../../../routes';
+import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../../services';
+import { coreMock, httpServiceMock } from '../../../../../../../../core/server/mocks';
 
 const defaultProxyValue = Object.freeze({
   readLegacyESConfig: async () => ({

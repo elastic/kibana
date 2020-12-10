@@ -42,6 +42,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
           body: recordsToBulkBody(records),
+          requestTimeout: 120000,
         });
         return { ok: true };
       },
@@ -66,6 +67,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
           body: recordsToBulkBody(records.slice(0, 1)),
+          requestTimeout: 120000,
         });
         return { ok: true };
       },
@@ -73,6 +75,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
           body: recordsToBulkBody(records.slice(1)),
+          requestTimeout: 120000,
         });
         return { ok: true };
       },
@@ -100,6 +103,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
           body: recordsToBulkBody(records.slice(0, 1)),
+          requestTimeout: 120000,
         });
         await delay(delayMs);
         return { ok: true };
@@ -108,6 +112,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
           body: recordsToBulkBody(records.slice(1)),
+          requestTimeout: 120000,
         });
         expect(Date.now() - start).to.not.be.lessThan(delayMs);
         return { ok: true };
