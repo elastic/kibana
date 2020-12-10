@@ -86,12 +86,6 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['packages/kbn-ui-framework/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/no-onchange': 'off',
-      },
-    },
-    {
       files: ['src/plugins/eui_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -417,7 +411,6 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
@@ -440,11 +433,7 @@ module.exports = {
      * Files that ARE NOT allowed to use devDependencies
      */
     {
-      files: [
-        'packages/kbn-ui-framework/**/*.js',
-        'x-pack/**/*.js',
-        'packages/kbn-interpreter/**/*.js',
-      ],
+      files: ['x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
@@ -462,10 +451,6 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ui-framework/**/*.test.js',
-        'packages/kbn-ui-framework/doc_site/**/*.js',
-        'packages/kbn-ui-framework/generator-kui/**/*.js',
-        'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*.js',
         'packages/kbn-interpreter/tasks/**/*.js',
         'packages/kbn-interpreter/src/plugin/**/*.js',
@@ -1074,20 +1059,6 @@ module.exports = {
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * disable jsx-a11y for kbn-ui-framework
-     */
-    {
-      files: ['packages/kbn-ui-framework/**/*.js'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-        'jsx-a11y/anchor-has-content': 'off',
-        'jsx-a11y/tabindex-no-positive': 'off',
-        'jsx-a11y/label-has-associated-control': 'off',
-        'jsx-a11y/aria-role': 'off',
       },
     },
 
