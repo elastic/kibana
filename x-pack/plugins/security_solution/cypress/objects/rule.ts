@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -13,9 +15,14 @@ export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
 
-interface Mitre {
+interface MitreAttackTechnique {
+  name: string;
+  subtechniques: string[];
+}
+
+export interface Mitre {
   tactic: string;
-  techniques: string[];
+  techniques: MitreAttackTechnique[];
 }
 
 interface SeverityOverride {
@@ -93,14 +100,30 @@ export const indexPatterns = [
   'winlogbeat-*',
 ];
 
+const { tactic, technique, subtechnique } = mockThreatData;
+
 const mitre1: Mitre = {
-  tactic: 'Discovery (TA0007)',
-  techniques: ['Cloud Service Discovery (T1526)', 'File and Directory Discovery (T1083)'],
+  tactic: `${tactic.name} (${tactic.id})`,
+  techniques: [
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+    },
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [],
+    },
+  ],
 };
 
 const mitre2: Mitre = {
-  tactic: 'Execution (TA0002)',
-  techniques: ['CMSTP (T1191)'],
+  tactic: `${tactic.name} (${tactic.id})`,
+  techniques: [
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+    },
+  ],
 };
 
 const severityOverride1: SeverityOverride = {

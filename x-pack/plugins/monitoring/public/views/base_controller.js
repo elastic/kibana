@@ -168,7 +168,7 @@ export class MonitoringViewBaseController {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData.value; // update the view's data with the fetch result
-          $scope.alerts = this.alerts = alerts.value || {};
+          $scope.alerts = this.alerts = alerts && alerts.value ? alerts.value : {};
         });
       });
     };
@@ -239,12 +239,9 @@ export class MonitoringViewBaseController {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
-    const services = {
-      usageCollection: Legacy.shims.usageCollection,
-    };
     const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={Legacy.shims.kibanaServices}>
         <I18nContext>
           {!this._isDataInitialized ? (
             <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />

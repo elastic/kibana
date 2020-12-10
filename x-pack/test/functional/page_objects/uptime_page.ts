@@ -109,17 +109,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       return commonService.clickPageSizeSelectPopoverItem(size);
     }
 
-    public async checkPingListInteractions(
-      timestamps: string[],
-      location?: string,
-      status?: string
-    ): Promise<void> {
-      if (location) {
-        await monitor.setPingListLocation(location);
-      }
-      if (status) {
-        await monitor.setPingListStatus(status);
-      }
+    public async checkPingListInteractions(timestamps: string[]): Promise<void> {
       return monitor.checkForPingListTimestamps(timestamps);
     }
 

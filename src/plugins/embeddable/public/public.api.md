@@ -74,6 +74,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SavedObjectsClientContract as SavedObjectsClientContract_3 } from 'src/core/public';
+import { SavedObjectsFindOptions as SavedObjectsFindOptions_3 } from 'kibana/public';
 import { SavedObjectsFindResponse as SavedObjectsFindResponse_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
@@ -311,6 +312,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
+    getUpdated$(): Readonly<Rx.Observable<void>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)

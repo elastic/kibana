@@ -79,6 +79,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       fill={isFavorite}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
     >
       {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
     </EuiButton>

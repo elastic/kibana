@@ -51,7 +51,7 @@ export interface PainlessCompletionResult {
   suggestions: PainlessCompletionItem[];
 }
 
-export interface Field {
+export interface PainlessAutocompleteField {
   name: string;
   type: string;
 }
