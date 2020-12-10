@@ -92,8 +92,10 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         };
       }
 
+      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
       const auditLoggingEnabled =
-        (allowAuditLogging || allowLegacyAuditLogging) && config.audit.enabled;
+        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
+
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -113,7 +115,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       );
 
       return {
-        auditLoggingEnabled,
+        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,
