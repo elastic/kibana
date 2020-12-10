@@ -76,6 +76,7 @@ export interface LensAppProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
+  redirectToDashboard?: (input: LensEmbeddableInput, dashboardId: string) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensEmbeddableInput;

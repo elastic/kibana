@@ -9,6 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 import { ES_SPATIAL_RELATIONS } from './constants';
 
+export const UPTO = i18n.translate('xpack.maps.upto', {
+  defaultMessage: 'up to',
+});
+
+export const GREAT_THAN = i18n.translate('xpack.maps.greatThan', {
+  defaultMessage: 'greater than',
+});
+
 export function getAppTitle() {
   return i18n.translate('xpack.maps.appTitle', {
     defaultMessage: 'Maps',

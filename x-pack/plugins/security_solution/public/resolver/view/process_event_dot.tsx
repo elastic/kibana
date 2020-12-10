@@ -9,12 +9,13 @@ import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
-import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import * as selectors from '../store/selectors';
 import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
@@ -65,9 +66,50 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   z-index: 45;
 `;
 
-const StyledOuterGroup = styled.g`
+interface StyledEuiButtonContent {
+  readonly isShowingIcon: boolean;
+}
+
+const StyledEuiButtonContent = styled.span<StyledEuiButtonContent>`
+  padding: ${(props) => (props.isShowingIcon ? '0px' : '0 12px')};
+`;
+
+const StyledOuterGroup = styled.g<{ isNodeLoading: boolean }>`
   fill: none;
   pointer-events: visiblePainted;
+  // The below will apply the loading css to the <use> element that references the cube
+  // when the nodeData is loading for the current node
+  ${(props) =>
+    props.isNodeLoading &&
+    `
+    & .cube {
+    animation-name: pulse;
+    /**
+     * his is a multiple of .6 so it can match up with the EUI button's loading spinner
+     * which is (0.6s). Using .6 here makes it a bit too fast.
+     */
+    animation-duration: 1.8s;
+    animation-delay: 0;
+    animation-direction: normal;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  /**
+   * Animation loading state of the cube.
+   */
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  `}
 `;
 
 /**
@@ -77,9 +119,9 @@ const UnstyledProcessEventDot = React.memo(
   ({
     className,
     position,
-    event,
+    node,
+    nodeID,
     projectionMatrix,
-    isProcessTerminated,
     timeAtRender,
   }: {
     /**
@@ -87,21 +129,21 @@ const UnstyledProcessEventDot = React.memo(
      */
     className?: string;
     /**
-     * The positon of the process node, in 'world' coordinates.
+     * The positon of the graph node, in 'world' coordinates.
      */
     position: Vector2;
     /**
-     * An event which contains details about the process node.
+     * An event which contains details about the graph node.
      */
-    event: SafeResolverEvent;
+    node: ResolverNode;
+    /**
+     * The unique identifier for the node based on a datasource id
+     */
+    nodeID: string;
     /**
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
     projectionMatrix: Matrix3;
-    /**
-     * Whether or not to show the process as terminated.
-     */
-    isProcessTerminated: boolean;
 
     /**
      * The time (unix epoch) at render.
@@ -125,14 +167,7 @@ const UnstyledProcessEventDot = React.memo(
     const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
     const originID = useSelector(selectors.originID);
-    const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
-    if (nodeID === undefined) {
-      // NB: this component should be taking nodeID as a `string` instead of handling this logic here
-      throw new Error('Tried to render a node with no ID');
-    }
-    const relatedEventStats = useSelector((state: ResolverState) =>
-      selectors.relatedEventsStats(state)(nodeID)
-    );
+    const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -218,6 +253,11 @@ const UnstyledProcessEventDot = React.memo(
         | null;
     } = React.createRef();
     const colorMap = useColors();
+
+    const nodeState = useSelector((state: ResolverState) =>
+      selectors.nodeDataStatus(state)(nodeID)
+    );
+    const isNodeLoading = nodeState === 'loading';
     const {
       backingFill,
       cubeSymbol,
@@ -226,7 +266,7 @@ const UnstyledProcessEventDot = React.memo(
       labelButtonFill,
       strokeColor,
     } = useCubeAssets(
-      isProcessTerminated,
+      nodeState,
       /**
        * There is no definition for 'trigger process' yet. return false.
        */ false
@@ -257,18 +297,28 @@ const UnstyledProcessEventDot = React.memo(
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
-        dispatch({
-          type: 'userSelectedResolverNode',
-          payload: nodeID,
-        });
-        processDetailNavProps.onClick(clickEvent);
+
+        if (nodeState === 'error') {
+          dispatch({
+            type: 'userReloadedResolverNode',
+            payload: nodeID,
+          });
+        } else {
+          dispatch({
+            type: 'userSelectedResolverNode',
+            payload: nodeID,
+          });
+          processDetailNavProps.onClick(clickEvent);
+        }
       },
-      [animationTarget, dispatch, nodeID, processDetailNavProps]
+      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState]
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
-      selectors.relatedEventTotalForProcess(state)(event)
+      selectors.statsTotalForNode(state)(node)
     );
+
+    const nodeName = nodeModel.nodeName(node);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -315,7 +365,7 @@ const UnstyledProcessEventDot = React.memo(
             zIndex: 30,
           }}
         >
-          <StyledOuterGroup>
+          <StyledOuterGroup isNodeLoading={isNodeLoading}>
             <use
               xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -397,23 +447,34 @@ const UnstyledProcessEventDot = React.memo(
             }}
           >
             <EuiButton
+              iconSide={isNodeLoading ? 'right' : 'left'}
+              isLoading={isNodeLoading}
               color={labelButtonFill}
               fill={isLabelFilled}
+              iconType={nodeState === 'error' ? 'refresh' : ''}
               size="s"
               style={{
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={eventModel.processNameSafeVersion(event)}
+              title={nodeModel.nodeName(node)}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
-              <span className="euiButton__content">
+              <StyledEuiButtonContent
+                isShowingIcon={nodeState === 'loading' || nodeState === 'error'}
+              >
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.processNameSafeVersion(event)}
+                  {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
+                    defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
+                    values: {
+                      nodeState,
+                      nodeName,
+                    },
+                  })}
                 </span>
-              </span>
+              </StyledEuiButtonContent>
             </EuiButton>
           </div>
           <EuiFlexGroup
@@ -431,7 +492,7 @@ const UnstyledProcessEventDot = React.memo(
               {grandTotal !== null && grandTotal > 0 && (
                 <NodeSubMenu
                   buttonFill={colorMap.resolverBackground}
-                  relatedEventStats={relatedEventStats}
+                  nodeStats={nodeStats}
                   nodeID={nodeID}
                 />
               )}

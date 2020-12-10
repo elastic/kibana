@@ -20,6 +20,7 @@ import { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../..
 import { packageToPackagePolicyInputs } from '../../../services';
 import { Loading } from '../../../components';
 import { PackagePolicyValidationResults } from './services';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
@@ -34,8 +35,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   // Update package policy's package and agent policy info
   useEffect(() => {
     const pkg = packagePolicy.package;
-    const currentPkgKey = pkg ? `${pkg.name}-${pkg.version}` : '';
-    const pkgKey = `${packageInfo.name}-${packageInfo.version}`;
+    const currentPkgKey = pkg ? pkgKeyFromPackageInfo(pkg) : '';
+    const pkgKey = pkgKeyFromPackageInfo(packageInfo);
 
     // If package has changed, create shell package policy with input&stream values based on package info
     if (currentPkgKey !== pkgKey) {

@@ -19,8 +19,10 @@
 
 import './visualize_listing.scss';
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 
@@ -150,35 +152,65 @@ export const VisualizeListing = () => {
       : [];
   }, [savedObjectsTagging]);
 
+  const calloutMessage = (
+    <>
+      <FormattedMessage
+        id="visualize.visualizeListingDashboardFlowDescription"
+        defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
+        values={{
+          dashboardApp: (
+            <EuiLink
+              className="visListingCallout__link"
+              onClick={(event: MouseEvent) => {
+                event.preventDefault();
+                application.navigateToUrl(application.getUrlForApp('dashboards'));
+              }}
+            >
+              <FormattedMessage
+                id="visualize.visualizeListingDashboardAppName"
+                defaultMessage="Dashboard application"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </>
+  );
+
   return (
-    <TableListView
-      headingId="visualizeListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      createItem={createNewVis}
-      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      findItems={fetchItems}
-      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-      editItem={visualizeCapabilities.save ? editItem : undefined}
-      tableColumns={tableColumns}
-      listingLimit={listingLimit}
-      initialPageSize={savedObjectsPublic.settings.getPerPage()}
-      initialFilter={''}
-      rowHeader="title"
-      noItemsFragment={noItemsFragment}
-      entityName={i18n.translate('visualize.listing.table.entityName', {
-        defaultMessage: 'visualization',
-      })}
-      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-        defaultMessage: 'visualizations',
-      })}
-      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      toastNotifications={toastNotifications}
-      searchFilters={searchFilters}
-    />
+    <>
+      <div className="visListingCallout">
+        <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+      </div>
+      <TableListView
+        headingId="visualizeListingHeading"
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
+        createItem={createNewVis}
+        tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        findItems={fetchItems}
+        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+        editItem={visualizeCapabilities.save ? editItem : undefined}
+        tableColumns={tableColumns}
+        listingLimit={listingLimit}
+        initialPageSize={savedObjectsPublic.settings.getPerPage()}
+        initialFilter={''}
+        rowHeader="title"
+        noItemsFragment={noItemsFragment}
+        entityName={i18n.translate('visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+        searchFilters={searchFilters}
+      />
+    </>
   );
 };
