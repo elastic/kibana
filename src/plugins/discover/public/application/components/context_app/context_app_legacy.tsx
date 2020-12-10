@@ -18,7 +18,8 @@
  */
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
@@ -35,6 +36,7 @@ export interface ContextAppProps {
   minimumVisibleRows: number;
   sorting: string[];
   status: string;
+  reason: string;
   defaultStepSize: number;
   predecessorCount: number;
   successorCount: number;
@@ -56,6 +58,7 @@ function isLoading(status: string) {
 export function ContextAppLegacy(renderProps: ContextAppProps) {
   const status = renderProps.status;
   const isLoaded = status === LOADING_STATUS.LOADED;
+  const isFailed = status === LOADING_STATUS.FAILED;
 
   const actionBarProps = (type: string) => {
     const {
@@ -96,14 +99,9 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const loadingFeedback = () => {
     if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
       return (
-        <EuiPanel paddingSize="l" data-test-subj="contextApp_loadingIndicator">
-          <EuiText textAlign="center">
-            <FormattedMessage
-              id="discover.context.loadingDescription"
-              defaultMessage="Loading..."
-            />
-          </EuiText>
-        </EuiPanel>
+        <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
+          <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
+        </EuiText>
       );
     }
     return null;
@@ -111,18 +109,24 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
 
   return (
     <I18nProvider>
-      <React.Fragment>
-        <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-        {loadingFeedback()}
-        {isLoaded ? (
-          <EuiPanel paddingSize="none">
-            <div className="discover-table">
-              <DocTableLegacy {...docTableProps()} />
-            </div>
-          </EuiPanel>
-        ) : null}
-        <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
-      </React.Fragment>
+      {isFailed ? (
+        <ContextErrorMessage status={status} reason={renderProps.reason} />
+      ) : (
+        <EuiPage>
+          <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+            <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
+            {loadingFeedback()}
+            <EuiHorizontalRule margin="xs" />
+            {isLoaded ? (
+              <div className="discover-table">
+                <DocTableLegacy {...docTableProps()} />
+              </div>
+            ) : null}
+            <EuiHorizontalRule margin="xs" />
+            <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+          </EuiPageContent>
+        </EuiPage>
+      )}
     </I18nProvider>
   );
 }

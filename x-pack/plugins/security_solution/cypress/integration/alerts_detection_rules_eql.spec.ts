@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { eqlRule, eqlSequenceRule, indexPatterns } from '../objects/rule';
 
 import {
@@ -32,6 +33,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -78,11 +80,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = eqlRule.referenceUrls.join('');
 const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
 const expectedTags = eqlRule.tags.join('');
-const expectedMitre = eqlRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(eqlRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
@@ -136,9 +134,13 @@ describe('Detection rules, EQL', () => {
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', eqlRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', eqlRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });

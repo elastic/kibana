@@ -30,8 +30,6 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import { AlertsContextProvider } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -40,7 +38,12 @@ import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
-import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
+import {
+  loadAlerts,
+  loadAlertAggregations,
+  loadAlertTypes,
+  deleteAlerts,
+} from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -53,6 +56,7 @@ import {
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ENTER_KEY = 13;
 
@@ -71,16 +75,12 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
-    uiSettings,
-    docLinks,
-    charts,
-    dataPlugin,
     kibanaFeatures,
-  } = useAppDependencies();
+  } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
@@ -138,7 +138,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         setAlertTypesState({ isLoading: false, data: index, isInitialized: true });
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
             { defaultMessage: 'Unable to load alert types' }
@@ -155,7 +155,7 @@ export const AlertsList: React.FunctionComponent = () => {
         const result = await loadActionTypes({ http });
         setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -178,7 +178,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypesFilter,
           alertStatusesFilter,
         });
-        await loadAlertsTotalStatuses();
+        await loadAlertAggs();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -189,7 +189,7 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage({ ...page, index: 0 });
         }
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
             {
@@ -202,23 +202,20 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function loadAlertsTotalStatuses() {
-    let alertsStatuses = {};
+  async function loadAlertAggs() {
     try {
-      AlertExecutionStatusValues.forEach(async (status: string) => {
-        const alertsTotalResponse = await loadAlerts({
-          http,
-          page: { index: 0, size: 0 },
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          alertStatusesFilter: [status],
-        });
-        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
-        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
+      const alertsAggs = await loadAlertAggregations({
+        http,
+        searchText,
+        typesFilter,
+        actionTypesFilter,
+        alertStatusesFilter,
       });
+      if (alertsAggs?.alertExecutionStatus) {
+        setAlertsStatusesTotal(alertsAggs.alertExecutionStatus);
+      }
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
           {
@@ -617,7 +614,7 @@ export const AlertsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
-        onDeleted={async (deleted: string[]) => {
+        onDeleted={async () => {
           setAlertsToDelete([]);
           setSelectedIds([]);
           await loadAlertsData();
@@ -656,28 +653,14 @@ export const AlertsList: React.FunctionComponent = () => {
       ) : (
         noPermissionPrompt
       )}
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: loadAlertsData,
-          http,
-          actionTypeRegistry,
-          alertTypeRegistry,
-          toastNotifications,
-          uiSettings,
-          docLinks,
-          charts,
-          dataFieldsFormats: dataPlugin.fieldFormats,
-          capabilities,
-          dataUi: dataPlugin.ui,
-          dataIndexPatterns: dataPlugin.indexPatterns,
-        }}
-      >
-        <AlertAdd
-          consumer={ALERTS_FEATURE_ID}
-          addFlyoutVisible={alertFlyoutVisible}
-          setAddFlyoutVisibility={setAlertFlyoutVisibility}
-        />
-      </AlertsContextProvider>
+      <AlertAdd
+        consumer={ALERTS_FEATURE_ID}
+        addFlyoutVisible={alertFlyoutVisible}
+        setAddFlyoutVisibility={setAlertFlyoutVisibility}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
+        reloadAlerts={loadAlertsData}
+      />
     </section>
   );
 };

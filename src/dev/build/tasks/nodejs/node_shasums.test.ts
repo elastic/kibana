@@ -70,11 +70,12 @@ jest.mock('axios', () => ({
   },
 }));
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { getNodeShasums } from './node_shasums';
 
 describe('src/dev/build/tasks/nodejs/node_shasums', () => {
   it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums('8.9.4');
+    const shasums = await getNodeShasums(new ToolingLog(), '8.9.4');
     expect(shasums).toEqual(
       expect.objectContaining({
         'node-v8.9.4.tar.gz': '729b44b32b2f82ecd5befac4f7518de0c4e3add34e8fe878f745740a66cbbc01',

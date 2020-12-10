@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, ElasticsearchClient } from 'src/core/server';
 
 import { coreMock } from '../../../../../core/server/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/server/mocks';
@@ -63,7 +63,8 @@ describe('AggsService - server', () => {
       expect(start).toHaveProperty('asScopedToClient');
 
       const contract = await start.asScopedToClient(
-        savedObjects.getScopedClient({} as KibanaRequest)
+        savedObjects.getScopedClient({} as KibanaRequest),
+        {} as ElasticsearchClient
       );
       expect(contract).toHaveProperty('calculateAutoTimeExpression');
       expect(contract).toHaveProperty('createAggConfigs');
@@ -74,7 +75,10 @@ describe('AggsService - server', () => {
       service.setup(setupDeps);
       const start = await service
         .start(startDeps)
-        .asScopedToClient(savedObjects.getScopedClient({} as KibanaRequest));
+        .asScopedToClient(
+          savedObjects.getScopedClient({} as KibanaRequest),
+          {} as ElasticsearchClient
+        );
 
       expect(start.types.get('terms').name).toBe('terms');
     });
@@ -83,7 +87,10 @@ describe('AggsService - server', () => {
       service.setup(setupDeps);
       const start = await service
         .start(startDeps)
-        .asScopedToClient(savedObjects.getScopedClient({} as KibanaRequest));
+        .asScopedToClient(
+          savedObjects.getScopedClient({} as KibanaRequest),
+          {} as ElasticsearchClient
+        );
 
       const aggTypes = getAggTypes();
       expect(start.types.getAll().buckets.length).toBe(aggTypes.buckets.length);
@@ -103,7 +110,10 @@ describe('AggsService - server', () => {
 
       const start = await service
         .start(startDeps)
-        .asScopedToClient(savedObjects.getScopedClient({} as KibanaRequest));
+        .asScopedToClient(
+          savedObjects.getScopedClient({} as KibanaRequest),
+          {} as ElasticsearchClient
+        );
 
       const aggTypes = getAggTypes();
       expect(start.types.getAll().buckets.length).toBe(aggTypes.buckets.length + 1);

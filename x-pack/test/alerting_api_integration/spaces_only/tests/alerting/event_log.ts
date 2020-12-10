@@ -72,41 +72,38 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: [
-            'execute',
-            'execute-action',
-            'new-instance',
-            'active-instance',
-            'resolved-instance',
-          ],
+          actions: new Map([
+            // make sure the counts of the # of events per type are as expected
+            ['execute', { gte: 4 }],
+            ['execute-action', { equal: 2 }],
+            ['new-instance', { equal: 1 }],
+            ['active-instance', { gte: 1 }],
+            ['recovered-instance', { equal: 1 }],
+          ]),
         });
       });
 
-      // make sure the counts of the # of events per type are as expected
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const resolvedInstanceEvents = getEventsByAction(events, 'resolved-instance');
-
-      expect(executeEvents.length >= 4).to.be(true);
-      expect(executeActionEvents.length).to.be(2);
-      expect(newInstanceEvents.length).to.be(1);
-      expect(resolvedInstanceEvents.length).to.be(1);
+      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
-      const resolvedInstanceTimes = getTimestamps(resolvedInstanceEvents);
+      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
 
       expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
-      expect(resolvedInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
+      let executeCount = 0;
+      const executeStatuses = ['ok', 'active', 'active'];
       for (const event of events) {
         switch (event?.event?.action) {
           case 'execute':
@@ -115,6 +112,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+              status: executeStatuses[executeCount++],
             });
             break;
           case 'execute-action':
@@ -125,16 +123,18 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 { type: 'action', id: createdAction.id },
               ],
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
+              instanceId: 'instance',
+              actionGroupId: 'default',
             });
             break;
           case 'new-instance':
             validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
-          case 'resolved-instance':
-            validateInstanceEvent(event, `resolved instance: 'instance'`);
+          case 'recovered-instance':
+            validateInstanceEvent(event, `instance 'instance' has recovered`);
             break;
           case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance'`);
+            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
             break;
           // this will get triggered as we add new event actions
           default:
@@ -147,6 +147,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           spaceId: Spaces.space1.id,
           savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
+          instanceId: 'instance',
+          actionGroupId: 'default',
         });
       }
     });
@@ -174,7 +176,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute'],
+          actions: new Map([['execute', { gte: 1 }]]),
         });
       });
 
@@ -187,60 +189,83 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         outcome: 'failure',
         message: `alert execution failure: test.throw:${alertId}: 'abc'`,
         errorMessage: 'this alert is intended to fail',
+        status: 'error',
+        reason: 'execute',
       });
     });
   });
+}
 
-  interface SavedObject {
-    type: string;
-    id: string;
-    rel?: string;
+interface SavedObject {
+  type: string;
+  id: string;
+  rel?: string;
+}
+
+interface ValidateEventLogParams {
+  spaceId: string;
+  savedObjects: SavedObject[];
+  outcome?: string;
+  message: string;
+  errorMessage?: string;
+  status?: string;
+  actionGroupId?: string;
+  instanceId?: string;
+  reason?: string;
+}
+
+export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
+  const { spaceId, savedObjects, outcome, message, errorMessage } = params;
+  const { status, actionGroupId, instanceId, reason } = params;
+
+  if (status) {
+    expect(event?.kibana?.alerting?.status).to.be(status);
   }
 
-  interface ValidateEventLogParams {
-    spaceId: string;
-    savedObjects: SavedObject[];
-    outcome?: string;
-    message: string;
-    errorMessage?: string;
+  if (actionGroupId) {
+    expect(event?.kibana?.alerting?.action_group_id).to.be(actionGroupId);
   }
 
-  function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-    const { spaceId, savedObjects, outcome, message, errorMessage } = params;
+  if (instanceId) {
+    expect(event?.kibana?.alerting?.instance_id).to.be(instanceId);
+  }
 
-    const duration = event?.event?.duration;
-    const eventStart = Date.parse(event?.event?.start || 'undefined');
-    const eventEnd = Date.parse(event?.event?.end || 'undefined');
-    const dateNow = Date.now();
+  if (reason) {
+    expect(event?.event?.reason).to.be(reason);
+  }
 
-    if (duration !== undefined) {
-      expect(typeof duration).to.be('number');
-      expect(eventStart).to.be.ok();
-      expect(eventEnd).to.be.ok();
+  const duration = event?.event?.duration;
+  const eventStart = Date.parse(event?.event?.start || 'undefined');
+  const eventEnd = Date.parse(event?.event?.end || 'undefined');
+  const dateNow = Date.now();
 
-      const durationDiff = Math.abs(
-        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-      );
+  if (duration !== undefined) {
+    expect(typeof duration).to.be('number');
+    expect(eventStart).to.be.ok();
+    expect(eventEnd).to.be.ok();
 
-      // account for rounding errors
-      expect(durationDiff < 1).to.equal(true);
-      expect(eventStart <= eventEnd).to.equal(true);
-      expect(eventEnd <= dateNow).to.equal(true);
-    }
+    const durationDiff = Math.abs(
+      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    );
 
-    expect(event?.event?.outcome).to.equal(outcome);
+    // account for rounding errors
+    expect(durationDiff < 1).to.equal(true);
+    expect(eventStart <= eventEnd).to.equal(true);
+    expect(eventEnd <= dateNow).to.equal(true);
+  }
 
-    for (const savedObject of savedObjects) {
-      expect(
-        isSavedObjectInEvent(event, spaceId, savedObject.type, savedObject.id, savedObject.rel)
-      ).to.be(true);
-    }
+  expect(event?.event?.outcome).to.equal(outcome);
 
-    expect(event?.message).to.eql(message);
+  for (const savedObject of savedObjects) {
+    expect(
+      isSavedObjectInEvent(event, spaceId, savedObject.type, savedObject.id, savedObject.rel)
+    ).to.be(true);
+  }
 
-    if (errorMessage) {
-      expect(event?.error?.message).to.eql(errorMessage);
-    }
+  expect(event?.message).to.eql(message);
+
+  if (errorMessage) {
+    expect(event?.error?.message).to.eql(errorMessage);
   }
 }
 

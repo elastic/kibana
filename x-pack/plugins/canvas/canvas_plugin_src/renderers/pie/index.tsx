@@ -9,7 +9,7 @@ import 'jquery';
 
 import { debounce } from 'lodash';
 import { RendererStrings } from '../../../i18n';
-import { Pie } from '../../functions/common/pie';
+import { Pie } from '../../../public/functions/pie';
 import { RendererFactory } from '../../../types';
 
 const { pie: strings } = RendererStrings;

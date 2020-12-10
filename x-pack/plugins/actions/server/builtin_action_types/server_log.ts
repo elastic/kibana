@@ -38,10 +38,11 @@ const ParamsSchema = schema.object({
   ),
 });
 
+export const SERVER_LOG_ACTION_TYPE_ID = '.server-log';
 // action type definition
 export function getActionType({ logger }: { logger: Logger }): ServerLogActionType {
   return {
-    id: '.server-log',
+    id: SERVER_LOG_ACTION_TYPE_ID,
     minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',

@@ -13,19 +13,23 @@ import { getMemoryChartData } from '../shared/memory';
 import { getGcRateChart } from './gc/get_gc_rate_chart';
 import { getGcTimeChart } from './gc/get_gc_time_chart';
 
-export async function getJavaMetricsCharts(
-  setup: Setup & SetupTimeRange,
-  serviceName: string,
-  serviceNodeName?: string
-) {
+export async function getJavaMetricsCharts({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   const charts = await Promise.all([
-    getCPUChartData(setup, serviceName, serviceNodeName),
-    getMemoryChartData(setup, serviceName, serviceNodeName),
-    getHeapMemoryChart(setup, serviceName, serviceNodeName),
-    getNonHeapMemoryChart(setup, serviceName, serviceNodeName),
-    getThreadCountChart(setup, serviceName, serviceNodeName),
-    getGcRateChart(setup, serviceName, serviceNodeName),
-    getGcTimeChart(setup, serviceName, serviceNodeName),
+    getCPUChartData({ setup, serviceName, serviceNodeName }),
+    getMemoryChartData({ setup, serviceName, serviceNodeName }),
+    getHeapMemoryChart({ setup, serviceName, serviceNodeName }),
+    getNonHeapMemoryChart({ setup, serviceName, serviceNodeName }),
+    getThreadCountChart({ setup, serviceName, serviceNodeName }),
+    getGcRateChart({ setup, serviceName, serviceNodeName }),
+    getGcTimeChart({ setup, serviceName, serviceNodeName }),
   ]);
 
   return { charts };

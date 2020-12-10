@@ -680,16 +680,6 @@ describe('AggConfig', () => {
       const json = aggConfig.toExpressionAst()?.arguments.json;
       expect(json).toEqual([JSON.stringify(configStates.params.json)]);
     });
-
-    it(`returns undefined if an expressionName doesn't exist on the agg type`, () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
-      const configStates = {
-        type: 'unknown type',
-        params: {},
-      };
-      const aggConfig = ac.createAggConfig(configStates);
-      expect(aggConfig.toExpressionAst()).toBe(undefined);
-    });
   });
 
   describe('#makeLabel', () => {

@@ -245,6 +245,9 @@ describe('policy details: ', () => {
                       },
                     },
                     logging: { file: 'info' },
+                    antivirus_registration: {
+                      enabled: false,
+                    },
                   },
                   mac: {
                     events: { process: true, file: true, network: true },

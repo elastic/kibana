@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ExecutedStep } from '../executed_step';
 import { Ping } from '../../../../../common/runtime_types';

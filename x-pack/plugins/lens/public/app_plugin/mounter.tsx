@@ -42,7 +42,7 @@ export async function mountApp(
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data, navigation, embeddable } = startDependencies;
+  const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
@@ -54,6 +54,7 @@ export async function mountApp(
     data,
     storage,
     navigation,
+    savedObjectsTagging,
     attributeService: await attributeService(),
     http: coreStart.http,
     chrome: coreStart.chrome,
@@ -106,6 +107,23 @@ export async function mountApp(
     }
   };
 
+  const redirectToDashboard = (embeddableInput: LensEmbeddableInput, dashboardId: string) => {
+    if (!lensServices.dashboardFeatureFlag.allowByValueEmbeddables) {
+      throw new Error('redirectToDashboard called with by-value embeddables disabled');
+    }
+
+    const state = {
+      input: embeddableInput,
+      type: LENS_EMBEDDABLE_TYPE,
+    };
+
+    const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      state,
+      path,
+    });
+  };
+
   const redirectToOrigin = (props?: RedirectToOriginProps) => {
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
@@ -134,6 +152,7 @@ export async function mountApp(
         initialInput={getInitialInput(routeProps)}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
         redirectToOrigin={redirectToOrigin}
+        redirectToDashboard={redirectToDashboard}
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
@@ -150,6 +169,11 @@ export async function mountApp(
     trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = params.history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 
   params.element.classList.add('lnsAppWrapper');
   render(
@@ -170,5 +194,6 @@ export async function mountApp(
   return () => {
     instance.unmount();
     unmountComponentAtNode(params.element);
+    unlistenParentHistory();
   };
 }

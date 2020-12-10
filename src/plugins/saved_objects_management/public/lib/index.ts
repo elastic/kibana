@@ -45,3 +45,4 @@ export { findObjects, findObject } from './find_objects';
 export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
 export { createFieldList } from './create_field_list';
 export { getAllowedTypes } from './get_allowed_types';
+export { getTagFindReferences } from './get_tag_references';

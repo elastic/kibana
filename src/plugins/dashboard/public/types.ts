@@ -19,8 +19,11 @@
 
 import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-import { SavedDashboardPanel730ToLatest } from '../common';
+
 import { ViewMode } from './embeddable_plugin';
+
+import { SavedDashboardPanel } from '../common/types';
+export { SavedDashboardPanel };
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -71,16 +74,12 @@ export interface Field {
 
 export type NavAction = (anchorElement?: any) => void;
 
-/**
- * This should always represent the latest dashboard panel shape, after all possible migrations.
- */
-export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
-
 export interface DashboardAppState {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
   title: string;
   description: string;
+  tags: string[];
   timeRestore: boolean;
   options: {
     hidePanelTitles: boolean;

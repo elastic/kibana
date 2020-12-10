@@ -35,8 +35,8 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
   const logLine$ = new Rx.Subject<string>();
 
   Rx.merge(
-    observeLines(logsProc.stdout).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))),
-    observeLines(logsProc.stderr).pipe(tap((line) => log.error(`[docker:${name}] ${line}`)))
+    observeLines(logsProc.stdout!).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    observeLines(logsProc.stderr!).pipe(tap((line) => log.error(`[docker:${name}] ${line}`))) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
   ).subscribe(logLine$);
 
   return logLine$.asObservable();

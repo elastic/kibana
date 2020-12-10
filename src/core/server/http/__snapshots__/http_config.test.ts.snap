@@ -24,6 +24,14 @@ Object {
 }
 `;
 
+exports[`basePath throws if appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`basePath throws if not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
+
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
@@ -47,6 +55,9 @@ Object {
   "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [
+      "TLS_AES_256_GCM_SHA384",
+      "TLS_CHACHA20_POLY1305_SHA256",
+      "TLS_AES_128_GCM_SHA256",
       "ECDHE-RSA-AES128-GCM-SHA256",
       "ECDHE-ECDSA-AES128-GCM-SHA256",
       "ECDHE-RSA-AES256-GCM-SHA384",
@@ -75,23 +86,16 @@ Object {
     "supportedProtocols": Array [
       "TLSv1.1",
       "TLSv1.2",
+      "TLSv1.3",
     ],
     "truststore": Object {},
   },
   "xsrf": Object {
+    "allowlist": Array [],
     "disableProtection": false,
-    "whitelist": Array [],
   },
 }
 `;
-
-exports[`throws if basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
 
 exports[`throws if invalid hostname 1`] = `"[host]: value must be a valid hostname (see RFC 1123)."`;
 

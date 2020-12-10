@@ -90,6 +90,8 @@ async function fetchKibanaIndices(client: Client) {
   return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
+const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
+
 export async function cleanKibanaIndices({
   client,
   stats,
@@ -132,6 +134,7 @@ export async function cleanKibanaIndices({
         resp.deleted,
         resp.total
       );
+      await delay(200);
       continue;
     }
 

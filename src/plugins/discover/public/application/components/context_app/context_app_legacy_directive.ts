@@ -27,6 +27,7 @@ export function createContextAppLegacy(reactDirective: any) {
     ['columns', { watchDepth: 'collection' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],
     ['status', { watchDepth: 'reference' }],
+    ['reason', { watchDepth: 'reference' }],
     ['defaultStepSize', { watchDepth: 'reference' }],
     ['predecessorCount', { watchDepth: 'reference' }],
     ['predecessorAvailable', { watchDepth: 'reference' }],

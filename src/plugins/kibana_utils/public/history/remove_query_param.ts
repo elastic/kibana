@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { parse, stringify } from 'query-string';
+import { stringify } from 'query-string';
 import { History, Location } from 'history';
 import { url } from '../../common';
+import { getQueryParams } from './get_query_params';
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {
   const oldLocation = history.location;
-  const search = (oldLocation.search || '').replace(/^\?/, '');
-  const query = parse(search, { sort: false });
+  const query = getQueryParams(oldLocation);
 
   delete query[param];
 

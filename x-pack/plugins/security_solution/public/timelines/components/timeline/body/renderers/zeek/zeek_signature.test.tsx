@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import '../../../../../../common/mock/match_media';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
@@ -89,7 +90,7 @@ describe('ZeekSignature', () => {
 
     test('should render value', () => {
       const wrapper = mount(<Link value={'abc'} />);
-      expect(wrapper.text()).toEqual('abc');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('abc');
     });
 
     test('should render value and link', () => {

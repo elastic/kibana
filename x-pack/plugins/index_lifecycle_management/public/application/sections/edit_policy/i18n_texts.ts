@@ -8,6 +8,23 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    searchableSnapshotInHotPhase: {
+      searchableSnapshotDisallowed: {
+        calloutTitle: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle',
+          {
+            defaultMessage: 'Searchable snapshot disabled',
+          }
+        ),
+        calloutBody: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody',
+          {
+            defaultMessage:
+              'To use searchable snapshot in this phase you must disable searchable snapshot in the hot phase.',
+          }
+        ),
+      },
+    },
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
     }),
@@ -44,6 +61,12 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.nodeAllocationFieldLabel',
       {
         defaultMessage: 'Select a node attribute',
+      }
+    ),
+    searchableSnapshotsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot repository',
       }
     ),
     errors: {
@@ -96,6 +119,48 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.errors.nonNegativeNumberRequiredError',
         {
           defaultMessage: 'Only non-negative numbers are allowed.',
+        }
+      ),
+      policyNameContainsInvalidChars: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.policyNameContainsInvalidCharsError',
+        {
+          defaultMessage: 'A policy name cannot contain spaces or commas.',
+        }
+      ),
+      policyNameAlreadyUsedErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError',
+        {
+          defaultMessage: 'That policy name is already used.',
+        }
+      ),
+      policyNameMustBeDifferentErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError',
+        {
+          defaultMessage: 'The policy name must be different.',
+        }
+      ),
+      policyNameRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError',
+        {
+          defaultMessage: 'A policy name is required.',
+        }
+      ),
+      policyNameStartsWithUnderscoreErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError',
+        {
+          defaultMessage: 'A policy name cannot start with an underscore.',
+        }
+      ),
+      policyNameTooLongErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError',
+        {
+          defaultMessage: 'A policy name cannot be longer than 255 bytes.',
+        }
+      ),
+      searchableSnapshotRepoRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError',
+        {
+          defaultMessage: 'A snapshot repository name is required.',
         }
       ),
     },

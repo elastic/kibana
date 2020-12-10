@@ -38,7 +38,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedPipelineName = attemptToURIDecode(name);
+  const decodedPipelineName = attemptToURIDecode(name)!;
 
   const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 

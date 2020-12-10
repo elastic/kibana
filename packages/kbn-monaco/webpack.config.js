@@ -55,4 +55,8 @@ const createLangWorkerConfig = (lang) => {
   };
 };
 
-module.exports = [createLangWorkerConfig('xjson'), createLangWorkerConfig('default')];
+module.exports = [
+  createLangWorkerConfig('xjson'),
+  createLangWorkerConfig('painless'),
+  createLangWorkerConfig('default'),
+];

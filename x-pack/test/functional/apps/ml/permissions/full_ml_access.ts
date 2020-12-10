@@ -47,9 +47,32 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
+          it('should display tabs in the ML app correctly', async () => {
+            await ml.testExecution.logTestStep('should load the ML app');
+            await ml.navigation.navigateToMl();
+
+            await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
+            await ml.navigation.assertOverviewTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Anomaly Detection" tab'
+            );
+            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Frame Analytics" tab'
+            );
+            await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
+            await ml.navigation.assertSettingsTabEnabled(true);
+          });
+
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML overview page');
-            await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
             await ml.testExecution.logTestStep('should display enabled AD create job button');
@@ -73,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
       const filterItems = ['filter_item_permission'];
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
-      const ecExpectedTotalCount = 287;
+      const ecExpectedTotalCount = '287';
       const ecExpectedFieldPanelCount = 2;
       const ecExpectedModuleId = 'sample_data_ecommerce';
 
@@ -192,16 +215,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobSelection.assertJobSelection([adJobId]);
 
             await ml.testExecution.logTestStep('should pre-fill the detector input');
-            await ml.singleMetricViewer.assertDetectorInputExsist();
+            await ml.singleMetricViewer.assertDetectorInputExist();
             await ml.singleMetricViewer.assertDetectorInputValue('0');
 
             await ml.testExecution.logTestStep('should input the airline entity value');
-            await ml.singleMetricViewer.assertEntityInputExsist('airline');
+            await ml.singleMetricViewer.assertEntityInputExist('airline');
             await ml.singleMetricViewer.assertEntityInputSelection('airline', []);
             await ml.singleMetricViewer.selectEntityValue('airline', 'AAL');
 
             await ml.testExecution.logTestStep('should display the chart');
-            await ml.singleMetricViewer.assertChartExsist();
+            await ml.singleMetricViewer.assertChartExist();
 
             await ml.testExecution.logTestStep('should display the annotations section');
             await ml.singleMetricViewer.assertAnnotationsExists('loaded');
@@ -353,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
             await ml.testExecution.logTestStep(
-              'should displays components of the file details page'
+              'should display components of the file details page'
             );
             await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
             await ml.dataVisualizerFileBased.assertFileContentPanelExists();

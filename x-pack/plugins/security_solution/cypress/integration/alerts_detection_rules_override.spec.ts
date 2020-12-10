@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { indexPatterns, newOverrideRule, severitiesOverride } from '../objects/rule';
 import {
   NUMBER_OF_ALERTS,
@@ -34,6 +35,7 @@ import {
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -82,11 +84,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newOverrideRule.referenceUrls.join('');
 const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
 const expectedTags = newOverrideRule.tags.join('');
-const expectedMitre = newOverrideRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newOverrideRule.mitre);
 
 describe('Detection rules, override', () => {
   before(() => {
@@ -141,9 +139,13 @@ describe('Detection rules, override', () => {
         `${newOverrideRule.riskOverride}signal.rule.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', newOverrideRule.nameOverride);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', newOverrideRule.timestampOverride);
       cy.contains(DETAILS_TITLE, 'Severity override')

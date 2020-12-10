@@ -23,8 +23,8 @@ import {
   legacyClusterClientInstanceMock,
 } from './core_service.test.mocks';
 
-import Boom from 'boom';
-import { Request } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import { errors as esErrors } from 'elasticsearch';
 import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
 

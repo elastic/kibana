@@ -6,7 +6,7 @@
 
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { usePrevious } from 'react-use';
+import usePrevious from 'react-use/lib/usePrevious';
 import {
   combineDatasetFilters,
   DatasetFilter,

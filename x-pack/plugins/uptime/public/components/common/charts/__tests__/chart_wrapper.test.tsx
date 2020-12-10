@@ -7,8 +7,8 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { ChartWrapper } from '../chart_wrapper';
 import { SnapshotHeading } from '../../../overview/snapshot/snapshot_heading';
 import { DonutChart } from '../donut_chart';

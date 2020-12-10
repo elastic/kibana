@@ -20,7 +20,7 @@
 import { InsecureClusterService } from './insecure_cluster_service';
 import { ConfigType } from '../config';
 import { coreMock } from '../../../../core/public/mocks';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 
 let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {
   throw new Error('expected callback to be replaced!');

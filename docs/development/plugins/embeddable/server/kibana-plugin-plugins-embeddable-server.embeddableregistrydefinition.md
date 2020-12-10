@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableRegistryDefinition<P extends EmbeddableInput = EmbeddableInput> extends PersistableStateDefinition<P> 
+export interface EmbeddableRegistryDefinition<P extends EmbeddableStateWithType = EmbeddableStateWithType> extends PersistableStateDefinition<P> 
 ```
 
 ## Properties

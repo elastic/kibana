@@ -10,11 +10,11 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
 import { AppLogic } from '../../app_logic';
 
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { getGroupPath, USERS_PATH } from '../../routes';
@@ -61,7 +61,7 @@ export const Groups: React.FC = () => {
 
   if (newGroup && hasMessages) {
     messages[0].description = (
-      <EuiLinkButton
+      <EuiButtonTo
         to={getGroupPath(newGroup.id)}
         color="primary"
         data-test-subj="NewGroupManageButton"
@@ -69,17 +69,17 @@ export const Groups: React.FC = () => {
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
           defaultMessage: 'Manage Group',
         })}
-      </EuiLinkButton>
+      </EuiButtonTo>
     );
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
   const inviteUsersButton = !isFederatedAuth ? (
-    <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
+    <EuiButtonTo to={USERS_PATH} data-test-subj="InviteUsersButton">
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
         defaultMessage: 'Invite users',
       })}
-    </EuiLinkButton>
+    </EuiButtonTo>
   ) : null;
 
   const headerAction = (

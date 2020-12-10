@@ -95,7 +95,7 @@ export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
 export const THREAT_MATCH_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError',
   {
-    defaultMessage: 'At least one threat match is required.',
+    defaultMessage: 'At least one indicator match is required.',
   }
 );
 

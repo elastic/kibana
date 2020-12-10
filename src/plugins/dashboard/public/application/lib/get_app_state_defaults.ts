@@ -17,18 +17,21 @@
  * under the License.
  */
 
+import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
 import { ViewMode } from '../../embeddable_plugin';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppStateDefaults } from '../../types';
 
 export function getAppStateDefaults(
   savedDashboard: SavedObjectDashboard,
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard
 ): DashboardAppStateDefaults {
   return {
     fullScreenMode: false,
     title: savedDashboard.title,
     description: savedDashboard.description || '',
+    tags: hasTaggingCapabilities(savedDashboard) ? savedDashboard.getTags() : [],
     timeRestore: savedDashboard.timeRestore,
     panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
     options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},

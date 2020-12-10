@@ -5,7 +5,7 @@
  */
 
 import { getSavedObjectFormat, Props } from './save';
-import { createMockDatasource, createMockVisualization } from '../mocks';
+import { createMockDatasource, createMockFramePublicAPI, createMockVisualization } from '../mocks';
 import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
 
 jest.mock('./expression_helpers');
@@ -37,6 +37,7 @@ describe('save editor frame state', () => {
       visualization: { activeId: '2', state: {} },
     },
     framePublicAPI: {
+      ...createMockFramePublicAPI(),
       addNewLayer: jest.fn(),
       removeLayers: jest.fn(),
       datasourceLayers: {

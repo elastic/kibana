@@ -47,6 +47,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
+    public async clickAggBasedVisualizations() {
+      await testSubjects.click('visGroupAggBasedExploreLink');
+    }
+
+    public async goBackToGroups() {
+      await testSubjects.click('goBackLink');
+    }
+
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
@@ -59,6 +67,21 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
+    public async getPromotedVisTypes() {
+      const chartTypeField = await testSubjects.find('visNewDialogGroups');
+      const $ = await chartTypeField.parseDomContent();
+      const promotedVisTypes: string[] = [];
+      $('button')
+        .toArray()
+        .forEach((chart) => {
+          const title = $(chart).findTestSubject('visTypeTitle').text().trim();
+          if (title) {
+            promotedVisTypes.push(title);
+          }
+        });
+      return promotedVisTypes;
+    }
+
     public async waitForVisualizationSelectPage() {
       await retry.try(async () => {
         const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
@@ -68,10 +91,27 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
+    public async waitForGroupsSelectPage() {
+      await retry.try(async () => {
+        const visualizeSelectGroupStep = await testSubjects.find('visNewDialogGroups');
+        if (!(await visualizeSelectGroupStep.isDisplayed())) {
+          throw new Error('wait for vis groups select step');
+        }
+      });
+    }
+
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
+      await this.waitForGroupsSelectPage();
+    }
+
+    public async navigateToNewAggBasedVisualization() {
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
+      await this.clickNewVisualization();
+      await this.clickAggBasedVisualizations();
       await this.waitForVisualizationSelectPage();
     }
 

@@ -35,7 +35,12 @@ export async function findObjects(
   const response = await http.get<Record<string, any>>(
     '/api/kibana/management/saved_objects/_find',
     {
-      query: findOptions as Record<string, any>,
+      query: {
+        ...findOptions,
+        hasReference: findOptions.hasReference
+          ? JSON.stringify(findOptions.hasReference)
+          : undefined,
+      } as Record<string, any>,
     }
   );
 

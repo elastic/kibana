@@ -17,13 +17,13 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
     <EuiCallOut
       title={i18n.translate('xpack.apm.serviceInventory.mlNudgeMessageTitle', {
         defaultMessage:
-          'Enable anomaly detection to see the health of your services',
+          'Enable anomaly detection to add health status indicators to your services',
       })}
       iconType="iInCircle"
     >
       <p>
         {i18n.translate('xpack.apm.serviceOverview.mlNudgeMessage.content', {
-          defaultMessage: `Our integration with ML anomaly detection will enable you to see your services' health status`,
+          defaultMessage: `Pinpoint anomalous transactions and see the health of upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
         })}
       </p>
       <EuiFlexGrid gutterSize="s">
@@ -36,7 +36,7 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
               {i18n.translate(
                 'xpack.apm.serviceOverview.mlNudgeMessage.learnMoreButton',
                 {
-                  defaultMessage: `Learn more`,
+                  defaultMessage: `Get started`,
                 }
               )}
             </APMLink>
@@ -47,7 +47,7 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
             {i18n.translate(
               'xpack.apm.serviceOverview.mlNudgeMessage.dismissButton',
               {
-                defaultMessage: `Dismiss message`,
+                defaultMessage: `Dismiss`,
               }
             )}
           </EuiButtonEmpty>

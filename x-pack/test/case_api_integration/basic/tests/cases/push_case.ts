@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/case/common/constants';
-import { postCaseReq, defaultUser, postCommentReq } from '../../../common/lib/mock';
+import { postCaseReq, defaultUser, postCommentUserReq } from '../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -130,7 +130,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentUserReq)
+        .expect(200);
 
       const { body } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
@@ -143,6 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
           external_url: 'external_url',
         })
         .expect(200);
+
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
 

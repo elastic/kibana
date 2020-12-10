@@ -10,7 +10,7 @@ experimental[]
 You can configure `xpack.fleet` settings in your `kibana.yml`. 
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
-See the {ingest-guide}/index.html[Ingest Management] docs for more information.
+See the {ingest-guide}/index.html[{fleet}] docs for more information.
 
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings

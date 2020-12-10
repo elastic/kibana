@@ -19,7 +19,7 @@ export const fetchObservabilityOverviewPageData = async ({
   bucketSize,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
-    pathname: '/api/apm/observability_overview',
+    endpoint: 'GET /api/apm/observability_overview',
     params: {
       query: {
         start: new Date(absoluteTime.start).toISOString(),
@@ -58,6 +58,6 @@ export const fetchObservabilityOverviewPageData = async ({
 
 export async function hasData() {
   return await callApmApi({
-    pathname: '/api/apm/observability_overview/has_data',
+    endpoint: 'GET /api/apm/observability_overview/has_data',
   });
 }

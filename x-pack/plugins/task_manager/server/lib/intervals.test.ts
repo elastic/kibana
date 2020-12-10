@@ -14,6 +14,7 @@ import {
   secondsFromNow,
   secondsFromDate,
   asInterval,
+  maxIntervalFromDate,
 } from './intervals';
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -58,6 +59,8 @@ describe('taskIntervals', () => {
       expect(parseIntervalAsSecond('20m')).toEqual(20 * 60);
       expect(parseIntervalAsSecond('61m')).toEqual(61 * 60);
       expect(parseIntervalAsSecond('90m')).toEqual(90 * 60);
+      expect(parseIntervalAsSecond('2h')).toEqual(2 * 60 * 60);
+      expect(parseIntervalAsSecond('9d')).toEqual(9 * 60 * 60 * 24);
     });
   });
 
@@ -94,6 +97,8 @@ describe('taskIntervals', () => {
       expect(parseIntervalAsMillisecond('20m')).toEqual(20 * 60 * 1000);
       expect(parseIntervalAsMillisecond('61m')).toEqual(61 * 60 * 1000);
       expect(parseIntervalAsMillisecond('90m')).toEqual(90 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('1h')).toEqual(60 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('3d')).toEqual(3 * 24 * 60 * 60 * 1000);
     });
   });
 
@@ -151,6 +156,44 @@ describe('taskIntervals', () => {
       );
       expect(() => intervalFromNow('0s')).toThrow(
         /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+  });
+
+  describe('maxIntervalFromDate', () => {
+    test('it handles a single interval', () => {
+      const mins = _.random(1, 100);
+      const now = new Date();
+      const expected = now.getTime() + mins * 60 * 1000;
+      expect(maxIntervalFromDate(now, `${mins}m`)!.getTime()).toEqual(expected);
+    });
+
+    test('it handles multiple intervals', () => {
+      const mins = _.random(1, 100);
+      const maxMins = mins + _.random(1, 100);
+      const now = new Date();
+      const expected = now.getTime() + maxMins * 60 * 1000;
+      expect(maxIntervalFromDate(now, `${mins}m`, `${maxMins}m`)!.getTime()).toEqual(expected);
+    });
+
+    test('it handles multiple mixed type intervals', () => {
+      const mins = _.random(1, 100);
+      const seconds = _.random(1, 100);
+      const maxSeconds = Math.max(mins * 60, seconds) + _.random(1, 100);
+      const now = new Date();
+      const expected = now.getTime() + maxSeconds * 1000;
+      expect(
+        maxIntervalFromDate(now, `${mins}m`, `${maxSeconds}s`, `${seconds}s`)!.getTime()
+      ).toEqual(expected);
+    });
+
+    test('it handles undefined intervals', () => {
+      const mins = _.random(1, 100);
+      const maxMins = mins + _.random(1, 100);
+      const now = new Date();
+      const expected = now.getTime() + maxMins * 60 * 1000;
+      expect(maxIntervalFromDate(now, `${mins}m`, undefined, `${maxMins}m`)!.getTime()).toEqual(
+        expected
       );
     });
   });

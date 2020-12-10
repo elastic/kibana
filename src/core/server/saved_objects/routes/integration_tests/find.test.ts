@@ -118,6 +118,7 @@ describe('GET /api/saved_objects/_find', () => {
       page: 1,
       type: ['foo', 'bar'],
       defaultSearchOperator: 'OR',
+      hasReferenceOperator: 'OR',
     });
   });
 
@@ -129,7 +130,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
+    expect(options).toEqual(expect.objectContaining({ perPage: 10, page: 50 }));
   });
 
   it('accepts the optional query parameter has_reference', async () => {
@@ -141,7 +142,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(options.hasReference).toBe(undefined);
   });
 
-  it('accepts the query parameter has_reference', async () => {
+  it('accepts the query parameter has_reference as an object', async () => {
     const references = querystring.escape(
       JSON.stringify({
         id: '1',
@@ -161,6 +162,53 @@ describe('GET /api/saved_objects/_find', () => {
     });
   });
 
+  it('accepts the query parameter has_reference as an array', async () => {
+    const references = querystring.escape(
+      JSON.stringify([
+        {
+          id: '1',
+          type: 'reference',
+        },
+        {
+          id: '2',
+          type: 'reference',
+        },
+      ])
+    );
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasReference).toEqual([
+      {
+        id: '1',
+        type: 'reference',
+      },
+      {
+        id: '2',
+        type: 'reference',
+      },
+    ]);
+  });
+
+  it('accepts the query parameter has_reference_operator', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&has_reference_operator=AND')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        hasReferenceOperator: 'AND',
+      })
+    );
+  });
+
   it('accepts the query parameter search_fields', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&search_fields=title')
@@ -169,13 +217,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      searchFields: ['title'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        searchFields: ['title'],
+      })
+    );
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -186,13 +232,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      fields: ['title'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        fields: ['title'],
+      })
+    );
   });
 
   it('accepts the query parameter fields as an array', async () => {
@@ -203,13 +247,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      fields: ['title', 'description'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        fields: ['title', 'description'],
+      })
+    );
   });
 
   it('accepts the query parameter type as a string', async () => {
@@ -220,12 +262,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        type: ['index-pattern'],
+      })
+    );
   });
 
   it('accepts the query parameter type as an array', async () => {
@@ -236,12 +277,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern', 'visualization'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        type: ['index-pattern', 'visualization'],
+      })
+    );
   });
 
   it('accepts the query parameter namespaces as a string', async () => {
@@ -252,13 +292,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern'],
-      namespaces: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        namespaces: ['foo'],
+      })
+    );
   });
 
   it('accepts the query parameter namespaces as an array', async () => {
@@ -269,12 +307,10 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern'],
-      namespaces: ['default', 'foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        namespaces: ['default', 'foo'],
+      })
+    );
   });
 });

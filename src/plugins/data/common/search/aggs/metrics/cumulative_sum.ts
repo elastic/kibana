@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggCumulativeSumFnName } from './cumulative_sum_fn';
 import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
@@ -43,6 +44,7 @@ export const getCumulativeSumMetricAgg = () => {
 
   return new MetricAggType({
     name: METRIC_TYPES.CUMULATIVE_SUM,
+    expressionName: aggCumulativeSumFnName,
     title: cumulativeSumTitle,
     makeLabel: (agg) => makeNestedLabel(agg, cumulativeSumLabel),
     subtype,

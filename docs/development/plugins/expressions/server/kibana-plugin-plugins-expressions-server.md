@@ -83,7 +83,6 @@
 |  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-server.expressionastexpression.md) |  |
 |  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-server.expressionastfunction.md) |  |
 |  [ExpressionAstNode](./kibana-plugin-plugins-expressions-server.expressionastnode.md) |  |
-|  [ExpressionFunctionKibana](./kibana-plugin-plugins-expressions-server.expressionfunctionkibana.md) |  |
 |  [ExpressionsServerSetup](./kibana-plugin-plugins-expressions-server.expressionsserversetup.md) |  |
 |  [ExpressionsServerStart](./kibana-plugin-plugins-expressions-server.expressionsserverstart.md) |  |
 |  [ExpressionValue](./kibana-plugin-plugins-expressions-server.expressionvalue.md) |  |
@@ -93,13 +92,10 @@
 |  [ExpressionValueFilter](./kibana-plugin-plugins-expressions-server.expressionvaluefilter.md) | Represents an object that is a Filter. |
 |  [ExpressionValueNum](./kibana-plugin-plugins-expressions-server.expressionvaluenum.md) |  |
 |  [ExpressionValueRender](./kibana-plugin-plugins-expressions-server.expressionvaluerender.md) | Represents an object that is intended to be rendered. |
-|  [ExpressionValueSearchContext](./kibana-plugin-plugins-expressions-server.expressionvaluesearchcontext.md) |  |
 |  [ExpressionValueUnboxed](./kibana-plugin-plugins-expressions-server.expressionvalueunboxed.md) |  |
 |  [FontLabel](./kibana-plugin-plugins-expressions-server.fontlabel.md) | This type contains a unions of all supported font labels, or the the name of the font the user would see in a UI. |
 |  [FontValue](./kibana-plugin-plugins-expressions-server.fontvalue.md) | This type contains a union of all supported font values, equivalent to the CSS <code>font-value</code> property. |
 |  [InterpreterErrorType](./kibana-plugin-plugins-expressions-server.interpretererrortype.md) |  |
-|  [KIBANA\_CONTEXT\_NAME](./kibana-plugin-plugins-expressions-server.kibana_context_name.md) |  |
-|  [KibanaContext](./kibana-plugin-plugins-expressions-server.kibanacontext.md) |  |
 |  [KnownTypeToString](./kibana-plugin-plugins-expressions-server.knowntypetostring.md) | Map the type of the generic to a string-based representation of the type.<!-- -->If the provided generic is its own type interface, we use the value of the <code>type</code> key as a string literal type for it. |
 |  [PointSeries](./kibana-plugin-plugins-expressions-server.pointseries.md) | A <code>PointSeries</code> is a unique structure that represents dots on a chart. |
 |  [PointSeriesColumnName](./kibana-plugin-plugins-expressions-server.pointseriescolumnname.md) | Allowed column names in a PointSeries |

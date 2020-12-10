@@ -214,16 +214,5 @@ describe('Executor', () => {
         expect(migrateFn).toBeCalledTimes(5);
       });
     });
-
-    describe('.migrateToLatest', () => {
-      test('calls extract function for every expression function in expression', () => {
-        migrateFn.mockClear();
-        executor.migrateToLatest(
-          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
-          '7.10.0'
-        );
-        expect(migrateFn).toBeCalledTimes(10);
-      });
-    });
   });
 });

@@ -20,8 +20,8 @@
 import { IndexPattern } from './index_pattern';
 
 export interface PatternCache {
-  get: (id: string) => IndexPattern;
-  set: (id: string, value: IndexPattern) => IndexPattern;
+  get: (id: string) => Promise<IndexPattern> | undefined;
+  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
   clear: (id: string) => void;
   clearAll: () => void;
 }

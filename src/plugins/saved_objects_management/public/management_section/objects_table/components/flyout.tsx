@@ -107,6 +107,17 @@ interface ConflictingRecord {
   done: (result: [boolean, string | undefined]) => void;
 }
 
+const getErrorMessage = (e: any) => {
+  const errorMessage =
+    e.body?.error && e.body?.message ? `${e.body.error}: ${e.body.message}` : e.message;
+  return i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
+    defaultMessage: 'The file could not be processed due to error: "{error}"',
+    values: {
+      error: errorMessage,
+    },
+  });
+};
+
 export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
     super(props);
@@ -183,9 +194,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: getErrorMessage(e),
       });
       return;
     }
@@ -241,10 +250,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          { defaultMessage: 'The file could not be processed.' }
-        ),
+        error: getErrorMessage(e),
       });
     }
   };
@@ -437,8 +443,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         );
       } catch (e) {
         this.setState({
-          error: e.message,
           status: 'error',
+          error: getErrorMessage(e),
           loadingMessage: undefined,
         });
         return;
@@ -605,7 +611,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
           color="danger"
         >
-          <p>{error}</p>
+          <p data-test-subj="importSavedObjectsErrorText">{error}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </Fragment>
@@ -752,13 +758,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFormRow
           fullWidth
           label={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Select a file to import"
-            />
+            <EuiTitle size="xs">
+              <span>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+                  defaultMessage="Select a file to import"
+                />
+              </span>
+            </EuiTitle>
           }
         >
           <EuiFilePicker
+            accept=".ndjson, .json"
             fullWidth
             initialPromptText={
               <FormattedMessage

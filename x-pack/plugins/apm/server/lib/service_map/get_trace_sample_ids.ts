@@ -3,20 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { uniq, take, sortBy } from 'lodash';
-import Boom from 'boom';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { ESFilter } from '../../../typings/elasticsearch';
+import Boom from '@hapi/boom';
+import { sortBy, take, uniq } from 'lodash';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
-  SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  TRACE_ID,
+  SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRACE_ID,
 } from '../../../common/elasticsearch_fieldnames';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 

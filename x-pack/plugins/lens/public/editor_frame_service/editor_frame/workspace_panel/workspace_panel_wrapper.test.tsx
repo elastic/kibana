@@ -7,7 +7,7 @@
 import React from 'react';
 import { Visualization } from '../../../types';
 import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../../mocks';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { WorkspacePanelWrapper, WorkspacePanelWrapperProps } from './workspace_panel_wrapper';
 
@@ -36,7 +36,6 @@ describe('workspace_panel_wrapper', () => {
         visualizationMap={{ myVis: mockVisualization }}
         datasourceMap={{}}
         datasourceStates={{}}
-        emptyExpression={false}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -58,7 +57,6 @@ describe('workspace_panel_wrapper', () => {
         visualizationMap={{ myVis: { ...mockVisualization, renderToolbar: renderToolbarMock } }}
         datasourceMap={{}}
         datasourceStates={{}}
-        emptyExpression={false}
       />
     );
 

@@ -127,7 +127,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ALL_OPTION_VALUE",
-          "size": 50,
+          "size": 100,
         },
       },
     },

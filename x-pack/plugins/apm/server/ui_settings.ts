@@ -17,7 +17,7 @@ import {
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
   [enableCorrelations]: {
-    category: ['Observability'],
+    category: ['observability'],
     name: i18n.translate('xpack.apm.enableCorrelationsExperimentName', {
       defaultMessage: 'APM Correlations',
     }),
@@ -32,7 +32,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
     schema: schema.boolean(),
   },
   [enableServiceOverview]: {
-    category: ['Observability'],
+    category: ['observability'],
     name: i18n.translate('xpack.apm.enableServiceOverviewExperimentName', {
       defaultMessage: 'APM Service overview',
     }),

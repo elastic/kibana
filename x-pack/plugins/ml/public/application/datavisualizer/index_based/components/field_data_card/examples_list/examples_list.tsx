@@ -31,7 +31,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   });
 
   return (
-    <div>
+    <div data-test-subj="mlFieldDataCardExamplesList">
       <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
         <span>
           <FormattedMessage

@@ -20,6 +20,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [fatalError](./kibana-plugin-plugins-embeddable-public.embeddable.fatalerror.md) |  | <code>Error</code> |  |
 |  [id](./kibana-plugin-plugins-embeddable-public.embeddable.id.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-embeddable-public.embeddable.input.md) |  | <code>TEmbeddableInput</code> |  |
 |  [isContainer](./kibana-plugin-plugins-embeddable-public.embeddable.iscontainer.md) |  | <code>boolean</code> |  |
@@ -43,6 +44,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  [getOutput$()](./kibana-plugin-plugins-embeddable-public.embeddable.getoutput_.md) |  |  |
 |  [getRoot()](./kibana-plugin-plugins-embeddable-public.embeddable.getroot.md) |  | Returns the top most parent embeddable, or itself if this embeddable is not within a parent. |
 |  [getTitle()](./kibana-plugin-plugins-embeddable-public.embeddable.gettitle.md) |  |  |
+|  [onFatalError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.onfatalerror.md) |  |  |
 |  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change. |
 |  [render(el)](./kibana-plugin-plugins-embeddable-public.embeddable.render.md) |  |  |
 |  [supportedTriggers()](./kibana-plugin-plugins-embeddable-public.embeddable.supportedtriggers.md) |  |  |

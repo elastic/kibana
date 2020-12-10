@@ -26,17 +26,15 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
       },
     },
     (context, request, response) => {
-      const allFeatures = featureRegistry.getAllKibanaFeatures();
+      const currentLicense = context.licensing!.license;
+
+      const allFeatures = featureRegistry.getAllKibanaFeatures(
+        currentLicense,
+        request.query.ignoreValidLicenses
+      );
 
       return response.ok({
         body: allFeatures
-          .filter(
-            (feature) =>
-              request.query.ignoreValidLicenses ||
-              !feature.minimumLicense ||
-              (context.licensing!.license &&
-                context.licensing!.license.hasAtLeast(feature.minimumLicense))
-          )
           .sort(
             (f1, f2) =>
               (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)

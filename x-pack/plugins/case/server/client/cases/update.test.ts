@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorTypes, CasesPatchRequest } from '../../../common/api';
+import { ConnectorTypes, CasesPatchRequest, CaseStatuses } from '../../../common/api';
 import {
   createMockSavedObjectsRepository,
   mockCaseNoConnectorId,
@@ -27,7 +27,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'closed' as const,
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -56,7 +56,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           id: 'mock-id-1',
           external_service: null,
-          status: 'closed',
+          status: CaseStatuses.closed,
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalComment: 0,
@@ -79,8 +79,8 @@ describe('update', () => {
               username: 'awesome',
             },
             action_field: ['status'],
-            new_value: 'closed',
-            old_value: 'open',
+            new_value: CaseStatuses.closed,
+            old_value: CaseStatuses.open,
           },
           references: [
             {
@@ -98,7 +98,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'open' as const,
+            status: CaseStatuses.open,
             version: 'WzAsMV0=',
           },
         ],
@@ -106,7 +106,10 @@ describe('update', () => {
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: [
-          { ...mockCases[0], attributes: { ...mockCases[0].attributes, status: 'closed' } },
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, status: CaseStatuses.closed },
+          },
           ...mockCases.slice(1),
         ],
       });
@@ -130,7 +133,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           id: 'mock-id-1',
           external_service: null,
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalComment: 0,
@@ -146,7 +149,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-no-connector_id',
-            status: 'closed' as const,
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -177,7 +180,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'closed',
+          status: CaseStatuses.closed,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -231,7 +234,7 @@ describe('update', () => {
           description: 'Oh no, a bad meanie going LOLBins all over the place!',
           external_service: null,
           title: 'Another bad one',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['LOLBins'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -247,7 +250,7 @@ describe('update', () => {
 
   describe('unhappy path', () => {
     test('it throws when missing id', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const patchCases = {
         cases: [
           {
@@ -270,11 +273,15 @@ describe('update', () => {
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when missing version', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const patchCases = {
         cases: [
           {
@@ -297,16 +304,20 @@ describe('update', () => {
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
-        .catch((e) => expect(e).not.toBeNull());
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(e.isBoom).toBe(true);
+          expect(e.output.statusCode).toBe(400);
+        });
     });
 
     test('it throws when fields are identical', async () => {
-      expect.assertions(1);
+      expect.assertions(4);
       const patchCases = {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'open' as const,
+            status: CaseStatuses.open,
             version: 'WzAsMV0=',
           },
         ],
@@ -317,14 +328,16 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .update({ cases: patchCases })
-        .catch((e) =>
-          expect(e.message).toBe('All update fields are identical to current version.')
-        );
+      caseClient.client.update({ cases: patchCases }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(406);
+        expect(e.message).toBe('All update fields are identical to current version.');
+      });
     });
 
     test('it throws when case does not exist', async () => {
+      expect.assertions(4);
       const patchCases = {
         cases: [
           {
@@ -345,17 +358,18 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .update({ cases: patchCases })
-        .catch((e) =>
-          expect(e.message).toBe(
-            'These cases not-exists do not exist. Please check you have the correct ids.'
-          )
+      caseClient.client.update({ cases: patchCases }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(404);
+        expect(e.message).toBe(
+          'These cases not-exists do not exist. Please check you have the correct ids.'
         );
+      });
     });
 
     test('it throws when cases conflicts', async () => {
-      expect.assertions(1);
+      expect.assertions(4);
       const patchCases = {
         cases: [
           {
@@ -371,13 +385,14 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .update({ cases: patchCases })
-        .catch((e) =>
-          expect(e.message).toBe(
-            'These cases mock-id-1 has been updated. Please refresh before saving additional updates.'
-          )
+      caseClient.client.update({ cases: patchCases }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(409);
+        expect(e.message).toBe(
+          'These cases mock-id-1 has been updated. Please refresh before saving additional updates.'
         );
+      });
     });
   });
 });

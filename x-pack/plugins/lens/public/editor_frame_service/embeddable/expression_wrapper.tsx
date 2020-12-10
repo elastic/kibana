@@ -12,23 +12,31 @@ import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
 } from 'src/plugins/expressions/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { RenderMode } from 'src/plugins/expressions';
 import { getOriginalRequestErrorMessage } from '../error_helper';
+import { LensInspectorAdapters } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
+  variables?: Record<string, unknown>;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
+  onData$: (data: unknown, inspectorAdapters?: LensInspectorAdapters | undefined) => void;
+  renderMode?: RenderMode;
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
   searchContext,
+  variables,
   handleEvent,
   searchSessionId,
+  onData$,
+  renderMode,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -51,9 +59,12 @@ export function ExpressionWrapper({
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
             padding="s"
+            variables={variables}
             expression={expression}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
+            onData$={onData$}
+            renderMode={renderMode}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">

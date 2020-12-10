@@ -33,7 +33,10 @@ export function createSearchStartMock(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     getSearchStrategy: jest.fn(),
-    search: jest.fn(),
+    asScoped: jest.fn().mockReturnValue({
+      search: jest.fn(),
+      cancel: jest.fn(),
+    }),
     searchSource: searchSourceMock.createStartContract(),
   };
 }

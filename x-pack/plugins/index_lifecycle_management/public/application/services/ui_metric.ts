@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * TODO:
+ * IMPORTANT: Please see how {@link BreadcrumbService} is set up for an example of how these services should be set up
+ * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
+ */
+
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 import {
   UIM_APP_NAME,
@@ -19,11 +25,11 @@ import {
 
 import { Phases } from '../../../common/types';
 
-export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
+export let trackUiMetric = (metricType: UiCounterMetricType, eventName: string | string[]) => {};
 
 export function init(usageCollection?: UsageCollectionSetup): void {
   if (usageCollection) {
-    trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
+    trackUiMetric = usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME);
   }
 }
 

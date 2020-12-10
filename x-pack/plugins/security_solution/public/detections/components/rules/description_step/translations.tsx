@@ -23,7 +23,7 @@ export const QUERY_LABEL = i18n.translate(
 export const THREAT_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
   {
-    defaultMessage: 'Threat query',
+    defaultMessage: 'Indicator index query',
   }
 );
 

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';

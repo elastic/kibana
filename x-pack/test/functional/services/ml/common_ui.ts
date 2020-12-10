@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -97,6 +98,23 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
 
     async assertKibanaHomeFileDataVisLinkNotExists() {
       await testSubjects.missingOrFail('homeSynopsisLinkml_file_data_visualizer');
+    },
+
+    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+      const assertRadioGroupValue = await testSubjects.find(testSubject);
+      const input = await assertRadioGroupValue.findByCssSelector(':checked');
+      const selectedOptionId = await input.getAttribute('id');
+      expect(selectedOptionId).to.eql(
+        expectedValue,
+        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`
+      );
+    },
+
+    async selectRadioGroupValue(testSubject: string, value: string) {
+      const radioGroup = await testSubjects.find(testSubject);
+      const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
+      await label.click();
+      await this.assertRadioGroupValue(testSubject, value);
     },
   };
 }

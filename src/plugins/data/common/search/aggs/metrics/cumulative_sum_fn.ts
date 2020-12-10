@@ -23,16 +23,21 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggCumulativeSum';
+export const aggCumulativeSumFnName = 'aggCumulativeSum';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.CUMULATIVE_SUM>;
 type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggCumulativeSumFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggCumulativeSum = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggCumulativeSumFnName,
   help: i18n.translate('data.search.aggs.function.metrics.cumulative_sum.help', {
     defaultMessage: 'Generates a serialized agg config for a Cumulative Sum agg',
   }),

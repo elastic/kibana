@@ -15,10 +15,10 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/ui_filters/local_ui_filters/config';
 import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
-import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
+import { removeUndefinedProps } from '../context/url_params_context/helpers';
 import { useCallApi } from './useCallApi';
-import { useFetcher } from './useFetcher';
-import { useUrlParams } from './useUrlParams';
+import { useFetcher } from './use_fetcher';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { LocalUIFilterName } from '../../common/ui_filter';
 
 const getInitialData = (

@@ -48,7 +48,7 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
     }
-    const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
+    const totalCount = response.rawResponse.hits.total || 0;
     const matrixHistogramData = getOr([], myConfig.aggName, response.rawResponse);
     const inspect = {
       dsl: [inspectStringifyObject(myConfig.buildDsl(options))],

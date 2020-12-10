@@ -50,7 +50,6 @@ export function LibraryNotificationPopover({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <EuiButtonIcon
           data-test-subj={`embeddablePanelNotification-${id}`}

@@ -23,16 +23,21 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggMovingAvg';
+export const aggMovingAvgFnName = 'aggMovingAvg';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MOVING_FN>;
 type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggMovingAvgFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggMovingAvg = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggMovingAvgFnName,
   help: i18n.translate('data.search.aggs.function.metrics.moving_avg.help', {
     defaultMessage: 'Generates a serialized agg config for a Moving Average agg',
   }),

@@ -9,7 +9,7 @@ import supertestAsPromised from 'supertest-as-promised';
 import { format, UrlObject } from 'url';
 import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 
 interface Settings {

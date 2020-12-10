@@ -27,6 +27,9 @@ MIT License http://www.opensource.org/licenses/mit-license.php
 Author Tobias Koppers @sokra
 
 ---
+This product has relied on ASTExplorer that is licensed under MIT.
+
+---
 This product includes code that is based on Ace editor, which was available
 under a "BSD" license.
 

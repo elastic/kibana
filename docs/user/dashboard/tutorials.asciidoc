@@ -76,8 +76,6 @@ Now that you've created your *Lens* visualization, add it to a <<dashboard,dashb
 [[vega-lite-tutorial-create-your-first-visualizations]]
 === Create your first visualization with Vega-Lite
 
-experimental[]
-
 In this tutorial, you will learn about how to edit Vega-Lite in {kib} to create
 a stacked area chart from an {es} search query. It will give you a starting point
 for a more comprehensive
@@ -88,7 +86,7 @@ In this tutorial, you will build a stacked area chart from one of the {kib} samp
 sets.
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_1.png[]
+image::visualize/images/vega_lite_tutorial_1.png[Vega-Lite tutorial stacked area chart]
 
 Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
 set.
@@ -98,7 +96,7 @@ line chart which shows the total number of documents across all your indices
 within the time range.
 
 [role="screenshot"]
-image::visualize/images/vega_lite_default.png[]
+image::visualize/images/vega_lite_default.png[Vega-Lite tutorial default visualization]
 
 The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
 which is similar to JSON but optimized for human editing. HJSON supports:
@@ -134,7 +132,7 @@ Click "Update". The result is probably not what you expect. You should see a fla
 line with 0 results.
 
 You've only changed the index, so the difference must be the query is returning
-no results. You can try the <<vega-browser-debugging-console, Vega debugging process>>,
+no results. You can try the <<vega-debugging, Vega debugging process>>,
 but intuition may be faster for this particular problem.
 
 In this case, the problem is that you are querying the field `@timestamp`,
@@ -332,38 +330,29 @@ your spec:
 
 If you copy and paste that into your Vega-Lite spec, and click "Update",
 you will see a warning saying `Infinite extent for field "key": [Infinity, -Infinity]`.
-Let's use our <<vega-browser-debugging-console, Vega debugging skills>> to understand why.
+Let's use our <<vega-inspector, Vega debugging skills>> to understand why.
 
 Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` contains
 the results from the {es} query, and `data_0` contains the visually encoded results
 which are shown in the chart. To debug this problem, you need to compare both.
 
-To look at the source, open the browser dev tools console and type
-`VEGA_DEBUG.view.data('source_0')`. You will see:
+To inspect data sets, go to *Inspect* and select *View: Vega debug*. You will see a menu with different data sources:
 
-```js
-[{
-  doc_count: 454
-  key: "Men's Clothing"
-  time_buckets: {buckets: Array(57)}
-  Symbol(vega_id): 12822
-}, ...]
-```
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_3.png[Data set selector showing root, source_0, data_0, and marks]
 
-To compare to the visually encoded data, open the browser dev tools console and type
-`VEGA_DEBUG.view.data('data_0')`. You will see:
+To look closer at the raw data in Vega, select the option for `source_0` in the dropdown:
 
-```js
-[{
-  doc_count: 454
-  key: NaN
-  time_buckets: {buckets: Array(57)}
-  Symbol(vega_id): 13879
-}]
-```
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
+
+To compare to the visually encoded data, change the dropdown selection to `data_0`. You will see:
+
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
 
 The issue seems to be that the `key` property is not being converted the right way,
-which makes sense because the `key` is now `Men's Clothing` instead of a timestamp.
+which makes sense because the `key` is now category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
 
 To fix this, try updating the `encoding` of your Vega-Lite spec to:
 
@@ -382,21 +371,13 @@ To fix this, try updating the `encoding` of your Vega-Lite spec to:
   }
 ```
 
-This will show more errors, and you can inspect `VEGA_DEBUG.view.data('data_0')` to
+This will show more errors, so you need to debug. Click *Inspect*, switch the view to *Vega Debug*, and switch to look at the visually encoded data in `data_0` to
 understand why. This now shows:
 
-```js
-[{
-  doc_count: 454
-  key: "Men's Clothing"
-  time_buckets: {buckets: Array(57)}
-  time_buckets.buckets.doc_count: undefined
-  time_buckets.buckets.key: null
-  Symbol(vega_id): 14094
-}]
-```
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
 
-It looks like the problem is that the `time_buckets` inner array is not being
+It looks like the problem is that the `time_buckets.buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
 https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {kib} 7.9 and later.
 If using an older version of Kibana, the flatten transformation is available in Vega
@@ -411,23 +392,10 @@ Add this section in between the `data` and `encoding` section:
 ```
 
 This does not yet produce the results you expect. Inspect the transformed data
-by typing `VEGA_DEBUG.view.data('data_0')` into the console again:
+by selecting `data_0` in *Data sets* again:
 
-```js
-[{
-  doc_count: 453
-  key: "Men's Clothing"
-  time_bucket.buckets.doc_count: undefined
-  time_buckets: {buckets: Array(57)}
-  time_buckets.buckets: {
-    key_as_string: "2020-06-30T15:00:00.000Z",
-    key: 1593529200000,
-    doc_count: 2
-  }
-  time_buckets.buckets.key: null
-  Symbol(vega_id): 21564
-}]
-```
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
 
 The debug view shows `undefined` values where you would expect to see numbers, and
 the cause is that there are duplicate names which are confusing Vega-Lite. This can
@@ -564,7 +532,9 @@ Now that you've enabled a selection, try moving the mouse around the visualizati
 and seeing the points respond to the nearest position:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_2.png[]
+image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
+
+The selection is controlled by a Vega signal, and can be viewed using the <<vega-inspector, Vega Inspector>>.
 
 The final result of this tutorial is this spec:
 
@@ -682,8 +652,6 @@ The final result of this tutorial is this spec:
 
 [[vega-tutorial-update-kibana-filters-from-vega]]
 === Update {kib} filters from Vega
-
-experimental[]
 
 In this tutorial you will build an area chart in Vega using an {es} search query,
 and add a click handler and drag handler to update {kib} filters.
@@ -935,6 +903,7 @@ The first step is to add a new `signal` to track the X position of the cursor:
       }]
     }
 ```
+To learn more about inspecting signals, explore the <<vega-inspector, Vega Inspector>>.
 
 Now add a new `mark` to indicate the current cursor position:
 

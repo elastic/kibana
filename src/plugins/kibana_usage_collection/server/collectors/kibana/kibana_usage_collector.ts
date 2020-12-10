@@ -21,7 +21,6 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { getSavedObjectsCounts, KibanaSavedObjectCounts } from './get_saved_object_counts';
 
 interface KibanaUsage extends KibanaSavedObjectCounts {
@@ -32,7 +31,7 @@ export function getKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
-  return usageCollection.makeUsageCollector<KibanaUsage, { usage: KibanaUsage }>({
+  return usageCollection.makeUsageCollector<KibanaUsage>({
     type: 'kibana',
     isReady: () => true,
     schema: {
@@ -51,20 +50,6 @@ export function getKibanaUsageCollector(
       return {
         index,
         ...(await getSavedObjectsCounts(callCluster, index)),
-      };
-    },
-
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
-     */
-    formatForBulkUpload: (result) => {
-      return {
-        type: KIBANA_STATS_TYPE,
-        payload: {
-          usage: result,
-        },
       };
     },
   });

@@ -20,6 +20,7 @@ export interface AlertInstanceSummary {
 export interface AlertInstanceStatus {
   status: string;
   muted: boolean;
+  actionGroupId: string;
   activeStartDate?: string;
 }
 

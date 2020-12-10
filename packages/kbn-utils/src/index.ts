@@ -20,3 +20,4 @@
 export * from './package_json';
 export * from './path';
 export * from './repo_root';
+export * from './streams';

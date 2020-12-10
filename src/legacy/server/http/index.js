@@ -18,7 +18,7 @@
  */
 
 import { format } from 'url';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';

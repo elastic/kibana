@@ -1,0 +1,6 @@
+{
+  "id": "coverage-fixtures",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}

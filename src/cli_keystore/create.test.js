@@ -38,7 +38,7 @@ jest.mock('fs', () => ({
 
 import sinon from 'sinon';
 
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 import { create } from './create';
 import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from './utils/prompt';

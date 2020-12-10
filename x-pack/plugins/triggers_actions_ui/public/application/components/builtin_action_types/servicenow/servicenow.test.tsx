@@ -90,7 +90,7 @@ describe('servicenow action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        title: ['Short description is required.'],
       },
     });
   });

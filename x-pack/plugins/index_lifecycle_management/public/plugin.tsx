@@ -3,22 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
+import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
-import { PluginsDependencies, ClientConfigType } from './types';
+import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import { registerUrlGenerator } from './url_generator';
 
-export class IndexLifecycleManagementPlugin {
+export class IndexLifecycleManagementPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies) {
+  private breadcrumbService = new BreadcrumbService();
+
+  public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
     const {
       ui: { enabled: isIndexLifecycleManagementUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
@@ -31,7 +36,7 @@ export class IndexLifecycleManagementPlugin {
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement, home, cloud } = plugins;
+      const { usageCollection, management, indexManagement, home, cloud, share } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -42,8 +47,8 @@ export class IndexLifecycleManagementPlugin {
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history }) => {
-          const [coreStart] = await getStartServices();
+        mount: async ({ element, history, setBreadcrumbs }) => {
+          const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
             i18n: { Context: I18nContext },
@@ -51,7 +56,10 @@ export class IndexLifecycleManagementPlugin {
             application: { navigateToApp, getUrlForApp },
           } = coreStart;
 
+          const license = await licensing.license$.pipe(first()).toPromise();
+
           docTitle.change(PLUGIN.TITLE);
+          this.breadcrumbService.setup(setBreadcrumbs);
 
           // Initialize additional services.
           initDocumentation(
@@ -66,6 +74,8 @@ export class IndexLifecycleManagementPlugin {
             history,
             navigateToApp,
             getUrlForApp,
+            this.breadcrumbService,
+            license,
             cloud
           );
 
@@ -97,6 +107,8 @@ export class IndexLifecycleManagementPlugin {
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);
       }
+
+      registerUrlGenerator(coreSetup, management, share);
     }
   }
 

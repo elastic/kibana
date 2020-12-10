@@ -7,6 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { MarkdownRenderer } from './renderer';
 
 describe('Markdown', () => {
@@ -16,9 +17,9 @@ describe('Markdown', () => {
     test('it renders the expected link text', () => {
       const wrapper = mount(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(wrapper.find('[data-test-subj="markdown-link"]').first().text()).toEqual(
-        'External Site'
-      );
+      expect(
+        removeExternalLinkText(wrapper.find('[data-test-subj="markdown-link"]').first().text())
+      ).toEqual('External Site');
     });
 
     test('it renders the expected href', () => {

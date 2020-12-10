@@ -22,7 +22,6 @@ import { SavedObjectReference } from '../../../../core/types';
 export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
 export type Serializable = SerializableValue | SerializableValue[];
 
-// eslint-disable-next-line
 export type SerializableState = {
   [key: string]: Serializable;
 };
@@ -32,7 +31,11 @@ export type MigrateFunction<
   ToVersion extends SerializableState = SerializableState
 > = (state: FromVersion) => ToVersion;
 
-export interface PersistableState<P extends SerializableState = SerializableState> {
+export type MigrateFunctionsObject = {
+  [key: string]: MigrateFunction;
+};
+
+export interface PersistableStateService<P extends SerializableState = SerializableState> {
   /**
    *  function to extract telemetry information
    * @param state
@@ -65,16 +68,36 @@ export interface PersistableState<P extends SerializableState = SerializableStat
    * @param state
    * @param version
    */
-  migrate?: (state: SerializableState, version: string) => SerializableState;
+  migrate: (state: SerializableState, version: string) => SerializableState;
 }
 
-export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
-  Omit<PersistableState<P>, 'migrate'>
-> & {
+export interface PersistableState<P extends SerializableState = SerializableState> {
+  /**
+   *  function to extract telemetry information
+   * @param state
+   * @param collector
+   */
+  telemetry: (state: P, collector: Record<string, any>) => Record<string, any>;
+  /**
+   * inject function receives state and a list of references and should return state with references injected
+   * default is identity function
+   * @param state
+   * @param references
+   */
+  inject: (state: P, references: SavedObjectReference[]) => P;
+  /**
+   * extract function receives state and should return state with references extracted and array of references
+   * default returns same state with empty reference array
+   * @param state
+   */
+  extract: (state: P) => { state: P; references: SavedObjectReference[] };
+
   /**
    * list of all migrations per semver
    */
-  migrations?: {
-    [key: string]: MigrateFunction;
-  };
-};
+  migrations: MigrateFunctionsObject;
+}
+
+export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
+  PersistableState<P>
+>;

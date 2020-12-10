@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create a visualization from a saved search', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.timePicker.setDefaultAbsoluteRange();

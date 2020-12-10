@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -79,7 +79,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map((entries) => {
+            data: entriesPerHighlightTerm.map(({ entries }) => {
               if (entries.length > 0) {
                 return {
                   entries,

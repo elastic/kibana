@@ -9,27 +9,55 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHealth,
+  EuiHighlight,
+} from '@elastic/eui';
+import { EntityFieldType } from '../../../../../common/types/anomalies';
+import { UiPartitionFieldConfig } from '../series_controls/series_controls';
+import { getSeverityColor } from '../../../../../common';
+import { EntityConfig } from './entity_config';
 
 export interface Entity {
   fieldName: string;
+  fieldType: EntityFieldType;
   fieldValue: any;
-  fieldValues: any;
+  fieldValues?: any;
 }
 
-interface EntityControlProps {
+/**
+ * Configuration for entity field dropdown options
+ */
+export interface FieldConfig {
+  isAnomalousOnly: boolean;
+}
+
+export type ComboBoxOption = EuiComboBoxOptionOption<{
+  value: string | number;
+  maxRecordScore?: number;
+}>;
+
+export interface EntityControlProps {
   entity: Entity;
-  entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
+  entityFieldValueChanged: (entity: Entity, fieldValue: string | number | null) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
+  config: UiPartitionFieldConfig;
+  onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
   forceSelection: boolean;
-  options: Array<EuiComboBoxOptionOption<string>>;
+  options: ComboBoxOption[];
+  isModelPlotEnabled: boolean;
 }
 
 interface EntityControlState {
-  selectedOptions: Array<EuiComboBoxOptionOption<string>> | undefined;
+  selectedOptions: ComboBoxOption[] | undefined;
   isLoading: boolean;
-  options: Array<EuiComboBoxOptionOption<string>> | undefined;
+  options: ComboBoxOption[] | undefined;
+  isEntityConfigPopoverOpen: boolean;
 }
 
 export const EMPTY_FIELD_VALUE_LABEL = i18n.translate(
@@ -46,6 +74,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     selectedOptions: undefined,
     options: undefined,
     isLoading: false,
+    isEntityConfigPopoverOpen: false,
   };
 
   componentDidUpdate(prevProps: EntityControlProps) {
@@ -54,7 +83,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const { fieldValue } = entity;
 
-    let selectedOptionsUpdate: Array<EuiComboBoxOptionOption<string>> | undefined = selectedOptions;
+    let selectedOptionsUpdate: ComboBoxOption[] | undefined = selectedOptions;
     if (
       (selectedOptions === undefined && fieldValue !== null) ||
       (Array.isArray(selectedOptions) &&
@@ -87,15 +116,34 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     }
   }
 
-  onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+  onChange = (selectedOptions: ComboBoxOption[]) => {
     const options = selectedOptions.length > 0 ? selectedOptions : undefined;
     this.setState({
       selectedOptions: options,
     });
 
     const fieldValue =
-      Array.isArray(options) && options[0].value !== null ? options[0].value : null;
+      Array.isArray(options) && options[0].value?.value !== null
+        ? options[0].value?.value ?? null
+        : null;
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
+  };
+
+  onManualInput = (inputValue: string) => {
+    const normalizedSearchValue = inputValue.trim().toLowerCase();
+    if (!normalizedSearchValue) {
+      return;
+    }
+    const manualInputValue: ComboBoxOption = {
+      label: inputValue,
+      value: {
+        value: inputValue,
+      },
+    };
+    this.setState({
+      selectedOptions: [manualInputValue],
+    });
+    this.props.entityFieldValueChanged(this.props.entity, inputValue);
   };
 
   onSearchChange = (searchValue: string) => {
@@ -106,13 +154,19 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     this.props.onSearchChange(this.props.entity, searchValue);
   };
 
-  renderOption = (option: EuiComboBoxOptionOption) => {
-    const { label } = option;
-    return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
+  renderOption = (option: ComboBoxOption, searchValue: string) => {
+    const highlightedLabel = <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
+    return option.value?.maxRecordScore ? (
+      <EuiHealth color={getSeverityColor(option.value.maxRecordScore)}>
+        {highlightedLabel}
+      </EuiHealth>
+    ) : (
+      highlightedLabel
+    );
   };
 
   render() {
-    const { entity, forceSelection } = this.props;
+    const { entity, forceSelection, isModelPlotEnabled, config, onConfigChange } = this.props;
     const { isLoading, options, selectedOptions } = this.state;
 
     const control = (
@@ -129,6 +183,10 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
           defaultMessage: 'Enter value',
         })}
         singleSelection={{ asPlainText: true }}
+        onCreateOption={this.onManualInput}
+        customOptionText={i18n.translate('xpack.ml.timeSeriesExplorer.setManualInputHelperText', {
+          defaultMessage: 'No matching values',
+        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={this.onChange}
@@ -136,6 +194,14 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         isClearable={false}
         renderOption={this.renderOption}
         data-test-subj={`mlSingleMetricViewerEntitySelection ${entity.fieldName}`}
+        prepend={
+          <EntityConfig
+            entity={entity}
+            isModelPlotEnabled={isModelPlotEnabled}
+            config={config}
+            onConfigChange={onConfigChange}
+          />
+        }
       />
     );
 

@@ -21,6 +21,14 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 
 export const registerFindRoute = (router: IRouter) => {
+  const referenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
+  const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
+    defaultValue: 'OR',
+  });
+
   router.get(
     {
       path: '/_find',
@@ -30,19 +38,15 @@ export const registerFindRoute = (router: IRouter) => {
           page: schema.number({ min: 0, defaultValue: 1 }),
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
-          default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-            defaultValue: 'OR',
-          }),
+          default_search_operator: searchOperatorSchema,
           search_fields: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
           sort_field: schema.maybe(schema.string()),
           has_reference: schema.maybe(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-            })
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
+          has_reference_operator: searchOperatorSchema,
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
           namespaces: schema.maybe(
@@ -67,6 +71,7 @@ export const registerFindRoute = (router: IRouter) => {
           typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
         sortField: query.sort_field,
         hasReference: query.has_reference,
+        hasReferenceOperator: query.has_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         namespaces,

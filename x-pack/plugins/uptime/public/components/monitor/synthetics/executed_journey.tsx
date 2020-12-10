@@ -57,29 +57,31 @@ interface ExecutedJourneyProps {
   journey: JourneyState;
 }
 
-export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
-  <div>
-    <EuiText>
-      <h3>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.executedJourney.heading"
-          defaultMessage="Summary information"
-        />
-      </h3>
-      <p>
-        {statusMessage(
-          journey.steps
-            .filter(isStepEnd)
-            .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
-        )}
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup direction="column">
-      {journey.steps.filter(isStepEnd).map((step, index) => (
-        <ExecutedStep key={index} index={index} step={step} />
-      ))}
-      <EuiSpacer size="s" />
-    </EuiFlexGroup>
-  </div>
-);
+export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
+  return (
+    <div>
+      <EuiText>
+        <h3>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.executedJourney.heading"
+            defaultMessage="Summary information"
+          />
+        </h3>
+        <p>
+          {statusMessage(
+            journey.steps
+              .filter(isStepEnd)
+              .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
+          )}
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
+        {journey.steps.filter(isStepEnd).map((step, index) => (
+          <ExecutedStep key={index} index={index} step={step} />
+        ))}
+        <EuiSpacer size="s" />
+      </EuiFlexGroup>
+    </div>
+  );
+};

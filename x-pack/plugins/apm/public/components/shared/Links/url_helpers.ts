@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
@@ -18,6 +19,48 @@ export function fromQuery(query: Record<string, any>) {
   );
 
   return stringify(encodedQuery, { sort: false, encode: false });
+}
+
+type LocationWithQuery = Partial<
+  History['location'] & {
+    query: Record<string, string>;
+  }
+>;
+
+function getNextLocation(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const { query, ...rest } = locationWithQuery;
+  return {
+    ...history.location,
+    ...rest,
+    search: fromQuery({
+      ...toQuery(history.location.search),
+      ...query,
+    }),
+  };
+}
+
+export function replace(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.replace(location);
+}
+
+export function push(history: History, locationWithQuery: LocationWithQuery) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.push(location);
+}
+
+export function createHref(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.createHref(location);
 }
 
 export type APMQueryParams = {

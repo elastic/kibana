@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { TagLabel } from '../tag_label';
 
 describe('TagLabel component', () => {

@@ -74,6 +74,31 @@ describe('date_range params', () => {
     );
   };
 
+  test('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs();
+    const dateRange = aggConfigs.aggs[0];
+    expect(dateRange.toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "date_range",
+          ],
+          "ranges": Array [
+            "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
+          ],
+          "schema": Array [
+            "buckets",
+          ],
+        },
+        "function": "aggDateRange",
+        "type": "function",
+      }
+    `);
+  });
+
   describe('getKey', () => {
     test('should return object', () => {
       const aggConfigs = getAggConfigs();

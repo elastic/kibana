@@ -45,7 +45,7 @@ export const workpadTemplateType: SavedObjectsType = {
   },
   migrations: {},
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'canvasApp',
     defaultSearchField: 'name',
     getTitle(obj) {

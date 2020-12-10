@@ -19,3 +19,10 @@ export declare class SavedObjectsUtils
 |  [namespaceIdToString](./kibana-plugin-core-server.savedobjectsutils.namespaceidtostring.md) | <code>static</code> | <code>(namespace?: string &#124; undefined) =&gt; string</code> | Converts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with the exception of the <code>undefined</code> namespace ID (which has a namespace string of <code>'default'</code>). |
 |  [namespaceStringToId](./kibana-plugin-core-server.savedobjectsutils.namespacestringtoid.md) | <code>static</code> | <code>(namespace: string) =&gt; string &#124; undefined</code> | Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with the exception of the <code>'default'</code> namespace string (which has a namespace ID of <code>undefined</code>). |
 
+## Methods
+
+|  Method | Modifiers | Description |
+|  --- | --- | --- |
+|  [generateId()](./kibana-plugin-core-server.savedobjectsutils.generateid.md) | <code>static</code> | Generates a random ID for a saved objects. |
+|  [isRandomId(id)](./kibana-plugin-core-server.savedobjectsutils.israndomid.md) | <code>static</code> | Validates that a saved object ID matches UUID format. |
+

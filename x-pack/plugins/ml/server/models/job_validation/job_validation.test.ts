@@ -8,20 +8,10 @@ import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
+import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  ml: {
-    info: () =>
-      Promise.resolve({
-        body: {
-          limits: {
-            effective_max_model_memory_limit: '100MB',
-            max_model_memory_limit: '1GB',
-          },
-        },
-      }),
-  },
   search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
 };
 
@@ -29,6 +19,18 @@ const mlClusterClient = ({
   asCurrentUser: callAs,
   asInternalUser: callAs,
 } as unknown) as IScopedClusterClient;
+
+const mlClient = ({
+  info: () =>
+    Promise.resolve({
+      body: {
+        limits: {
+          effective_max_model_memory_limit: '100MB',
+          max_model_memory_limit: '1GB',
+        },
+      },
+    }),
+} as unknown) as MlClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads
@@ -39,7 +41,7 @@ describe('ML - validateJob', () => {
       job: { analysis_config: { detectors: [] } },
     } as unknown) as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
 
       expect(ids).toStrictEqual([
@@ -59,7 +61,7 @@ describe('ML - validateJob', () => {
           job_id: id,
         },
       } as unknown) as ValidateJobPayload;
-      return validateJob(mlClusterClient, payload).catch(() => {
+      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
         new Error('Promise should not fail for jobIdTests.');
       });
     });
@@ -80,7 +82,7 @@ describe('ML - validateJob', () => {
       job: { analysis_config: { detectors: [] }, groups: testIds },
     } as unknown) as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes(messageId)).toBe(true);
     });
@@ -120,7 +122,7 @@ describe('ML - validateJob', () => {
       const payload = ({
         job: { analysis_config: { bucket_span: format, detectors: [] } },
       } as unknown) as ValidateJobPayload;
-      return validateJob(mlClusterClient, payload).catch(() => {
+      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
         new Error('Promise should not fail for bucketSpanFormatTests.');
       });
     });
@@ -159,7 +161,7 @@ describe('ML - validateJob', () => {
       function: undefined,
     });
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_empty')).toBe(true);
     });
@@ -173,7 +175,7 @@ describe('ML - validateJob', () => {
       function: 'count',
     });
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_not_empty')).toBe(true);
     });
@@ -185,7 +187,7 @@ describe('ML - validateJob', () => {
       fields: {},
     } as unknown) as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_invalid')).toBe(true);
     });
@@ -197,7 +199,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     } as unknown) as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_valid')).toBe(true);
     });
@@ -225,7 +227,7 @@ describe('ML - validateJob', () => {
     const payload = getBasicPayload() as any;
     delete payload.job.analysis_config.influencers;
 
-    validateJob(mlClusterClient, payload).then(
+    validateJob(mlClusterClient, mlClient, payload).then(
       () =>
         done(
           new Error('Promise should not resolve for this test when influencers is not an Array.')
@@ -237,7 +239,7 @@ describe('ML - validateJob', () => {
   it('detect duplicate detectors', () => {
     const payload = getBasicPayload() as any;
     payload.job.analysis_config.detectors.push({ function: 'count' });
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -260,7 +262,7 @@ describe('ML - validateJob', () => {
       { function: 'count', by_field_name: 'airline' },
       { function: 'count', partition_field_name: 'airline' },
     ];
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -275,7 +277,7 @@ describe('ML - validateJob', () => {
   // Failing https://github.com/elastic/kibana/issues/65865
   it('basic validation passes, extended checks return some messages', () => {
     const payload = getBasicPayload();
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -308,7 +310,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -341,7 +343,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -384,7 +386,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, payload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -403,7 +405,7 @@ describe('ML - validateJob', () => {
   const docsTestPayload = getBasicPayload() as any;
   docsTestPayload.job.analysis_config.detectors = [{ function: 'count', by_field_name: 'airline' }];
   it('creates a docs url pointing to the current docs version', () => {
-    return validateJob(mlClusterClient, docsTestPayload).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, docsTestPayload).then((messages) => {
       const message = messages[
         messages.findIndex((m) => m.id === 'field_not_aggregatable')
       ] as JobValidationMessage;
@@ -412,7 +414,7 @@ describe('ML - validateJob', () => {
   });
 
   it('creates a docs url pointing to the master docs version', () => {
-    return validateJob(mlClusterClient, docsTestPayload, 'master').then((messages) => {
+    return validateJob(mlClusterClient, mlClient, docsTestPayload, 'master').then((messages) => {
       const message = messages[
         messages.findIndex((m) => m.id === 'field_not_aggregatable')
       ] as JobValidationMessage;

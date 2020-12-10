@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
 import { LegacyAPICaller, IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
-import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../common/constants';
 import { PipelineListItem } from '../../models/pipeline_list_item';
-import { fetchAllFromScroll } from '../../lib/fetch_all_from_scroll';
 import { checkLicense } from '../../lib/check_license';
 
 async function fetchPipelines(callWithRequest: LegacyAPICaller) {
   const params = {
-    index: INDEX_NAMES.PIPELINES,
-    scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-    body: {
-      size: ES_SCROLL_SETTINGS.PAGE_SIZE,
-    },
+    path: '/_logstash/pipeline',
+    method: 'GET',
     ignore: [404],
   };
 
-  const response = await callWithRequest<SearchResponse<any>>('search', params);
-  return fetchAllFromScroll(response, callWithRequest);
+  return await callWithRequest('transport.request', params);
 }
 
 export function registerPipelinesListRoute(router: IRouter) {
@@ -38,11 +31,16 @@ export function registerPipelinesListRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         try {
           const client = context.logstash!.esClient;
-          const pipelinesHits = await fetchPipelines(client.callAsCurrentUser);
+          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<
+            string,
+            any
+          >;
 
-          const pipelines = pipelinesHits.map((pipeline) => {
-            return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
-          });
+          const pipelines = Object.keys(pipelinesRecord)
+            .sort()
+            .map((key) => {
+              return PipelineListItem.fromUpstreamJSON(key, pipelinesRecord).downstreamJSON;
+            });
 
           return response.ok({ body: { pipelines } });
         } catch (err) {

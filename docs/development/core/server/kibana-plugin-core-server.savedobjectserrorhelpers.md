@@ -16,7 +16,7 @@ export declare class SavedObjectsErrorHelpers
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [createBadRequestError(reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.createbadrequesterror.md) | <code>static</code> |  |
-|  [createConflictError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
+|  [createConflictError(type, id, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
 |  [createGenericNotFoundError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md) | <code>static</code> |  |
 |  [createInvalidVersionError(versionInput)](./kibana-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md) | <code>static</code> |  |
 |  [createTooManyRequestsError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createtoomanyrequestserror.md) | <code>static</code> |  |

@@ -29,7 +29,6 @@ exports.getWebpackConfig = function (kibanaPath) {
       alias: {
         // Dev defaults for test bundle https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/core_plugins/tests_bundle/index.js#L73-L78
         fixtures: resolve(kibanaPath, 'src/fixtures'),
-        test_utils: resolve(kibanaPath, 'src/test_utils/public'),
       },
       unsafeCache: true,
     },

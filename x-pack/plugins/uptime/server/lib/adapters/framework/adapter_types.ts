@@ -9,17 +9,18 @@ import {
   IRouter,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
-
-export type ESAPICaller = ILegacyScopedClusterClient['callAsCurrentUser'];
+import { UptimeESClient } from '../../lib';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: ESAPICaller; dynamicSettings: DynamicSettings } & P
+  params: {
+    uptimeEsClient: UptimeESClient;
+    esClient?: IScopedClusterClient;
+  } & P
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (

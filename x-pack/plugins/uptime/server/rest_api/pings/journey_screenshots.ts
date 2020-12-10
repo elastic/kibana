@@ -17,11 +17,10 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex: schema.number(),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
+  handler: async ({ uptimeEsClient }, _context, request, response) => {
     const { checkGroup, stepIndex } = request.params;
     const result = await libs.requests.getJourneyScreenshot({
-      callES,
-      dynamicSettings,
+      uptimeEsClient,
       checkGroup,
       stepIndex,
     });
@@ -30,10 +29,12 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       return response.notFound();
     }
     return response.ok({
-      body: Buffer.from(result, 'base64'),
+      body: Buffer.from(result.blob, 'base64'),
       headers: {
         'content-type': 'image/png',
         'cache-control': 'max-age=600',
+        'caption-name': result.stepName,
+        'max-steps': result.totalSteps,
       },
     });
   },

@@ -88,8 +88,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
     ],
   };
 

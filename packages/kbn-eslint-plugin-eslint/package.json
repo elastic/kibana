@@ -5,14 +5,5 @@
   "license": "Apache-2.0",
   "kibana": {
     "devOnly": true
-  },
-  "peerDependencies": {
-    "eslint": "6.8.0",
-    "babel-eslint": "^10.0.3"
-  },
-  "dependencies": {
-    "micromatch": "3.1.10",
-    "dedent": "^0.7.0",
-    "eslint-module-utils": "2.5.0"
   }
 }

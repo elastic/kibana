@@ -5,17 +5,17 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
 
 import { UIM_APP_NAME } from '../constants';
 
 export { METRIC_TYPE };
 
 // usageCollection is an optional dependency, so we default to a no-op.
-export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
+export let trackUiMetric = (metricType: UiCounterMetricType, eventName: string) => {};
 
 export function init(usageCollection: UsageCollectionSetup): void {
-  trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
+  trackUiMetric = usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME);
 }
 
 /**

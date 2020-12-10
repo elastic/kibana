@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-setFieldFormat: (fieldName: string, format: SerializedFieldFormat) => void;
+readonly setFieldFormat: (fieldName: string, format: SerializedFieldFormat) => void;
 ```

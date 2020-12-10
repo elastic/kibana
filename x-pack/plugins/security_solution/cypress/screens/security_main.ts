@@ -7,3 +7,5 @@
 export const MAIN_PAGE = '[data-test-subj="kibanaChrome"]';
 
 export const TIMELINE_TOGGLE_BUTTON = '[data-test-subj="flyoutOverlay"]';
+
+export const TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON = `[data-test-subj="flyoutBottomBar"] ${TIMELINE_TOGGLE_BUTTON}`;

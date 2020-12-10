@@ -185,21 +185,21 @@ describe('VegaParser._resolveEsQueries', () => {
     'es',
     check(
       { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
-      { data: { name: 'requestId', values: [42], x: 1 } }
+      { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }
     )
   );
   test(
     'es 2',
     check(
       { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
-      { data: { name: 'requestId', values: [42] } }
+      { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42] } }
     )
   );
   test(
     'es arr',
     check(
       { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
-      { arr: [{ data: { name: 'requestId', values: [42], x: 1 } }] }
+      { arr: [{ data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }] }
     )
   );
   test(

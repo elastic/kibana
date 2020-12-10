@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { aggregateAlertRoute } from './aggregate';
 export { createAlertRoute } from './create';
 export { deleteAlertRoute } from './delete';
 export { findAlertRoute } from './find';

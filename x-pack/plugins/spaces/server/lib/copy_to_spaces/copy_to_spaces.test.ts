@@ -18,6 +18,9 @@ import {
 } from 'src/core/server/mocks';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 
+// Mock out circular dependency
+jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
+
 jest.mock('../../../../../../src/core/server', () => {
   return {
     ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
@@ -283,7 +286,7 @@ describe('copySavedObjectsToSpaces', () => {
           new Readable({
             objectMode: true,
             read() {
-              this.emit('error', new Error('Something went wrong while reading this stream'));
+              this.destroy(new Error('Something went wrong while reading this stream'));
             },
           })
         );

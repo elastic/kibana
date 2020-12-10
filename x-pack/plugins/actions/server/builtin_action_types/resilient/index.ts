@@ -25,6 +25,7 @@ import {
   ResilientExecutorResultData,
   ExecutorSubActionGetIncidentTypesParams,
   ExecutorSubActionGetSeverityParams,
+  ExecutorSubActionCommonFieldsParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
@@ -37,7 +38,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'incidentTypes', 'severity'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
 // action type definition
 export function getActionType(
@@ -120,6 +121,14 @@ async function executor(
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'getFields') {
+    const getFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+    data = await api.getFields({
+      externalService,
+      params: getFieldsParams,
+    });
   }
 
   if (subAction === 'incidentTypes') {

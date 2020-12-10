@@ -36,16 +36,14 @@ export const parsedIndexedInterfaceWithNoMatchingSchema: ParsedUsageCollection =
     fetch: {
       typeName: 'Usage',
       typeDescriptor: {
-        '': {
-          '@@INDEX@@': {
-            count_1: {
-              kind: SyntaxKind.NumberKeyword,
-              type: 'NumberKeyword',
-            },
-            count_2: {
-              kind: SyntaxKind.NumberKeyword,
-              type: 'NumberKeyword',
-            },
+        '@@INDEX@@': {
+          count_1: {
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
+          },
+          count_2: {
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
           },
         },
       },

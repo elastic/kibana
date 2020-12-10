@@ -6,7 +6,7 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerWSOverviewRoute } from './overview';
+import { registerOverviewRoute } from './overview';
 
 describe('Overview route', () => {
   describe('GET /api/workplace_search/overview', () => {
@@ -14,9 +14,13 @@ describe('Overview route', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/overview',
+        payload: 'query',
+      });
 
-      registerWSOverviewRoute({
+      registerOverviewRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });

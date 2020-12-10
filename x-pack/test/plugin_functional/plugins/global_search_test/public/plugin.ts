@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of } from 'rxjs';
 import { map, reduce } from 'rxjs/operators';
 import { Plugin, CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
 import {
@@ -12,13 +11,11 @@ import {
   GlobalSearchPluginStart,
   GlobalSearchResult,
 } from '../../../../../plugins/global_search/public';
-import { createResult } from '../common/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}
 export interface GlobalSearchTestPluginStart {
-  findTest: (term: string) => Promise<GlobalSearchResult[]>;
-  findReal: (term: string) => Promise<GlobalSearchResult[]>;
+  find: (term: string) => Promise<GlobalSearchResult[]>;
 }
 
 export interface GlobalSearchTestPluginSetupDeps {
@@ -48,25 +45,6 @@ export class GlobalSearchTestPlugin
       },
     });
 
-    globalSearch.registerResultProvider({
-      id: 'gs_test_client',
-      find: (term, options) => {
-        if (term.includes('client')) {
-          return of([
-            createResult({
-              id: 'client1',
-              type: 'test_client_type',
-            }),
-            createResult({
-              id: 'client2',
-              type: 'test_client_type',
-            }),
-          ]);
-        }
-        return of([]);
-      },
-    });
-
     return {};
   }
 
@@ -75,23 +53,11 @@ export class GlobalSearchTestPlugin
     { globalSearch }: GlobalSearchTestPluginStartDeps
   ): GlobalSearchTestPluginStart {
     return {
-      findTest: (term) =>
+      find: (term) =>
         globalSearch
-          .find(term, {})
+          .find({ term }, {})
           .pipe(
             map((batch) => batch.results),
-            // restrict to test type to avoid failure when real providers are present
-            map((results) => results.filter((r) => r.type.startsWith('test_'))),
-            reduce((memo, results) => [...memo, ...results])
-          )
-          .toPromise(),
-      findReal: (term) =>
-        globalSearch
-          .find(term, {})
-          .pipe(
-            map((batch) => batch.results),
-            // remove test types
-            map((results) => results.filter((r) => !r.type.startsWith('test_'))),
             reduce((memo, results) => [...memo, ...results])
           )
           .toPromise(),

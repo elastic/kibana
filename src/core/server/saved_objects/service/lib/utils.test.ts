@@ -17,11 +17,22 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsUtils } from './utils';
 
+jest.mock('uuid', () => ({
+  v1: jest.fn().mockReturnValue('mock-uuid'),
+}));
+
 describe('SavedObjectsUtils', () => {
-  const { namespaceIdToString, namespaceStringToId, createEmptyFindResponse } = SavedObjectsUtils;
+  const {
+    namespaceIdToString,
+    namespaceStringToId,
+    createEmptyFindResponse,
+    generateId,
+    isRandomId,
+  } = SavedObjectsUtils;
 
   describe('#namespaceIdToString', () => {
     it('converts `undefined` to default namespace string', () => {
@@ -75,6 +86,22 @@ describe('SavedObjectsUtils', () => {
     it('handles `perPage` field', () => {
       const options = { perPage: 42 } as SavedObjectsFindOptions;
       expect(createEmptyFindResponse(options).per_page).toEqual(42);
+    });
+  });
+
+  describe('#generateId', () => {
+    it('returns a valid uuid', () => {
+      expect(generateId()).toBe('mock-uuid');
+      expect(uuid.v1).toHaveBeenCalled();
+    });
+  });
+
+  describe('#isRandomId', () => {
+    it('validates uuid correctly', () => {
+      expect(isRandomId('c4d82f66-3046-11eb-adc1-0242ac120002')).toBe(true);
+      expect(isRandomId('invalid')).toBe(false);
+      expect(isRandomId('')).toBe(false);
+      expect(isRandomId(undefined)).toBe(false);
     });
   });
 });

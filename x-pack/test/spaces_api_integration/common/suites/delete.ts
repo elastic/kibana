@@ -167,7 +167,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       error: 'Bad Request',
       statusCode: 400,
-      message: `This Space cannot be deleted because it is reserved.`,
+      message: `The default space cannot be deleted because it is reserved.`,
     });
   };
 

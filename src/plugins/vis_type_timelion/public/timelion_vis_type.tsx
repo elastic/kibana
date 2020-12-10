@@ -42,7 +42,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     title: 'Timelion',
     icon: 'visTimelion',
     description: i18n.translate('timelion.timelionDescription', {
-      defaultMessage: 'Build time-series using functional expressions',
+      defaultMessage: 'Show time series data on a graph.',
     }),
     visConfig: {
       defaults: {

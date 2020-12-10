@@ -41,6 +41,13 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
+export const API_URL_REQUIRE_HTTPS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requireHttpsApiUrlTextField',
+  {
+    defaultMessage: 'URL must start with https://.',
+  }
+);
+
 export const JIRA_PROJECT_KEY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.projectKey',
   {
@@ -120,10 +127,10 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const TITLE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredTitleTextField',
+export const SUMMARY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredSummaryTextField',
   {
-    defaultMessage: 'Title is required.',
+    defaultMessage: 'Summary is required.',
   }
 );
 

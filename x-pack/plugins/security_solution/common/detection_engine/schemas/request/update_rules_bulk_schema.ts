@@ -5,10 +5,7 @@
  */
 
 import * as t from 'io-ts';
-
-import { updateRulesSchema, UpdateRulesSchemaDecoded } from './update_rules_schema';
+import { updateRulesSchema } from './rule_schemas';
 
 export const updateRulesBulkSchema = t.array(updateRulesSchema);
 export type UpdateRulesBulkSchema = t.TypeOf<typeof updateRulesBulkSchema>;
-
-export type UpdateRulesBulkSchemaDecoded = UpdateRulesSchemaDecoded[];

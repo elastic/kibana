@@ -9,7 +9,7 @@ import React, { MouseEventHandler, useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { updateColumnParam } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
 import { OperationDefinition } from '../index';
 import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
@@ -75,7 +75,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   input: 'none',
   isTransferable: () => true,
 
-  buildColumn({ suggestedPriority, previousColumn }) {
+  getDefaultLabel: () => filtersLabel,
+  buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -96,7 +97,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
-      suggestedPriority,
       isBucketed: true,
       params,
     };
@@ -203,7 +203,7 @@ export const FilterList = ({
     <>
       <DragDropBuckets
         onDragEnd={updateFilters}
-        onDragStart={() => setIsOpenByCreation(false)}
+        onDragStart={() => {}}
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
@@ -227,8 +227,7 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {

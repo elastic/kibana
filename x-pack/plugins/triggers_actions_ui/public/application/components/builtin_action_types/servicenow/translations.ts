@@ -41,6 +41,13 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
+export const API_URL_REQUIRE_HTTPS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requireHttpsApiUrlTextField',
+  {
+    defaultMessage: 'URL must start with https://.',
+  }
+);
+
 export const AUTHENTICATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.authenticationLabel',
   {
@@ -150,6 +157,6 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
 export const TITLE_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredTitleTextField',
   {
-    defaultMessage: 'Title is required.',
+    defaultMessage: 'Short description is required.',
   }
 );

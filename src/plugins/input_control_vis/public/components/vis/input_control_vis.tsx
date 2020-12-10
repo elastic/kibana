@@ -26,6 +26,8 @@ import { RangeControl } from '../../control/range_control_factory';
 import { ListControl as ListControlComponent } from './list_control';
 import { RangeControl as RangeControlComponent } from './range_control';
 
+import './input_control_vis.scss';
+
 function isListControl(control: RangeControl | ListControl): control is ListControl {
   return control.type === CONTROL_TYPES.LIST;
 }
@@ -165,9 +167,11 @@ export class InputControlVis extends Component<InputControlVisProps> {
     }
 
     return (
-      <div className="icvContainer">
-        <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
-        {stagingButtons}
+      <div className="icvContainer__wrapper">
+        <div className="icvContainer">
+          <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
+          {stagingButtons}
+        </div>
       </div>
     );
   }

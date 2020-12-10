@@ -82,12 +82,13 @@ describe('core deprecations', () => {
 
   describe('xsrfDeprecation', () => {
     it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { messages } = applyCoreDeprecations({
+      const { migrated, messages } = applyCoreDeprecations({
         server: { xsrf: { whitelist: ['/path'] } },
       });
+      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
         ]
       `);
     });

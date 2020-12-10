@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../constants';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 
 export const metadata = {
   id: CSV_FROM_SAVEDOBJECT_JOB_TYPE,

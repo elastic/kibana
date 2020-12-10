@@ -8,14 +8,18 @@ import React, { FC, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import d3 from 'd3';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { useDecisionPathData, isDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
 interface RegressionDecisionPathProps {
   predictionFieldName?: string;
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   predictedValue?: number | undefined;
   featureImportance: FeatureImportance[];
   topClasses?: TopClasses;

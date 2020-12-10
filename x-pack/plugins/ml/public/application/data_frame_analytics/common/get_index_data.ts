@@ -63,7 +63,13 @@ export const getIndexData = async (
 
       if (!options.didCancel) {
         setRowCount(resp.hits.total.value);
-        setTableItems(resp.hits.hits.map((d) => getProcessedFields(d.fields)));
+        setTableItems(
+          resp.hits.hits.map((d) =>
+            getProcessedFields(d.fields, (key: string) =>
+              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            )
+          )
+        );
         setStatus(INDEX_STATUS.LOADED);
       }
     } catch (e) {

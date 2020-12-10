@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { CustomHttpResponseOptions, ResponseError } from '../../../../src/core/server';
 
 export function wrapError(error: any) {

@@ -24,18 +24,18 @@ import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
 export const mySearchStrategyProvider = (
   data: PluginStart
 ): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
-  const es = data.search.getSearchStrategy('es');
+  const es = data.search.getSearchStrategy();
   return {
-    search: (request, options, context) =>
-      es.search(request, options, context).pipe(
+    search: (request, options, deps) =>
+      es.search(request, options, deps).pipe(
         map((esSearchRes) => ({
           ...esSearchRes,
           cool: request.get_cool ? 'YES' : 'NOPE',
         }))
       ),
-    cancel: async (context, id) => {
+    cancel: async (id, options, deps) => {
       if (es.cancel) {
-        es.cancel(context, id);
+        await es.cancel(id, options, deps);
       }
     },
   };

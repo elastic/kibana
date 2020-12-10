@@ -98,7 +98,7 @@ const makeMonitorSummaries = (count: number): MonitorSummary[] => {
     summaries.push({
       monitor_id: id,
       state: {
-        monitor: {},
+        monitor: { type: 'http' },
         timestamp: (123 + i).toString(),
         url: {},
         summaryPings: [],

@@ -17,8 +17,8 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RenderingService as Service } from '../rendering_service';
-import { InternalRenderingServiceSetup } from '../types';
+import type { RenderingService as Service } from '../rendering_service';
+import type { InternalRenderingServiceSetup } from '../types';
 import { mockRenderingServiceParams } from './params';
 
 type IRenderingService = PublicMethodsOf<Service>;

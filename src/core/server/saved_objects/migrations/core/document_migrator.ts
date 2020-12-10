@@ -60,7 +60,7 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';

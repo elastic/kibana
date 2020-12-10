@@ -24,7 +24,7 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
     }),
   },
   handler: async (
-    { savedObjectsClient, callES, dynamicSettings },
+    { savedObjectsClient, uptimeEsClient },
     _context,
     request,
     response
@@ -33,7 +33,10 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
     if (pageView.refreshTelemetryHistory) {
       KibanaTelemetryAdapter.clearLocalTelemetry();
     }
-    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(callES, savedObjectsClient);
+    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(
+      uptimeEsClient,
+      savedObjectsClient
+    );
     const pageViewResult = KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
 
     return response.ok({
