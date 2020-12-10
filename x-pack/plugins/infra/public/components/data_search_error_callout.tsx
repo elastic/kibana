@@ -41,12 +41,11 @@ export const DataSearchErrorCallout: React.FC<{
 const DataSearchErrorMessage: React.FC<{ error: SearchStrategyError }> = ({ error }) => {
   if (error.type === 'aborted') {
     return <AbortedRequestErrorMessage error={error} />;
-  } else if (error.type === 'generic') {
-    return <GenericErrorMessage error={error} />;
   } else if (error.type === 'shardFailure') {
     return <ShardFailureErrorMessage error={error} />;
+  } else {
+    return <GenericErrorMessage error={error} />;
   }
-  return <p>{`${error}`}</p>;
 };
 
 const AbortedRequestErrorMessage: React.FC<{
@@ -60,7 +59,7 @@ const AbortedRequestErrorMessage: React.FC<{
 );
 
 const GenericErrorMessage: React.FC<{ error: GenericSearchStrategyError }> = ({ error }) => (
-  <p>{error.message}</p>
+  <p>{error.message ?? `${error}`}</p>
 );
 
 const ShardFailureErrorMessage: React.FC<{ error: ShardFailureSearchStrategyError }> = ({
