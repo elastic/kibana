@@ -50,6 +50,17 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) 
   return settings;
 };
 
+const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, log) => {
+  const corsSettings = get(settings, 'server.cors');
+  if (typeof get(settings, 'server.cors') === 'boolean') {
+    log('"server.cors" is deprecated and has been replaced by "server.cors.enabled"');
+    settings.server.cors = {
+      enabled: corsSettings,
+    };
+  }
+  return settings;
+};
+
 const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   const NONCE_STRING = `{nonce}`;
   // Policies that should include the 'self' source
@@ -142,6 +153,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   unusedFromRoot('elasticsearch.preserveHost'),
   unusedFromRoot('elasticsearch.startupTimeout'),
+  rewriteCorsSettings,
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
