@@ -55,7 +55,6 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           title: '',
           description: '',
           columns: [],
-          grid: {},
           hits: 0,
           sort: [],
           version: 1,
