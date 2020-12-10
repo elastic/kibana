@@ -27,6 +27,7 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { eventsDefaultModel } from '../../../../common/components/events_viewer/default_model';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -206,12 +207,13 @@ const makeMapStateToProps = () => {
     headers: ColumnHeaderOptions[],
     browserFields: BrowserFields
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
-
+  const getEvents = timelineSelectors.getEventsByIdSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
+    const events: TimelineModel = getEvents(state, id) ?? eventsDefaultModel;
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+    const { columns } = events;
     const {
-      columns,
       eventIdToNoteIds,
       excludedRowRendererIds,
       isSelectAllChecked,

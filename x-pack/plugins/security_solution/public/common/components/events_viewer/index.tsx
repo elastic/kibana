@@ -167,7 +167,6 @@ const makeMapStateToProps = () => {
       sort,
       showCheckboxes,
     } = events;
-
     return {
       columns,
       dataProviders,
