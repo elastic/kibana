@@ -115,6 +115,17 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleRecurringTaskWhichHangs: {
+        title: 'Sample Recurring Task that Hangs for a minute',
+        description: 'A sample task that Hangs for a minute on each run.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
       sampleOneTimeTaskTimingOut: {
         title: 'Sample One-Time Task that Times Out',
         description: 'A sample task that times out each run.',

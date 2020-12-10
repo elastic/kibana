@@ -27,6 +27,7 @@ describe('dateHistogram(req, panel, series)', () => {
   let capabilities;
   let config;
   let indexPatternObject;
+  let uiSettings;
 
   beforeEach(() => {
     req = {
@@ -50,19 +51,29 @@ describe('dateHistogram(req, panel, series)', () => {
     };
     indexPatternObject = {};
     capabilities = new DefaultSearchCapabilities(req);
+    uiSettings = { maxBarsUiSettings: 100, barTargetUiSettings: 50 };
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+    dateHistogram(req, panel, series, config, indexPatternObject, capabilities, uiSettings)(next)(
+      {}
+    );
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns valid date histogram', () => {
     const next = (doc) => doc;
-    const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
-      {}
-    );
+    const doc = dateHistogram(
+      req,
+      panel,
+      series,
+      config,
+      indexPatternObject,
+      capabilities,
+      uiSettings
+    )(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -94,9 +105,16 @@ describe('dateHistogram(req, panel, series)', () => {
   test('returns valid date histogram (offset by 1h)', () => {
     series.offset_time = '1h';
     const next = (doc) => doc;
-    const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
-      {}
-    );
+    const doc = dateHistogram(
+      req,
+      panel,
+      series,
+      config,
+      indexPatternObject,
+      capabilities,
+      uiSettings
+    )(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -131,9 +149,16 @@ describe('dateHistogram(req, panel, series)', () => {
     series.series_time_field = 'timestamp';
     series.series_interval = '20s';
     const next = (doc) => doc;
-    const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
-      {}
-    );
+    const doc = dateHistogram(
+      req,
+      panel,
+      series,
+      config,
+      indexPatternObject,
+      capabilities,
+      uiSettings
+    )(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -168,9 +193,15 @@ describe('dateHistogram(req, panel, series)', () => {
       panel.type = 'timeseries';
 
       const next = (doc) => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
-        {}
-      );
+      const doc = dateHistogram(
+        req,
+        panel,
+        series,
+        config,
+        indexPatternObject,
+        capabilities,
+        uiSettings
+      )(next)({});
 
       expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).toBeUndefined();
       expect(doc.aggs.test.aggs.timeseries.date_histogram).toBeDefined();
@@ -180,9 +211,16 @@ describe('dateHistogram(req, panel, series)', () => {
       panel.time_range_mode = 'entire_time_range';
 
       const next = (doc) => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
-        {}
-      );
+      const doc = dateHistogram(
+        req,
+        panel,
+        series,
+        config,
+        indexPatternObject,
+        capabilities,
+        uiSettings
+      )(next)({});
+
       expect(doc).toEqual({
         aggs: {
           test: {

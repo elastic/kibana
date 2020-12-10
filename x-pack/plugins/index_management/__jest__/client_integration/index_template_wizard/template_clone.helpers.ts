@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 import { TemplateClone } from '../../../public/application/sections/template_clone';
 import { WithAppDependencies } from '../helpers';
 

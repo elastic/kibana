@@ -26,10 +26,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiButton as EuiLinkButton } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
-import { IGroup } from '../../../types';
-import { ORG_SOURCES_PATH } from '../../../routes';
+import { Group } from '../../../types';
+import { SOURCES_PATH } from '../../../routes';
 
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 
@@ -67,17 +67,17 @@ const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
-interface IGroupManagerModalProps {
+interface GroupManagerModalProps {
   children: React.ReactElement;
   label: string;
   allItems: object[];
   numSelected: number;
-  hideModal(group: IGroup): void;
+  hideModal(group: Group): void;
   selectAll(allItems: object[]): void;
   saveItems(): void;
 }
 
-export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
+export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   children,
   label,
   allItems,
@@ -96,9 +96,9 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
   const sourcesButton = (
-    <EuiLinkButton to={ORG_SOURCES_PATH} fill color="primary">
+    <EuiButtonTo to={SOURCES_PATH} fill color="primary">
       {ADD_SOURCE_BUTTON_TEXT}
-    </EuiLinkButton>
+    </EuiButtonTo>
   );
 
   const emptyState = (

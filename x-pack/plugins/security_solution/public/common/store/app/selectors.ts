@@ -33,4 +33,4 @@ export const selectNotesByIdSelector = createSelector(
 export const notesByIdsSelector = () =>
   createSelector(selectNotesById, (notesById: NotesById) => notesById);
 
-export const errorsSelector = () => createSelector(getErrors, (errors) => ({ errors }));
+export const errorsSelector = () => createSelector(getErrors, (errors) => errors);

@@ -147,6 +147,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
         await PageObjects.dashboard.switchToEditMode();
       }
       await this.ensureNewVisualizationDialogIsShowing();
+      await PageObjects.visualize.clickAggBasedVisualizations();
       await PageObjects.visualize.clickMetric();
       await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
       await testSubjects.exists('visualizeSaveButton');

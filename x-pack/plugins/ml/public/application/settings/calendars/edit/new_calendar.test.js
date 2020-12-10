@@ -57,7 +57,7 @@ jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
 

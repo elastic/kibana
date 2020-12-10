@@ -62,6 +62,9 @@
       "createdAt": {
         "type": "date"
       },
+      "updatedAt": {
+        "type": "date"
+      },
       "apiKey": {
         "type": "binary"
       },

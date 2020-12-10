@@ -21,7 +21,7 @@ import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
 import { ILicense } from '../../../licensing/server';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { first } from 'rxjs/operators';
 
 const advanceRetry = async (initializeCount: number) => {

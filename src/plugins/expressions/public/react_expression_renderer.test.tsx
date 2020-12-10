@@ -195,6 +195,38 @@ describe('ExpressionRenderer', () => {
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
   });
 
+  it('should call onData$ prop on every data$ observable emission in loader', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+
+    const newData = {};
+    const inspectData = {};
+    const onData$ = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$,
+        loading$: new Subject(),
+        events$: new Subject(),
+        update: jest.fn(),
+        inspect: jest.fn(() => inspectData),
+      };
+    });
+
+    mount(<ReactExpressionRenderer expression="" onData$={onData$} />);
+
+    expect(onData$).toHaveBeenCalledTimes(0);
+
+    act(() => {
+      dataSubject.next(newData);
+    });
+
+    expect(onData$).toHaveBeenCalledTimes(1);
+    expect(onData$.mock.calls[0][0]).toBe(newData);
+    expect(onData$.mock.calls[0][1]).toBe(inspectData);
+  });
+
   it('should fire onEvent prop on every events$ observable emission in loader', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());

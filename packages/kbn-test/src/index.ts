@@ -59,4 +59,6 @@ export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export * from './functional_test_runner';
 
-export * from './jest';
+export { getUrl } from './jest/utils/get_url';
+
+export { runCheckJestConfigsCli } from './jest/run_check_jest_configs_cli';

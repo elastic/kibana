@@ -30,7 +30,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       direction: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
     const index = request.query?.index ?? 0;
     const size = request.query?.size ?? DEFAULT_SIZE;
     const from = request.query?.from ?? DEFAULT_FROM;
@@ -39,8 +39,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     const direction = request.query?.direction ?? DEFAULT_DIRECTION;
     const { search } = request.query;
     const result = await libs.requests.getCerts({
-      callES,
-      dynamicSettings,
+      uptimeEsClient,
       index,
       search,
       size,

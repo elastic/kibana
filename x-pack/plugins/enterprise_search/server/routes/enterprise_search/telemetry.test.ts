@@ -25,7 +25,11 @@ describe('Enterprise Search Telemetry API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+    mockRouter = new MockRouter({
+      method: 'put',
+      path: '/api/enterprise_search/stats',
+      payload: 'body',
+    });
 
     registerTelemetryRoute({
       ...mockDependencies,

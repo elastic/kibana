@@ -11,9 +11,19 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
+import {
+  flattenCaseSavedObject,
+  wrapError,
+  escapeHatch,
+  getCommentContextFromAttributes,
+} from '../utils';
 
-import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
+import {
+  CaseExternalServiceRequestRt,
+  CaseResponseRt,
+  throwErrors,
+  CaseStatuses,
+} from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
@@ -72,7 +82,7 @@ export function initPushCaseUserActionApi({
           actionsClient.getAll(),
         ]);
 
-        if (myCase.attributes.status === 'closed') {
+        if (myCase.attributes.status === CaseStatuses.closed) {
           throw Boom.conflict(
             `This case ${myCase.attributes.title} is closed. You can not pushed if the case is closed.`
           );
@@ -112,7 +122,7 @@ export function initPushCaseUserActionApi({
               ...(myCaseConfigure.total > 0 &&
               myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
-                    status: 'closed',
+                    status: CaseStatuses.closed,
                     closed_at: pushedDate,
                     closed_by: { email, full_name, username },
                   }
@@ -148,7 +158,7 @@ export function initPushCaseUserActionApi({
                       actionBy: { username, full_name, email },
                       caseId,
                       fields: ['status'],
-                      newValue: 'closed',
+                      newValue: CaseStatuses.closed,
                       oldValue: myCase.attributes.status,
                     }),
                   ]
@@ -164,6 +174,7 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
+
         return response.ok({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
@@ -183,6 +194,7 @@ export function initPushCaseUserActionApi({
                   attributes: {
                     ...origComment.attributes,
                     ...updatedComment?.attributes,
+                    ...getCommentContextFromAttributes(origComment.attributes),
                   },
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],

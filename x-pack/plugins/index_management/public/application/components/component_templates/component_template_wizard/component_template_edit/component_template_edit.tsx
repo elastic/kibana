@@ -31,7 +31,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedName = attemptToURIDecode(name);
+  const decodedName = attemptToURIDecode(name)!;
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
 

@@ -32,8 +32,7 @@ export const validateEql = async ({
   const { rawResponse: response } = await data.search
     .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       {
-        // @ts-expect-error allow_no_indices is missing on EqlSearch
-        params: { allow_no_indices: true, index: index.join(), body: { query, size: 0 } },
+        params: { index: index.join(), body: { query, size: 0 } },
         options: { ignore: [400] },
       },
       {

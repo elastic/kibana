@@ -24,24 +24,27 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
   options: {
     tags: ['access:uptime-read'],
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
-    const {
-      dateRangeStart,
-      dateRangeEnd,
-      filters,
-      pagination,
-      statusFilter,
-      pageSize,
-    } = request.query;
+  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
+    try {
+      const {
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        pagination,
+        statusFilter,
+        pageSize,
+      } = request.query;
 
-    const decodedPagination = pagination
-      ? JSON.parse(decodeURIComponent(pagination))
-      : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
-    const [indexStatus, { summaries, nextPagePagination, prevPagePagination }] = await Promise.all([
-      libs.requests.getIndexStatus({ callES, dynamicSettings }),
-      libs.requests.getMonitorStates({
-        callES,
-        dynamicSettings,
+      const decodedPagination = pagination
+        ? JSON.parse(decodeURIComponent(pagination))
+        : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
+
+      const {
+        summaries,
+        nextPagePagination,
+        prevPagePagination,
+      } = await libs.requests.getMonitorStates({
+        uptimeEsClient,
         dateRangeStart,
         dateRangeEnd,
         pagination: decodedPagination,
@@ -51,18 +54,17 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
         // this sort of reassignment used to be further downstream but I've moved it here
         // because this code is going to be decomissioned soon
         statusFilter: statusFilter || undefined,
-      }),
-    ]);
+      });
 
-    const totalSummaryCount = indexStatus?.docCount ?? 0;
-
-    return response.ok({
-      body: {
-        summaries,
-        nextPagePagination,
-        prevPagePagination,
-        totalSummaryCount,
-      },
-    });
+      return response.ok({
+        body: {
+          summaries,
+          nextPagePagination,
+          prevPagePagination,
+        },
+      });
+    } catch (e) {
+      return response.internalError({ body: { message: e.message } });
+    }
   },
 });

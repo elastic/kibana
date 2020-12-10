@@ -5,7 +5,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../ingest_manager/common/mocks';
+import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import {
   getManifestManagerMock,

@@ -11,15 +11,18 @@ import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType } from '../types';
+import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getColumnToLabelMap } from './state_helpers';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -76,8 +79,10 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
+  data,
 }: {
   paletteService: PaletteRegistry;
+  data: DataPublicPluginStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -145,6 +150,7 @@ export const getXyVisualization = ({
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
@@ -167,7 +173,27 @@ export const getXyVisualization = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
 
-    const sortedAccessors = getSortedAccessors(datasource, layer);
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    let mappedAccessors: AccessorConfig[] = sortedAccessors.map((accessor) => ({
+      columnId: accessor,
+    }));
+
+    if (frame.activeData) {
+      const colorAssignments = getColorAssignments(
+        state.layers,
+        { tables: frame.activeData },
+        data.fieldFormats.deserialize
+      );
+      mappedAccessors = getAccessorColorConfig(
+        colorAssignments,
+        frame,
+        {
+          ...layer,
+          accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        },
+        paletteService
+      );
+    }
 
     const isHorizontal = isHorizontalChart(state.layers);
     return {
@@ -175,16 +201,15 @@ export const getXyVisualization = ({
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [layer.xAccessor] : [],
+          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
-          accessors: sortedAccessors,
+          accessors: mappedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,
@@ -196,9 +221,18 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          accessors: layer.splitAccessor
+            ? [
+                {
+                  columnId: layer.splitAccessor,
+                  triggerIcon: 'colorBy',
+                  palette: paletteService
+                    .get(layer.palette?.name || 'default')
+                    .getColors(10, layer.palette?.params),
+                },
+              ]
+            : [],
           filterOperations: isBucketed,
-          suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
@@ -263,7 +297,11 @@ export const getXyVisualization = ({
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
+    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
+    return {
+      icon: visualizationType?.icon || 'gear',
+      label: visualizationType?.label || '',
+    };
   },
 
   renderLayerContextMenu(domElement, props) {
@@ -287,7 +325,11 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor
+          {...props}
+          formatFactory={data.fieldFormats.deserialize}
+          paletteService={paletteService}
+        />
       </I18nProvider>,
       domElement
     );
@@ -331,6 +373,37 @@ export const getXyVisualization = ({
     }
 
     return errors.length ? errors : undefined;
+  },
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const layers = state.layers;
+
+    const filteredLayers = layers.filter(({ accessors }: LayerConfig) => accessors.length > 0);
+    const accessorsWithArrayValues = [];
+    for (const layer of filteredLayers) {
+      const { layerId, accessors } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows) {
+        break;
+      }
+      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
+      for (const accessor of accessors) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+        if (hasArrayValues) {
+          accessorsWithArrayValues.push(columnToLabel[accessor]);
+        }
+      }
+    }
+    return accessorsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
   },
 });
 

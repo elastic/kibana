@@ -18,15 +18,10 @@ import {
 } from '../common/constants';
 import {
   getHttp,
-  getIsEmsEnabled,
   getRegionmapLayers,
   getTilemap,
-  getEmsFileApiUrl,
-  getEmsTileApiUrl,
-  getEmsLandingPageUrl,
-  getEmsFontLibraryUrl,
-  getProxyElasticMapsServiceInMaps,
   getKibanaVersion,
+  getEMSSettings,
 } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 import { LayerConfig } from '../../../../src/plugins/region_map/config';
@@ -40,7 +35,7 @@ export function getKibanaTileMap(): unknown {
 }
 
 export async function getEmsFileLayers(): Promise<FileLayer[]> {
-  if (!getIsEmsEnabled()) {
+  if (!getEMSSettings().isEMSEnabled()) {
     return [];
   }
 
@@ -48,7 +43,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
-  if (!getIsEmsEnabled()) {
+  if (!getEMSSettings().isEMSEnabled()) {
     return [];
   }
 
@@ -65,18 +60,18 @@ let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
-    const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
+    const emsSettings = getEMSSettings();
     const proxyPath = '';
-    const tileApiUrl = proxyElasticMapsServiceInMaps
+    const tileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
         )
-      : getEmsTileApiUrl();
-    const fileApiUrl = proxyElasticMapsServiceInMaps
+      : emsSettings!.getEMSTileApiUrl();
+    const fileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
         )
-      : getEmsFileApiUrl();
+      : emsSettings!.getEMSFileApiUrl();
 
     emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -84,7 +79,7 @@ export function getEMSClient(): EMSClient {
       appName: EMS_APP_NAME,
       tileApiUrl,
       fileApiUrl,
-      landingPageUrl: getEmsLandingPageUrl(),
+      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
       fetchFunction(url: string) {
         return fetch(url);
       },
@@ -100,16 +95,18 @@ export function getEMSClient(): EMSClient {
 }
 
 export function getGlyphUrl(): string {
-  if (!getIsEmsEnabled()) {
+  const emsSettings = getEMSSettings();
+  if (!emsSettings!.isEMSEnabled()) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
-  return getProxyElasticMapsServiceInMaps()
+
+  return emsSettings!.isProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(
         getHttp().basePath.prepend(
           `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
         )
       ) + `/{fontstack}/{range}`
-    : getEmsFontLibraryUrl();
+    : emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {

@@ -155,7 +155,7 @@ export const getAnalyticsFactory = (
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,
-              spaces: spaces[config.id] ?? [],
+              spaceIds: spaces[config.id] ?? [],
             });
             return reducedtableRows;
           },

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
@@ -58,7 +57,9 @@ export function createExecutionHandler({
   request,
   alertParams,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
+  const alertTypeActionGroups = new Map(
+    alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+  );
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
@@ -75,6 +76,8 @@ export function createExecutionHandler({
             spaceId,
             tags,
             alertInstanceId,
+            alertActionGroup: actionGroup,
+            alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
             context,
             actionParams: action.params,
             state,
@@ -116,6 +119,7 @@ export function createExecutionHandler({
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
+            action_group_id: actionGroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },

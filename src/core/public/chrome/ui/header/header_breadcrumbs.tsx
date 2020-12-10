@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiFlexGroup, EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -51,15 +51,14 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, breadcrumbsAppendEx
     ),
   }));
 
-  if (breadcrumbsAppendExtension) {
+  if (breadcrumbsAppendExtension && crumbs[crumbs.length - 1]) {
     const lastCrumb = crumbs[crumbs.length - 1];
     lastCrumb.text = (
-      <>
-        {lastCrumb.text}
-        <HeaderExtension extension={breadcrumbsAppendExtension.content} display={'inlineBlock'} />
-      </>
+      <EuiFlexGroup responsive={false} gutterSize={'none'} alignItems={'baseline'}>
+        <div className="eui-textTruncate">{lastCrumb.text}</div>
+        <HeaderExtension extension={breadcrumbsAppendExtension.content} />
+      </EuiFlexGroup>
     );
   }
-
   return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }

@@ -22,7 +22,7 @@ import {
 } from '../../../../../../maps/common/constants';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -43,6 +43,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   ],
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
+  applyGlobalTime: true,
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
@@ -56,6 +57,8 @@ const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
     language: 'kuery',
   },
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
+  applyGlobalQuery: true,
+  applyGlobalTime: true,
 };
 
 const getWhereQuery = (serviceName: string) => {
@@ -158,7 +161,6 @@ export function useLayerList() {
       type: 'EMS_FILE',
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
-      applyGlobalQuery: true,
     },
     style: getLayerStyle(TRANSACTION_DURATION_COUNTRY),
     id: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',

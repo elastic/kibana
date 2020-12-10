@@ -5,6 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { CaseStatuses } from '../../../../case/common/api';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
@@ -157,7 +158,7 @@ describe('useGetCases', () => {
       const newFilters = {
         search: 'new',
         tags: ['new'],
-        status: 'closed',
+        status: CaseStatuses.closed,
       };
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
       await waitForNextUpdate();

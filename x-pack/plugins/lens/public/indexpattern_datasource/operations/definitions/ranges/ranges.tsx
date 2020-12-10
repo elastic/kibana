@@ -7,15 +7,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
-import { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/index';
+import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import {
+  buildExpressionFunction,
+  Range,
+} from '../../../../../../../../src/plugins/expressions/public';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { updateColumnParam, changeColumn } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
+import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
+import { getInvalidFieldMessage } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -71,36 +76,6 @@ function getFieldDefaultFormat(indexPattern: IndexPattern, field: IndexPatternFi
   return undefined;
 }
 
-function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
-  if (params.type === MODES.Range) {
-    return {
-      field: sourceField,
-      ranges: params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
-        if (isFullRange(range)) {
-          return range;
-        }
-        const partialRange: Partial<RangeType> = { label: range.label };
-        // be careful with the fields to set on partial ranges
-        if (isValidNumber(range.from)) {
-          partialRange.from = range.from;
-        }
-        if (isValidNumber(range.to)) {
-          partialRange.to = range.to;
-        }
-        return partialRange;
-      }),
-    };
-  }
-  return {
-    field: sourceField,
-    // fallback to 0 in case of empty string
-    maxBars: params.maxBars === AUTO_BARS ? null : params.maxBars,
-    has_extended_bounds: false,
-    min_doc_count: 0,
-    extended_bounds: { min: '', max: '' },
-  };
-}
-
 export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field'> = {
   type: 'range',
   displayName: i18n.translate('xpack.lens.indexPattern.intervals', {
@@ -108,6 +83,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&
@@ -121,12 +98,13 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, indexPattern, field }) {
+  getDefaultLabel: (column, indexPattern) =>
+    indexPattern.getFieldByName(column.sourceField)!.displayName,
+  buildColumn({ field }) {
     return {
-      label: field.name,
+      label: field.displayName,
       dataType: 'number', // string for Range
       operationType: 'range',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval', // ordinal for Range
@@ -140,7 +118,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
@@ -149,28 +127,55 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
     );
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.name,
       sourceField: field.name,
     };
   },
-  toEsAggsConfig: (column, columnId) => {
-    const params = getEsAggsParams(column);
-    return {
+  toEsAggsFn: (column, columnId) => {
+    const { sourceField, params } = column;
+    if (params.type === MODES.Range) {
+      return buildExpressionFunction<AggFunctionsMapping['aggRange']>('aggRange', {
+        id: columnId,
+        enabled: true,
+        schema: 'segment',
+        field: sourceField,
+        ranges: JSON.stringify(
+          params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
+            if (isFullRange(range)) {
+              return range;
+            }
+            const partialRange: Partial<RangeType> = { label: range.label };
+            // be careful with the fields to set on partial ranges
+            if (isValidNumber(range.from)) {
+              partialRange.from = range.from;
+            }
+            if (isValidNumber(range.to)) {
+              partialRange.to = range.to;
+            }
+            return partialRange;
+          })
+        ),
+      }).toAst();
+    }
+    return buildExpressionFunction<AggFunctionsMapping['aggHistogram']>('aggHistogram', {
       id: columnId,
       enabled: true,
-      type: column.params.type,
       schema: 'segment',
-      params,
-    };
+      field: sourceField,
+      // fallback to 0 in case of empty string
+      maxBars: params.maxBars === AUTO_BARS ? undefined : params.maxBars,
+      interval: 'auto',
+      has_extended_bounds: false,
+      min_doc_count: false,
+      extended_bounds: JSON.stringify({ min: '', max: '' }),
+    }).toAst();
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const currentField = indexPattern.fields.find(
-      (field) => field.name === currentColumn.sourceField
-    );
+    const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =
       numberFormat &&
@@ -213,23 +218,26 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
       setState(
-        changeColumn({
+        mergeLayer({
           state,
           layerId,
-          columnId,
-          newColumn: {
-            ...currentColumn,
-            scale,
-            dataType,
-            params: {
-              type: newMode,
-              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-              maxBars: maxBarsDefaultValue,
-              format: undefined,
-              parentFormat,
+          newLayer: {
+            columns: {
+              ...state.layers[layerId].columns,
+              [columnId]: {
+                ...currentColumn,
+                scale,
+                dataType,
+                params: {
+                  type: newMode,
+                  ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+                  maxBars: maxBarsDefaultValue,
+                  format: currentColumn.params.format,
+                  parentFormat,
+                },
+              },
             },
           },
-          keepParams: false,
         })
       );
     };

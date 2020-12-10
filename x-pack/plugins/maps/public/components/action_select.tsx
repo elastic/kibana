@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 interface Props {
   value?: string;
@@ -41,7 +42,7 @@ export class ActionSelect extends Component<Props, State> {
     }
     const actions = await this.props.getFilterActions();
     if (this._isMounted) {
-      this.setState({ actions });
+      this.setState({ actions: actions.filter((action) => !isUrlDrilldown(action)) });
     }
   }
 

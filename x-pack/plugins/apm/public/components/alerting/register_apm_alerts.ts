@@ -22,6 +22,9 @@ export function registerApmAlerts(
         'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(() => import('./ErrorCountAlertTrigger')),
     validate: () => ({
       errors: [],
@@ -53,6 +56,9 @@ export function registerApmAlerts(
       }
     ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAlertTrigger')
     ),
@@ -87,6 +93,9 @@ export function registerApmAlerts(
       }
     ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
       () => import('./TransactionErrorRateAlertTrigger')
     ),
@@ -121,6 +130,9 @@ export function registerApmAlerts(
       }
     ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAnomalyAlertTrigger')
     ),

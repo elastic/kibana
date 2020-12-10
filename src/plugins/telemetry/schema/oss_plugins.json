@@ -616,7 +616,7 @@
             }
           }
         },
-        "ingestManager": {
+        "fleet": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1391,7 +1391,7 @@
                     "disableProtection": {
                       "type": "boolean"
                     },
-                    "whitelistConfigured": {
+                    "allowlistConfigured": {
                       "type": "boolean"
                     }
                   }
@@ -1516,6 +1516,57 @@
               }
             }
           }
+        },
+        "apiCalls.savedObjectsImport.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.createNewCopiesEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.overwriteEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.overwriteEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.allTypesSelected.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.allTypesSelected.no": {
+          "type": "long"
         }
       }
     },
@@ -1578,6 +1629,23 @@
               "type": "long"
             }
           }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
         }
       }
     },
@@ -1849,6 +1917,35 @@
         },
         "dateFormat": {
           "type": "keyword"
+        }
+      }
+    },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword"
+              },
+              "eventName": {
+                "type": "keyword"
+              },
+              "lastUpdatedAt": {
+                "type": "date"
+              },
+              "fromTimestamp": {
+                "type": "date"
+              },
+              "counterType": {
+                "type": "keyword"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
         }
       }
     },

@@ -43,6 +43,9 @@ export function healthRoute(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       try {
         const {
           security: {
@@ -57,9 +60,12 @@ export function healthRoute(
             path: '/_xpack/usage',
           });
 
+        const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
           hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+          alertingFrameworkHeath,
         };
 
         return res.ok({

@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
 import {
   filter,
   map,
@@ -35,6 +35,7 @@ import {
   startWith,
   switchMap,
   distinctUntilChanged,
+  catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
@@ -73,14 +74,13 @@ import { NavAction, SavedDashboardPanel } from '../types';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard } from './lib';
+import { createSessionRestorationDataProvider, saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
-import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
   IKbnUrlStateStorage,
@@ -96,6 +96,7 @@ import {
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -149,7 +150,7 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService, search: searchService },
+    data,
     core: {
       notifications,
       overlays,
@@ -167,6 +168,8 @@ export class DashboardAppController {
     navigation,
     savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
+    const queryService = data.query;
+    const searchService = data.search;
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
     const queryStringManager = queryService.queryString;
@@ -260,6 +263,16 @@ export class DashboardAppController {
     dashboardStateManager.startStateSyncing();
 
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
+
+    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+
+    const getDashTitle = () =>
+      getDashboardTitle(
+        dashboardStateManager.getTitle(),
+        dashboardStateManager.getViewMode(),
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
+      );
 
     const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
@@ -428,6 +441,15 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
+    searchService.session.setSearchSessionInfoProvider(
+      createSessionRestorationDataProvider({
+        data,
+        getDashboardTitle: () => getDashTitle(),
+        getDashboardId: () => dash.id,
+        getAppState: () => dashboardStateManager.getAppState(),
+      })
+    );
+
     if (dashboardFactory) {
       const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
@@ -464,7 +486,10 @@ export class DashboardAppController {
                 switchMap((newChildIds: string[]) =>
                   merge(
                     ...newChildIds.map((childId) =>
-                      dashboardContainer!.getChild(childId).getOutput$()
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(catchError(() => EMPTY))
                     )
                   )
                 )
@@ -524,6 +549,7 @@ export class DashboardAppController {
                 incomingEmbeddable.type,
                 incomingEmbeddable.input
               );
+              updateViewMode(ViewMode.EDIT);
             }
           }
 
@@ -547,16 +573,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-
-    const getDashTitle = () =>
-      getDashboardTitle(
-        dashboardStateManager.getTitle(),
-        dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter),
-        dashboardStateManager.isNew()
-      );
 
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
@@ -617,9 +633,26 @@ export class DashboardAppController {
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
         }
 
+        // state keys change in which likely won't need a data fetch
+        const noRefetchKeys: Array<keyof DashboardContainerInput> = [
+          'viewMode',
+          'title',
+          'description',
+          'expandedPanelId',
+          'useMargins',
+          'isEmbeddedExternally',
+          'isFullScreenMode',
+          'isEmptyState',
+        ];
+
+        const shouldRefetch = Object.keys(changes).some(
+          (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
+        );
+
         dashboardContainer.updateInput({
           ...changes,
-          searchSessionId: searchService.session.start(),
+          // do not start a new session if this is irrelevant state change to prevent excessive searches
+          ...(shouldRefetch && { searchSessionId: searchService.session.start() }),
         });
       }
     };
@@ -633,6 +666,13 @@ export class DashboardAppController {
         refreshDashboardContainer();
       }
     };
+
+    const searchServiceSessionRefreshSubscribtion = searchService.session.onRefresh$.subscribe(
+      () => {
+        lastReloadRequestTime = new Date().getTime();
+        refreshDashboardContainer();
+      }
+    );
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const allFilters = filterManager.getFilters();
@@ -1195,6 +1235,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchServiceSessionRefreshSubscribtion.unsubscribe();
       searchService.session.clear();
     });
   }

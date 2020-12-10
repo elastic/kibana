@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
+  ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
@@ -50,6 +50,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
+    activeData?: Record<string, Datatable>;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -71,9 +72,6 @@ export interface EditorFrameSetup {
 export interface EditorFrameStart {
   createInstance: () => Promise<EditorFrameInstance>;
 }
-
-// Hints the default nesting to the data source. 0 is the highest priority
-export type DimensionPriority = 0 | 1 | 2;
 
 export interface TableSuggestionColumn {
   columnId: string;
@@ -169,8 +167,13 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  updateStateOnCloseDimension?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+  }) => T | undefined;
 
-  toExpression: (state: T, layerId: string) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -178,10 +181,16 @@ export interface Datasource<T = unknown, P = unknown> {
     indexPatternId: string,
     fieldName: string
   ) => Array<DatasourceSuggestion<T>>;
-  getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsFromCurrentState: (
+    state: T,
+    activeData?: Record<string, Datatable>
+  ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  getErrorMessages: (
+    state: T,
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -214,11 +223,6 @@ interface SharedDimensionProps {
    */
   filterOperations: (operation: OperationMetadata) => boolean;
 
-  /** Visualizations can hint at the role this dimension would play, which
-   * affects the default ordering of the query
-   */
-  suggestedPriority?: DimensionPriority;
-
   /** Some dimension editors will allow users to change the operation grouping
    * from the panel, and this lets the visualization hint that it doesn't want
    * users to have that level of control
@@ -231,24 +235,27 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   columnId: string;
   onRemove?: (accessor: string) => void;
   state: T;
+  activeData?: Record<string, Datatable>;
 };
 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
-  setState: StateSetter<T>;
+  // Not a StateSetter because we have this unique use case of determining valid columns
+  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+  activeData?: Record<string, Datatable>;
 }
 
 export interface DraggedOperation {
@@ -340,12 +347,19 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   setState: (newState: T) => void;
 };
 
+export interface AccessorConfig {
+  columnId: string;
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  color?: string;
+  palette?: string[];
+}
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: string[];
+  accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
@@ -428,6 +442,12 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  /**
+   * Data of the chart currently rendered in the preview.
+   * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
+   * If accessing, make sure to check whether expected columns actually exist.
+   */
+  activeData?: Record<string, Datatable>;
 
   dateRange: DateRange;
   query: Query;
@@ -526,7 +546,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
@@ -563,7 +586,7 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>,
     attributes?: Partial<{ title: string; description: string }>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
@@ -571,7 +594,7 @@ export interface Visualization<T = unknown> {
   toPreviewExpression?: (
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
@@ -580,6 +603,11 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: FramePublicAPI
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 export interface LensFilterEvent {

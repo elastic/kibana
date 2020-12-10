@@ -9,6 +9,7 @@
 ```typescript
 readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
@@ -100,6 +101,12 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: {
+            readonly guide: string;
+            readonly anomalyDetection: string;
+            readonly anomalyDetectionJobs: string;
+            readonly dataFrameAnalytics: string;
+        };
         readonly visualize: Record<string, string>;
     };
 ```

@@ -5,6 +5,7 @@
  */
 
 import {
+  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -12,7 +13,6 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../constants';
 import { ExportTypeDefinition } from '../../types';
 import { createJobFnFactory, ImmediateCreateJobFn } from './create_job';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';

@@ -27,6 +27,7 @@ import {
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
 import { getResult } from './__mocks__/request_responses';
+import { AlertExecutionStatusErrorReasons } from '../../../../../alerts/common';
 
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
@@ -464,7 +465,7 @@ describe('utils', () => {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
         error: {
-          reason: 'read',
+          reason: AlertExecutionStatusErrorReasons.Read,
           message: 'oops',
         },
       };

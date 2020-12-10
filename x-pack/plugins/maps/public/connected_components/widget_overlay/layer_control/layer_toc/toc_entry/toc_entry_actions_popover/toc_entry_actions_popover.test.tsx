@@ -36,19 +36,6 @@ class LayerMock extends AbstractLayer implements ILayer {
   isVisible() {
     return true;
   }
-
-  getIconAndTooltipContent(zoom: number, isUsingSearch: boolean) {
-    return {
-      icon: <span>mockIcon</span>,
-      tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      footnotes: [
-        {
-          icon: <span>mockFootnoteIcon</span>,
-          message: `simulated footnote at isUsingSearch: ${isUsingSearch}`,
-        },
-      ],
-    };
-  }
 }
 
 const defaultProps = {
@@ -59,11 +46,9 @@ const defaultProps = {
   fitToBounds: () => {},
   isEditButtonDisabled: false,
   isReadOnly: false,
-  isUsingSearch: true,
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
-  zoom: 0,
 };
 
 describe('TOCEntryActionsPopover', () => {

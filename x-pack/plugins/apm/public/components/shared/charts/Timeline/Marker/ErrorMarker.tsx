@@ -8,12 +8,12 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useTheme } from '../../../../../hooks/use_theme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { px, unit, units } from '../../../../../style/variables';
 import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';

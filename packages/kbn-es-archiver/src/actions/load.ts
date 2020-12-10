@@ -23,7 +23,7 @@ import { Readable } from 'stream';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Client } from 'elasticsearch';
 
-import { createPromiseFromStreams, concatStreamProviders } from '../lib/streams';
+import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
 import {
   isGzip,
@@ -43,7 +43,7 @@ import {
 // are not listened for
 const pipeline = (...streams: Readable[]) =>
   streams.reduce((source, dest) =>
-    source.once('error', (error) => dest.emit('error', error)).pipe(dest as any)
+    source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
 
 export async function loadAction({

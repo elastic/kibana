@@ -142,10 +142,11 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
+      cy.scrollTo('bottom');
       waitsForEventsToBeLoaded();
     });
 
@@ -156,13 +157,12 @@ describe('Events Viewer', () => {
 
     it('re-orders columns via drag and drop', () => {
       const originalColumnOrder =
-        '@timestampmessagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        '@timestamp1messagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
       const expectedOrderAfterDragAndDrop =
-        'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        'message@timestamp1host.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
-      cy.scrollTo('bottom');
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
-      dragAndDropColumn({ column: 0, newPosition: 1 });
+      dragAndDropColumn({ column: 0, newPosition: 0 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
     });
   });

@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./regression_creation'));
     loadTestFile(require.resolve('./classification_creation'));
     loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./feature_importance'));
   });
 }

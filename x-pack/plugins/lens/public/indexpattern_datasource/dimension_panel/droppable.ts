@@ -10,9 +10,9 @@ import {
   isDraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { buildColumn, changeField } from '../operations';
-import { changeColumn, mergeLayer } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { insertOrReplaceColumn } from '../operations';
+import { mergeLayer } from '../state_helpers';
+import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { getOperationSupportMatrix } from './operation_support';
@@ -28,9 +28,12 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
   }
 
   if (isDraggedField(dragging)) {
+    const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
     return (
       layerIndexPatternId === dragging.indexPatternId &&
-      Boolean(hasOperationForField(dragging.field))
+      Boolean(hasOperationForField(dragging.field)) &&
+      (!currentColumn ||
+        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
     );
   }
 
@@ -126,52 +129,36 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
-  const selectedColumn: IndexPatternColumn | null = state.layers[layerId].columns[columnId] || null;
-  const currentIndexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
-
-  // We need to check if dragging in a new field, was just a field change on the same
-  // index pattern and on the same operations (therefore checking if the new field supports
-  // our previous operation)
-  const hasFieldChanged =
-    selectedColumn &&
-    hasField(selectedColumn) &&
-    selectedColumn.sourceField !== droppedItem.field.name &&
-    operationsForNewField &&
-    operationsForNewField.includes(selectedColumn.operationType);
-
-  if (!operationsForNewField || operationsForNewField.length === 0) {
+  if (!operationsForNewField || operationsForNewField.size === 0) {
     return false;
   }
 
-  // If only the field has changed use the onFieldChange method on the operation to get the
-  // new column, otherwise use the regular buildColumn to get a new column.
-  const newColumn = hasFieldChanged
-    ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
-    : buildColumn({
-        op: operationsForNewField[0],
-        columns: state.layers[layerId].columns,
-        indexPattern: currentIndexPattern,
-        layerId,
-        suggestedPriority: props.suggestedPriority,
-        field: droppedItem.field,
-        previousColumn: selectedColumn,
-      });
+  const layer = state.layers[layerId];
+
+  const selectedColumn: IndexPatternColumn | null = layer.columns[columnId] || null;
+  const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
+
+  // Detects if we can change the field only, otherwise change field + operation
+  const fieldIsCompatibleWithCurrent =
+    selectedColumn &&
+    operationSupportMatrix.operationByField[droppedItem.field.name]?.has(
+      selectedColumn.operationType
+    );
+
+  const newLayer = insertOrReplaceColumn({
+    layer,
+    columnId,
+    indexPattern: currentIndexPattern,
+    op: fieldIsCompatibleWithCurrent
+      ? selectedColumn.operationType
+      : operationsForNewField.values().next().value,
+    field: droppedItem.field,
+  });
 
   trackUiEvent('drop_onto_dimension');
   const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
-
-  setState(
-    changeColumn({
-      state,
-      layerId,
-      columnId,
-      newColumn,
-      // If the field has changed, the onFieldChange method needs to take care of everything including moving
-      // over params. If we create a new column above we want changeColumn to move over params.
-      keepParams: !hasFieldChanged,
-    })
-  );
+  setState(mergeLayer({ state, layerId, newLayer }));
 
   return true;
 }

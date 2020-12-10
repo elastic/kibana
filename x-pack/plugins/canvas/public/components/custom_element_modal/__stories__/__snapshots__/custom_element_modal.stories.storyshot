@@ -211,7 +211,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div
@@ -517,7 +517,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -827,7 +827,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div
@@ -1132,7 +1132,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div

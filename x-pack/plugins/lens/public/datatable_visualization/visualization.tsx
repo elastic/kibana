@@ -149,9 +149,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns.filter(
-            (c) => datasource!.getOperationForColumnId(c)?.isBucketed
-          ),
+          accessors: sortedColumns
+            .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
+            .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
@@ -162,9 +162,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             defaultMessage: 'Metrics',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns.filter(
-            (c) => !datasource!.getOperationForColumnId(c)?.isBucketed
-          ),
+          accessors: sortedColumns
+            .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
+            .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,

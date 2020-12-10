@@ -43,7 +43,7 @@ describe('getRoleAbilities', () => {
       canManageEngineCredentials: false,
       canManageEngineCurations: false,
       canManageEngineRelevanceTuning: false,
-      canManageEngineReferenceUi: false,
+      canManageEngineSearchUi: false,
       canManageEngineResultSettings: false,
       canManageEngineSchema: false,
       canManageMetaEngineSourceEngines: false,

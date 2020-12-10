@@ -136,7 +136,10 @@ describe('HTTPAuthenticationProvider', () => {
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.succeeded({ ...user, authentication_provider: 'http' })
+          AuthenticationResult.succeeded({
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+          })
         );
 
         expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });

@@ -14,7 +14,11 @@ describe('Overview route', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/overview',
+        payload: 'query',
+      });
 
       registerOverviewRoute({
         ...mockDependencies,

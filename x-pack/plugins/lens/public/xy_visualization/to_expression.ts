@@ -7,12 +7,9 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, LayerConfig } from './types';
+import { State, ValidLayer, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
-
-interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
-}
+import { getColumnToLabelMap } from './state_helpers';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
   const originalOrder = datasource
@@ -60,6 +57,7 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
+      valueLabels: 'hide',
     },
     datasourceLayers,
     paletteService,
@@ -197,18 +195,9 @@ export const buildExpression = (
               ],
             },
           ],
+          valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
-            const columnToLabel: Record<string, string> = {};
-
-            const datasource = datasourceLayers[layer.layerId];
-            layer.accessors
-              .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-              .forEach((accessor) => {
-                const operation = datasource.getOperationForColumnId(accessor);
-                if (operation?.label) {
-                  columnToLabel[accessor] = operation.label;
-                }
-              });
+            const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 
             const xAxisOperation =
               datasourceLayers &&

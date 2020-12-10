@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { ExplainPluginEnabled } from '../plugin_enabled';
 
 describe('ExplainPluginEnabled', () => {

@@ -16,7 +16,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './state_helpers';
+import { updateLayerIndexPattern } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
@@ -26,6 +26,7 @@ import {
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
+import { getFieldByNameFactory } from './pure_helpers';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
@@ -112,6 +113,7 @@ export async function loadIndexPatterns({
             ])
           ),
         fields: newFields,
+        getFieldByName: getFieldByNameFactory(newFields),
         hasRestrictions: !!typeMeta?.aggs,
       };
 

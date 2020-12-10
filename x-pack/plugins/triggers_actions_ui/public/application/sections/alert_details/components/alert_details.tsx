@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
@@ -26,7 +26,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -38,9 +37,10 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
-import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -61,18 +61,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    http,
-    toastNotifications,
-    capabilities,
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
-    uiSettings,
-    docLinks,
-    charts,
-    dataPlugin,
     setBreadcrumbs,
     chrome,
-  } = useAppDependencies();
+  } = useKibana().services;
+  const [{}, dispatch] = useReducer(alertReducer, { alert });
+  const setInitialAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -148,27 +146,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         />
                       </EuiButtonEmpty>
                       {editFlyoutVisible && (
-                        <AlertsContextProvider
-                          value={{
-                            http,
-                            actionTypeRegistry,
-                            alertTypeRegistry,
-                            toastNotifications,
-                            uiSettings,
-                            docLinks,
-                            charts,
-                            dataFieldsFormats: dataPlugin.fieldFormats,
-                            reloadAlerts: setAlert,
-                            capabilities,
-                            dataUi: dataPlugin.ui,
-                            dataIndexPatterns: dataPlugin.indexPatterns,
+                        <AlertEdit
+                          initialAlert={alert}
+                          onClose={() => {
+                            setInitialAlert(alert);
+                            setEditFlyoutVisibility(false);
                           }}
-                        >
-                          <AlertEdit
-                            initialAlert={alert}
-                            onClose={() => setEditFlyoutVisibility(false)}
-                          />
-                        </AlertsContextProvider>
+                          actionTypeRegistry={actionTypeRegistry}
+                          alertTypeRegistry={alertTypeRegistry}
+                          reloadAlerts={setAlert}
+                        />
                       )}
                     </Fragment>
                   </EuiFlexItem>
@@ -301,6 +288,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <AlertInstancesRouteWithApi
                     requestRefresh={requestRefresh}
                     alert={alert}
+                    alertType={alertType}
                     readOnly={!canSaveAlert}
                   />
                 ) : (

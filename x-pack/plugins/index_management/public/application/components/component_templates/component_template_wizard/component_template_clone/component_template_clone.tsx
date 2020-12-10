@@ -19,7 +19,7 @@ export interface Params {
 
 export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
-  const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName);
+  const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 
   const { toasts, api } = useComponentTemplatesContext();
 

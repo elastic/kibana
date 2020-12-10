@@ -4,34 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
-import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
+jest.mock('../../../common/lib/kibana');
 
 describe('alert_form', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
-  let deps: any;
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
     name: 'test-alert',
-    description: 'test',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -59,12 +56,14 @@ describe('alert_form', () => {
     iconClass: 'test',
     name: 'non edit alert',
     description: 'test',
+    documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
     requiresAppContext: true,
   };
+  const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('alert_form create alert', () => {
     let wrapper: ReactWrapper<any>;
@@ -83,6 +82,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -96,14 +96,14 @@ describe('alert_form', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      deps = {
-        toastNotifications: mocks.notifications.toasts,
-        http: mocks.http,
-        uiSettings: mocks.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-        capabilities,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        alerts: {
+          show: true,
+          save: true,
+          delete: true,
+        },
       };
       alertTypeRegistry.list.mockReturnValue([alertType, alertTypeNonEditable]);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -125,27 +125,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+        />
       );
 
       await act(async () => {
@@ -182,6 +169,22 @@ describe('alert_form', () => {
       );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
+
+    it('renders alert type description', async () => {
+      await setup();
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toContain('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
+    });
   });
 
   describe('alert_form create alert non alerting consumer and producer', () => {
@@ -189,6 +192,7 @@ describe('alert_form', () => {
 
     async function setup() {
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+
       loadAlertTypes.mockResolvedValue([
         {
           id: 'other-consumer-producer-alert-type',
@@ -200,6 +204,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -216,6 +221,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'test',
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -229,14 +235,14 @@ describe('alert_form', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      deps = {
-        toastNotifications: mocks.notifications.toasts,
-        http: mocks.http,
-        uiSettings: mocks.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-        capabilities,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        alerts: {
+          show: true,
+          save: true,
+          delete: true,
+        },
       };
       alertTypeRegistry.list.mockReturnValue([
         {
@@ -244,6 +250,7 @@ describe('alert_form', () => {
           iconClass: 'test',
           name: 'test-alert',
           description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -255,6 +262,7 @@ describe('alert_form', () => {
           iconClass: 'test',
           name: 'test-alert',
           description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -279,27 +287,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+        />
       );
 
       await act(async () => {
@@ -331,14 +326,6 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const mockes = coreMock.createSetup();
-      deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
-        uiSettings: mockes.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -362,27 +349,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+        />
       );
 
       await act(async () => {
@@ -422,6 +396,20 @@ describe('alert_form', () => {
       throttleField.at(1).simulate('change', { target: { value: newThrottle } });
       const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+
+    it('renders alert type description', async () => {
+      await setup();
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toContain('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
     });
   });
 });

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { EuiComboBox } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RoleSelector } from './role_selector';

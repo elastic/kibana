@@ -5,8 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+
+import { getInvalidFieldMessage } from './helpers';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -42,8 +46,10 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
@@ -52,34 +58,34 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+  buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: OPERATION_TYPE,
-    schema: 'metric',
-    params: {
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
       field: column.sourceField,
-      missing: 0,
-    },
-  }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
+    }).toAst();
+  },
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: ofName(field.displayName),

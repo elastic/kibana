@@ -25,6 +25,8 @@ import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   PushToServiceResponse,
+  ExecutorSubActionCommonFieldsParams,
+  ServiceNowExecutorResultData,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -63,7 +65,7 @@ export function getActionType(
 }
 
 // action executor
-
+const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions<
@@ -71,10 +73,10 @@ async function executor(
     ServiceNowSecretConfigurationType,
     ExecutorParams
   >
-): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> {
+): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
-  let data: PushToServiceResponse | null = null;
+  let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
     {
@@ -91,7 +93,7 @@ async function executor(
     throw new Error(errorMessage);
   }
 
-  if (subAction !== 'pushToService') {
+  if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
@@ -115,6 +117,14 @@ async function executor(
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'getFields') {
+    const getFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+    data = await api.getFields({
+      externalService,
+      params: getFieldsParams,
+    });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

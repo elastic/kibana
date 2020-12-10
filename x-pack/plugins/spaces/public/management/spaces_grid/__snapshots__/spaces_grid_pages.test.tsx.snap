@@ -112,6 +112,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
       }
       pagination={true}
       responsive={true}
+      rowHeader="name"
       search={
         Object {
           "box": Object {
@@ -120,6 +121,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         }
       }
       sorting={true}
+      tableCaption="Kibana spaces"
       tableLayout="fixed"
     />
   </EuiPageContent>

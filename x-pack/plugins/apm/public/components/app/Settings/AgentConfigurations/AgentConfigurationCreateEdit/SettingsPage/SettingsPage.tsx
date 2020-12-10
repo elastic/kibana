@@ -32,8 +32,8 @@ import {
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
-import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
-import { FETCH_STATUS } from '../../../../../../hooks/useFetcher';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './saveConfig';
 import { SettingFormRow } from './SettingFormRow';
 

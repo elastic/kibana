@@ -5,6 +5,7 @@ exports[`Storyshots components/Elements/Debug large payload 1`] = `
   <code>
     <pre
       className="canvasDebug__content"
+      data-test-subj="canvasDebug__content"
     >
       {
   "datatable": {
@@ -1256,6 +1257,7 @@ exports[`Storyshots components/Elements/Debug small payload 1`] = `
   <code>
     <pre
       className="canvasDebug__content"
+      data-test-subj="canvasDebug__content"
     >
       {
   "datatable": {

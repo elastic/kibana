@@ -30,6 +30,8 @@ requesting the breaking change to be surfaced in the Upgrade Assistant.
 <!-- e.g. Based on telemetry data, roughly 75% of our users will need to make changes to x. -->
 <!-- e.g. A majority of users will need to make changes to x. -->
 
+**How can we programmatically determine whether the cluster is affected by this breaking change?**
+
 **What can users do to address the change manually?**
 
 <!-- If applicable, describe the manual migration steps and/or link to available docs. -->

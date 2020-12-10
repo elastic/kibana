@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IGroupsValues } from '../groups_logic';
-
-import { IContentSource, IUser, IGroup } from '../../../types';
+import { ContentSource, User, Group } from '../../../types';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 
 export const mockGroupsValues = {
-  groups: [] as IGroup[],
-  contentSources: [] as IContentSource[],
-  users: [] as IUser[],
+  groups: [] as Group[],
+  contentSources: [] as ContentSource[],
+  users: [] as User[],
   groupsDataLoading: true,
   groupListLoading: true,
   newGroupModalOpen: false,
@@ -29,4 +27,4 @@ export const mockGroupsValues = {
   allGroupUsers: [],
   filterValue: '',
   groupsMeta: DEFAULT_META,
-} as IGroupsValues;
+};

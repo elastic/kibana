@@ -5,16 +5,22 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
-    "build": "../../node_modules/.bin/babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "kibana": {
     "devOnly": true
   },
+  "dependencies": {
+    "@kbn/es": "link:../kbn-es",
+    "@kbn/i18n": "link:../kbn-i18n",
+    "@kbn/optimizer": "link:../kbn-optimizer"
+  },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/expect": "link:../kbn-expect",
     "@kbn/utils": "link:../kbn-utils"
   }
 }

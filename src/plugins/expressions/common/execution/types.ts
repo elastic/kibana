@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
+import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, Filter } from '../../../data/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<
+  InspectorAdapters extends Adapters = Adapters,
+  ExecutionContextSearch extends SerializableState = SerializableState
+> {
   /**
    * Get search context of the expression.
    */
@@ -58,6 +63,13 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   getSearchSessionId: () => string | undefined;
 
   /**
+   * Getter to retrieve the `KibanaRequest` object inside an expression function.
+   * Useful for functions which are running on the server and need to perform
+   * operations that are scoped to a specific user.
+   */
+  getKibanaRequest?: () => KibanaRequest;
+
+  /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
    * function is provided automatically by the Expressions plugin. On the server
    * the caller of the expression has to provide this context function. The
@@ -78,10 +90,4 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
 export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   data: DataAdapter;
-}
-
-export interface ExecutionContextSearch {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
 }

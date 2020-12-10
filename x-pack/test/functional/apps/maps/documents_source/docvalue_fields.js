@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
-      const responseBody = await testSubjects.getVisibleText('inspectorResponseBody');
+      const responseBody = await inspector.getCodeEditorValue();
       await inspector.close();
       return JSON.parse(responseBody);
     }

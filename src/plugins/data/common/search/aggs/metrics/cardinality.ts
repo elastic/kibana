@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggCardinalityFnName } from './cardinality_fn';
 import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -34,6 +35,7 @@ export interface AggParamsCardinality extends BaseAggParams {
 export const getCardinalityMetricAgg = () =>
   new MetricAggType({
     name: METRIC_TYPES.CARDINALITY,
+    expressionName: aggCardinalityFnName,
     title: uniqueCountTitle,
     makeLabel(aggConfig: IMetricAggConfig) {
       return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {

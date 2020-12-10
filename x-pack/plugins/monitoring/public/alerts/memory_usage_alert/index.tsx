@@ -18,6 +18,9 @@ export function createMemoryUsageAlertType(): AlertTypeModel {
     name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
     description: ALERT_DETAILS[ALERT_MEMORY_USAGE].description,
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-jvm-memory-threshold`;
+    },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_MEMORY_USAGE].paramDetails} />
     ),

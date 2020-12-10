@@ -16,11 +16,11 @@ import { InferenceConfigResponse } from '../../common/types/trained_models';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
-   * @apiGroup Inference
+   * @apiGroup TrainedModels
    *
    * @api {get} /api/ml/trained_models/:modelId Get info of a trained inference model
-   * @apiName GetInferenceModel
-   * @apiDescription Retrieves configuration information for a trained inference model.
+   * @apiName GetTrainedModel
+   * @apiDescription Retrieves configuration information for a trained model.
    */
   router.get(
     {
@@ -68,11 +68,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   );
 
   /**
-   * @apiGroup Inference
+   * @apiGroup TrainedModels
    *
-   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained inference model
-   * @apiName GetInferenceModelStats
-   * @apiDescription Retrieves usage information for trained inference models.
+   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
+   * @apiName GetTrainedModelStats
+   * @apiDescription Retrieves usage information for trained models.
    */
   router.get(
     {
@@ -100,11 +100,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   );
 
   /**
-   * @apiGroup Inference
+   * @apiGroup TrainedModels
    *
-   * @api {get} /api/ml/trained_models/:modelId/pipelines Get model pipelines
-   * @apiName GetModelPipelines
-   * @apiDescription Retrieves pipelines associated with a model
+   * @api {get} /api/ml/trained_models/:modelId/pipelines Get trained model pipelines
+   * @apiName GetTrainedModelPipelines
+   * @apiDescription Retrieves pipelines associated with a trained model
    */
   router.get(
     {
@@ -130,11 +130,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   );
 
   /**
-   * @apiGroup Inference
+   * @apiGroup TrainedModels
    *
-   * @api {delete} /api/ml/trained_models/:modelId Get stats of a trained inference model
-   * @apiName DeleteInferenceModel
-   * @apiDescription Deletes an existing trained inference model that is currently not referenced by an ingest pipeline.
+   * @api {delete} /api/ml/trained_models/:modelId Delete a trained model
+   * @apiName DeleteTrainedModel
+   * @apiDescription Deletes an existing trained model that is currently not referenced by an ingest pipeline.
    */
   router.delete(
     {

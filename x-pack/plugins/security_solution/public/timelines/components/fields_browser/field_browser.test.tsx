@@ -50,11 +50,9 @@ describe('FieldsBrowser', () => {
             onCategorySelected={jest.fn()}
             onHideFieldBrowser={jest.fn()}
             onOutsideClick={onOutsideClick}
-            onUpdateColumns={jest.fn()}
             onSearchInputChange={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </div>
@@ -88,11 +86,9 @@ describe('FieldsBrowser', () => {
             onFieldSelected={jest.fn()}
             onHideFieldBrowser={jest.fn()}
             onOutsideClick={onOutsideClick}
-            onUpdateColumns={jest.fn()}
             onSearchInputChange={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </div>
@@ -118,11 +114,9 @@ describe('FieldsBrowser', () => {
           onCategorySelected={jest.fn()}
           onHideFieldBrowser={jest.fn()}
           onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
           onSearchInputChange={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -144,11 +138,9 @@ describe('FieldsBrowser', () => {
           onCategorySelected={jest.fn()}
           onHideFieldBrowser={jest.fn()}
           onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
           onSearchInputChange={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -170,11 +162,9 @@ describe('FieldsBrowser', () => {
           onCategorySelected={jest.fn()}
           onHideFieldBrowser={jest.fn()}
           onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
           onSearchInputChange={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -196,11 +186,9 @@ describe('FieldsBrowser', () => {
           onCategorySelected={jest.fn()}
           onHideFieldBrowser={jest.fn()}
           onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
           onSearchInputChange={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -228,11 +216,9 @@ describe('FieldsBrowser', () => {
           onCategorySelected={jest.fn()}
           onHideFieldBrowser={jest.fn()}
           onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
           onSearchInputChange={onSearchInputChange}
           selectedCategoryId={''}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>

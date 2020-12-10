@@ -102,7 +102,7 @@ const createPlugin = (
   });
 };
 
-async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
+async function testSetup(options: { isDevCliParent?: boolean } = {}) {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -116,7 +116,7 @@ async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
   coreId = Symbol('core');
   env = Env.createDefault(REPO_ROOT, {
     ...getEnvOptions(),
-    isDevClusterMaster: options.isDevClusterMaster ?? false,
+    isDevCliParent: options.isDevCliParent ?? false,
   });
 
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
@@ -127,6 +127,7 @@ async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
   mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+  mockPluginSystem.getPlugins.mockReturnValue([]);
 
   environmentSetup = environmentServiceMock.createSetupContract();
 }
@@ -469,6 +470,22 @@ describe('PluginsService', () => {
         deprecationProvider
       );
     });
+
+    it('returns the paths of the plugins', async () => {
+      const pluginA = createPlugin('A', { path: '/plugin-A-path', configPath: 'pathA' });
+      const pluginB = createPlugin('B', { path: '/plugin-B-path', configPath: 'pathB' });
+
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([]),
+      });
+
+      mockPluginSystem.getPlugins.mockReturnValue([pluginA, pluginB]);
+
+      const { pluginPaths } = await pluginsService.discover({ environment: environmentSetup });
+
+      expect(pluginPaths).toEqual(['/plugin-A-path', '/plugin-B-path']);
+    });
   });
 
   describe('#generateUiPluginsConfigs()', () => {
@@ -621,10 +638,10 @@ describe('PluginsService', () => {
   });
 });
 
-describe('PluginService when isDevClusterMaster is true', () => {
+describe('PluginService when isDevCliParent is true', () => {
   beforeEach(async () => {
     await testSetup({
-      isDevClusterMaster: true,
+      isDevCliParent: true,
     });
   });
 
@@ -633,6 +650,7 @@ describe('PluginService when isDevClusterMaster is true', () => {
       await expect(pluginsService.discover({ environment: environmentSetup })).resolves
         .toMatchInlineSnapshot(`
               Object {
+                "pluginPaths": Array [],
                 "pluginTree": undefined,
                 "uiPlugins": Object {
                   "browserConfigs": Map {},

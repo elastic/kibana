@@ -1,0 +1,20 @@
+{
+  "type": "index",
+  "value": {
+    "index": "text_no_spaces",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "text": { "type": "text" }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

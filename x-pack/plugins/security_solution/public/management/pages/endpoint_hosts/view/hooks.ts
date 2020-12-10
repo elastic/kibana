@@ -24,22 +24,22 @@ export function useEndpointSelector<TSelected>(selector: (state: EndpointState) 
 }
 
 /**
- * Returns an object that contains Ingest app and URL information
+ * Returns an object that contains Fleet app and URL information
  */
 export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
     const appPath = `#/${subpath}`;
     return {
-      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
-      appId: 'ingestManager',
+      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      appId: 'fleet',
       appPath,
     };
   }, [services.application, subpath]);
 };
 
 /**
- * Returns an object that contains Ingest app and URL information
+ * Returns an object that contains Fleet app and URL information
  */
 export const useAgentDetailsIngestUrl = (
   agentId: string
@@ -48,8 +48,8 @@ export const useAgentDetailsIngestUrl = (
   return useMemo(() => {
     const appPath = `#/fleet/agents/${agentId}/activity`;
     return {
-      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
-      appId: 'ingestManager',
+      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      appId: 'fleet',
       appPath,
     };
   }, [services.application, agentId]);

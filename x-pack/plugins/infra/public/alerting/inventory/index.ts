@@ -21,6 +21,9 @@ export function createInventoryMetricAlertType(): AlertTypeModel {
       defaultMessage: 'Alert when the inventory exceeds a defined threshold.',
     }),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/infrastructure-threshold-alert.html`;
+    },
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(

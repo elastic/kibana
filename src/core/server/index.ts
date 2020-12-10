@@ -64,17 +64,25 @@ import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
 
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
+  CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
 
-export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
+export {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+};
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -128,6 +136,7 @@ export {
   DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
+export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -294,6 +303,7 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
@@ -335,6 +345,8 @@ export {
   MetricsServiceSetup,
   MetricsServiceStart,
 } from './metrics';
+
+export { I18nServiceSetup } from './i18n';
 
 export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
@@ -391,6 +403,9 @@ export interface RequestHandlerContext {
     elasticsearch: {
       client: IScopedClusterClient;
       legacy: {
+        /*
+         * @deprecated Use {@link IScopedClusterClient}.
+         */
         client: ILegacyScopedClusterClient;
       };
     };
@@ -421,6 +436,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     /** {@link HttpResources} */
     resources: HttpResources;
   };
+  /** {@link I18nServiceSetup} */
+  i18n: I18nServiceSetup;
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
   /** {@link MetricsServiceSetup} */

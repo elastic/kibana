@@ -102,6 +102,7 @@ export class KbnClientUiSettings {
       body: {
         changes: updates,
       },
+      retries: 3,
     });
   }
 

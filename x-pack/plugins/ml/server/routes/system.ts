@@ -5,11 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { Request } from '@hapi/hapi';
 import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { mlLog } from '../client/log';
+import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
@@ -19,7 +17,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(client: IScopedClusterClient) {
     const { body } = await client.asInternalUser.nodes.info({
@@ -117,11 +115,7 @@ export function systemRoutes(
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } =
-          spaces !== undefined
-            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
-            : { isMlEnabledInSpace: async () => true };
+        const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
         const mlCapabilities = await resolveMlCapabilities(request);
         if (mlCapabilities === null) {

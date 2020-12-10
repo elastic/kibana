@@ -5,11 +5,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
+import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
-import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { PluginStartContract } from '../plugin';
 
 export function isBoomError(error: { isBoom?: boolean }): error is Boom {
   return error.isBoom === true;
@@ -28,7 +31,7 @@ export interface Field {
   script?: string;
 }
 
-export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
+export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
   const router = setup.http.createRouter();
 
   router.post(
@@ -47,11 +50,18 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
       },
     },
     async (context, req, res) => {
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
           body: await fetchFieldExistence({
             ...req.params,
             ...req.body,
+            indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
+              savedObjectsClient,
+              esClient
+            ),
             context,
           }),
         });
@@ -59,7 +69,7 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
         logger.info(
           `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
         );
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
         }
         if (isBoomError(e)) {
@@ -80,6 +90,7 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  indexPatternsService,
   dslQuery = { match_all: {} },
   fromDate,
   toDate,
@@ -87,68 +98,47 @@ async function fetchFieldExistence({
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  indexPatternsService: IndexPatternsService;
   dslQuery: object;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
-  const { indexPattern, indexPatternTitle } = await fetchIndexPatternDefinition(
-    indexPatternId,
-    context
-  );
+  const indexPattern = await indexPatternsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.legacy.client,
-    index: indexPatternTitle,
-    timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
+    client: context.core.elasticsearch.client.asCurrentUser,
+    index: indexPattern.title,
+    timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
   });
 
   return {
-    indexPatternTitle,
+    indexPatternTitle: indexPattern.title,
     existingFieldNames: existingFields(docs, fields),
-  };
-}
-
-async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
-  const savedObjectsClient = context.core.savedObjects.client;
-  const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
-    'index-pattern',
-    indexPatternId
-  );
-  const indexPatternTitle = indexPattern.attributes.title;
-
-  return {
-    indexPattern,
-    indexPatternTitle,
   };
 }
 
 /**
  * Exported only for unit tests.
  */
-export function buildFieldList(
-  indexPattern: SavedObject<IndexPatternAttributes>,
-  metaFields: string[]
-): Field[] {
-  return JSON.parse(indexPattern.attributes.fields).map(
-    (field: { name: string; lang: string; scripted?: boolean; script?: string }) => {
-      return {
-        name: field.name,
-        isScript: !!field.scripted,
-        lang: field.lang,
-        script: field.script,
-        // id is a special case - it doesn't show up in the meta field list,
-        // but as it's not part of source, it has to be handled separately.
-        isMeta: metaFields.includes(field.name) || field.name === '_id',
-      };
-    }
-  );
+export function buildFieldList(indexPattern: IndexPattern, metaFields: string[]): Field[] {
+  return indexPattern.fields.map((field) => {
+    return {
+      name: field.name,
+      isScript: !!field.scripted,
+      lang: field.lang,
+      script: field.script,
+      // id is a special case - it doesn't show up in the meta field list,
+      // but as it's not part of source, it has to be handled separately.
+      isMeta: metaFields.includes(field.name) || field.name === '_id',
+    };
+  });
 }
 
 async function fetchIndexPatternStats({
@@ -160,7 +150,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: ILegacyScopedClusterClient;
+  client: ElasticsearchClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -190,7 +180,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const result = await client.callAsCurrentUser('search', {
+  const { body: result } = await client.search({
     index,
     body: {
       size: SAMPLE_SIZE,

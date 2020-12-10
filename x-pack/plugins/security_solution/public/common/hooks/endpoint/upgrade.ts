@@ -11,7 +11,7 @@ import {
   appRoutesService,
   CheckPermissionsResponse,
   BulkInstallPackagesResponse,
-} from '../../../../../ingest_manager/common';
+} from '../../../../../fleet/common';
 import { StartServices } from '../../../types';
 import { useIngestEnabledCheck } from './ingest_enabled';
 

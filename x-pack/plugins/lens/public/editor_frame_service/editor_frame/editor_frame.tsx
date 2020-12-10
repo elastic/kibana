@@ -101,6 +101,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    activeData: state.activeData,
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
@@ -243,6 +244,7 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
+      state.activeData,
       props.query,
       props.dateRange,
       props.filters,

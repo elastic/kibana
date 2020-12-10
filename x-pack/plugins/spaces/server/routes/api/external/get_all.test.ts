@@ -10,7 +10,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
   loggingSystemMock,
   httpServiceMock,
@@ -18,11 +18,11 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
+import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -38,27 +38,23 @@ describe('GET /spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log);
-    const spacesService = await service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
+    const clientServiceStart = clientService.start(coreStart);
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
     });
 
     initGetAllSpacesApi({
@@ -66,11 +62,12 @@ describe('GET /spaces/space', () => {
       getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
-      authorization: null, // not needed for this route
+      getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     return {
+      routeConfig: router.get.mock.calls[0][0],
       routeHandler: router.get.mock.calls[0][1],
     };
   };
@@ -89,21 +86,27 @@ describe('GET /spaces/space', () => {
         });
 
         it(`returns expected result when specifying include_authorized_purposes=true`, async () => {
-          const { routeHandler } = await setup();
+          const { routeConfig, routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({
             method: 'get',
             query: { purpose, include_authorized_purposes: true },
           });
+
+          if (routeConfig.validate === false) {
+            throw new Error('Test setup failure. Expected route validation');
+          }
+          const queryParamsValidation = routeConfig.validate.query! as ObjectType<any>;
+
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
           if (purpose === undefined) {
+            expect(() => queryParamsValidation.validate(request.query)).not.toThrow();
             expect(response.status).toEqual(200);
             expect(response.payload).toEqual(spaces);
           } else {
-            expect(response.status).toEqual(400);
-            expect(response.payload).toEqual(
-              new Error(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`)
+            expect(() => queryParamsValidation.validate(request.query)).toThrowError(
+              '[include_authorized_purposes]: expected value to equal [false]'
             );
           }
         });

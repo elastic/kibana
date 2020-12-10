@@ -18,10 +18,8 @@
  */
 import Http from 'http';
 import Url from 'url';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../../services/types';
-
-// @ts-ignore
-import getUrl from '../../../../src/test_utils/get_url';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;
@@ -31,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   describe('headers timeout ', () => {
-    it('issue-73849', async () => {
+    it('handles correctly. See issue #73849', async () => {
       const agent = new Http.Agent({
         keepAlive: true,
       });
@@ -74,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await performRequest();
-      const defaultHeadersTimeout = 40 * oneSec;
+      const defaultHeadersTimeout = 60 * oneSec;
       await delay(defaultHeadersTimeout + oneSec);
       await performRequest();
     });

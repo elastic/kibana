@@ -106,6 +106,63 @@ describe('#savedObjectEvent', () => {
     `);
   });
 
+  test('does create event for read access of saved objects', () => {
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.GET,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.FIND,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+  });
+
+  test('does not create event for read access of config or telemetry objects', () => {
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.GET,
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.GET,
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.FIND,
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.FIND,
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+  });
+
+  test('does create event for write access of config or telemetry objects', () => {
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.UPDATE,
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.UPDATE,
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+  });
+
   test('creates event with `success` outcome for `REMOVE_REFERENCES` action', () => {
     expect(
       savedObjectEvent({

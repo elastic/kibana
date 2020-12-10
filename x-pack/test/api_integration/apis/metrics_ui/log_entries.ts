@@ -7,11 +7,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-import { fold } from 'fp-ts/lib/Either';
-
-import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
+import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 
 import {
   LOG_ENTRIES_PATH,
@@ -68,10 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200);
 
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           const entries = logEntriesResponse.data.entries;
           const firstEntry = entries[0];
@@ -104,10 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200);
 
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           const entries = logEntriesResponse.data.entries;
           const entry = entries[0];
@@ -126,6 +116,52 @@ export default function ({ getService }: FtrProviderContext) {
           expect(messageColumn.message.length).to.be.greaterThan(0);
         });
 
+        it('Returns custom column configurations', async () => {
+          const customColumns = [
+            { timestampColumn: { id: uuidv4() } },
+            { fieldColumn: { id: uuidv4(), field: 'host.name' } },
+            { fieldColumn: { id: uuidv4(), field: 'event.dataset' } },
+            { messageColumn: { id: uuidv4() } },
+          ];
+
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+                columns: customColumns,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
+
+          const entries = logEntriesResponse.data.entries;
+          const entry = entries[0];
+          expect(entry.columns).to.have.length(4);
+
+          const timestampColumn = entry.columns[0] as LogTimestampColumn;
+          expect(timestampColumn).to.have.property('timestamp');
+
+          const hostNameColumn = entry.columns[1] as LogFieldColumn;
+          expect(hostNameColumn).to.have.property('field');
+          expect(hostNameColumn.field).to.be('host.name');
+          expect(hostNameColumn).to.have.property('value');
+
+          const eventDatasetColumn = entry.columns[2] as LogFieldColumn;
+          expect(eventDatasetColumn).to.have.property('field');
+          expect(eventDatasetColumn.field).to.be('event.dataset');
+          expect(eventDatasetColumn).to.have.property('value');
+
+          const messageColumn = entry.columns[3] as LogMessageColumn;
+          expect(messageColumn).to.have.property('message');
+          expect(messageColumn.message.length).to.be.greaterThan(0);
+        });
+
         it('Does not build context if entry does not have all fields', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -140,10 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200);
 
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           const entries = logEntriesResponse.data.entries;
           const entry = entries[0];
@@ -162,10 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               })
             );
-          const firstPage = pipe(
-            logEntriesResponseRT.decode(firstPageBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const firstPage = decodeOrThrow(logEntriesResponseRT)(firstPageBody);
 
           const { body: secondPageBody } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -179,10 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               })
             );
-          const secondPage = pipe(
-            logEntriesResponseRT.decode(secondPageBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const secondPage = decodeOrThrow(logEntriesResponseRT)(secondPageBody);
 
           const { body: bothPagesBody } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -195,10 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 20,
               })
             );
-          const bothPages = pipe(
-            logEntriesResponseRT.decode(bothPagesBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const bothPages = decodeOrThrow(logEntriesResponseRT)(bothPagesBody);
 
           expect(bothPages.data.entries).to.eql([
             ...firstPage.data.entries,
@@ -222,10 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               })
             );
-          const lastPage = pipe(
-            logEntriesResponseRT.decode(lastPageBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const lastPage = decodeOrThrow(logEntriesResponseRT)(lastPageBody);
 
           const { body: secondToLastPageBody } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -239,10 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               })
             );
-          const secondToLastPage = pipe(
-            logEntriesResponseRT.decode(secondToLastPageBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const secondToLastPage = decodeOrThrow(logEntriesResponseRT)(secondToLastPageBody);
 
           const { body: bothPagesBody } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -256,10 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 20,
               })
             );
-          const bothPages = pipe(
-            logEntriesResponseRT.decode(bothPagesBody),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const bothPages = decodeOrThrow(logEntriesResponseRT)(bothPagesBody);
 
           expect(bothPages.data.entries).to.eql([
             ...secondToLastPage.data.entries,
@@ -283,10 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           const entries = logEntriesResponse.data.entries;
           const firstEntry = entries[0];
@@ -313,10 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200);
 
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           expect(logEntriesResponse.data.entries).to.have.length(0);
           expect(logEntriesResponse.data.topCursor).to.be(null);
@@ -371,10 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200);
 
-          const logEntriesResponse = pipe(
-            logEntriesResponseRT.decode(body),
-            fold(throwErrors(createPlainError), identity)
-          );
+          const logEntriesResponse = decodeOrThrow(logEntriesResponseRT)(body);
 
           const entries = logEntriesResponse.data.entries;
           const entry = entries[0];

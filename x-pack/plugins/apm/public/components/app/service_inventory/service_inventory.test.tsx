@@ -13,19 +13,20 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
-import * as useAnomalyDetectionJobs from '../../../hooks/useAnomalyDetectionJobs';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
-import * as urlParamsHooks from '../../../hooks/useUrlParams';
+import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import * as hook from './use_anomaly_detection_jobs_fetcher';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const addWarning = jest.fn();
@@ -50,7 +51,16 @@ function wrapper({ children }: { children?: ReactNode }) {
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <MockApmPluginContextWrapper value={mockPluginContext}>
-            {children}
+            <MockUrlParamsContextProvider
+              params={{
+                rangeFrom: 'now-15m',
+                rangeTo: 'now',
+                start: 'mystart',
+                end: 'myend',
+              }}
+            >
+              {children}
+            </MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>
@@ -63,16 +73,6 @@ describe('ServiceInventory', () => {
     // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
 
-    // mock urlParams
-    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
-      urlParams: {
-        start: 'myStart',
-        end: 'myEnd',
-      },
-      refreshTimeRange: jest.fn(),
-      uiFilters: {},
-    });
-
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
       filters: [],
       setFilterValue: () => null,
@@ -80,15 +80,16 @@ describe('ServiceInventory', () => {
       status: FETCH_STATUS.SUCCESS,
     });
 
+    jest.spyOn(hook, 'useAnomalyDetectionJobsFetcher').mockReturnValue({
+      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+      anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
+    });
+
     jest
-      .spyOn(useAnomalyDetectionJobs, 'useAnomalyDetectionJobs')
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
       .mockReturnValue({
+        indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,
-        data: {
-          jobs: [],
-          hasLegacyJobs: false,
-        },
-        refetch: () => undefined,
       });
   });
 
@@ -149,7 +150,7 @@ describe('ServiceInventory', () => {
       "Looks like you don't have any APM services installed. Let's add some!"
     );
 
-    expect(gettingStartedMessage).not.toBeEmpty();
+    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
   });
 
   it('should render empty message, when list is empty and historical data is found', async () => {
@@ -165,7 +166,7 @@ describe('ServiceInventory', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
     const noServicesText = await findByText('No services found');
 
-    expect(noServicesText).not.toBeEmpty();
+    expect(noServicesText).not.toBeEmptyDOMElement();
   });
 
   describe('when legacy data is found', () => {

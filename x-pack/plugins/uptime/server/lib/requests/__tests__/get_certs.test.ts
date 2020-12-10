@@ -5,11 +5,10 @@
  */
 
 import { getCerts } from '../get_certs';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { getUptimeESMockClient } from './helper';
 
 describe('getCerts', () => {
   let mockHits: any;
-  let mockCallES: jest.Mock<any, any>;
 
   beforeEach(() => {
     mockHits = [
@@ -79,23 +78,21 @@ describe('getCerts', () => {
         },
       },
     ];
-    mockCallES = jest.fn();
-    mockCallES.mockImplementation(() => ({
-      hits: {
-        hits: mockHits,
-      },
-    }));
   });
 
   it('parses query result and returns expected values', async () => {
-    const result = await getCerts({
-      callES: mockCallES,
-      dynamicSettings: {
-        heartbeatIndices: 'heartbeat*',
-        certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-        certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-        defaultConnectors: [],
+    const { esClient, uptimeEsClient } = getUptimeESMockClient();
+
+    esClient.search.mockResolvedValueOnce({
+      body: {
+        hits: {
+          hits: mockHits,
+        },
       },
+    } as any);
+
+    const result = await getCerts({
+      uptimeEsClient,
       index: 1,
       from: 'now-2d',
       to: 'now+1h',
@@ -126,10 +123,9 @@ describe('getCerts', () => {
         "total": 0,
       }
     `);
-    expect(mockCallES.mock.calls).toMatchInlineSnapshot(`
+    expect(esClient.search.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "search",
           Object {
             "body": Object {
               "_source": Array [
@@ -215,7 +211,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat*",
+            "index": "heartbeat-8*",
           },
         ],
       ]

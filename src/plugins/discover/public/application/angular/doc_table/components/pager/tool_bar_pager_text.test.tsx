@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { ToolBarPagerText } from './tool_bar_pager_text';
 
 test('it renders ToolBarPagerText without crashing', () => {

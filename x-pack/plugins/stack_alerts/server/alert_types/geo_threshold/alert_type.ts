@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Service } from '../../types';
+import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
 import {
@@ -15,6 +15,7 @@ import {
   ActionVariable,
   AlertTypeState,
 } from '../../../../alerts/server';
+import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
@@ -155,6 +156,8 @@ export const ParamsSchema = schema.object({
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
   delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
+  indexQuery: schema.maybe(schema.any({})),
+  boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
 export interface GeoThresholdParams {
@@ -170,10 +173,12 @@ export interface GeoThresholdParams {
   boundaryGeoField: string;
   boundaryNameField?: string;
   delayOffsetWithUnits?: string;
+  indexQuery?: Query;
+  boundaryIndexQuery?: Query;
 }
 
 export function getAlertType(
-  service: Omit<Service, 'indexThreshold'>
+  logger: Logger
 ): {
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
@@ -222,7 +227,7 @@ export function getAlertType(
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoThresholdExecutor(service),
+    executor: getGeoThresholdExecutor(logger),
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

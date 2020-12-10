@@ -18,12 +18,11 @@ export interface EmbeddableRegistryDefinition<P extends EmbeddableStateWithType 
     id: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PersistableStateService" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EmbeddableSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EmbeddableSetup {
-    // (undocumented)
-    getAttributeService: any;
+export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
     // (undocumented)
     registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
     // (undocumented)

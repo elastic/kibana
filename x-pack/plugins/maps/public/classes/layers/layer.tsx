@@ -8,9 +8,8 @@
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
-import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
@@ -49,8 +48,6 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
-  getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -64,6 +61,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
+  isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
   getMbLayerIds(): string[];
@@ -78,11 +76,9 @@ export interface ILayer {
   getType(): string | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
-  renderStyleEditor({
-    onStyleDescriptorChange,
-  }: {
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> | null;
+  renderStyleEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+  ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
@@ -93,16 +89,9 @@ export interface ILayer {
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
 }
-export type Footnote = {
-  icon: ReactElement<any>;
-  message?: string | null;
-};
-export type IconAndTooltipContent = {
-  icon?: ReactElement<any> | null;
-  tooltipContent?: string | null;
-  footnotes: Footnote[];
-};
+
 export type CustomIconAndTooltipContent = {
   icon: ReactElement<any> | null;
   tooltipContent?: string | null;
@@ -182,12 +171,12 @@ export class AbstractLayer implements ILayer {
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
-              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
               rightSourceId: originalJoinId,
             });
             const newJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
-              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
               rightSourceId: joinDescriptor.right.id!,
             });
 
@@ -237,6 +226,10 @@ export class AbstractLayer implements ILayer {
     return (await this.supportsFitToBounds()) && this.isVisible();
   }
 
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    return false;
+  }
+
   async getDisplayName(source?: ISource): Promise<string> {
     if (this._descriptor.label) {
       return this._descriptor.label;
@@ -274,68 +267,6 @@ export class AbstractLayer implements ILayer {
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
-    };
-  }
-
-  getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent {
-    let icon;
-    let tooltipContent = null;
-    const footnotes = [];
-    if (this.hasErrors()) {
-      icon = (
-        <EuiIcon
-          aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
-            defaultMessage: 'Load warning',
-          })}
-          size="m"
-          type="alert"
-          color="warning"
-        />
-      );
-      tooltipContent = this.getErrors();
-    } else if (this.isLayerLoading()) {
-      icon = <EuiLoadingSpinner size="m" />;
-    } else if (!this.isVisible()) {
-      icon = <EuiIcon size="m" type="eyeClosed" />;
-      tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
-        defaultMessage: `Layer is hidden.`,
-      });
-    } else if (!this.showAtZoomLevel(zoomLevel)) {
-      const minZoom = this.getMinZoom();
-      const maxZoom = this.getMaxZoom();
-      icon = <EuiIcon size="m" type="expand" />;
-      tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
-        defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
-        values: { minZoom, maxZoom },
-      });
-    } else {
-      const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
-      if (customIconAndTooltipContent) {
-        icon = customIconAndTooltipContent.icon;
-        if (!customIconAndTooltipContent.areResultsTrimmed) {
-          tooltipContent = customIconAndTooltipContent.tooltipContent;
-        } else {
-          footnotes.push({
-            icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent,
-          });
-        }
-      }
-
-      if (isUsingSearch && this.getQueryableIndexPatternIds().length) {
-        footnotes.push({
-          icon: <EuiIcon color="subdued" type="filter" size="s" />,
-          message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by search bar',
-          }),
-        });
-      }
-    }
-
-    return {
-      icon,
-      tooltipContent,
-      footnotes,
     };
   }
 
@@ -504,16 +435,14 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  renderStyleEditor({
-    onStyleDescriptorChange,
-  }: {
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> | null {
+  renderStyleEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+  ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor({ layer: this, onStyleDescriptorChange });
+    return style.renderEditor(onStyleDescriptorChange);
   }
 
   getIndexPatternIds(): string[] {

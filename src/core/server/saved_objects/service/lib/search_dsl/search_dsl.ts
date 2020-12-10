@@ -71,7 +71,6 @@ export function getSearchDsl(
 
   return {
     ...getQueryParams({
-      mappings,
       registry,
       namespaces,
       type,

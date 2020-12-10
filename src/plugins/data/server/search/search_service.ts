@@ -29,7 +29,9 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { catchError, first, map } from 'rxjs/operators';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
   ISearchSetup,
   ISearchStart,
@@ -38,11 +40,11 @@ import {
   SearchStrategyDependencies,
 } from './types';
 
-import { AggsService, AggsSetupDependencies } from './aggs';
+import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -50,26 +52,31 @@ import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
 import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
-  SearchSourceDependencies,
-  SearchSourceService,
-  searchSourceRequiredUiSettings,
-  ISearchOptions,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchClient,
+  ISearchOptions,
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
+  SearchSourceDependencies,
+  searchSourceRequiredUiSettings,
+  SearchSourceService,
 } from '../../common/search';
+import { getEsaggs } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+import { SessionService, IScopedSessionService, ISessionService } from './session';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    search?: ISearchClient;
+    search?: ISearchClient & { session: IScopedSessionService };
   }
 }
 
@@ -77,7 +84,8 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  registerFunction: AggsSetupDependencies['registerFunction'];
+  bfetch: BfetchServerSetup;
+  expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -98,15 +106,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
+  private sessionService: ISessionService;
+  private coreStart?: CoreStart;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
-  ) {}
+  ) {
+    this.sessionService = new SessionService();
+  }
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { registerFunction, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
@@ -118,9 +130,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
 
+    core.getStartServices().then(([coreStart]) => {
+      this.coreStart = coreStart;
+    });
+
     core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const [coreStart] = await core.getStartServices();
-      return this.asScopedProvider(coreStart)(request);
+      const search = this.asScopedProvider(this.coreStart!)(request);
+      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
+      return { ...search, session };
     });
 
     this.registerSearchStrategy(
@@ -132,12 +149,55 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
+    bfetch.addBatchProcessingRoute<
+      { request: IKibanaSearchResponse; options?: ISearchOptions },
+      any
+    >('/internal/bsearch', (request) => {
+      const search = this.asScopedProvider(this.coreStart!)(request);
+
+      return {
+        onBatchItem: async ({ request: requestData, options }) => {
+          return search
+            .search(requestData, options)
+            .pipe(
+              first(),
+              map((response) => {
+                return {
+                  ...response,
+                  ...{
+                    rawResponse: shimHitsTotal(response.rawResponse),
+                  },
+                };
+              }),
+              catchError((err) => {
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  statusCode: err.statusCode || 500,
+                  body: {
+                    message: err.message,
+                    attributes: {
+                      error: err.body?.error || err.message,
+                    },
+                  },
+                };
+              })
+            )
+            .toPromise();
+        },
+      };
+    });
+
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
-    const aggs = this.aggsService.setup({ registerFunction });
+    expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
+
+    const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
     this.initializerContext.config
       .create<ConfigSchema>()
@@ -146,7 +206,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       .then((value) => {
         if (value.search.aggs.shardDelay.enabled) {
           aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
-          registerFunction(aggShardDelay);
+          expressions.registerFunction(aggShardDelay);
         }
       });
 
@@ -155,6 +215,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
           this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
+        this.sessionService = enhancements.sessionService;
       },
       aggs,
       registerSearchStrategy: this.registerSearchStrategy,
@@ -169,7 +230,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs: this.aggsService.start({
+        fieldFormats,
+        uiSettings,
+        indexPatterns,
+      }),
       getSearchStrategy: this.getSearchStrategy,
       asScoped,
       searchSource: {
@@ -177,7 +242,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
-            savedObjectsClient
+            savedObjectsClient,
+            esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 
@@ -190,8 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: asScoped(request).search,
-            // onResponse isn't used on the server, so we just return the original value
-            onResponse: (req, res) => res,
+            onResponse: (req, res) => shimHitsTotal(res),
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,
@@ -227,20 +292,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    searchRequest: SearchStrategyRequest,
+    session: IScopedSessionService,
+    request: SearchStrategyRequest,
     options: ISearchOptions,
     deps: SearchStrategyDependencies
   ) => {
     const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
       options.strategy
     );
-
-    return strategy.search(searchRequest, options, deps);
+    return session.search(strategy, request, options, deps);
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
     const strategy = this.getSearchStrategy(options.strategy);
-
     return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
   };
 
@@ -258,8 +322,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy;
   };
 
-  private asScopedProvider = ({ elasticsearch, savedObjects, uiSettings }: CoreStart) => {
+  private asScopedProvider = (core: CoreStart) => {
+    const { elasticsearch, savedObjects, uiSettings } = core;
+    const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): ISearchClient => {
+      const scopedSession = getSessionAsScoped(request);
       const savedObjectsClient = savedObjects.getScopedClient(request);
       const deps = {
         savedObjectsClient,
@@ -267,7 +334,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
       };
       return {
-        search: (searchRequest, options = {}) => this.search(searchRequest, options, deps),
+        search: (searchRequest, options = {}) =>
+          this.search(scopedSession, searchRequest, options, deps),
         cancel: (id, options = {}) => this.cancel(id, options, deps),
       };
     };

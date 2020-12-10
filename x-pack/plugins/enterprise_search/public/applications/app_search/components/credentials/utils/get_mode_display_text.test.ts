@@ -5,11 +5,11 @@
  */
 
 import { ApiTokenTypes } from '../constants';
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 
 import { getModeDisplayText } from './get_mode_display_text';
 
-const apiToken: IApiToken = {
+const apiToken: ApiToken = {
   name: '',
   type: ApiTokenTypes.Private,
   read: true,

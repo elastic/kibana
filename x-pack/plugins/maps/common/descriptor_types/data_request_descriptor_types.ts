@@ -34,21 +34,30 @@ type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
+type ESGeoLineSourceSyncMeta = {
+  splitField: string;
+  sortField: string;
+};
+
+export type VectorSourceSyncMeta =
+  | ESSearchSourceSyncMeta
+  | ESGeoGridSourceSyncMeta
+  | ESGeoLineSourceSyncMeta
+  | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
   sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };
 
-export type VectorJoinSourceRequestMeta = MapFilters & {
-  applyGlobalQuery: boolean;
-  fieldNames: string[];
-  sourceQuery?: Query;
-};
+export type VectorJoinSourceRequestMeta = Omit<
+  VectorSourceRequestMeta,
+  'geogridPrecision' | 'sourceMeta'
+> & { sourceQuery?: Query };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
@@ -66,12 +75,21 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
+export type ESGeoLineSourceResponseMeta = {
+  areResultsTrimmed: boolean;
+  areEntitiesTrimmed: boolean;
+  entityCount: number;
+  numTrimmedTracks: number;
+  totalEntities: number;
+};
+
 // Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
-    ESSearchSourceResponseMeta
+    ESSearchSourceResponseMeta &
+    ESGeoLineSourceResponseMeta
 >;
 
 type NumericalStyleFieldData = {

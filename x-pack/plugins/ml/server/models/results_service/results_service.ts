@@ -54,7 +54,8 @@ export function resultsServiceProvider(mlClient: MlClient) {
     dateFormatTz: string,
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
-    influencersFilterQuery: any
+    influencersFilterQuery?: any,
+    functionDescription?: string
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
@@ -102,6 +103,13 @@ export function resultsServiceProvider(mlClient: MlClient) {
         },
       });
     });
+    if (functionDescription !== undefined) {
+      boolCriteria.push({
+        term: {
+          function_description: functionDescription,
+        },
+      });
+    }
 
     if (influencersFilterQuery !== undefined) {
       boolCriteria.push(influencersFilterQuery);

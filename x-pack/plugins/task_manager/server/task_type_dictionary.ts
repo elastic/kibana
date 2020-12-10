@@ -32,6 +32,10 @@ export class TaskTypeDictionary {
     return this.definitions.entries();
   }
 
+  public getAllTypes() {
+    return [...this.definitions.keys()];
+  }
+
   public has(type: string) {
     return this.definitions.has(type);
   }
@@ -44,9 +48,7 @@ export class TaskTypeDictionary {
   public ensureHas(type: string) {
     if (!this.has(type)) {
       throw new Error(
-        `Unsupported task type "${type}". Supported types are ${[...this.definitions.keys()].join(
-          ', '
-        )}`
+        `Unsupported task type "${type}". Supported types are ${this.getAllTypes().join(', ')}`
       );
     }
   }

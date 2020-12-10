@@ -25,7 +25,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@kbn/expect';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '../../report_path';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 
@@ -67,6 +67,7 @@ describe('dev/mocha/junit report generation', () => {
     expect(testsuite).to.eql({
       $: {
         failures: '2',
+        name: 'test',
         skipped: '1',
         tests: '4',
         time: testsuite.$.time,

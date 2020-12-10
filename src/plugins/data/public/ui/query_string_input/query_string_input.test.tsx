@@ -29,7 +29,7 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
-import { EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
@@ -172,6 +172,30 @@ describe('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });
 
+  it('Should not show the language switcher when disabled', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableLanguageSwitcher: true,
+      })
+    );
+    expect(component.find(QueryLanguageSwitcher).exists()).toBeFalsy();
+  });
+
+  it('Should show an icon when an iconType is specified', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        iconType: 'search',
+      })
+    );
+    expect(component.find(EuiIcon).exists()).toBeTruthy();
+  });
+
   it('Should call onSubmit when the user hits enter inside the query bar', () => {
     const mockCallback = jest.fn();
 
@@ -255,20 +279,16 @@ describe('QueryStringInput', () => {
   });
 
   it('Should accept index pattern strings and fetch the full object', () => {
+    const patternStrings = ['logstash-*'];
     mockFetchIndexPatterns.mockClear();
     mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: ['logstash-*'],
+        indexPatterns: patternStrings,
         disableAutoFocus: true,
       })
     );
-
-    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(
-      startMock.savedObjects.client,
-      ['logstash-*'],
-      startMock.uiSettings
-    );
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
   });
 });

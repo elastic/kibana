@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IngestManagerStart,
-  registerPackagePolicyComponent,
-} from '../../../../../ingest_manager/public';
+import { FleetStart } from '../../../../../fleet/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
 } from '../../../../../../../src/plugins/data/public/mocks';
+import { fleetMock } from '../../../../../fleet/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
@@ -36,7 +34,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
  */
 export interface DepsStartMock {
   data: DataMock;
-  ingestManager: IngestManagerStart;
+  fleet: FleetStart;
 }
 
 /**
@@ -59,9 +57,6 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: {
-      isInitialized: () => Promise.resolve(true),
-      registerPackagePolicyComponent,
-    },
+    fleet: fleetMock.createStartMock(),
   };
 };

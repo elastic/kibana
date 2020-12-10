@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mergeMap } from 'rxjs/operators';
-import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
+import { map, mergeMap } from 'rxjs/operators';
+import {
+  ISearchStrategy,
+  PluginStart,
+  shimHitsTotal,
+} from '../../../../../../src/plugins/data/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -17,7 +22,7 @@ import { SecuritySolutionFactory } from './factory/types';
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy('es');
+  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
@@ -27,9 +32,17 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
       const queryFactory: SecuritySolutionFactory<T> =
         securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
-      return es
-        .search({ ...request, params: dsl }, options, deps)
-        .pipe(mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes)));
+      return es.search({ ...request, params: dsl }, options, deps).pipe(
+        map((response) => {
+          return {
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
+          };
+        }),
+        mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
+      );
     },
     cancel: async (id, options, deps) => {
       if (es.cancel) {

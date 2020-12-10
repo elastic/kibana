@@ -20,13 +20,9 @@ import {
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
+import { Doc } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
-
-interface Doc {
-  index: string;
-  body: IEvent;
-}
 
 interface IEventLoggerCtorParams {
   esContext: EsContext;
@@ -72,7 +68,6 @@ export class EventLogger implements IEventLogger {
 
     const event: IEvent = {};
     const fixedProperties = {
-      '@timestamp': new Date().toISOString(),
       ecs: {
         version: ECS_VERSION,
       },
@@ -81,8 +76,12 @@ export class EventLogger implements IEventLogger {
       },
     };
 
+    const defaultProperties = {
+      '@timestamp': new Date().toISOString(),
+    };
+
     // merge the initial properties and event properties
-    merge(event, this.initialProperties, eventProperties, fixedProperties);
+    merge(event, defaultProperties, this.initialProperties, eventProperties, fixedProperties);
 
     let validatedEvent: IValidatedEvent;
     try {
@@ -156,44 +155,9 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
 export const EVENT_LOGGED_PREFIX = `event logged: `;
 
 function logEventDoc(logger: Logger, doc: Doc): void {
-  setImmediate(() => {
-    logger.info(`${EVENT_LOGGED_PREFIX}${JSON.stringify(doc.body)}`);
-  });
+  logger.info(`event logged: ${JSON.stringify(doc.body)}`);
 }
 
 function indexEventDoc(esContext: EsContext, doc: Doc): void {
-  // TODO:
-  // the setImmediate() on an async function is a little overkill, but,
-  // setImmediate() may be tweakable via node params, whereas async
-  // tweaking is in the v8 params realm, which is very dicey.
-  // Long-term, we should probably create an in-memory queue for this, so
-  // we can explictly see/set the queue lengths.
-
-  // already verified this.clusterClient isn't null above
-  setImmediate(async () => {
-    try {
-      await indexLogEventDoc(esContext, doc);
-    } catch (err) {
-      esContext.logger.warn(`error writing event doc: ${err.message}`);
-      writeLogEventDocOnError(esContext, doc);
-    }
-  });
-}
-
-// whew, the thing that actually writes the event log document!
-async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
-  esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
-  const success = await esContext.waitTillReady();
-  if (!success) {
-    esContext.logger.debug(`event log did not initialize correctly, event not written`);
-    return;
-  }
-
-  await esContext.esAdapter.indexDocument(doc);
-  esContext.logger.debug(`writing to event log complete`);
-}
-
-// TODO: write log entry to a bounded queue buffer
-function writeLogEventDocOnError(esContext: EsContext, doc: unknown) {
-  esContext.logger.warn(`unable to write event doc: ${JSON.stringify(doc)}`);
+  esContext.esAdapter.indexDocument(doc);
 }

@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SinonFakeServer } from 'sinon';
 import { ReactWrapper } from 'enzyme';
 import axios from 'axios';
@@ -20,27 +20,27 @@ import {
   notificationServiceMock,
   fatalErrorsServiceMock,
 } from '../../../../../src/core/public/mocks';
+
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+
 import { CloudSetup } from '../../../cloud/public';
 
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
+import {
+  EditPolicyContextProvider,
+  EditPolicyContextValue,
+} from '../../public/application/sections/edit_policy/edit_policy_context';
+
 import { KibanaContextProvider } from '../../public/shared_imports';
+
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
 import { PolicyFromES } from '../../common/types';
-import {
-  positiveNumberRequiredMessage,
-  policyNameRequiredMessage,
-  policyNameStartsWithUnderscoreErrorMessage,
-  policyNameContainsCommaErrorMessage,
-  policyNameContainsSpaceErrorMessage,
-  policyNameMustBeDifferentErrorMessage,
-  policyNameAlreadyUsedErrorMessage,
-} from '../../public/application/services/policies/policy_validation';
 
 import { i18nTexts } from '../../public/application/sections/edit_policy/i18n_texts';
 import { editPolicyHelpers } from './helpers';
+import { defaultPolicy } from '../../public/application/constants';
 
 // @ts-ignore
 initHttp(axios.create({ adapter: axiosXhrAdapter }));
@@ -122,14 +122,11 @@ const noRollover = async (rendered: ReactWrapper) => {
 const getNodeAttributeSelect = (rendered: ReactWrapper, phase: string) => {
   return findTestSubject(rendered, `${phase}-selectedNodeAttrs`);
 };
-const setPolicyName = (rendered: ReactWrapper, policyName: string) => {
+const setPolicyName = async (rendered: ReactWrapper, policyName: string) => {
   const policyNameField = findTestSubject(rendered, 'policyNameField');
-  policyNameField.simulate('change', { target: { value: policyName } });
-  rendered.update();
-};
-const setPhaseAfterLegacy = (rendered: ReactWrapper, phase: string, after: string | number) => {
-  const afterInput = rendered.find(`input#${phase}-selectedMinimumAge`);
-  afterInput.simulate('change', { target: { value: after } });
+  await act(async () => {
+    policyNameField.simulate('change', { target: { value: policyName } });
+  });
   rendered.update();
 };
 const setPhaseAfter = async (rendered: ReactWrapper, phase: string, after: string | number) => {
@@ -157,6 +154,35 @@ const save = async (rendered: ReactWrapper) => {
   });
   rendered.update();
 };
+
+const MyComponent = ({
+  isCloudEnabled,
+  isNewPolicy,
+  policy: _policy,
+  existingPolicies,
+  getUrlForApp,
+  policyName,
+}: EditPolicyContextValue & { isCloudEnabled: boolean }) => {
+  return (
+    <KibanaContextProvider services={{ cloud: { isCloudEnabled } as CloudSetup }}>
+      <EditPolicyContextProvider
+        value={{
+          isNewPolicy,
+          policy: _policy,
+          existingPolicies,
+          policyName,
+          getUrlForApp,
+          license: {
+            canUseSearchableSnapshot: () => true,
+          },
+        }}
+      >
+        <EditPolicy history={history} />
+      </EditPolicyContextProvider>
+    </KibanaContextProvider>
+  );
+};
+
 describe('edit policy', () => {
   beforeAll(() => {
     jest.useFakeTimers();
@@ -179,14 +205,15 @@ describe('edit policy', () => {
 
   beforeEach(() => {
     component = (
-      <KibanaContextProvider services={{ cloud: { isCloudEnabled: false } as CloudSetup }}>
-        <EditPolicy
-          history={history}
-          getUrlForApp={jest.fn()}
-          policies={policies}
-          policyName={''}
-        />
-      </KibanaContextProvider>
+      <MyComponent
+        isNewPolicy={true}
+        policy={defaultPolicy}
+        existingPolicies={policies}
+        getUrlForApp={jest.fn()}
+        policyName="test"
+        isCloudEnabled={false}
+        license={{ canUseSearchableSnapshot: () => true }}
+      />
     );
 
     ({ http } = editPolicyHelpers.setup());
@@ -198,73 +225,91 @@ describe('edit policy', () => {
     test('should show error when trying to save empty form', async () => {
       const rendered = mountWithIntl(component);
       await save(rendered);
-      expectedErrorMessages(rendered, [policyNameRequiredMessage]);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
     });
     test('should show error when trying to save policy name with space', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'my policy');
-      await save(rendered);
-      expectedErrorMessages(rendered, [policyNameContainsSpaceErrorMessage]);
+      await setPolicyName(rendered, 'my policy');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
     });
     test('should show error when trying to save policy name that is already used', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'testy0');
-      rendered.update();
-      await save(rendered);
-      expectedErrorMessages(rendered, [policyNameAlreadyUsedErrorMessage]);
+      await setPolicyName(rendered, 'testy0');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [
+        i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage,
+      ]);
     });
     test('should show error when trying to save as new policy but using the same name', async () => {
       component = (
-        <EditPolicy
-          policyName={'testy0'}
-          policies={policies}
+        <MyComponent
+          isNewPolicy={false}
+          policy={defaultPolicy}
+          existingPolicies={policies}
           getUrlForApp={jest.fn()}
-          history={history}
+          isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       const rendered = mountWithIntl(component);
       findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
       rendered.update();
-      setPolicyName(rendered, 'testy0');
-      await save(rendered);
-      expectedErrorMessages(rendered, [policyNameMustBeDifferentErrorMessage]);
+      await setPolicyName(rendered, 'testy0');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [
+        i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage,
+      ]);
     });
     test('should show error when trying to save policy name with comma', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'my,policy');
-      await save(rendered);
-      expectedErrorMessages(rendered, [policyNameContainsCommaErrorMessage]);
+      await setPolicyName(rendered, 'my,policy');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
     });
     test('should show error when trying to save policy name starting with underscore', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, '_mypolicy');
-      await save(rendered);
-      expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
+      await setPolicyName(rendered, '_mypolicy');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [
+        i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
+      ]);
     });
     test('should show correct json in policy flyout', async () => {
-      const rendered = mountWithIntl(component);
+      const rendered = mountWithIntl(
+        <MyComponent
+          policyName="my-policy"
+          isNewPolicy={false}
+          policy={defaultPolicy}
+          existingPolicies={policies}
+          getUrlForApp={jest.fn()}
+          isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
+        />
+      );
 
       await act(async () => {
         findTestSubject(rendered, 'requestButton').simulate('click');
       });
       rendered.update();
+
       const json = rendered.find(`code`).text();
-      const expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(
+      const expected = `PUT _ilm/policy/my-policy\n${JSON.stringify(
         {
           policy: {
             phases: {
               hot: {
                 actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_size: '50gb',
+                  },
                   set_priority: {
                     priority: 100,
-                  },
-                  rollover: {
-                    max_size: '50gb',
-                    max_age: '30d',
                   },
                 },
                 min_age: '0ms',
@@ -279,10 +324,10 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', async () => {
+    test('should show errors when trying to save with no max size, no max age and no max docs', async () => {
       const rendered = mountWithIntl(component);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '' } });
@@ -293,12 +338,17 @@ describe('edit policy', () => {
         maxAgeInput.simulate('change', { target: { value: '' } });
       });
       waitForFormLibValidation(rendered);
+      const maxDocsInput = findTestSubject(rendered, 'hot-selectedMaxDocuments');
+      await act(async () => {
+        maxDocsInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation(rendered);
       await save(rendered);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeTruthy();
     });
     test('should show number above 0 required error when trying to save with -1 for max size', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -309,7 +359,7 @@ describe('edit policy', () => {
     });
     test('should show number above 0 required error when trying to save with 0 for max size', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -319,7 +369,7 @@ describe('edit policy', () => {
     });
     test('should show number above 0 required error when trying to save with -1 for max age', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '-1' } });
@@ -329,7 +379,7 @@ describe('edit policy', () => {
     });
     test('should show number above 0 required error when trying to save with 0 for max age', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '0' } });
@@ -337,21 +387,21 @@ describe('edit policy', () => {
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
-    test('should show forcemerge input when rollover enabled', () => {
+    test('should show forcemerge input when rollover enabled', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeTruthy();
     });
     test('should hide forcemerge input when rollover is disabled', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await noRollover(rendered);
       waitForFormLibValidation(rendered);
       expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeFalsy();
     });
     test('should show positive number required above zero error when trying to save hot phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       act(() => {
         findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       });
@@ -365,7 +415,7 @@ describe('edit policy', () => {
     });
     test('should show positive number above 0 required error when trying to save hot phase with -1 for force merge', async () => {
       const rendered = mountWithIntl(component);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       rendered.update();
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
@@ -379,7 +429,7 @@ describe('edit policy', () => {
     test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await setPhaseIndexPriority(rendered, 'hot', '-1');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
@@ -397,7 +447,7 @@ describe('edit policy', () => {
     test('should show number required error when trying to save empty warm phase', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '');
       waitForFormLibValidation(rendered);
@@ -406,7 +456,7 @@ describe('edit policy', () => {
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '0');
       waitForFormLibValidation(rendered);
@@ -415,7 +465,7 @@ describe('edit policy', () => {
     test('should show positive number required error when trying to save warm phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '-1');
       waitForFormLibValidation(rendered);
@@ -424,7 +474,7 @@ describe('edit policy', () => {
     test('should show positive number required error when trying to save warm phase with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       await setPhaseAfter(rendered, 'warm', '-1');
@@ -434,10 +484,10 @@ describe('edit policy', () => {
     test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
@@ -451,11 +501,11 @@ describe('edit policy', () => {
     test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
@@ -468,7 +518,7 @@ describe('edit policy', () => {
     test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
@@ -485,7 +535,7 @@ describe('edit policy', () => {
     test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       await act(async () => {
@@ -503,9 +553,10 @@ describe('edit policy', () => {
       server.respondImmediately = false;
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'warm-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
@@ -517,7 +568,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'warm');
@@ -527,7 +578,7 @@ describe('edit policy', () => {
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'warm');
@@ -539,7 +590,7 @@ describe('edit policy', () => {
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'warm');
@@ -568,7 +619,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
@@ -581,7 +632,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
@@ -594,7 +645,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
@@ -611,7 +662,7 @@ describe('edit policy', () => {
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       await setPhaseAfter(rendered, 'cold', '0');
       waitForFormLibValidation(rendered);
@@ -621,7 +672,7 @@ describe('edit policy', () => {
     test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       await setPhaseAfter(rendered, 'cold', '-1');
       waitForFormLibValidation(rendered);
@@ -631,9 +682,10 @@ describe('edit policy', () => {
       server.respondImmediately = false;
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
@@ -645,7 +697,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
@@ -655,7 +707,7 @@ describe('edit policy', () => {
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
@@ -667,7 +719,7 @@ describe('edit policy', () => {
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
@@ -689,7 +741,7 @@ describe('edit policy', () => {
     test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       await setPhaseAfter(rendered, 'cold', '1');
       await setPhaseIndexPriority(rendered, 'cold', '-1');
@@ -704,7 +756,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
@@ -717,7 +769,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
@@ -730,7 +782,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
@@ -740,20 +792,20 @@ describe('edit policy', () => {
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
-      setPhaseAfterLegacy(rendered, 'delete', '0');
-      await save(rendered);
+      await setPhaseAfter(rendered, 'delete', '0');
+      waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
-      setPhaseAfterLegacy(rendered, 'delete', '-1');
-      await save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+      await setPhaseAfter(rendered, 'delete', '-1');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
   });
   describe('not on cloud', () => {
@@ -768,7 +820,7 @@ describe('edit policy', () => {
       });
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
+      await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
@@ -782,14 +834,14 @@ describe('edit policy', () => {
   describe('on cloud', () => {
     beforeEach(() => {
       component = (
-        <KibanaContextProvider services={{ cloud: { isCloudEnabled: true } as CloudSetup }}>
-          <EditPolicy
-            history={history}
-            getUrlForApp={jest.fn()}
-            policies={policies}
-            policyName="test"
-          />
-        </KibanaContextProvider>
+        <MyComponent
+          isNewPolicy={true}
+          policy={defaultPolicy}
+          existingPolicies={policies}
+          getUrlForApp={jest.fn()}
+          isCloudEnabled={true}
+          license={{ canUseSearchableSnapshot: () => true }}
+        />
       );
       ({ http } = editPolicyHelpers.setup());
       ({ server, httpRequestsMockHelpers } = http);
@@ -808,7 +860,7 @@ describe('edit policy', () => {
         });
         const rendered = mountWithIntl(component);
         await noRollover(rendered);
-        setPolicyName(rendered, 'mypolicy');
+        await setPolicyName(rendered, 'mypolicy');
         await activatePhase(rendered, 'warm');
         expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
@@ -829,7 +881,7 @@ describe('edit policy', () => {
         });
         const rendered = mountWithIntl(component);
         await noRollover(rendered);
-        setPolicyName(rendered, 'mypolicy');
+        await setPolicyName(rendered, 'mypolicy');
         await activatePhase(rendered, 'warm');
         expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
@@ -849,7 +901,7 @@ describe('edit policy', () => {
         });
         const rendered = mountWithIntl(component);
         await noRollover(rendered);
-        setPolicyName(rendered, 'mypolicy');
+        await setPolicyName(rendered, 'mypolicy');
         await activatePhase(rendered, 'cold');
         expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
         expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeTruthy();

@@ -20,10 +20,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -59,25 +59,12 @@ export const useNetworkKpiNetworkEvents = ({
   const [
     networkKpiNetworkEventsRequest,
     setNetworkKpiNetworkEventsRequest,
-  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.networkEvents,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
 
-  const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] = useState<
-    NetworkKpiNetworkEventsArgs
-  >({
+  const [
+    networkKpiNetworkEventsResponse,
+    setNetworkKpiNetworkEventsResponse,
+  ] = useState<NetworkKpiNetworkEventsArgs>({
     networkEvents: 0,
     id: ID,
     inspect: {
@@ -90,7 +77,7 @@ export const useNetworkKpiNetworkEvents = ({
 
   const networkKpiNetworkEventsSearch = useCallback(
     (request: NetworkKpiNetworkEventsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -147,7 +134,7 @@ export const useNetworkKpiNetworkEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -157,19 +144,18 @@ export const useNetworkKpiNetworkEvents = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.networkEvents,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);

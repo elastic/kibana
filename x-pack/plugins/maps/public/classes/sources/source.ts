@@ -60,6 +60,7 @@ export interface ISource {
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  getApplyGlobalTime(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
@@ -135,7 +136,11 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return false;
+  }
+
+  getApplyGlobalTime(): boolean {
+    return false;
   }
 
   getIndexPatternIds(): string[] {

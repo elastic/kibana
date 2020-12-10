@@ -15,4 +15,4 @@
 // styles for timelion visualization are lazy loaded only while a vis is opened
 // this will duplicate styles only if both Timelion app and timelion visualization are loaded
 // could be left here as it is since the Timelion app is deprecated
-@import '../../vis_type_timelion/public/components/index.scss';
+@import '../../vis_type_timelion/public/components/timelion_vis.scss';
