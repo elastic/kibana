@@ -54,6 +54,8 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
   defaultMessage: 'Off',
 });
 
+const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
+
 interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
@@ -259,11 +261,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
               >
                 <EuiSelect
                   compressed
-                  options={[
-                    { value: 100, text: '100' },
-                    { value: 1000, text: '1000' },
-                    { value: 10000, text: '10000' },
-                  ]}
+                  options={sampleSizeOptions}
                   value={fetchSize}
                   onChange={(e) => fetchSizeOnChange(e)}
                 />
