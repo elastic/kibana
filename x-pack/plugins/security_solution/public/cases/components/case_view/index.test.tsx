@@ -23,6 +23,15 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
@@ -441,6 +450,7 @@ describe('CaseView ', () => {
       ).toBeTruthy();
     });
   });
+
   // TO DO fix when the useEffects in edit_connector are cleaned up
   it.skip('should revert to the initial connector in case of failure', async () => {
     updateCaseProperty.mockImplementation(({ onError }) => {
@@ -492,6 +502,7 @@ describe('CaseView ', () => {
       ).toBe(connectorName);
     });
   });
+
   // TO DO fix when the useEffects in edit_connector are cleaned up
   it.skip('should update connector', async () => {
     const wrapper = mount(
@@ -543,6 +554,29 @@ describe('CaseView ', () => {
         incidentTypes: null,
         severityCode: null,
       },
+    });
+  });
+
+  it('it should create a new timeline on mount', async () => {
+    mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'x-pack/security_solution/local/timeline/CREATE_TIMELINE',
+        payload: {
+          columns: [],
+          expandedEvent: {},
+          id: 'timeline-case',
+          indexNames: [],
+          show: false,
+        },
+      });
     });
   });
 });
