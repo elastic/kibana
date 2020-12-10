@@ -13,7 +13,7 @@ import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 const mapping = {
   open: 'primary',
-  'in progress': 'warning',
+  'in-progress': 'warning',
   closed: 'default',
 };
 
