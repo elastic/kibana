@@ -134,7 +134,7 @@ export const HotPhase: FunctionComponent = () => {
                       label={field.label}
                       checked={field.value}
                       onChange={(e) => field.setValue(e.target.checked)}
-                      data-test-subj="useDefaultRolloverToggle"
+                      data-test-subj="useDefaultRolloverSwitch"
                     />
                     &nbsp;
                     <EuiIconTip
@@ -153,142 +153,142 @@ export const HotPhase: FunctionComponent = () => {
           }
           fullWidth
         >
-          <div aria-live="polite" role="region">
-            {isUsingDefaultRollover === false && (
-              <>
-                <UseField<boolean> path="_meta.hot.useRollover">
-                  {(field) => (
-                    <>
-                      <EuiSwitch
-                        label={field.label}
-                        checked={field.value}
-                        onChange={(e) => field.setValue(e.target.checked)}
-                        data-test-subj="rolloverSwitch"
-                      />
-                      &nbsp;
-                      <EuiIconTip
-                        type="questionInCircle"
-                        content={
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                            defaultMessage="The new index created by rollover is added
+          <div
+            aria-live="polite"
+            role="region"
+            style={{ display: isUsingDefaultRollover === false ? undefined : 'none' }}
+          >
+            <UseField<boolean> path="_meta.hot.useRollover">
+              {(field) => (
+                <>
+                  <EuiSwitch
+                    label={field.label}
+                    checked={field.value}
+                    onChange={(e) => field.setValue(e.target.checked)}
+                    data-test-subj="rolloverSwitch"
+                  />
+                  &nbsp;
+                  <EuiIconTip
+                    type="questionInCircle"
+                    content={
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
+                        defaultMessage="The new index created by rollover is added
     to the index alias and designated as the write index."
-                          />
-                        }
                       />
-                    </>
-                  )}
-                </UseField>
-                {isRolloverEnabled && (
+                    }
+                  />
+                </>
+              )}
+            </UseField>
+            {isRolloverEnabled && (
+              <>
+                <EuiSpacer size="m" />
+                {showEmptyRolloverFieldsError && (
                   <>
-                    <EuiSpacer size="m" />
-                    {showEmptyRolloverFieldsError && (
-                      <>
-                        <EuiCallOut
-                          title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
-                          data-test-subj="rolloverSettingsRequired"
-                          color="danger"
-                        >
-                          <div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>
-                        </EuiCallOut>
-                        <EuiSpacer size="s" />
-                      </>
-                    )}
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
-                          {(field) => {
-                            const showErrorCallout = field.errors.some(
-                              (e) => e.code === ROLLOVER_EMPTY_VALIDATION
-                            );
-                            if (showErrorCallout !== showEmptyRolloverFieldsError) {
-                              setShowEmptyRolloverFieldsError(showErrorCallout);
-                            }
-                            return (
-                              <NumericField
-                                field={field}
-                                euiFieldProps={{
-                                  'data-test-subj': `${hotProperty}-selectedMaxSizeStored`,
-                                  min: 1,
-                                }}
-                              />
-                            );
-                          }}
-                        </UseField>
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          key="_meta.hot.maxStorageSizeUnit"
-                          path="_meta.hot.maxStorageSizeUnit"
-                          component={SelectField}
-                          componentProps={{
-                            'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
-                            hasEmptyLabelSpace: true,
-                            euiFieldProps: {
-                              options: maxSizeStoredUnits,
-                              'aria-label': i18n.translate(
-                                'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
-                                {
-                                  defaultMessage: 'Maximum index size units',
-                                }
-                              ),
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          path={ROLLOVER_FORM_PATHS.maxDocs}
-                          component={NumericField}
-                          componentProps={{
-                            euiFieldProps: {
-                              'data-test-subj': `${hotProperty}-selectedMaxDocuments`,
-                              min: 1,
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          path={ROLLOVER_FORM_PATHS.maxAge}
-                          component={NumericField}
-                          componentProps={{
-                            euiFieldProps: {
-                              'data-test-subj': `${hotProperty}-selectedMaxAge`,
-                              min: 1,
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          key="_meta.hot.maxAgeUnit"
-                          path="_meta.hot.maxAgeUnit"
-                          component={SelectField}
-                          componentProps={{
-                            'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
-                            hasEmptyLabelSpace: true,
-                            euiFieldProps: {
-                              'aria-label': i18n.translate(
-                                'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
-                                {
-                                  defaultMessage: 'Maximum age units',
-                                }
-                              ),
-                              options: maxAgeUnits,
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiCallOut
+                      title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
+                      data-test-subj="rolloverSettingsRequired"
+                      color="danger"
+                    >
+                      <div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>
+                    </EuiCallOut>
+                    <EuiSpacer size="s" />
                   </>
                 )}
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
+                      {(field) => {
+                        const showErrorCallout = field.errors.some(
+                          (e) => e.code === ROLLOVER_EMPTY_VALIDATION
+                        );
+                        if (showErrorCallout !== showEmptyRolloverFieldsError) {
+                          setShowEmptyRolloverFieldsError(showErrorCallout);
+                        }
+                        return (
+                          <NumericField
+                            field={field}
+                            euiFieldProps={{
+                              'data-test-subj': `${hotProperty}-selectedMaxSizeStored`,
+                              min: 1,
+                            }}
+                          />
+                        );
+                      }}
+                    </UseField>
+                  </EuiFlexItem>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      key="_meta.hot.maxStorageSizeUnit"
+                      path="_meta.hot.maxStorageSizeUnit"
+                      component={SelectField}
+                      componentProps={{
+                        'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
+                        hasEmptyLabelSpace: true,
+                        euiFieldProps: {
+                          options: maxSizeStoredUnits,
+                          'aria-label': i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                            {
+                              defaultMessage: 'Maximum index size units',
+                            }
+                          ),
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      path={ROLLOVER_FORM_PATHS.maxDocs}
+                      component={NumericField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'data-test-subj': `${hotProperty}-selectedMaxDocuments`,
+                          min: 1,
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      path={ROLLOVER_FORM_PATHS.maxAge}
+                      component={NumericField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'data-test-subj': `${hotProperty}-selectedMaxAge`,
+                          min: 1,
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      key="_meta.hot.maxAgeUnit"
+                      path="_meta.hot.maxAgeUnit"
+                      component={SelectField}
+                      componentProps={{
+                        'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
+                        hasEmptyLabelSpace: true,
+                        euiFieldProps: {
+                          'aria-label': i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
+                            {
+                              defaultMessage: 'Maximum age units',
+                            }
+                          ),
+                          options: maxAgeUnits,
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </>
             )}
           </div>
