@@ -75,7 +75,7 @@ export interface SourceActions {
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
-    successCallback: (oauthUrl: string) => string
+    successCallback: (oauthUrl: string) => void
   ): { serviceType: string; successCallback(oauthUrl: string): void };
   getSourceReConnectData(sourceId: string): { sourceId: string };
   getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };

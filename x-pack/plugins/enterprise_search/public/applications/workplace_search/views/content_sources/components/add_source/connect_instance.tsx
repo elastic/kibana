@@ -95,7 +95,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
-  const redirectOauth = (oauthUrl: string) => (window.location.href = oauthUrl);
+  const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
   const handleFormSubmitError = () => setFormLoading(false);
@@ -199,7 +199,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
         {!needsPermissions && (
-          <span>
+          <span data-test-subj="NeedsPermissionsMessage">
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.message"
               defaultMessage="Document-level permissions are not yet available for this source. {link}"
