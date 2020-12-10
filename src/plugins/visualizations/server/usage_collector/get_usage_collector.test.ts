@@ -120,10 +120,11 @@ const enlargedMockSavedObjects = [
 
 describe('Visualizations usage collector', () => {
   const mockIndex = '';
+
   const getMockCallCluster = (hits: unknown[]) =>
-    (({
+    ({
       search: () => Promise.resolve({ body: { hits: { hits } } }) as unknown,
-    } as unknown) as ElasticsearchClient);
+    } as ElasticsearchClient);
 
   test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
