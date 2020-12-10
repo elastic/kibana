@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// There is still an issue with Vega Lite's typings with the strict mode we're using.
+// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
+import { i18n } from '@kbn/i18n';
+
 export type LegendType = 'nominal' | 'quantitative';
 
-const OUTLIER_SCORE_FIELD = 'outlier_score';
+export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
   if (outliers) {
@@ -110,7 +112,9 @@ export const getScatterplotMatrixVegaLiteSpec = (
                   input: 'range',
                   max: 1,
                   min: 0,
-                  name: 'Outlier score threshold:',
+                  name: i18n.translate('xpack.ml.splomSpec.outlierScoreThresholdName', {
+                    defaultMessage: 'Outlier score threshold: ',
+                  }),
                   step: 0.01,
                 },
                 init: { cutoff: 0.99 },

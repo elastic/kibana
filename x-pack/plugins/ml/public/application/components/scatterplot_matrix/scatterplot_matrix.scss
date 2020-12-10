@@ -1,6 +1,6 @@
 .mlScatterplotMatrix {
   .vega-bind span {
-    font-size: 14px;
-    padding: 0 5px;
+    font-size: $euiSizeM;
+    padding: 0 $euiSizeXS;
   }
 }
