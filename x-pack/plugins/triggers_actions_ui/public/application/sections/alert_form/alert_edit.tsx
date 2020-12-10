@@ -20,20 +20,37 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject } from '../../../types';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertAction,
+  AlertTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
+import { useKibana } from '../../../common/lib/kibana';
 
-interface AlertEditProps {
+export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
   onClose(): void;
+  reloadAlerts?: () => Promise<void>;
+  metadata?: MetaData;
 }
 
-export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
+export const AlertEdit = ({
+  initialAlert,
+  onClose,
+  reloadAlerts,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  metadata,
+}: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
     alert: initialAlert,
   });
@@ -44,13 +61,9 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   );
 
   const {
-    reloadAlerts,
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
-    docLinks,
-  } = useAlertsContext();
+    notifications: { toasts },
+  } = useKibana().services;
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
@@ -76,7 +89,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await updateAlert({ http, alert, id: alert.id });
-      toastNotifications.addSuccess(
+      toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
           defaultMessage: "Updated '{alertName}'",
           values: {
@@ -86,7 +99,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
       );
       return newAlert;
     } catch (errorRes) {
-      toastNotifications.addDanger(
+      toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
             defaultMessage: 'Cannot update alert.',
@@ -114,7 +127,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               {hasActionsDisabled && (
                 <Fragment>
@@ -135,12 +148,15 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
                 alert={alert}
                 dispatch={dispatch}
                 errors={errors}
+                actionTypeRegistry={actionTypeRegistry}
+                alertTypeRegistry={alertTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
                 operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
                   defaultMessage: 'edit',
                 })"
+                metadata={metadata}
               />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

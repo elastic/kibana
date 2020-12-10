@@ -18,7 +18,6 @@ import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/appli
 import { ValidationResult, Alert } from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public/application/context/alerts_context';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
@@ -100,7 +99,6 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      const coreStart = coreMock.createStart();
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -108,12 +106,7 @@ describe('alert_form', () => {
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const monitoringDependencies = {
-        toastNotifications: coreStart.notifications.toasts,
-        ...Legacy.shims.kibanaServices,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      } as any;
+      const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
       const initialAlert = ({
         name: 'test',
@@ -131,18 +124,18 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            ...monitoringDependencies,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <I18nProvider>
+          <KibanaReactContext.Provider>
+            <AlertForm
+              alert={initialAlert}
+              dispatch={() => {}}
+              errors={{ name: [], interval: [] }}
+              operation="create"
+              actionTypeRegistry={actionTypeRegistry}
+              alertTypeRegistry={alertTypeRegistry}
+            />
+          </KibanaReactContext.Provider>
+        </I18nProvider>
       );
 
       await act(async () => {

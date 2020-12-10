@@ -102,6 +102,9 @@ describe('timeouts', () => {
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
+      cors: {
+        enabled: false,
+      },
       compression: { enabled: true },
       requestId: {
         allowFromAnyIp: true,
@@ -136,6 +139,7 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
+      {} as any,
       {} as any
     );
 
@@ -165,6 +169,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
+      {} as any,
       {} as any
     );
 
@@ -184,6 +189,26 @@ describe('getServerOptions', () => {
         "secureOptions": 67108864,
       }
     `);
+  });
+
+  it('properly configures CORS when cors enabled', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        cors: {
+          enabled: true,
+          credentials: false,
+          origin: '*',
+        },
+      }),
+      {} as any,
+      {} as any
+    );
+
+    expect(getServerOptions(httpConfig).routes?.cors).toEqual({
+      credentials: false,
+      origin: '*',
+      headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
+    });
   });
 });
 

@@ -110,7 +110,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'critical', value: 'critical' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['dotnet', 'ruby', 'java', 'python'],
+    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs'],
   },
 
   // Recording
@@ -235,7 +235,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
       }
     ),
-    includeAgents: ['java', 'python'],
+    includeAgents: ['java', 'python', 'go'],
   },
 
   // Ignore transactions based on URLs
