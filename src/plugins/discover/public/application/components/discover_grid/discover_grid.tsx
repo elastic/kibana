@@ -52,23 +52,80 @@ interface SortObj {
 }
 
 export interface DiscoverGridProps {
+  /**
+   * Determines which element labels the grid for ARIA
+   */
   ariaLabelledBy: string;
+  /**
+   * Determines which columns are displayed
+   */
   columns: string[];
+  /**
+   * Determines whether the given columns are the default ones, so parts of the document
+   * are displayed (_source) with limited actions (cannor move, remove columns)
+   * Implemented for matching with legacy behavior
+   */
   defaultColumns: boolean;
+  /**
+   * The used index pattern
+   */
   indexPattern: IndexPattern;
+  /**
+   * Function used to add a column in the document flyout
+   */
   onAddColumn: (column: string) => void;
+  /**
+   * Function to add a filter in the grid cell or document flyout
+   */
   onFilter: DocViewFilterFn;
+  /**
+   * Function used in the grid header and flyout to remove a column
+   * @param column
+   */
   onRemoveColumn: (column: string) => void;
+  /**
+   * Function triggered when a column is resized by the user
+   */
   onResize?: (colSettings: { columnId: string; width: number }) => void;
+  /**
+   * Function to set all columns
+   */
   onSetColumns: (columns: string[]) => void;
-  onSort: (props: any) => void;
+  /**
+   * function to change sorting of the documents
+   */
+  onSort: (sort: string[][]) => void;
+  /**
+   * Array of documents provided by Elasticsearch
+   */
   rows?: ElasticSearchHit[];
+  /**
+   * The max size of the documents returned by Elasticsearch
+   */
   sampleSize: number;
+  /**
+   * Grid display settings persisted in Elasticsearch (e.g. column width)
+   */
   settings?: DiscoverGridSettings;
+  /**
+   * Saved search description
+   */
   searchDescription?: string;
+  /**
+   * Saved search title
+   */
   searchTitle?: string;
+  /**
+   * Discover plugin services
+   */
   services: DiscoverServices;
+  /**
+   * Determines whether the time columns should be displayed (legacy settings)
+   */
   showTimeCol: boolean;
+  /**
+   * Current sort setting
+   */
   sort: SortPairArr[];
 }
 

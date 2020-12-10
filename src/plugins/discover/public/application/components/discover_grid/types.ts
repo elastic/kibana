@@ -18,7 +18,7 @@
  */
 
 /**
- * User configureable state of data grid, persisted in saved search
+ * User configurable state of data grid, persisted in saved search
  */
 export interface DiscoverGridSettings {
   columns?: Record<string, DiscoverGridSettingsColumn>;
