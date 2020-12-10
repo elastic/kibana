@@ -12,24 +12,19 @@ export function enforceSuperUser<T1, T2, T3>(
 ): RequestHandler<T1, T2, T3> {
   return function enforceSuperHandler(context, req, res) {
     const security = appContextService.getSecurity();
-    const shouldEnforce = security.authz.mode.useRbacForRequest(req);
-
-    if (shouldEnforce) {
-      const user = security.authc.getCurrentUser(req);
-      if (!user) {
-        return res.unauthorized();
-      }
-
-      const userRoles = user.roles || [];
-      if (!userRoles.includes('superuser')) {
-        return res.forbidden({
-          body: {
-            message: 'Access to Fleet API require the superuser role.',
-          },
-        });
-      }
+    const user = security.authc.getCurrentUser(req);
+    if (!user) {
+      return res.unauthorized();
     }
 
+    const userRoles = user.roles || [];
+    if (!userRoles.includes('superuser')) {
+      return res.forbidden({
+        body: {
+          message: 'Access to Fleet API require the superuser role.',
+        },
+      });
+    }
     return handler(context, req, res);
   };
 }
