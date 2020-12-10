@@ -5,6 +5,7 @@
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { nudgeAnimationDuration } from '../../../plugins/security_solution/public/resolver/store/camera/scaling_constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteEventsStream,
@@ -52,9 +53,8 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
     );
 
     await panelNodeButton?.click();
-    // magical wait for the animation to complete
-    // TODO: export the animation time??
-    await pageObjects.common.sleep(1000);
+    // ensure that we wait longer than the animation time
+    await pageObjects.common.sleep(nudgeAnimationDuration * 2);
   };
 
   /**
