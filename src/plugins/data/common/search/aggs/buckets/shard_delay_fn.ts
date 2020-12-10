@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggConfigSerialized } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
@@ -27,9 +26,7 @@ import { AggParamsShardDelay, SHARD_DELAY_AGG_NAME } from './shard_delay';
 export const aggShardDelayFnName = 'aggShardDelay';
 
 type Input = any;
-type AggArgs = AggParamsShardDelay & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
-
-type Arguments = Assign<AggArgs, { delay?: number }>;
+type Arguments = AggParamsShardDelay & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -66,9 +63,9 @@ export const aggShardDelay = (): FunctionDefinition => ({
       }),
     },
     delay: {
-      types: ['number'],
+      types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.shardDelay.delay.help', {
-        defaultMessage: 'Delay in ms between shards to process.',
+        defaultMessage: 'Delay between shards to process. Example: "5s".',
       }),
     },
     json: {
@@ -97,7 +94,6 @@ export const aggShardDelay = (): FunctionDefinition => ({
         params: {
           ...rest,
           json: getParsedValue(args, 'json'),
-          delay: getParsedValue(args, 'delay'),
         },
       },
     };

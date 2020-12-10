@@ -69,59 +69,64 @@ describe('Terms Agg', () => {
       });
       expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
         Object {
-          "arguments": Object {
-            "enabled": Array [
-              true,
-            ],
-            "field": Array [
-              "field",
-            ],
-            "id": Array [
-              "test",
-            ],
-            "missingBucket": Array [
-              false,
-            ],
-            "missingBucketLabel": Array [
-              "Missing",
-            ],
-            "order": Array [
-              "desc",
-            ],
-            "orderAgg": Array [
-              Object {
-                "chain": Array [
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "enabled": Array [
+                  true,
+                ],
+                "field": Array [
+                  "field",
+                ],
+                "id": Array [
+                  "test",
+                ],
+                "missingBucket": Array [
+                  false,
+                ],
+                "missingBucketLabel": Array [
+                  "Missing",
+                ],
+                "order": Array [
+                  "desc",
+                ],
+                "orderAgg": Array [
                   Object {
-                    "arguments": Object {
-                      "enabled": Array [
-                        true,
-                      ],
-                      "id": Array [
-                        "test-orderAgg",
-                      ],
-                      "schema": Array [
-                        "orderAgg",
-                      ],
-                    },
-                    "function": "aggCount",
-                    "type": "function",
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "test-orderAgg",
+                          ],
+                          "schema": Array [
+                            "orderAgg",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
                   },
                 ],
-                "type": "expression",
+                "otherBucket": Array [
+                  false,
+                ],
+                "otherBucketLabel": Array [
+                  "Other",
+                ],
+                "size": Array [
+                  5,
+                ],
               },
-            ],
-            "otherBucket": Array [
-              false,
-            ],
-            "otherBucketLabel": Array [
-              "Other",
-            ],
-            "size": Array [
-              5,
-            ],
-          },
-          "function": "aggTerms",
-          "type": "function",
+              "function": "aggTerms",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
         }
       `);
     });
