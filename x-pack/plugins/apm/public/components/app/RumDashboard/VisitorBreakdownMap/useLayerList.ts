@@ -6,7 +6,6 @@
 
 import {
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
@@ -76,10 +75,6 @@ export const TRANSACTION_DURATION_REGION =
 
 export const TRANSACTION_DURATION_COUNTRY =
   '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
-
-interface LayerDescriptor extends BaseLayerDescriptor {
-  sourceDescriptor: EMSTMSSourceDescriptor;
-}
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -184,5 +179,8 @@ export function useLayerList() {
     type: 'VECTOR',
   };
 
-  return [pageLoadDurationByCountryLayer, pageLoadDurationByAdminRegionLayer];
+  return [
+    pageLoadDurationByCountryLayer,
+    pageLoadDurationByAdminRegionLayer,
+  ] as BaseLayerDescriptor[];
 }

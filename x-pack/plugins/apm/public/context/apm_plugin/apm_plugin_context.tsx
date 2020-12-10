@@ -14,7 +14,7 @@ export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
   core: CoreStart;
-  plugins: ApmPluginSetupDeps & { maps: MapsStartApi };
+  plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

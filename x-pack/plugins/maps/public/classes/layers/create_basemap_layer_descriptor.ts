@@ -5,13 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  LayerDescriptor,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
-} from '../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 import { getKibanaTileMap } from '../../meta';
 import { getEMSSettings } from '../../kibana_services';
 // @ts-expect-error

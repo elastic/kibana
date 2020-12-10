@@ -153,7 +153,7 @@ export class SavedMap {
 
     let layerList: LayerDescriptor[] = [];
     if (this._attributes.layerListJSON) {
-      layerList = JSON.parse(layerListJSON);
+      layerList = JSON.parse(this._attributes.layerListJSON);
     } else {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {
