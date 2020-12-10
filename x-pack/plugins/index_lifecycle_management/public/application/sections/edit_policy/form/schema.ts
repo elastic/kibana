@@ -38,6 +38,12 @@ export const schema: FormSchema<FormInternal> = {
           defaultMessage: 'Enable rollover',
         }),
       },
+      isUsingDefaultRollover: {
+        defaultValue: true,
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
+          defaultMessage: 'Use default rollover',
+        }),
+      },
       maxStorageSizeUnit: {
         defaultValue: 'gb',
       },

@@ -23,6 +23,7 @@ export interface ForcemergeFields {
 
 interface HotPhaseMetaFields extends ForcemergeFields {
   useRollover: boolean;
+  isUsingDefaultRollover: boolean;
   maxStorageSizeUnit?: string;
   maxAgeUnit?: string;
 }

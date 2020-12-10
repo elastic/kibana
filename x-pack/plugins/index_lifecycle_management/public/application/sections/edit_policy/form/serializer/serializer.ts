@@ -6,11 +6,11 @@
 
 import { produce } from 'immer';
 
-import { merge } from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 
 import { SerializedPolicy } from '../../../../../../common/types';
 
-import { defaultPolicy } from '../../../../constants';
+import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 
 import { FormInternal } from '../../types';
 
@@ -42,7 +42,9 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
-      if (hotPhaseActions.rollover && _meta.hot.useRollover) {
+      if (_meta.hot.isUsingDefaultRollover) {
+        hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
+      } else if (hotPhaseActions.rollover && _meta.hot.useRollover) {
         if (hotPhaseActions.rollover.max_age) {
           hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
         }
