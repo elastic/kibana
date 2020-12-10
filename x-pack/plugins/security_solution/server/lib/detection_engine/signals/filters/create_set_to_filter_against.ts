@@ -27,6 +27,7 @@ export const createSetToFilterAgainst = async <T>({
   listType,
   listClient,
   logger,
+  buildRuleMessage,
 }: CreateSetToFilterAgainstOptions<T>): Promise<Set<unknown>> => {
   const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
     const valueField = get(field, searchResultItem._source);
@@ -36,7 +37,7 @@ export const createSetToFilterAgainst = async <T>({
     return acc;
   }, new Set<unknown>());
 
-  logger.debug(
+  buildRuleMessage(
     `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
   );
 
@@ -46,6 +47,9 @@ export const createSetToFilterAgainst = async <T>({
     value: [...valuesFromSearchResultField],
   });
 
-  logger.debug(`number of matched items from list with id ${listId}: ${matchedListItems.length}`);
+  buildRuleMessage(
+    `number of matched items from list with id ${listId}: ${matchedListItems.length}`
+  );
+
   return new Set<unknown>(matchedListItems.map((item) => JSON.stringify(item.value)));
 };

@@ -18,7 +18,7 @@ export interface TransformElasticMSearchToListItemOptions {
 }
 
 /**
- * Given an ElasticSearch response this will look to see if the named query matches the
+ * Given an Elasticsearch response this will look to see if the named query matches the
  * index found. The named query will have to be in the format of, "1.0", "1.1", "2.0" where the
  * major number "1,2,n" will match with the index.
  * Ref: https://www.elastic.co/guide/en/elasticsearch//reference/7.9/query-dsl-bool-query.html#named-queries

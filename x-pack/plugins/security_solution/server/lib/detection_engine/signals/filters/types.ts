@@ -26,6 +26,7 @@ export interface CreateSetToFilterAgainstOptions<T> {
   listType: Type;
   listClient: ListClient;
   logger: Logger;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export interface FilterEventsOptions<T> {
@@ -38,6 +39,7 @@ export interface CreateFieldAndSetTuplesOptions<T> {
   exceptionItem: ExceptionListItemSchema;
   listClient: ListClient;
   logger: Logger;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export interface FieldSet {

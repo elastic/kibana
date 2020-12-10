@@ -11,6 +11,7 @@ import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/s
 import { listMock } from '../../../../../../lists/server/mocks';
 import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 import { EntryList } from '../../../../../../lists/common';
+import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
@@ -56,6 +57,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(field).toEqual([]);
   });
@@ -66,6 +68,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(field.length).toEqual(1);
   });
@@ -77,6 +80,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(operator).toEqual('included');
   });
@@ -88,6 +92,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(operator).toEqual('excluded');
   });
@@ -99,6 +104,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(field).toEqual('source.ip');
   });
@@ -111,6 +117,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1')]);
   });
@@ -123,6 +130,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
   });
@@ -135,6 +143,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1', '2.2.2.2'])]);
   });
@@ -166,6 +175,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(fields.length).toEqual(2);
   });
@@ -197,6 +207,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(operator1).toEqual('included');
     expect(operator2).toEqual('excluded');
@@ -229,6 +240,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect(field1).toEqual('source.ip');
     expect(field2).toEqual('destination.ip');
@@ -267,6 +279,7 @@ describe('filterEventsAgainstList', () => {
       logger: mockLogger,
       events,
       exceptionItem,
+      buildRuleMessage,
     });
     expect([...matchedSet1]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
     expect([...matchedSet2]).toEqual([JSON.stringify('3.3.3.3'), JSON.stringify('5.5.5.5')]);

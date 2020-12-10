@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isObject } from 'lodash/fp';
 
 import { Type } from '../../../common/schemas';
 
@@ -31,7 +31,9 @@ export const getQueryFilterFromTypeValue = ({
   value: unknown[];
   listId: string;
 }): QueryFilterType => {
-  const valueFlattened = value.flat(Infinity).filter((singleValue) => singleValue != null);
+  const valueFlattened = value
+    .flat(Infinity)
+    .filter((singleValue) => singleValue != null && !isObject(singleValue));
   if (isEmpty(valueFlattened)) {
     return getEmptyQuery({ listId });
   } else if (type === 'text') {
@@ -79,14 +81,16 @@ export const getTermsQuery = ({
 }): QueryFilterType => {
   const should = value.reduce<unknown[]>((accum, item, index) => {
     if (Array.isArray(item)) {
-      const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
+      const itemFlattened = item
+        .flat(Infinity)
+        .filter((singleValue) => singleValue != null && !isObject(singleValue));
       if (itemFlattened.length === 0) {
         return accum;
       } else {
         return [...accum, { terms: { _name: `${index}.0`, [type]: itemFlattened } }];
       }
     } else {
-      if (item == null) {
+      if (item == null || isObject(item)) {
         return accum;
       } else {
         return [...accum, { term: { [type]: { _name: `${index}.0`, value: item } } }];
@@ -114,7 +118,9 @@ export const getTextQuery = ({
 }): QueryFilterType => {
   const should = value.reduce<unknown[]>((accum, item, index) => {
     if (Array.isArray(item)) {
-      const itemFlattened = item.flat(Infinity).filter((singleValue) => singleValue != null);
+      const itemFlattened = item
+        .flat(Infinity)
+        .filter((singleValue) => singleValue != null && !isObject(singleValue));
       if (itemFlattened.length === 0) {
         return accum;
       } else {
@@ -128,7 +134,7 @@ export const getTextQuery = ({
         ];
       }
     } else {
-      if (item == null) {
+      if (item == null || isObject(item)) {
         return accum;
       } else {
         return [

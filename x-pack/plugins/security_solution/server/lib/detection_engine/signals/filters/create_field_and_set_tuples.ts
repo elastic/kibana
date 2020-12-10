@@ -13,6 +13,7 @@ export const createFieldAndSetTuples = async <T>({
   exceptionItem,
   listClient,
   logger,
+  buildRuleMessage,
 }: CreateFieldAndSetTuplesOptions<T>): Promise<FieldSet[]> => {
   const typedEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
     entriesList.is(entry)
@@ -28,6 +29,7 @@ export const createFieldAndSetTuples = async <T>({
         listType: type,
         listClient,
         logger,
+        buildRuleMessage,
       });
 
       return { field, operator, matchedSet };

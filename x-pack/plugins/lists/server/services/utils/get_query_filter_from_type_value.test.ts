@@ -191,11 +191,47 @@ describe('get_query_filter_from_type_value', () => {
       expect(query).toEqual(expected);
     });
 
+    test('it filters out an object value if mixed with a string value for non-text based query', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'ip',
+        value: [{}, 'host-name-1'],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
     test('it filters out a null value if mixed with a string value for text based query', () => {
       const query = getQueryFilterFromTypeValue({
         listId: 'list-123',
         type: 'text',
         value: [null, 'host-name-1'],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ match: { text: { _name: '1.0', operator: 'and', query: 'host-name-1' } } }],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it filters out object values if mixed with a string value for text based query', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'text',
+        value: [{}, 'host-name-1'],
       });
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
@@ -321,6 +357,24 @@ describe('get_query_filter_from_type_value', () => {
         ];
         expect(query).toEqual(expected);
       });
+
+      test('it filters out an object value if mixed with a string value', () => {
+        const query = getTermsQuery({
+          listId: 'list-123',
+          type: 'ip',
+          value: [{}, 'host-name-1'],
+        });
+        const expected: QueryFilterType = [
+          { term: { list_id: 'list-123' } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
+            },
+          },
+        ];
+        expect(query).toEqual(expected);
+      });
     });
 
     describe('array values', () => {
@@ -407,6 +461,24 @@ describe('get_query_filter_from_type_value', () => {
           listId: 'list-123',
           type: 'ip',
           value: [[null], ['host-name-1']],
+        });
+        const expected: QueryFilterType = [
+          { term: { list_id: 'list-123' } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ terms: { _name: '1.0', ip: ['host-name-1'] } }],
+            },
+          },
+        ];
+        expect(query).toEqual(expected);
+      });
+
+      test('it filters out an object value if mixed with a string value', () => {
+        const query = getTermsQuery({
+          listId: 'list-123',
+          type: 'ip',
+          value: [[{}], ['host-name-1']],
         });
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
@@ -555,6 +627,24 @@ describe('get_query_filter_from_type_value', () => {
         ];
         expect(query).toEqual(expected);
       });
+
+      test('it filters out an object value if mixed with a string value', () => {
+        const query = getTextQuery({
+          listId: 'list-123',
+          type: 'ip',
+          value: [{}, 'host-name-1'],
+        });
+        const expected: QueryFilterType = [
+          { term: { list_id: 'list-123' } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ match: { ip: { _name: '1.0', operator: 'and', query: 'host-name-1' } } }],
+            },
+          },
+        ];
+        expect(query).toEqual(expected);
+      });
     });
 
     describe('array values', () => {
@@ -644,6 +734,24 @@ describe('get_query_filter_from_type_value', () => {
           listId: 'list-123',
           type: 'ip',
           value: [[null], ['host-name-1']],
+        });
+        const expected: QueryFilterType = [
+          { term: { list_id: 'list-123' } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ match: { ip: { _name: '1.0', operator: 'and', query: 'host-name-1' } } }],
+            },
+          },
+        ];
+        expect(query).toEqual(expected);
+      });
+
+      test('it filters out a object value if mixed with a string value', () => {
+        const query = getTextQuery({
+          listId: 'list-123',
+          type: 'ip',
+          value: [[{}], ['host-name-1']],
         });
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },

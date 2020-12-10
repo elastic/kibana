@@ -65,6 +65,7 @@ export const filterEventsAgainstList = async <T>({
           exceptionItem,
           listClient,
           logger,
+          buildRuleMessage,
         });
         const filteredEvents = filterEvents({ events, fieldAndSetTuples });
         const diff = eventSearchResult.hits.hits.length - filteredEvents.length;

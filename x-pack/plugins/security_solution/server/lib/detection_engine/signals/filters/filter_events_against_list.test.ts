@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import { filterEventsAgainstList } from './filter_events_against_list';
-import { buildRuleMessageFactory } from '../rule_messages';
+import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 import { mockLogger, repeatedSearchResultsWithSortId } from '../__mocks__/es_results';
 
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -14,13 +14,6 @@ import { listMock } from '../../../../../../lists/server/mocks';
 import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
-
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
