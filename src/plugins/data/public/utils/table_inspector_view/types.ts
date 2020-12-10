@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { Datatable, DatatableRow } from '../../../../expressions/common';
+import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
 
-export interface DataViewColumn {
-  name: string;
-  id: string;
+export interface DataViewColumn extends DatatableColumn {
   field: string;
   sortable: (item: DatatableRow) => string | number;
   render: DataViewColumnRender;

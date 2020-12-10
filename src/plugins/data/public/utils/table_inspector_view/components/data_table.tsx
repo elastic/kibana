@@ -177,7 +177,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       const fieldFormatter = fieldFormats.deserialize(formatParams);
       const filterable = isFilterable(dataColumn);
       return {
-        name: dataColumn.name,
+        ...dataColumn,
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
@@ -196,7 +196,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       };
     });
 
-    return { columns, rows: data.rows.map((row, index) => ({ ...row, __rowIndex: index })) };
+    return { columns, rows: data.rows };
   }
 
   render() {
@@ -217,6 +217,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
               quoteValues={this.quoteValues}
               columns={columns}
               rows={rows}
+              fieldFormats={this.props.fieldFormats}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
