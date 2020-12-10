@@ -2,4 +2,8 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:apiIntegrationTests
+checks-reporter-with-killswitch "API Integration Tests" \
+  node scripts/functional_tests \
+    --config test/api_integration/config.js \
+    --bail \
+    --debug

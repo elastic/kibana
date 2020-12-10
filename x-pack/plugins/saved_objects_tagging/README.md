@@ -51,3 +51,8 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
   },
 };
 ```
+
+### Update the `taggableTypes` constant to add your type
+
+Edit the `taggableTypes` list in `x-pack/plugins/saved_objects_tagging/common/constants.ts` to add
+the name of the type you are adding.
