@@ -322,5 +322,6 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     authorizedConsumers: {},
     producer: ALERTS_FEATURE_ID,
     minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
   };
 }

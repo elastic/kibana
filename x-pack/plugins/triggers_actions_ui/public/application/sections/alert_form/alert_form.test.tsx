@@ -9,7 +9,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { ValidationResult, Alert } from '../../../types';
+import { ValidationResult, Alert, AlertType } from '../../../types';
 import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
 import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
@@ -63,6 +63,20 @@ describe('alert_form', () => {
     alertParamsExpression: () => <Fragment />,
     requiresAppContext: true,
   };
+
+  const disabledByLicenseAlertType = {
+    id: 'disabled-by-license',
+    iconClass: 'test',
+    name: 'test-alert',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
+    validate: (): ValidationResult => {
+      return { errors: {} };
+    },
+    alertParamsExpression: () => <Fragment />,
+    requiresAppContext: false,
+  };
+
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('alert_form create alert', () => {
@@ -71,7 +85,7 @@ describe('alert_form', () => {
     async function setup() {
       const mocks = coreMock.createSetup();
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
-      const alertTypes = [
+      const alertTypes: AlertType[] = [
         {
           id: 'my-alert-type',
           name: 'Test',
@@ -89,6 +103,34 @@ describe('alert_form', () => {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
             test: { read: true, all: true },
           },
+          actionVariables: {
+            params: [],
+            state: [],
+          },
+          enabledInLicense: true,
+        },
+        {
+          id: 'disabled-by-license',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          minimumLicenseRequired: 'gold',
+          recoveryActionGroup: RecoveredActionGroup,
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
+          actionVariables: {
+            params: [],
+            state: [],
+          },
+          enabledInLicense: false,
         },
       ];
       loadAlertTypes.mockResolvedValue(alertTypes);
@@ -106,7 +148,11 @@ describe('alert_form', () => {
           delete: true,
         },
       };
-      alertTypeRegistry.list.mockReturnValue([alertType, alertTypeNonEditable]);
+      alertTypeRegistry.list.mockReturnValue([
+        alertType,
+        alertTypeNonEditable,
+        disabledByLicenseAlertType,
+      ]);
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -185,6 +231,15 @@ describe('alert_form', () => {
       const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
       expect(alertDocumentationLink.exists()).toBeTruthy();
       expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
+    });
+
+    it('renders alert types disabled by license', async () => {
+      await setup();
+      const actionOption = wrapper.find(`[data-test-subj="disabled-by-license-SelectOption"]`);
+      expect(actionOption.exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="disabled-by-license-disabledTooltip"]').exists()
+      ).toBeTruthy();
     });
   });
 

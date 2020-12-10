@@ -64,6 +64,7 @@ describe('alert_details', () => {
       minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -91,6 +92,7 @@ describe('alert_details', () => {
       minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -121,6 +123,7 @@ describe('alert_details', () => {
       minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -157,6 +160,7 @@ describe('alert_details', () => {
         minimumLicenseRequired: 'basic',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        enabledInLicense: true,
       };
 
       const actionTypes: ActionType[] = [
@@ -213,6 +217,7 @@ describe('alert_details', () => {
         producer: ALERTS_FEATURE_ID,
         minimumLicenseRequired: 'basic',
         authorizedConsumers,
+        enabledInLicense: true,
       };
       const actionTypes: ActionType[] = [
         {
@@ -274,6 +279,7 @@ describe('alert_details', () => {
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
         minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       };
 
       expect(
@@ -296,6 +302,7 @@ describe('alert_details', () => {
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
         minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       };
 
       expect(
@@ -327,6 +334,7 @@ describe('disable button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -357,6 +365,7 @@ describe('disable button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -387,6 +396,7 @@ describe('disable button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const disableAlert = jest.fn();
@@ -426,6 +436,7 @@ describe('disable button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableAlert = jest.fn();
@@ -468,6 +479,7 @@ describe('mute button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -499,6 +511,7 @@ describe('mute button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -530,6 +543,7 @@ describe('mute button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const muteAlert = jest.fn();
@@ -570,6 +584,7 @@ describe('mute button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const unmuteAlert = jest.fn();
@@ -610,6 +625,7 @@ describe('mute button', () => {
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -677,6 +693,7 @@ describe('edit button', () => {
       producer: 'alerting',
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(
@@ -721,6 +738,7 @@ describe('edit button', () => {
       producer: 'alerting',
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(
@@ -758,6 +776,7 @@ describe('edit button', () => {
       producer: 'alerting',
       authorizedConsumers,
       minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(

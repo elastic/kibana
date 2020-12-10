@@ -6,7 +6,6 @@
 import React, { Fragment, useState, useEffect, Suspense, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { upperFirst } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -71,6 +70,7 @@ import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
+import { alertTypeCompare, alertTypeSolutionCompare } from '../../lib/alert_type_compare';
 
 const ENTER_KEY = 13;
 
@@ -388,9 +388,7 @@ export const AlertForm = ({
   );
 
   const alertTypeNodes = Object.entries(alertTypesByProducer)
-    .sort(([a], [b]) =>
-      solutions ? solutions.get(a)!.localeCompare(solutions.get(b)!) : a.localeCompare(b)
-    )
+    .sort((a, b) => alertTypeSolutionCompare(a, b, solutions))
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
         <EuiFlexGroup
@@ -418,7 +416,7 @@ export const AlertForm = ({
         <EuiHorizontalRule size="full" margin="xs" />
         <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
           {items
-            .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
+            .sort((a, b) => alertTypeCompare(a, b))
             .map((item, index) => {
               const alertTypeListItemHtml = (
                 <span>
@@ -437,13 +435,16 @@ export const AlertForm = ({
                       item.checkEnabledResult.isEnabled ? (
                         alertTypeListItemHtml
                       ) : (
-                        <EuiToolTip position="top" content={item.checkEnabledResult.message}>
+                        <EuiToolTip
+                          position="top"
+                          data-test-subj={`${item.id}-disabledTooltip`}
+                          content={item.checkEnabledResult.message}
+                        >
                           {alertTypeListItemHtml}
                         </EuiToolTip>
                       )
                     }
                     isDisabled={!item.checkEnabledResult.isEnabled}
-                    aria-label={'test fdgfgdfgdf'}
                     onClick={() => {
                       setAlertProperty('alertTypeId', item.id);
                       setActions([]);

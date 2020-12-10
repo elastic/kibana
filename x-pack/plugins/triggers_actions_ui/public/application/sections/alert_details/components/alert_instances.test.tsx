@@ -311,6 +311,7 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
     authorizedConsumers: {},
     producer: 'alerts',
     minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
     ...overloads,
   };
 }
