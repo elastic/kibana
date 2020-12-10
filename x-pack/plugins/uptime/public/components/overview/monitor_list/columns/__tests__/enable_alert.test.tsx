@@ -14,6 +14,7 @@ import {
 } from '../../../../../lib';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
+import { ReactRouterEuiLink } from '../../../../common/react_router_helpers';
 
 describe('EnableAlertComponent', () => {
   let defaultConnectors: string[] = [];
@@ -66,6 +67,32 @@ describe('EnableAlertComponent', () => {
     expect(wrapper.find(EuiText).text()).toBe(
       'To start enabling alerts, please define a default alert action connector in Settings'
     );
+    expect(wrapper.find(ReactRouterEuiLink)).toMatchInlineSnapshot(`
+      <ReactRouterEuiLink
+        data-test-subj="uptimeSettingsLink"
+        to="/settings?focusConnectorField=true"
+      >
+        <ReactRouterHelperForEui
+          to="/settings?focusConnectorField=true"
+        >
+          <EuiLink
+            data-test-subj="uptimeSettingsLink"
+            href="/settings?focusConnectorField=true"
+            onClick={[Function]}
+          >
+            <a
+              className="euiLink euiLink--primary"
+              data-test-subj="uptimeSettingsLink"
+              href="/settings?focusConnectorField=true"
+              onClick={[Function]}
+              rel="noreferrer"
+            >
+              Settings
+            </a>
+          </EuiLink>
+        </ReactRouterHelperForEui>
+      </ReactRouterEuiLink>
+    `);
   });
 
   it('does not displays define connectors when there is connector', () => {

@@ -201,6 +201,19 @@
                       },
                       "reference": {
                         "type": "keyword"
+                      },
+                      "subtechnique": {
+                        "properties": {
+                          "id": {
+                            "type": "keyword"
+                          },
+                          "name": {
+                            "type": "keyword"
+                          },
+                          "reference": {
+                            "type": "keyword"
+                          }
+                        }
                       }
                     }
                   }
