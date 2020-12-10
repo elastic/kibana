@@ -5,7 +5,7 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicAppSearchDeepLinkInfo } from 'src/core/public';
+import { PublicAppInfo, PublicAppSearchDeepLinkInfo, PublicAppMetaInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
 
 /** Type used internally to represent an application unrolled into its separate searchDeepLinks */
@@ -14,6 +14,8 @@ export interface AppLink {
   app: PublicAppInfo;
   subLinkTitles: string[];
   path: string;
+  meta: PublicAppMetaInfo;
+  subLinkKeywords: string[];
 }
 
 export const getAppResults = (
@@ -26,7 +28,16 @@ export const getAppResults = (
       .flatMap((app) =>
         term.length > 0
           ? flattenDeepLinks(app)
-          : [{ id: app.id, app, path: app.appRoute, subLinkTitles: [] }]
+          : [
+              {
+                id: app.id,
+                app,
+                path: app.appRoute,
+                subLinkTitles: [],
+                subLinkKeywords: [],
+                meta: app.meta,
+              },
+            ]
       )
       .map((appLink) => ({
         appLink,
@@ -40,9 +51,17 @@ export const getAppResults = (
 export const scoreApp = (term: string, appLink: AppLink): number => {
   term = term.toLowerCase();
   const title = [appLink.app.title, ...appLink.subLinkTitles].join(' ').toLowerCase();
+  const appScoreByTerms = scoreAppByTerms(term, title);
+  const appKeywords = appLink.app.meta.keywords.map((keyword) => keyword.toLowerCase());
+  const appSubLinkKeywords = appLink.subLinkKeywords.map((keyword) => keyword.toLowerCase());
+  const keywords = [...appKeywords, ...appSubLinkKeywords];
+  const appScoreByKeywords = scoreAppByKeywords(term, keywords);
+  return Math.max(appScoreByTerms, appScoreByKeywords);
+};
 
-  // shortcuts to avoid calculating the distance when there is an exact match somewhere.
+const scoreAppByTerms = (term: string, title: string): number => {
   if (title === term) {
+    // shortcuts to avoid calculating the distance when there is an exact match somewhere.
     return 100;
   }
   if (title.startsWith(term)) {
@@ -60,6 +79,13 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
     return ratio;
   }
   return 0;
+};
+
+const scoreAppByKeywords = (term: string, keywords: string[]): number => {
+  const scores = keywords.map((keyword) => {
+    return scoreAppByTerms(term, keyword);
+  });
+  return Math.max(...scores);
 };
 
 export const appToResult = (appLink: AppLink, score: number): GlobalSearchProviderResult => {
@@ -95,11 +121,14 @@ const flattenDeepLinks = (
         app,
         path: app.appRoute,
         subLinkTitles: [],
+        subLinkKeywords: [],
+        meta: {
+          keywords: app.meta?.keywords || [],
+        },
       },
       ...app.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
     ];
   }
-
   return [
     ...(deepLink.path
       ? [
@@ -107,7 +136,9 @@ const flattenDeepLinks = (
             id: `${app.id}-${deepLink.id}`,
             app,
             subLinkTitles: [deepLink.title],
+            subLinkKeywords: [...deepLink.meta.keywords],
             path: `${app.appRoute}${deepLink.path}`,
+            meta: { ...deepLink.meta },
           },
         ]
       : []),
@@ -117,6 +148,8 @@ const flattenDeepLinks = (
         ...deepAppLink,
         // shift current sublink title into array of sub-sublink titles
         subLinkTitles: [deepLink.title, ...deepAppLink.subLinkTitles],
+        // combine current sublink keywords into array of sub-link keywords
+        subLinkKeywords: deepLink.meta.keywords.concat(deepAppLink.subLinkKeywords),
       })),
   ];
 };

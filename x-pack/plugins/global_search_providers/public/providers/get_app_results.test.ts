@@ -20,6 +20,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
   searchDeepLinks: [],
+  meta: { keywords: [] },
   ...props,
 });
 
@@ -27,7 +28,11 @@ const createAppLink = (props: Partial<PublicAppInfo> = {}): AppLink => ({
   id: props.id ?? 'app1',
   path: props.appRoute ?? '/app/app1',
   subLinkTitles: [],
+  subLinkKeywords: [],
   app: createApp(props),
+  meta: {
+    keywords: props.meta?.keywords || [],
+  },
 });
 
 describe('getAppResults', () => {
@@ -47,14 +52,21 @@ describe('getAppResults', () => {
     const apps = [
       createApp({
         searchDeepLinks: [
-          { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [] },
+          { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [], meta: { keywords: [] } },
           {
             id: 'sub2',
             title: 'Sub2',
             path: '/sub2',
             searchDeepLinks: [
-              { id: 'sub2sub1', title: 'Sub2Sub1', path: '/sub2/sub1', searchDeepLinks: [] },
+              {
+                id: 'sub2sub1',
+                title: 'Sub2Sub1',
+                path: '/sub2/sub1',
+                searchDeepLinks: [],
+                meta: { keywords: [] },
+              },
             ],
+            meta: { keywords: [] },
           },
         ],
       }),
@@ -74,12 +86,55 @@ describe('getAppResults', () => {
   it('only includes searchDeepLinks when search term is non-empty', () => {
     const apps = [
       createApp({
-        searchDeepLinks: [{ id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [] }],
+        searchDeepLinks: [
+          { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [], meta: { keywords: [] } },
+        ],
       }),
     ];
 
     expect(getAppResults('', apps).length).toBe(1);
     expect(getAppResults('App 1', apps).length).toBe(2);
+  });
+
+  it('retrieves the matching results from keywords', () => {
+    const apps = [
+      createApp({
+        meta: { keywords: ['One'] },
+      }),
+    ];
+    const results = getAppResults('One', apps);
+    expect(results.length).toBe(1);
+    expect(results.map(({ title }) => title)).toEqual(['App 1']);
+  });
+
+  it('retrieves the matching results from deeplink keywords', () => {
+    const apps = [
+      createApp({
+        searchDeepLinks: [
+          { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [], meta: { keywords: [] } },
+          {
+            id: 'sub2',
+            title: 'Sub2',
+            path: '/sub2',
+            searchDeepLinks: [
+              {
+                id: 'sub2sub1',
+                title: 'Sub2Sub1',
+                path: '/sub2/sub1',
+                searchDeepLinks: [],
+                meta: { keywords: ['TwoOne'] },
+              },
+            ],
+            meta: { keywords: ['two'] },
+          },
+        ],
+      }),
+    ];
+
+    const results = getAppResults('TwoOne', apps);
+
+    expect(results.length).toBe(1);
+    expect(results.map(({ title }) => title)).toEqual(['App 1 / Sub2 / Sub2Sub1']);
   });
 });
 
@@ -111,6 +166,88 @@ describe('scoreApp', () => {
     it('returns 0 if the levenshtein ratio is inferior to 60', () => {
       expect(scoreApp('0123456789', createAppLink({ title: '12345' }))).toBe(0);
       expect(scoreApp('1-2-3-4-5', createAppLink({ title: '123456789' }))).toBe(0);
+    });
+  });
+
+  describe('when the term is included in the keywords but not in the title', () => {
+    it('returns 100 if one of the app meta keywords is an exact match', () => {
+      expect(scoreApp('bar', createAppLink({ title: 'foo', meta: { keywords: ['bar'] } }))).toBe(
+        100
+      );
+      expect(scoreApp('bar', createAppLink({ title: 'foo', meta: { keywords: ['BAR'] } }))).toBe(
+        100
+      );
+    });
+    it('returns 90 if any of the keywords start with the term', () => {
+      expect(
+        scoreApp(
+          'viz',
+          createAppLink({ title: 'Foo', meta: { keywords: ['Vizualize', 'Viz view'] } })
+        )
+      ).toBe(90);
+    });
+    it('returns 75 if the term is included in any of the keywords', () => {
+      expect(
+        scoreApp('board', createAppLink({ title: 'Foo', meta: { keywords: ['dashboard app'] } }))
+      ).toBe(75);
+      expect(
+        scoreApp('shboa', createAppLink({ title: 'Foo', meta: { keywords: ['dashboard app'] } }))
+      ).toBe(75);
+    });
+  });
+
+  describe('when the term is included in the keywords an the title', () => {
+    it('returns 100 if one of the app meta keywords and the title is an exact match', () => {
+      expect(scoreApp('home', createAppLink({ title: 'Home', meta: { keywords: ['home'] } }))).toBe(
+        100
+      );
+      expect(scoreApp('Home', createAppLink({ title: 'Home', meta: { keywords: ['HOME'] } }))).toBe(
+        100
+      );
+    });
+    it('returns 90 if either one of the keywords or the title start with the term', () => {
+      expect(
+        scoreApp('vis', createAppLink({ title: 'Visualize', meta: { keywords: ['Visualise'] } }))
+      ).toBe(90);
+    });
+    it('returns 75 if the term is included in the title or any of the keywords', () => {
+      expect(
+        scoreApp(
+          'board',
+          createAppLink({ title: 'Dashboard', meta: { keywords: ['dashboard app'] } })
+        )
+      ).toBe(75);
+      expect(
+        scoreApp(
+          'shboa',
+          createAppLink({ title: 'dashboard', meta: { keywords: ['dashboard app'] } })
+        )
+      ).toBe(75);
+    });
+  });
+
+  describe('when the term is not included in the title or the keywords', () => {
+    it('returns the levenshtein ratio if superior or equal to 60', () => {
+      expect(
+        scoreApp(
+          '0123456789',
+          createAppLink({ title: '012345', meta: { keywords: ['0345', '9987'] } })
+        )
+      ).toBe(60);
+      expect(
+        scoreApp(
+          '--1234567-',
+          createAppLink({ title: '123456789', meta: { keywords: ['--345--'] } })
+        )
+      ).toBe(60);
+    });
+    it('returns 0 if the levenshtein ratio is inferior to 60', () => {
+      expect(
+        scoreApp('0123456789', createAppLink({ title: '12345', meta: { keywords: ['12', '34'] } }))
+      ).toBe(0);
+      expect(
+        scoreApp('1-2-3-4-5', createAppLink({ title: '123456789', meta: { keywords: ['12-789'] } }))
+      ).toBe(0);
     });
   });
 });
@@ -166,6 +303,8 @@ describe('appToResult', () => {
       app,
       path: '/sub1',
       subLinkTitles: ['Sub1'],
+      subLinkKeywords: [],
+      meta: { keywords: [] },
     };
 
     expect(appToResult(appLink, 42).title).toEqual('App 1 / Sub1');
@@ -178,6 +317,8 @@ describe('appToResult', () => {
       app,
       path: '/sub1',
       subLinkTitles: ['Sub1'],
+      subLinkKeywords: [],
+      meta: { keywords: [] },
     };
 
     expect(appToResult(appLink, 42).title).toEqual('Sub1');

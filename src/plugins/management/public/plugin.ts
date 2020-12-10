@@ -58,6 +58,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         id: mgmtApp.id,
         title: mgmtApp.title,
         path: mgmtApp.basePath,
+        meta: { ...mgmtApp.meta },
       })),
     }));
 

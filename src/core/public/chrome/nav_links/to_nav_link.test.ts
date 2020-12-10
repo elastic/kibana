@@ -29,6 +29,9 @@ const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   navLinkStatus: AppNavLinkStatus.default,
   appRoute: `/app/some-id`,
   searchDeepLinks: [],
+  meta: {
+    keywords: [],
+  },
   ...props,
 });
 

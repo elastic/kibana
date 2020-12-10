@@ -83,7 +83,7 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks' | 'meta'
 >;
 
 /**
@@ -250,12 +250,12 @@ export interface App<HistoryLocationState = unknown> {
    *   id: 'my_app',
    *   title: 'My App',
    *   searchDeepLinks: [
-   *     { id: 'sub1', title: 'Sub1', path: '/sub1' },
+   *     { id: 'sub1', title: 'Sub1', path: '/sub1', meta: { keywords: ['subpath1'] } },
    *     {
    *       id: 'sub2',
    *       title: 'Sub2',
    *       searchDeepLinks: [
-   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub' }
+   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub', meta: { keywords: ['subpath2'] } }
    *       ]
    *     }
    *   ],
@@ -268,8 +268,49 @@ export interface App<HistoryLocationState = unknown> {
    * - `/app/my_app/sub2/sub`
    */
   searchDeepLinks?: AppSearchDeepLink[];
+
+  /**
+   * Meta data for an application that represent additional information for the app.
+   * See {@link AppMeta}
+   *
+   * @remarks
+   * Used for global search results (where available).
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'Translated title',
+   *   meta: {
+   *     keywords: ['tracing', 'distributed tracing']
+   *   },
+   *   mount: () => { ... }
+   * })
+   * ```
+   */
+  meta?: AppMeta;
 }
 
+/**
+ * Input type for meta data for an application.
+ *
+ * Meta fields include at least `keywords`, an array of strings with which to associate the app.
+ * Keywords must include at least one unique string as an array.
+ * @public
+ */
+export interface AppMeta {
+  /** Keywords to represent this application */
+  keywords?: string[];
+}
+
+/**
+ * Public information about a registered app's {@link AppMeta | keywords }
+ *
+ * @public
+ */
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords'> & {
+  keywords: string[];
+};
 /**
  * Input type for registering secondary in-app locations for an application.
  *
@@ -289,12 +330,16 @@ export type AppSearchDeepLink = {
       path: string;
       /** Optional array of links that are 'underneath' this section in the hierarchy */
       searchDeepLinks?: AppSearchDeepLink[];
+      /** Optional meta containing keywords to match with in deep links search */
+      meta?: AppMeta;
     }
   | {
       /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
       path?: string;
       /** Array links that are 'underneath' this section in this hierarchy. */
       searchDeepLinks: AppSearchDeepLink[];
+      /** Meta containing keywords to match with in deep links search */
+      meta?: AppMeta;
     }
 );
 
@@ -303,8 +348,9 @@ export type AppSearchDeepLink = {
  *
  * @public
  */
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'meta'> & {
   searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  meta: PublicAppMetaInfo;
 };
 
 /**
@@ -312,12 +358,13 @@ export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLin
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks' | 'meta'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  meta: PublicAppMetaInfo;
 };
 
 /**

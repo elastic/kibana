@@ -40,6 +40,9 @@ export function getAppInfo(app: App): PublicAppInfo {
     navLinkStatus,
     appRoute: app.appRoute!,
     searchDeepLinks: getSearchDeepLinkInfos(app, app.searchDeepLinks),
+    meta: {
+      keywords: app.meta?.keywords || [],
+    },
   };
 }
 
@@ -58,6 +61,9 @@ function getSearchDeepLinkInfos(
         title: rawDeepLink.title,
         path: rawDeepLink.path,
         searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+        meta: {
+          keywords: rawDeepLink.meta?.keywords || [],
+        },
       };
     }
   );
