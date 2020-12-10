@@ -59,17 +59,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
 
             expectSnapshot(healthStatuses).toMatchInline(`
-            Array [
-              "healthy",
-              undefined,
-              "healthy",
-              undefined,
-              "healthy",
-              "healthy",
-              "healthy",
-              "healthy",
-            ]
-          `);
+              Array [
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+              ]
+            `);
           });
         });
       });
