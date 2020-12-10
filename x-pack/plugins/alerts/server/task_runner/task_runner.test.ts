@@ -230,7 +230,9 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subDefault');
       }
     );
     const taskRunner = new TaskRunner(
@@ -290,6 +292,7 @@ describe('Task Runner', () => {
       kibana: {
         alerting: {
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
           instance_id: '1',
         },
         saved_objects: [
@@ -311,6 +314,7 @@ describe('Task Runner', () => {
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
         },
         saved_objects: [
           {
@@ -321,7 +325,8 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      message:
+        "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
@@ -331,6 +336,7 @@ describe('Task Runner', () => {
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
         },
         saved_objects: [
           {
@@ -347,7 +353,7 @@ describe('Task Runner', () => {
         ],
       },
       message:
-        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -647,6 +653,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -733,6 +740,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -852,6 +860,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -929,6 +938,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
