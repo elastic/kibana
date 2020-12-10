@@ -95,7 +95,7 @@ function getModalContent(
     ),
   };
 
-  if (canDelete && canUntag) {
+  if (canDelete) {
     return {
       buttonText: (
         <FormattedMessage
