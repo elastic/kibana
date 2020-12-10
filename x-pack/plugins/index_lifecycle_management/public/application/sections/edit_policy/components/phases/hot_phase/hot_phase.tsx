@@ -24,7 +24,7 @@ import { useFormData, UseField, SelectField, NumericField } from '../../../../..
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -50,8 +50,6 @@ export const HotPhase: FunctionComponent = () => {
   });
   const isRolloverEnabled = get(formData, useRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
-
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
     <>
@@ -143,7 +141,7 @@ export const HotPhase: FunctionComponent = () => {
                   <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
                     {(field) => {
                       const showErrorCallout = field.errors.some(
-                        (e) => e.validationType === ROLLOVER_EMPTY_VALIDATION
+                        (e) => e.code === ROLLOVER_EMPTY_VALIDATION
                       );
                       if (showErrorCallout !== showEmptyRolloverFieldsError) {
                         setShowEmptyRolloverFieldsError(showErrorCallout);
@@ -236,8 +234,8 @@ export const HotPhase: FunctionComponent = () => {
         </ToggleFieldWithDescribedFormRow>
         {isRolloverEnabled && (
           <>
+            {<ForcemergeField phase="hot" />}
             {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-            {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="hot" />}
           </>
         )}
         <SetPriorityInputField phase={hotProperty} />

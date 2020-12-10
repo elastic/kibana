@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EuiI18nNumber } from '@elastic/eui';
-import { ResolverNodeStats } from '../../../common/endpoint/types';
+import { EventStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { useColors } from './use_colors';
 
@@ -67,7 +67,7 @@ export const NodeSubMenuComponents = React.memo(
   ({
     className,
     nodeID,
-    relatedEventStats,
+    nodeStats,
   }: {
     className?: string;
     // eslint-disable-next-line react/no-unused-prop-types
@@ -76,18 +76,18 @@ export const NodeSubMenuComponents = React.memo(
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
      */
     nodeID: string;
-    relatedEventStats: ResolverNodeStats | undefined;
+    nodeStats: EventStats | undefined;
   }) => {
     // The last projection matrix that was used to position the popover
     const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
       nodeID,
-      categories: relatedEventStats?.events?.byCategory,
+      categories: nodeStats?.byCategory,
     });
     const relatedEventOptions = useMemo(() => {
-      if (relatedEventStats === undefined) {
+      if (nodeStats === undefined) {
         return [];
       } else {
-        return Object.entries(relatedEventStats.events.byCategory).map(([category, total]) => {
+        return Object.entries(nodeStats.byCategory).map(([category, total]) => {
           const [mantissa, scale, hasRemainder] = compactNotationParts(total || 0);
           const prefix = (
             <FormattedMessage
@@ -104,7 +104,7 @@ export const NodeSubMenuComponents = React.memo(
           };
         });
       }
-    }, [relatedEventStats, relatedEventCallbacks]);
+    }, [nodeStats, relatedEventCallbacks]);
 
     const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
     const listStylesFromTheme = useMemo(() => {

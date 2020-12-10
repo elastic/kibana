@@ -467,6 +467,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         await button.click();
       }
     }
+
+    /**
+     * Get visible text of the Welcome Banner
+     */
+    async getWelcomeText() {
+      return await testSubjects.getVisibleText('global-banner-item');
+    }
   }
 
   return new CommonPage();
