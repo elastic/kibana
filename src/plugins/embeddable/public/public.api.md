@@ -312,6 +312,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
+    getUpdated$(): Readonly<Rx.Observable<void>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)
