@@ -413,7 +413,6 @@ describe('Package policy service', () => {
 
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
-        NewPackagePolicySchema,
         newPackagePolicy,
         context,
         request
@@ -427,7 +426,6 @@ describe('Package policy service', () => {
 
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
-        NewPackagePolicySchema,
         newPackagePolicy,
         context,
         request
@@ -475,7 +473,6 @@ describe('Package policy service', () => {
         try {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
-            NewPackagePolicySchema,
             newPackagePolicy,
             context,
             request
@@ -495,7 +492,6 @@ describe('Package policy service', () => {
         expect(
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
-            NewPackagePolicySchema,
             newPackagePolicy,
             context,
             request
