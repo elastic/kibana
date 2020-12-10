@@ -163,6 +163,7 @@ export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
   isEditable: boolean;
+  enabledInLicense: boolean;
 }
 
 export interface AlertTypeParamsExpressionProps<

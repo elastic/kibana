@@ -139,6 +139,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         iconType="pencil"
                         onClick={() => setEditFlyoutVisibility(true)}
                         name="edit"
+                        disabled={!alertType.enabledInLicense}
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
@@ -210,7 +211,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       name="disable"
-                      disabled={!canSaveAlert}
+                      disabled={!canSaveAlert || !alertType.enabledInLicense}
                       checked={!isEnabled}
                       data-test-subj="disableSwitch"
                       onChange={async () => {
@@ -235,7 +236,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSwitch
                       name="mute"
                       checked={isMuted}
-                      disabled={!canSaveAlert || !isEnabled}
+                      disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
                       data-test-subj="muteSwitch"
                       onChange={async () => {
                         if (isMuted) {

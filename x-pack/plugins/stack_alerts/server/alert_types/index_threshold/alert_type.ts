@@ -143,7 +143,7 @@ export function getAlertType(
         ...alertParamsVariables,
       ],
     },
-    minimumLicenseRequired: 'gold',
+    minimumLicenseRequired: 'basic',
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };

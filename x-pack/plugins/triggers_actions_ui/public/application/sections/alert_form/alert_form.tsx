@@ -71,6 +71,7 @@ import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_pa
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeSolutionCompare } from '../../lib/alert_type_compare';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 
 const ENTER_KEY = 13;
 
@@ -187,6 +188,7 @@ export const AlertForm = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
+  let hasDisabledByLicenseAlertTypes: boolean = false;
 
   // load alert types
   useEffect(() => {
@@ -372,13 +374,17 @@ export const AlertForm = ({
     ) => {
       const producer = alertTypeValue.alertType.producer;
       if (producer) {
+        const checkEnabledResult = checkAlertTypeEnabled(alertTypeValue.alertType);
+        if (!checkEnabledResult.isEnabled) {
+          hasDisabledByLicenseAlertTypes = true;
+        }
         (result[producer] = result[producer] || []).push({
           name:
             typeof alertTypeValue.alertTypeModel.name === 'string'
               ? alertTypeValue.alertTypeModel.name
               : alertTypeValue.alertTypeModel.name.props.defaultMessage,
           id: alertTypeValue.alertTypeModel.id,
-          checkEnabledResult: checkAlertTypeEnabled(alertTypeValue.alertType),
+          checkEnabledResult,
           alertTypeItem: alertTypeValue.alertTypeModel,
         });
       }
@@ -785,6 +791,25 @@ export const AlertForm = ({
           <EuiHorizontalRule />
           <EuiFormRow
             fullWidth
+            labelAppend={
+              hasDisabledByLicenseAlertTypes && (
+                <EuiTitle size="xxs">
+                  <h5>
+                    <EuiLink
+                      href={VIEW_LICENSE_OPTIONS_LINK}
+                      target="_blank"
+                      external
+                      className="actActionForm__getMoreActionsLink"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Get more alert types"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
+                      />
+                    </EuiLink>
+                  </h5>
+                </EuiTitle>
+              )
+            }
             label={
               <EuiTitle size="xxs">
                 <h5>
