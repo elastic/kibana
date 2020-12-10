@@ -26,6 +26,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     // TODO: we should not have a service overview.
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/dependencies'));
     });
 
     describe('Settings', function () {

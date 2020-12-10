@@ -20,6 +20,11 @@ export interface SpanRaw extends APMBaseDoc {
     name: string;
   };
   span: {
+    destination?: {
+      service: {
+        resource: string;
+      };
+    };
     action?: string;
     duration: { us: number };
     id: string;
