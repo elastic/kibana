@@ -11,7 +11,7 @@ import {
   CasePatchRequest,
   CasePostRequest,
   CasesStatusResponse,
-  CommentRequestUserType,
+  CommentRequest,
   User,
   CaseUserActionsResponse,
   CaseExternalServiceRequest,
@@ -183,7 +183,7 @@ export const patchCasesStatus = async (
 };
 
 export const postComment = async (
-  newComment: CommentRequestUserType,
+  newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<Case> => {

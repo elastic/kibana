@@ -69,6 +69,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete hotPhaseActions.set_priority;
       }
 
+      if (!updatedPolicy.phases.hot?.actions?.shrink) {
+        delete hotPhaseActions.shrink;
+      }
+
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
         delete hotPhaseActions.searchable_snapshot;
       }
@@ -95,7 +99,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       warmPhase.actions = serializeMigrateAndAllocateActions(
         _meta.warm,
         warmPhase.actions,
-        originalPolicy?.phases.warm?.actions
+        originalPolicy?.phases.warm?.actions,
+        updatedPolicy.phases.warm?.actions?.allocate?.number_of_replicas
       );
 
       if (!updatedPolicy.phases.warm?.actions?.forcemerge) {
@@ -129,7 +134,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       coldPhase.actions = serializeMigrateAndAllocateActions(
         _meta.cold,
         coldPhase.actions,
-        originalPolicy?.phases.cold?.actions
+        originalPolicy?.phases.cold?.actions,
+        updatedPolicy.phases.cold?.actions?.allocate?.number_of_replicas
       );
 
       if (_meta.cold.freezeEnabled) {

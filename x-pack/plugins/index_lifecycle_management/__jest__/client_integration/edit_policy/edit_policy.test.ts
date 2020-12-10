@@ -125,6 +125,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
+        await actions.hot.setShrink('2');
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -147,6 +148,9 @@ describe('<EditPolicy />', () => {
                   },
                   "set_priority": Object {
                     "priority": 123,
+                  },
+                  "shrink": Object {
+                    "number_of_shards": 2,
                   },
                 },
                 "min_age": "0ms",
@@ -743,6 +747,36 @@ describe('<EditPolicy />', () => {
         expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
         expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
       });
+    });
+  });
+  describe('without rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+      await act(async () => {
+        testBed = await setup({
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'basic' } }),
+          },
+        });
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+    test('hiding and disabling searchable snapshot field', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleRollover(false);
+      await actions.cold.enable(true);
+
+      expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
     });
   });
 });
