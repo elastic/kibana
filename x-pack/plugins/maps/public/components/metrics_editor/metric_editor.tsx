@@ -12,7 +12,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFormRow,
-  EuiRange,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -104,9 +104,13 @@ export function MetricEditor({
     if (metric.type !== AGG_TYPE.PERCENTILE) {
       return;
     }
+    const percentile = parseInt((e.target as HTMLInputElement).value, 10);
+    if (typeof percentile !== 'number' || percentile < 0 || percentile > 100) {
+      return;
+    }
     onChange({
       ...metric,
-      percentile: parseInt((e.target as HTMLInputElement).value, 10),
+      percentile,
     });
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -154,14 +158,21 @@ export function MetricEditor({
         })}
         display="columnCompressed"
       >
-        <EuiRange
+        {/* <EuiRange*/}
+        {/*  min={0}*/}
+        {/*  max={100}*/}
+        {/*  step={1}*/}
+        {/*  value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}*/}
+        {/*  onChange={onPercentileChange}*/}
+        {/*  showLabels*/}
+        {/*  showValue*/}
+        {/*  aria-label="percentile select"*/}
+
+        <EuiFieldNumber
           min={0}
           max={100}
-          step={1}
           value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}
           onChange={onPercentileChange}
-          showLabels
-          showValue
           aria-label="percentile select"
         />
       </EuiFormRow>
