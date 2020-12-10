@@ -30,6 +30,8 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
+const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
+
 const ConfigSchemaProps = {
   service: schema.nullable(schema.string()),
   host: schema.nullable(schema.string()),
@@ -183,6 +185,12 @@ async function executor(
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
+  const footerMessage = getFooterMessage({
+    publicBaseUrl,
+    viewInKibanaPath: params.viewInKibanaPath,
+    viewInKibanaText: params.viewInKibanaText,
+  });
+
   const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
@@ -193,13 +201,7 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message:
-        params.message +
-        `\n\n--\n\n${getViewInKibanaMessage({
-          publicBaseUrl,
-          viewInKibanaPath: params.viewInKibanaPath,
-          viewInKibanaText: params.viewInKibanaText,
-        })}`,
+      message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
     },
     proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
@@ -247,7 +249,7 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   return false;
 }
 
-function getViewInKibanaMessage({
+function getFooterMessage({
   viewInKibanaPath,
   viewInKibanaText,
   publicBaseUrl,

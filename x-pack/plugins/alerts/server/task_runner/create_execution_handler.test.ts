@@ -11,6 +11,11 @@ import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { InjectActionParamsOpts } from './inject_action_params';
+
+jest.mock('./inject_action_params', () => ({
+  injectActionParams: jest.fn(),
+}));
 
 const alertType: AlertType = {
   id: 'test',
@@ -64,6 +69,11 @@ const createExecutionHandlerParams = {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  jest
+    .requireMock('./inject_action_params')
+    .injectActionParams.mockImplementation(
+      ({ actionParams }: InjectActionParamsOpts) => actionParams
+    );
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
   createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
@@ -137,6 +147,17 @@ test('enqueues execution per selected action', async () => {
       ],
     ]
   `);
+
+  expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
+    alertId: '1',
+    actionTypeId: 'test',
+    actionParams: {
+      alertVal: 'My 1 name-of-alert default tag-A,tag-B 2 goes here',
+      contextVal: 'My  goes here',
+      foo: true,
+      stateVal: 'My  goes here',
+    },
+  });
 });
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {

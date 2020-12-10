@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isString, cloneDeepWith } from 'lodash';
 import {
@@ -26,7 +25,6 @@ interface TransformActionParamsOptions {
   alertParams: AlertTypeParams;
   state: AlertInstanceState;
   context: AlertInstanceContext;
-  actionTypeId: string;
 }
 
 export function transformActionParams({
@@ -41,7 +39,6 @@ export function transformActionParams({
   actionParams,
   state,
   alertParams,
-  actionTypeId,
 }: TransformActionParamsOptions): AlertActionParams {
   const result = cloneDeepWith(actionParams, (value: unknown) => {
     if (!isString(value)) return;
@@ -64,18 +61,6 @@ export function transformActionParams({
     };
     return Mustache.render(value, variables);
   });
-
-  // Inject viewInKibanaPath if action type is email. This is used by the email action
-  // type to inject a "View in Kibana" URL in the email's footer.
-  if (actionTypeId === '.email') {
-    result.viewInKibanaPath = `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`;
-    result.viewInKibanaText = i18n.translate(
-      'xpack.alerts.transformActionParams.emailViewInKibanaText',
-      {
-        defaultMessage: 'View alert in Kibana',
-      }
-    );
-  }
 
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer
