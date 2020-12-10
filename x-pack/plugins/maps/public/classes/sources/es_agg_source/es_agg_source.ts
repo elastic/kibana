@@ -21,7 +21,7 @@ export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
   hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
@@ -110,17 +110,17 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string {
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldName}`,
-          values: { fieldName },
+          defaultMessage: `Top {fieldLabel}`,
+          values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldName}`;
+        return `${aggType} ${fieldLabel}`;
     }
   }
 

@@ -118,12 +118,17 @@ export function MetricEditor({
 
   let fieldSelect;
   if (metric.type && metric.type !== AGG_TYPE.COUNT) {
+    const showErrors = metric.field === undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
           defaultMessage: 'Field',
         })}
         display="columnCompressed"
+        isInvalid={showErrors}
+        error={i18n.translate('xpack.maps.metricsEditor.selectFieldError', {
+          defaultMessage: 'Field required for aggregation',
+        })}
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
@@ -133,6 +138,7 @@ export function MetricEditor({
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
+          isInvalid={showErrors}
           compressed
         />
       </EuiFormRow>
