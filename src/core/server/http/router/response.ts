@@ -44,6 +44,7 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
   readonly status: number;
   readonly payload?: T;
   readonly options: HttpResponseOptions;
+  readonly customResponse?: boolean;
 }
 
 export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
@@ -59,7 +60,8 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
   constructor(
     public readonly status: number,
     public readonly payload?: T,
-    public readonly options: HttpResponseOptions = {}
+    public readonly options: HttpResponseOptions = {},
+    public readonly customResponse?: boolean // Is the response created via the factory `res.custom`
   ) {}
 }
 
@@ -192,6 +194,8 @@ const errorResponseFactory = {
    * The server encountered an unexpected condition that prevented it from fulfilling the request.
    * Status code: `500`.
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
+   *
+   * @deprecated Throw an error instead.
    */
   internalError: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(500, options.body || 'Internal Error', options),
@@ -322,7 +326,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest);
+    return new KibanaResponse(code, body, rest, true);
   },
 };
 

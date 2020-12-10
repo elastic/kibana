@@ -16,6 +16,7 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [customResponse](./kibana-plugin-core-server.ikibanaresponse.customresponse.md) | <code>boolean</code> |  |
 |  [options](./kibana-plugin-core-server.ikibanaresponse.options.md) | <code>HttpResponseOptions</code> |  |
 |  [payload](./kibana-plugin-core-server.ikibanaresponse.payload.md) | <code>T</code> |  |
 |  [status](./kibana-plugin-core-server.ikibanaresponse.status.md) | <code>number</code> |  |

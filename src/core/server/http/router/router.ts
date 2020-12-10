@@ -270,7 +270,19 @@ export class Router implements IRouter {
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
-      return hapiResponseAdapter.handle(kibanaResponse);
+      const handledResponse = hapiResponseAdapter.handle(kibanaResponse);
+      // Ensure similar "Internal Server Error" behaviour when the handler throws
+      // and when it returns a response with 500 error.
+      // NB: If 500 error, the previous steps ensures it's a Boom error,
+      // unless it's a streamed response and we should not intercept it
+      if (
+        !kibanaResponse.customResponse && // Except for custom responses (built via res.custom)
+        handledResponse instanceof Boom &&
+        handledResponse.output.statusCode === 500
+      ) {
+        throw new Error(handledResponse.output.payload.message);
+      }
+      return handledResponse;
     } catch (e) {
       this.log.error(e);
       // forward 401 errors from ES client

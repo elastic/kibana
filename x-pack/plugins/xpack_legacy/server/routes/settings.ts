@@ -52,7 +52,7 @@ export function registerSettingsRoute({
         | KibanaSettingsCollector
         | undefined;
       if (!settingsCollector) {
-        return res.internalError();
+        throw new Error('The settings collector is not registered');
       }
 
       const settings =
