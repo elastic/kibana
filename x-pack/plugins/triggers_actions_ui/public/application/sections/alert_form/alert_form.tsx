@@ -70,7 +70,7 @@ import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
-import { alertTypeCompare, alertTypeSolutionCompare } from '../../lib/alert_type_compare';
+import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 
 const ENTER_KEY = 13;
@@ -394,7 +394,7 @@ export const AlertForm = ({
   );
 
   const alertTypeNodes = Object.entries(alertTypesByProducer)
-    .sort((a, b) => alertTypeSolutionCompare(a, b, solutions))
+    .sort((a, b) => alertTypeGroupCompare(a, b, solutions))
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
         <EuiFlexGroup

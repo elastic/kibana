@@ -26,7 +26,7 @@ import {
   EuiButtonEmpty,
   EuiHealth,
   EuiText,
-  EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -274,14 +274,13 @@ export const AlertsList: React.FunctionComponent = () => {
         return checkEnabledResult.isEnabled ? (
           link
         ) : (
-          <Fragment>
+          <EuiToolTip
+            position="top"
+            data-test-subj={`${alert.id}-disabledTooltip`}
+            content={checkEnabledResult.message}
+          >
             {link}
-            <EuiIconTip
-              type="questionInCircle"
-              content={checkEnabledResult.message}
-              position="right"
-            />
-          </Fragment>
+          </EuiToolTip>
         );
       },
     },

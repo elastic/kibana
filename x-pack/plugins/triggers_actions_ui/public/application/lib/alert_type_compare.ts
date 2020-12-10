@@ -7,8 +7,8 @@
 import { AlertTypeModel } from '../../types';
 import { IsEnabledResult, IsDisabledResult } from './check_alert_type_enabled';
 
-export function alertTypeSolutionCompare(
-  a: [
+export function alertTypeGroupCompare(
+  left: [
     string,
     Array<{
       id: string;
@@ -17,7 +17,7 @@ export function alertTypeSolutionCompare(
       alertTypeItem: AlertTypeModel;
     }>
   ],
-  b: [
+  right: [
     string,
     Array<{
       id: string;
@@ -26,26 +26,31 @@ export function alertTypeSolutionCompare(
       alertTypeItem: AlertTypeModel;
     }>
   ],
-  solutions: Map<string, string> | undefined
+  groupNames: Map<string, string> | undefined
 ) {
-  // .sort(([a], [b]) =>
-  // solutions ? solutions.get(a)!.localeCompare(solutions.get(b)!) : a.localeCompare(b)
-  // )
-  const solutionA = a[0];
-  const solutionB = b[0];
-  const alertTypeItemsA = a[1].find((alertTypeItem) => alertTypeItem.checkEnabledResult.isEnabled);
-  const alertTypeItemsB = b[1].find((alertTypeItem) => alertTypeItem.checkEnabledResult.isEnabled);
+  const groupNameA = left[0];
+  const groupNameB = right[0];
+  const leftAlertTypesList = left[1];
+  const rightAlertTypesList = right[1];
 
-  if (!!alertTypeItemsA && !alertTypeItemsB) {
+  const hasEnabledAlertTypeInListLeft =
+    leftAlertTypesList.find((alertTypeItem) => alertTypeItem.checkEnabledResult.isEnabled) !==
+    undefined;
+
+  const hasEnabledAlertTypeInListRight =
+    rightAlertTypesList.find((alertTypeItem) => alertTypeItem.checkEnabledResult.isEnabled) !==
+    undefined;
+
+  if (hasEnabledAlertTypeInListLeft && !hasEnabledAlertTypeInListRight) {
     return -1;
   }
-  if (!alertTypeItemsA && !!alertTypeItemsB) {
+  if (!hasEnabledAlertTypeInListLeft && hasEnabledAlertTypeInListRight) {
     return 1;
   }
 
-  return solutions
-    ? solutions.get(solutionA)!.localeCompare(solutions.get(solutionB)!)
-    : solutionA.localeCompare(solutionB);
+  return groupNames
+    ? groupNames.get(groupNameA)!.localeCompare(groupNames.get(groupNameB)!)
+    : groupNameA.localeCompare(groupNameB);
 }
 
 export function alertTypeCompare(
