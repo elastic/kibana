@@ -556,6 +556,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'warm-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
@@ -684,6 +685,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });

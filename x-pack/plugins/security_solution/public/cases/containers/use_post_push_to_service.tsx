@@ -10,6 +10,7 @@ import {
   ServiceConnectorCaseResponse,
   ServiceConnectorCaseParams,
   CaseConnector,
+  CommentType,
 } from '../../../../case/common/api';
 import {
   errorToToaster,
@@ -177,7 +178,7 @@ export const formatServiceRequestData = (
       )
       .map((c) => ({
         commentId: c.id,
-        comment: c.comment,
+        comment: c.type === CommentType.user ? c.comment : '',
         createdAt: c.createdAt,
         createdBy: {
           fullName: c.createdBy.fullName ?? null,
