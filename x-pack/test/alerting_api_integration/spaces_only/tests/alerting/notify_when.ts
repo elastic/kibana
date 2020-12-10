@@ -85,7 +85,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           id: createdAlert.id,
           provider: 'alerting',
           actions: new Map([
-            ['execute-action', { gte: 6 }],
+            ['execute-action', { gte: 6 }], // one more action (for recovery) will be executed after the last pattern fires
             ['new-instance', { equal: 2 }],
           ]),
         });
@@ -98,7 +98,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       expect(executeActionEventsActionGroup).to.eql(expectedActionGroupBasedOnPattern);
     });
 
-    it(`alert with notifyWhen=onActionGroupChange should only execute actions when action group changes`, async () => {
+    it(`alert with notifyWhen=onActionGroupChange should execute actions when action group changes`, async () => {
       const { body: defaultAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
@@ -162,6 +162,97 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           provider: 'alerting',
           actions: new Map([
             ['execute-action', { gte: 4 }],
+            ['new-instance', { equal: 2 }],
+          ]),
+        });
+      });
+
+      const executeActionEvents = getEventsByAction(events, 'execute-action');
+      const executeActionEventsActionGroup = executeActionEvents.map(
+        (event) => event?.kibana?.alerting?.action_group_id
+      );
+      expect(executeActionEventsActionGroup).to.eql(expectedActionGroupBasedOnPattern);
+    });
+
+    it(`alert with notifyWhen=onActionGroupChange should only execute actions when action subgroup changes`, async () => {
+      const { body: defaultAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My Default Action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const { body: recoveredAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My Recovered Action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const pattern = {
+        instance: [
+          'subgroup1',
+          'subgroup1',
+          false,
+          false,
+          'subgroup1',
+          'subgroup2',
+          'subgroup2',
+          false,
+        ],
+      };
+      const expectedActionGroupBasedOnPattern = [
+        'default',
+        'recovered',
+        'default',
+        'default',
+        'recovered',
+      ];
+
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            params: { pattern },
+            schedule: { interval: '1s' },
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+            actions: [
+              {
+                id: defaultAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: recoveredAction.id,
+                group: 'recovered',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+          provider: 'alerting',
+          actions: new Map([
+            ['execute-action', { gte: 5 }],
             ['new-instance', { equal: 2 }],
           ]),
         });
