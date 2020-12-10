@@ -87,9 +87,11 @@ export class AuditService {
     getSpaceId,
   }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
-        this.allowAuditLogging = allowAuditLogging;
-      });
+      this.licenseFeaturesSubscription = license.features$.subscribe(
+        ({ allowLegacyAuditLogging }) => {
+          this.allowAuditLogging = allowLegacyAuditLogging;
+        }
+      );
     }
 
     // Configure logging during setup and when license changes
