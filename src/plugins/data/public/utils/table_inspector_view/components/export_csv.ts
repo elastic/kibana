@@ -54,14 +54,14 @@ function buildCsv(
   const header = columns.map((col) => escape(col.name, quoteValues));
 
   const formatters = columns.map((column) => {
-    return fieldFormats.deserialize(column.meta.params);
+    return fieldFormats.deserialize(column.originalColumn().meta.params);
   });
 
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
     return columns.map((column, i) => {
       return escape(
-        isFormatted ? formatters[i].convert(row[column.id]) : row[column.id],
+        isFormatted ? formatters[i].convert(row[column.field]) : row[column.field],
         quoteValues
       );
     });

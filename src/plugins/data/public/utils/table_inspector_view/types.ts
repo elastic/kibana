@@ -21,7 +21,9 @@ import { Datatable, DatatableColumn, DatatableRow } from '../../../../expression
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
 
-export interface DataViewColumn extends DatatableColumn {
+export interface DataViewColumn {
+  originalColumn: () => DatatableColumn;
+  name: string;
   field: string;
   sortable: (item: DatatableRow) => string | number;
   render: DataViewColumnRender;

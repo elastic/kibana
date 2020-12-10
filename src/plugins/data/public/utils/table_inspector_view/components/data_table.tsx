@@ -177,7 +177,8 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       const fieldFormatter = fieldFormats.deserialize(formatParams);
       const filterable = isFilterable(dataColumn);
       return {
-        ...dataColumn,
+        originalColumn: () => dataColumn,
+        name: dataColumn.name,
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
