@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, merge } from 'lodash/fp';
+import { cloneDeep, merge } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
@@ -27,13 +27,14 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
-    const sourceData = getOr({}, 'hits.hits.0._source', response.rawResponse);
-    const hitsData = getOr({}, 'hits.hits.0', response.rawResponse);
+    const fieldsData = cloneDeep(response.rawResponse.hits.hits[0].fields ?? {});
+    const hitsData = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
     delete hitsData._source;
+    delete hitsData.fields;
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-    const data = getDataFromHits(merge(sourceData, hitsData));
+    const data = getDataFromHits(merge(fieldsData, hitsData));
 
     return {
       ...response,
