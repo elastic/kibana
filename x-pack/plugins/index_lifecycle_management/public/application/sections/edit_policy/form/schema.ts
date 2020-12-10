@@ -41,7 +41,7 @@ export const schema: FormSchema<FormInternal> = {
       isUsingDefaultRollover: {
         defaultValue: true,
         label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
-          defaultMessage: 'Use default rollover',
+          defaultMessage: 'Use recommended defaults',
         }),
       },
       maxStorageSizeUnit: {
