@@ -228,6 +228,8 @@ To view the data field summary information, navigate to the field, then click *i
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window]
 
+Sometimes documents have no data for the field inspected: *Lens* will show a "Other" entry to represent these documents in the distribution chart.
+
 [float]
 [[change-the-visualization-type]]
 ==== Change the visualization type
