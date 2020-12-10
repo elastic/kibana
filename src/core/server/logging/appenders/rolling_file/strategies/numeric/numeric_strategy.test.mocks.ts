@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
+export const getOrderedRolledFilesMock = jest.fn();
+export const deleteFilesMock = jest.fn();
+export const rollPreviousFilesInOrderMock = jest.fn();
+export const rollCurrentFileMock = jest.fn();
+export const shouldSkipRolloutMock = jest.fn();
 
-/**
- * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
- * is implemented internally. It's supposed to be used by `Logger`.
- * @internal
- */
-export interface Appender {
-  append(record: LogRecord): void;
-}
+jest.doMock('./rolling_tasks', () => ({
+  getOrderedRolledFiles: getOrderedRolledFilesMock,
+  deleteFiles: deleteFilesMock,
+  rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
+  rollCurrentFile: rollCurrentFileMock,
+  shouldSkipRollout: shouldSkipRolloutMock,
+}));
 
-/**
- * This interface should be additionally implemented by the `Appender`'s if they are supposed
- * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
- * that interacts with `Appender` doesn't have control over appender lifetime.
- * @internal
- */
-export interface DisposableAppender extends Appender {
-  dispose: () => void | Promise<void>;
-}
+export const resetAllMock = () => {
+  shouldSkipRolloutMock.mockReset();
+  getOrderedRolledFilesMock.mockReset();
+  deleteFilesMock.mockReset();
+  rollPreviousFilesInOrderMock.mockReset();
+  rollCurrentFileMock.mockReset();
+};

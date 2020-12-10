@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
+export const readdirMock = jest.fn();
+export const unlinkMock = jest.fn();
+export const renameMock = jest.fn();
+export const accessMock = jest.fn();
 
-/**
- * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
- * is implemented internally. It's supposed to be used by `Logger`.
- * @internal
- */
-export interface Appender {
-  append(record: LogRecord): void;
-}
+jest.doMock('fs/promises', () => ({
+  readdir: readdirMock,
+  unlink: unlinkMock,
+  rename: renameMock,
+  access: accessMock,
+}));
 
-/**
- * This interface should be additionally implemented by the `Appender`'s if they are supposed
- * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
- * that interacts with `Appender` doesn't have control over appender lifetime.
- * @internal
- */
-export interface DisposableAppender extends Appender {
-  dispose: () => void | Promise<void>;
-}
+export const clearAllMocks = () => {
+  readdirMock.mockClear();
+  unlinkMock.mockClear();
+  renameMock.mockClear();
+  accessMock.mockClear();
+};

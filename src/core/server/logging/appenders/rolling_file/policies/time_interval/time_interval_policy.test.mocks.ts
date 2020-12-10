@@ -17,23 +17,5 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
-
-/**
- * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
- * is implemented internally. It's supposed to be used by `Logger`.
- * @internal
- */
-export interface Appender {
-  append(record: LogRecord): void;
-}
-
-/**
- * This interface should be additionally implemented by the `Appender`'s if they are supposed
- * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
- * that interacts with `Appender` doesn't have control over appender lifetime.
- * @internal
- */
-export interface DisposableAppender extends Appender {
-  dispose: () => void | Promise<void>;
-}
+export const getNextRollingTimeMock = jest.fn();
+jest.doMock('./get_next_rolling_time', () => ({ getNextRollingTime: getNextRollingTimeMock }));
