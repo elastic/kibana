@@ -31,7 +31,11 @@ import {
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
 } from '../types';
-import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
+import {
+  validateAlertTypeParams,
+  alertExecutionStatusFromRaw,
+  getAlertNotifyWhenType,
+} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -253,7 +257,7 @@ export class AlertsClient {
     const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
 
-    const notifyWhen = this.validateAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
       ...data,
@@ -699,7 +703,7 @@ export class AlertsClient {
       ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = this.validateAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawAlert>;
     const createAttributes = this.updateMeta({
@@ -1380,15 +1384,6 @@ export class AlertsClient {
         })
       );
     }
-  }
-
-  private validateAlertNotifyWhenType(
-    notifyWhen: AlertNotifyWhenType | null,
-    throttle: string | null
-  ): AlertNotifyWhenType {
-    // We allow notifyWhen to be null for backwards compatibility. If it is null, determine its
-    // value based on whether the throttle is set to a value or null
-    return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : 'onActiveAlert';
   }
 
   private async denormalizeActions(

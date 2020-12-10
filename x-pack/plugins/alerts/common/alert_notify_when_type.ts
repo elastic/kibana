@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const AlertNotifyWhenTypeValues = ['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'];
+const AlertNotifyWhenTypeValues = [
+  'onActionGroupChange',
+  'onActiveAlert',
+  'onThrottleInterval',
+] as const;
 export type AlertNotifyWhenType = typeof AlertNotifyWhenTypeValues[number];
 
 export function validateNotifyWhenType(notifyWhen: string) {
-  if (AlertNotifyWhenTypeValues.includes(notifyWhen)) {
+  if (AlertNotifyWhenTypeValues.includes(notifyWhen as AlertNotifyWhenType)) {
     return;
   }
   return `string is not a valid AlertNotifyWhenType: ${notifyWhen}`;
