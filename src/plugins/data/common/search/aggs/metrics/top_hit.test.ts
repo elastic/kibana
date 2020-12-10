@@ -106,34 +106,39 @@ describe('Top hit metric', () => {
     init({ fieldName: 'machine.os' });
     expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "aggregate": Array [
-            "concat",
-          ],
-          "enabled": Array [
-            true,
-          ],
-          "field": Array [
-            "machine.os",
-          ],
-          "id": Array [
-            "1",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-          "size": Array [
-            1,
-          ],
-          "sortField": Array [
-            "machine.os",
-          ],
-          "sortOrder": Array [
-            "desc",
-          ],
-        },
-        "function": "aggTopHit",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "aggregate": Array [
+                "concat",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "machine.os",
+              ],
+              "id": Array [
+                "1",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+              "size": Array [
+                1,
+              ],
+              "sortField": Array [
+                "machine.os",
+              ],
+              "sortOrder": Array [
+                "desc",
+              ],
+            },
+            "function": "aggTopHit",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });
