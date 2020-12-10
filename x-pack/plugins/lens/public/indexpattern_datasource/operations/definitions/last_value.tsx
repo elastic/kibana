@@ -6,6 +6,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
@@ -160,19 +162,18 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       },
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    schema: 'metric',
-    type: 'top_hits',
-    params: {
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
       field: column.sourceField,
       aggregate: 'concat',
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
-    },
-  }),
+    }).toAst();
+  },
 
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
