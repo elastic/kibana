@@ -45,6 +45,15 @@ export const createGridColumns = (
   fireEvent: IInterpreterRenderHandlers['event']
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
+    /**
+     * Visible column index and the actual one from the source table could be different.
+     * e.x. a column could be filtered out if it's not a dimension -
+     * see formattedColumns in use_formatted_columns.ts file,
+     * or an extra percantage column could be added, which doesn't exist in the raw table
+     */
+    const rawTableActualColumnIndex = table.columns.findIndex(
+      (c) => c.id === columns[data.column].id
+    );
     fireEvent({
       name: 'filterBucket',
       data: {
@@ -55,6 +64,7 @@ export const createGridColumns = (
               rows,
             },
             ...data,
+            column: rawTableActualColumnIndex,
           },
         ],
         negate,
