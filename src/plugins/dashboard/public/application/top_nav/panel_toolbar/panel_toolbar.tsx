@@ -18,44 +18,116 @@
  */
 
 import './panel_toolbar.scss';
-import React, { FC } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { Container, openAddPanelFlyout } from 'src/plugins/embeddable/public';
+import { getSavedObjectFinder } from 'src/plugins/saved_objects/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
+import { DashboardAppServices } from '../../types';
 
 interface Props {
+  /** The label for the primary action button */
+  primaryActionButton: JSX.Element;
   /** The click handler for the Add Panel button for creating new panels */
-  onAddPanelClick: () => void;
-  /** The click handler for the Library button for adding existing visualizations/embeddables */
-  onLibraryClick: () => void;
+  onPrimaryActionClick: () => void;
+  container: Container;
 }
 
-export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => (
-  <EuiFlexGroup className="panelToolbar" id="kbnDashboard__panelToolbar" gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        fill
-        size="s"
-        iconType="plusInCircleFilled"
-        onClick={onAddPanelClick}
-        data-test-subj="addVisualizationButton"
-      >
-        {i18n.translate('dashboard.panelToolbar.addPanelButtonLabel', {
-          defaultMessage: 'Create panel',
-        })}
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        size="s"
-        color="text"
-        className="panelToolbarButton"
-        iconType="folderOpen"
-        onClick={onLibraryClick}
-      >
-        {i18n.translate('dashboard.panelToolbar.libraryButtonLabel', {
-          defaultMessage: 'Add from library',
-        })}
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
+  const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
+  const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
+  const closeEditorMenu = () => setEditorMenuOpen(false);
+
+  const { core, embeddable, uiSettings } = useKibana<DashboardAppServices>().services;
+
+  const factories = Array.from(embeddable.getEmbeddableFactories()).filter(
+    ({ type, isEditable, canCreateNew, isContainerType }) =>
+      isEditable() && !isContainerType && canCreateNew()
+  );
+
+  const addFromLibrary = useCallback(() => {
+    openAddPanelFlyout({
+      embeddable: container,
+      getAllFactories: embeddable.getEmbeddableFactories,
+      getFactory: embeddable.getEmbeddableFactory,
+      notifications: core.notifications,
+      overlays: core.overlays,
+      SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+    });
+  }, [
+    container,
+    embeddable.getEmbeddableFactories,
+    embeddable.getEmbeddableFactory,
+    core.notifications,
+    core.savedObjects,
+    core.overlays,
+    uiSettings,
+  ]);
+
+  const editorMenuButtonLabel = i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
+    defaultMessage: 'All editors',
+  });
+
+  const panels = [
+    {
+      id: 0,
+      items: [
+        ...factories.map((factory) => {
+          const onClick = async () => {
+            const explicitInput = await factory.getExplicitInput();
+            await container.addNewEmbeddable(factory.type, explicitInput);
+          };
+          return {
+            name: factory.getDisplayName(),
+            icon: 'empty',
+            onClick,
+          };
+        }),
+      ],
+    },
+  ];
+
+  const editorMenuButton = (
+    <EuiButton
+      size="s"
+      color="text"
+      className="panelToolbarButton"
+      iconType="visualizeApp"
+      onClick={toggleEditorMenu}
+    >
+      {editorMenuButtonLabel}
+    </EuiButton>
+  );
+
+  return (
+    <EuiFlexGroup className="panelToolbar" id="kbnDashboard__panelToolbar" gutterSize="s">
+      <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          ownFocus
+          button={editorMenuButton}
+          isOpen={isEditorMenuOpen}
+          closePopover={closeEditorMenu}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          color="text"
+          className="panelToolbarButton"
+          iconType="folderOpen"
+          onClick={addFromLibrary}
+        >
+          {i18n.translate('dashboard.panelToolbar.libraryButtonLabel', {
+            defaultMessage: 'Add from library',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

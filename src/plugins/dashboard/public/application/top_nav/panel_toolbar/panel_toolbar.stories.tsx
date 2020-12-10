@@ -20,11 +20,15 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { PanelToolbar } from './panel_toolbar';
+import { PanelToolbar } from './panel_toolbar.component';
+
+const button = <button onClick={action('foo')}>Foo</button>;
 
 storiesOf('components/PanelToolbar', module).add('default', () => (
   <PanelToolbar
-    onAddPanelClick={action('onAddPanelClick')}
+    primaryActionButton={button}
     onLibraryClick={action('onLibraryClick')}
+    addNewEmbeddable={action('addNewEmbeddable')}
+    editorPanels={[{}]}
   />
 ));

@@ -22,7 +22,7 @@ import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { EuiButton } from '@elastic/eui';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -466,11 +466,25 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
+
+  const createPanelButton = (
+    <EuiButton
+      fill
+      size="s"
+      iconType="plusInCircleFilled"
+      onClick={createNew}
+      data-test-subj="addVisualizationButton"
+    >
+      {i18n.translate('dashboard.panelToolbar.addPanelButtonLabel', {
+        defaultMessage: 'Create panel',
+      })}
+    </EuiButton>
+  );
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {!dashboardStateManager.getIsViewMode() ? (
-        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+      {!isErrorEmbeddable(dashboardContainer) && !dashboardStateManager.getIsViewMode() ? (
+        <PanelToolbar primaryActionButton={createPanelButton} container={dashboardContainer} />
       ) : null}
     </>
   );
