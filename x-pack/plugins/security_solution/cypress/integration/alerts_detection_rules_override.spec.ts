@@ -95,6 +95,7 @@ describe('Detection rules, override', () => {
     createTimeline(newOverrideRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
+  });
 
   afterEach(() => {
     deleteTimeline(rule.timeline.id!);
