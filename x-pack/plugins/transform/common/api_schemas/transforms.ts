@@ -46,6 +46,8 @@ export const latestFunctionSchema = schema.object({
   sort: schema.string(),
 });
 
+export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
