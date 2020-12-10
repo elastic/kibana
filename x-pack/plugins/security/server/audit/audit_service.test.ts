@@ -27,7 +27,7 @@ const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });
 const getSpaceId = jest.fn().mockReturnValue('default');
-const getSessionId = jest.fn().mockResolvedValue('SESSION_ID');
+const getSID = jest.fn().mockResolvedValue('SESSION_ID');
 
 beforeEach(() => {
   logger.info.mockClear();
@@ -46,7 +46,7 @@ describe('#setup', () => {
         http,
         getCurrentUser,
         getSpaceId,
-        getSID: getSessionId,
+        getSID,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -72,7 +72,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
   });
@@ -85,7 +85,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
     expect(http.registerOnPostAuth).toHaveBeenCalledWith(expect.any(Function));
   });
@@ -100,7 +100,7 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
@@ -128,7 +128,7 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
@@ -149,7 +149,7 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
@@ -375,7 +375,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -406,7 +406,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -445,7 +445,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -474,7 +474,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -504,7 +504,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
-      getSID: getSessionId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
