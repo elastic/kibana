@@ -19,7 +19,7 @@ bin/kibana-encryption-keys generate
 
 {kib} uses encryption keys in several areas, ranging from encrypting data
 in {kib} associated indices to storing session information.  By defining these
-encryption keys in your configuration you'll be ensuring consistent operations
+encryption keys in your configuration, you'll ensure consistent operations
 across restarts.
 
 [discrete]
