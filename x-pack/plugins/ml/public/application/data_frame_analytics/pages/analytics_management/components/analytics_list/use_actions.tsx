@@ -20,6 +20,7 @@ import { useViewAction } from '../action_view';
 import { useMapAction } from '../action_map';
 
 import { DataFrameAnalyticsListRow } from './common';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 export const useActions = (
   isManagementTable: boolean
@@ -38,6 +39,8 @@ export const useActions = (
   const editAction = useEditAction(canStartStopDataFrameAnalytics);
   const startAction = useStartAction(canStartStopDataFrameAnalytics);
   const stopAction = useStopAction(canStartStopDataFrameAnalytics);
+
+  const { refresh } = useRefreshAnalyticsList();
 
   let modals: JSX.Element | null = null;
 
@@ -61,6 +64,7 @@ export const useActions = (
               deleteAction.openModal(deleteAction.item!);
               deleteAction.closeDeleteJobCheckModal();
             }}
+            refreshJobsCallback={refresh}
             jobType={deleteAction.jobType}
             jobIds={[deleteAction.item.config.id]}
           />

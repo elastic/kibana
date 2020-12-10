@@ -19,7 +19,7 @@ export interface SyncSavedObjectResponse {
 }
 
 export interface CanDeleteJobResponse {
-  [key: string]: {
+  [jobId: string]: {
     canDelete: boolean;
     canUntag: boolean;
   };

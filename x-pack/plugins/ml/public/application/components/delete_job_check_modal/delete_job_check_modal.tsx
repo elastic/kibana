@@ -8,6 +8,7 @@ import React, { FC, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -17,10 +18,8 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiButton,
-  EuiSwitch,
   // EuiLoadingSpinner, // TODO: loading spinner as modal content when waiting for check
 } from '@elastic/eui';
-import { ml } from '../../services/ml_api_service';
 import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -96,12 +95,12 @@ function getModalContent(
     ),
   };
 
-  if (canDelete) {
+  if (canDelete && canUntag) {
     return {
       buttonText: (
         <FormattedMessage
           id="xpack.ml.deleteJobCheckModal.buttonTextCanDelete"
-          defaultMessage={`Continue to delete {length, plural, one {# job} other {# jobs}}`}
+          defaultMessage="Continue to delete {length, plural, one {# job} other {# jobs}}"
           values={{ length: jobIds.length }}
         />
       ),
@@ -118,8 +117,7 @@ function getModalContent(
       buttonText: (
         <FormattedMessage
           id="xpack.ml.deleteJobCheckModal.buttonTextCanUnTagConfirm"
-          defaultMessage={`Remove {length, plural, one {# job} other {# jobs}} from space`}
-          values={{ length: jobIds.length }}
+          defaultMessage="Remove from current space"
         />
       ),
       modalText: (
@@ -140,6 +138,7 @@ function getModalContent(
 interface Props {
   canDeleteCallback: () => void;
   onCloseCallback: () => void;
+  refreshJobsCallback?: () => void;
   jobType: JobType;
   jobIds: string[];
 }
@@ -147,18 +146,20 @@ interface Props {
 export const DeleteJobCheckModal: FC<Props> = ({
   canDeleteCallback,
   onCloseCallback,
+  refreshJobsCallback,
   jobType,
   jobIds,
 }) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
-  const [shouldUnTag, setShouldUnTag] = useState<boolean>(false);
+  const [hasUntagged, setHasUntagged] = useState<boolean>(false);
+  const [isUntagging, setIsUntagging] = useState<boolean>(false);
   const [jobCheckRespSummary, setJobCheckRespSummary] = useState<JobCheckRespSummary | undefined>();
 
   const {
-    savedObjects: { canDeleteJob },
+    savedObjects: { canDeleteJob, removeJobFromCurrentSpace },
   } = useMlApiContext();
-  const { displayErrorToast } = useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   useEffect(() => {
     // Do the spaces check and set the content for the modal and buttons depending on results
@@ -171,24 +172,34 @@ export const DeleteJobCheckModal: FC<Props> = ({
     });
   }, []);
 
-  const onClick = async () => {
-    // Remove job(s) from current space then execute relevant callback
-    // TODO: get current space for job
-    const currentSpace = 'default';
-    if (shouldUnTag === true) {
-      const resp = await ml.savedObjects.removeJobFromSpace(jobType, jobIds, [currentSpace]);
-
-      Object.entries(resp).forEach(([id, { success, error }]) => {
-        if (success === false) {
-          const title = i18n.translate('xpack.ml.deleteJobCheckModal.unTagErrorErrorTitle', {
-            defaultMessage: 'Error updating {id}',
-            values: { id },
-          });
-          displayErrorToast(error, title);
-        }
-      });
+  const onUntagClick = async () => {
+    setIsUntagging(true);
+    const resp = await removeJobFromCurrentSpace(jobType, jobIds);
+    setIsUntagging(false);
+    Object.entries(resp).forEach(([id, { success, error }]) => {
+      if (success === false) {
+        const title = i18n.translate('xpack.ml.deleteJobCheckModal.unTagErrorTitle', {
+          defaultMessage: 'Error updating {id}',
+          values: { id },
+        });
+        displayErrorToast(error, title);
+      } else {
+        setHasUntagged(true);
+        const message = i18n.translate('xpack.ml.deleteJobCheckModal.unTagSuccessTitle', {
+          defaultMessage: 'Successfully updated {id}',
+          values: { id },
+        });
+        displaySuccessToast(message);
+      }
+    });
+    // Close the modal
+    onCloseCallback();
+    if (typeof refreshJobsCallback === 'function') {
+      refreshJobsCallback();
     }
+  };
 
+  const onClick = async () => {
     if (jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canDelete) {
       canDeleteCallback();
     } else {
@@ -208,25 +219,39 @@ export const DeleteJobCheckModal: FC<Props> = ({
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={true}>{modalContent}</EuiFlexItem>
-            {jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canUntag && (
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={shouldUnTagLabel}
-                  checked={shouldUnTag}
-                  onChange={() => setShouldUnTag(!shouldUnTag)}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiModalBody>
+        <EuiModalBody>{modalContent}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={onClick} fill>
-            {buttonContent}
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {!hasUntagged &&
+                jobCheckRespSummary?.canTakeAnyAction &&
+                jobCheckRespSummary?.canUntag &&
+                jobCheckRespSummary?.canDelete && (
+                  <EuiButtonEmpty
+                    isLoading={isUntagging}
+                    color="primary"
+                    size="s"
+                    onClick={onUntagClick}
+                  >
+                    {shouldUnTagLabel}
+                  </EuiButtonEmpty>
+                )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                onClick={
+                  jobCheckRespSummary?.canUntag && !jobCheckRespSummary?.canDelete
+                    ? onUntagClick
+                    : onClick
+                }
+                fill
+              >
+                {buttonContent}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>
