@@ -31,6 +31,7 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
+  GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 
@@ -57,6 +58,8 @@ const FormattedFieldValueComponent: React.FC<{
         truncate={truncate}
       />
     );
+  } else if (fieldType === GEO_FIELD_TYPE) {
+    return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
     return (
       <DefaultDraggable
