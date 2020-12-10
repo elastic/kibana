@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('../../../../../core/server/http/router/request', () => ({
+jest.mock('../../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
