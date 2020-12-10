@@ -39,6 +39,7 @@ import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -94,18 +95,23 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   }, []);
 
   const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions.map((action) => {
-        return {
-          ...action,
-          actionType: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].name
-            : action.actionTypeId,
-        };
-      })
+    ? actions
+        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+        .filter((action) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(action.actionTypeId))
+        .map((action) => {
+          return {
+            ...action,
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
+              : action.actionTypeId,
+          };
+        })
     : [];
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
+        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+        .filter((actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id))
         .map((actionType) => ({
           value: actionType.id,
           name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
