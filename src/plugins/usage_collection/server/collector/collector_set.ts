@@ -28,6 +28,7 @@ import {
 } from 'src/core/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { StatsCollector } from './stats_collector';
 
 type AnyCollector = Collector<any, any>;
 
@@ -75,7 +76,7 @@ export class CollectorSet {
   >(
     options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
   ) => {
-    return new Collector<TFetchReturn, ExtraOptions>(this.logger, options);
+    return new StatsCollector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
 
   /**
