@@ -226,7 +226,6 @@ const makeMapStateToProps = () => {
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      defaultModel,
       eventIdToNoteIds,
       excludedRowRendererIds,
       isSelectAllChecked,
