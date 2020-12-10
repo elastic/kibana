@@ -33,7 +33,9 @@ describe('ServiceNow service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://dev102283.service-now.com' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://dev102283.service-now.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger
