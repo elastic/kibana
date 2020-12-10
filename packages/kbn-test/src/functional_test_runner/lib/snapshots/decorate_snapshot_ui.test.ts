@@ -28,7 +28,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     beforeEach(() => {
       lifecycle = new Lifecycle();
-      decorateSnapshotUi(lifecycle, false);
+      decorateSnapshotUi(lifecycle, false, false);
     });
 
     it('passes when the snapshot matches the actual value', async () => {
@@ -109,7 +109,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     beforeEach(() => {
       lifecycle = new Lifecycle();
-      decorateSnapshotUi(lifecycle, true);
+      decorateSnapshotUi(lifecycle, true, false);
     });
 
     it("doesn't throw if the value does not match", async () => {
@@ -135,10 +135,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     beforeEach(() => {
       lifecycle = new Lifecycle();
-      const ci = process.env.CI;
-      process.env.CI = 'true';
-      decorateSnapshotUi(lifecycle, true);
-      process.env.CI = ci;
+      decorateSnapshotUi(lifecycle, false, true);
     });
 
     it('throws on new snapshots', async () => {
