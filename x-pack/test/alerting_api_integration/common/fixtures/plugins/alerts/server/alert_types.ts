@@ -15,6 +15,15 @@ import {
   AlertInstanceContext,
 } from '../../../../../../../plugins/alerts/server';
 
+export const EscapableStrings = {
+  escapableBold: '*bold*',
+  escapableBacktic: 'back`tic',
+  escapableBackticBold: '`*bold*`',
+  escapableHtml: '<&>',
+  escapableDoubleQuote: '"double quote"',
+  escapableLineFeed: 'line\x0afeed',
+};
+
 function getAlwaysFiringAlertType() {
   const paramsSchema = schema.object({
     index: schema.string(),
@@ -376,7 +385,7 @@ function getPatternFiringAlertType() {
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         if (instancePattern[patternIndex]) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default');
+          services.alertInstanceFactory(instanceId).scheduleActions('default', EscapableStrings);
         }
       }
 

@@ -79,12 +79,15 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
+      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+      const varsTemplate = '{{context.escapableDoubleQuote}} -- {{context.escapableLineFeed}}';
+
       const alertResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            name: 'contains "double quote"',
+            name: 'testing variable escapes for webhook',
             alertTypeId: 'test.patternFiring',
             params: {
               pattern: { instance: [true] },
@@ -94,7 +97,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
                 id: createdAction.id,
                 group: 'default',
                 params: {
-                  body: 'payload {{alertId}} - {{alertName}}',
+                  body: `payload {{alertId}} - ${varsTemplate}`,
                 },
               },
             ],
@@ -107,10 +110,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const body = await retry.try(async () =>
         waitForActionBody(webhookSimulatorURL, createdAlert.id)
       );
-      expect(body).to.be(`contains \\"double quote\\"`);
+      expect(body).to.be(`\\"double quote\\" -- line\\nfeed`);
     });
 
-    it('should handle bold and italic escapes in slack', async () => {
+    it('should handle escapes in slack', async () => {
       const actionResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'test')
@@ -125,12 +128,16 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
+      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+      const varsTemplate =
+        '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}}';
+
       const alertResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            name: 'contains *bold* and _italic_ and back`tic and htmlish <&> things',
+            name: 'testing variable escapes for slack',
             alertTypeId: 'test.patternFiring',
             params: {
               pattern: { instance: [true] },
@@ -140,7 +147,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
                 id: createdAction.id,
                 group: 'default',
                 params: {
-                  message: 'message {{alertId}} - {{alertName}}',
+                  message: `message {{alertId}} - ${varsTemplate}`,
                 },
               },
             ],
@@ -153,53 +160,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const body = await retry.try(async () =>
         waitForActionBody(slackSimulatorURL, createdAlert.id)
       );
-      expect(body).to.be("`contains *bold* and _italic_ and back'tic and htmlish <&> things`");
-    });
-
-    it('should handle single escapes in slack', async () => {
-      const actionResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-        .set('kbn-xsrf', 'test')
-        .send({
-          name: 'testing single mustache escapes for slack',
-          actionTypeId: '.slack',
-          secrets: {
-            webhookUrl: slackSimulatorURL,
-          },
-        });
-      expect(actionResponse.status).to.eql(200);
-      const createdAction = actionResponse.body;
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-      const alertResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            name: 'contains back`tic and htmlish <&> things',
-            alertTypeId: 'test.patternFiring',
-            params: {
-              pattern: { instance: [true] },
-            },
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {
-                  message: 'message {{alertId}} - {{alertName}}',
-                },
-              },
-            ],
-          })
-        );
-      expect(alertResponse.status).to.eql(200);
-      const createdAlert = alertResponse.body;
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
-
-      const body = await retry.try(async () =>
-        waitForActionBody(slackSimulatorURL, createdAlert.id)
-      );
-      expect(body).to.be("contains back'tic and htmlish &lt;&amp;&gt; things");
+      expect(body).to.be("back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt;");
     });
   });
 
