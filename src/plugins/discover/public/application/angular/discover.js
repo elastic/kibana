@@ -70,6 +70,7 @@ import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
+import { getDefaultSort } from './doc_table/lib/get_default_sort';
 
 const services = getServices();
 
@@ -410,9 +411,11 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+    const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+
     return {
       query,
-      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
+      sort: !sort.length ? getDefaultSort($scope.indexPattern) : sort,
       columns:
         savedSearch.columns.length > 0
           ? savedSearch.columns
