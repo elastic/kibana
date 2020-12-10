@@ -51,6 +51,7 @@ import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -404,7 +405,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         ? packageInfo && (
             <IntegrationBreadcrumb
               pkgTitle={packageInfo.title}
-              pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
             />
           )
         : agentPolicy && (

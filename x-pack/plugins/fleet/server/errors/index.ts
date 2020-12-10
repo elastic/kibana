@@ -9,6 +9,7 @@ export {
   defaultIngestErrorHandler,
   ingestErrorToResponseOptions,
   isLegacyESClientError,
+  isESClientError,
 } from './handlers';
 
 export class IngestManagerError extends Error {
