@@ -32,7 +32,12 @@ export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: Timeli
 
     return {
       ...acc,
-      [timelineId]: timelineModel,
+      [timelineId]: {
+        ...timelineModel,
+        ...(timelineModel.sort != null && !Array.isArray(timelineModel.sort)
+          ? { sort: [timelineModel.sort] }
+          : {}),
+      },
     };
   }, {} as { [K in TimelineIdLiteral]: TimelineModel });
 };
