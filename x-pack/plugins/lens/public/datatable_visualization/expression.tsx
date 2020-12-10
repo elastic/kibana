@@ -345,7 +345,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
   if (!!props.rowHasRowClickTriggerActions && !!onRowContextMenuClick) {
     const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
     if (hasAtLeastOneRowClickAction) {
-      const actions: EuiTableActionsColumnType<unknown> = {
+      const actions: EuiTableActionsColumnType<{ rowIndex: number; [key: string]: unknown }> = {
         name: 'Actions',
         actions: [
           {
@@ -373,8 +373,8 @@ export function DatatableComponent(props: DatatableRenderProps) {
             },
           },
         ],
-      } as EuiTableActionsColumnType<unknown>;
-      tableColumns.push(actions);
+      };
+      tableColumns.push(actions as EuiTableActionsColumnType<unknown>);
     }
   }
 
