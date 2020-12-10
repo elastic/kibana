@@ -5,6 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
@@ -31,7 +33,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with the default APM read user', () => {
         describe('and fetching a list of services', () => {
-          let response: PromiseReturnType<typeof supertest.get>;
+          let response: {
+            status: number;
+            body: APIReturnType<'GET /api/apm/services'>;
+          };
+
           before(async () => {
             response = await supertest.get(
               `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
@@ -54,7 +60,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             // services report as unknown (so without any health status):
             // https://github.com/elastic/kibana/issues/77083
 
-            const healthStatuses = response.body.items.map((item: any) => item.healthStatus);
+            const healthStatuses = sortBy(response.body.items, 'serviceName').map(
+              (item: any) => item.healthStatus
+            );
 
             expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
 
