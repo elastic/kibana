@@ -62,7 +62,7 @@ won't be executed unless a subscriber subscribes to it. And in order to cleanly
 cancel and garbage collect the subscription it should be integrated with the
 React component life-cycle.
 
-The `useLatestPartialDataSearchRequest()` does that in such a way that the
+The `useLatestPartialDataSearchResponse()` does that in such a way that the
 newest response observable is subscribed to and that any previous response
 observables are unsubscribed from for proper cancellation if a new request has
 been created. This uses RxJS's `switchMap()` operator under the hood. The hook
@@ -75,7 +75,7 @@ an appropriate way.
 A request can fail due to various reasons that include servers-side errors,
 Elasticsearch shard failures and network failures. The intention is to map all
 of them to a common `SearchStrategyError` interface. While the
-`useLatestPartialDataSearchRequest()` hook does that for errors emitted
+`useLatestPartialDataSearchResponse()` hook does that for errors emitted
 natively by the response `Observable`, it's the responsibility of the
 projection function to handle errors that are encoded in the response body,
 which includes most server-side errors. Note that errors and partial results in
@@ -94,7 +94,7 @@ const {
   latestResponseErrors,
   loaded,
   total,
-} = useLatestPartialDataSearchRequest(
+} = useLatestPartialDataSearchResponse(
   requests$,
   'initialValue',
   useMemo(() => decodeOrThrow(mySearchStrategyResponsePayloadRT), []),
@@ -104,7 +104,7 @@ const {
 ## Representing the request state to the user
 
 After the values have been made available to the React rendering process using
-the `useLatestPartialDataSearchRequest()` hook, normal component hierarchies
+the `useLatestPartialDataSearchResponse()` hook, normal component hierarchies
 can be used to make the request state and result available to the user. The
 following utility components can make that even easier.
 

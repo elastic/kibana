@@ -11,10 +11,7 @@ import {
   logEntrySearchResponsePayloadRT,
   LOG_ENTRY_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import {
-  useDataSearch,
-  useLatestPartialDataSearchRequest,
-} from '../../utils/use_data_search_request';
+import { useDataSearch, useLatestPartialDataSearchResponse } from '../../utils/data_search';
 
 export const useLogEntry = ({
   sourceId,
@@ -44,7 +41,7 @@ export const useLogEntry = ({
     latestResponseErrors,
     loaded,
     total,
-  } = useLatestPartialDataSearchRequest(
+  } = useLatestPartialDataSearchResponse(
     logEntrySearchRequests$,
     null,
     decodeLogEntrySearchResponse

@@ -5,128 +5,15 @@
  */
 
 import { useCallback } from 'react';
-import { Observable, of, Subject } from 'rxjs';
-import { catchError, map, share, startWith, switchMap, tap } from 'rxjs/operators';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { SearchStrategyError } from '../../common/search_strategies/common/errors';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
-import {
-  tapUnsubscribe,
-  useLatest,
-  useObservable,
-  useObservableState,
-} from '../utils/use_observable';
+import { Observable, of } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/public';
+import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
+import { useLatest, useObservable, useObservableState } from '../use_observable';
+import { DataSearchRequestDescriptor, DataSearchResponseDescriptor } from './types';
 
-export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
-  request: Request;
-  options: ISearchOptions;
-  response$: Observable<IKibanaSearchResponse<RawResponse>>;
-  abortController: AbortController;
-}
-
-interface NormalizedKibanaSearchResponse<ResponseData> {
-  total?: number;
-  loaded?: number;
-  isRunning: boolean;
-  isPartial: boolean;
-  data: ResponseData;
-  errors: SearchStrategyError[];
-}
-
-interface DataSearchResponseDescriptor<Request extends IKibanaSearchRequest, Response> {
-  request: Request;
-  options: ISearchOptions;
-  response: NormalizedKibanaSearchResponse<Response>;
-  abortController: AbortController;
-}
-
-export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
-  ...args: Args
-) =>
-  | {
-      request: Request;
-      options: ISearchOptions;
-    }
-  | null
-  | undefined;
-
-export const useDataSearch = <
-  RequestFactoryArgs extends any[],
-  Request extends IKibanaSearchRequest,
-  RawResponse
->({
-  getRequest,
-}: {
-  getRequest: DataSearchRequestFactory<RequestFactoryArgs, Request>;
-}) => {
-  const { services } = useKibanaContextForPlugin();
-  const request$ = useObservable(
-    () => new Subject<{ request: Request; options: ISearchOptions }>(),
-    []
-  );
-  const requests$ = useObservable(
-    (inputs$) =>
-      inputs$.pipe(
-        switchMap(([currentRequest$]) => currentRequest$),
-        map(({ request, options }) => {
-          const abortController = new AbortController();
-          let isAbortable = true;
-
-          return {
-            abortController,
-            request,
-            options,
-            response$: services.data.search
-              .search<Request, IKibanaSearchResponse<RawResponse>>(request, {
-                abortSignal: abortController.signal,
-                ...options,
-              })
-              .pipe(
-                // avoid aborting failed or completed requests
-                tap({
-                  error: () => {
-                    isAbortable = false;
-                  },
-                  complete: () => {
-                    isAbortable = false;
-                  },
-                }),
-                tapUnsubscribe(() => {
-                  if (isAbortable) {
-                    abortController.abort();
-                  }
-                }),
-                share()
-              ),
-          };
-        })
-      ),
-    [request$]
-  );
-
-  const search = useCallback(
-    (...args: RequestFactoryArgs) => {
-      const request = getRequest(...args);
-
-      if (request) {
-        request$.next(request);
-      }
-    },
-    [getRequest, request$]
-  );
-
-  return {
-    requests$,
-    search,
-  };
-};
-
-export const useLatestPartialDataSearchRequest = <
+export const useLatestPartialDataSearchResponse = <
   Request extends IKibanaSearchRequest,
   RawResponse,
   Response,

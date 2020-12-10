@@ -10,19 +10,14 @@ import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchGeneric,
   ISearchStart,
-} from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
-import { PluginKibanaContextValue } from '../hooks/use_kibana';
-import {
-  DataSearchRequestDescriptor,
-  useDataSearch,
-  useLatestPartialDataSearchRequest,
-} from './use_data_search_request';
+} from '../../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import { PluginKibanaContextValue } from '../../hooks/use_kibana';
+import { useDataSearch } from './use_data_search_request';
 
 describe('useDataSearch hook', () => {
   it('forwards the search function arguments to the getRequest function', async () => {
@@ -182,108 +177,6 @@ describe('useDataSearch hook', () => {
     firstResponseSubscription.unsubscribe();
 
     expect(firstRequestOptions?.abortSignal?.aborted).toBe(true);
-  });
-});
-
-describe('useLatestPartialDataSearchRequest hook', () => {
-  it("subscribes to the latest request's response observable", () => {
-    const firstRequest = {
-      abortController: new AbortController(),
-      options: {},
-      request: { params: 'firstRequestParam' },
-      response$: new Subject<IKibanaSearchResponse<string>>(),
-    };
-
-    const secondRequest = {
-      abortController: new AbortController(),
-      options: {},
-      request: { params: 'secondRequestParam' },
-      response$: new Subject<IKibanaSearchResponse<string>>(),
-    };
-
-    const requests$ = new Subject<
-      DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>
-    >();
-
-    const { result } = renderHook(() =>
-      useLatestPartialDataSearchRequest(requests$, 'initial', (response) => ({
-        data: `projection of ${response}`,
-      }))
-    );
-
-    expect(result).toHaveProperty('current.isRequestRunning', false);
-    expect(result).toHaveProperty('current.latestResponseData', undefined);
-
-    // first request is started
-    act(() => {
-      requests$.next(firstRequest);
-    });
-
-    expect(result).toHaveProperty('current.isRequestRunning', true);
-    expect(result).toHaveProperty('current.latestResponseData', 'initial');
-
-    // first response of the first request arrives
-    act(() => {
-      firstRequest.response$.next({ rawResponse: 'request-1-response-1', isRunning: true });
-    });
-
-    expect(result).toHaveProperty('current.isRequestRunning', true);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-1-response-1'
-    );
-
-    // second request is started before the second response of the first request arrives
-    act(() => {
-      requests$.next(secondRequest);
-      secondRequest.response$.next({ rawResponse: 'request-2-response-1', isRunning: true });
-    });
-
-    expect(result).toHaveProperty('current.isRequestRunning', true);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-2-response-1'
-    );
-
-    // second response of the second request arrives
-    act(() => {
-      secondRequest.response$.next({ rawResponse: 'request-2-response-2', isRunning: false });
-    });
-
-    expect(result).toHaveProperty('current.isRequestRunning', false);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-2-response-2'
-    );
-  });
-
-  it("unsubscribes from the latest request's response observable on unmount", () => {
-    const onUnsubscribe = jest.fn();
-
-    const firstRequest = {
-      abortController: new AbortController(),
-      options: {},
-      request: { params: 'firstRequestParam' },
-      response$: new Observable<IKibanaSearchResponse<string>>(() => {
-        return onUnsubscribe;
-      }),
-    };
-
-    const requests$ = of<DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(
-      firstRequest
-    );
-
-    const { unmount } = renderHook(() =>
-      useLatestPartialDataSearchRequest(requests$, 'initial', (response) => ({
-        data: `projection of ${response}`,
-      }))
-    );
-
-    expect(onUnsubscribe).not.toHaveBeenCalled();
-
-    unmount();
-
-    expect(onUnsubscribe).toHaveBeenCalled();
   });
 });
 
