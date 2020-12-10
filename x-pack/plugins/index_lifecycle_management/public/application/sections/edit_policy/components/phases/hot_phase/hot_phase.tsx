@@ -37,6 +37,7 @@ import {
   SetPriorityInputField,
   SearchableSnapshotField,
   useRolloverPath,
+  ReadonlyField,
   ShrinkField,
 } from '../shared_fields';
 
@@ -238,33 +239,7 @@ export const HotPhase: FunctionComponent = () => {
             {<ForcemergeField phase="hot" />}
             <ShrinkField phase="hot" />
             {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-            <ToggleFieldWithDescribedFormRow
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.readonlyText"
-                    defaultMessage="Read only"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.readonlyExplanationText"
-                    defaultMessage="Enable to make the index and index metadata read only, disable to allow writes and metadata changes."
-                  />{' '}
-                  <LearnMoreLink docPath="ilm-readonly.html" />
-                </EuiTextColor>
-              }
-              fullWidth
-              titleSize="xs"
-              switchProps={{
-                'data-test-subj': 'readonlySwitch',
-                path: '_meta.hot.readonlyEnabled',
-              }}
-            >
-              <div />
-            </ToggleFieldWithDescribedFormRow>
+            {<ReadonlyField phase={'hot'} />}
           </>
         )}
         <SetPriorityInputField phase={hotProperty} />

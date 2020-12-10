@@ -83,6 +83,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     allocate?: AllocateAction;
     shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };

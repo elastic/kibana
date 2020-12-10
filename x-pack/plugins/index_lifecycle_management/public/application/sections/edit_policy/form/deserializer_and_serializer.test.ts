@@ -64,6 +64,7 @@ const originalPolicy: SerializedPolicy = {
             some: 'value',
           },
         },
+        readonly: {},
         set_priority: {
           priority: 10,
         },
@@ -171,12 +172,20 @@ describe('deserializer and serializer', () => {
     expect(result.phases.warm!.actions.forcemerge).toBeUndefined();
   });
 
-  it('removes the readonly action if it is disabled in the form', () => {
+  it('removes the readonly action if it is disabled in hot', () => {
     formInternal._meta.hot.readonlyEnabled = false;
 
     const result = serializer(formInternal);
 
     expect(result.phases.hot!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in warm', () => {
+    formInternal._meta.warm.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.readonly).toBeUndefined();
   });
 
   it('removes set priority if it is disabled in the form', () => {

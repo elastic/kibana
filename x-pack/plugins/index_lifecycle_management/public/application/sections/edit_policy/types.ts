@@ -31,6 +31,7 @@ interface HotPhaseMetaFields extends ForcemergeFields {
 interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
+  readonlyEnabled: boolean;
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {

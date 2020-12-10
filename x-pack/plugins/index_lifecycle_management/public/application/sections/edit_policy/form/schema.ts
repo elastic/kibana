@@ -50,7 +50,7 @@ export const schema: FormSchema<FormInternal> = {
       },
       readonlyEnabled: {
         defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.readonlyLabel', {
+        label: i18n.translate('xpack.indexLifecycleMgmt.readonly.label', {
           defaultMessage: 'Make index read only',
         }),
       },
@@ -81,6 +81,12 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.readonly.label', {
+          defaultMessage: 'Make index read only',
+        }),
       },
     },
     cold: {

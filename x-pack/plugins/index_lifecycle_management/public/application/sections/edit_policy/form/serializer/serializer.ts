@@ -116,6 +116,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
       }
 
+      if (_meta.warm.readonlyEnabled) {
+        warmPhase.actions.readonly = warmPhase.actions.readonly ?? {};
+      } else {
+        delete warmPhase.actions.readonly;
+      }
+
       if (!updatedPolicy.phases.warm?.actions?.set_priority) {
         delete warmPhase.actions.set_priority;
       }
