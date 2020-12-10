@@ -215,7 +215,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(expectedContext).toMatchObject(testAlertActionArr);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = {
@@ -234,7 +234,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(expectedContext).toMatchObject(testAlertActionArr);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = {
@@ -268,7 +268,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
-      expect(expectedContextPlusD).toMatchObject(testAlertActionArr);
+      expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
     });
     it('should remove "other" entries and schedule the expected number of actions', () => {
       const emptyPrevLocationMap = {};
@@ -287,7 +287,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(expectedContext).toMatchObject(testAlertActionArr);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
   });
 });
