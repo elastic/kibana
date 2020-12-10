@@ -21,7 +21,7 @@ import { getEuiGridColumns } from './discover_grid_columns';
 
 describe('Discover grid columns ', function () {
   it('returns eui grid columns without time column', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false);
+    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false, false);
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -29,6 +29,8 @@ describe('Discover grid columns ', function () {
             "showHide": Object {
               "label": "Remove column",
             },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -41,6 +43,39 @@ describe('Discover grid columns ', function () {
             "showHide": Object {
               "label": "Remove column",
             },
+            "showMoveLeft": true,
+            "showMoveRight": true,
+          },
+          "cellActions": undefined,
+          "display": undefined,
+          "id": "message",
+          "isSortable": undefined,
+          "schema": "json",
+        },
+      ]
+    `);
+  });
+  it('returns eui grid columns without time column showing default columns', async () => {
+    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Object {
+            "showHide": false,
+            "showMoveLeft": false,
+            "showMoveRight": false,
+          },
+          "cellActions": undefined,
+          "display": undefined,
+          "id": "extension",
+          "isSortable": undefined,
+          "schema": "json",
+        },
+        Object {
+          "actions": Object {
+            "showHide": false,
+            "showMoveLeft": false,
+            "showMoveRight": false,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -52,7 +87,7 @@ describe('Discover grid columns ', function () {
     `);
   });
   it('returns eui grid columns with time column', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, true);
+    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, true, false);
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -60,6 +95,8 @@ describe('Discover grid columns ', function () {
             "showHide": Object {
               "label": "Remove column",
             },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": "Time (date)",
@@ -73,6 +110,8 @@ describe('Discover grid columns ', function () {
             "showHide": Object {
               "label": "Remove column",
             },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -85,6 +124,8 @@ describe('Discover grid columns ', function () {
             "showHide": Object {
               "label": "Remove column",
             },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
