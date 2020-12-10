@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomRule } from '../objects/rule';
+import { CustomRule } from '../../objects/rule';
 
-export const createCustomRule = (rule: CustomRule) => {
+export const createCustomRule = (rule: CustomRule) =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -26,7 +26,6 @@ export const createCustomRule = (rule: CustomRule) => {
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
-};
 
 export const deleteCustomRule = () => {
   cy.request({
