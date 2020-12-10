@@ -1422,11 +1422,15 @@ export const ComponentStrings = {
       }),
     getPDFFullPageLayoutHelpText: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutHelpText', {
-        defaultMessage: 'Remove borders and footer logot',
+        defaultMessage: 'Remove borders and footer logo',
       }),
     getPDFFullPageLayoutLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutLabel', {
         defaultMessage: 'Full page layout',
+      }),
+    getPDFPanelAdvancedOptionsLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelOptionsLabel', {
+        defaultMessage: 'Advanced options',
       }),
     getPDFPanelCopyAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyAriaLabel', {

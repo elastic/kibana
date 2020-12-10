@@ -70,7 +70,11 @@ export const PDFPanel = ({ getPdfURL, onExport, onCopy }: Props) => {
         margin="s"
         style={{ width: 'auto', marginLeft: '-16px', marginRight: '-16px' }}
       />
-      <EuiAccordion id="advanced-options" buttonContent="Advanced options" paddingSize="none">
+      <EuiAccordion
+        id="advanced-options"
+        buttonContent={strings.getPDFPanelAdvancedOptionsLabel()}
+        paddingSize="none"
+      >
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>{strings.getPDFPanelCopyDescription()}</p>

@@ -81,7 +81,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
           className="euiFormHelpText euiFormRow__text"
           id="generated-id-help"
         >
-          Remove borders and footer logot
+          Remove borders and footer logo
         </div>
       </div>
     </div>
