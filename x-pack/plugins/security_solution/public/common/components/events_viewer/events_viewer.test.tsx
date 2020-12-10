@@ -79,7 +79,7 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
-  onFlyoutCollapsed: jest.fn(),
+  handleCloseExpandedEvent: jest.fn(),
   start: from,
   sort: [
     {

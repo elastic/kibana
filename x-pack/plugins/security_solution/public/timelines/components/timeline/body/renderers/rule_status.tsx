@@ -28,7 +28,7 @@ interface Props {
   value: string | number | undefined | null;
 }
 
-export const RenderRuleStatus: React.FC<Props> = ({ contextId, eventId, fieldName, value }) => {
+const RuleStatusComponent: React.FC<Props> = ({ contextId, eventId, fieldName, value }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   return (
     <DefaultDraggable
@@ -42,5 +42,5 @@ export const RenderRuleStatus: React.FC<Props> = ({ contextId, eventId, fieldNam
   );
 };
 
-export const RuleStatus = React.memo(RenderRuleStatus);
+export const RuleStatus = React.memo(RuleStatusComponent);
 RuleStatus.displayName = 'RuleStatus';

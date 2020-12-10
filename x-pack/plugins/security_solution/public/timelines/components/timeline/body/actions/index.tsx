@@ -66,7 +66,7 @@ const ActionsComponent: React.FC<Props> = ({
       )}
       <EventsTd key="expand-event">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-          <EuiToolTip data-test-subj={`expand-event-tool-tip`} content={i18n.EXPAND_EVENT}>
+          <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.EXPAND_EVENT}>
             <EuiButtonIcon
               aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
               data-test-subj="expand-event"

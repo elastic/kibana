@@ -19,7 +19,7 @@ interface Props {
   value: string | number | undefined | null;
 }
 
-const RenderHostName: React.FC<Props> = ({ fieldName, contextId, eventId, value }) => {
+const HostNameComponent: React.FC<Props> = ({ fieldName, contextId, eventId, value }) => {
   const hostname = `${value}`;
 
   return isString(value) && hostname.length > 0 ? (
@@ -38,5 +38,5 @@ const RenderHostName: React.FC<Props> = ({ fieldName, contextId, eventId, value 
   );
 };
 
-export const HostName = React.memo(RenderHostName);
+export const HostName = React.memo(HostNameComponent);
 HostName.displayName = 'HostName';

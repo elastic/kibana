@@ -46,6 +46,7 @@ import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { activeTimeline } from '../../../containers/active_timeline_context';
+import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -251,9 +252,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ indexName: expandedEvent.indexName, eventId: expandedEvent.eventId });
+    onEventClosed({ timelineId, event: {} });
     setShowEventDetailsColumn(false);
-  }, [expandedEvent.indexName, expandedEvent.eventId, onEventClosed]);
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({
+        eventId: expandedEvent.eventId!,
+        indexName: expandedEvent.indexName!,
+        loading: false,
+      });
+    }
+  }, [timelineId, onEventClosed, expandedEvent.eventId, expandedEvent.indexName]);
 
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
@@ -420,21 +429,8 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
       })
     );
   },
-  onEventClosed: ({ indexName, eventId }: { indexName: string; eventId: string }) => {
-    dispatch(
-      timelineActions.toggleExpandedEvent({
-        timelineId,
-        event: {},
-      })
-    );
-
-    if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({
-        eventId,
-        indexName,
-        loading: false,
-      });
-    }
+  onEventClosed: (args: ToggleExpandedEvent) => {
+    dispatch(timelineActions.toggleExpandedEvent(args));
   },
 });
 

@@ -14,7 +14,11 @@ import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  KqlMode,
+  SubsetTimelineModel,
+} from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -37,6 +41,7 @@ import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { ToggleExpandedEvent } from '../../../timelines/store/timeline/actions';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -99,6 +104,7 @@ interface Props {
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
+  defaultModel?: SubsetTimelineModel;
   docValueFields: DocValueFields[];
   end: string;
   expandedEvent: TimelineExpandedEvent;
@@ -114,7 +120,7 @@ interface Props {
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   query: Query;
-  onFlyoutCollapsed: (args: { indexName: string; eventId: string }) => void;
+  handleCloseExpandedEvent: (args: ToggleExpandedEvent) => void;
   onRuleChange?: () => void;
   start: string;
   sort: Sort[];
@@ -127,6 +133,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   browserFields,
   columns,
   dataProviders,
+  defaultModel,
   deletedEventIds,
   docValueFields,
   end,
@@ -143,7 +150,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   query,
   onRuleChange,
-  onFlyoutCollapsed,
+  handleCloseExpandedEvent,
   start,
   sort,
   utilityBar,
@@ -232,9 +239,13 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (!events || findIndex((e) => e._id === expandedEvent?.eventId, events) < 0) {
-      onFlyoutCollapsed({ indexName: expandedEvent.indexName, eventId: expandedEvent.eventId });
+      handleCloseExpandedEvent({
+        timelineId: id,
+        event: {},
+        defaultModel,
+      });
     }
-  }, [expandedEvent, onFlyoutCollapsed, events]);
+  }, [events, expandedEvent, handleCloseExpandedEvent, id, defaultModel]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),

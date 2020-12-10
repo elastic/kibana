@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useMemo, useEffect, useCallback } from 'react';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
@@ -21,8 +20,6 @@ import { useFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { EventDetailsFlyout } from './event_details_flyout';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { TimelineId } from '../../../../common/types/timeline';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -51,6 +48,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
   dataProviders,
+  defaultModel,
   deletedEventIds,
   deleteEventQuery,
   end,
@@ -103,6 +101,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+  const dispatch = useDispatch();
+  const handleCloseExpandedEvent = useCallback(() => {
+    dispatch(
+      onFlyoutCollapsed({
+        timelineId: id,
+        event: {},
+      })
+    );
+  }, [dispatch, id, onFlyoutCollapsed]);
 
   return (
     <>
@@ -111,6 +118,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           <EventsViewer
             browserFields={browserFields}
             columns={columns}
+            defaultModel={defaultModel}
             docValueFields={docValueFields}
             id={id}
             dataProviders={dataProviders!}
@@ -128,7 +136,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             kqlMode={kqlMode}
             query={query}
             onRuleChange={onRuleChange}
-            onFlyoutCollapsed={onFlyoutCollapsed}
+            handleCloseExpandedEvent={handleCloseExpandedEvent}
             start={start}
             sort={sort}
             utilityBar={utilityBar}
@@ -140,6 +148,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         browserFields={browserFields}
         docValueFields={docValueFields}
         timelineId={id}
+        handleCloseExpandedEvent={handleCloseExpandedEvent}
       />
     </>
   );
@@ -150,17 +159,16 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
-    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
-    const { expandedEvent, graphEventId } = timeline;
     const {
       columns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
+      expandedEvent,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -190,21 +198,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (
-  dispatch: Dispatch,
-  { defaultModel }: { defaultModel: SubsetTimelineModel }
-) => ({
+const mapDispatchToProps = () => ({
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  onFlyoutCollapsed: () => {
-    dispatch(
-      timelineActions.toggleExpandedEvent({
-        timelineId: TimelineId.detectionsPage,
-        event: {},
-        defaultModel,
-      })
-    );
-  },
+  onFlyoutCollapsed: timelineActions.toggleExpandedEvent,
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

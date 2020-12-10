@@ -13,7 +13,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { findIndex, pick } from 'lodash/fp';
+import { findIndex } from 'lodash/fp';
 
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import {
@@ -40,8 +40,8 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   handleOnEventClosed,
 }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { expandedEvent } = useDeepEqualSelector((state) =>
-    pick(['expandedEvent'], getTimeline(state, timelineId) ?? timelineDefaults)
+  const expandedEvent = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent
   );
 
   const [loading, detailsData] = useTimelineEventsDetails({

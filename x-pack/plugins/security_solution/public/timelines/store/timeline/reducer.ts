@@ -102,9 +102,8 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { timelineDefaults } from './defaults';
-import { alertsDefaultModel } from '../../../detections/components/alerts_table/default_config';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

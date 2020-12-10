@@ -53,7 +53,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ isAlert, loading, handleOnEventClosed }: ExpandableEventTitleProps) => (
+  ({ isAlert, loading, handleOnEventClosed }) => (
     <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">

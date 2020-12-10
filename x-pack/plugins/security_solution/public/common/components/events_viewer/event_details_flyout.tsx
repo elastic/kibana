@@ -5,13 +5,11 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useDispatch } from 'react-redux';
 import { findIndex } from 'lodash/fp';
 
-import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
   ExpandableEvent,
@@ -19,6 +17,8 @@ import {
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+
+export type HandleCloseExpandedEvent = () => void;
 
 const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
@@ -28,6 +28,7 @@ interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   timelineId: string;
+  handleCloseExpandedEvent: HandleCloseExpandedEvent;
 }
 
 const emptyExpandedEvent = {};
@@ -36,8 +37,8 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
   timelineId,
+  handleCloseExpandedEvent,
 }) => {
-  const dispatch = useDispatch();
   const expandedEvent = useDeepEqualSelector(
     (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
   );
@@ -56,21 +57,12 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
     return false;
   }, [detailsData]);
 
-  const handleClearSelection = useCallback(() => {
-    dispatch(
-      timelineActions.toggleExpandedEvent({
-        timelineId,
-        event: emptyExpandedEvent,
-      })
-    );
-  }, [dispatch, timelineId]);
-
   if (!expandedEvent.eventId) {
     return null;
   }
 
   return (
-    <StyledEuiFlyout size="s" onClose={handleClearSelection}>
+    <StyledEuiFlyout size="s" onClose={handleCloseExpandedEvent}>
       <EuiFlyoutHeader hasBorder>
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
