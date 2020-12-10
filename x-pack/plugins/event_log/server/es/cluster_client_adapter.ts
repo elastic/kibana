@@ -286,15 +286,13 @@ export class ClusterClientAdapter {
         hits: { hits, total },
       }: SearchResponse<unknown> = await this.callEs('search', {
         index,
-        // The SearchResponse type only supports total as an int,
-        // so we're forced to explicitly request that it return as an int
-        rest_total_hits_as_int: true,
+        track_total_hits: true,
         body,
       });
       return {
         page,
         per_page: perPage,
-        total,
+        total: ((total as unknown) as { value: number; relation: string }).value || 0,
         data: hits.map((hit) => hit._source) as IValidatedEvent[],
       };
     } catch (err) {
