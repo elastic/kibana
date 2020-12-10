@@ -58,7 +58,16 @@ function getErrorMessage(error: ApiError, event: RequestEvent): string {
   return `[${error.name}]: ${error.message}`;
 }
 
-function getResponseMessage(event: RequestEvent) {
+/**
+ * returns a string in format:
+ *
+ * status code
+ * URL
+ * request body
+ *
+ * so it could be copy-pasted into the Dev console
+ */
+function getResponseMessage(event: RequestEvent): string {
   const params = event.meta.request.params;
 
   // definition is wrong, `params.querystring` can be either a string or an object
