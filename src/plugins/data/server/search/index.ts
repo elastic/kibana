@@ -22,3 +22,4 @@ export * from './es_search';
 export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
 export * from './aggs';
 export { shimHitsTotal } from './routes';
+export * from './session';

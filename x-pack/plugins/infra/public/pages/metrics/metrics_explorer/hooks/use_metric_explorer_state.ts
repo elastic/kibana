@@ -48,7 +48,6 @@ export const useMetricsExplorerState = (
     currentTimerange,
     afterKey,
     refreshSignal,
-    undefined,
     shouldLoadImmediately
   );
 

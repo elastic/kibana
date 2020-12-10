@@ -25,6 +25,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -39,6 +40,7 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Closes and opens alerts', () => {
@@ -168,6 +170,7 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('closed_alerts');
+      removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -219,6 +222,7 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {

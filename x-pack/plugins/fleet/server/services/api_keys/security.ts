@@ -6,7 +6,7 @@
 
 import type { Request } from '@hapi/hapi';
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { FleetAdminUserInvalidError, isLegacyESClientError } from '../../errors';
+import { FleetAdminUserInvalidError, isESClientError } from '../../errors';
 import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
@@ -37,14 +37,14 @@ export async function createAPIKey(
   }
 
   try {
-    const key = await security.authc.createAPIKey(request, {
+    const key = await security.authc.apiKeys.create(request, {
       name,
       role_descriptors: roleDescriptors,
     });
 
     return key;
   } catch (err) {
-    if (isLegacyESClientError(err) && err.statusCode === 401) {
+    if (isESClientError(err) && err.statusCode === 401) {
       // Clear Fleet admin user cache as the user is probably not valid anymore
       outputService.invalidateCache();
       throw new FleetAdminUserInvalidError(`Fleet Admin user is invalid: ${err.message}`);
@@ -87,13 +87,13 @@ export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id:
   }
 
   try {
-    const res = await security.authc.invalidateAPIKey(request, {
+    const res = await security.authc.apiKeys.invalidate(request, {
       id,
     });
 
     return res;
   } catch (err) {
-    if (isLegacyESClientError(err) && err.statusCode === 401) {
+    if (isESClientError(err) && err.statusCode === 401) {
       // Clear Fleet admin user cache as the user is probably not valid anymore
       outputService.invalidateCache();
       throw new FleetAdminUserInvalidError(`Fleet Admin user is invalid: ${err.message}`);

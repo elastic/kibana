@@ -274,6 +274,69 @@ describe('LayerPanel', () => {
       expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
     });
 
+    it('should not update the visualization if the datasource is incomplete', () => {
+      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      const updateAll = jest.fn();
+      const updateDatasource = jest.fn();
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel
+          {...getDefaultProps()}
+          updateDatasource={updateDatasource}
+          updateAll={updateAll}
+        />
+      );
+
+      act(() => {
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      component.update();
+
+      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({ columnId: 'newid' })
+      );
+      const stateFn =
+        mockDatasource.renderDimensionEditor.mock.calls[
+          mockDatasource.renderDimensionEditor.mock.calls.length - 1
+        ][1].setState;
+
+      act(() => {
+        stateFn({
+          indexPatternId: '1',
+          columns: {},
+          columnOrder: [],
+          incompleteColumns: { newId: { operationType: 'count' } },
+        });
+      });
+      expect(updateAll).not.toHaveBeenCalled();
+
+      act(() => {
+        stateFn(
+          {
+            indexPatternId: '1',
+            columns: {},
+            columnOrder: [],
+          },
+          true
+        );
+      });
+      expect(updateAll).toHaveBeenCalled();
+    });
+
     it('should close the DimensionContainer when the active visualization changes', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
