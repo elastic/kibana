@@ -44,3 +44,4 @@ snapshots.js
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
 /packages/kbn-ui-shared-deps/flot_charts
+/packages/kbn-monaco/src/painless/antlr

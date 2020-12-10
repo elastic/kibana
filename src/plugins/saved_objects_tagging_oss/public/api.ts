@@ -17,20 +17,47 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { SavedObject, SavedObjectReference } from '../../../core/types';
 import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { ITagsClient } from '../common';
+import { ITagsClient, Tag } from '../common';
 
 /**
  * @public
  */
 export interface SavedObjectsTaggingApi {
+  /**
+   * The client to perform tag-related operations on the server-side
+   */
   client: ITagsClient;
+  /**
+   * A client-side auto-refreshing cache of the existing tags. Can be used
+   * to synchronously access the list of tags.
+   */
+  cache: ITagsCache;
+  /**
+   * UI API to use to add tagging capabilities to an application
+   */
   ui: SavedObjectsTaggingApiUi;
+}
+
+/**
+ * @public
+ */
+export interface ITagsCache {
+  /**
+   * Return the current state of the cache
+   */
+  getState(): Tag[];
+
+  /**
+   * Return an observable that will emit everytime the cache's state mutates.
+   */
+  getState$(): Observable<Tag[]>;
 }
 
 /**
