@@ -73,11 +73,10 @@ export const transactionGroupsOverviewRoute = createRoute({
         pageIndex: toNumberRt,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         sortField: t.union([
-          t.literal('error_rate'),
-          t.literal('impact'),
           t.literal('latency'),
-          t.literal('name'),
           t.literal('throughput'),
+          t.literal('errorRate'),
+          t.literal('impact'),
         ]),
       }),
     ]),
