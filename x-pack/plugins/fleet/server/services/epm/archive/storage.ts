@@ -5,8 +5,8 @@
  */
 
 import { extname } from 'path';
-import yaml from 'js-yaml';
 import { uniq } from 'lodash';
+import yaml from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
@@ -23,8 +23,8 @@ import {
   RegistryDataStream,
 } from '../../../../common';
 import { getArchiveEntry } from './index';
-import { pkgToPkgKey } from '../registry';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+import { pkgToPkgKey } from '../registry';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -169,6 +169,7 @@ export const getEsPackage = async (
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${manifestPath}`,
   });
   const packageInfo = yaml.load(soResManifest.saved_objects[0].attributes.data_utf8);
+
   const readmePath = `${pkgName}-${pkgVersion}/docs/README.md`;
   const readmeRes = await savedObjectsClient.find<PackageAsset>({
     type: ASSETS_SAVED_OBJECT_TYPE,

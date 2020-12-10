@@ -13,6 +13,7 @@ import {
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
+  PackageSpecManifest,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { unpackBufferEntries } from './index';
@@ -143,7 +144,7 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
   const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
   return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
 }
-function parseAndVerifyDataStreams(
+export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
   pkgVersion: string
@@ -243,7 +244,7 @@ export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): Re
   }
   return streams;
 }
-function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
+export function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
   const vars: RegistryVarsEntry[] = [];
   if (manifestVars && manifestVars.length > 0) {
     manifestVars.forEach((manifestVar) => {
@@ -278,10 +279,12 @@ function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVars
   }
   return vars;
 }
-export function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+export function parseAndVerifyPolicyTemplates(
+  manifest: PackageSpecManifest
+): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
-  if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
+  if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
     manifestPolicyTemplates.forEach((policyTemplate: any) => {
       const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
       if (!(name && policyTemplateTitle && description && inputs)) {
@@ -307,7 +310,7 @@ export function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemp
   }
   return policyTemplates;
 }
-function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
+export function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
   const inputs: RegistryInput[] = [];
   if (manifestInputs && manifestInputs.length > 0) {
     manifestInputs.forEach((input: any) => {
