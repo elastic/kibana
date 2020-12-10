@@ -28,12 +28,12 @@ export function MachineLearningJobSelectionProvider({ getService }: FtrProviderC
       const selectedJobsOrGroups = await testSubjects.findAll(
         'mlJobSelectionBadges > ~mlJobSelectionBadge'
       );
-      const actualJobOrGroupLabel = await Promise.all(
+      const actualJobOrGroupLabels = await Promise.all(
         selectedJobsOrGroups.map(async (badge) => await badge.getVisibleText())
       );
-      expect(actualJobOrGroupLabel).to.not.contain(
+      expect(actualJobOrGroupLabels).to.not.contain(
         jobOrGroupId,
-        `Job selection should not contain job or group '${jobOrGroupId}' (got '${actualJobOrGroupLabel}')`
+        `Job selection should not contain job or group '${jobOrGroupId}' (got '${actualJobOrGroupLabels}')`
       );
     },
   };
