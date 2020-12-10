@@ -70,11 +70,7 @@ export const Node = ({
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <NodeDetailStatus
-            stats={nodeSummary}
-            alerts={alerts}
-            alertsStateFilter={(state) => state.stackProductUuid === nodeId}
-          />
+          <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />

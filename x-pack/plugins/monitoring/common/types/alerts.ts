@@ -7,29 +7,19 @@
 import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
-export type CommonAlert = Alert | SanitizedAlert;
-export type AlertMeta =
-  | LegacyAlert
-  | AlertCpuUsageNodeStats
-  | AlertDiskUsageNodeStats
-  | AlertMemoryUsageNodeStats
-  | AlertMissingData
-  | AlertThreadPoolRejectionsStats
-  | {};
-
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: CommonAlert;
+  rawAlert: Alert | SanitizedAlert;
 }
 
 export interface CommonAlertState {
   firing: boolean;
-  state: AlertState;
-  meta: AlertMeta;
+  state: any;
+  meta: any;
 }
 
 export interface CommonAlertFilter {
-  stackProductUuid?: string;
+  nodeUuid?: string;
 }
 
 export interface CommonAlertParamDetail {
@@ -58,7 +48,13 @@ export interface AlertEnableAction {
 }
 
 export interface AlertInstanceState {
-  alertStates: AlertState[];
+  alertStates: Array<
+    | AlertState
+    | AlertCpuUsageState
+    | AlertDiskUsageState
+    | AlertThreadPoolRejectionsState
+    | AlertNodeState
+  >;
   [x: string]: unknown;
 }
 
@@ -66,21 +62,24 @@ export interface AlertState {
   cluster: AlertCluster;
   ccs?: string;
   ui: AlertUiState;
-  stackProduct: string;
-  stackProductUuid: string;
-  stackProductName: string;
   [key: string]: unknown;
 }
 
-export interface AlertCpuUsageState extends AlertState {
+export interface AlertNodeState extends AlertState {
+  nodeId: string;
+  nodeName?: string;
+  [key: string]: unknown;
+}
+
+export interface AlertCpuUsageState extends AlertNodeState {
   cpuUsage: number;
 }
 
-export interface AlertDiskUsageState extends AlertState {
+export interface AlertDiskUsageState extends AlertNodeState {
   diskUsage: number;
 }
 
-export interface AlertMemoryUsageState extends AlertState {
+export interface AlertMemoryUsageState extends AlertNodeState {
   memoryUsage: number;
 }
 
@@ -172,7 +171,7 @@ export interface AlertData {
   ccs?: string;
   shouldFire?: boolean;
   severity: AlertSeverity;
-  meta: AlertMeta;
+  meta: any;
 }
 
 export interface LegacyAlert {

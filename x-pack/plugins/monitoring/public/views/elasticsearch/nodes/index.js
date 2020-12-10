@@ -102,11 +102,6 @@ uiRoutes.when('/elasticsearch/nodes', {
               ALERT_MISSING_MONITORING_DATA,
               ALERT_ELASTICSEARCH_VERSION_MISMATCH,
             ],
-            filters: [
-              {
-                stackProduct: ELASTICSEARCH_SYSTEM_ID,
-              },
-            ],
           },
         },
       });

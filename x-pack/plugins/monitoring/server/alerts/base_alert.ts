@@ -17,6 +17,7 @@ import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common'
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
+  AlertNodeState,
   AlertCluster,
   AlertMessage,
   AlertData,
@@ -25,7 +26,6 @@ import {
   CommonAlertFilter,
   CommonAlertParams,
   LegacyAlert,
-  AlertMeta,
 } from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -198,15 +198,12 @@ export class BaseAlert {
           return accum;
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
-        if (alertInstance) {
-          accum[instanceId] = alertInstance;
-          if (alertInstance.state) {
+        const filteredAlertInstance = this.filterAlertInstance(alertInstance, filters);
+        if (filteredAlertInstance) {
+          accum[instanceId] = filteredAlertInstance as RawAlertInstance;
+          if (filteredAlertInstance.state) {
             accum[instanceId].state = {
-              alertStates: (alertInstance.state as AlertInstanceState).alertStates.filter(
-                (alertState: AlertState) => {
-                  return this.filterAlertState(alertState, filters);
-                }
-              ),
+              alertStates: (filteredAlertInstance.state as AlertInstanceState).alertStates,
             };
           }
         }
@@ -216,13 +213,21 @@ export class BaseAlert {
     );
   }
 
-  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
-    for (const filter of filters) {
-      if (filter.stackProductUuid && filter.stackProductUuid !== alertState.stackProductUuid) {
-        return false;
-      }
+  protected filterAlertInstance(
+    alertInstance: RawAlertInstance,
+    filters: CommonAlertFilter[],
+    filterOnNodes: boolean = false
+  ) {
+    if (!filterOnNodes) {
+      return alertInstance;
     }
-    return true;
+    const alertInstanceStates = alertInstance.state?.alertStates as AlertNodeState[];
+    const nodeFilter = filters?.find((filter) => filter.nodeUuid);
+    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
+      return alertInstance;
+    }
+    const alertStates = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    return { state: { alertStates } };
   }
 
   protected async execute({
@@ -335,7 +340,7 @@ export class BaseAlert {
 
       const firingUuids = nodes
         .filter((node) => node.shouldFire)
-        .map((node) => this.getUuidFromAlertMeta(node.meta))
+        .map((node) => node.meta.nodeId)
         .join(',');
       const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
@@ -411,10 +416,6 @@ export class BaseAlert {
 
   protected getVersions(legacyAlert: LegacyAlert) {
     return `[${legacyAlert.message.match(/(?<=Versions: \[).+?(?=\])/)}]`;
-  }
-
-  protected getUuidFromAlertMeta(meta: AlertMeta) {
-    throw new Error('Child classes must implement `getUuidFromAlertMeta`');
   }
 
   protected getUiMessage(

@@ -72,9 +72,9 @@ import {
   MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
 } from '../screens/create_new_rule';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { NUMBER_OF_ALERTS } from '../screens/alerts';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -229,7 +229,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timelineId!)).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -331,6 +331,22 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(
+    () => {
+      refreshPage();
+      return cy
+        .get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount > 0;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
@@ -338,18 +354,5 @@ export const waitForTheRuleToBeExecuted = () => {
       .get(RULE_STATUS)
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
-};
-
-export const waitForAlertsToPopulate = async () => {
-  cy.waitUntil(() => {
-    refreshPage();
-    return cy
-      .get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((countText) => {
-        const alertCount = parseInt(countText, 10) || 0;
-        return alertCount > 0;
-      });
   });
 };
