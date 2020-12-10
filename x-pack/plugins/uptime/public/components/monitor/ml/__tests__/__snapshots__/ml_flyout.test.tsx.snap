@@ -5,6 +5,11 @@ exports[`ML Flyout component renders without errors 1`] = `
   data-test-subj="uptimeMLFlyout"
   onClose={[Function]}
   size="s"
+  style={
+    Object {
+      "width": 800,
+    }
+  }
 >
   <EuiFlyoutHeader>
     <EuiTitle>
@@ -12,9 +17,6 @@ exports[`ML Flyout component renders without errors 1`] = `
         Enable anomaly detection
       </h2>
     </EuiTitle>
-    <EuiSpacer
-      size="s"
-    />
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText>
@@ -39,13 +41,27 @@ exports[`ML Flyout component renders without errors 1`] = `
           }
         />
       </p>
+    </EuiText>
+    <EuiSpacer />
+    <JobConfig
+      bucketSpan="15m"
+      setBucketSpan={[Function]}
+      setTimeRange={[Function]}
+      timeRange={
+        Object {
+          "start": 1606387756729,
+        }
+      }
+    />
+    <EuiText
+      size="s"
+    >
       <p>
         <em>
           Note: It might take a few minutes for the job to begin calculating results.
         </em>
       </p>
     </EuiText>
-    <EuiSpacer />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
@@ -87,6 +103,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
     class="euiFlyout euiFlyout--small"
     data-test-subj="uptimeMLFlyout"
     role="dialog"
+    style="width:800px"
     tabindex="0"
   >
     <button
@@ -109,9 +126,6 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
       >
         Enable anomaly detection
       </h2>
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
     </div>
     <div
       class="euiFlyoutBody"
@@ -186,15 +200,427 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
               </a>
               .
             </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep"
+            >
+              <div
+                class="euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber euiStep__circle"
+                >
+                  <span
+                    class="euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiTitle--small euiStep__title"
+                >
+                  Configuration
+                </p>
+              </div>
+              <div
+                class="euiStep__content"
+              >
+                <div
+                  class="euiSwitch"
+                >
+                  <button
+                    aria-checked="false"
+                    aria-labelledby="generated-id"
+                    class="euiSwitch__button"
+                    id="generated-id"
+                    role="switch"
+                    type="button"
+                  >
+                    <span
+                      class="euiSwitch__body"
+                    >
+                      <span
+                        class="euiSwitch__thumb"
+                      />
+                      <span
+                        class="euiSwitch__track"
+                      >
+                        <span
+                          class="euiSwitch__icon"
+                          data-euiicon-type="cross"
+                        />
+                        <span
+                          class="euiSwitch__icon euiSwitch__icon--checked"
+                          data-euiicon-type="check"
+                        />
+                      </span>
+                    </span>
+                  </button>
+                  <span
+                    class="euiSwitch__label"
+                    id="generated-id"
+                  >
+                    Use full heartbeat-* data
+                  </span>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--l"
+                />
+                <div
+                  class="euiDescribedFormGroup"
+                  role="group"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <h3
+                        class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                      >
+                        Choose a time range
+                      </h3>
+                      <div
+                        class="euiText euiText--small euiDescribedFormGroup__description"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          By default, Machine Learning analyzes data in your heartbeat indices no older than two weeks, and continues indefinitely. You can specify a different date to begin, to end, or both.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        class="euiFormRow euiFormRow--fullWidth"
+                        id="generated-id-row"
+                      >
+                        <div
+                          class="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid="false"
+                            class="euiFormLabel euiFormRow__label"
+                            for="generated-id"
+                          >
+                            Start time
+                          </label>
+                        </div>
+                        <div
+                          class="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            id="generated-id"
+                          >
+                            <div
+                              class="euiFormControlLayout euiFormControlLayout--compressed"
+                            >
+                              <div
+                                class="euiFormControlLayout__childrenWrapper"
+                              >
+                                <span>
+                                  <span
+                                    class="euiDatePicker euiDatePicker--shadow"
+                                  >
+                                    <div
+                                      class="euiFormControlLayout"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <div
+                                          class="react-datepicker-wrapper"
+                                        >
+                                          <div
+                                            class="react-datepicker__input-container"
+                                          >
+                                            <input
+                                              aria-label="11/26/2020 05:49 AM"
+                                              class="euiDatePicker euiFieldText euiFieldText--withIcon"
+                                              placeholder="Start of heartbeat data"
+                                              type="text"
+                                              value="11/26/2020 05:49 AM"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormControlLayoutIcons"
+                                        >
+                                          <span
+                                            class="euiFormControlLayoutCustomIcon"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              class="euiFormControlLayoutCustomIcon__icon"
+                                              data-euiicon-type="calendar"
+                                            />
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </span>
+                                </span>
+                                <div
+                                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                >
+                                  <button
+                                    aria-label="Clear input"
+                                    class="euiFormControlLayoutClearButton"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutClearButton__icon"
+                                      data-euiicon-type="cross"
+                                    />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFormRow euiFormRow--fullWidth"
+                        id="generated-id-row"
+                      >
+                        <div
+                          class="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid="false"
+                            class="euiFormLabel euiFormRow__label"
+                            for="generated-id"
+                          >
+                            End time
+                          </label>
+                        </div>
+                        <div
+                          class="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            id="generated-id"
+                          >
+                            <div
+                              class="euiFormControlLayout"
+                            >
+                              <div
+                                class="euiFormControlLayout__childrenWrapper"
+                              >
+                                <span>
+                                  <span
+                                    class="euiDatePicker euiDatePicker--shadow"
+                                  >
+                                    <div
+                                      class="euiFormControlLayout"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <div
+                                          class="react-datepicker-wrapper"
+                                        >
+                                          <div
+                                            class="react-datepicker__input-container"
+                                          >
+                                            <input
+                                              aria-label=""
+                                              class="euiDatePicker euiFieldText euiFieldText--withIcon"
+                                              placeholder="Indefinitely"
+                                              type="text"
+                                              value=""
+                                            />
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormControlLayoutIcons"
+                                        >
+                                          <span
+                                            class="euiFormControlLayoutCustomIcon"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              class="euiFormControlLayoutCustomIcon__icon"
+                                              data-euiicon-type="calendar"
+                                            />
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiDescribedFormGroup"
+                  role="group"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <h3
+                        class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                      >
+                        Bucket span
+                      </h3>
+                      <div
+                        class="euiText euiText--small euiDescribedFormGroup__description"
+                      >
+                        <div
+                          class="euiTextColor euiTextColor--subdued"
+                        >
+                          Set the interval for time series analysis, typically between 15m to 1h.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        class="euiFormRow euiFormRow--fullWidth"
+                        id="generated-id-row"
+                      >
+                        <div
+                          class="euiFormRow__labelWrapper"
+                        >
+                          <label
+                            aria-invalid="false"
+                            class="euiFormLabel euiFormRow__label"
+                            for="generated-id"
+                          >
+                            Bucket span
+                          </label>
+                        </div>
+                        <div
+                          class="euiFormRow__fieldWrapper"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            id="generated-id"
+                          >
+                            <div
+                              class="euiFormControlLayout"
+                            >
+                              <div
+                                class="euiFormControlLayout__childrenWrapper"
+                              >
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                >
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <div
+                                      class="euiFormControlLayout"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <input
+                                          class="euiFieldText"
+                                          data-test-subj="uptimeMLBucketSpanInput"
+                                          placeholder="Bucket span"
+                                          type="text"
+                                          value="15m"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem"
+                                    style="align-self:center"
+                                  >
+                                    <button
+                                      class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                                      disabled=""
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButton__content"
+                                      >
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Estimate bucket span
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep"
+            >
+              <div
+                class="euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber euiStep__circle"
+                >
+                  <span
+                    class="euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiTitle--small euiStep__title"
+                >
+                  Create ML job
+                </p>
+              </div>
+              <div
+                class="euiStep__content"
+              />
+            </div>
+          </div>
+          <div
+            class="euiText euiText--small"
+          >
             <p>
               <em>
                 Note: It might take a few minutes for the job to begin calculating results.
               </em>
             </p>
           </div>
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
         </div>
       </div>
     </div>

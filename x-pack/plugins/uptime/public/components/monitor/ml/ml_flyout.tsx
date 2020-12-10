@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,14 +21,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ShowLicenseInfo } from './license_info';
 import { hasMLFeatureSelector } from '../../../state/selectors';
+import { JobConfig, TimeRange } from './job_config/job_config';
+import { isValidBucketSpan } from './job_config/bucket_span';
 
 interface Props {
   isCreatingJob: boolean;
-  onClickCreate: () => void;
+  onClickCreate: (config: { timeRange: TimeRange; bucketSpan: string }) => void;
   onClose: () => void;
   canCreateMLJob: boolean;
 }
@@ -38,15 +41,24 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
 
   const hasMlFeature = useSelector(hasMLFeatureSelector);
 
+  const [bucketSpan, setBucketSpan] = useState('15m');
+
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    start: moment().subtract(2, 'week').valueOf(),
+  });
+
+  const invalidData = !bucketSpan || !isValidBucketSpan(bucketSpan) || !timeRange?.start;
+
   const isLoadingMLJob = false;
 
+  const inProgress = isCreatingJob || isLoadingMLJob;
+
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout" style={{ width: 800 }}>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>{labels.ENABLE_ANOMALY_DETECTION}</h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {!hasMlFeature && <ShowLicenseInfo />}
@@ -63,26 +75,34 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
               }}
             />
           </p>
+        </EuiText>
+        <EuiSpacer />
+        <JobConfig
+          bucketSpan={bucketSpan}
+          setBucketSpan={setBucketSpan}
+          timeRange={timeRange}
+          setTimeRange={setTimeRange}
+        />
+        <EuiText size="s">
           <p>
             <em>{labels.TAKE_SOME_TIME_TEXT}</em>
           </p>
         </EuiText>
-        <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} disabled={isCreatingJob || isLoadingMLJob}>
+            <EuiButtonEmpty onClick={() => onClose()} disabled={inProgress}>
               {labels.CANCEL_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="uptimeMLCreateJobBtn"
-              onClick={() => onClickCreate()}
+              onClick={() => onClickCreate({ timeRange, bucketSpan })}
               fill
               isLoading={isCreatingJob}
-              disabled={isCreatingJob || isLoadingMLJob || !hasMlFeature || !canCreateMLJob}
+              disabled={inProgress || !hasMlFeature || !canCreateMLJob || invalidData}
             >
               {labels.CREATE_NEW_JOB}
             </EuiButton>

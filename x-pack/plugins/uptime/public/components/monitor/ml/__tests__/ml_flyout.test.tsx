@@ -10,6 +10,9 @@ import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import * as redux from 'react-redux';
+import { mockMonitorIdHook } from '../../../../lib/helper/test_helpers';
+
+mockMonitorIdHook();
 
 describe('ML Flyout component', () => {
   const createJob = () => {};

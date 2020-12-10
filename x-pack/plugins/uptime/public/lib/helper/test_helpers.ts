@@ -9,6 +9,7 @@
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import * as redux from 'react-redux';
+import * as monHook from '../../hooks/use_monitor';
 
 export function mockMoment() {
   // avoid timezone issues
@@ -26,4 +27,8 @@ export function mockReduxHooks(response?: any) {
   jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 
   jest.spyOn(redux, 'useSelector').mockReturnValue(response);
+}
+
+export function mockMonitorIdHook() {
+  jest.spyOn(monHook, 'useMonitorId').mockReturnValue('test-monitor-id');
 }

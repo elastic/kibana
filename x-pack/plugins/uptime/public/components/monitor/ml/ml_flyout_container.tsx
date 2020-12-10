@@ -8,7 +8,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   canCreateMLJobSelector,
-  hasMLJobSelector,
   hasNewMLJobSelector,
   isMLJobCreatingSelector,
   selectDynamicSettings,
@@ -30,6 +29,7 @@ import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { TimeRange } from './job_config/job_config';
 
 interface Props {
   onClose: () => void;
@@ -86,15 +86,6 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   const canCreateMLJob = useSelector(canCreateMLJobSelector) && heartbeatIndices !== '';
 
-  // This function is a noop in the form's disabled state
-  const createMLJob = heartbeatIndices
-    ? () => dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }))
-    : () => null;
-
-  const { data: uptimeJobs } = useSelector(hasMLJobSelector);
-
-  const hasExistingMLJob = !!uptimeJobs?.jobsExist;
-
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -131,23 +122,22 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMLJob, onClose, isCreatingJob, error, isMLJobCreating, monitorId, dispatch, basePath]);
 
-  useEffect(() => {
-    if (hasExistingMLJob && !isMLJobCreating && !hasMLJob && heartbeatIndices) {
-      setIsCreatingJob(true);
-      dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }));
-    }
-
-    // Don't add isMLJobCreating, because it will result int end less loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, hasExistingMLJob, heartbeatIndices, monitorId, hasMLJob]);
-
-  if (hasExistingMLJob) {
-    return null;
-  }
-
-  const createAnomalyJob = () => {
+  const createAnomalyJob = ({
+    timeRange,
+    bucketSpan,
+  }: {
+    timeRange: TimeRange;
+    bucketSpan: string;
+  }) => {
     setIsCreatingJob(true);
-    createMLJob();
+    dispatch(
+      createMLJobAction.get({
+        bucketSpan,
+        timeRange,
+        heartbeatIndices,
+        monitorId: monitorId as string,
+      })
+    );
   };
 
   return (

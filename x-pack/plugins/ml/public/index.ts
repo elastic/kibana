@@ -27,6 +27,7 @@ export const plugin: PluginInitializer<
 export type { MlPluginSetup, MlPluginStart };
 export type {
   AnomaliesTableRecord,
+  DataRecognizerConfigRequest,
   DataRecognizerConfigResponse,
   Influencer,
   JobExistResult,

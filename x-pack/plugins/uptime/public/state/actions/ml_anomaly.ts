@@ -17,6 +17,8 @@ import {
   MonitorIdParam,
   HeartbeatIndicesParam,
 } from './types';
+import { TimeRange } from '../../components/monitor/ml/job_config/job_config';
+import { NewMLJobParams } from '../api/ml_anomaly';
 
 export const resetMLState = createAction('RESET_ML_STATE');
 
@@ -24,10 +26,9 @@ export const getExistingMLJobAction = createAsyncAction<MonitorIdParam, JobExist
   'GET_EXISTING_ML_JOB'
 );
 
-export const createMLJobAction = createAsyncAction<
-  MonitorIdParam & HeartbeatIndicesParam,
-  CreateMLJobSuccess | null
->('CREATE_ML_JOB');
+export const createMLJobAction = createAsyncAction<NewMLJobParams, CreateMLJobSuccess | null>(
+  'CREATE_ML_JOB'
+);
 
 export const getMLCapabilitiesAction = createAsyncAction<any, MlCapabilitiesResponse>(
   'GET_ML_CAPABILITIES'

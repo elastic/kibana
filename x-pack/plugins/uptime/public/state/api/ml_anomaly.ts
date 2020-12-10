@@ -9,6 +9,7 @@ import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_MODULE_ID } from '../../../common/constants';
 import {
+  DataRecognizerConfigRequest,
   DataRecognizerConfigResponse,
   JobExistResult,
   MlCapabilitiesResponse,
@@ -20,6 +21,7 @@ import {
   MonitorIdParam,
 } from '../actions/types';
 import { getJobPrefix, getMLJobId } from '../../../common/lib/ml';
+import { TimeRange } from '../../components/monitor/ml/job_config/job_config';
 
 export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
@@ -28,20 +30,26 @@ export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
 export const getExistingJobs = async (): Promise<JobExistResult> => {
   return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
 };
+export type NewMLJobParams = MonitorIdParam &
+  HeartbeatIndicesParam & { timeRange: TimeRange; bucketSpan: string };
 
 export const createMLJob = async ({
   monitorId,
+  bucketSpan,
+  timeRange,
   heartbeatIndices,
-}: MonitorIdParam & HeartbeatIndicesParam): Promise<CreateMLJobSuccess | null> => {
+}: NewMLJobParams): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
-  const data = {
+  const data: Omit<DataRecognizerConfigRequest, 'moduleId'> = {
     prefix: `${getJobPrefix(monitorId)}`,
     useDedicatedIndex: false,
     startDatafeed: true,
-    start: moment().subtract(2, 'w').valueOf(),
+    start: timeRange.start,
+    end: timeRange.end,
     indexPatternName: heartbeatIndices,
     applyToAllSpaces: true,
+    jobOverrides: [{ analysis_config: { bucket_span: bucketSpan } as any }],
     query: {
       bool: {
         filter: [
@@ -95,3 +103,26 @@ export const fetchAnomalyRecords = async ({
   };
   return apiService.post(API_URLS.ML_ANOMALIES_RESULT, data);
 };
+
+export async function getTimeFieldRange(heartbeatIndices: string, monitorId: string) {
+  return apiService.post('/api/ml/fields_service/time_field_range', {
+    index: heartbeatIndices,
+    timeFieldName: '@timestamp',
+    query: {
+      bool: {
+        filter: [{ term: { 'monitor.id': monitorId } }],
+      },
+    },
+  });
+}
+
+export async function getBucketSpanEstimate(timeRange: TimeRange, monitorId: string) {
+  return apiService.post('/api/ml/validate/estimate_bucket_span', {
+    aggTypes: ['avg'],
+    duration: { start: timeRange.start, end: timeRange.gg ?? moment().valueOf() },
+    fields: ['monitor.duration.us'],
+    index: 'heartbeat-*',
+    query: { bool: { filter: [{ term: { 'monitor.id': monitorId } }] } },
+    timeField: '@timestamp',
+  });
+}

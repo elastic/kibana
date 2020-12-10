@@ -32,7 +32,11 @@ import {
   FieldHistogramRequestConfig,
   FieldRequestConfig,
 } from '../../datavisualizer/index_based/common';
-import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
+import {
+  DataRecognizerConfigRequest,
+  DataRecognizerConfigResponse,
+  Module,
+} from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 
 export interface MlInfoResponse {
@@ -436,19 +440,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       end,
       jobOverrides,
       estimateModelMemory,
-    }: {
-      moduleId: string;
-      prefix?: string;
-      groups?: string[];
-      indexPatternName?: string;
-      query?: any;
-      useDedicatedIndex?: boolean;
-      startDatafeed?: boolean;
-      start?: number;
-      end?: number;
-      jobOverrides?: Array<Partial<Job>>;
-      estimateModelMemory?: boolean;
-    }) {
+    }: DataRecognizerConfigRequest) {
       const body = JSON.stringify({
         prefix,
         groups,
