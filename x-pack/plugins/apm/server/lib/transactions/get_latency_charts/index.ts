@@ -128,10 +128,7 @@ export async function getLatencyTimeseries({
       response.aggregations.overall_avg_duration.value || null,
     latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
       (bucket) => {
-        return {
-          x: bucket.key,
-          y: getLatencyValue(bucket.latency),
-        };
+        return { x: bucket.key, y: getLatencyValue(bucket.latency) };
       }
     ),
   };
