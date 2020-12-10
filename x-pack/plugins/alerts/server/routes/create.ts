@@ -16,7 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
-import { Alert, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../types';
+import { Alert, AlertNotifyWhenType, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../types';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -62,7 +62,8 @@ export const createAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         }
         const alertsClient = context.alerting.getAlertsClient();
         const alert = req.body;
-        const alertRes: Alert = await alertsClient.create({ data: alert });
+        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+        const alertRes: Alert = await alertsClient.create({ data: { ...alert, notifyWhen } });
         return res.ok({
           body: alertRes,
         });

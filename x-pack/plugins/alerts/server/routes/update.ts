@@ -16,7 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
-import { BASE_ALERT_API_PATH, validateNotifyWhenType } from '../../common';
+import { AlertNotifyWhenType, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -74,7 +74,7 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
               schedule,
               tags,
               throttle,
-              notifyWhen,
+              notifyWhen: notifyWhen as AlertNotifyWhenType,
             },
           }),
         });
