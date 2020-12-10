@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchListItemArraySchema } from '../../../common/schemas';
 import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2 } from '../../../common/constants.mock';
@@ -19,7 +20,22 @@ describe('search_list_item_by_values', () => {
     jest.clearAllMocks();
   });
 
-  test('Returns a an empty array if the ES query is also empty', async () => {
+  test('Returns a an empty array of items if the value is empty', async () => {
+    const data = getSearchListItemMock();
+    data.hits.hits = [];
+    const callCluster = getCallClusterMock(data);
+    const listItem = await searchListItemByValues({
+      callCluster,
+      listId: LIST_ID,
+      listItemIndex: LIST_ITEM_INDEX,
+      type: TYPE,
+      value: [],
+    });
+
+    expect(listItem).toEqual([]);
+  });
+
+  test('Returns a an empty array of items if the ES query is also empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
     const callCluster = getCallClusterMock(data);
@@ -31,7 +47,11 @@ describe('search_list_item_by_values', () => {
       value: [VALUE, VALUE_2],
     });
 
-    expect(listItem).toEqual([]);
+    const expected: SearchListItemArraySchema = [
+      { items: [], value: VALUE },
+      { items: [], value: VALUE_2 },
+    ];
+    expect(listItem).toEqual(expected);
   });
 
   test('Returns transformed list item if the data exists within ES', async () => {
@@ -45,7 +65,7 @@ describe('search_list_item_by_values', () => {
       value: [VALUE, VALUE_2],
     });
 
-    expect(listItem).toEqual([
+    const expected: SearchListItemArraySchema = [
       {
         items: [
           {
@@ -66,6 +86,11 @@ describe('search_list_item_by_values', () => {
         ],
         value: '127.0.0.1',
       },
-    ]);
+      {
+        items: [],
+        value: VALUE_2,
+      },
+    ];
+    expect(listItem).toEqual(expected);
   });
 });
