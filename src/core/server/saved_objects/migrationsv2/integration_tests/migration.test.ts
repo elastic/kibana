@@ -114,9 +114,31 @@ describe('migration v2', () => {
       await stopServers();
     });
 
-    it.only('works (tm)', async () => {
-      const response = await esClient.cat.indices();
-      console.log(response.body);
+    it('works (tm)', async () => {
+      await esClient.cat.indices();
+      // console.log(response.body);
+    });
+  });
+
+  describe('migration from 7.7.2-xpack with 100k objects', () => {
+    const migratedIndex = `.kibana_${kibanaVersion}_001`;
+
+    beforeAll(async () => {
+      await startServers({
+        oss: false,
+        dataArchive: join(__dirname, 'archives', '7_7_2_xpack_100k_obj.zip'),
+      });
+    });
+
+    afterAll(async () => {
+      await stopServers();
+    });
+
+    it('migrates all the objects', async () => {
+      const { body } = await esClient.count({
+        index: migratedIndex,
+      });
+      expect(body).toEqual({});
     });
   });
 
