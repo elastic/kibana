@@ -22,13 +22,7 @@ import {
 
 import { Phases } from '../../../../../../../common/types';
 
-import {
-  useFormData,
-  UseField,
-  SelectField,
-  NumericField,
-  ToggleField,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
