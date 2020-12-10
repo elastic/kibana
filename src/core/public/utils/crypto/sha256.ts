@@ -130,7 +130,7 @@ type BufferEncoding =
   | 'binary'
   | 'hex';
 
-/* eslint-disable  no-bitwise, no-shadow */
+/* eslint-disable  no-bitwise, @typescript-eslint/no-shadow */
 export class Sha256 {
   private _a: number;
   private _b: number;
@@ -200,7 +200,7 @@ export class Sha256 {
     return this;
   }
 
-  digest(encoding: string): string {
+  digest(encoding: BufferEncoding): string {
     // Suppose the length of the message M, in bits, is l
     const l = this._len * 8;
 

@@ -8,6 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -188,9 +189,11 @@ describe('Netflow', () => {
   test('it renders the destination ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()).toEqual(
-      '10.1.2.3:80'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
+      )
+    ).toEqual('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -324,9 +327,9 @@ describe('Netflow', () => {
   test('it renders the source ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text()).toEqual(
-      '192.168.1.2:9987'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
+    ).toEqual('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {
@@ -353,11 +356,13 @@ describe('Netflow', () => {
     const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
-      wrapper
-        .find('[data-test-subj="client-certificate-fingerprint"]')
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .text()
+      removeExternalLinkText(
+        wrapper
+          .find('[data-test-subj="client-certificate-fingerprint"]')
+          .find('[data-test-subj="certificate-fingerprint-link"]')
+          .first()
+          .text()
+      )
     ).toEqual('tls.client_certificate.fingerprint.sha1-value');
   });
 
@@ -372,9 +377,9 @@ describe('Netflow', () => {
   test('renders tls.fingerprints.ja3.hash text', () => {
     const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text()).toEqual(
-      'tls.fingerprints.ja3.hash-value'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
+    ).toEqual('tls.fingerprints.ja3.hash-value');
   });
 
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
@@ -395,11 +400,13 @@ describe('Netflow', () => {
     const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
-      wrapper
-        .find('[data-test-subj="server-certificate-fingerprint"]')
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .text()
+      removeExternalLinkText(
+        wrapper
+          .find('[data-test-subj="server-certificate-fingerprint"]')
+          .find('[data-test-subj="certificate-fingerprint-link"]')
+          .first()
+          .text()
+      )
     ).toEqual('tls.server_certificate.fingerprint.sha1-value');
   });
 

@@ -16,8 +16,8 @@ import {
 } from '../../../../common/constants';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import {
-  AggDescriptor,
   ColorDynamicOptions,
+  CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
 } from '../../../../common/descriptor_types';
@@ -43,11 +43,11 @@ function createChoroplethLayerDescriptor({
   rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
-  const metricsDescriptor: AggDescriptor = { type: AGG_TYPE.COUNT };
+  const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
   const joinId = uuid();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+    aggFieldName: '',
     rightSourceId: joinId,
   });
   return VectorLayer.createDescriptor({
@@ -71,7 +71,7 @@ function createChoroplethLayerDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
           field: {
             name: joinKey,
             origin: FIELD_ORIGIN.JOIN,

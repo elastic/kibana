@@ -37,22 +37,6 @@ export const POLYGON_STYLES = [
   VECTOR_STYLES.LINE_WIDTH,
 ];
 
-export function getDefaultProperties(mapColors: string[] = []): VectorStylePropertiesDescriptor {
-  return {
-    ...getDefaultStaticProperties(mapColors),
-    [VECTOR_STYLES.SYMBOLIZE_AS]: {
-      options: {
-        value: SYMBOLIZE_AS_TYPES.CIRCLE,
-      },
-    },
-    [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
-      options: {
-        size: LABEL_BORDER_SIZES.SMALL,
-      },
-    },
-  };
-}
-
 export function getDefaultStaticProperties(
   mapColors: string[] = []
 ): VectorStylePropertiesDescriptor {
@@ -127,6 +111,16 @@ export function getDefaultStaticProperties(
       type: STYLE_TYPE.STATIC,
       options: {
         color: isDarkMode ? '#000000' : '#FFFFFF',
+      },
+    },
+    [VECTOR_STYLES.SYMBOLIZE_AS]: {
+      options: {
+        value: SYMBOLIZE_AS_TYPES.CIRCLE,
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
+      options: {
+        size: LABEL_BORDER_SIZES.SMALL,
       },
     },
   };
@@ -242,6 +236,16 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
         },
+      },
+    },
+    [VECTOR_STYLES.SYMBOLIZE_AS]: {
+      options: {
+        value: SYMBOLIZE_AS_TYPES.CIRCLE,
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
+      options: {
+        size: LABEL_BORDER_SIZES.SMALL,
       },
     },
   };

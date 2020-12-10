@@ -10,21 +10,24 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/http_api';
+import { LogEntryCursor } from '../../../../common/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogSourceConfigurationProperties } from '../log_source';
 
 interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
   query?: string;
-  center?: LogEntriesCursor;
+  center?: LogEntryCursor;
+  columns?: LogSourceConfigurationProperties['logColumns'];
 }
 
 interface LogStreamState {
   entries: LogEntry[];
-  topCursor: LogEntriesCursor | null;
-  bottomCursor: LogEntriesCursor | null;
+  topCursor: LogEntryCursor | null;
+  bottomCursor: LogEntryCursor | null;
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
 }
@@ -60,6 +63,7 @@ export function useLogStream({
   endTimestamp,
   query,
   center,
+  columns,
 }: LogStreamProps): LogStreamReturn {
   const { services } = useKibanaContextForPlugin();
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
@@ -100,6 +104,7 @@ export function useLogStream({
             startTimestamp,
             endTimestamp,
             query: parsedQuery,
+            columns,
             ...fetchPosition,
           },
           services.http.fetch

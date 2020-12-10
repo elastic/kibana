@@ -23,9 +23,11 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
+    getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
     getCspConfig: jest.fn(),
+    getExternalUrlConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
     getPlugins: jest.fn(),
@@ -34,6 +36,7 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+  setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getAnonymousStatusPage.mockReturnValue(false);
   setupContract.getLegacyMetadata.mockReturnValue({

@@ -153,6 +153,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   return (
     <>
       <ExpandableSection
+        urlStateKey={'results'}
         dataTestId="results"
         content={resultsSectionContent}
         headerItems={resultsSectionHeaderItems}

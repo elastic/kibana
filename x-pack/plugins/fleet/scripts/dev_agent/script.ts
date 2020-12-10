@@ -45,7 +45,7 @@ run(
 
     while (!closing) {
       await checkin(kibanaUrl, agent, log);
-      await new Promise((resolve, reject) => setTimeout(() => resolve(), CHECKIN_INTERVAL));
+      await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), CHECKIN_INTERVAL));
     }
   },
   {

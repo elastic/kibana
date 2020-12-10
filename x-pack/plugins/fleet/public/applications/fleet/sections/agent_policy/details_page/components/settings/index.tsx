@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../../types';
 import {
   useLink,
-  useCore,
+  useStartServices,
   useCapabilities,
   sendUpdateAgentPolicy,
   useConfig,
@@ -33,7 +33,7 @@ const FormWrapper = styled.div`
 
 export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
-    const { notifications } = useCore();
+    const { notifications } = useStartServices();
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();

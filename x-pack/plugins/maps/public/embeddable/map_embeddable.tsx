@@ -18,6 +18,7 @@ import {
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   ActionExecutionContext,
   TriggerContextMapping,
 } from '../../../../../src/plugins/ui_actions/public';
@@ -57,6 +58,7 @@ import {
   getExistingMapPath,
   MAP_SAVED_OBJECT_TYPE,
   MAP_PATH,
+  RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
@@ -65,6 +67,7 @@ import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
+import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
 import {
   MapByValueInput,
@@ -202,7 +205,7 @@ export class MapEmbeddable
   }
 
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
-    return [APPLY_FILTER_TRIGGER];
+    return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -290,6 +293,7 @@ export class MapEmbeddable
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <MapContainer
+            onSingleValueTrigger={this.onSingleValueTrigger}
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             getFilterActions={this.getFilterActions}
             getActionContext={this.getActionContext}
@@ -320,6 +324,20 @@ export class MapEmbeddable
     return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
 
+  onSingleValueTrigger = (actionId: string, key: string, value: RawValue) => {
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply action, could not locate action');
+    }
+    const executeContext = {
+      ...this.getActionContext(),
+      data: {
+        data: toValueClickDataFormat(key, value),
+      },
+    };
+    action.execute(executeContext);
+  };
+
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
     const executeContext = {
       ...this.getActionContext(),
@@ -333,10 +351,24 @@ export class MapEmbeddable
   };
 
   getFilterActions = async () => {
-    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+    const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters: [],
     });
+    const valueClickActions = await getUiActions().getTriggerCompatibleActions(
+      VALUE_CLICK_TRIGGER,
+      {
+        embeddable: this,
+        data: {
+          // uiActions.getTriggerCompatibleActions validates action with provided context
+          // so if event.key and event.value are used in the URL template but can not be parsed from context
+          // then the action is filtered out.
+          // To prevent filtering out actions, provide dummy context when initially fetching actions.
+          data: toValueClickDataFormat('anyfield', 'anyvalue'),
+        },
+      }
+    );
+    return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
   };
 
   getActionContext = () => {

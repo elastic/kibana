@@ -14,13 +14,6 @@ import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 const PAGINATION_SIZE = 50;
 
-export interface FieldsGroup {
-  specialFields: IndexPatternField[];
-  availableFields: IndexPatternField[];
-  emptyFields: IndexPatternField[];
-  metaFields: IndexPatternField[];
-}
-
 export type FieldGroups = Record<
   string,
   {
@@ -132,19 +125,21 @@ export function FieldList({
       onScroll={throttle(lazyScroll, 100)}
     >
       <div className="lnsIndexPatternFieldList__accordionContainer">
-        {Object.entries(fieldGroups)
-          .filter(([, { showInAccordion }]) => !showInAccordion)
-          .flatMap(([, { fields }]) =>
-            fields.map((field) => (
-              <FieldItem
-                {...fieldProps}
-                exists={exists(field)}
-                field={field}
-                hideDetails={true}
-                key={field.name}
-              />
-            ))
-          )}
+        <ul>
+          {Object.entries(fieldGroups)
+            .filter(([, { showInAccordion }]) => !showInAccordion)
+            .flatMap(([, { fields }]) =>
+              fields.map((field) => (
+                <FieldItem
+                  {...fieldProps}
+                  exists={exists(field)}
+                  field={field}
+                  hideDetails={true}
+                  key={field.name}
+                />
+              ))
+            )}
+        </ul>
         <EuiSpacer size="s" />
         {Object.entries(fieldGroups)
           .filter(([, { showInAccordion }]) => showInAccordion)

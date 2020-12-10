@@ -8,8 +8,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -22,7 +22,7 @@ export function VisitorBreakdown() {
 
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/visitor-breakdown',
+          endpoint: 'GET /api/apm/rum-client/visitor-breakdown',
           params: {
             query: {
               start,

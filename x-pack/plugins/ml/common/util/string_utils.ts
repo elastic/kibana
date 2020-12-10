@@ -45,5 +45,5 @@ export function getGroupQueryText(groupIds: string[]): string {
 }
 
 export function getJobQueryText(jobIds: string | string[]): string {
-  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
+  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : `id:${jobIds}`;
 }

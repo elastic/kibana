@@ -4,8 +4,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "bfetch",
     "expressions",
-    "uiActions"
+    "uiActions",
+    "share"
   ],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],

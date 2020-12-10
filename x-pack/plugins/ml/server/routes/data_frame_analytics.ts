@@ -8,6 +8,7 @@ import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
+import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
@@ -19,6 +20,7 @@ import {
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
 } from './schemas/data_analytics_schema';
+import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
@@ -36,14 +38,22 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-function getAnalyticsMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+function getAnalyticsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: GetAnalyticsMapArgs
+) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.getAnalyticsMap(analyticsId);
+  return analytics.getAnalyticsMap(idOptions);
 }
 
-function getExtendedMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+function getExtendedMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: ExtendAnalyticsMapArgs
+) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
+  return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
 /**
@@ -633,10 +643,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { analyticsId } = request.params;
         const treatAsRoot = request.query?.treatAsRoot;
-        const caller =
-          treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
+        const type = request.query?.type;
 
-        const results = await caller(mlClient, client, analyticsId);
+        let results;
+        if (treatAsRoot === 'true' || treatAsRoot === true) {
+          results = await getExtendedMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+            index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+          });
+        } else {
+          results = await getAnalyticsMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+            modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+          });
+        }
 
         return response.ok({
           body: results,

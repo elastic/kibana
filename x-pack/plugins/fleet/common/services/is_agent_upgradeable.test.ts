@@ -94,7 +94,7 @@ const getAgent = ({
   }
   return agent;
 };
-describe('Ingest Manager - isAgentUpgradeable', () => {
+describe('Fleet - isAgentUpgradeable', () => {
   it('returns false if agent reports not upgradeable with agent version < kibana version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(false);
   });

@@ -40,9 +40,9 @@ jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_asy
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
-  let ExceptionBuilderComponent: jest.SpyInstance<ReturnType<
-    typeof builder.ExceptionBuilderComponent
-  >>;
+  let ExceptionBuilderComponent: jest.SpyInstance<
+    ReturnType<typeof builder.ExceptionBuilderComponent>
+  >;
 
   beforeEach(() => {
     ExceptionBuilderComponent = jest

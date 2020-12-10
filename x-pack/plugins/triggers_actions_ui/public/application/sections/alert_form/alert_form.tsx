@@ -30,18 +30,18 @@ import {
   EuiLink,
   EuiText,
   EuiNotificationBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { capitalize } from 'lodash';
+import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerts/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
-import { actionVariablesFromAlertType } from '../../lib/action_variables';
-import { AlertReducerAction } from './alert_reducer';
+import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
   AlertTypeModel,
   Alert,
@@ -49,18 +49,28 @@ import {
   AlertAction,
   AlertTypeIndex,
   AlertType,
+  ValidationResult,
+  AlertTypeRegistryContract,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import {
+  AlertActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
+import { useKibana } from '../../../common/lib/kibana';
+import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 const ENTER_KEY = 13;
 
-export function validateBaseProperties(alertObject: Alert) {
+export function validateBaseProperties(alertObject: InitialAlert): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
@@ -93,18 +103,34 @@ export function validateBaseProperties(alertObject: Alert) {
   return validationResult;
 }
 
+const hasErrors: (errors: IErrorObject) => boolean = (errors) =>
+  !!Object.values(errors).find((errorList) => {
+    if (isObject(errorList)) return hasErrors(errorList as IErrorObject);
+    return errorList.length >= 1;
+  });
+
+export function isValidAlert(
+  alertObject: InitialAlert | Alert,
+  validationResult: IErrorObject
+): alertObject is Alert {
+  return !hasErrors(validationResult);
+}
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
-interface AlertFormProps {
-  alert: Alert;
+interface AlertFormProps<MetaData = Record<string, any>> {
+  alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  operation: string;
+  metadata?: MetaData;
 }
 
 export const AlertForm = ({
@@ -115,17 +141,19 @@ export const AlertForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   operation,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  metadata,
 }: AlertFormProps) => {
-  const alertsContext = useAlertsContext();
   const {
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
+    notifications: { toasts },
     docLinks,
-    capabilities,
+    application: { capabilities },
     kibanaFeatures,
-  } = alertsContext;
+    charts,
+    data,
+  } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
@@ -169,6 +197,7 @@ export const AlertForm = ({
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
+
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
 
@@ -191,7 +220,7 @@ export const AlertForm = ({
           new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
         );
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
             { defaultMessage: 'Unable to load alert types' }
@@ -204,10 +233,13 @@ export const AlertForm = ({
 
   useEffect(() => {
     setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
-  }, [alert, alertTypeRegistry]);
+    if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    }
+  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry]);
 
   const setAlertProperty = useCallback(
-    (key: string, value: any) => {
+    <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
       dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
     },
     [dispatch]
@@ -226,12 +258,16 @@ export const AlertForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = (key: string, value: any, index: number) => {
+  const setActionProperty = <Key extends keyof AlertAction>(
+    key: Key,
+    value: AlertAction[Key] | null,
+    index: number
+  ) => {
     dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
   const setActionParamsProperty = useCallback(
-    (key: string, value: any, index: number) => {
+    (key: string, value: AlertActionParam, index: number) => {
       dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
     },
     [dispatch]
@@ -285,8 +321,33 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
+  const selectedAlertType = alert?.alertTypeId
+    ? alertTypesIndex?.get(alert?.alertTypeId)
+    : undefined;
+  const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
+  const getDefaultActionParams = useCallback(
+    (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
+      getDefaultsForActionParams(
+        actionTypeId,
+        actionGroupId,
+        actionGroupId === recoveryActionGroup
+      ),
+    [recoveryActionGroup]
+  );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
+
+  const isActionGroupDisabledForActionType = useCallback(
+    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+      return isActionGroupDisabledForActionTypeId(
+        actionGroupId === alertType?.recoveryActionGroup?.id
+          ? RecoveredActionGroup.id
+          : actionGroupId,
+        actionTypeId
+      );
+    },
+    []
+  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
@@ -437,44 +498,59 @@ export const AlertForm = ({
         </EuiFlexGroup>
       )}
       <EuiHorizontalRule />
-      {AlertParamsExpressionComponent ? (
-        <Suspense fallback={<CenterJustifiedSpinner />}>
-          <AlertParamsExpressionComponent
-            alertParams={alert.params}
-            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
-            errors={errors}
-            setAlertParams={setAlertParams}
-            setAlertProperty={setAlertProperty}
-            alertsContext={alertsContext}
-          />
-        </Suspense>
+      {AlertParamsExpressionComponent &&
+      defaultActionGroupId &&
+      alert.alertTypeId &&
+      selectedAlertType ? (
+        <EuiErrorBoundary>
+          <Suspense fallback={<CenterJustifiedSpinner />}>
+            <AlertParamsExpressionComponent
+              alertParams={alert.params}
+              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              errors={errors}
+              setAlertParams={setAlertParams}
+              setAlertProperty={setAlertProperty}
+              defaultActionGroupId={defaultActionGroupId}
+              actionGroups={selectedAlertType.actionGroups}
+              metadata={metadata}
+              charts={charts}
+              data={data}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
       {canShowActions &&
       defaultActionGroupId &&
       alertTypeModel &&
-      alertTypesIndex?.has(alert.alertTypeId) ? (
+      alert.alertTypeId &&
+      selectedAlertType ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={actionVariablesFromAlertType(
-            alertTypesIndex.get(alert.alertTypeId)!
-          ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()))}
+          messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
-          actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+          }
+          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+            actionGroup.id === selectedAlertType.recoveryActionGroup.id
+              ? {
+                  ...actionGroup,
+                  omitOptionalMessageVariables: true,
+                  defaultActionMessage: recoveredActionGroupMessage,
+                }
+              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+          )}
+          getDefaultActionParams={getDefaultActionParams}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
             setActionProperty('group', group, index)
           }
-          setAlertProperty={setActions}
+          setActions={setActions}
           setActionParamsProperty={setActionParamsProperty}
-          http={http}
           actionTypeRegistry={actionTypeRegistry}
-          defaultActionMessage={alertTypeModel?.defaultActionMessage}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

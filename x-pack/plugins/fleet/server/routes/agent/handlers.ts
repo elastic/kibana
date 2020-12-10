@@ -35,9 +35,9 @@ import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
 
-export const getAgentHandler: RequestHandler<TypeOf<
-  typeof GetOneAgentRequestSchema.params
->> = async (context, request, response) => {
+export const getAgentHandler: RequestHandler<
+  TypeOf<typeof GetOneAgentRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     const agent = await AgentService.getAgent(soClient, request.params.agentId);
@@ -94,9 +94,9 @@ export const getAgentEventsHandler: RequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<TypeOf<
-  typeof DeleteAgentRequestSchema.params
->> = async (context, request, response) => {
+export const deleteAgentHandler: RequestHandler<
+  TypeOf<typeof DeleteAgentRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     await AgentService.deleteAgent(soClient, request.params.agentId);
@@ -330,7 +330,8 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
       soClient,
-      request.query.policyId
+      request.query.policyId,
+      request.query.kuery
     );
 
     const body: GetAgentStatusResponse = { results };

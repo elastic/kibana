@@ -6,7 +6,7 @@
 
 import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
 import { IEvent } from '../../../event_log/server';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 export interface AlertInstanceSummaryFromEventLogParams {
   alert: SanitizedAlert;
@@ -80,7 +80,8 @@ export function alertInstanceSummaryFromEventLog(
         status.status = 'Active';
         status.actionGroupId = event?.kibana?.alerting?.action_group_id;
         break;
-      case EVENT_LOG_ACTIONS.resolvedInstance:
+      case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
+      case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;

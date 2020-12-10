@@ -7,8 +7,17 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
-const Page = styled(EuiPage)`
+export const Page = styled(EuiPage)`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
+  width: 100%;
+  align-self: center;
+  margin-left: 0;
+  margin-right: 0;
+  flex: 1;
+`;
+
+export const ContentWrapper = styled.div`
+  height: 100%;
 `;
 
 interface Props {
@@ -20,8 +29,10 @@ export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }
   <Fragment>
     <Page restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
-        <EuiSpacer size="m" />
-        {children}
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
       </EuiPageBody>
     </Page>
   </Fragment>

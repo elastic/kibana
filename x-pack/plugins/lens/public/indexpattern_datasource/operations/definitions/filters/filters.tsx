@@ -75,6 +75,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   input: 'none',
   isTransferable: () => true,
 
+  getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
@@ -202,7 +203,7 @@ export const FilterList = ({
     <>
       <DragDropBuckets
         onDragEnd={updateFilters}
-        onDragStart={() => setIsOpenByCreation(false)}
+        onDragStart={() => {}}
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
@@ -226,8 +227,7 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {

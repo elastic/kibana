@@ -103,10 +103,6 @@ interface ListenerOptions {
 export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
   const server = new Server(serverOptions);
 
-  // remove fix + test as soon as update node.js to v12.19 https://github.com/elastic/kibana/pull/61587
-  server.listener.headersTimeout =
-    listenerOptions.keepaliveTimeout + 2 * server.listener.headersTimeout;
-
   server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
   server.listener.on('timeout', (socket) => {

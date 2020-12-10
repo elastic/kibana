@@ -10,27 +10,30 @@ import { PackagePolicyConfigRecord } from '../../../../common';
 
 const handlebars = Handlebars.create();
 
-export function createStream(variables: PackagePolicyConfigRecord, streamTemplate: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
+export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+  const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
 
-  const template = handlebars.compile(streamTemplate, { noEscape: true });
-  let stream = template(vars);
-  stream = replaceRootLevelYamlVariables(yamlValues, stream);
+  const template = handlebars.compile(templateStr, { noEscape: true });
+  let compiledTemplate = template(vars);
+  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 
-  const yamlFromStream = safeLoad(stream, {});
+  const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
   // `safeLoad` replaces empty strings with null
-  const patchedYamlFromStream = Object.entries(yamlFromStream).reduce((acc, [key, value]) => {
-    if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
-      acc[key] = '';
-    } else {
-      acc[key] = value;
-    }
-    return acc;
-  }, {} as { [k: string]: any });
+  const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+    (acc, [key, value]) => {
+      if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+        acc[key] = '';
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as { [k: string]: any }
+  );
 
-  return replaceVariablesInYaml(yamlValues, patchedYamlFromStream);
+  return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
 }
 
 function isValidKey(key: string) {
@@ -54,7 +57,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackagePolicyConfigRecord, streamTemplate: string) {
+function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns

@@ -22,7 +22,7 @@ import { PaletteService } from './service';
 import { PaletteDefinition, SeriesLayer } from './types';
 
 export const getPaletteRegistry = () => {
-  const mockPalette: jest.Mocked<PaletteDefinition> = {
+  const mockPalette1: jest.Mocked<PaletteDefinition> = {
     id: 'default',
     title: 'My Palette',
     getColor: jest.fn((_: SeriesLayer[]) => 'black'),
@@ -41,9 +41,28 @@ export const getPaletteRegistry = () => {
     })),
   };
 
+  const mockPalette2: jest.Mocked<PaletteDefinition> = {
+    id: 'mocked',
+    title: 'Mocked Palette',
+    getColor: jest.fn((_: SeriesLayer[]) => 'blue'),
+    getColors: jest.fn((num: number) => ['blue', 'yellow']),
+    toExpression: jest.fn(() => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: ['mocked'],
+          },
+        },
+      ],
+    })),
+  };
+
   return {
-    get: (_: string) => mockPalette,
-    getAll: () => [mockPalette],
+    get: (name: string) => (name !== 'default' ? mockPalette2 : mockPalette1),
+    getAll: () => [mockPalette1, mockPalette2],
   };
 };
 

@@ -47,6 +47,7 @@ Object {
     ],
   },
   "count": 1,
+  "customLabel": undefined,
   "esTypes": Array [
     "text",
   ],
@@ -62,6 +63,7 @@ Object {
   "script": "script",
   "scripted": true,
   "searchable": true,
+  "shortDotsEnable": undefined,
   "subType": Object {
     "multi": Object {
       "parent": "parent",

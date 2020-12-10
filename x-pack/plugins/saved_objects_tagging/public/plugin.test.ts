@@ -11,16 +11,18 @@ import { managementPluginMock } from '../../../../src/plugins/management/public/
 import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { SavedObjectsTaggingClientConfigRawType } from './config';
-import { TagsCache } from './tags';
-import { tagsCacheMock } from './tags/tags_cache.mock';
+import { TagsCache } from './services';
+import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
-jest.mock('./tags/tags_cache');
+jest.mock('./services/tags/tags_cache');
 const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<TagsCache>>;
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
   let managementPluginSetup: ReturnType<typeof managementPluginMock.createSetupContract>;
-  let savedObjectsTaggingOssPluginSetup: ReturnType<typeof savedObjectTaggingOssPluginMock.createSetup>;
+  let savedObjectsTaggingOssPluginSetup: ReturnType<
+    typeof savedObjectTaggingOssPluginMock.createSetup
+  >;
 
   beforeEach(() => {
     const rawConfig: SavedObjectsTaggingClientConfigRawType = {

@@ -33,6 +33,7 @@ const savedObjectsService = savedObjectsServiceMock.createInternalStartContract(
 const features = featuresPluginMock.createStart();
 
 const securityPluginSetup = securityMock.createSetup();
+const securityPluginStart = securityMock.createStart();
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   taskManager: taskManagerMock.createStart(),
@@ -68,16 +69,16 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClientFactoryParams.actions = actionsMock.createStart();
-  (alertsClientFactoryParams.actions as jest.Mocked<
-    ActionsStartContract
-  >).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
+  (alertsClientFactoryParams.actions as jest.Mocked<ActionsStartContract>).getActionsAuthorizationWithRequest.mockReturnValue(
+    actionsAuthorization
+  );
   alertsClientFactoryParams.getSpaceId.mockReturnValue('default');
   alertsClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });
 
 test('creates an alerts client with proper constructor arguments when security is enabled', async () => {
   const factory = new AlertsClientFactory();
-  factory.initialize({ securityPluginSetup, ...alertsClientFactoryParams });
+  factory.initialize({ securityPluginSetup, securityPluginStart, ...alertsClientFactoryParams });
   const request = KibanaRequest.from(fakeRequest);
 
   const { AlertsAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
@@ -92,13 +93,13 @@ test('creates an alerts client with proper constructor arguments when security i
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
-    includedHiddenTypes: ['alert'],
+    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
   const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
   expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
-    authorization: securityPluginSetup.authz,
+    authorization: securityPluginStart.authz,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
     auditLogger: expect.any(AlertsAuthorizationAuditLogger),
@@ -125,7 +126,6 @@ test('creates an alerts client with proper constructor arguments when security i
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     createAPIKey: expect.any(Function),
-    invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
   });
@@ -142,7 +142,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
-    includedHiddenTypes: ['alert'],
+    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
   const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
@@ -167,7 +167,6 @@ test('creates an alerts client with proper constructor arguments', async () => {
     namespace: 'default',
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
-    invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
@@ -190,11 +189,12 @@ test('getUserName() returns a name when security is enabled', async () => {
   factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup,
+    securityPluginStart,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsService);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.getCurrentUser.mockReturnValueOnce(({
+  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce(({
     username: 'bob',
   } as unknown) as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();
@@ -227,7 +227,7 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled 
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsService);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce(null);
+  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
 });
@@ -237,11 +237,12 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup,
+    securityPluginStart,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsService);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
     api_key: '123',
     id: 'abc',
     name: '',
@@ -258,11 +259,12 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
   factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup,
+    securityPluginStart,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsService);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockRejectedValueOnce(
+  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
     new Error('TLS disabled')
   );
   await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(

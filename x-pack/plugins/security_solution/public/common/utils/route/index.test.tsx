@@ -188,6 +188,9 @@ describe('Spy Routes', () => {
       });
       wrapper.update();
       expect(dispatchMock.mock.calls[0]).toEqual([
+        { type: 'updateSearch', search: '?updated="true"' },
+      ]);
+      expect(dispatchMock.mock.calls[1]).toEqual([
         {
           route: {
             detailName: undefined,

@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { TabularCallback, TabularHolder, TabularLoaderOptions } from './types';
 
-class DataAdapter extends EventEmitter {
+export class DataAdapter extends EventEmitter {
   private tabular?: TabularCallback;
   private tabularOptions?: TabularLoaderOptions;
 
@@ -38,5 +38,3 @@ class DataAdapter extends EventEmitter {
     return Promise.resolve(this.tabular()).then((data) => ({ data, options }));
   }
 }
-
-export { DataAdapter };

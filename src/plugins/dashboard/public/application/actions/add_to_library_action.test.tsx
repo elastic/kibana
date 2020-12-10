@@ -137,12 +137,17 @@ test('Add to library is not compatible when embeddable is not in a dashboard con
 test('Add to library replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
 
   const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
 });
 
@@ -158,10 +163,15 @@ test('Add to library returns reference type input', async () => {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
     mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id } as EmbeddableInput,
   });
+  const dashboard = embeddable.getRoot() as IContainer;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
   expect(newPanel.explicitInput.attributes).toBeUndefined();
   expect(newPanel.explicitInput.savedObjectId).toBe('testSavedObjectId');

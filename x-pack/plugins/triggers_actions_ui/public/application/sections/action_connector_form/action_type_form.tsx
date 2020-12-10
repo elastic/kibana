@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Suspense, useState } from 'react';
+import React, { Fragment, Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,11 +24,26 @@ import {
   EuiSuperSelect,
   EuiLoadingSpinner,
   EuiBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
-import { IErrorObject, AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { pick } from 'lodash';
+import { AlertActionParam } from '../../../../../alerts/common';
+import {
+  IErrorObject,
+  AlertAction,
+  ActionTypeIndex,
+  ActionConnector,
+  ActionVariables,
+  ActionVariable,
+  ActionTypeRegistryContract,
+  REQUIRED_ACTION_VARIABLES,
+} from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
+import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
+import { transformActionVariables } from '../../lib/action_variables';
+import { useKibana } from '../../../common/lib/kibana';
+import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -40,22 +55,20 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
+  actionTypeRegistry: ActionTypeRegistryContract;
+  defaultParams: DefaultActionParams;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
   | 'actionGroups'
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
-  | 'http'
-  | 'actionTypeRegistry'
-  | 'toastNotifications'
-  | 'docLinks'
   | 'messageVariables'
   | 'defaultActionMessage'
-  | 'capabilities'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -76,18 +89,35 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   actionTypesIndex,
   connectors,
-  http,
-  toastNotifications,
-  docLinks,
-  capabilities,
-  actionTypeRegistry,
   defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
+  actionTypeRegistry,
+  isActionGroupDisabledForActionType,
+  defaultParams,
 }: ActionTypeFormProps) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
+  const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
+  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
+  const selectedActionGroup =
+    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+
+  useEffect(() => {
+    setAvailableActionVariables(
+      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+    );
+    if (defaultParams) {
+      for (const [key, paramValue] of Object.entries(defaultParams)) {
+        setActionParamsProperty(key, paramValue, index);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionItem.group]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
@@ -117,6 +147,28 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
+  const actionGroupDisplay = (
+    actionGroupId: string,
+    actionGroupName: string,
+    actionTypeId: string
+  ): string =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+        ? i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            {
+              defaultMessage: '{actionGroupName} (Not Currently Supported)',
+              values: { actionGroupName },
+            }
+          )
+        : actionGroupName
+      : actionGroupName;
+
+  const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+      : false;
+
   const optionsList = connectors
     .filter(
       (connectorItem) =>
@@ -137,10 +189,6 @@ export const ActionTypeForm = ({
     actionTypesIndex[actionConnector.actionTypeId],
     connectors.filter((connector) => connector.isPreconfigured)
   );
-
-  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
-  const selectedActionGroup =
-    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <Fragment>
@@ -167,7 +215,8 @@ export const ActionTypeForm = ({
                   data-test-subj={`addNewActionConnectorActionGroup-${index}`}
                   options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    inputDisplay: name,
+                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
                     'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
                   }))}
                   valueOfSelected={selectedActionGroup.id}
@@ -230,28 +279,27 @@ export const ActionTypeForm = ({
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
-            docLinks={docLinks}
-            http={http}
-            toastNotifications={toastNotifications}
-            actionConnector={actionConnector}
-          />
-        </Suspense>
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={availableActionVariables}
+              defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
+              actionConnector={actionConnector}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
     </Fragment>
   ) : (
@@ -337,3 +385,14 @@ export const ActionTypeForm = ({
     </Fragment>
   );
 };
+
+function getAvailableActionVariables(
+  actionVariables: ActionVariables,
+  actionGroup?: ActionGroupWithMessageVariables
+) {
+  return transformActionVariables(
+    actionGroup?.omitOptionalMessageVariables
+      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+      : actionVariables
+  ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
+}

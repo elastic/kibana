@@ -93,6 +93,9 @@
             },
             "title": {
               "type": "text"
+            },
+            "fieldAttrs": {
+              "type": "text"
             }
           }
         },

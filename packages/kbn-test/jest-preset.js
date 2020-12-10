@@ -48,7 +48,6 @@ module.exports = {
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '^src/core/(.*)': '<rootDir>/src/core/$1',
-    '^src/legacy/(.*)': '<rootDir>/src/legacy/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
   },
 
@@ -107,5 +106,15 @@ module.exports = {
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
     '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
+  ],
+
+  // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
+  collectCoverageFrom: [
+    '**/*.{js,mjs,jsx,ts,tsx}',
+    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
+    '!**/*mock*.ts',
+    '!**/*.test.ts',
+    '!**/*.d.ts',
+    '!**/index.{js,ts}',
   ],
 };

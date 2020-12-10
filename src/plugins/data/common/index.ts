@@ -26,6 +26,7 @@ export * from './query';
 export * from './search';
 export * from './types';
 export * from './utils';
+export * from './exports';
 
 /**
  * Use data plugin interface instead

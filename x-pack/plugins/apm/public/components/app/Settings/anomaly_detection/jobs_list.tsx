@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';

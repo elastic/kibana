@@ -55,7 +55,9 @@ describe('JobsTableComponent', () => {
       '[data-test-subj="jobs-table-link"]'
     );
     await waitFor(() =>
-      expect(href).toEqual('/app/ml/jobs?_a=(queryText:linux_anomalous_network_activity_ecs)')
+      expect(href).toEqual(
+        "/app/ml/jobs?_a=(jobs:(queryText:'id:linux_anomalous_network_activity_ecs'))"
+      )
     );
   });
 
@@ -72,7 +74,7 @@ describe('JobsTableComponent', () => {
       '[data-test-subj="jobs-table-link"]'
     );
     await waitFor(() =>
-      expect(href).toEqual("/app/ml/jobs?_a=(queryText:'job%20id%20with%20spaces')")
+      expect(href).toEqual("/app/ml/jobs?_a=(jobs:(queryText:'id:job%20id%20with%20spaces'))")
     );
   });
 

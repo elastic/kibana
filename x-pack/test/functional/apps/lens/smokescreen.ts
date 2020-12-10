@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
 
-  describe('lens smokescreen tests', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/77969
+  describe.skip('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -327,9 +328,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to change index pattern', async () => {
-      await PageObjects.lens.switchFirstLayerIndexPattern('otherpattern');
-      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('otherpattern');
-      expect(await PageObjects.lens.isShowingNoResults()).to.equal(true);
+      await PageObjects.lens.switchFirstLayerIndexPattern('log*');
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');
+    });
+
+    it('should show a download button only when the configuration is valid', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      // incomplete configuration should not be downloadable
+      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(false);
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
     });
   });
 }

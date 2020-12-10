@@ -26,3 +26,8 @@ export const initTranslationsMock = jest.fn();
 jest.doMock('./init_translations', () => ({
   initTranslations: initTranslationsMock,
 }));
+
+export const registerRoutesMock = jest.fn();
+jest.doMock('./routes', () => ({
+  registerRoutes: registerRoutesMock,
+}));

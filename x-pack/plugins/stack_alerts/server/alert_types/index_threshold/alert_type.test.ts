@@ -46,7 +46,7 @@ describe('alertType', () => {
           },
           Object {
             "description": "A string describing the threshold comparator and threshold",
-            "name": "function",
+            "name": "conditions",
           },
         ],
         "params": Array [

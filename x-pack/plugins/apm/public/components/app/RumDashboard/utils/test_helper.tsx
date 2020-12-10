@@ -13,7 +13,7 @@ import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history';
 import { EuiThemeProvider } from '../../../../../../observability/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
+import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
 export const core = ({
   http: {

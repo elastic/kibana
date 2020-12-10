@@ -6,17 +6,14 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import JiraParamsFields from './jira_params';
-import { DocLinksStart } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
-
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { ActionConnector } from '../../../../types';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
-
-const mocks = coreMock.createSetup();
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
@@ -90,10 +87,7 @@ describe('JiraParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: 'alertId', description: '' }]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
+        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
         actionConnector={connector}
       />
     );
@@ -120,9 +114,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -139,9 +130,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -164,9 +152,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -189,9 +174,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -218,9 +200,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -247,9 +226,6 @@ describe('JiraParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
         actionConnector={connector}
       />
     );

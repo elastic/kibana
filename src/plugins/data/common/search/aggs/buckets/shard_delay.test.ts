@@ -60,6 +60,27 @@ describe('Shard Delay Agg', () => {
     );
   };
 
+  test('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs();
+    expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "delay": Array [
+            "5s",
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "1",
+          ],
+        },
+        "function": "aggShardDelay",
+        "type": "function",
+      }
+    `);
+  });
+
   describe('write', () => {
     test('writes the delay as the value parameter', () => {
       const aggConfigs = getAggConfigs();

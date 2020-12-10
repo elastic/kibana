@@ -16,6 +16,8 @@ Options:
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
+  --updateSnapshots              Replace inline and file snapshots with whatever is generated from the test. 
+  --u                            Replace both baseline screenshots and snapshots 
   --include <file>               Files that must included to be run, can be included multiple times. 
   --exclude <file>               Files that must NOT be included to be run, can be included multiple times. 
   --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 
@@ -45,6 +47,27 @@ Object {
     "include": Array [],
   },
   "updateBaselines": true,
+}
+`;
+
+exports[`process options for run tests CLI accepts boolean value for updateSnapshots 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "updateSnapshots": true,
 }
 `;
 

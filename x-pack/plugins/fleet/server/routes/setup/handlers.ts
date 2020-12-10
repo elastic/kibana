@@ -15,7 +15,9 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   const soClient = context.core.savedObjects.client;
   try {
     const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
-    const isApiKeysEnabled = await appContextService.getSecurity().authc.areAPIKeysEnabled();
+    const isApiKeysEnabled = await appContextService
+      .getSecurity()
+      .authc.apiKeys.areAPIKeysEnabled();
     const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
@@ -72,7 +74,7 @@ export const createFleetSetupHandler: RequestHandler<
   }
 };
 
-export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
+export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 

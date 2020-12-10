@@ -6,6 +6,7 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -145,10 +146,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    const queryString = request.url.search || `?msg=LOGGED_OUT`;
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -235,6 +233,8 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     const nextURL = encodeURIComponent(
       `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
     );
-    return `${this.options.basePath.get(request)}/login?next=${nextURL}`;
+    return `${this.options.basePath.get(
+      request
+    )}/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${nextURL}`;
   }
 }

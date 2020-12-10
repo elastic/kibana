@@ -15,7 +15,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { HeatmapLayer } from '../../layers/heatmap_layer/heatmap_layer';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
-import { HeatmapLayerIcon } from './heatmap_layer_icon';
+import { HeatmapLayerIcon } from '../../layers/icons/heatmap_layer_icon';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

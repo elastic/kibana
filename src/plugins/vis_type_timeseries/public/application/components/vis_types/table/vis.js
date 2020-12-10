@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
+import { calculateLabel } from '../../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -30,7 +30,7 @@ import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 
-import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -46,7 +46,7 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
-export class TableVis extends Component {
+class TableVis extends Component {
   constructor(props) {
     super(props);
 
@@ -260,3 +260,7 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TableVis as default };

@@ -12,10 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { UpgradeAssistantTabProps } from './types';
 
-export const LoadingErrorBanner: React.FunctionComponent<Pick<
-  UpgradeAssistantTabProps,
-  'loadingError'
->> = ({ loadingError }) => {
+export const LoadingErrorBanner: React.FunctionComponent<
+  Pick<UpgradeAssistantTabProps, 'loadingError'>
+> = ({ loadingError }) => {
   if (get(loadingError, 'response.status') === 403) {
     return (
       <EuiCallOut

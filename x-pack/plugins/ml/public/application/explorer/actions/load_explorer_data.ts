@@ -285,6 +285,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
       uiSettings,
     },
   } = useMlKibana();
+
   const loadExplorerData = useMemo(() => {
     const service = new AnomalyTimelineService(
       timefilter,
@@ -293,6 +294,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     );
     return loadExplorerDataProvider(service);
   }, []);
+
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
   const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);

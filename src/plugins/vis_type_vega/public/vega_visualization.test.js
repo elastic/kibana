@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import 'jest-canvas-mock';
+
 import $ from 'jquery';
 
 import 'leaflet/dist/leaflet.js';
@@ -30,7 +32,7 @@ import vegaMapGraph from './test_utils/vega_map_test.json';
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
-import { setInjectedVars, setData, setSavedObjects, setNotifications } from './services';
+import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 
@@ -76,7 +78,6 @@ describe('VegaVisualizations', () => {
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
-    setSavedObjects(coreStart.savedObjects);
     setNotifications(coreStart.notifications);
 
     vegaVisualizationDependencies = {
@@ -100,7 +101,8 @@ describe('VegaVisualizations', () => {
       mockHeight.mockRestore();
     });
 
-    test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
+    // SKIP: https://github.com/elastic/kibana/issues/83385
+    test.skip('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
@@ -131,7 +133,8 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    test('should show vega graph (may fail in dev env)', async () => {
+    // SKIP: https://github.com/elastic/kibana/issues/83385
+    test.skip('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());

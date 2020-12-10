@@ -697,7 +697,7 @@ describe('#start()', () => {
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
-        const mountPromise = new Promise((resolve) => (finishMount = resolve));
+        const mountPromise = new Promise<void>((resolve) => (finishMount = resolve));
         const app = {
           id: 'some-id',
           title: 'some-title',

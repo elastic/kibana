@@ -55,7 +55,7 @@ export async function incrementUICounter({
   await internalRepository.incrementCounter(
     id,
     id,
-    `${uiAction}.${metric}` // e.g., ui_viewed.setup_guide
+    [`${uiAction}.${metric}`] // e.g., ui_viewed.setup_guide
   );
 
   return { success: true };

@@ -11,8 +11,8 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {

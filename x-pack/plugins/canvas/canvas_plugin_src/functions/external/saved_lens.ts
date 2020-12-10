@@ -83,6 +83,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           title: args.title === null ? undefined : args.title,
           disableTriggers: true,
           palette: args.palette,
+          renderMode: 'noInteractivity',
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),

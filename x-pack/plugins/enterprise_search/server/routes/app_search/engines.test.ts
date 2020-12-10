@@ -116,7 +116,6 @@ describe('engine routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{name}',
-        payload: 'params',
       });
 
       registerEnginesRoutes({
@@ -130,6 +129,31 @@ describe('engine routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/some-engine/details',
+      });
+    });
+  });
+
+  describe('GET /api/app_search/engines/{name}/overview', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}/overview',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({ params: { name: 'some-engine' } });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/some-engine/overview_metrics',
       });
     });
   });

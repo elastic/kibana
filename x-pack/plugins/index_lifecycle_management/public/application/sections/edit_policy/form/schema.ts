@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import { FormInternal } from '../types';
 
@@ -23,7 +26,7 @@ import { i18nTexts } from '../i18n_texts';
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
 const serializers = {
-  stringToNumber: (v: string): any => (v ? parseInt(v, 10) : undefined),
+  stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
 
 export const schema: FormSchema<FormInternal> = {
@@ -127,6 +130,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
@@ -141,6 +145,7 @@ export const schema: FormSchema<FormInternal> = {
               },
             ],
             serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
@@ -154,6 +159,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
         },
         forcemerge: {
@@ -202,7 +208,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -273,7 +279,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -285,6 +291,14 @@ export const schema: FormSchema<FormInternal> = {
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
+          },
+        },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
           },
         },
       },

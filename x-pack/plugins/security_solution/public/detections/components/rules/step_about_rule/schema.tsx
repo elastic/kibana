@@ -198,20 +198,21 @@ export const schema: FormSchema<AboutStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
-          let hasError = false;
+          let hasTechniqueError = false;
           (value as IMitreEnterpriseAttack[]).forEach((v) => {
             if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
-              hasError = true;
+              hasTechniqueError = true;
             }
           });
-          return hasError
+          return hasTechniqueError
             ? {
                 code: 'ERR_FIELD_MISSING',
-                path,
+                path: `${path}.tactic`,
                 message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
               }
             : undefined;
         },
+        exitOnFail: false,
       },
     ],
   },

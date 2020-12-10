@@ -25,7 +25,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -35,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {

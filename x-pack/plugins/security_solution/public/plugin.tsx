@@ -59,8 +59,9 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './common/lib/connectors';
-import { LazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
+import { getCaseConnectorUI } from './cases/components/connectors';
+import { licenseService } from './common/hooks/use_license';
+import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -330,13 +331,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    if (plugins.ingestManager) {
-      const { registerExtension } = plugins.ingestManager;
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        component: LazyEndpointPolicyEditExtension,
+        component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
       registerExtension({
@@ -345,6 +346,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         component: LazyEndpointPolicyCreateExtension,
       });
     }
+    licenseService.start(plugins.licensing.license$);
 
     return {};
   }

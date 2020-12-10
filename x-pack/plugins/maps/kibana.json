@@ -19,7 +19,7 @@
     "savedObjects",
     "share"
   ],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home", "savedObjectsTagging"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],

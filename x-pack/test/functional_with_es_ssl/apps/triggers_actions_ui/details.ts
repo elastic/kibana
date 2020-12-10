@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { alwaysFiringAlertType } from '../../fixtures/plugins/alerts/server/plugin';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -306,8 +307,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/57426
-    describe.skip('Alert Instances', function () {
+    describe('Alert Instances', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -373,14 +373,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // refresh to ensure Api call and UI are looking at freshest output
         await browser.refresh();
 
+        // Get action groups
+        const { actionGroups } = alwaysFiringAlertType;
+
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const summary = await alerting.alerts.getAlertInstanceSummary(alert.id);
+        const actionGroupNameFromId = (actionGroupId: string) =>
+          actionGroups.find(
+            (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
+          )?.name;
 
+        const summary = await alerting.alerts.getAlertInstanceSummary(alert.id);
         const dateOnAllInstancesFromApiResponse = mapValues(
           summary.instances,
           (instance) => instance.activeStartDate
+        );
+
+        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
+          summary.instances,
+          (instance) => {
+            const name = actionGroupNameFromId(instance.actionGroupId);
+            return name ? ` (${name})` : '';
+          }
         );
 
         log.debug(
@@ -393,21 +408,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
-            status: 'Active (Default)',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
             start: moment(dateOnAllInstancesFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
-            status: 'Active (Default)',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
             start: moment(dateOnAllInstancesFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
-            status: 'Active (Default)',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
             start: moment(dateOnAllInstancesFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),

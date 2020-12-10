@@ -6,9 +6,8 @@
 
 import './advanced_editor.scss';
 
-import React, { useState, MouseEventHandler } from 'react';
+import React, { useState, MouseEventHandler, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
+import { useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -47,17 +47,21 @@ export const RangePopover = ({
   range,
   setRange,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: (open: boolean) => void;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
+
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
@@ -86,22 +90,21 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    setIsPopoverOpen(false);
-    setIsOpenByCreation(false);
-    saveRangeAndReset(tempRange, true);
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   return (
     <EuiPopover
       display="block"
       ownFocus
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       closePopover={onSubmit}
       button={
         <Button
           onClick={() => {
             setIsPopoverOpen((isOpen) => !isOpen);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -208,12 +211,13 @@ export const AdvancedRangeEditor = ({
 
   const lastIndex = localRanges.length - 1;
 
-  // Update locally all the time, but bounce the parents prop function
-  // to aviod too many requests
-  useDebounce(
+  // Update locally all the time, but bounce the parents prop function to avoid too many requests
+  // Avoid to trigger on first render
+  useDebounceWithOptions(
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
@@ -249,7 +253,7 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => setIsOpenByCreation(false)}
+          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
@@ -273,8 +277,7 @@ export const AdvancedRangeEditor = ({
             >
               <RangePopover
                 range={range}
-                isOpenByCreation={idx === lastIndex && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === lastIndex && isOpenByCreation}
                 setRange={(newRange: LocalRangeType) => {
                   const newRanges = [...localRanges];
                   if (newRange.id === newRanges[idx].id) {

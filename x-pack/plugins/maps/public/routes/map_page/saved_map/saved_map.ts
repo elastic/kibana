@@ -33,7 +33,12 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import { getMapAttributeService } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import { getCoreChrome, getToasts, getIsAllowByValueEmbeddables } from '../../../kibana_services';
+import {
+  getCoreChrome,
+  getToasts,
+  getIsAllowByValueEmbeddables,
+  getSavedObjectsTagging,
+} from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { getInitialLayers } from './get_initial_layers';
@@ -51,6 +56,7 @@ export class SavedMap {
   private _originatingApp?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
+  private _tags: string[] = [];
 
   constructor({
     defaultLayers = [],
@@ -87,7 +93,14 @@ export class SavedMap {
         description: '',
       };
     } else {
-      this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const references = doc.references;
+      delete doc.references;
+      this._attributes = doc;
+      const savedObjectsTagging = getSavedObjectsTagging();
+      if (savedObjectsTagging && references && references.length) {
+        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      }
     }
 
     if (this._attributes?.mapStateJSON) {
@@ -216,6 +229,10 @@ export class SavedMap {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
 
+  public getTags(): string[] {
+    return this._tags;
+  }
+
   public hasSaveAndReturnConfig() {
     const hasOriginatingApp = !!this._originatingApp;
     const isNewMap = !this.getSavedObjectId();
@@ -247,9 +264,11 @@ export class SavedMap {
     newTitle,
     newCopyOnSave,
     returnToOrigin,
+    newTags,
     saveByReference,
   }: OnSaveProps & {
     returnToOrigin: boolean;
+    newTags?: string[];
     saveByReference: boolean;
   }) {
     if (!this._attributes) {
@@ -264,8 +283,17 @@ export class SavedMap {
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
+      const savedObjectsTagging = getSavedObjectsTagging();
+      // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
+      const attributes =
+        savedObjectsTagging && newTags
+          ? {
+              ...this._attributes,
+              references: savedObjectsTagging.ui.updateTagsReferences([], newTags),
+            }
+          : this._attributes;
       updatedMapEmbeddableInput = (await getMapAttributeService().wrapAttributes(
-        this._attributes,
+        attributes,
         saveByReference,
         newCopyOnSave ? undefined : this._mapEmbeddableInput
       )) as MapEmbeddableInput;

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 
+import { OnUpdateColumns } from '../timeline/events';
 import { FieldBrowserProps } from './types';
 import { getCategoryColumns } from './category_columns';
 import { TABLE_HEIGHT } from './helpers';
@@ -38,7 +39,7 @@ const H5 = styled.h5`
 
 Title.displayName = 'Title';
 
-type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateColumns'> & {
+type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId'> & {
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -51,6 +52,8 @@ type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateC
    */
   onCategorySelected: (categoryId: string) => void;
   /** The category selected on the left-hand side of the field browser */
+  /** Invoked when a user chooses to view a new set of columns in the timeline */
+  onUpdateColumns: OnUpdateColumns;
   selectedCategoryId: string;
   /** The width of the categories pane */
   width: number;

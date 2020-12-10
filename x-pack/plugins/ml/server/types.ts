@@ -11,7 +11,7 @@ import type { CloudSetup } from '../../cloud/server';
 import type { SecurityPluginSetup } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginSetup } from '../../licensing/server';
-import type { SpacesPluginSetup } from '../../spaces/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
@@ -27,7 +27,12 @@ export interface LicenseCheckResult {
 
 export interface SystemRouteDeps {
   cloud: CloudSetup;
-  spaces?: SpacesPluginSetup;
+  getSpaces?: () => Promise<SpacesPluginStart>;
+  resolveMlCapabilities: ResolveMlCapabilities;
+}
+
+export interface SavedObjectsRouteDeps {
+  getSpaces?: () => Promise<SpacesPluginStart>;
   resolveMlCapabilities: ResolveMlCapabilities;
 }
 
@@ -39,6 +44,10 @@ export interface PluginsSetup {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
+}
+
+export interface PluginsStart {
+  spaces?: SpacesPluginStart;
 }
 
 export interface RouteInitialization {

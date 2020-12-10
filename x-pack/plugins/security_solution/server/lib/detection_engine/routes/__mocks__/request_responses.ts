@@ -29,6 +29,7 @@ import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_e
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -128,10 +129,11 @@ export const getDeleteAsPostBulkRequest = () =>
     body: [{ rule_id: 'rule-1' }],
   });
 
-export const getPrivilegeRequest = () =>
+export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
   requestMock.create({
     method: 'get',
     path: DETECTION_ENGINE_PRIVILEGES_URL,
+    ...options,
   });
 
 export const addPrepackagedRulesRequest = () =>
@@ -379,23 +381,7 @@ export const getResult = (): RuleAlertType => ({
     severityMapping: [],
     to: 'now',
     type: 'query',
-    threat: [
-      {
-        framework: 'MITRE ATT&CK',
-        tactic: {
-          id: 'TA0040',
-          name: 'impact',
-          reference: 'https://attack.mitre.org/tactics/TA0040/',
-        },
-        technique: [
-          {
-            id: 'T1499',
-            name: 'endpoint denial of service',
-            reference: 'https://attack.mitre.org/techniques/T1499/',
-          },
-        ],
-      },
-    ],
+    threat: getThreatMock(),
     threshold: undefined,
     timestampOverride: undefined,
     threatFilters: undefined,
@@ -508,18 +494,14 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
-> => ({
+export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
   page: 1,
   per_page: 1,
   total: 0,
   saved_objects: [],
 });
 
-export const getFindResultStatus = (): SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
-> => ({
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
   page: 1,
   per_page: 6,
   total: 2,

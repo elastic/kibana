@@ -24,7 +24,7 @@ import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 

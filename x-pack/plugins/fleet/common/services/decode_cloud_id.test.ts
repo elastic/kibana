@@ -5,7 +5,7 @@
  */
 import { decodeCloudId } from './decode_cloud_id';
 
-describe('Ingest Manager - decodeCloudId', () => {
+describe('Fleet - decodeCloudId', () => {
   it('parses various CloudID formats', () => {
     const tests = [
       {

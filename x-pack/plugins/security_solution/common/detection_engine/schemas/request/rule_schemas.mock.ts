@@ -40,9 +40,11 @@ export const getCreateSavedQueryRulesSchemaMock = (ruleId = 'rule-1'): SavedQuer
 });
 
 export const getCreateThreatMatchRulesSchemaMock = (
-  ruleId = 'rule-1'
+  ruleId = 'rule-1',
+  enabled = false
 ): ThreatMatchCreateSchema => ({
   description: 'Detecting root and admin users',
+  enabled,
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',

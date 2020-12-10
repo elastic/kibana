@@ -25,7 +25,16 @@ paths:
       },
     ];
   }
-  return [];
+  return [
+    {
+      buffer: Buffer.from(`
+hosts:
+{{#each hosts}}
+- {{this}}
+{{/each}}
+`),
+    },
+  ];
 }
 
 jest.mock('./epm/packages/assets', () => {
@@ -47,9 +56,9 @@ jest.mock('./epm/registry', () => {
 });
 
 describe('Package policy service', () => {
-  describe('assignPackageStream', () => {
+  describe('compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService.assignPackageStream(
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
           data_streams: [
             {
@@ -110,7 +119,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService.assignPackageStream(
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
           data_streams: [
             {
@@ -153,6 +162,117 @@ describe('Package policy service', () => {
             paths: {
               value: ['/var/log/set.log'],
             },
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should work with an input with a template and no streams', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
+        },
+      ]);
+    });
+
+    it('should work with an input with a template and streams', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
           },
           streams: [
             {

@@ -67,7 +67,7 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
 });
 
 const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-  color: ${(props) => props.theme.eui.textColors.danger};
+  color: ${(props) => props.theme.eui.euiColorDangerText};
 `;
 
 // eslint-disable-next-line react/display-name
@@ -147,7 +147,7 @@ export const PolicyList = React.memo(() => {
   } = usePolicyListSelector(selector);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'ingestManager',
+    'fleet',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
       // to the Integration Endpoint Package Add Integration if we have package information.
@@ -339,9 +339,9 @@ export const PolicyList = React.memo(() => {
                     <EuiContextMenuItem icon="link" key="agentPolicyLink">
                       <LinkToApp
                         data-test-subj="agentPolicyLink"
-                        appId="ingestManager"
+                        appId="fleet"
                         appPath={`#/policies/${item.policy_id}`}
-                        href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
+                        href={`${services.application.getUrlForApp('fleet')}#/policies/${
                           item.policy_id
                         }`}
                       >

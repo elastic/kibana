@@ -36,7 +36,7 @@ const actualVersion = pkg.version;
 const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';
-const whitelistedTestPath = '/xsrf/test/route/whitelisted';
+const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const setupDeps = {
@@ -50,26 +50,37 @@ describe('core lifecycle handlers', () => {
 
   beforeEach(async () => {
     const configService = configServiceMock.create();
-    configService.atPath.mockReturnValue(
-      new BehaviorSubject({
-        hosts: ['localhost'],
-        maxPayload: new ByteSizeValue(1024),
-        autoListen: true,
-        ssl: {
-          enabled: false,
-        },
-        compression: { enabled: true },
-        name: kibanaName,
-        customResponseHeaders: {
-          'some-header': 'some-value',
-        },
-        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
-        requestId: {
-          allowFromAnyIp: true,
-          ipAllowlist: [],
-        },
-      } as any)
-    );
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'server') {
+        return new BehaviorSubject({
+          hosts: ['localhost'],
+          maxPayload: new ByteSizeValue(1024),
+          autoListen: true,
+          ssl: {
+            enabled: false,
+          },
+          compression: { enabled: true },
+          name: kibanaName,
+          customResponseHeaders: {
+            'some-header': 'some-value',
+          },
+          xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+          requestId: {
+            allowFromAnyIp: true,
+            ipAllowlist: [],
+          },
+        } as any);
+      }
+      if (path === 'externalUrl') {
+        return new BehaviorSubject({
+          policy: [],
+        } as any);
+      }
+      if (path === 'csp') {
+        return new BehaviorSubject({} as any);
+      }
+      throw new Error(`Unexpected config path: ${path}`);
+    });
     server = createHttpServer({ configService });
 
     const serverSetup = await server.setup(setupDeps);
@@ -179,7 +190,7 @@ describe('core lifecycle handlers', () => {
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
-          { path: whitelistedTestPath, validate: false },
+          { path: allowlistedTestPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
@@ -235,7 +246,7 @@ describe('core lifecycle handlers', () => {
         });
 
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
-          await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+          await getSupertest(method.toLowerCase(), allowlistedTestPath).expect(200, 'ok');
         });
 
         it('accepts requests on a route with disabled xsrf protection', async () => {

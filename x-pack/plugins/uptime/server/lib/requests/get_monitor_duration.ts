@@ -23,35 +23,32 @@ export interface GetMonitorChartsParams {
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorDurationResult
-> = async ({ callES, dynamicSettings, dateStart, dateEnd, monitorId }) => {
+> = async ({ uptimeEsClient, dateStart, dateEnd, monitorId }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
-            { term: { 'monitor.id': monitorId } },
-            { range: { 'monitor.duration.us': { gt: 0 } } },
-          ],
-        },
+    query: {
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
+          { term: { 'monitor.id': monitorId } },
+          { range: { 'monitor.duration.us': { gt: 0 } } },
+        ],
       },
-      size: 0,
-      aggs: {
-        timeseries: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: QUERY.DEFAULT_BUCKET_COUNT,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                missing: 'N/A',
-              },
-              aggs: {
-                duration: { stats: { field: 'monitor.duration.us' } },
-              },
+    },
+    size: 0,
+    aggs: {
+      timeseries: {
+        auto_date_histogram: {
+          field: '@timestamp',
+          buckets: QUERY.DEFAULT_BUCKET_COUNT,
+        },
+        aggs: {
+          location: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: 'N/A',
+            },
+            aggs: {
+              duration: { stats: { field: 'monitor.duration.us' } },
             },
           },
         },
@@ -59,7 +56,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search(params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
   const dateHistogramBuckets: any[] = result?.aggregations?.timeseries?.buckets ?? [];
 

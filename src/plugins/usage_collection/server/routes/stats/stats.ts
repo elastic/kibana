@@ -27,6 +27,7 @@ import {
   ElasticsearchClient,
   IRouter,
   ISavedObjectsRepository,
+  KibanaRequest,
   LegacyAPICaller,
   MetricsServiceSetup,
   SavedObjectsClientContract,
@@ -67,9 +68,15 @@ export function registerStatsRoute({
   const getUsage = async (
     callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    kibanaRequest: KibanaRequest
   ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient, savedObjectsClient);
+    const usage = await collectorSet.bulkFetchUsage(
+      callCluster,
+      esClient,
+      savedObjectsClient,
+      kibanaRequest
+    );
     return collectorSet.toObject(usage);
   };
 
@@ -115,7 +122,7 @@ export function registerStatsRoute({
         }
 
         const usagePromise = shouldGetUsage
-          ? getUsage(callCluster, asCurrentUser, savedObjectsClient)
+          ? getUsage(callCluster, asCurrentUser, savedObjectsClient, req)
           : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([
           usagePromise,

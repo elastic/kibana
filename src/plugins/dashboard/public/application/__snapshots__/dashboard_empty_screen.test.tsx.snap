@@ -13,10 +13,14 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         "basePath": "",
         "get": [Function],
         "prepend": [Function],
+        "publicBaseUrl": undefined,
         "remove": [Function],
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],
@@ -297,14 +301,14 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""
@@ -376,10 +380,14 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         "basePath": "",
         "get": [Function],
         "prepend": [Function],
+        "publicBaseUrl": undefined,
         "remove": [Function],
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],
@@ -747,10 +755,14 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         "basePath": "",
         "get": [Function],
         "prepend": [Function],
+        "publicBaseUrl": undefined,
         "remove": [Function],
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],
@@ -1016,14 +1028,14 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""

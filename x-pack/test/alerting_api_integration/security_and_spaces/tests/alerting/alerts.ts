@@ -168,6 +168,7 @@ alertName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
 alertInstanceId: 1,
+alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
@@ -282,6 +283,7 @@ alertName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
 alertInstanceId: 1,
+alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
@@ -1094,11 +1096,9 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         provider: 'alerting',
-        actions: ['execute'],
+        actions: new Map([['execute', { gte: 1 }]]),
       });
     });
-
-    expect(events.length).to.be.greaterThan(0);
 
     const event = events[0];
 

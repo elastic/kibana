@@ -9,6 +9,10 @@ import { mockHistory } from './';
 export const mockKibanaValues = {
   config: { host: 'http://localhost:3002' },
   history: mockHistory,
+  cloud: {
+    isCloudEnabled: false,
+    cloudDeploymentUrl: 'https://cloud.elastic.co/deployments/some-id',
+  },
   navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
   setDocTitle: jest.fn(),

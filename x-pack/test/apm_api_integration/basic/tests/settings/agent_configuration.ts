@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { AgentConfigurationIntake } from '../../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../../plugins/apm/server/routes/settings/agent_configuration';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -136,7 +135,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         expectSnapshot(body).toMatchInline(`
           Array [
             "ALL_OPTION_VALUE",
-            "elastic-co-frontend",
+            "kibana",
+            "kibana-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",

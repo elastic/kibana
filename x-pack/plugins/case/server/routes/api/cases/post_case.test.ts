@@ -16,7 +16,7 @@ import {
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes } from '../../../../common/api/connectors';
+import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -54,6 +54,7 @@ describe('POST cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
+    expect(response.payload.status).toEqual('open');
     expect(response.payload.created_by.username).toEqual('awesome');
     expect(response.payload.connector).toEqual({
       id: 'none',
@@ -104,7 +105,7 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         connector: null,
       },
@@ -191,7 +192,7 @@ describe('POST cases', () => {
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       id: 'mock-it',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['defacement'],
       title: 'Super Bad Security Issue',
       totalComment: 0,

@@ -5,7 +5,7 @@
  */
 
 import { combineLatest, Observable, timer } from 'rxjs';
-import { mergeMap, map, filter, catchError } from 'rxjs/operators';
+import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
@@ -222,8 +222,8 @@ export function createWorkloadAggregator(
     }),
     catchError((ex: Error, caught) => {
       logger.error(`[WorkloadAggregator]: ${ex}`);
-      // continue to pull values from the same observable
-      return caught;
+      // continue to pull values from the same observable but only on the next refreshInterval
+      return timer(refreshInterval).pipe(switchMap(() => caught));
     })
   );
 }

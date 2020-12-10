@@ -11,11 +11,13 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
-  const users: { [rollName: string]: { username: string; password: string; permissions?: any } } = {
+  const users: {
+    [roleName: string]: { username: string; password: string; permissions?: any; roles?: string[] };
+  } = {
     fleet_user: {
       permissions: {
         feature: {
-          ingestManager: ['read'],
+          fleet: ['read'],
         },
         spaces: ['*'],
       },
@@ -23,9 +25,10 @@ export default function ({ getService }: FtrProviderContext) {
       password: 'changeme',
     },
     fleet_admin: {
+      roles: ['superuser'],
       permissions: {
         feature: {
-          ingestManager: ['all'],
+          fleet: ['all'],
         },
         spaces: ['*'],
       },
@@ -48,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
           // Import a repository first
           await security.user.create(user.username, {
             password: user.password,
-            roles: [roleName],
+            roles: [roleName, ...(user.roles || [])],
             full_name: user.username,
           });
         }

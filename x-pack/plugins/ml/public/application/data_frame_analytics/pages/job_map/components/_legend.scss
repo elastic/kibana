@@ -5,8 +5,8 @@
 .mlJobMapLegend__indexPattern {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: '#FFFFFF';
-  border: 1px solid $euiColorVis2;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis2;
   transform: rotate(45deg);
   display: 'inline-block';
 }
@@ -14,25 +14,34 @@
 .mlJobMapLegend__transform {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: '#FFFFFF';
-  border: 1px solid $euiColorVis1;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis1;
   display: 'inline-block';
 }
 
 .mlJobMapLegend__analytics {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: '#FFFFFF';
-  border: 1px solid $euiColorVis0;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis0;
   border-radius: 50%;
   display: 'inline-block';
 }
 
-.mlJobMapLegend__inferenceModel {
+.mlJobMapLegend__trainedModel {
+  width: 0;
+  height: 0;
+  border-left: $euiSizeS solid $euiColorGhost;
+  border-right: $euiSizeS solid $euiColorGhost;
+  border-bottom: $euiSizeM solid $euiColorVis3;
+  display: 'inline-block';
+}
+
+.mlJobMapLegend__sourceNode {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: '#FFFFFF';
-  border: 1px solid $euiColorMediumShade;
-  border-radius: 50%;
+  background-color: $euiColorLightShade;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
   display: 'inline-block';
 }

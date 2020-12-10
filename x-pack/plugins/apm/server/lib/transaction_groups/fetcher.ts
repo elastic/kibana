@@ -204,7 +204,7 @@ export async function transactionGroupsFetcher(
   };
 }
 
-export interface TransactionGroup {
+interface TransactionGroup {
   key: string | Record<'service.name' | 'transaction.name', string>;
   serviceName: string;
   transactionName: string;

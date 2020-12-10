@@ -152,6 +152,9 @@ export class Execution<
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
+      getKibanaRequest: execution.params.kibanaRequest
+        ? () => execution.params.kibanaRequest
+        : undefined,
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
@@ -359,9 +362,12 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
-        any
-      > & { name: string };
+      const {
+        aliases,
+        default: argDefault,
+        name: argName,
+        required,
+      } = argDef as ArgumentType<any> & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||

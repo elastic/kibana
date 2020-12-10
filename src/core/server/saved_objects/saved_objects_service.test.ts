@@ -33,6 +33,7 @@ import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
+import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
@@ -64,6 +65,7 @@ describe('SavedObjectsService', () => {
     return {
       http: httpServiceMock.createInternalSetupContract(),
       elasticsearch: elasticsearchMock,
+      coreUsageData: coreUsageDataServiceMock.createSetupContract(),
     };
   };
 
@@ -217,9 +219,8 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.elasticsearch.esNodesCompatibility$ as any) as BehaviorSubject<
-        NodesVersionCompatibility
-      >).next({
+      ((setupDeps.elasticsearch
+        .esNodesCompatibility$ as any) as BehaviorSubject<NodesVersionCompatibility>).next({
         isCompatible: true,
         incompatibleNodes: [],
         warningNodes: [],

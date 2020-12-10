@@ -15,6 +15,11 @@ export interface TabProps {
   nodeType: InventoryItemType;
 }
 
+export const OVERLAY_Y_START = 266;
+export const OVERLAY_BOTTOM_MARGIN = 16;
 export const TabContent = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;

@@ -91,6 +91,7 @@ export const MetricExpression = ({
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const firstFieldOption = {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.metric.selectFieldLabel', {
       defaultMessage: 'Select a metric',
@@ -106,16 +107,11 @@ export const MetricExpression = ({
     [fields, customMetric?.field]
   );
 
-  const expressionDisplayValue = useMemo(
-    () => {
-      return customMetricTabOpen
-        ? customMetric?.field && getCustomMetricLabel(customMetric)
-        : metric?.text || firstFieldOption.text;
-    },
-    // The ?s are confusing eslint here, so...
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [customMetricTabOpen, metric, customMetric, firstFieldOption]
-  );
+  const expressionDisplayValue = useMemo(() => {
+    return customMetricTabOpen
+      ? customMetric?.field && getCustomMetricLabel(customMetric)
+      : metric?.text || firstFieldOption.text;
+  }, [customMetricTabOpen, metric, customMetric, firstFieldOption]);
 
   const onChangeTab = useCallback(
     (id) => {

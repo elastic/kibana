@@ -20,8 +20,6 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
-  IClusterClient,
-  SavedObjectsServiceStart,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -32,16 +30,13 @@ import {
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
-// @ts-ignore
 import { requireUIRoutes } from './routes';
-// @ts-ignore
 import { initBulkUploader } from './kibana_monitoring';
-// @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
 import {
@@ -53,6 +48,8 @@ import {
   PluginsStart,
   LegacyRequest,
 } from './types';
+
+import { Globals } from './static_globals';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -75,9 +72,7 @@ export class Plugin {
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader: IBulkUploader = {} as IBulkUploader;
-  private telemetryElasticsearchClient: IClusterClient | undefined;
-  private telemetrySavedObjectsService: SavedObjectsServiceStart | undefined;
+  private bulkUploader: IBulkUploader | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -122,40 +117,11 @@ export class Plugin {
       log: this.log,
     });
 
+    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
     const serverInfo = core.http.getServerInfo();
-    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
-    if (core.http.basePath.serverBasePath) {
-      kibanaUrl += `/${core.http.basePath.serverBasePath}`;
-    }
-    const getUiSettingsService = async () => {
-      const coreStart = (await core.getStartServices())[0];
-      return coreStart.uiSettings;
-    };
-    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(
-        getUiSettingsService,
-        cluster,
-        this.getLogger,
-        config,
-        kibanaUrl,
-        isCloud
-      );
       plugins.alerts?.registerType(alert.getAlertType());
-    }
-
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection({
-        telemetryCollectionManager: plugins.telemetryCollectionManager,
-        esCluster: this.cluster,
-        esClientGetter: () => this.telemetryElasticsearchClient,
-        soServiceGetter: () => this.telemetrySavedObjectsService,
-        customContext: {
-          maxBucketSize: config.ui.max_bucket_size,
-        },
-      });
     }
 
     // Register collector objects for stats to show up in the APIs
@@ -173,7 +139,12 @@ export class Plugin {
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
     // Always create the bulk uploader
@@ -182,6 +153,7 @@ export class Plugin {
       elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
+      opsMetrics$: core.metrics.getOpsMetrics$(),
       statusGetter$: core.status.overall$,
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
@@ -208,7 +180,7 @@ export class Plugin {
           const monitoringBulkEnabled =
             mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
           if (monitoringBulkEnabled) {
-            bulkUploader.start(plugins.usageCollection);
+            bulkUploader.start();
           } else {
             bulkUploader.handleNotEnabled();
           }
@@ -249,20 +221,11 @@ export class Plugin {
     return {
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
-      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
+      getKibanaStats: () => bulkUploader.getKibanaStats(),
     };
   }
 
-  start({ elasticsearch, savedObjects }: CoreStart) {
-    // TODO: For the telemetry plugin to work, we need to provide the new ES client.
-    // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
-    // the new client in Monitoring Telemetry collection yet, setting the local client allows progress for now.
-    // The usage collector `fetch` method has been refactored to accept a `collectorFetchContext` object,
-    // exposing both es clients and the saved objects client.
-    // We will update the client in a follow up PR.
-    this.telemetryElasticsearchClient = elasticsearch.client;
-    this.telemetrySavedObjectsService = savedObjects;
-  }
+  start() {}
 
   stop() {
     if (this.cluster) {
@@ -271,6 +234,7 @@ export class Plugin {
     if (this.licenseService) {
       this.licenseService.stop();
     }
+    this.bulkUploader?.stop();
   }
 
   registerPluginInUI(plugins: PluginsSetup) {

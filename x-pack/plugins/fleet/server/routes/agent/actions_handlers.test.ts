@@ -25,7 +25,6 @@ describe('test actions handlers schema', () => {
       NewAgentActionSchema.validate({
         type: 'POLICY_CHANGE',
         data: 'data',
-        sent_at: '2020-03-14T19:45:02.620Z',
       })
     ).toBeTruthy();
   });
@@ -34,7 +33,6 @@ describe('test actions handlers schema', () => {
     expect(() => {
       NewAgentActionSchema.validate({
         data: 'data',
-        sent_at: '2020-03-14T19:45:02.620Z',
       });
     }).toThrowError();
   });
@@ -55,7 +53,6 @@ describe('test actions handlers', () => {
         action: {
           type: 'POLICY_CHANGE',
           data: 'data',
-          sent_at: '2020-03-14T19:45:02.620Z',
         },
       },
       params: {

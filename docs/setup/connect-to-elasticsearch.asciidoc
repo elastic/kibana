@@ -37,7 +37,7 @@ ship with dashboards and visualizations,
 so you can quickly get insights into your data.
 
 To get started, refer to
-{ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
+{ingest-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
 
 [role="screenshot"]
 image::images/add-data-fleet.png[Add data using Fleet]

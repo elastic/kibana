@@ -160,12 +160,21 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 /*
   Rule notifications options
 */
+export const ENABLE_CASE_CONNECTOR = false;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
   '.webhook',
+  '.servicenow',
+  '.jira',
+  '.resilient',
 ];
+
+if (ENABLE_CASE_CONNECTOR) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
@@ -185,5 +194,3 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-export const ENABLE_NEW_TIMELINE = false;

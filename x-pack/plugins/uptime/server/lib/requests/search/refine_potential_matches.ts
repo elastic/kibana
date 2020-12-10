@@ -86,6 +86,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
       timestamp: latest.timestamp,
       monitor: {
         name: latest.monitor?.name,
+        type: latest.monitor?.type,
       },
       url: latest.url ?? {},
       summary: {
@@ -109,7 +110,6 @@ export const query = async (
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
   const params = {
-    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {

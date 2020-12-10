@@ -147,26 +147,22 @@ export class MapsPlugin implements Plugin {
       return;
     }
 
-    let routesInitialized = false;
     let isEnterprisePlus = false;
+    let lastLicenseId: string | undefined;
     const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
-      const basic = license.check(APP_ID, 'basic');
-
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';
-
-      if (basic.state === 'valid' && !routesInitialized) {
-        routesInitialized = true;
-        initRoutes(
-          core.http.createRouter(),
-          license.uid,
-          emsSettings,
-          this.kibanaVersion,
-          this._logger
-        );
-      }
+      lastLicenseId = license.uid;
     });
+
+    initRoutes(
+      core.http.createRouter(),
+      () => lastLicenseId,
+      emsSettings,
+      this.kibanaVersion,
+      this._logger
+    );
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
@@ -185,7 +181,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern'],
+            read: ['index-pattern', 'tag'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
@@ -194,7 +190,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
           },
           ui: ['show'],
         },

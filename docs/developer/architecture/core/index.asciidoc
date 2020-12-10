@@ -1,0 +1,451 @@
+[[kibana-platform-api]]
+== {kib} Core API
+
+experimental[]
+
+{kib} Core provides a set of low-level API's required to run all {kib} plugins.
+These API's are injected into your plugin's lifecycle methods and may be invoked during that lifecycle only:
+
+[source,typescript]
+----
+import type { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+
+export class MyPlugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up during Kibana's startup sequence
+  }
+
+  public start(core: CoreStart) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
+    // called when plugin is torn down during Kibana's shutdown sequence
+  }
+}
+----
+
+=== Server-side
+[[configuration-service]]
+==== Configuration service
+{kib} provides `ConfigService` if a plugin developer may want to support
+adjustable runtime behavior for their plugins.
+Plugins can only read their own configuration values, it is not possible to access the configuration values from {kib} Core or other plugins directly.
+
+[source,js]
+----
+// in Legacy platform
+const basePath = config.get('server.basePath');
+// in Kibana Platform 'basePath' belongs to the http service
+const basePath = core.http.basePath.get(request);
+----
+
+To have access to your plugin config, you _should_:
+
+* Declare plugin-specific `configPath` (will fallback to plugin `id`
+if not specified) in {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+* Export schema validation for the config from plugin's main file. Schema is
+mandatory. If a plugin reads from the config without schema declaration,
+`ConfigService` will throw an error.
+
+*my_plugin/server/index.ts*
+[source,typescript]
+----
+import { schema, TypeOf } from '@kbn/config-schema';
+export const plugin = …
+export const config = {
+  schema: schema.object(…),
+};
+export type MyPluginConfigType = TypeOf<typeof config.schema>;
+----
+
+* Read config value exposed via `PluginInitializerContext`.
+*my_plugin/server/index.ts*
+[source,typescript]
+----
+import type { PluginInitializerContext } from 'kibana/server';
+export class MyPlugin {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config$ = initializerContext.config.create<MyPluginConfigType>();
+    // or if config is optional:
+    this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
+  }
+----
+
+If your plugin also has a client-side part, you can also expose
+configuration properties to it using the configuration `exposeToBrowser`
+allow-list property.
+
+*my_plugin/server/index.ts*
+[source,typescript]
+----
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Only on server' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+};
+----
+
+Configuration containing only the exposed properties will be then
+available on the client-side using the plugin's `initializerContext`:
+
+*my_plugin/public/index.ts*
+[source,typescript]
+----
+interface ClientConfigType {
+  uiProp: string;
+}
+
+export class MyPlugin implements Plugin<PluginSetup, PluginStart> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+  }
+----
+
+All plugins are considered enabled by default. If you want to disable
+your plugin, you could declare the `enabled` flag in the plugin
+config. This is a special {kib} Platform key. {kib} reads its
+value and won’t create a plugin instance if `enabled: false`.
+
+[source,js]
+----
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};
+----
+[[handle-plugin-configuration-deprecations]]
+===== Handle plugin configuration deprecations
+If your plugin has deprecated configuration keys, you can describe them using
+the `deprecations` config descriptor field.
+Deprecations are managed on a per-plugin basis, meaning you don’t need to specify
+the whole property path, but use the relative path from your plugin’s
+configuration root.
+
+*my_plugin/server/index.ts*
+[source,typescript]
+----
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  newProperty: schema.string({ defaultValue: 'Some string' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('oldProperty', 'newProperty'),
+    unused('someUnusedProperty'),
+  ],
+};
+----
+
+In some cases, accessing the whole configuration for deprecations is
+necessary. For these edge cases, `renameFromRoot` and `unusedFromRoot`
+are also accessible when declaring deprecations.
+
+*my_plugin/server/index.ts*
+[source,typescript]
+----
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot, unusedFromRoot }) => [
+    renameFromRoot('oldplugin.property', 'myplugin.property'),
+    unusedFromRoot('oldplugin.deprecated'),
+  ],
+};
+----
+==== Logging service
+Allows a plugin to provide status and diagnostic information.
+For detailed instructions see the {kib-repo}blob/{branch}/src/core/server/logging/README.md[logging service documentation].
+
+[source,typescript]
+----
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from 'kibana/server';
+
+export class MyPlugin implements Plugin {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(core: CoreSetup) {
+    try {
+      this.logger.debug('doing something...');
+      // …
+    } catch (e) {
+      this.logger.error('failed doing something...');
+    }
+  }
+}
+----
+
+==== Elasticsearch service
+`Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server REST API.
+`elasticsearch.client` interacts with Elasticsearch service on behalf of:
+
+- `kibana_system` user via `elasticsearch.client.asInternalUser.*` methods.
+- a current end-user via `elasticsearch.client.asCurrentUser.*` methods. In this case Elasticsearch client should be given the current user credentials.
+See <<scoped-services>> and <<development-security>>.
+
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.elasticsearchservicestart.md[Elasticsearch service API docs]
+
+[source,typescript]
+----
+import { CoreStart, Plugin } from 'kibana/public';
+
+export class MyPlugin implements Plugin {
+  public start(core: CoreStart) {
+    async function asyncTask() {
+      const result = await core.elasticsearch.client.asInternalUser.ping(…);
+    }
+    asyncTask();
+  }
+}
+----
+
+For advanced use-cases, such as a search, use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-server.md[Data plugin]
+
+include::saved-objects-service.asciidoc[leveloffset=+1]
+
+==== HTTP service
+Allows plugins:
+
+* to extend the {kib} server with custom REST API.
+* to execute custom logic on an incoming request or server response.
+* implement custom authentication and authorization strategy.
+
+See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HTTP service API docs]
+
+[source,typescript]
+----
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin } from 'kibana/server';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+    
+    const validate = {
+      params: schema.object({
+        id: schema.string(),
+      }),
+    };
+    
+    router.get({
+      path: 'my_plugin/{id}',
+      validate
+    },
+    async (context, request, response) => {
+      const data = await findObject(request.params.id);
+      if (!data) return response.notFound();
+      return response.ok({
+        body: data,
+        headers: {
+          'content-type': 'application/json'
+        }
+      });
+    });
+  }
+}
+----
+
+==== UI settings service
+The program interface to <<advanced-options, UI settings>>.
+It makes it possible for Kibana plugins to extend Kibana UI Settings Management with custom settings.
+
+See:
+
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicestart.register.md[UI settings service Start API docs]
+
+[source,typescript]
+----
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup,Plugin } from 'kibana/server';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register({
+      custom: { 
+        value: '42',
+        schema: schema.string(),
+      },
+    });
+    const router = core.http.createRouter();
+    router.get({
+      path: 'my_plugin/{id}',
+      validate: …,
+    },
+    async (context, request, response) => {
+      const customSetting = await context.uiSettings.client.get('custom');
+      …
+    });
+  }
+}
+
+----
+
+=== Client-side
+==== Application service
+Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in the UI in response to user interactions.
+[source,typescript]
+----
+import { AppMountParameters, CoreSetup, Plugin, DEFAULT_APP_CATEGORIES } from 'kibana/public';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.application.register({ // <1>
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      id: 'my-plugin',
+      title: 'my plugin title',
+      euiIconType: '/path/to/some.svg',
+      order: 100,
+      appRoute: '/app/my_plugin', // <2>
+      async mount(params: AppMountParameters) { // <3>
+        // Load application bundle
+        const { renderApp } = await import('./application');
+        // Get start services
+        const [coreStart, depsStart] = await core.getStartServices(); // <4>
+        // Render the application
+        return renderApp(coreStart, depsStart, params); // <5>
+      },
+    });
+  }
+}
+----
+<1> See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[application.register interface]
+<2> Application specific URL.
+<3> `mount` callback is invoked when a user navigates to the application-specific URL.
+<4> `core.getStartServices` method provides API available during `start` lifecycle.
+<5> `mount` method must return a function that will be called to unmount the application.
+
+NOTE:: you are free to use any UI library to render a plugin application in DOM.
+However, we recommend using React and https://elastic.github.io/eui[EUI] for all your basic UI
+components to create a consistent UI experience.
+
+==== HTTP service
+Provides API to communicate with the {kib} server. Feel free to use another HTTP client library to request 3rd party services.
+
+[source,typescript]
+----
+import { CoreStart } from 'kibana/public';
+interface ResponseType {…};
+async function fetchData<ResponseType>(core: CoreStart) {
+  return await core.http.get<>(
+    '/api/my_plugin/',
+    { query: … },
+  ); 
+}
+----
+See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[for all available API].
+
+==== Elasticsearch service
+Not available in the browser. Use {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.md[Data plugin] instead.
+
+== Patterns
+[[scoped-services]]
+=== Scoped services
+Whenever Kibana needs to get access to data saved in elasticsearch, it
+should perform a check whether an end-user has access to the data. In
+the legacy platform, Kibana requires binding elasticsearch related API
+with an incoming request to access elasticsearch service on behalf of a
+user.
+
+[source,js]
+----
+async function handler(req, res) {
+  const dataCluster = server.plugins.elasticsearch.getCluster('data');
+  const data = await dataCluster.callWithRequest(req, 'ping');
+}
+----
+
+The Kibana Platform introduced a handler interface on the server-side to perform that association
+internally. Core services, that require impersonation with an incoming
+request, are exposed via `context` argument of
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandler.md[the
+request handler interface.] The above example looks in the Kibana Platform
+as
+
+[source,js]
+----
+async function handler(context, req, res) {
+  const data = await context.core.elasticsearch.client.asCurrentUser('ping');
+}
+----
+
+The
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[request
+handler context] exposed the next scoped *core* services:
+
+[width="100%",cols="30%,70%",options="header",]
+|===
+|Legacy Platform |Kibana Platform
+|`request.getSavedObjectsClient`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
+
+|`server.plugins.elasticsearch.getCluster('admin')`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+
+|`server.plugins.elasticsearch.getCluster('data')`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+
+|`request.getUiSettingsService`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
+|===
+
+==== Declare a custom scoped service
+
+Plugins can extend the handler context with a custom API that will be
+available to the plugin itself and all dependent plugins. For example,
+the plugin creates a custom elasticsearch client and wants to use it via
+the request handler context:
+
+[source,typescript]
+----
+import type { CoreSetup, IScopedClusterClient } from 'kibana/server';
+
+export interface MyPluginContext {
+  client: IScopedClusterClient;
+}
+
+// extend RequestHandlerContext when a dependent plugin imports MyPluginContext from the file
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    myPlugin?: MyPluginContext;
+  }
+}
+
+class MyPlugin {
+  setup(core: CoreSetup) {
+    const client = core.elasticsearch.createClient('myClient');
+    core.http.registerRouteHandlerContext('myPlugin', (context, req, res) => {
+      return { client: client.asScoped(req) };
+    });
+    const router = core.http.createRouter();
+    router.get(
+      { path: '/api/my-plugin/', validate: … },
+      async (context, req, res) => {
+        const data = await context.myPlugin.client.asCurrentUser('endpoint');
+      }
+    );
+  }
+----

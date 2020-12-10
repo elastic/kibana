@@ -5,6 +5,8 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
+import type { Request } from '@hapi/hapi';
+import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
@@ -18,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -37,6 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -55,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -90,9 +93,10 @@ export class TaskRunner {
       requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
-    return ({
+    const path = addSpaceIdToPath('/', spaceId);
+
+    const fakeRequest = KibanaRequest.from(({
       headers: requestHeaders,
-      getBasePath: () => this.context.getBasePath(spaceId),
       path: '/',
       route: { settings: {} },
       url: {
@@ -103,7 +107,11 @@ export class TaskRunner {
           url: '/',
         },
       },
-    } as unknown) as KibanaRequest;
+    } as unknown) as Request);
+
+    this.context.basePathService.set(fakeRequest, path);
+
+    return fakeRequest;
   }
 
   private getServicesWithSpaceLevelPermissions(
@@ -210,10 +218,23 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
-    generateNewAndResolvedInstanceEvents({
+    const recoveredAlertInstances = pickBy(
+      alertInstances,
+      (alertInstance: AlertInstance) => !alertInstance.hasScheduledActions()
+    );
+
+    logActiveAndRecoveredInstances({
+      logger: this.logger,
+      activeAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
+      alertLabel,
+    });
+
+    generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
       alertId,
       alertLabel,
       namespace,
@@ -222,16 +243,36 @@ export class TaskRunner {
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
+      scheduleActionsForRecoveredInstances({
+        recoveryActionGroup: this.alertType.recoveryActionGroup,
+        recoveredAlertInstances,
+        executionHandler,
+        mutedInstanceIdsSet,
+        logger: this.logger,
+        alertLabel,
+      });
+
       await Promise.all(
         Object.entries(instancesWithScheduledActions)
-          .filter(
-            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
-              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
-          )
+          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+            const throttled = alertInstance.isThrottled(throttle);
+            const muted = mutedInstanceIdsSet.has(alertInstanceName);
+            const shouldExecuteAction = !throttled && !muted;
+            if (!shouldExecuteAction) {
+              this.logger.debug(
+                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                  muted ? 'muted' : 'throttled'
+                }`
+              );
+            }
+            return shouldExecuteAction;
+          })
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
           )
       );
+    } else {
+      this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
     }
 
     return {
@@ -315,12 +356,15 @@ export class TaskRunner {
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    const runDate = new Date().toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': runDate,
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
         saved_objects: [
@@ -419,27 +463,37 @@ export class TaskRunner {
   }
 }
 
-interface GenerateNewAndResolvedInstanceEventsParams {
+interface GenerateNewAndRecoveredInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstances: Dictionary<AlertInstance>;
   currentAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
 }
 
-function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
+function generateNewAndRecoveredInstanceEvents(
+  params: GenerateNewAndRecoveredInstanceEventsParams
+) {
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstances,
+    originalAlertInstances,
+    recoveredAlertInstances,
+  } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
-  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
-  for (const id of resolvedIds) {
+  for (const id of recoveredAlertInstanceIds) {
     const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
-    const message = `${params.alertLabel} resolved instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message, actionGroup);
+    const message = `${params.alertLabel} instance '${id}' has recovered`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
   }
 
   for (const id of newIds) {
@@ -476,6 +530,75 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       message,
     };
     eventLogger.logEvent(event);
+  }
+}
+
+interface ScheduleActionsForRecoveredInstancesParams {
+  logger: Logger;
+  recoveryActionGroup: ActionGroup;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  executionHandler: ReturnType<typeof createExecutionHandler>;
+  mutedInstanceIdsSet: Set<string>;
+  alertLabel: string;
+}
+
+function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecoveredInstancesParams) {
+  const {
+    logger,
+    recoveryActionGroup,
+    recoveredAlertInstances,
+    executionHandler,
+    mutedInstanceIdsSet,
+    alertLabel,
+  } = params;
+  const recoveredIds = Object.keys(recoveredAlertInstances);
+  for (const id of recoveredIds) {
+    if (mutedInstanceIdsSet.has(id)) {
+      logger.debug(
+        `skipping scheduling of actions for '${id}' in alert ${alertLabel}: instance is muted`
+      );
+    } else {
+      const instance = recoveredAlertInstances[id];
+      instance.updateLastScheduledActions(recoveryActionGroup.id);
+      instance.unscheduleActions();
+      executionHandler({
+        actionGroup: recoveryActionGroup.id,
+        context: {},
+        state: {},
+        alertInstanceId: id,
+      });
+      instance.scheduleActions(recoveryActionGroup.id);
+    }
+  }
+}
+
+interface LogActiveAndRecoveredInstancesParams {
+  logger: Logger;
+  activeAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  alertLabel: string;
+}
+
+function logActiveAndRecoveredInstances(params: LogActiveAndRecoveredInstancesParams) {
+  const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
+  const activeInstanceIds = Object.keys(activeAlertInstances);
+  const recoveredInstanceIds = Object.keys(recoveredAlertInstances);
+  if (activeInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${activeInstanceIds.length} active alert instances: ${JSON.stringify(
+        activeInstanceIds.map((instanceId) => ({
+          instanceId,
+          actionGroup: activeAlertInstances[instanceId].getScheduledActionOptions()?.actionGroup,
+        }))
+      )}`
+    );
+  }
+  if (recoveredInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${
+        recoveredInstanceIds.length
+      } recovered alert instances: ${JSON.stringify(recoveredInstanceIds)}`
+    );
   }
 }
 

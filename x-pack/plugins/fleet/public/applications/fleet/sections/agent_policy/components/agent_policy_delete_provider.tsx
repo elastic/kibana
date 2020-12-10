@@ -9,7 +9,7 @@ import { EuiConfirmModal, EuiOverlayMask, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { sendDeleteAgentPolicy, useCore, useConfig, sendRequest } from '../../../hooks';
+import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
@@ -20,7 +20,7 @@ export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallb
 type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 
 export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();

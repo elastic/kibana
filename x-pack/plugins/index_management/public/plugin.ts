@@ -16,16 +16,11 @@ import { UiMetricService } from './application/services/ui_metric';
 import { setExtensionsService } from './application/store/selectors';
 import { setUiMetricService } from './application/services/api';
 
-import {
-  IndexManagementPluginSetup,
-  IndexMgmtMetricsType,
-  SetupDependencies,
-  StartDependencies,
-} from './types';
+import { IndexManagementPluginSetup, SetupDependencies, StartDependencies } from './types';
 import { ExtensionsService } from './services';
 
 export class IndexMgmtUIPlugin {
-  private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
+  private uiMetricService = new UiMetricService(UIM_APP_NAME);
   private extensionsService = new ExtensionsService();
 
   constructor() {
@@ -40,7 +35,7 @@ export class IndexMgmtUIPlugin {
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
-    const { ingestManager, usageCollection, management } = plugins;
+    const { fleet, usageCollection, management } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
@@ -58,7 +53,7 @@ export class IndexMgmtUIPlugin {
           uiMetricService: this.uiMetricService,
           extensionsService: this.extensionsService,
         };
-        return mountManagementSection(coreSetup, usageCollection, services, params, ingestManager);
+        return mountManagementSection(coreSetup, usageCollection, services, params, fleet);
       },
     });
 

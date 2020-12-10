@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type Linux = 'linux';
-export type MacOS = 'macos';
-export type Windows = 'windows';
-export type OperatingSystem = Linux | MacOS | Windows;
+export enum OperatingSystem {
+  LINUX = 'linux',
+  MAC = 'macos',
+  WINDOWS = 'windows',
+}

@@ -23,7 +23,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggTerms';
+export const aggTermsFnName = 'aggTerms';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TERMS>;
@@ -33,10 +33,15 @@ type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TERMS>;
 type Arguments = Assign<AggArgs, { orderAgg?: AggExpressionType }>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggTermsFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggTerms = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggTermsFnName,
   help: i18n.translate('data.search.aggs.function.buckets.terms.help', {
     defaultMessage: 'Generates a serialized agg config for a Terms agg',
   }),

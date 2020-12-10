@@ -24,7 +24,7 @@ export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
   getCoreUsageDataService: () => CoreUsageDataStart
 ) {
-  return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
+  return usageCollection.makeUsageCollector<CoreUsageData>({
     type: 'core',
     isReady: () => typeof getCoreUsageDataService() !== 'undefined',
     schema: {
@@ -65,7 +65,7 @@ export function getCoreUsageCollector(
           },
           xsrf: {
             disableProtection: { type: 'boolean' },
-            whitelistConfigured: { type: 'boolean' },
+            allowlistConfigured: { type: 'boolean' },
           },
           requestId: {
             allowFromAnyIp: { type: 'boolean' },
@@ -115,6 +115,23 @@ export function getCoreUsageCollector(
           },
         },
       },
+      'apiCalls.savedObjectsImport.total': { type: 'long' },
+      'apiCalls.savedObjectsImport.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.savedObjectsImport.kibanaRequest.no': { type: 'long' },
+      'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes': { type: 'long' },
+      'apiCalls.savedObjectsImport.createNewCopiesEnabled.no': { type: 'long' },
+      'apiCalls.savedObjectsImport.overwriteEnabled.yes': { type: 'long' },
+      'apiCalls.savedObjectsImport.overwriteEnabled.no': { type: 'long' },
+      'apiCalls.savedObjectsResolveImportErrors.total': { type: 'long' },
+      'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no': { type: 'long' },
+      'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes': { type: 'long' },
+      'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no': { type: 'long' },
+      'apiCalls.savedObjectsExport.total': { type: 'long' },
+      'apiCalls.savedObjectsExport.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.savedObjectsExport.kibanaRequest.no': { type: 'long' },
+      'apiCalls.savedObjectsExport.allTypesSelected.yes': { type: 'long' },
+      'apiCalls.savedObjectsExport.allTypesSelected.no': { type: 'long' },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();

@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -39,7 +39,7 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/js-errors',
+          endpoint: 'GET /api/apm/rum-client/js-errors',
           params: {
             query: {
               start,

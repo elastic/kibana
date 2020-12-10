@@ -5,31 +5,56 @@
  */
 
 import uuid from 'uuid';
-import { range, random } from 'lodash';
+import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/alerts/server';
-import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import {
+  DEFAULT_INSTANCES_TO_GENERATE,
+  ALERTING_EXAMPLE_APP_ID,
+  AlwaysFiringParams,
+} from '../../common/constants';
 
 const ACTION_GROUPS = [
-  { id: 'small', name: 'small' },
-  { id: 'medium', name: 'medium' },
-  { id: 'large', name: 'large' },
+  { id: 'small', name: 'Small t-shirt' },
+  { id: 'medium', name: 'Medium t-shirt' },
+  { id: 'large', name: 'Large t-shirt' },
 ];
+const DEFAULT_ACTION_GROUP = 'small';
 
-export const alertType: AlertType = {
+function getTShirtSizeByIdAndThreshold(id: string, thresholds: AlwaysFiringParams['thresholds']) {
+  const idAsNumber = parseInt(id, 10);
+  if (!isNaN(idAsNumber)) {
+    if (thresholds?.large && thresholds.large < idAsNumber) {
+      return 'large';
+    }
+    if (thresholds?.medium && thresholds.medium < idAsNumber) {
+      return 'medium';
+    }
+    if (thresholds?.small && thresholds.small < idAsNumber) {
+      return 'small';
+    }
+  }
+  return DEFAULT_ACTION_GROUP;
+}
+
+export const alertType: AlertType<AlwaysFiringParams> = {
   id: 'example.always-firing',
   name: 'Always firing',
   actionGroups: ACTION_GROUPS,
-  defaultActionGroupId: 'small',
-  async executor({ services, params: { instances = DEFAULT_INSTANCES_TO_GENERATE }, state }) {
+  defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  async executor({
+    services,
+    params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
+    state,
+  }) {
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => ({ id: uuid.v4(), tshirtSize: ACTION_GROUPS[random(0, 2)].id! }))
-      .forEach((instance: { id: string; tshirtSize: string }) => {
+      .map(() => uuid.v4())
+      .forEach((id: string) => {
         services
-          .alertInstanceFactory(instance.id)
+          .alertInstanceFactory(id)
           .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(instance.tshirtSize);
+          .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
       });
 
     return {

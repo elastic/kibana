@@ -18,6 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
+import { FieldAttrs, FieldAttrSet } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -36,6 +37,7 @@ interface IndexPatternDeps {
 }
 
 interface SavedObjectBody {
+  fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -70,6 +72,8 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  // make private once manual field refresh is removed
+  public fieldAttrs: FieldAttrs;
 
   constructor({
     spec = {},
@@ -101,19 +105,12 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
+    this.fieldAttrs = spec.fieldAttrs || {};
+    this.intervalName = spec.intervalName;
   }
-
-  setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
-    this.fieldFormatMap[fieldName] = format;
-  };
-
-  deleteFieldFormat = (fieldName: string) => {
-    delete this.fieldFormatMap[fieldName];
-  };
 
   /**
    * Get last saved saved object fields
@@ -125,6 +122,31 @@ export class IndexPattern implements IIndexPattern {
    */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
+  };
+
+  getFieldAttrs = () => {
+    const newFieldAttrs = { ...this.fieldAttrs };
+
+    this.fields.forEach((field) => {
+      const attrs: FieldAttrSet = {};
+      let hasAttr = false;
+      if (field.customLabel) {
+        attrs.customLabel = field.customLabel;
+        hasAttr = true;
+      }
+      if (field.count) {
+        attrs.count = field.count;
+        hasAttr = true;
+      }
+
+      if (hasAttr) {
+        newFieldAttrs[field.name] = attrs;
+      } else {
+        delete newFieldAttrs[field.name];
+      }
+    });
+
+    return newFieldAttrs;
   };
 
   getComputedFields() {
@@ -180,6 +202,8 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      fieldAttrs: this.fieldAttrs,
+      intervalName: this.intervalName,
     };
   }
 
@@ -271,13 +295,17 @@ export class IndexPattern implements IIndexPattern {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
+    const fieldAttrs = this.getFieldAttrs();
 
     return {
+      fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields ? JSON.stringify(this.fields) : undefined,
+      fields: this.fields
+        ? JSON.stringify(this.fields.filter((field) => field.scripted))
+        : undefined,
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
@@ -312,4 +340,48 @@ export class IndexPattern implements IIndexPattern {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
+
+  protected setFieldAttrs<K extends keyof FieldAttrSet>(
+    fieldName: string,
+    attrName: K,
+    value: FieldAttrSet[K]
+  ) {
+    if (!this.fieldAttrs[fieldName]) {
+      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
+    }
+    this.fieldAttrs[fieldName][attrName] = value;
+  }
+
+  public setFieldCustomLabel(fieldName: string, customLabel: string | undefined | null) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCustomLabel: string | undefined = customLabel === null ? undefined : customLabel;
+
+    if (fieldObject) {
+      fieldObject.customLabel = newCustomLabel;
+      return;
+    }
+
+    this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);
+  }
+
+  public setFieldCount(fieldName: string, count: number | undefined | null) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCount: number | undefined = count === null ? undefined : count;
+
+    if (fieldObject) {
+      if (!newCount) fieldObject.deleteCount();
+      else fieldObject.count = newCount;
+      return;
+    }
+
+    this.setFieldAttrs(fieldName, 'count', newCount);
+  }
+
+  public readonly setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
+    this.fieldFormatMap[fieldName] = format;
+  };
+
+  public readonly deleteFieldFormat = (fieldName: string) => {
+    delete this.fieldFormatMap[fieldName];
+  };
 }
