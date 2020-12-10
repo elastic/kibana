@@ -26,7 +26,7 @@ across restarts.
 [[encryption-key-parameters]]
 === Parameters
 
-`generate`::  Generates randomly-generated passwords to the console.
+`generate`::  Randomly generates passwords to the console.
 
 `-i, --interactive`:: Prompts you for which encryption keys to set and optionally
 save output to a sample configuration file
