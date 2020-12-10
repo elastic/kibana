@@ -16,7 +16,7 @@ export const getLazyEndpointPackageCustomExtension = (
   return lazy<PackageCustomExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPackageCustomExtension }] = await Promise.all([
       import('./with_security_context'),
-      import('./endpoint_package_custom_extension'),
+      import('./endpoint_package_custom_extension/index'),
     ]);
     return {
       default: withSecurityContext({

@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import React, { memo, useEffect, useMemo, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import { ApplicationStart } from 'kibana/public';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { MANAGEMENT_APP_ID } from '../../../../common/constants';
-import { getTrustedAppsListPath } from '../../../../common/routing';
-import { TrustedAppsListPageRouteState } from '../../../../../../common/endpoint/types';
-import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../fleet/common';
+import { useKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
+import { MANAGEMENT_APP_ID } from '../../../../../common/constants';
+import { getTrustedAppsListPath } from '../../../../../common/routing';
+import { TrustedAppsListPageRouteState } from '../../../../../../../common/endpoint/types';
+import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../fleet/common';
 import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
-} from '../../../../../../../fleet/public';
+} from '../../../../../../../../fleet/public';
 
 const LinkLabel = styled.span`
   display: inline-block;
@@ -33,6 +33,8 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
         application: { getUrlForApp },
       },
     } = useKibana<{ application: ApplicationStart }>();
+    const [total] = useState<number>(0);
+
     const trustedAppsListUrlPath = getTrustedAppsListPath();
 
     const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
@@ -57,6 +59,10 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       };
     }, [getUrlForApp, pkgkey]);
 
+    useEffect(() => {
+      //
+    }, []);
+
     return (
       <EuiPanel paddingSize="l">
         <EuiFlexGroup>
@@ -68,6 +74,15 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
                   defaultMessage="Trusted Applications"
                 />
               </h4>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.totalLabel"
+                defaultMessage="Total"
+              />
+              <EuiBadge color="primary">{total}</EuiBadge>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
