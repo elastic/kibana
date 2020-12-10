@@ -86,7 +86,7 @@
       "job_id": "v2_linux_rare_metadata_process"
     },
     {
-      "id": "datafeed-v2_linux_anomalous_user_name",
+      "id": "datafeed-v2_linux_anomalous_user_name_ecs",
       "file": "datafeed_v2_linux_anomalous_user_name_ecs.json",
       "job_id": "v2_linux_anomalous_user_name_ecs"
     },
@@ -96,7 +96,7 @@
       "job_id": "v2_linux_anomalous_process_all_hosts_ecs"
     },
     {
-      "id": "datafeed-v2_linux_anomalous_network_port_activity",
+      "id": "datafeed-v2_linux_anomalous_network_port_activity_ecs",
       "file": "datafeed_v2_linux_anomalous_network_port_activity_ecs.json",
       "job_id": "v2_linux_anomalous_network_port_activity_ecs"
     }
