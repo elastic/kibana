@@ -24,17 +24,11 @@ export function newJobCapsProvider(client: IScopedClusterClient) {
     convertForStringify(aggs, fields);
 
     // Remove the _doc_count field as we don't want to display this in the fields lists in the UI
-    const docCountIndex = fields.findIndex((f: Field) => {
-      return f.id === _DOC_COUNT;
-    });
-    if (docCountIndex > -1) {
-      fields.splice(docCountIndex, 1);
-    }
-
+    const fieldsWithoutDocCount = fields.filter(({ id }) => id !== _DOC_COUNT);
     return {
       [indexPattern]: {
         aggs,
-        fields,
+        fields: fieldsWithoutDocCount,
       },
     };
   }
