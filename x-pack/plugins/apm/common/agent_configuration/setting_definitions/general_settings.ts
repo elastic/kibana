@@ -232,7 +232,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.sanitizeFiledNames.description',
       {
         defaultMessage:
-          'Sometimes it is <b>necessary</b> to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
+          'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
       }
     ),
     includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs'],
