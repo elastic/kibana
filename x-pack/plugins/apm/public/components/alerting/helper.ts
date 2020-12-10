@@ -6,7 +6,7 @@
 
 import datemath from '@elastic/datemath';
 
-export function windowToTimeRange(windowSize: number, windowUnit: string) {
+export function getAbsoluteTimeRange(windowSize: number, windowUnit: string) {
   const now = new Date().toISOString();
 
   return {

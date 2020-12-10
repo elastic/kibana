@@ -17,7 +17,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { windowToTimeRange } from '../helper';
+import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {
@@ -53,7 +53,7 @@ export function ErrorCountAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
         params: {
           query: {
-            ...windowToTimeRange(windowSize, windowUnit),
+            ...getAbsoluteTimeRange(windowSize, windowUnit),
             environment,
             serviceName,
           },

@@ -26,7 +26,6 @@ export async function getTransactionErrorCountChartPreview({
     bool: {
       filter: [
         { range: rangeFilter(start, end) },
-        ,
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...getEnvironmentUiFilterES(environment),
       ],

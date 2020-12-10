@@ -21,7 +21,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { windowToTimeRange } from '../helper';
+import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
@@ -61,7 +61,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
         params: {
           query: {
-            ...windowToTimeRange(windowSize, windowUnit),
+            ...getAbsoluteTimeRange(windowSize, windowUnit),
             environment,
             serviceName,
             transactionType: alertParams.transactionType,
@@ -130,7 +130,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const chartPreview = (
     <ChartPreview
       data={data}
-      yTickFormat={(d: any) => asPercent(d, 1)}
+      yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
     />
   );

@@ -19,16 +19,9 @@ import {
   TickFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import { max as getMax, min as getMin } from 'lodash';
-import moment from 'moment';
 import React from 'react';
-import styled from 'styled-components';
 import { Coordinate } from '../../../../typings/timeseries';
 import { useTheme } from '../../../hooks/use_theme';
-
-const ChartWithHeight = styled(Chart)`
-  height: 150px;
-`;
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -44,13 +37,13 @@ export function ChartPreview({
   const theme = useTheme();
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);
-  const xMin = moment.utc(getMax(timestamps)).valueOf();
-  const xMax = moment.utc(getMin(timestamps)).valueOf();
+  const xMin = Math.min(...timestamps);
+  const xMax = Math.max(...timestamps);
   const xFormatter = niceTimeFormatter([xMin, xMax]);
 
   // Make the maximum Y value either the actual max or 20% more than the threshold
   const values = data.map((d) => d.y ?? 0);
-  const yMax = Math.max(Math.max(...values), threshold * 1.2);
+  const yMax = Math.max(...values, threshold * 1.2);
 
   const style = {
     fill: theme.eui.euiColorVis9,
@@ -76,7 +69,7 @@ export function ChartPreview({
   return (
     <>
       <EuiSpacer size="m" />
-      <ChartWithHeight data-test-subj="ChartPreview">
+      <Chart size={{ height: 150 }} data-test-subj="ChartPreview">
         <Settings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
@@ -113,7 +106,7 @@ export function ChartPreview({
           yAccessors={['y']}
           yScaleType={ScaleType.Linear}
         />
-      </ChartWithHeight>
+      </Chart>
     </>
   );
 }
