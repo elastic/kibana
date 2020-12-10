@@ -34,7 +34,7 @@ export const FriendlyTimingLabels = {
     }
   ),
   [Timings.Ssl]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.ssl', {
-    defaultMessage: 'SSL',
+    defaultMessage: 'TLS',
   }),
   [Timings.Send]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.send', {
     defaultMessage: 'Sending request',
@@ -145,9 +145,7 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/font-sfnt': MimeType.Font,
 };
 
-export type NetworkItem = Omit<NetworkEvent, 'timings'> & {
-  timings?: CalculatedTimings;
-};
+export type NetworkItem = NetworkEvent;
 export type NetworkItems = NetworkItem[];
 
 // NOTE: A number will always be present if the property exists, but that number might be -1, which represents no value.

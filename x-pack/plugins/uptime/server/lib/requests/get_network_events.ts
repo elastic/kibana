@@ -50,7 +50,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
       requestSentTime,
       requestStartTime,
       loadEndTime,
-      timings: event._source.synthetics.payload.response?.timing,
+      timings: event._source.synthetics.payload.timings,
     };
   });
 };

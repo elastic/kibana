@@ -7,8 +7,6 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import {
-  PayloadTimings,
-  CalculatedTimings,
   NetworkItems,
   NetworkItem,
   FriendlyTimingLabels,
@@ -23,112 +21,10 @@ import {
 import { WaterfallData } from '../../waterfall';
 import { NetworkEvent } from '../../../../../../common/runtime_types';
 
-const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 1000);
-
-// The timing calculations here are based off several sources:
-// https://github.com/ChromeDevTools/devtools-frontend/blob/2fe91adefb2921b4deb2b4b125370ef9ccdb8d1b/front_end/sdk/HARLog.js#L307
-// and
-// https://chromium.googlesource.com/chromium/blink.git/+/master/Source/devtools/front_end/sdk/HAREntry.js#131
-// and
-// https://github.com/cyrus-and/chrome-har-capturer/blob/master/lib/har.js#L195
-// and
-// https://github.com/sitespeedio/chrome-har/blob/4586d2961fe8752982120c3f613b8da42cf3648b/lib/finalizeEntry.js#L7
-// Order of events: request_start = 0, [proxy], [dns], [connect [ssl]], [send], receive_headers_end
-
-export const getTimings = (
-  timings: NetworkEvent['timings'],
-  requestSentTime: NetworkEvent['requestSentTime'],
-  loadEndTime: NetworkEvent['loadEndTime']
-): CalculatedTimings => {
-  if (!timings) return { blocked: -1, dns: -1, connect: -1, send: 0, wait: 0, receive: 0, ssl: -1 };
-
-  const getLeastNonNegative = (values: number[]) =>
-    values.reduce<number>((best, value) => (value >= 0 && value < best ? value : best), Infinity);
-  const getOptionalTiming = (_timings: PayloadTimings, key: keyof PayloadTimings) =>
-    _timings[key] >= 0 ? _timings[key] : -1;
-
-  // NOTE: Request sent and request start can differ due to queue times
-  const requestStartTime = microToMillis(timings.request_time);
-
-  // Queued
-  const queuedTime = requestSentTime < requestStartTime ? requestStartTime - requestSentTime : -1;
-
-  // Blocked
-  // "blocked" represents both queued time + blocked/stalled time + proxy time (ie: anything before the request was actually started).
-  let blocked = queuedTime;
-
-  const blockedStart = getLeastNonNegative([
-    timings.dns_start,
-    timings.connect_start,
-    timings.send_start,
-  ]);
-
-  if (blockedStart !== Infinity) {
-    blocked += blockedStart;
-  }
-
-  // Proxy
-  // Proxy is part of blocked, but it can be quirky in that blocked can be -1 even though there are proxy timings. This can happen with
-  // protocols like Quic.
-  if (timings.proxy_end !== -1) {
-    const blockedProxy = timings.proxy_end - timings.proxy_start;
-
-    if (blockedProxy && blockedProxy > blocked) {
-      blocked = blockedProxy;
-    }
-  }
-
-  // DNS
-  const dnsStart = timings.dns_end >= 0 ? blockedStart : 0;
-  const dnsEnd = getOptionalTiming(timings, 'dns_end');
-  const dns = dnsEnd - dnsStart;
-
-  // SSL
-  const sslStart = getOptionalTiming(timings, 'ssl_start');
-  const sslEnd = getOptionalTiming(timings, 'ssl_end');
-  let ssl;
-
-  if (sslStart >= 0 && sslEnd >= 0) {
-    ssl = timings.ssl_end - timings.ssl_start;
-  }
-
-  // Connect
-  let connect = -1;
-  if (timings.connect_start >= 0) {
-    connect = timings.send_start - timings.connect_start;
-  }
-
-  // Send
-  const send = timings.send_end - timings.send_start;
-
-  // Wait
-  const waitStart = timings.send_end;
-  const waitEnd = timings.receive_headers_end;
-  const wait = waitEnd - waitStart;
-
-  const receive = loadEndTime - (requestStartTime + timings.receive_headers_end);
-
-  // SSL connection is a part of the overall connection time
-  if (connect && ssl) {
-    connect = connect - ssl;
-  }
-
-  return { blocked, dns, connect, send, wait, receive, ssl };
-};
-
 export const extractItems = (data: NetworkEvent[]): NetworkItems => {
-  return data
-    .map((entry) => {
-      return {
-        ...entry,
-        timings: entry.timings
-          ? getTimings(entry.timings, entry.requestSentTime, entry.loadEndTime)
-          : undefined,
-      };
-    })
-    .sort((a: NetworkItem, b: NetworkItem) => {
-      return a.requestSentTime - b.requestSentTime;
-    });
+  return data.sort((a: NetworkItem, b: NetworkItem) => {
+    return a.requestSentTime - b.requestSentTime;
+  });
 };
 
 const formatValueForDisplay = (value: number, points: number = 3) => {
@@ -141,50 +37,36 @@ const getColourForMimeType = (mimeType?: string) => {
 };
 
 export const getSeriesAndDomain = (items: NetworkItems) => {
+  const getValueForOffset = (item: NetworkItem) => {
+    return item.requestSentTime;
+  };
+
   // The earliest point in time a request is sent or started. This will become our notion of "0".
   const zeroOffset = items.reduce<number>((acc, item) => {
-    const { requestSentTime } = item;
-    return requestSentTime < acc ? requestSentTime : acc;
+    const offsetValue = getValueForOffset(item);
+    return offsetValue < acc ? offsetValue : acc;
   }, Infinity);
 
-  const series = items.reduce<WaterfallData>((acc, item, index) => {
-    const { requestSentTime } = item;
+  const getValue = (timings: NetworkEvent['timings'], timing: Timings) => {
+    if (!timings) return;
 
-    // Entries without timings should be handled differently:
-    // https://github.com/ChromeDevTools/devtools-frontend/blob/ed2a064ac194bfae4e25c4748a9fa3513b3e9f7d/front_end/network/RequestTimingView.js#L140
-    // If there are no concrete timings just plot one block via request start and response end
-    if (!item.timings || item.timings === null) {
-      const duration = item.loadEndTime - item.requestSentTime;
-      const colour = getColourForMimeType(item.mimeType);
-      return [
-        ...acc,
-        {
-          x: index,
-          y0: item.requestSentTime - zeroOffset,
-          // NOTE: The loadEndTime can sometimes be "0"
-          y:
-            item.loadEndTime && item.loadEndTime > 0
-              ? item.loadEndTime - zeroOffset
-              : item.requestSentTime - zeroOffset,
-          config: {
-            colour,
-            tooltipProps: {
-              // NOTE: The loadEndTime can sometimes be "0"
-              value:
-                item.loadEndTime && item.loadEndTime > 0
-                  ? `${formatValueForDisplay(duration)}ms`
-                  : "Response time couldn't be determined",
-              colour,
-            },
-          },
-        },
-      ];
+    // SSL is a part of the connect timing
+    if (timing === Timings.Connect && timings.ssl > 0) {
+      return timings.connect - timings.ssl;
+    } else {
+      return timings[timing];
     }
+  };
 
-    let currentOffset = requestSentTime - zeroOffset;
+  const series = items.reduce<WaterfallData>((acc, item, index) => {
+    if (!item.timings) return acc;
+
+    const offsetValue = getValueForOffset(item);
+
+    let currentOffset = offsetValue - zeroOffset;
 
     TIMING_ORDER.forEach((timing) => {
-      const value = item.timings![timing];
+      const value = getValue(item.timings, timing);
       const colour =
         timing === Timings.Receive ? getColourForMimeType(item.mimeType) : colourPalette[timing];
       if (value && value >= 0) {

@@ -7,24 +7,16 @@
 import * as t from 'io-ts';
 
 const NetworkTimingsType = t.type({
-  dns_start: t.number,
-  push_end: t.number,
-  worker_fetch_start: t.number,
-  worker_respond_with_settled: t.number,
-  proxy_end: t.number,
-  worker_start: t.number,
-  worker_ready: t.number,
-  send_end: t.number,
-  connect_end: t.number,
-  connect_start: t.number,
-  send_start: t.number,
-  proxy_start: t.number,
-  push_start: t.number,
-  ssl_end: t.number,
-  receive_headers_end: t.number,
-  ssl_start: t.number,
-  request_time: t.number,
-  dns_end: t.number,
+  queueing: t.number,
+  connect: t.number,
+  total: t.number,
+  send: t.number,
+  blocked: t.number,
+  receive: t.number,
+  wait: t.number,
+  dns: t.number,
+  proxy: t.number,
+  ssl: t.number,
 });
 
 export type NetworkTimings = t.TypeOf<typeof NetworkTimingsType>;
