@@ -195,7 +195,6 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       currIntervalEndTime
     );
 
-    // Combine newly active with previously active entries
     return {
       shapesFilters,
       shapesIdsNamesMap,
