@@ -31,7 +31,7 @@ across restarts.
 `-i, --interactive`:: Prompts you for which encryption keys to set and optionally
 save output to a sample configuration file
 
-`-q, --quiet`:: Outputs the encryption keys without helper information
+`-q, --quiet`:: Outputs the encryption keys without helper information.
 
 `-f, --force`:: Shows help information.
 
