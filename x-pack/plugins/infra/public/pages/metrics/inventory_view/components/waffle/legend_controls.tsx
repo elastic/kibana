@@ -186,7 +186,7 @@ export const LegendControls = ({
         button={buttonComponent}
       >
         <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-        <EuiForm style={{ minWidth: 500 }}>
+        <EuiForm style={{ minWidth: 400 }}>
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
@@ -223,7 +223,6 @@ export const LegendControls = ({
               value={draftLegend.steps}
               onChange={handleStepsChange}
               showValue
-              compressed
               fullWidth
             />
           </EuiFormRow>
@@ -314,7 +313,7 @@ export const LegendControls = ({
             </div>
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
                 <FormattedMessage
