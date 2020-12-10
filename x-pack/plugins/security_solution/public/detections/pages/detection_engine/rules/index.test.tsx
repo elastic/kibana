@@ -49,12 +49,13 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   createPrepackagedRules: jest.fn(),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useToast: jest.fn(),
-    useHttp: jest.fn(),
-  };
-});
+// jest.mock('../../../../common/lib/kibana', () => {
+//   return {
+//     useToast: jest.fn(),
+//     useHttp: jest.fn(),
+//     useKibana: jest.fn(),
+//   };
+// });
 
 jest.mock('../../../components/value_lists_management_modal', () => {
   return {

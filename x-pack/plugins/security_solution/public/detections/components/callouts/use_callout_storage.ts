@@ -6,7 +6,8 @@
 
 import { difference, fromPairs, identity } from 'lodash/fp';
 import { useCallback, useMemo } from 'react';
-import { useEffectOnce, useMap } from 'react-use';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import useMap from 'react-use/lib/useMap';
 import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
 import { CallOutMessage } from './callout_types';
 
@@ -20,10 +21,10 @@ export const useCallOutStorage = (
   messages: CallOutMessage[],
   namespace: string = 'common'
 ): CallOutStorage => {
+  const { getMessages, addMessage } = useMessagesStorage();
+
   const visibilityStateInitial = useMemo(() => createInitialVisibilityState(messages), [messages]);
   const [visibilityState, setVisibilityState] = useMap(visibilityStateInitial);
-
-  const { getMessages, addMessage } = useMessagesStorage();
 
   const dismissedMessagesKey = getDismissedMessagesStorageKey(namespace);
 

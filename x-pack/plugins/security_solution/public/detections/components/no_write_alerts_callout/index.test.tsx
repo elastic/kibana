@@ -9,7 +9,8 @@ import { shallow } from 'enzyme';
 
 import { NoWriteAlertsCallOut } from './index';
 
-describe('no_write_alerts_callout', () => {
+// TODO: Add unit tests
+describe.skip('no_write_alerts_callout', () => {
   it('renders correctly', () => {
     const wrapper = shallow(<NoWriteAlertsCallOut />);
 
