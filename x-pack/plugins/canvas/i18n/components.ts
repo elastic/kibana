@@ -1429,7 +1429,7 @@ export const ComponentStrings = {
         defaultMessage: 'Full page layout',
       }),
     getPDFPanelAdvancedOptionsLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelOptionsLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelAdvancedOptionsLabel', {
         defaultMessage: 'Advanced options',
       }),
     getPDFPanelCopyAriaLabel: () =>
