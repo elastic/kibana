@@ -990,6 +990,38 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#updateStateOnCloseDimension', () => {
+    it('should not update when there are no incomplete columns', () => {
+      expect(
+        indexPatternDatasource.updateStateOnCloseDimension!({
+          state: {
+            indexPatternRefs: [],
+            existingFields: {},
+            isFirstExistenceFetch: false,
+            indexPatterns: expectedIndexPatterns,
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Foo',
+                    operationType: 'avg',
+                    sourceField: 'bytes',
+                  },
+                },
+                incompleteColumns: {},
+              },
+            },
+            currentIndexPatternId: '1',
+          },
+          layerId: 'first',
+          columnId: 'col1',
+        })
+      ).toBeUndefined();
+    });
+
     it('should clear the incomplete column', () => {
       const state = {
         indexPatternRefs: [],

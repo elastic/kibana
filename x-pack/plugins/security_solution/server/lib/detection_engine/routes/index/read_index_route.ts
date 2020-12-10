@@ -38,7 +38,7 @@ export const readIndexRoute = (router: IRouter) => {
           let mappingOutdated: boolean | null = null;
           try {
             const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
-            mappingOutdated = indexVersion !== SIGNALS_TEMPLATE_VERSION;
+            mappingOutdated = (indexVersion ?? 0) < SIGNALS_TEMPLATE_VERSION;
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version

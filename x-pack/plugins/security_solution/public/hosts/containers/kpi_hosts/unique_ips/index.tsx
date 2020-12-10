@@ -55,20 +55,7 @@ export const useHostsKpiUniqueIps = ({
   const [
     hostsKpiUniqueIpsRequest,
     setHostsKpiUniqueIpsRequest,
-  ] = useState<HostsKpiUniqueIpsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<HostsKpiUniqueIpsRequestOptions | null>(null);
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {
@@ -88,7 +75,7 @@ export const useHostsKpiUniqueIps = ({
 
   const hostsKpiUniqueIpsSearch = useCallback(
     (request: HostsKpiUniqueIpsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -145,7 +132,7 @@ export const useHostsKpiUniqueIps = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -161,7 +148,7 @@ export const useHostsKpiUniqueIps = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

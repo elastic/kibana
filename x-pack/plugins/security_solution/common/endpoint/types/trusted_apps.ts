@@ -39,7 +39,7 @@ export enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
-export interface ConditionEntry<T extends ConditionEntryField> {
+export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
   type: 'match';
   operator: 'included';

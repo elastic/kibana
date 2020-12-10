@@ -8,7 +8,6 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   EuiLink,
-  EuiIcon,
   EuiSpacer,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -27,13 +26,14 @@ import { MonitorRedirects } from './monitor_redirects';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
-    width: 35%;
+    width: 30%;
+    max-width: 250px;
   }
 `;
 
 export const MonListDescription = styled(EuiDescriptionListDescription)`
   &&& {
-    width: 65%;
+    width: 70%;
     overflow-wrap: anywhere;
   }
 `;
@@ -53,12 +53,7 @@ export const MonitorStatusBar: React.FC = () => {
         <StatusByLocations locations={locations ?? []} />
       </div>
       <EuiSpacer />
-      <EuiDescriptionList
-        type="column"
-        compressed={true}
-        textStyle="reverse"
-        style={{ maxWidth: '450px' }}
-      >
+      <EuiDescriptionList type="column" compressed={true} textStyle="reverse">
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
           <FormattedMessage
@@ -70,8 +65,8 @@ export const MonitorStatusBar: React.FC = () => {
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>
-          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-            {full} <EuiIcon type={'popout'} size="s" />
+          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank" external>
+            {full}
           </EuiLink>
         </MonListDescription>
         <MonListTitle>{MonitorIDLabel}</MonListTitle>

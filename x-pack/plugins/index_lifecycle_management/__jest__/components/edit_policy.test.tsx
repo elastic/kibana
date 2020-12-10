@@ -172,6 +172,9 @@ const MyComponent = ({
           existingPolicies,
           policyName,
           getUrlForApp,
+          license: {
+            canUseSearchableSnapshot: () => true,
+          },
         }}
       >
         <EditPolicy history={history} />
@@ -209,6 +212,7 @@ describe('edit policy', () => {
         getUrlForApp={jest.fn()}
         policyName="test"
         isCloudEnabled={false}
+        license={{ canUseSearchableSnapshot: () => true }}
       />
     );
 
@@ -247,6 +251,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       const rendered = mountWithIntl(component);
@@ -283,6 +288,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
 
@@ -318,7 +324,7 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', async () => {
+    test('should show errors when trying to save with no max size, no max age and no max docs', async () => {
       const rendered = mountWithIntl(component);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       await setPolicyName(rendered, 'mypolicy');
@@ -330,6 +336,11 @@ describe('edit policy', () => {
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation(rendered);
+      const maxDocsInput = findTestSubject(rendered, 'hot-selectedMaxDocuments');
+      await act(async () => {
+        maxDocsInput.simulate('change', { target: { value: '' } });
       });
       waitForFormLibValidation(rendered);
       await save(rendered);
@@ -827,6 +838,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={true}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       ({ http } = editPolicyHelpers.setup());

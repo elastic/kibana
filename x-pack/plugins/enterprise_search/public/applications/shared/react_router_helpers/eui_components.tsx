@@ -6,7 +6,15 @@
 
 import React from 'react';
 import { useValues } from 'kea';
-import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps, EuiPanel } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonEmptyProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiPanel,
+} from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
 import { KibanaLogic } from '../kibana';
@@ -80,6 +88,18 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
 }) => (
   <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiButton {...rest} />
+  </ReactRouterHelper>
+);
+
+type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
+export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiButtonEmpty {...rest} />
   </ReactRouterHelper>
 );
 

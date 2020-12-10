@@ -10,16 +10,18 @@ import { useDispatch } from 'react-redux';
 
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { updateTimelineGraphEventId } from '../../../store/timeline/actions';
+import { setActiveTabTimeline, updateTimelineGraphEventId } from '../../../store/timeline/actions';
 import {
   TimelineEventsType,
   TimelineTypeLiteral,
   TimelineType,
+  TimelineId,
 } from '../../../../../common/types/timeline';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
 
 import * as i18n from './translations';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -115,7 +117,9 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
 };
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
-  get(['agent', 'type', 0], ecsData) === 'endpoint' &&
+  (get(['agent', 'type', 0], ecsData) === 'endpoint' ||
+    (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
+      get(['event', 'module', 0], ecsData) === 'sysmon')) &&
   get(['process', 'entity_id'], ecsData)?.length === 1 &&
   get(['process', 'entity_id', 0], ecsData) !== '';
 
@@ -130,10 +134,12 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 }) => {
   const dispatch = useDispatch();
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
-  const handleClick = useCallback(
-    () => dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id })),
-    [dispatch, ecsData._id, timelineId]
-  );
+  const handleClick = useCallback(() => {
+    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (TimelineId.active) {
+      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    }
+  }, [dispatch, ecsData._id, timelineId]);
 
   return (
     <ActionIconItem

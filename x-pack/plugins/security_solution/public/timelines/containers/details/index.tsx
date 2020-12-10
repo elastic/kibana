@@ -50,7 +50,7 @@ export const useTimelineEventsDetails = ({
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -97,7 +97,7 @@ export const useTimelineEventsDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -109,12 +109,12 @@ export const useTimelineEventsDetails = ({
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

@@ -89,6 +89,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esTransportPort = "61${parallelId}3"
   def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
+  def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -101,7 +102,9 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
-    "ALERTING_PROXY_PORT=${alertingProxyPort}"
+    "ALERTING_PROXY_PORT=${alertingProxyPort}",
+    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
   }

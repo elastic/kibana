@@ -101,26 +101,7 @@ export const useTimelineEvents = ({
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
   const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
-    !skip
-      ? {
-          fields: [],
-          fieldRequested: fields,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          pagination: {
-            activePage,
-            querySize: limit,
-          },
-          sort,
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: TimelineEventsQueries.all,
-        }
-      : null
+    null
   );
   const prevTimelineRequest = usePreviousRequest(timelineRequest);
 
@@ -171,7 +152,7 @@ export const useTimelineEvents = ({
 
   const timelineSearch = useCallback(
     (request: TimelineEventsAllRequestOptions | null) => {
-      if (request == null || pageName === '') {
+      if (request == null || pageName === '' || skip) {
         return;
       }
       let didCancel = false;
@@ -266,11 +247,11 @@ export const useTimelineEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, id, notifications.toasts, pageName, refetchGrid, wrappedLoadPage]
+    [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
   );
 
   useEffect(() => {
-    if (skip || skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
@@ -324,11 +305,7 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (
-        !skip &&
-        !skipQueryForDetectionsPage(id, indexNames) &&
-        !deepEqual(prevRequest, currentRequest)
-      ) {
+      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;
@@ -344,7 +321,6 @@ export const useTimelineEvents = ({
     limit,
     startDate,
     sort,
-    skip,
     fields,
   ]);
 

@@ -31,3 +31,27 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
     });
   },
 });
+
+export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'GET',
+  path: '/api/uptime/journeys/failed_steps',
+  validate: {
+    query: schema.object({
+      checkGroups: schema.arrayOf(schema.string()),
+    }),
+  },
+  handler: async ({ uptimeEsClient }, _context, request, response) => {
+    const { checkGroups } = request.query;
+    const result = await libs.requests.getJourneyFailedSteps({
+      uptimeEsClient,
+      checkGroups,
+    });
+
+    return response.ok({
+      body: {
+        checkGroups,
+        steps: result,
+      },
+    });
+  },
+});

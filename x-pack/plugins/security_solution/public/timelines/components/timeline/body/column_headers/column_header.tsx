@@ -8,23 +8,22 @@ import React, { useCallback, useMemo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
 
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
-import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
+import { OnFilterChange } from '../../events';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
 
 import { Header } from './header';
+import { timelineActions } from '../../../../store/timeline';
 
 const RESIZABLE_ENABLE = { right: true };
 
 interface ColumneHeaderProps {
   draggableIndex: number;
   header: ColumnHeaderOptions;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnSorted: OnColumnSorted;
-  onColumnResized: OnColumnResized;
   isDragging: boolean;
   onFilterChange?: OnFilterChange;
   sort: Sort;
@@ -36,12 +35,10 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   header,
   timelineId,
   isDragging,
-  onColumnRemoved,
-  onColumnResized,
-  onColumnSorted,
   onFilterChange,
   sort,
 }) => {
+  const dispatch = useDispatch();
   const resizableSize = useMemo(
     () => ({
       width: header.width,
@@ -65,9 +62,15 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
   const handleResizeStop: ResizeCallback = useCallback(
     (e, direction, ref, delta) => {
-      onColumnResized({ columnId: header.id, delta: delta.width });
+      dispatch(
+        timelineActions.applyDeltaToColumnWidth({
+          columnId: header.id,
+          delta: delta.width,
+          id: timelineId,
+        })
+      );
     },
-    [header.id, onColumnResized]
+    [dispatch, header.id, timelineId]
   );
   const draggableId = useMemo(
     () =>
@@ -90,15 +93,13 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
           <Header
             timelineId={timelineId}
             header={header}
-            onColumnRemoved={onColumnRemoved}
-            onColumnSorted={onColumnSorted}
             onFilterChange={onFilterChange}
             sort={sort}
           />
         </EventsThContent>
       </EventsTh>
     ),
-    [header, onColumnRemoved, onColumnSorted, onFilterChange, sort, timelineId]
+    [header, onFilterChange, sort, timelineId]
   );
 
   return (
@@ -129,9 +130,6 @@ export const ColumnHeader = React.memo(
     prevProps.draggableIndex === nextProps.draggableIndex &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.isDragging === nextProps.isDragging &&
-    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
-    prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onFilterChange === nextProps.onFilterChange &&
     prevProps.sort === nextProps.sort &&
     deepEqual(prevProps.header, nextProps.header)

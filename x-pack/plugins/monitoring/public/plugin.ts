@@ -93,7 +93,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggersActionsUi,
+          triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 

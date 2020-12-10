@@ -26,14 +26,14 @@ export function mockEndpointEvent({
   eventType?: string;
   eventCategory?: string;
   pid?: number;
-  eventID?: string;
+  eventID?: string | number;
 }): SafeResolverEvent {
   return {
     '@timestamp': timestamp,
     event: {
       type: eventType,
       category: eventCategory,
-      id: eventID,
+      id: String(eventID),
     },
     agent: {
       id: 'agent.id',

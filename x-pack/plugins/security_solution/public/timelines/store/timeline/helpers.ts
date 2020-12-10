@@ -19,7 +19,7 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -177,7 +177,6 @@ interface AddNewTimelineParams {
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
   sort?: Sort;
@@ -197,7 +196,7 @@ export const addNewTimeline = ({
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
   indexNames,
-  kqlQuery = { filterQuery: null, filterQueryDraft: null },
+  kqlQuery = { filterQuery: null },
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
@@ -577,31 +576,6 @@ export const updateTimelineKqlMode = ({
     [id]: {
       ...timeline,
       kqlMode,
-    },
-  };
-};
-
-interface UpdateKqlFilterQueryDraftParams {
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-  timelineById: TimelineById;
-}
-
-export const updateKqlFilterQueryDraft = ({
-  id,
-  filterQueryDraft,
-  timelineById,
-}: UpdateKqlFilterQueryDraftParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      kqlQuery: {
-        ...timeline.kqlQuery,
-        filterQueryDraft,
-      },
     },
   };
 };

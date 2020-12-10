@@ -160,7 +160,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
@@ -269,9 +269,10 @@ export interface AuthToolkit {
 // @public
 export class BasePath {
     // @internal
-    constructor(serverBasePath?: string);
+    constructor(serverBasePath?: string, publicBaseUrl?: string);
     get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
     set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
@@ -862,7 +863,7 @@ export interface HttpResponseOptions {
 // @public
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
-// @public (undocumented)
+// @public
 export interface HttpServerInfo {
     hostname: string;
     name: string;
@@ -2406,6 +2407,12 @@ export interface SavedObjectsImportUnsupportedTypeError {
 }
 
 // @public (undocumented)
+export interface SavedObjectsIncrementCounterField {
+    fieldName: string;
+    incrementBy?: number;
+}
+
+// @public (undocumented)
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
     initialize?: boolean;
     // (undocumented)
@@ -2486,7 +2493,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
@@ -2512,7 +2519,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
-    generateRawId(namespace: string | undefined, type: string, id?: string): string;
+    generateRawId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
     rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
@@ -2594,6 +2601,8 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public (undocumented)
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
+    static generateId(): string;
+    static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
@@ -2791,7 +2800,7 @@ export interface UiSettingsParams<T = unknown> {
     description?: string;
     // @deprecated
     metric?: {
-        type: UiStatsMetricType;
+        type: UiCounterMetricType;
         name: string;
     };
     name?: string;

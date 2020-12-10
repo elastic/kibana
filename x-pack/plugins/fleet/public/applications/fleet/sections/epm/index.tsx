@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
 import { CreatePackagePolicyPage } from '../agent_policy/create_package_policy_page';
@@ -16,18 +16,16 @@ export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');
 
   return (
-    <Router>
-      <Switch>
-        <Route path={PAGE_ROUTING_PATHS.add_integration_to_policy}>
-          <CreatePackagePolicyPage />
-        </Route>
-        <Route path={PAGE_ROUTING_PATHS.integration_details}>
-          <Detail />
-        </Route>
-        <Route path={PAGE_ROUTING_PATHS.integrations}>
-          <EPMHomePage />
-        </Route>
-      </Switch>
-    </Router>
+    <Switch>
+      <Route path={PAGE_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
+      </Route>
+      <Route path={PAGE_ROUTING_PATHS.integration_details}>
+        <Detail />
+      </Route>
+      <Route path={PAGE_ROUTING_PATHS.integrations}>
+        <EPMHomePage />
+      </Route>
+    </Switch>
   );
 };

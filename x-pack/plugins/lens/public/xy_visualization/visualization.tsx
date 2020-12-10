@@ -187,8 +187,10 @@ export const getXyVisualization = ({
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
         frame,
-        layer,
-        sortedAccessors,
+        {
+          ...layer,
+          accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        },
         paletteService
       );
     }

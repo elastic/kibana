@@ -247,8 +247,7 @@ export function LayerPanel(
                     const isFromTheSameGroup =
                       isDraggedOperation(dragging) &&
                       dragging.groupId === group.groupId &&
-                      dragging.columnId !== accessor &&
-                      dragging.groupId !== 'y'; // TODO: remove this line when https://github.com/elastic/elastic-charts/issues/868 is fixed
+                      dragging.columnId !== accessor;
 
                     const isDroppable = isDraggedOperation(dragging)
                       ? dragType === 'reorder'
@@ -322,6 +321,7 @@ export function LayerPanel(
                         <div className="lnsLayerPanel__dimension">
                           <EuiLink
                             className="lnsLayerPanel__dimensionLink"
+                            data-test-subj="lnsLayerPanel-dimensionLink"
                             onClick={() => {
                               if (activeId) {
                                 setActiveDimension(initialActiveDimensionState);
@@ -486,7 +486,9 @@ export function LayerPanel(
                 layerId,
                 columnId: activeId!,
               });
-              props.updateDatasource(datasourceId, newState);
+              if (newState) {
+                props.updateDatasource(datasourceId, newState);
+              }
             }
             setActiveDimension(initialActiveDimensionState);
           }}
@@ -501,17 +503,21 @@ export function LayerPanel(
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
                     dimensionGroups: groups,
-                    setState: (newState: unknown) => {
-                      props.updateAll(
-                        datasourceId,
-                        newState,
-                        activeVisualization.setDimension({
-                          layerId,
-                          groupId: activeGroup.groupId,
-                          columnId: activeId,
-                          prevState: props.visualizationState,
-                        })
-                      );
+                    setState: (newState: unknown, shouldUpdateVisualization?: boolean) => {
+                      if (shouldUpdateVisualization) {
+                        props.updateAll(
+                          datasourceId,
+                          newState,
+                          activeVisualization.setDimension({
+                            layerId,
+                            groupId: activeGroup.groupId,
+                            columnId: activeId,
+                            prevState: props.visualizationState,
+                          })
+                        );
+                      } else {
+                        props.updateDatasource(datasourceId, newState);
+                      }
                       setActiveDimension({
                         ...activeDimension,
                         isNew: false,

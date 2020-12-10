@@ -28,14 +28,14 @@ describe('getTagConnectionsUrl', () => {
   it('appends the basePath to the generated url', () => {
     const tag = createTag('myTag');
     expect(getTagConnectionsUrl(tag, httpMock.basePath)).toMatchInlineSnapshot(
-      `"/my-base-path/app/management/kibana/objects?initialQuery=tag%3A(myTag)"`
+      `"/my-base-path/app/management/kibana/objects?initialQuery=tag%3A(%22myTag%22)"`
     );
   });
 
   it('escapes the query', () => {
     const tag = createTag('tag with spaces');
     expect(getTagConnectionsUrl(tag, httpMock.basePath)).toMatchInlineSnapshot(
-      `"/my-base-path/app/management/kibana/objects?initialQuery=tag%3A(tag%20with%20spaces)"`
+      `"/my-base-path/app/management/kibana/objects?initialQuery=tag%3A(%22tag%20with%20spaces%22)"`
     );
   });
 });

@@ -80,7 +80,7 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
 };
 
 // TODO: Find a way to retrieve it automatically
-// Searching `reportUiStats` across Kibana
+// Searching `reportUiCounter` across Kibana
 export const uiMetricSchema: MakeSchemaFrom<UIMetricUsage> = {
   console: commonSchema,
   DashboardPanelVersionInUrl: commonSchema,

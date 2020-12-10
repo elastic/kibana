@@ -26,6 +26,10 @@ import { AlertsTableFilterGroup } from '../../../detections/components/alerts_ta
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useTimelineEvents } from '../../../timelines/containers';
 
+jest.mock('../../../timelines/components/graph_overlay', () => ({
+  GraphOverlay: jest.fn(() => <div />),
+}));
+
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -70,7 +74,6 @@ const eventsViewerDefaultProps = {
   itemsPerPage: 10,
   itemsPerPageOptions: [],
   kqlMode: 'filter' as KqlMode,
-  onChangeItemsPerPage: jest.fn(),
   query: {
     query: '',
     language: 'kql',
@@ -81,7 +84,6 @@ const eventsViewerDefaultProps = {
     sortDirection: 'none' as SortDirection,
   },
   scopeId: SourcererScopeName.timeline,
-  toggleColumn: jest.fn(),
   utilityBar,
 };
 

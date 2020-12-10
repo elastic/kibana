@@ -129,7 +129,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
             ? theme.eui.euiColorPrimaryText
-            : theme.eui.textColors.text,
+            : theme.eui.euiTextColor,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
