@@ -51,14 +51,14 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
 const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
   switch (jobType) {
     case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
-      return 'nominal';
+      return LEGEND_TYPES.NOMINAL;
     case ANALYSIS_CONFIG_TYPE.REGRESSION:
-      return 'quantitative';
+      return LEGEND_TYPES.QUANTITATIVE;
     default:
       return undefined;
   }

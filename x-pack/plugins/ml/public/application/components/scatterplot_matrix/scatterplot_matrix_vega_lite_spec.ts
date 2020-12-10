@@ -10,9 +10,15 @@ import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
 import { i18n } from '@kbn/i18n';
 
-export type LegendType = 'nominal' | 'quantitative';
+export const LEGEND_TYPES = {
+  NOMINAL: 'nominal',
+  QUANTITATIVE: 'quantitative',
+} as const;
+export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
+
+const SCATTERPLOT_SIZE = 125;
 
 const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
   if (outliers) {
@@ -84,7 +90,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
         size: {
           ...(outliers && dynamicSize
             ? {
-                type: 'quantitative',
+                type: LEGEND_TYPES.QUANTITATIVE,
                 field: OUTLIER_SCORE_FIELD,
                 scale: {
                   type: 'linear',
@@ -94,9 +100,9 @@ export const getScatterplotMatrixVegaLiteSpec = (
               }
             : { value: 2 }),
         },
-        tooltip: { type: 'quantitative', field: OUTLIER_SCORE_FIELD },
-        x: { type: 'quantitative', field: { repeat: 'column' } },
-        y: { type: 'quantitative', field: { repeat: 'row' } },
+        tooltip: { type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD },
+        x: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'column' } },
+        y: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'row' } },
         ...(outliers
           ? {
               order: { field: OUTLIER_SCORE_FIELD },
@@ -124,8 +130,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
           }
         : {}),
       transform,
-      width: 125,
-      height: 125,
+      width: SCATTERPLOT_SIZE,
+      height: SCATTERPLOT_SIZE,
     },
   };
 };
