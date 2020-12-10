@@ -1,5 +1,5 @@
 {
-  "name": "Query with a threat mapping",
+  "name": "Query with a indicator mapping",
   "description": "Query with a threat mapping",
   "rule_id": "threat-mapping",
   "risk_score": 1,

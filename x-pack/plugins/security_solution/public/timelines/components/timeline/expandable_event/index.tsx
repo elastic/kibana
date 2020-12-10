@@ -4,88 +4,81 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import { find } from 'lodash/fp';
+import { EuiTextColor, EuiLoadingContent, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
 
-import { BrowserFields } from '../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
+import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import {
+  EventDetails,
+  EventsViewType,
+  View,
+} from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
-import { LazyAccordion } from '../../lazy_accordion';
-import { OnUpdateColumns } from '../events';
-
-const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
-  ${({ hideExpandButton }) =>
-    hideExpandButton
-      ? `
-  .euiAccordion__button {
-    display: none;
-  }
-  `
-      : ''};
-`;
-
-ExpandableDetails.displayName = 'ExpandableDetails';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import * as i18n from './translations';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  id: string;
-  event: TimelineEventsDetailsItem[];
-  forceExpand?: boolean;
-  hideExpandButton?: boolean;
-  onEventToggled: () => void;
-  onUpdateColumns: OnUpdateColumns;
+  docValueFields: DocValueFields[];
+  event: TimelineExpandedEvent;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
+export const ExpandableEventTitle = React.memo(() => (
+  <EuiTitle size="s">
+    <h4>{i18n.EVENT_DETAILS}</h4>
+  </EuiTitle>
+));
+
+ExpandableEventTitle.displayName = 'ExpandableEventTitle';
+
 export const ExpandableEvent = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    event,
-    forceExpand = false,
-    id,
-    timelineId,
-    toggleColumn,
-    onEventToggled,
-    onUpdateColumns,
-  }) => {
-    const handleRenderExpandedContent = useCallback(
-      () => (
-        <StatefulEventDetails
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          data={event}
-          id={id}
-          onEventToggled={onEventToggled}
-          onUpdateColumns={onUpdateColumns}
-          timelineId={timelineId}
-          toggleColumn={toggleColumn}
-        />
-      ),
-      [
-        browserFields,
-        columnHeaders,
-        event,
-        id,
-        onEventToggled,
-        onUpdateColumns,
-        timelineId,
-        toggleColumn,
-      ]
-    );
+  ({ browserFields, docValueFields, event, timelineId }) => {
+    const [view, setView] = useState<View>(EventsViewType.tableView);
+
+    const [loading, detailsData] = useTimelineEventsDetails({
+      docValueFields,
+      indexName: event.indexName!,
+      eventId: event.eventId!,
+      skip: !event.eventId,
+    });
+
+    const message = useMemo(() => {
+      if (detailsData) {
+        const messageField = find({ category: 'base', field: 'message' }, detailsData) as
+          | TimelineEventsDetailsItem
+          | undefined;
+
+        if (messageField?.originalValue) {
+          return messageField?.originalValue;
+        }
+      }
+      return null;
+    }, [detailsData]);
+
+    if (!event.eventId) {
+      return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
+    }
+
+    if (loading) {
+      return <EuiLoadingContent lines={10} />;
+    }
 
     return (
-      <ExpandableDetails hideExpandButton={true}>
-        <LazyAccordion
-          id={`timeline-${timelineId}-row-${id}`}
-          renderExpandedContent={handleRenderExpandedContent}
-          forceExpand={forceExpand}
-          paddingSize="none"
+      <>
+        <EuiText>{message}</EuiText>
+        <EuiSpacer size="m" />
+        <EventDetails
+          browserFields={browserFields}
+          data={detailsData!}
+          id={event.eventId!}
+          onViewSelected={setView}
+          timelineId={timelineId}
+          view={view}
         />
-      </ExpandableDetails>
+      </>
     );
   }
 );

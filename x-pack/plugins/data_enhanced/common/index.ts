@@ -10,6 +10,9 @@ export {
   EqlRequestParams,
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-  IAsyncSearchRequest,
-  IEnhancedEsSearchRequest,
+  IAsyncSearchOptions,
+  pollSearch,
+  BackgroundSessionSavedObjectAttributes,
+  BackgroundSessionFindOptions,
+  BackgroundSessionStatus,
 } from './search';

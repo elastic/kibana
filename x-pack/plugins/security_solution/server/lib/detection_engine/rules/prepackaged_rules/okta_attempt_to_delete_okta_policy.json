@@ -24,10 +24,11 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Monitoring",
-    "Continuous Monitoring"
+    "Monitoring"
   ],
   "type": "query",
   "version": 2

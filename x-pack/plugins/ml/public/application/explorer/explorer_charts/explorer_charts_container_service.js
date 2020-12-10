@@ -28,10 +28,12 @@ import { mlJobService } from '../../services/job_service';
 import { explorerService } from '../explorer_dashboard_service';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { i18n } from '@kbn/i18n';
 
 export function getDefaultChartsData() {
   return {
     chartsPerRow: 1,
+    errorMessages: undefined,
     seriesToPlot: [],
     // default values, will update on every re-render
     tooManyBuckets: false,
@@ -46,8 +48,6 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
-// callback(getDefaultChartsData());
-
 export const anomalyDataChange = function (
   chartsContainerWidth,
   anomalyRecords,
@@ -60,7 +60,7 @@ export const anomalyDataChange = function (
   const filteredRecords = anomalyRecords.filter((record) => {
     return Number(record.record_score) >= severity;
   });
-  const allSeriesRecords = processRecordsForDisplay(filteredRecords);
+  const [allSeriesRecords, errorMessages] = processRecordsForDisplay(filteredRecords);
   // Calculate the number of charts per row, depending on the width available, to a max of 4.
   let chartsPerRow = Math.min(
     Math.max(Math.floor(chartsContainerWidth / 550), 1),
@@ -99,10 +99,12 @@ export const anomalyDataChange = function (
     chartData: null,
   }));
 
+  data.errorMessages = errorMessages;
+
   explorerService.setCharts({ ...data });
 
   if (seriesConfigs.length === 0) {
-    return;
+    return data;
   }
 
   // Query 1 - load the raw metric data.
@@ -111,7 +113,9 @@ export const anomalyDataChange = function (
 
     const job = mlJobService.getJob(jobId);
 
-    // If source data can be plotted, use that, otherwise model plot will be available.
+    // If the job uses aggregation or scripted fields, and if it's a config we don't support
+    // use model plot data if model plot is enabled
+    // else if source data can be plotted, use that, otherwise model plot will be available.
     const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
     if (useSourceData === true) {
       const datafeedQuery = get(config, 'datafeedConfig.query', null);
@@ -125,7 +129,8 @@ export const anomalyDataChange = function (
           config.timeField,
           range.min,
           range.max,
-          bucketSpanSeconds * 1000
+          bucketSpanSeconds * 1000,
+          config.datafeedConfig
         )
         .toPromise();
     } else {
@@ -423,21 +428,50 @@ export const anomalyDataChange = function (
 function processRecordsForDisplay(anomalyRecords) {
   // Aggregate the anomaly data by detector, and entity (by/over/partition).
   if (anomalyRecords.length === 0) {
-    return [];
+    return [[], undefined];
   }
 
   // Aggregate by job, detector, and analysis fields (partition, by, over).
   const aggregatedData = {};
+
+  const jobsErrorMessage = {};
   each(anomalyRecords, (record) => {
     // Check if we can plot a chart for this record, depending on whether the source data
     // is chartable, and if model plot is enabled for the job.
     const job = mlJobService.getJob(record.job_id);
+
+    // if we already know this job has datafeed aggregations we cannot support
+    // no need to do more checks
+    if (jobsErrorMessage[record.job_id] !== undefined) {
+      return;
+    }
+
     let isChartable = isSourceDataChartableForDetector(job, record.detector_index);
-    if (isChartable === false && isModelPlotChartableForDetector(job, record.detector_index)) {
-      // Check if model plot is enabled for this job.
-      // Need to check the entity fields for the record in case the model plot config has a terms list.
-      const entityFields = getEntityFieldList(record);
-      isChartable = isModelPlotEnabled(job, record.detector_index, entityFields);
+    if (isChartable === false) {
+      if (isModelPlotChartableForDetector(job, record.detector_index)) {
+        // Check if model plot is enabled for this job.
+        // Need to check the entity fields for the record in case the model plot config has a terms list.
+        const entityFields = getEntityFieldList(record);
+        if (isModelPlotEnabled(job, record.detector_index, entityFields)) {
+          isChartable = true;
+        } else {
+          isChartable = false;
+          jobsErrorMessage[record.job_id] = i18n.translate(
+            'xpack.ml.timeSeriesJob.sourceDataNotChartableWithDisabledModelPlotMessage',
+            {
+              defaultMessage:
+                'source data is not viewable for this detector and model plot is disabled',
+            }
+          );
+        }
+      } else {
+        jobsErrorMessage[record.job_id] = i18n.translate(
+          'xpack.ml.timeSeriesJob.sourceDataModelPlotNotChartableMessage',
+          {
+            defaultMessage: 'both source data and model plot are not chartable for this detector',
+          }
+        );
+      }
     }
 
     if (isChartable === false) {
@@ -530,34 +564,48 @@ function processRecordsForDisplay(anomalyRecords) {
     }
   });
 
+  // Group job id by error message instead of by job:
+  const errorMessages = {};
+  Object.keys(jobsErrorMessage).forEach((jobId) => {
+    const msg = jobsErrorMessage[jobId];
+    if (errorMessages[msg] === undefined) {
+      errorMessages[msg] = new Set([jobId]);
+    } else {
+      errorMessages[msg].add(jobId);
+    }
+  });
   let recordsForSeries = [];
   // Convert to an array of the records with the highest record_score per unique series.
   each(aggregatedData, (detectorsForJob) => {
     each(detectorsForJob, (groupsForDetector) => {
-      if (groupsForDetector.maxScoreRecord !== undefined) {
-        // Detector with no partition / by field.
-        recordsForSeries.push(groupsForDetector.maxScoreRecord);
+      if (groupsForDetector.errorMessage !== undefined) {
+        recordsForSeries.push(groupsForDetector.errorMessage);
       } else {
-        each(groupsForDetector, (valuesForGroup) => {
-          each(valuesForGroup, (dataForGroupValue) => {
-            if (dataForGroupValue.maxScoreRecord !== undefined) {
-              recordsForSeries.push(dataForGroupValue.maxScoreRecord);
-            } else {
-              // Second level of aggregation for partition and by/over.
-              each(dataForGroupValue, (splitsForGroup) => {
-                each(splitsForGroup, (dataForSplitValue) => {
-                  recordsForSeries.push(dataForSplitValue.maxScoreRecord);
+        if (groupsForDetector.maxScoreRecord !== undefined) {
+          // Detector with no partition / by field.
+          recordsForSeries.push(groupsForDetector.maxScoreRecord);
+        } else {
+          each(groupsForDetector, (valuesForGroup) => {
+            each(valuesForGroup, (dataForGroupValue) => {
+              if (dataForGroupValue.maxScoreRecord !== undefined) {
+                recordsForSeries.push(dataForGroupValue.maxScoreRecord);
+              } else {
+                // Second level of aggregation for partition and by/over.
+                each(dataForGroupValue, (splitsForGroup) => {
+                  each(splitsForGroup, (dataForSplitValue) => {
+                    recordsForSeries.push(dataForSplitValue.maxScoreRecord);
+                  });
                 });
-              });
-            }
+              }
+            });
           });
-        });
+        }
       }
     });
   });
   recordsForSeries = sortBy(recordsForSeries, 'record_score').reverse();
 
-  return recordsForSeries;
+  return [recordsForSeries, errorMessages];
 }
 
 function calculateChartRange(
@@ -571,11 +619,14 @@ function calculateChartRange(
   let tooManyBuckets = false;
   // Calculate the time range for the charts.
   // Fit in as many points in the available container width plotted at the job bucket span.
+  // Look for the chart with the shortest bucket span as this determines
+  // the length of the time range that can be plotted.
   const midpointMs = Math.ceil((selectedEarliestMs + selectedLatestMs) / 2);
+  const minBucketSpanMs = Math.min.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
   const maxBucketSpanMs = Math.max.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
   const pointsToPlotFullSelection = Math.ceil(
-    (selectedLatestMs - selectedEarliestMs) / maxBucketSpanMs
+    (selectedLatestMs - selectedEarliestMs) / minBucketSpanMs
   );
 
   // Optimally space points 5px apart.
@@ -588,16 +639,16 @@ function calculateChartRange(
   const halfPoints = Math.ceil(plotPoints / 2);
   const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
+  const boundsMin = bounds.min.valueOf();
 
   let chartRange = {
-    min: Math.max(midpointMs - halfPoints * maxBucketSpanMs, bounds.min.valueOf()),
-    max: Math.min(midpointMs + halfPoints * maxBucketSpanMs, bounds.max.valueOf()),
+    min: Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin),
+    max: Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf()),
   };
 
   if (plotPoints > CHART_MAX_POINTS) {
-    tooManyBuckets = true;
     // For each series being plotted, display the record with the highest score if possible.
-    const maxTimeSpan = maxBucketSpanMs * CHART_MAX_POINTS;
+    const maxTimeSpan = minBucketSpanMs * CHART_MAX_POINTS;
     let minMs = recordsToPlot[0][timeFieldName];
     let maxMs = recordsToPlot[0][timeFieldName];
 
@@ -620,12 +671,31 @@ function calculateChartRange(
     });
 
     if (maxMs - minMs < maxTimeSpan) {
-      // Expand out to cover as much as the requested time span as possible.
-      minMs = Math.max(selectedEarliestMs, minMs - maxTimeSpan);
-      maxMs = Math.min(selectedLatestMs, maxMs + maxTimeSpan);
+      // Expand out before and after the span with the highest scoring anomalies,
+      // covering as much as the requested time span as possible.
+      // Work out if the high scoring region is nearer the start or end of the selected time span.
+      const diff = maxTimeSpan - (maxMs - minMs);
+      if (minMs - 0.5 * diff <= selectedEarliestMs) {
+        minMs = Math.max(selectedEarliestMs, minMs - 0.5 * diff);
+        maxMs = minMs + maxTimeSpan;
+      } else {
+        maxMs = Math.min(selectedLatestMs, maxMs + 0.5 * diff);
+        minMs = maxMs - maxTimeSpan;
+      }
     }
 
     chartRange = { min: minMs, max: maxMs };
+  }
+
+  // Elasticsearch aggregation returns points at start of bucket,
+  // so align the min to the length of the longest bucket.
+  chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
+  if (chartRange.min < boundsMin) {
+    chartRange.min = chartRange.min + maxBucketSpanMs;
+  }
+
+  if (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) {
+    tooManyBuckets = true;
   }
 
   return {

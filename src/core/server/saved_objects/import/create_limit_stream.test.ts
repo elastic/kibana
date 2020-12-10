@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  createConcatStream,
-  createListStream,
-  createPromiseFromStreams,
-} from '../../utils/streams';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { createLimitStream } from './create_limit_stream';
 
 describe('createLimitStream()', () => {

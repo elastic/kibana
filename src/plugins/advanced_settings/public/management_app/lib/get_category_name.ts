@@ -25,6 +25,12 @@ const names: Record<string, string> = {
   general: i18n.translate('advancedSettings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),
+  machineLearning: i18n.translate('advancedSettings.categoryNames.machineLearningLabel', {
+    defaultMessage: 'Machine Learning',
+  }),
+  observability: i18n.translate('advancedSettings.categoryNames.observabilityLabel', {
+    defaultMessage: 'Observability',
+  }),
   timelion: i18n.translate('advancedSettings.categoryNames.timelionLabel', {
     defaultMessage: 'Timelion',
   }),

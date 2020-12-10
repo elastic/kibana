@@ -22,7 +22,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public';
+} from '@kbn/test/jest';
 
 // Data
 import series from '../../fixtures/mock_data/date_histogram/_series';
@@ -157,7 +157,7 @@ dateHistogramArray.forEach(function (data, i) {
           const args = Array.from(arguments);
           expect(args.length).toBe(2);
           expect(args[0]).toBe('click');
-          expect(args[1]).toBe(event);
+          expect(args[1].data).toBe(event);
           done();
         };
 

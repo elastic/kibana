@@ -25,6 +25,7 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
     getAlertsClientWithRequest: jest.fn().mockResolvedValue(alertsClientMock.create()),
+    getFrameworkHealth: jest.fn(),
   };
   return mock;
 };
@@ -61,6 +62,7 @@ const createAlertServicesMock = () => {
     callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
     getLegacyScopedClusterClient: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

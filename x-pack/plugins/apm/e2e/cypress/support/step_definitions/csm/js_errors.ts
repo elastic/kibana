@@ -12,12 +12,7 @@ Then(`it displays list of relevant js errors`, () => {
   cy.get('.euiBasicTable-loading').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
-  getDataTestSubj('uxJsErrorsTotal').should('have.text', 'Total errors110');
-
-  getDataTestSubj('uxJsErrorRate').should(
-    'have.text',
-    'Error rate100 %Error rate 100 %'
-  );
+  getDataTestSubj('uxJsErrorsTotal').should('have.text', 'Total errors112');
 
   getDataTestSubj('uxJsErrorTable').within(() => {
     cy.get('tr.euiTableRow', DEFAULT_TIMEOUT)

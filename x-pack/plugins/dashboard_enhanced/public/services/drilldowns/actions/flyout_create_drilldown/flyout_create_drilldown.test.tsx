@@ -129,7 +129,7 @@ describe('isCompatible', () => {
     });
   });
 
-  test('not compatible if no triggers intersection', async () => {
+  test('not compatible if no triggers intersect', async () => {
     await assertNonCompatibility({
       actionFactoriesTriggers: [],
     });

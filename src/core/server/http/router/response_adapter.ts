@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import {
+  ResponseObject as HapiResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
+} from '@hapi/hapi';
 import typeDetect from 'type-detect';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import * as stream from 'stream';
 
 import {

@@ -39,16 +39,16 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    const savedObject = (mockCases.find((s) => s.id === 'mock-id-1') as unknown) as SavedObject<
-      ESCaseAttributes
-    >;
+    const savedObject = (mockCases.find(
+      (s) => s.id === 'mock-id-1'
+    ) as unknown) as SavedObject<ESCaseAttributes>;
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual(
       flattenCaseSavedObject({
@@ -70,7 +70,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -94,7 +94,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -104,7 +104,7 @@ describe('GET case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload.comments).toHaveLength(3);
+    expect(response.payload.comments).toHaveLength(4);
   });
 
   it(`returns an error when thrown from getAllCaseComments`, async () => {
@@ -119,7 +119,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCasesErrorTriggerData,
       })
@@ -142,7 +142,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
@@ -171,7 +171,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
         caseConfigureSavedObject: mockCaseConfigure,
@@ -201,7 +201,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,

@@ -27,7 +27,7 @@ const getMockContext = () =>
 
 const getMockRequest = () =>
   ({
-    url: { port: '5601', query: '', path: '/foo' },
+    url: { port: '5601', search: '', pathname: '/foo' },
     route: { path: '/foo', options: {} },
   } as KibanaRequest);
 

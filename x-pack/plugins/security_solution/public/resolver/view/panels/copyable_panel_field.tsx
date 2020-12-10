@@ -9,10 +9,11 @@
 import { EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useColors } from '../use_colors';
 import { StyledPanel } from '../styles';
+import { SideEffectContext } from '../side_effect_context';
 
 interface StyledCopyableField {
   readonly backgroundColor: string;
@@ -48,39 +49,41 @@ export const CopyablePanelField = memo(
     const onMouseEnter = () => setIsOpen(true);
     const onMouseLeave = () => setIsOpen(false);
 
-    const ButtonContent = memo(() => (
-      <StyledCopyableField
-        backgroundColor={copyableFieldBackground}
-        data-test-subj="resolver:panel:copyable-field"
-        activeBackgroundColor={linkColor}
-        onMouseEnter={onMouseEnter}
-      >
-        {content}
-      </StyledCopyableField>
-    ));
-
-    const onClick = useCallback(
-      async (event: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-          await navigator.clipboard.writeText(textToCopy);
-        } catch (error) {
-          if (toasts) {
-            toasts.addError(error, {
-              title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
-                defaultMessage: 'Copy Failure',
-              }),
-            });
-          }
-        }
-      },
-      [textToCopy, toasts]
+    const hoverArea = useMemo(
+      () => (
+        <StyledCopyableField
+          backgroundColor={copyableFieldBackground}
+          data-test-subj="resolver:panel:copyable-field-hover-area"
+          activeBackgroundColor={linkColor}
+          onMouseEnter={onMouseEnter}
+        >
+          {content}
+        </StyledCopyableField>
+      ),
+      [content, copyableFieldBackground, linkColor]
     );
+
+    const { writeTextToClipboard } = useContext(SideEffectContext);
+
+    const onClick = useCallback(async () => {
+      try {
+        await writeTextToClipboard(textToCopy);
+      } catch (error) {
+        if (toasts) {
+          toasts.addError(error, {
+            title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
+              defaultMessage: 'Copy Failure',
+            }),
+          });
+        }
+      }
+    }, [textToCopy, toasts, writeTextToClipboard]);
 
     return (
       <div onMouseLeave={onMouseLeave}>
         <EuiPopover
           anchorPosition={'downCenter'}
-          button={<ButtonContent />}
+          button={hoverArea}
           closePopover={onMouseLeave}
           hasArrow={false}
           isOpen={isOpen}

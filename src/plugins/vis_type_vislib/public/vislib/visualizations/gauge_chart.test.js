@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import { setHTMLElementClientSizes, setSVGElementGetBBox } from '../../../../../test_utils/public';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test/jest';
 
 import data from '../../fixtures/mock_data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';
@@ -28,7 +28,7 @@ import { getVis } from './_vis_fixture';
 describe('Vislib Gauge Chart Test Suite', function () {
   let vis;
   let chartEl;
-  const visLibParams = {
+  const vislibParams = {
     type: 'gauge',
     addTooltip: true,
     addLegend: false,
@@ -71,7 +71,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
   };
 
   function generateVis(opts = {}) {
-    const config = _.defaultsDeep({}, opts, visLibParams);
+    const config = _.defaultsDeep({}, opts, vislibParams);
     if (vis) {
       vis.destroy();
       $('.visChart').remove();

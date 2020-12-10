@@ -12,8 +12,7 @@ import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
-// @ts-ignore untyped module
-import { pdf } from './pdf';
+import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
@@ -58,7 +57,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         tracker.endScreenshots();
 
         tracker.startSetup();
-        const pdfOutput = pdf.create(layout, logo);
+        const pdfOutput = new PdfMaker(layout, logo);
         if (title) {
           const timeRange = getTimeRange(results);
           title += timeRange ? ` - ${timeRange}` : '';
@@ -81,7 +80,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         let buffer: Buffer | null = null;
         try {
           tracker.startCompile();
-          logger.debug(`Compiling PDF...`);
+          logger.debug(`Compiling PDF using "${layout.id}" layout...`);
           pdfOutput.generate();
           tracker.endCompile();
 

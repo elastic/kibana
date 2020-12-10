@@ -13,7 +13,7 @@ import { createLicensedRouteHandler } from '../../lib';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getStartServices, authorization } = deps;
+  const { externalRouter, getStartServices } = deps;
 
   const shareSchema = schema.object({
     spaces: schema.arrayOf(
@@ -36,31 +36,6 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
     ),
     object: schema.object({ type: schema.string(), id: schema.string() }),
   });
-
-  externalRouter.get(
-    {
-      path: '/internal/spaces/_share_saved_object_permissions',
-      validate: { query: schema.object({ type: schema.string() }) },
-    },
-    createLicensedRouteHandler(async (_context, request, response) => {
-      let shareToAllSpaces = true;
-      const { type } = request.query;
-
-      if (authorization) {
-        try {
-          const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
-          shareToAllSpaces = (
-            await checkPrivileges.globally({
-              kibana: authorization.actions.savedObject.get(type, 'share_to_space'),
-            })
-          ).hasAllRequested;
-        } catch (error) {
-          return response.customError(wrapError(error));
-        }
-      }
-      return response.ok({ body: { shareToAllSpaces } });
-    })
-  );
 
   externalRouter.post(
     { path: '/api/spaces/_share_saved_object_add', validate: { body: shareSchema } },

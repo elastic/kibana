@@ -832,6 +832,32 @@ describe('patch_rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('name cannot be an empty string', () => {
+    const payload: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      name: '',
+    };
+
+    const decoded = patchRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('description cannot be an empty string', () => {
+    const payload: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      description: '',
+    };
+
+    const decoded = patchRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "description"']);
+    expect(message.schema).toEqual({});
+  });
+
   test('threat is not defaulted to empty array on patch', () => {
     const payload: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',

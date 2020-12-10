@@ -8,16 +8,19 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Network Connection via Signed Binary",
-  "query": "event.category:network and event.type:connection and process.name:(expand.exe or extrac.exe or ieexec.exe or makecab.exe) and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "sequence by process.entity_id\n  [process where (process.name : \"expand.exe\" or process.name : \"extrac.exe\" or\n                 process.name : \"ieexec.exe\" or process.name : \"makecab.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"expand.exe\" or process.name : \"extrac.exe\" or\n                 process.name : \"ieexec.exe\" or process.name : \"makecab.exe\") and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,
   "rule_id": "63e65ec3-43b1-45b0-8f2d-45b34291dc44",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -51,6 +54,6 @@
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

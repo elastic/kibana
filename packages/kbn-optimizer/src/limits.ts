@@ -79,10 +79,18 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
   log.success('limits.yml file valid');
 }
 
-export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
+interface UpdateBundleLimitsOptions {
+  log: ToolingLog;
+  config: OptimizerConfig;
+  dropMissing: boolean;
+}
+
+export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLimitsOptions) {
   const metrics = getMetrics(log, config);
 
-  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = {};
+  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
+    ? {}
+    : config.limits.pageLoadAssetSize ?? {};
 
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {

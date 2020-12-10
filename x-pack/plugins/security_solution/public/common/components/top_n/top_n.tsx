@@ -7,7 +7,6 @@
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
@@ -52,11 +51,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   indexNames: string[];
   options: TopNOption[];
   query: Query;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   timelineId?: string;
   toggleTopN: () => void;
@@ -78,7 +72,6 @@ const TopNComponent: React.FC<Props> = ({
   indexNames,
   options,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -142,7 +135,6 @@ const TopNComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             onlyField={field}
             query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             timelineId={timelineId}

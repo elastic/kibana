@@ -34,7 +34,7 @@ expect.extend({
     expected: T
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
-    const matcherName = 'toSometimesYieldEqualTo';
+    const matcherName = 'toYieldEqualTo';
     const options: jest.MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
       isNot: this.isNot,
@@ -100,9 +100,9 @@ expect.extend({
     expected: T
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
-    const matcherName = 'toSometimesYieldEqualTo';
+    const matcherName = 'toYieldObjectEqualTo';
     const options: jest.MatcherHintOptions = {
-      comment: 'deep equality with any yielded value',
+      comment: 'subset equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
     };

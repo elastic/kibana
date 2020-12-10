@@ -122,6 +122,11 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -229,7 +234,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -335,7 +340,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -441,7 +446,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -553,6 +558,11 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -675,7 +685,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -787,6 +797,11 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span

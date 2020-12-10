@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, IContainer } from '../../embeddable_plugin';
+
 import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { ClonePanelAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
+import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../services/embeddable';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -60,6 +62,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
   const input = getSampleDashboardInput({
     panels: {
@@ -86,6 +90,16 @@ beforeEach(async () => {
   }
 });
 
+test('Clone is incompatible with Error Embeddables', async () => {
+  const action = new ClonePanelAction(coreStart);
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
+});
+
 test('Clone adds a new embeddable', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
@@ -98,7 +112,13 @@ test('Clone adds a new embeddable', async () => {
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(embeddable.type);
+  expect(newPanel.type).toEqual('placeholder');
+  // let the placeholder load
+  await dashboard.untilEmbeddableLoaded(newPanelId!);
+  await new Promise((r) => process.nextTick(r)); // Allow the current loop of the event loop to run to completion
+  // now wait for the full embeddable to replace it
+  const loadedPanel = await dashboard.untilEmbeddableLoaded(newPanelId!);
+  expect(loadedPanel.type).toEqual(embeddable.type);
 });
 
 test('Clones an embeddable without a saved object ID', async () => {

@@ -17,7 +17,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -37,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

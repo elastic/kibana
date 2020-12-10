@@ -65,6 +65,12 @@ test('getHref is defined', () => {
   expect(drilldown.getHref).toBeDefined();
 });
 
+test('inject/extract are defined', () => {
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
+  expect(drilldown.extract).toBeDefined();
+  expect(drilldown.inject).toBeDefined();
+});
+
 describe('.execute() & getHref', () => {
   /**
    * A convenience test setup helper

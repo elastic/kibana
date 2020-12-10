@@ -11,13 +11,16 @@
   "language": "lucene",
   "license": "Elastic License",
   "name": "Renamed AutoIt Scripts Interpreter",
-  "query": "event.category:process AND event.type:(start OR process_started) AND process.pe.original_file_name:/[aA][uU][tT][oO][iI][tT]\\d\\.[eE][xX][eE]/ AND NOT process.name:/[aA][uU][tT][oO][iI][tT]\\d{1,3}\\.[eE][xX][eE]/",
+  "query": "event.category:process AND event.type:(start OR process_started) AND (process.pe.original_file_name:/[aA][uU][tT][oO][iI][tT]\\d\\.[eE][xX][eE]/ OR winlog.event_data.OriginalFileName:/[aA][uU][tT][oO][iI][tT]\\d\\.[eE][xX][eE]/) AND NOT process.name:/[aA][uU][tT][oO][iI][tT]\\d{1,3}\\.[eE][xX][eE]/",
   "risk_score": 47,
   "rule_id": "2e1e835d-01e5-48ca-b9fc-7a61f7f11902",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {

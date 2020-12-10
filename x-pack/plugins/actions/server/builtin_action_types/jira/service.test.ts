@@ -57,8 +57,10 @@ const fieldsResponse = {
             id: '10006',
             name: 'Task',
             fields: {
-              summary: { fieldId: 'summary' },
+              summary: { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               priority: {
+                required: false,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -109,7 +111,9 @@ describe('Jira service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger
@@ -198,7 +202,7 @@ describe('Jira service', () => {
         error.response = { data: { errors: { summary: 'Required field' } } };
         throw error;
       });
-      expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncident('1')).rejects.toThrow(
         '[Action][Jira]: Unable to get incident with id 1. Error: An error has occurred Reason: Required field'
       );
     });
@@ -348,7 +352,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(
+      await expect(
         service.createIncident({
           incident: {
             summary: 'title',
@@ -442,7 +446,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(
+      await expect(
         service.updateIncident({
           incidentId: '1',
           incident: {
@@ -526,7 +530,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(
+      await expect(
         service.createComment({
           incidentId: '1',
           comment: {
@@ -587,7 +591,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(service.getCapabilities()).rejects.toThrow(
+      await expect(service.getCapabilities()).rejects.toThrow(
         '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Could not get capabilities'
       );
     });
@@ -657,7 +661,7 @@ describe('Jira service', () => {
           throw error;
         });
 
-        expect(service.getIssueTypes()).rejects.toThrow(
+        await expect(service.getIssueTypes()).rejects.toThrow(
           '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
@@ -741,7 +745,7 @@ describe('Jira service', () => {
           throw error;
         });
 
-        expect(service.getIssueTypes()).rejects.toThrow(
+        await expect(service.getIssueTypes()).rejects.toThrow(
           '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
@@ -765,6 +769,8 @@ describe('Jira service', () => {
 
         expect(res).toEqual({
           priority: {
+            required: false,
+            schema: { type: 'string' },
             allowedValues: [
               { id: '1', name: 'Highest' },
               { id: '2', name: 'High' },
@@ -774,7 +780,12 @@ describe('Jira service', () => {
             ],
             defaultValue: { id: '3', name: 'Medium' },
           },
-          summary: { allowedValues: [], defaultValue: {} },
+          summary: {
+            required: true,
+            schema: { type: 'string' },
+            allowedValues: [],
+            defaultValue: {},
+          },
         });
       });
 
@@ -815,7 +826,7 @@ describe('Jira service', () => {
           throw error;
         });
 
-        expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
+        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
           '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get fields'
         );
       });
@@ -837,8 +848,10 @@ describe('Jira service', () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
             values: [
-              { fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               {
+                required: false,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -859,10 +872,17 @@ describe('Jira service', () => {
 
         expect(res).toEqual({
           priority: {
+            required: false,
+            schema: { type: 'string' },
             allowedValues: [{ id: '3', name: 'Medium' }],
             defaultValue: { id: '3', name: 'Medium' },
           },
-          summary: { allowedValues: [], defaultValue: {} },
+          summary: {
+            required: true,
+            schema: { type: 'string' },
+            allowedValues: [],
+            defaultValue: {},
+          },
         });
       });
 
@@ -881,8 +901,10 @@ describe('Jira service', () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
             values: [
-              { fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               {
+                required: true,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -927,7 +949,7 @@ describe('Jira service', () => {
           throw error;
         });
 
-        expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
+        await expect(service.getFieldsByIssueType('10006')).rejects.toThrowError(
           '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
@@ -976,7 +998,7 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(service.getIssues('Test title')).rejects.toThrow(
+      await expect(service.getIssues('Test title')).rejects.toThrow(
         '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Could not get issue types'
       );
     });
@@ -1020,8 +1042,127 @@ describe('Jira service', () => {
         throw error;
       });
 
-      expect(service.getIssue('RJ-107')).rejects.toThrow(
+      await expect(service.getIssue('RJ-107')).rejects.toThrow(
         '[Action][Jira]: Unable to get issue with id RJ-107. Error: An error has occurred. Reason: Could not get issue types'
+      );
+    });
+  });
+
+  describe('getFields', () => {
+    const callMocks = () => {
+      requestMock
+        .mockImplementationOnce(() => ({
+          data: {
+            capabilities: {
+              'list-project-issuetypes':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+              'list-issuetype-fields':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+            },
+          },
+        }))
+        .mockImplementationOnce(() => ({
+          data: {
+            values: issueTypesResponse.data.projects[0].issuetypes,
+          },
+        }))
+        .mockImplementationOnce(() => ({
+          data: {
+            capabilities: {
+              'list-project-issuetypes':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+              'list-issuetype-fields':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+            },
+          },
+        }))
+        .mockImplementationOnce(() => ({
+          data: {
+            capabilities: {
+              'list-project-issuetypes':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+              'list-issuetype-fields':
+                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+            },
+          },
+        }))
+        .mockImplementationOnce(() => ({
+          data: {
+            values: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'description' },
+              {
+                required: false,
+                schema: { type: 'string' },
+                fieldId: 'priority',
+                allowedValues: [
+                  {
+                    name: 'Medium',
+                    id: '3',
+                  },
+                ],
+                defaultValue: {
+                  name: 'Medium',
+                  id: '3',
+                },
+              },
+            ],
+          },
+        }))
+        .mockImplementationOnce(() => ({
+          data: {
+            values: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'description' },
+            ],
+          },
+        }));
+    };
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    test('it should call request with correct arguments', async () => {
+      callMocks();
+      await service.getFields();
+      const callUrls = [
+        'https://siem-kibana.atlassian.net/rest/capabilities',
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes',
+        'https://siem-kibana.atlassian.net/rest/capabilities',
+        'https://siem-kibana.atlassian.net/rest/capabilities',
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10007',
+      ];
+      requestMock.mock.calls.forEach((call, i) => {
+        expect(call[0].url).toEqual(callUrls[i]);
+      });
+    });
+    test('it returns common fields correctly', async () => {
+      callMocks();
+      const res = await service.getFields();
+      expect(res).toEqual({
+        description: {
+          allowedValues: [],
+          defaultValue: {},
+          required: true,
+          schema: { type: 'string' },
+        },
+        summary: {
+          allowedValues: [],
+          defaultValue: {},
+          required: true,
+          schema: { type: 'string' },
+        },
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('An error has occurred');
+        error.response = { data: { errors: { summary: 'Required field' } } };
+        throw error;
+      });
+      await expect(service.getFields()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Required field'
       );
     });
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';

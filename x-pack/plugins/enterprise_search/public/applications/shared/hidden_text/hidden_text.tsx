@@ -7,18 +7,18 @@
 import React, { useState, ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 
-interface IChildrenProps {
+interface ChildrenProps {
   toggle: () => void;
   isHidden: boolean;
   hiddenText: React.ReactNode;
 }
 
-interface IProps {
+interface Props {
   text: string;
-  children(props: IChildrenProps): ReactElement;
+  children(props: ChildrenProps): ReactElement;
 }
 
-export const HiddenText: React.FC<IProps> = ({ text, children }) => {
+export const HiddenText: React.FC<Props> = ({ text, children }) => {
   const [isHidden, toggleIsHidden] = useState(true);
 
   const hiddenLabel = i18n.translate('xpack.enterpriseSearch.hiddenText', {

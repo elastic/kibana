@@ -8,6 +8,7 @@ import { isAlertSavedObjectNotFoundError } from './is_alert_not_found_error';
 import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import uuid from 'uuid';
+import { AlertExecutionStatusErrorReasons } from '../types';
 
 describe('isAlertSavedObjectNotFoundError', () => {
   const id = uuid.v4();
@@ -25,7 +26,7 @@ describe('isAlertSavedObjectNotFoundError', () => {
   });
 
   test('identifies SavedObjects Not Found errors wrapped in an ErrorWithReason', () => {
-    const error = new ErrorWithReason('read', errorSONF);
+    const error = new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, errorSONF);
     expect(isAlertSavedObjectNotFoundError(error, id)).toBe(true);
   });
 });

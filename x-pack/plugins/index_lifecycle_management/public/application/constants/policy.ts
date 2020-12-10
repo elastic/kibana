@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SerializedPhase,
-  ColdPhase,
-  DeletePhase,
-  WarmPhase,
-  SerializedPolicy,
-} from '../../../common/types';
+import { SerializedPhase, DeletePhase, SerializedPolicy } from '../../../common/types';
 
 export const defaultSetPriority: string = '100';
+
+export const defaultPhaseIndexPriority: string = '50';
 
 export const defaultPolicy: SerializedPolicy = {
   name: '',
@@ -26,33 +22,6 @@ export const defaultPolicy: SerializedPolicy = {
       },
     },
   },
-};
-
-export const defaultNewWarmPhase: WarmPhase = {
-  phaseEnabled: false,
-  forceMergeEnabled: false,
-  selectedForceMergeSegments: '',
-  bestCompressionEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  shrinkEnabled: false,
-  selectedPrimaryShardCount: '',
-  selectedReplicaCount: '',
-  warmPhaseOnRollover: true,
-  phaseIndexPriority: '50',
-  dataTierAllocationType: 'default',
-};
-
-export const defaultNewColdPhase: ColdPhase = {
-  phaseEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  selectedReplicaCount: '',
-  freezeEnabled: false,
-  phaseIndexPriority: '0',
-  dataTierAllocationType: 'default',
 };
 
 export const defaultNewDeletePhase: DeletePhase = {

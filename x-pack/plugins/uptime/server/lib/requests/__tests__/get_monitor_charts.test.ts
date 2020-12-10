@@ -7,39 +7,39 @@
 import { set } from '@elastic/safer-lodash-set';
 import mockChartsData from './monitor_charts_mock.json';
 import { getMonitorDurationChart } from '../get_monitor_duration';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { getUptimeESMockClient } from './helper';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(2);
-    const searchMock = jest.fn();
-    const search = searchMock.bind({});
+
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
     await getMonitorDurationChart({
-      callES: search,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
     });
-    expect(searchMock).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
 
     set(
-      searchMock.mock.calls[0][1],
+      mockEsClient.search.mock.calls[0],
       'body.aggs.timeseries.date_histogram.fixed_interval',
       '36000ms'
     );
-    expect(searchMock.mock.calls[0]).toMatchSnapshot();
+    expect(mockEsClient.search.mock.calls[0]).toMatchSnapshot();
   });
 
   it('inserts empty buckets for missing data', async () => {
-    const searchMock = jest.fn();
-    searchMock.mockReturnValue(mockChartsData);
-    const search = searchMock.bind({});
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
+
     expect(
       await getMonitorDurationChart({
-        callES: search,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeEsClient,
         monitorId: 'id',
         dateStart: 'now-15m',
         dateEnd: 'now',

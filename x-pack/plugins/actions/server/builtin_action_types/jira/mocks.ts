@@ -73,6 +73,20 @@ const createMock = (): jest.Mocked<ExternalService> => {
       key: 'RJ-107',
       title: 'Test title',
     })),
+    getFields: jest.fn().mockImplementation(() => ({
+      description: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+      summary: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+    })),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -97,7 +111,6 @@ const createMock = (): jest.Mocked<ExternalService> => {
 const externalServiceMock = {
   create: createMock,
 };
-
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {

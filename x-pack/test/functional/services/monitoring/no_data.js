@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function MonitoringNoDataProvider({ getService, getPageObjects }) {
+export function MonitoringNoDataProvider({ getService }) {
+  const deployment = getService('deployment');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
 
   return new (class NoData {
     async enableMonitoring() {
@@ -15,7 +15,7 @@ export function MonitoringNoDataProvider({ getService, getPageObjects }) {
       // so the UI does not give the user a choice between the two collection
       // methods. So if we're on cloud, do not try and switch to internal collection
       // as it's already the default
-      if (!(await PageObjects.common.isCloud())) {
+      if (!(await deployment.isCloud())) {
         await testSubjects.click('useInternalCollection');
       }
       await testSubjects.click('enableCollectionEnabled');

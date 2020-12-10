@@ -5,6 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState } from './types';
@@ -12,14 +13,19 @@ import { PieVisualizationState } from './types';
 export function toExpression(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ) {
-  return expressionHelper(state, datasourceLayers, { ...attributes, isPreview: false });
+  return expressionHelper(state, datasourceLayers, paletteService, {
+    ...attributes,
+    isPreview: false,
+  });
 }
 
 function expressionHelper(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
   attributes: { isPreview: boolean; title?: string; description?: string } = { isPreview: false }
 ): Ast | null {
   const layer = state.layers[0];
@@ -50,6 +56,29 @@ function expressionHelper(
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
+          ...(state.palette
+            ? {
+                palette: [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'theme',
+                        arguments: {
+                          variable: ['palette'],
+                          default: [
+                            paletteService
+                              .get(state.palette.name)
+                              .toExpression(state.palette.params),
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }
+            : {}),
         },
       },
     ],
@@ -58,7 +87,8 @@ function expressionHelper(
 
 export function toPreviewExpression(
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry
 ) {
-  return expressionHelper(state, datasourceLayers, { isPreview: true });
+  return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });
 }

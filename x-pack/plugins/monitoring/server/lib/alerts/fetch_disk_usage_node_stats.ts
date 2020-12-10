@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { AlertCluster, AlertDiskUsageNodeStats } from '../../alerts/types';
+import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
 
 export async function fetchDiskUsageNodeStats(
   callCluster: any,

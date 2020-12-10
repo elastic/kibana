@@ -189,6 +189,11 @@ module.exports = {
           '@typescript-eslint/no-extra-non-null-assertion': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
+          '@typescript-eslint/no-shadow': 'error',
+          // rely on typescript
+          '@typescript-eslint/no-undef': 'off',
+          'no-undef': 'off',
+
           '@typescript-eslint/triple-slash-reference': ['error', {
             path: 'never',
             types: 'never',
@@ -218,7 +223,6 @@ module.exports = {
           'no-eval': 'error',
           'no-new-wrappers': 'error',
           'no-script-url': 'error',
-          'no-shadow': 'error',
           'no-throw-literal': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',

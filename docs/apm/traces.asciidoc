@@ -7,7 +7,8 @@ and which services were part of it.
 In addition to the Traces overview, you can view your application traces in the <<spans,trace sample timeline waterfall>>.
 
 The *Traces* overview displays the entry transaction for all traces in your application.
-If you're using <<distributed-tracing>>, this view is key to finding the critical paths within your application.
+If you're using <<distributed-tracing,distributed tracing>>,
+this view is key to finding the critical paths within your application.
 Transactions with the same name are grouped together and only shown once in this table.
 
 By default, transactions are sorted by _Impact_.

@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr } from './lib/result_type';
@@ -21,6 +22,8 @@ import {
   TaskClaim,
   TaskRunRequest,
   asTaskRunRequestEvent,
+  TaskPollingCycle,
+  asTaskPollingCycleEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -33,7 +36,7 @@ import {
   createObservableMonitor,
 } from './polling';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner, TaskRunner } from './task_runner';
+import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
@@ -45,9 +48,15 @@ export type TaskPollingLifecycleOpts = {
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
 } & ManagedConfiguration;
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
+export type TaskLifecycleEvent =
+  | TaskMarkRunning
+  | TaskRun
+  | TaskClaim
+  | TaskRunRequest
+  | TaskPollingCycle;
 
 /**
  * The public interface into the task manager system.
@@ -64,8 +73,6 @@ export class TaskPollingLifecycle {
   private events$ = new Subject<TaskLifecycleEvent>();
   // all on-demand requests we wish to pipe into the poller
   private claimRequests$ = new Subject<Option<string>>();
-  // the task poller that polls for work on fixed intervals and on demand
-  private poller$: Observable<Result<FillPoolResult, PollingError<string>>>;
   // our subscription to the poller
   private pollingSubscription: Subscription = Subscription.EMPTY;
 
@@ -76,36 +83,49 @@ export class TaskPollingLifecycle {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  constructor(opts: TaskPollingLifecycleOpts) {
-    const { logger, middleware, maxWorkersConfiguration$, pollIntervalConfiguration$ } = opts;
+  constructor({
+    logger,
+    middleware,
+    maxWorkersConfiguration$,
+    pollIntervalConfiguration$,
+    // Elasticsearch and SavedObjects availability status
+    elasticsearchAndSOAvailability$,
+    config,
+    taskStore,
+    definitions,
+  }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
+    this.definitions = definitions;
+    this.store = taskStore;
 
-    this.definitions = opts.definitions;
-    this.store = opts.taskStore;
     // pipe store events into the lifecycle event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
-      bufferMaxOperations: opts.config.max_workers,
-      logger: this.logger,
+      bufferMaxOperations: config.max_workers,
+      logger,
     });
 
     this.pool = new TaskPool({
-      logger: this.logger,
+      logger,
       maxWorkers$: maxWorkersConfiguration$,
     });
 
     const {
       max_poll_inactivity_cycles: maxPollInactivityCycles,
       poll_interval: pollInterval,
-    } = opts.config;
-    this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+    } = config;
+
+    // the task poller that polls for work on fixed intervals and on demand
+    const poller$: Observable<
+      Result<FillPoolResult, PollingError<string>>
+    > = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
-          logger: this.logger,
+          logger,
           pollInterval$: pollIntervalConfiguration$,
-          bufferCapacity: opts.config.request_capacity,
+          bufferCapacity: config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
           work: this.pollForWork,
@@ -125,10 +145,20 @@ export class TaskPollingLifecycle {
         // operation than just timing out the `work` internally)
         inactivityTimeout: pollInterval * (maxPollInactivityCycles + 1),
         onError: (error) => {
-          this.logger.error(`[Task Poller Monitor]: ${error.message}`);
+          logger.error(`[Task Poller Monitor]: ${error.message}`);
         },
       }
     );
+
+    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
+      if (areESAndSOAvailable && !this.isStarted) {
+        // start polling for work
+        this.pollingSubscription = this.subscribeToPoller(poller$);
+      } else if (!areESAndSOAvailable && this.isStarted) {
+        this.pollingSubscription.unsubscribe();
+        this.pool.cancelRunningTasks();
+      }
+    });
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -176,33 +206,24 @@ export class TaskPollingLifecycle {
     );
   };
 
-  /**
-   * Starts up the task manager and starts picking up tasks.
-   */
-  public start() {
-    if (!this.isStarted) {
-      this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: PollingError<string>) => {
-          if (error.type === PollingErrorType.RequestCapacityReached) {
-            pipe(
-              error.data,
-              mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-            );
-          }
-          this.logger.error(error.message);
-        })
-      );
-    }
-  }
-
-  /**
-   * Stops the task manager and cancels running tasks.
-   */
-  public stop() {
-    if (this.isStarted) {
-      this.pollingSubscription.unsubscribe();
-      this.pool.cancelRunningTasks();
-    }
+  private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
+    return poller$
+      .pipe(
+        tap(
+          mapErr((error: PollingError<string>) => {
+            if (error.type === PollingErrorType.RequestCapacityReached) {
+              pipe(
+                error.data,
+                mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+              );
+            }
+            this.logger.error(error.message);
+          })
+        )
+      )
+      .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+        this.emitEvent(asTaskPollingCycleEvent<string>(event));
+      });
   }
 }
 

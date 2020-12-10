@@ -150,8 +150,10 @@ export const getThresholdAggregationDataProvider = (
   ];
 };
 
-export const isEqlRule = (ecsData: Ecs) =>
-  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'eql';
+export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length &&
+  ecsData.signal?.rule?.type[0] === 'eql' &&
+  ecsData.signal?.group?.id?.length;
 
 export const isThresholdRule = (ecsData: Ecs) =>
   ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
@@ -181,24 +183,23 @@ export const sendAlertToTimelineAction = async ({
             timelineType: TimelineType.template,
           },
         }),
-        searchStrategyClient.search<
-          TimelineEventsDetailsRequestOptions,
-          TimelineEventsDetailsStrategyResponse
-        >(
-          {
-            defaultIndex: [],
-            docValueFields: [],
-            indexName: ecsData._index ?? '',
-            eventId: ecsData._id,
-            factoryQueryType: TimelineEventsQueries.details,
-          },
-          {
-            strategy: 'securitySolutionTimelineSearchStrategy',
-          }
-        ),
+        searchStrategyClient
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            {
+              defaultIndex: [],
+              docValueFields: [],
+              indexName: ecsData._index ?? '',
+              eventId: ecsData._id,
+              factoryQueryType: TimelineEventsQueries.details,
+            },
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+            }
+          )
+          .toPromise(),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-      const eventData: TimelineEventsDetailsItem[] = getOr([], 'data', eventDataResp);
+      const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         const { timeline, notes } = formatTimelineResultToModel(
@@ -240,10 +241,6 @@ export const sendAlertToTimelineAction = async ({
                   expression: query,
                 },
                 serializedQuery: convertKueryToElasticSearchQuery(query),
-              },
-              filterQueryDraft: {
-                kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-                expression: query,
               },
             },
             noteIds: notes?.map((n) => n.noteId) ?? [],
@@ -300,12 +297,6 @@ export const sendAlertToTimelineAction = async ({
               ? ecsData.signal?.rule?.query[0]
               : '',
           },
-          filterQueryDraft: {
-            kind: ecsData.signal?.rule?.language?.length
-              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-              : 'kuery',
-            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
-          },
         },
       },
       to,
@@ -327,7 +318,7 @@ export const sendAlertToTimelineAction = async ({
         },
       },
     ];
-    if (isEqlRule(ecsData)) {
+    if (isEqlRuleWithGroupId(ecsData)) {
       const signalGroupId = ecsData.signal?.group?.id?.length
         ? ecsData.signal?.group?.id[0]
         : 'unknown-signal-group-id';
@@ -364,10 +355,6 @@ export const sendAlertToTimelineAction = async ({
               expression: '',
             },
             serializedQuery: '',
-          },
-          filterQueryDraft: {
-            kind: 'kuery',
-            expression: '',
           },
         },
       },

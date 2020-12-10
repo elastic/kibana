@@ -18,11 +18,10 @@ import {
 
 import { EuiCallOut } from '@elastic/eui';
 import { Pipeline } from '../../../../common/types';
-import { useKibana, SectionLoading } from '../../../shared_imports';
+import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
 
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
-import { attemptToURIDecode } from '../shared';
 
 interface MatchParams {
   name: string;
@@ -39,7 +38,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedPipelineName = attemptToURIDecode(name);
+  const decodedPipelineName = attemptToURIDecode(name)!;
 
   const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 

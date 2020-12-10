@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TimefilterContract } from 'src/plugins/data/public';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { TimefilterContract } from '../../services/data';
+import { SavedObjectSaveOpts } from '../../services/saved_objects';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 
@@ -38,8 +38,9 @@ export function saveDashboard(
 ): Promise<string> {
   const savedDashboard = dashboardStateManager.savedDashboard;
   const appState = dashboardStateManager.appState;
+  const hasTaggingCapabilities = dashboardStateManager.hasTaggingCapabilities;
 
-  updateSavedDashboard(savedDashboard, appState, timeFilter, toJson);
+  updateSavedDashboard(savedDashboard, appState, timeFilter, hasTaggingCapabilities, toJson);
 
   return savedDashboard.save(saveOptions).then((id: string) => {
     if (id) {

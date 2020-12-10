@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
+import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
 import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
-} from '../../../../embeddable/public';
+  isErrorEmbeddable,
+} from '../../services/embeddable';
 import { NotificationsStart } from '../../../../../core/public';
+import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
@@ -47,9 +49,7 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.unlinkFromLibrary', {
-      defaultMessage: 'Unlink from library',
-    });
+    return dashboardUnlinkFromLibraryAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: UnlinkFromLibraryActionContext) {
@@ -61,7 +61,8 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
@@ -86,18 +87,13 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel(panelToReplace, newPanel, true);
 
-    const title = embeddable.getTitle()
-      ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {
-          defaultMessage: `Panel '{panelTitle}' is no longer connected to the visualize library`,
-          values: { panelTitle: embeddable.getTitle() },
-        })
-      : i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-          defaultMessage: `Panel is no longer connected to the visualize library`,
-        });
+    const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(
+      embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
+    );
     this.deps.toasts.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',

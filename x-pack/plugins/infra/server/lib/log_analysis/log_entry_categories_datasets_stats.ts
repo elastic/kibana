@@ -40,7 +40,8 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
         endTime,
         COMPOSITE_AGGREGATION_BATCH_SIZE,
         afterLatestBatchKey
-      )
+      ),
+      jobIds
     );
 
     const { after_key: afterKey, buckets: latestBatchBuckets = [] } =

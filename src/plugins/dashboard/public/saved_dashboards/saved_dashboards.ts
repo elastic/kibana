@@ -18,18 +18,26 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
+
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
+
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjects: SavedObjectsStart;
+  embeddableStart: EmbeddableStart;
 }
 
 /**
  * @param services
  */
-export function createSavedDashboardLoader({ savedObjects, savedObjectsClient }: Services) {
-  const SavedDashboard = createSavedDashboardClass(savedObjects);
+export function createSavedDashboardLoader({
+  savedObjects,
+  savedObjectsClient,
+  embeddableStart,
+}: Services) {
+  const SavedDashboard = createSavedDashboardClass(savedObjects, embeddableStart);
   return new SavedObjectLoader(SavedDashboard, savedObjectsClient);
 }

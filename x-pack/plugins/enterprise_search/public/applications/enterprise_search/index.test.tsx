@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPage } from '@elastic/eui';
 
-import '../__mocks__/kea.mock';
-import { useValues } from 'kea';
+import { setMockValues } from '../__mocks__/kea.mock';
+import { rerender } from '../__mocks__';
 
 import { EnterpriseSearch } from './';
 import { SetupGuide } from './components/setup_guide';
@@ -18,7 +17,7 @@ import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {
   it('renders the Setup Guide and Product Selector', () => {
-    (useValues as jest.Mock).mockReturnValue({
+    setMockValues({
       errorConnecting: false,
       config: { host: 'localhost' },
     });
@@ -28,15 +27,23 @@ describe('EnterpriseSearch', () => {
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 
-  it('renders the error connecting prompt when host is not configured', () => {
-    (useValues as jest.Mock).mockReturnValueOnce({
+  it('renders the error connecting prompt only if host is configured', () => {
+    setMockValues({
       errorConnecting: true,
-      config: { host: '' },
+      config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
-    expect(wrapper.find(EuiPage)).toHaveLength(0);
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
+
+    setMockValues({
+      errorConnecting: true,
+      config: { host: '' },
+    });
+    rerender(wrapper);
+
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
+    expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 });

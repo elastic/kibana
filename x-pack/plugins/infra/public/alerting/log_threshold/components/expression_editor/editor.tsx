@@ -7,12 +7,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
-import {
-  ForLastExpression,
-  AlertsContextValue,
-} from '../../../../../../triggers_actions_ui/public';
+import { ForLastExpression } from '../../../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Comparator,
@@ -36,14 +34,13 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
-export type AlertsContext = AlertsContextValue<LogsContextMeta>;
 interface Props {
   errors: Errors;
   alertParams: Partial<AlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
-  alertsContext: AlertsContext;
   sourceId: string;
+  metadata: LogsContextMeta;
 }
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
@@ -75,8 +72,9 @@ const DEFAULT_RATIO_EXPRESSION = {
 };
 
 export const ExpressionEditor: React.FC<Props> = (props) => {
-  const isInternal = props.alertsContext.metadata?.isInternal;
+  const isInternal = props.metadata?.isInternal;
   const [sourceId] = useSourceId();
+  const { http } = useKibana().services;
 
   return (
     <>
@@ -85,7 +83,7 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
           <Editor {...props} sourceId={sourceId} />
         </SourceStatusWrapper>
       ) : (
-        <LogSourceProvider sourceId={sourceId} fetch={props.alertsContext.http.fetch}>
+        <LogSourceProvider sourceId={sourceId} fetch={http!.fetch}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} sourceId={sourceId} />
           </SourceStatusWrapper>
@@ -139,7 +137,7 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
 };
 
 export const Editor: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext, sourceId } = props;
+  const { setAlertParams, alertParams, errors, sourceId } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
   useMount(() => {
@@ -157,7 +155,6 @@ export const Editor: React.FC<Props> = (props) => {
     } else {
       return [];
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
   const groupByFields = useMemo(() => {
@@ -168,7 +165,6 @@ export const Editor: React.FC<Props> = (props) => {
     } else {
       return [];
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
   const updateThreshold = useCallback(
@@ -230,7 +226,6 @@ export const Editor: React.FC<Props> = (props) => {
       criteria={alertParams.criteria}
       errors={errors.criteria}
       alertParams={alertParams}
-      context={alertsContext}
       sourceId={sourceId}
       updateCriteria={updateCriteria}
     />

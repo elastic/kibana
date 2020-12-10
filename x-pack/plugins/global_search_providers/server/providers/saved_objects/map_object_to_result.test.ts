@@ -11,6 +11,7 @@ import {
   Capabilities,
 } from 'src/core/server';
 import { mapToResult, mapToResults } from './map_object_to_result';
+import { SavedObjectReference } from 'src/core/types';
 
 const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   return {
@@ -24,12 +25,13 @@ const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
 
 const createObject = <T>(
   props: Partial<SavedObjectsFindResult>,
-  attributes: T
+  attributes: T,
+  references: SavedObjectReference[] = []
 ): SavedObjectsFindResult<T> => {
   return {
     id: 'id',
     type: 'dashboard',
-    references: [],
+    references,
     score: 100,
     ...props,
     attributes,
@@ -42,6 +44,7 @@ describe('mapToResult', () => {
       name: 'dashboard',
       management: {
         defaultSearchField: 'title',
+        icon: 'dashboardApp',
         getInAppUrl: (obj) => ({ path: `/dashboard/${obj.id}`, uiCapabilitiesPath: '' }),
       },
     });
@@ -62,7 +65,9 @@ describe('mapToResult', () => {
       title: 'My dashboard',
       type: 'dashboard',
       url: '/dashboard/dash1',
+      icon: 'dashboardApp',
       score: 42,
+      meta: { tagIds: [] },
     });
   });
 
@@ -196,7 +201,12 @@ describe('mapToResults', () => {
         {
           excerpt: 'titleC',
           title: 'foo',
-        }
+        },
+        [
+          { name: 'tag A', type: 'tag', id: '1' },
+          { name: 'tag B', type: 'tag', id: '2' },
+          { name: 'not-tag', type: 'not-tag', id: '1' },
+        ]
       ),
       createObject(
         {
@@ -218,6 +228,7 @@ describe('mapToResults', () => {
         type: 'typeA',
         url: '/type-a/resultA',
         score: 100,
+        meta: { tagIds: [] },
       },
       {
         id: 'resultC',
@@ -225,6 +236,7 @@ describe('mapToResults', () => {
         type: 'typeC',
         url: '/type-c/resultC',
         score: 42,
+        meta: { tagIds: ['1', '2'] },
       },
       {
         id: 'resultB',
@@ -232,6 +244,7 @@ describe('mapToResults', () => {
         type: 'typeB',
         url: '/type-b/resultB',
         score: 69,
+        meta: { tagIds: [] },
       },
     ]);
   });
@@ -269,6 +282,7 @@ describe('mapToResults', () => {
         type: 'typeA',
         url: '/type-a/resultA',
         score: 100,
+        meta: { tagIds: [] },
       },
     ]);
   });

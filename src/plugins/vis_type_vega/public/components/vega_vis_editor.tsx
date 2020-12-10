@@ -30,6 +30,8 @@ import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
 
+import './vega_editor.scss';
+
 const aceOptions = {
   maxLines: Infinity,
   highlightActiveLine: false,
@@ -102,4 +104,6 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
   );
 }
 
-export { VegaVisEditor };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { VegaVisEditor as default };

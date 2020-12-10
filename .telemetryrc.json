@@ -7,5 +7,10 @@
       "src/plugins/testbed/",
       "src/plugins/kibana_utils/"
     ]
+  },
+  {
+    "output": "src/plugins/telemetry/schema/legacy_plugins.json",
+    "root": "src/legacy/server/",
+    "exclude": []
   }
 ]

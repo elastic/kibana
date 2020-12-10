@@ -9,12 +9,12 @@ Constructs a new instance of the `ExecutionContract` class
 <b>Signature:</b>
 
 ```typescript
-constructor(execution: Execution<ExtraContext, Input, Output, InspectorAdapters>);
+constructor(execution: Execution<Input, Output, InspectorAdapters>);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  execution | <code>Execution&lt;ExtraContext, Input, Output, InspectorAdapters&gt;</code> |  |
+|  execution | <code>Execution&lt;Input, Output, InspectorAdapters&gt;</code> |  |
 

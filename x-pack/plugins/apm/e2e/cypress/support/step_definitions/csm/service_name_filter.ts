@@ -15,7 +15,7 @@ When('the user changes the selected service name', () => {
 });
 
 Then(`it displays relevant client metrics`, () => {
-  const metrics = ['4 ms', '58 ms', '55'];
+  const metrics = ['80 ms', '4 ms', '76 ms', '55'];
 
   verifyClientMetrics(metrics, false);
 });

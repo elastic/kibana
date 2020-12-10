@@ -7,51 +7,8 @@
 import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
-import { JobStatus, ReportApiJSON } from '../../../common/types';
-import { JobStatuses } from '../../../constants';
-import { LayoutParams } from '../layouts';
-import { TaskRunResult } from '../tasks';
-
-interface ReportDocumentHead {
-  _id: string;
-  _index: string;
-  _seq_no: unknown;
-  _primary_term: unknown;
-}
-
-/*
- * The document created by Reporting to store in the .reporting index
- */
-export interface ReportDocument extends ReportDocumentHead {
-  _source: ReportSource;
-}
-
-export interface ReportSource {
-  jobtype: string;
-  kibana_name: string;
-  kibana_id: string;
-  created_by: string | false;
-  payload: {
-    headers: string; // encrypted headers
-    browserTimezone?: string; // may use timezone from advanced settings
-    objectType: string;
-    title: string;
-    layout?: LayoutParams;
-  };
-  meta: { objectType: string; layout?: string };
-  browser_type: string;
-  max_attempts: number;
-  timeout: number;
-
-  status: JobStatus;
-  attempts: number;
-  output: TaskRunResult | null;
-  started_at?: string;
-  completed_at?: string;
-  created_at: string;
-  priority?: number;
-  process_expiration?: string;
-}
+import { JOB_STATUSES } from '../../../common/constants';
+import { ReportApiJSON, ReportDocumentHead, ReportSource } from '../../../common/types';
 
 const puid = new Puid();
 
@@ -107,7 +64,7 @@ export class Report implements Partial<ReportSource> {
     this.browser_type = opts.browser_type;
     this.priority = opts.priority;
 
-    this.status = opts.status || JobStatuses.PENDING;
+    this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
   }
 
@@ -175,3 +132,5 @@ export class Report implements Partial<ReportSource> {
     };
   }
 }
+
+export { ReportApiJSON, ReportSource };

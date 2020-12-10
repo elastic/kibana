@@ -14,6 +14,19 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
+export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+/**
+ * TIMELINE BODY
+ */
 export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
@@ -25,12 +38,12 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
-}))<{ bodyHeight?: number; visible: boolean }>`
-  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
+}))`
+  height: auto;
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  display: ${({ visible }) => (visible ? 'block' : 'none')};
+  display: block;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -99,6 +112,9 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   min-width: 0;
   padding-left: ${({ isEventViewer }) =>
     !isEventViewer ? '4px;' : '0;'}; // match timeline event border
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -176,17 +192,18 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
 }))<{
   className?: string;
   eventType: Omit<TimelineEventsType, 'all'>;
+  isExpanded: boolean;
   isBuildingBlockType: boolean;
   showLeftBorder: boolean;
 }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
+  ${({ theme, eventType, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
       : ''};
-  ${({ isBuildingBlockType, showLeftBorder }) =>
+  ${({ isBuildingBlockType }) =>
     isBuildingBlockType
       ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
@@ -194,6 +211,16 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
+
+  ${({ isExpanded, theme }) =>
+    isExpanded &&
+    `
+    background: ${theme.eui.euiTableSelectedColor};
+
+    &:hover {
+      ${theme.eui.euiTableHoverSelectedColor}
+    }
+  `}
 `;
 
 export const EventsTrData = styled.div.attrs(({ className = '' }) => ({

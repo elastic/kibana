@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
@@ -21,14 +20,12 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({
-          cls: '0',
-          fid: '0.00',
-          lcp: '0.00',
-          tbt: '0.00',
-          fcp: 0,
-          lcpRanks: [0, 0, 100],
-          fidRanks: [0, 0, 100],
-          clsRanks: [0, 0, 100],
+          coreVitalPages: 0,
+          cls: null,
+          tbt: 0,
+          lcpRanks: [100, 0, 0],
+          fidRanks: [100, 0, 0],
+          clsRanks: [100, 0, 0],
         });
       });
     });
@@ -52,20 +49,21 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "cls": "0.00",
+            "cls": "0.000",
             "clsRanks": Array [
               100,
               0,
               0,
             ],
-            "fcp": 1072,
+            "coreVitalPages": 6,
+            "fcp": 817.5,
             "fid": 1352.13,
             "fidRanks": Array [
               0,
               0,
               100,
             ],
-            "lcp": 1270.5,
+            "lcp": 1019,
             "lcpRanks": Array [
               100,
               0,

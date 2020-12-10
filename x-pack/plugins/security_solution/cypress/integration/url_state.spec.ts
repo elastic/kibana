@@ -31,12 +31,7 @@ import { openAllHosts } from '../tasks/hosts/main';
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import {
-  addNameToTimeline,
-  closeTimeline,
-  populateTimeline,
-  waitForTimelineChanges,
-} from '../tasks/timeline';
+import { addNameToTimeline, closeTimeline, populateTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../urls/state';
@@ -225,24 +220,21 @@ describe('url state', () => {
     openTimelineUsingToggle();
     populateTimeline();
 
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
 
     addNameToTimeline(timeline.title);
-    waitForTimelineChanges();
 
-    cy.wait('@timeline').then((response) => {
+    cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
-      cy.wrap(response.status).should('eql', 200);
-      const JsonResponse = JSON.parse(response.xhr.responseText);
-      const timelineId = JsonResponse.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response!.statusCode).should('eql', 200);
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
     });
   });
 });

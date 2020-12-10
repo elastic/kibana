@@ -7,13 +7,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { attemptToURIDecode } from '../../../../shared_imports';
 import { SectionLoading, ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
-import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import {
   ComponentTemplateDetailsFlyoutContent,
@@ -72,7 +73,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   // Track component loaded
   useEffect(() => {
-    trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
+    trackMetric(METRIC_TYPE.LOADED, UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
 
   useEffect(() => {
@@ -84,7 +85,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           }),
           icon: 'pencil',
           handleActionClick: () =>
-            goToEditComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+            goToEditComponentTemplate(attemptToURIDecode(componentTemplateName)!),
         },
         {
           name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
@@ -92,7 +93,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           }),
           icon: 'copy',
           handleActionClick: () =>
-            goToCloneComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+            goToCloneComponentTemplate(attemptToURIDecode(componentTemplateName)!),
         },
         {
           name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
@@ -103,7 +104,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
             details._kbnMeta.usedBy.length > 0,
           closePopoverOnClick: true,
           handleActionClick: () => {
-            setComponentTemplatesToDelete([attemptToDecodeURI(componentTemplateName)]);
+            setComponentTemplatesToDelete([attemptToURIDecode(componentTemplateName)!]);
           },
         },
       ];

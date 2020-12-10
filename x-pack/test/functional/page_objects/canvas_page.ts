@@ -32,6 +32,19 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
     },
 
+    /*
+     * Finds the first workpad in the loader (uses find, not findAll) and
+     * ensures the expected name is the actual name. Then it clicks the element
+     * to load the workpad. Resolves once the workpad is in the DOM
+     */
+    async loadFirstWorkpad(workpadName: string) {
+      const elem = await testSubjects.find('canvasWorkpadLoaderWorkpad');
+      const text = await elem.getVisibleText();
+      expect(text).to.be(workpadName);
+      await elem.click();
+      await testSubjects.existOrFail('canvasWorkpadPage');
+    },
+
     async fillOutCustomElementForm(name: string, description: string) {
       // Fill out the custom element form and submit it
       await testSubjects.setValue('canvasCustomElementForm-name', name, {
@@ -78,6 +91,28 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       expect(refreshPopoverExists).to.be(true);
 
       await testSubjects.missingOrFail('add-element-button');
+    },
+
+    async getTimeFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'time');
+    },
+
+    async getMatchFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'exactly');
     },
   };
 }

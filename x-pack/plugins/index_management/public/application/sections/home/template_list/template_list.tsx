@@ -8,6 +8,7 @@ import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
@@ -36,6 +37,7 @@ import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
 import { FilterListButton, Filters } from './components';
+import { attemptToURIDecode } from '../../../../shared_imports';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';
 interface MatchParams {
@@ -100,7 +102,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const selectedTemplate = Boolean(templateName)
     ? {
-        name: templateName!,
+        name: attemptToURIDecode(templateName!)!,
         isLegacy: getIsLegacyFromQueryParams(location),
       }
     : null;
@@ -259,7 +261,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Track component loaded
   useEffect(() => {
-    uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
+    uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
 
   return (

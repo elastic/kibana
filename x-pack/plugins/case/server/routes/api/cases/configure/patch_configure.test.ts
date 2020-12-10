@@ -39,7 +39,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -72,7 +72,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -110,7 +110,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -141,7 +141,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [],
       })
@@ -163,7 +163,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -190,7 +190,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })

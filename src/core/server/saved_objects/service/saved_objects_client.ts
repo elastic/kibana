@@ -213,6 +213,24 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
  *
  * @public
  */
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+  /** The number of objects that have been updated by this operation */
+  updated: number;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -432,5 +450,16 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
   }
 }

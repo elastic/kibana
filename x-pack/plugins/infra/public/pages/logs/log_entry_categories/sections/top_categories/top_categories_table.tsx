@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useSet } from 'react-use';
+import useSet from 'react-use/lib/useSet';
 
 import { euiStyled } from '../../../../../../../observability/public';
 import {

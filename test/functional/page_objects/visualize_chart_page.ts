@@ -218,7 +218,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async expectError() {
-      await testSubjects.existOrFail('visLibVisualizeError');
+      await testSubjects.existOrFail('vislibVisualizeError');
     }
 
     public async getVisualizationRenderingCount() {
@@ -326,6 +326,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
+    }
+
+    /**
+     * This function returns the text displayed in the Table Vis header
+     */
+    public async getTableVisHeader() {
+      return await testSubjects.getVisibleText('paginated-table-header');
     }
 
     /**

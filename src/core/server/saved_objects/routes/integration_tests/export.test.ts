@@ -22,9 +22,12 @@ jest.mock('../../export', () => ({
 }));
 
 import * as exportMock from '../../export';
-import { createListStream } from '../../../utils/streams';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { UnwrapPromise } from '@kbn/utility-types';
+import { createListStream } from '@kbn/utils';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
@@ -33,9 +36,10 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
-  maxImportPayloadBytes: 10485760,
+  maxImportPayloadBytes: 26214400,
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
+let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
@@ -49,7 +53,10 @@ describe('POST /api/saved_objects/_export', () => {
     );
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerExportRoute(router, config);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the export does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerExportRoute(router, { config, coreUsageData });
 
     await server.start();
   });
@@ -59,7 +66,7 @@ describe('POST /api/saved_objects/_export', () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const sortedObjects = [
       {
         id: '1',
@@ -110,5 +117,10 @@ describe('POST /api/saved_objects/_export', () => {
         types: ['search'],
       })
     );
+    expect(coreUsageStatsClient.incrementSavedObjectsExport).toHaveBeenCalledWith({
+      headers: expect.anything(),
+      types: ['search'],
+      supportedTypes: ['index-pattern', 'search'],
+    });
   });
 });

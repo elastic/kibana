@@ -17,40 +17,20 @@
  * under the License.
  */
 
-import './index.scss';
-
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
 import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { BaseVisTypeOptions, VisualizationsSetup } from '../../visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
-import {
-  createHistogramVisTypeDefinition,
-  createLineVisTypeDefinition,
-  createPieVisTypeDefinition,
-  createAreaVisTypeDefinition,
-  createHeatmapVisTypeDefinition,
-  createHorizontalBarVisTypeDefinition,
-  createGaugeVisTypeDefinition,
-  createGoalVisTypeDefinition,
-} from './vis_type_vislib_vis_types';
+import { visLibVisTypeDefinitions, pieVisTypeDefinition } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setDataActions, setKibanaLegacy } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-
-export interface VisTypeVislibDependencies {
-  uiSettings: IUiSettingsClient;
-  charts: ChartsPluginSetup;
-}
+import { setFormatService, setDataActions } from './services';
+import { getVislibVisRenderer } from './vis_renderer';
+import { BasicVislibParams } from './types';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
@@ -66,54 +46,37 @@ export interface VisTypeVislibPluginStartDependencies {
   kibanaLegacy: KibanaLegacyStart;
 }
 
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
+export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin implements Plugin<void, void> {
+export class VisTypeVislibPlugin
+  implements
+    Plugin<void, void, VisTypeVislibPluginSetupDependencies, VisTypeVislibPluginStartDependencies> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
   ) {
-    const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
-      uiSettings: core.uiSettings,
-      charts,
-    };
-    const vislibTypes = [
-      createHistogramVisTypeDefinition,
-      createLineVisTypeDefinition,
-      createPieVisTypeDefinition,
-      createAreaVisTypeDefinition,
-      createHeatmapVisTypeDefinition,
-      createHorizontalBarVisTypeDefinition,
-      createGaugeVisTypeDefinition,
-      createGoalVisTypeDefinition,
-    ];
-    const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
-
     // if visTypeXy plugin is disabled it's config will be undefined
     if (!visTypeXy) {
-      const convertedTypes: any[] = [];
+      const convertedTypes: Array<BaseVisTypeOptions<BasicVislibParams>> = [];
       const convertedFns: any[] = [];
 
       // Register legacy vislib types that have been converted
       convertedFns.forEach(expressions.registerFunction);
-      convertedTypes.forEach((vis) =>
-        visualizations.createBaseVisualization(vis(visualizationDependencies))
-      );
+      convertedTypes.forEach(visualizations.createBaseVisualization);
+      expressions.registerRenderer(getVislibVisRenderer(core, charts));
     }
-
     // Register non-converted types
-    vislibFns.forEach(expressions.registerFunction);
-    vislibTypes.forEach((vis) =>
-      visualizations.createBaseVisualization(vis(visualizationDependencies))
-    );
+    visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
+    visualizations.createBaseVisualization(pieVisTypeDefinition);
+    expressions.registerRenderer(getVislibVisRenderer(core, charts));
+    [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: VisTypeVislibPluginStartDependencies) {
+  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
-    setKibanaLegacy(kibanaLegacy);
   }
 }

@@ -20,6 +20,7 @@ import {
   reputationRenderer,
   DefaultFieldRenderer,
   DEFAULT_MORE_MAX_HEIGHT,
+  DefaultFieldRendererOverflow,
   MoreContainer,
 } from './field_renderers';
 import { mockData } from '../../../network/components/details/mock';
@@ -328,6 +329,47 @@ describe('Field Renderers', () => {
       );
 
       expect(render).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('DefaultFieldRendererOverflow', () => {
+    const idPrefix = 'prefix-1';
+    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
+
+    test('it should render the length of items after the overflowIndexStart', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(' ,+2 More');
+      expect(wrapper.find('[data-test-subj="more-container"]').first().exists()).toBe(false);
+    });
+
+    test('it should render the items after overflowIndexStart in the popover', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      wrapper.find('button').first().simulate('click');
+      wrapper.update();
+      expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="more-container"]').first().text()).toEqual(
+        'item6item7'
+      );
     });
   });
 });

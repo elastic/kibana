@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import {
@@ -26,12 +27,20 @@ interface Props {
 }
 
 export const SubFeatureForm = (props: Props) => {
+  const groupsWithPrivileges = props.subFeature
+    .getPrivilegeGroups()
+    .filter((group) => group.privileges.length > 0);
+
+  if (groupsWithPrivileges.length === 0) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText size="s">{props.subFeature.name}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{props.subFeature.getPrivilegeGroups().map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -118,7 +127,7 @@ export const SubFeatureForm = (props: Props) => {
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}
-        onChange={(selectedPrivilegeId) => {
+        onChange={(selectedPrivilegeId: string) => {
           // Deselect all privileges which belong to this mutually-exclusive group
           const privilegesWithoutGroupEntries = props.selectedFeaturePrivileges.filter(
             (sp) => !privilegeGroup.privileges.some((privilege) => privilege.id === sp)
@@ -130,6 +139,15 @@ export const SubFeatureForm = (props: Props) => {
             props.onChange([...privilegesWithoutGroupEntries, selectedPrivilegeId]);
           }
         }}
+        legend={i18n.translate(
+          'xpack.security.management.editRole.subFeatureForm.controlLegendText',
+          {
+            defaultMessage: '{subFeatureName} sub-feature privilege',
+            values: {
+              subFeatureName: props.subFeature.name,
+            },
+          }
+        )}
       />
     );
   }

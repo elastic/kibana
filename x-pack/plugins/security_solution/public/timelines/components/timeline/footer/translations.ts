@@ -36,10 +36,6 @@ export const TOTAL_COUNT_OF_EVENTS = i18n.translate(
   }
 );
 
-export const UPDATED = i18n.translate('xpack.securitySolution.footer.updated', {
-  defaultMessage: 'Updated',
-});
-
 export const AUTO_REFRESH_ACTIVE = i18n.translate(
   'xpack.securitySolution.footer.autoRefreshActiveDescription',
   {

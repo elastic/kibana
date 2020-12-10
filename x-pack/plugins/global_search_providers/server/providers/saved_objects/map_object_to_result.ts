@@ -50,7 +50,11 @@ export const mapToResult = (
     // so we are forced to cast the attributes to any to access the properties associated with it.
     title: (object.attributes as any)[defaultSearchField],
     type: object.type,
+    icon: type.management?.icon ?? undefined,
     url: getInAppUrl(object).path,
     score: object.score,
+    meta: {
+      tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+    },
   };
 };

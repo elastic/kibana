@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Execution of File Written or Modified by PDF Reader",
-  "query": "sequence with maxspan=2h\n  [file where event.type != \"delete\" and file.extension == \"exe\" and\n     process.name in (\"acrord32.exe\", \"rdrcef.exe\", \"foxitphantomPDF.exe\", \"foxitreader.exe\") and\n     file.name not in (\"foxitphantomPDF.exe\",\n                       \"FoxitPhantomPDFUpdater.exe\",\n                       \"foxitreader.exe\",\n                       \"FoxitReaderUpdater.exe\",\n                       \"acrord32.exe\",\n                       \"rdrcef.exe\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
+  "query": "sequence with maxspan=2h\n  [file where event.type != \"deletion\" and file.extension : \"exe\" and\n     (process.name : \"AcroRd32.exe\" or\n      process.name : \"rdrcef.exe\" or\n      process.name : \"FoxitPhantomPDF.exe\" or\n      process.name : \"FoxitReader.exe\") and\n     not (file.name : \"FoxitPhantomPDF.exe\" or\n          file.name : \"FoxitPhantomPDFUpdater.exe\" or\n          file.name : \"FoxitReader.exe\" or\n          file.name : \"FoxitReaderUpdater.exe\" or\n          file.name : \"AcroRd32.exe\" or\n          file.name : \"rdrcef.exe\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
   "risk_score": 21,
   "rule_id": "1defdd62-cd8d-426e-a246-81a37751bb2b",
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {

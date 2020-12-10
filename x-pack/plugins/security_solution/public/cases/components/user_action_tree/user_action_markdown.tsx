@@ -4,24 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiMarkdownFormat,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
 import { Form, useForm, UseField } from '../../../shared_imports';
 import { schema, Content } from './schema';
-import {
-  MarkdownEditorForm,
-  parsingPlugins,
-  processingPlugins,
-} from '../../../common/components/markdown_editor/eui_form';
+import { MarkdownRenderer, MarkdownEditorForm } from '../../../common/components/markdown_editor';
 
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -111,12 +101,7 @@ export const UserActionMarkdown = ({
     </Form>
   ) : (
     <ContentWrapper data-test-subj="user-action-markdown">
-      <EuiMarkdownFormat
-        parsingPluginList={parsingPlugins}
-        processingPluginList={processingPlugins}
-      >
-        {content}
-      </EuiMarkdownFormat>
+      <MarkdownRenderer>{content}</MarkdownRenderer>
     </ContentWrapper>
   );
 };

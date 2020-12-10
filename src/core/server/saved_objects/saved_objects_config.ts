@@ -36,7 +36,7 @@ export type SavedObjectsConfigType = TypeOf<typeof savedObjectsConfig.schema>;
 export const savedObjectsConfig = {
   path: 'savedObjects',
   schema: schema.object({
-    maxImportPayloadBytes: schema.byteSize({ defaultValue: 10485760 }),
+    maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
     maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
   }),
 };

@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Observable, Subscription } from 'rxjs';
 
-import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { migrateLegacyQuery } from './lib/migrate_legacy_query';
-
-import { ViewMode } from '../embeddable_plugin';
-import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
-import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
+import { DashboardContainer } from './embeddable';
+import { DashboardSavedObject } from '../saved_dashboards';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
@@ -38,15 +36,18 @@ import {
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
+
+import { ViewMode } from '../services/embeddable';
+import { UsageCollectionSetup } from '../services/usage_collection';
+import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
+import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
 import {
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../kibana_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
-import { DashboardContainer } from './embeddable';
+} from '../services/kibana_utils';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -55,7 +56,7 @@ import { DashboardContainer } from './embeddable';
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
-  public savedDashboard: SavedObjectDashboard;
+  public savedDashboard: DashboardSavedObject;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -86,6 +87,7 @@ export class DashboardStateManager {
   private readonly stateSyncRef: ISyncStateRef;
   private readonly history: History;
   private readonly usageCollection: UsageCollectionSetup | undefined;
+  public readonly hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
 
   /**
    *
@@ -101,23 +103,26 @@ export class DashboardStateManager {
     kbnUrlStateStorage,
     history,
     usageCollection,
+    hasTaggingCapabilities,
   }: {
-    savedDashboard: SavedObjectDashboard;
+    savedDashboard: DashboardSavedObject;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
     usageCollection?: UsageCollectionSetup;
+    hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
   }) {
     this.history = history;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
     this.usageCollection = usageCollection;
+    this.hasTaggingCapabilities = hasTaggingCapabilities;
 
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls, this.hasTaggingCapabilities),
       kibanaVersion,
       usageCollection
     );
@@ -313,7 +318,7 @@ export class DashboardStateManager {
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls, this.hasTaggingCapabilities),
       this.kibanaVersion,
       this.usageCollection
     );
@@ -355,6 +360,10 @@ export class DashboardStateManager {
     return this.appState.description;
   }
 
+  public getTags() {
+    return this.appState.tags;
+  }
+
   public setDescription(description: string) {
     this.stateContainer.transitions.set('description', description);
   }
@@ -362,6 +371,10 @@ export class DashboardStateManager {
   public setTitle(title: string) {
     this.savedDashboard.title = title;
     this.stateContainer.transitions.set('title', title);
+  }
+
+  public setTags(tags: string[]) {
+    this.stateContainer.transitions.set('tags', tags);
   }
 
   public getAppState() {

@@ -89,7 +89,6 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
       isOpen={openPopup}
       closePopover={() => setOpenPopup(false)}
       panelPaddingSize="none"
-      withTitle
       anchorPosition="downLeft"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />

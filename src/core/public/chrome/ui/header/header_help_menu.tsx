@@ -319,7 +319,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         data-test-subj="helpMenuButton"
         id="headerHelpMenu"
         isOpen={this.state.isOpen}
-        ownFocus
         repositionOnScroll
       >
         <EuiPopoverTitle>

@@ -16,21 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode } from '../../../../embeddable/public';
+import {
+  ErrorEmbeddable,
+  IContainer,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+} from '../../services/embeddable';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -62,6 +69,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -85,6 +94,16 @@ beforeEach(async () => {
     mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
   });
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
+});
+
+test('Notification is incompatible with Error Embeddables', async () => {
+  const action = new LibraryNotificationAction(unlinkAction);
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {

@@ -18,14 +18,16 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
-import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
-import { ViewMode } from 'src/plugins/embeddable/public';
-import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { DashboardContainer, DashboardContainerInput } from '.';
-import { DashboardContainerOptions } from './embeddable/dashboard_container';
-import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { DashboardContainerServices } from './embeddable/dashboard_container';
+
+import { ViewMode } from '../services/embeddable';
+import { createKbnUrlStateStorage } from '../services/kibana_utils';
+import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -41,6 +43,11 @@ describe('DashboardState', function () {
     },
   } as TimefilterContract;
 
+  // TS is *very* picky with type guards / predicates. can't just use jest.fn()
+  function mockHasTaggingCapabilities(obj: any): obj is any {
+    return false;
+  }
+
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
@@ -48,6 +55,7 @@ describe('DashboardState', function () {
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }
 
@@ -65,7 +73,7 @@ describe('DashboardState', function () {
       panels: {} as DashboardContainerInput['panels'],
     };
     const input = { ...defaultInput, ...(initialInput ?? {}) };
-    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerOptions);
+    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerServices);
   }
 
   describe('syncTimefilterWithDashboard', function () {

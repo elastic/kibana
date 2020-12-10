@@ -18,6 +18,6 @@ export const STEP_ONE_TITLE = i18n.translate(
 export const STEP_TWO_TITLE = i18n.translate(
   'xpack.securitySolution.components.create.stepTwoTitle',
   {
-    defaultMessage: 'External incident management system fields',
+    defaultMessage: 'External Connector Fields',
   }
 );

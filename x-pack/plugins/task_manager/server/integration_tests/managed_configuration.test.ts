@@ -30,7 +30,17 @@ describe('managed configuration', () => {
       max_attempts: 9,
       poll_interval: 3000,
       max_poll_inactivity_cycles: 10,
+      monitored_aggregated_stats_refresh_rate: 60000,
+      monitored_stats_required_freshness: 4000,
+      monitored_stats_running_average_window: 50,
       request_capacity: 1000,
+      monitored_task_execution_thresholds: {
+        default: {
+          error_threshold: 90,
+          warn_threshold: 80,
+        },
+        custom: {},
+      },
     });
     logger = context.logger.get('taskManager');
 

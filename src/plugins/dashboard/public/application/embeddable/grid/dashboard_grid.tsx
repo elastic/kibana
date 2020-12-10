@@ -30,10 +30,10 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
+import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
-import { withKibana } from '../../../../../kibana_react/public';
+import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
@@ -265,6 +265,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         <div
           style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
           className={classes}
+          // This key is required for the ReactGridLayout to work properly
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
           ref={(reactGridItem) => {
@@ -272,6 +273,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
+            // This key is used to force rerendering on embeddable type change while the id remains the same
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}

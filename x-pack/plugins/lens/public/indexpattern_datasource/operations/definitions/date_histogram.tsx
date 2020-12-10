@@ -19,10 +19,16 @@ import {
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
-import { updateColumnParam } from '../../state_helpers';
+import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternAggRestrictions, search } from '../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  IndexPatternAggRestrictions,
+  search,
+} from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
+import { getInvalidFieldMessage } from './helpers';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -46,6 +52,8 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
@@ -59,7 +67,9 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  getDefaultLabel: (column, indexPattern) =>
+    indexPattern.getFieldByName(column.sourceField)!.displayName,
+  buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
@@ -70,7 +80,6 @@ export const dateHistogramOperation: OperationDefinition<
       label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval',
@@ -81,7 +90,7 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
@@ -91,12 +100,9 @@ export const dateHistogramOperation: OperationDefinition<
     );
   },
   transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
-    if (
-      newField &&
-      newField.aggregationRestrictions &&
-      newField.aggregationRestrictions.date_histogram
-    ) {
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
+
+    if (newField?.aggregationRestrictions?.date_histogram) {
       const restrictions = newField.aggregationRestrictions.date_histogram;
 
       return {
@@ -115,36 +121,33 @@ export const dateHistogramOperation: OperationDefinition<
 
     return column;
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.displayName,
       sourceField: field.name,
     };
   },
-  toEsAggsConfig: (column, columnId, indexPattern) => {
-    const usedField = indexPattern.fields.find((field) => field.name === column.sourceField);
-    return {
+  toEsAggsFn: (column, columnId, indexPattern) => {
+    const usedField = indexPattern.getFieldByName(column.sourceField);
+    return buildExpressionFunction<AggFunctionsMapping['aggDateHistogram']>('aggDateHistogram', {
       id: columnId,
       enabled: true,
-      type: 'date_histogram',
       schema: 'segment',
-      params: {
-        field: column.sourceField,
-        time_zone: column.params.timeZone,
-        useNormalizedEsInterval: !usedField || !usedField.aggregationRestrictions?.date_histogram,
-        interval: column.params.interval,
-        drop_partials: false,
-        min_doc_count: 0,
-        extended_bounds: {},
-      },
-    };
+      field: column.sourceField,
+      time_zone: column.params.timeZone,
+      useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
+      interval: column.params.interval,
+      drop_partials: false,
+      min_doc_count: 0,
+      extended_bounds: JSON.stringify({}),
+    }).toAst();
   },
   paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
-      state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
-        (currentField) => currentField.name === currentColumn.sourceField
+      state.indexPatterns[state.layers[layerId].indexPatternId].getFieldByName(
+        currentColumn.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
@@ -171,15 +174,7 @@ export const dateHistogramOperation: OperationDefinition<
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      setState(
-        updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
-          value,
-          paramName: 'interval',
-        })
-      );
+      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     };
 
     return (

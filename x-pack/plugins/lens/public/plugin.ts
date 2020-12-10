@@ -5,15 +5,18 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../src/plugins/visualizations/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -27,6 +30,7 @@ import {
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import {
   UiActionsStart,
@@ -34,6 +38,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -57,8 +62,12 @@ export interface LensPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
+  visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
+  charts: ChartsPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
+
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
@@ -102,6 +111,7 @@ export class LensPlugin {
       {
         data,
         embeddable,
+        charts,
         expressions,
       },
       this.attributeService
@@ -166,6 +176,8 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    // unregisters the OSS alias
+    startDependencies.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref } from '../../../../../../ml/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function useTimeSeriesExplorerHref({
   jobId,
@@ -38,7 +38,6 @@ export function useTimeSeriesExplorerHref({
         refreshPaused !== undefined && refreshInterval !== undefined
           ? { pause: refreshPaused, value: refreshInterval }
           : undefined,
-      zoom: timeRange,
       ...(serviceName && transactionType
         ? {
             entities: {

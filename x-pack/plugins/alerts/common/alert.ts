@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeState = Record<string, any>;
@@ -20,13 +21,12 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
-export const AlertExecutionStatusErrorReasonValues = [
-  'read',
-  'decrypt',
-  'execute',
-  'unknown',
-] as const;
-export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+export enum AlertExecutionStatusErrorReasons {
+  Read = 'read',
+  Decrypt = 'decrypt',
+  Execute = 'execute',
+  Unknown = 'unknown',
+}
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
@@ -38,12 +38,17 @@ export interface AlertExecutionStatus {
 }
 
 export type AlertActionParams = SavedObjectAttributes;
+export type AlertActionParam = SavedObjectAttribute;
 
 export interface AlertAction {
   group: string;
   id: string;
   actionTypeId: string;
   params: AlertActionParams;
+}
+
+export interface AlertAggregations {
+  alertExecutionStatus: { [status: string]: number };
 }
 
 export interface Alert {
@@ -64,9 +69,31 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
 }
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;
+
+export enum HealthStatus {
+  OK = 'ok',
+  Warning = 'warn',
+  Error = 'error',
+}
+
+export interface AlertsHealth {
+  decryptionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  executionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  readHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+}

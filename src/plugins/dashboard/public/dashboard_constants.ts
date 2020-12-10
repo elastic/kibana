@@ -20,12 +20,20 @@
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
+  VIEW_DASHBOARD_URL: '/view',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
+  SEARCH_SESSION_ID: 'searchSessionId',
 };
 
 export function createDashboardEditUrl(id: string) {
-  return `/view/${id}`;
+  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
+}
+
+export function createDashboardListingFilterUrl(filter: string | undefined) {
+  return filter
+    ? `${DashboardConstants.LANDING_PAGE_PATH}?filter="${filter}"`
+    : DashboardConstants.LANDING_PAGE_PATH;
 }

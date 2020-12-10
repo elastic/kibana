@@ -13,16 +13,29 @@ import {
 
 import { parseDuration } from '../lib';
 
-export type AlertInstances = Record<string, AlertInstance>;
+interface ScheduledExecutionOptions<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
+> {
+  actionGroup: string;
+  subgroup?: string;
+  context: Context;
+  state: State;
+}
+
+export type PublicAlertInstance<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext
+> = Pick<
+  AlertInstance<State, Context>,
+  'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+>;
+
 export class AlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext
 > {
-  private scheduledExecutionOptions?: {
-    actionGroup: string;
-    context: Context;
-    state: State;
-  };
+  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context>;
   private meta: AlertInstanceMeta;
   private state: State;
 
@@ -40,15 +53,66 @@ export class AlertInstance<
       return false;
     }
     const throttleMills = throttle ? parseDuration(throttle) : 0;
-    const actionGroup = this.scheduledExecutionOptions.actionGroup;
     if (
       this.meta.lastScheduledActions &&
-      this.meta.lastScheduledActions.group === actionGroup &&
+      this.scheduledActionGroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
+      ) &&
+      this.scheduledActionSubgroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
+      ) &&
       this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
     ) {
       return true;
     }
     return false;
+  }
+
+  scheduledActionGroupOrSubgroupHasChanged(): boolean {
+    if (!this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
+      // it is considered a change when there are no previous scheduled actions
+      // and new scheduled actions
+      return true;
+    }
+
+    if (this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
+      // compare previous and new scheduled actions if both exist
+      return (
+        !this.scheduledActionGroupIsUnchanged(
+          this.meta.lastScheduledActions,
+          this.scheduledExecutionOptions
+        ) ||
+        !this.scheduledActionSubgroupIsUnchanged(
+          this.meta.lastScheduledActions,
+          this.scheduledExecutionOptions
+        )
+      );
+    }
+
+    // no previous and no new scheduled actions
+    return false;
+  }
+
+  private scheduledActionGroupIsUnchanged(
+    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
+  ) {
+    return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
+  }
+
+  private scheduledActionSubgroupIsUnchanged(
+    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
+  ) {
+    return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
+      ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
+      : true;
+  }
+
+  getLastScheduledActions() {
+    return this.meta.lastScheduledActions;
   }
 
   getScheduledActionOptions() {
@@ -64,16 +128,35 @@ export class AlertInstance<
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context?: Context) {
-    if (this.hasScheduledActions()) {
-      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
-    }
+  scheduleActions(actionGroup: string, context: Context = {} as Context) {
+    this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
-      context: (context || {}) as Context,
+      context,
       state: this.state,
     };
     return this;
+  }
+
+  scheduleActionsWithSubGroup(
+    actionGroup: string,
+    subgroup: string,
+    context: Context = {} as Context
+  ) {
+    this.ensureHasNoScheduledActions();
+    this.scheduledExecutionOptions = {
+      actionGroup,
+      subgroup,
+      context,
+      state: this.state,
+    };
+    return this;
+  }
+
+  private ensureHasNoScheduledActions() {
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
+    }
   }
 
   replaceState(state: State) {
@@ -81,8 +164,8 @@ export class AlertInstance<
     return this;
   }
 
-  updateLastScheduledActions(group: string) {
-    this.meta.lastScheduledActions = { group, date: new Date() };
+  updateLastScheduledActions(group: string, subgroup?: string) {
+    this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
   }
 
   /**

@@ -39,6 +39,8 @@ describe('createLayerDescriptor', () => {
         {
           leftField: 'iso2',
           right: {
+            applyGlobalQuery: true,
+            applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
             indexPatternTitle: 'apm-*',
@@ -175,6 +177,8 @@ describe('createLayerDescriptor', () => {
         query: 'processor.event:"transaction"',
       },
       sourceDescriptor: {
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
         geoField: 'client.geo.location',
         id: '12345',
         indexPatternId: 'apm_static_index_pattern_id',
@@ -216,6 +220,8 @@ describe('createLayerDescriptor', () => {
         query: 'processor.event:"transaction"',
       },
       sourceDescriptor: {
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
         geoField: 'client.geo.location',
         id: '12345',
         indexPatternId: 'apm_static_index_pattern_id',

@@ -20,6 +20,7 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -119,36 +120,104 @@ test('can specify max payload as string', () => {
   expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
 });
 
-test('throws if basepath is missing prepended slash', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: 'foo',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+describe('basePath', () => {
+  test('throws if missing prepended slash', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: 'foo',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if appends a slash', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: '/foo/',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if is an empty string', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      basePath: '',
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if not specified, but rewriteBasePath is set', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      rewriteBasePath: true,
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
 });
 
-test('throws if basepath appends a slash', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: '/foo/',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-});
+describe('publicBaseUrl', () => {
+  test('throws if invalid HTTP(S) URL', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: '//myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'ftp://myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+  });
 
-test('throws if basepath is an empty string', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    basePath: '',
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-});
+  test('throws if includes hash, query, or auth', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/?a=b' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/#a' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://user:pass@myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+  });
 
-test('throws if basepath is not specified, but rewriteBasePath is set', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    rewriteBasePath: true,
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  test('throws if basePath and publicBaseUrl are specified, but do not match', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({
+        basePath: '/foo',
+        publicBaseUrl: 'https://myhost.com/',
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] must contain the [basePath]: / !== /foo"`
+    );
+  });
+
+  test('does not throw if valid URL and matches basePath', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com' })).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com/' })).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'https://myhost.com' })).not.toThrow();
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'https://myhost.com/foo', basePath: '/foo' })
+    ).not.toThrow();
+    expect(() => httpSchema.validate({ publicBaseUrl: 'http://myhost.com:8080' })).not.toThrow();
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com:4/foo', basePath: '/foo' })
+    ).not.toThrow();
+  });
 });
 
 test('accepts only valid uuids for server.uuid', () => {
@@ -165,15 +234,15 @@ test('uses os.hostname() as default for server.name', () => {
   expect(validated.name).toEqual('kibana-hostname');
 });
 
-test('throws if xsrf.whitelist element does not start with a slash', () => {
+test('throws if xsrf.allowlist element does not start with a slash', () => {
   const httpSchema = config.schema;
   const obj = {
     xsrf: {
-      whitelist: ['/valid-path', 'invalid-path'],
+      allowlist: ['/valid-path', 'invalid-path'],
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[xsrf.whitelist.1]: must start with a slash"`
+    `"[xsrf.allowlist.1]: must start with a slash"`
   );
 });
 
@@ -261,6 +330,59 @@ describe('with compression', () => {
   });
 });
 
+describe('cors', () => {
+  describe('origin', () => {
+    it('list cannot be empty', () => {
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: [],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+              "[cors.origin]: types that failed validation:
+              - [cors.origin.0]: expected value to equal [*]
+              - [cors.origin.1]: array size is [0], but cannot be smaller than [1]"
+          `);
+    });
+
+    it('list of valid URLs', () => {
+      const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      expect(
+        config.schema.validate({
+          cors: { origin },
+        }).cors.origin
+      ).toStrictEqual(origin);
+
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: ['*://elastic.co/*'],
+          },
+        })
+      ).toThrow();
+    });
+
+    it('can be configured as "*" wildcard', () => {
+      expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
+    });
+  });
+  describe('credentials', () => {
+    it('cannot use wildcard origin if "credentials: true"', () => {
+      expect(
+        () => config.schema.validate({ cors: { credentials: true, origin: '*' } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+      expect(
+        () => config.schema.validate({ cors: { credentials: true } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
@@ -276,7 +398,7 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',

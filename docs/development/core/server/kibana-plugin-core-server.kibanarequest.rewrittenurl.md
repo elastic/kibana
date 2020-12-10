@@ -9,5 +9,5 @@ URL rewritten in onPreRouting request interceptor.
 <b>Signature:</b>
 
 ```typescript
-readonly rewrittenUrl?: Url;
+readonly rewrittenUrl?: URL;
 ```

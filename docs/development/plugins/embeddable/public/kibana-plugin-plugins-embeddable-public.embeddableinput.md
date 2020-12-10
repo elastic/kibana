@@ -19,5 +19,6 @@ export declare type EmbeddableInput = {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
+    searchSessionId?: string;
 };
 ```

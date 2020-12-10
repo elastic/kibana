@@ -11,5 +11,3 @@ export * from './request';
 export * from './documentation';
 
 export * from './breadcrumbs';
-
-export { attemptToDecodeURI } from './utils';

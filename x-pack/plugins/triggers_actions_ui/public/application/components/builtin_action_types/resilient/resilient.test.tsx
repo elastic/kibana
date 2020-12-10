@@ -68,7 +68,7 @@ describe('resilient connector validation', () => {
       errors: {
         apiUrl: ['URL is required.'],
         apiKeyId: [],
-        apiKeySecret: ['API key secret is required'],
+        apiKeySecret: ['Secret is required'],
         orgId: ['Organization ID is required'],
       },
     });
@@ -93,7 +93,7 @@ describe('resilient action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        title: ['Name is required.'],
       },
     });
   });

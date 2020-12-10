@@ -8,18 +8,20 @@ import axios from 'axios';
 
 import { Logger } from '../../../../../../src/core/server';
 import {
-  ExternalServiceCredentials,
-  ExternalService,
+  CreateCommentParams,
   CreateIncidentParams,
-  UpdateIncidentParams,
+  ExternalService,
+  ExternalServiceCommentResponse,
+  ExternalServiceCredentials,
+  ExternalServiceIncidentResponse,
+  Fields,
+  FieldSchema,
+  GetCommonFieldsResponse,
+  Incident,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  Fields,
-  CreateCommentParams,
-  Incident,
   ResponseError,
-  ExternalServiceCommentResponse,
-  ExternalServiceIncidentResponse,
+  UpdateIncidentParams,
 } from './types';
 
 import * as i18n from './translations';
@@ -46,21 +48,22 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/issue`;
-  const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue`;
+  const capabilitiesUrl = `${urlWithoutTrailingSlash}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
-  const getIssueTypesOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
-  const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
-  const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
-  const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
-  const searchUrl = `${url}/${BASE_URL}/search`;
+  const getIssueTypesOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypeFieldsOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
+  const getIssueTypesUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
+  const getIssueTypeFieldsUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
+  const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
 
   const getIncidentViewURL = (key: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}/${key}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   };
 
   const getCommentsURL = (issueId: string) => {
@@ -127,14 +130,21 @@ export const createExternalService = (
     issueTypes.map((type) => ({ id: type.id, name: type.name }));
 
   const normalizeFields = (fields: {
-    [key: string]: { allowedValues?: Array<{}>; defaultValue?: {} };
+    [key: string]: {
+      allowedValues?: Array<{}>;
+      defaultValue?: {};
+      required: boolean;
+      schema: FieldSchema;
+    };
   }) =>
     Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
       return {
         ...fieldsAcc,
         [fieldKey]: {
+          required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
+          schema: fields[fieldKey]?.schema,
         },
       };
     }, {});
@@ -326,7 +336,6 @@ export const createExternalService = (
   const getIssueTypes = async () => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -366,7 +375,6 @@ export const createExternalService = (
   const getFieldsByIssueType = async (issueTypeId: string) => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -378,6 +386,7 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+
         return normalizeFields(fields);
       } else {
         const res = await request({
@@ -406,6 +415,30 @@ export const createExternalService = (
           )}`
         )
       );
+    }
+  };
+
+  const getFields = async () => {
+    try {
+      const issueTypes = await getIssueTypes();
+      const fieldsPerIssueType = await Promise.all(
+        issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
+      );
+      return fieldsPerIssueType.reduce((acc: GetCommonFieldsResponse, fieldTypesByIssue) => {
+        const currentListOfFields = Object.keys(acc);
+        return currentListOfFields.length === 0
+          ? fieldTypesByIssue
+          : currentListOfFields.reduce(
+              (add: GetCommonFieldsResponse, field) =>
+                Object.keys(fieldTypesByIssue).includes(field)
+                  ? { ...add, [field]: acc[field] }
+                  : add,
+              {}
+            );
+      }, {});
+    } catch (error) {
+      // errors that happen here would be thrown in the contained async calls
+      throw error;
     }
   };
 
@@ -461,6 +494,7 @@ export const createExternalService = (
   };
 
   return {
+    getFields,
     getIncident,
     createIncident,
     updateIncident,

@@ -17,21 +17,25 @@
  * under the License.
  */
 
-import { KIBANA_STATS_TYPE } from '../../common/constants';
-import { Collector } from './collector';
+import { Logger } from 'src/core/server';
+import { Collector, CollectorOptions } from './collector';
 
-export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
-  T,
-  U
+// Enforce the `schema` property for UsageCollectors
+export type UsageCollectorOptions<
+  TFetchReturn = unknown,
+  WithKibanaRequest extends boolean = false,
+  ExtraOptions extends object = {}
+> = CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions> &
+  Required<Pick<CollectorOptions<TFetchReturn, boolean>, 'schema'>>;
+
+export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
+  TFetchReturn,
+  ExtraOptions
 > {
-  protected defaultFormatterForBulkUpload(result: T) {
-    return {
-      type: KIBANA_STATS_TYPE,
-      payload: ({
-        usage: {
-          [this.type]: result,
-        },
-      } as unknown) as U,
-    };
+  constructor(
+    log: Logger,
+    collectorOptions: UsageCollectorOptions<TFetchReturn, any, ExtraOptions>
+  ) {
+    super(log, collectorOptions);
   }
 }

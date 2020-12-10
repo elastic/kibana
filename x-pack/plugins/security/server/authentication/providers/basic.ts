@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -90,7 +91,9 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
+    );
 
     if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
@@ -106,7 +109,9 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
       return AuthenticationResult.redirectTo(
-        `${basePath}/login?next=${encodeURIComponent(`${basePath}${request.url.path}`)}`
+        `${basePath}/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+          `${basePath}${request.url.pathname}${request.url.search}`
+        )}`
       );
     }
 
@@ -119,7 +124,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
     // Having a `null` state means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
@@ -127,12 +132,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.notHandled();
     }
 
-    // Query string may contain the path where logout has been called or
-    // logout reason that login page may need to know.
-    const queryString = request.url.search || `?msg=LOGGED_OUT`;
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**

@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  isErrorEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  EmbeddableInput,
-} from '../../embeddable_plugin';
+
+import { AddToLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+
+import { CoreStart } from 'kibana/public';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  EmbeddableInput,
+  ErrorEmbeddable,
+  IContainer,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+} from '../../services/embeddable';
+import {
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { AddToLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode } from '../../../../embeddable/public';
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -60,6 +65,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -84,6 +91,16 @@ beforeEach(async () => {
     });
     embeddable.updateInput({ viewMode: ViewMode.EDIT });
   }
+});
+
+test('Add to library is incompatible with Error Embeddables', async () => {
+  const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Add to library is compatible when embeddable on dashboard has value type input', async () => {
@@ -124,10 +141,11 @@ test('Add to library is not compatible when embeddable is not in a dashboard con
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
 
-test('Add to library replaces embeddableId but retains panel count', async () => {
+test('Add to library replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
+
   const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);

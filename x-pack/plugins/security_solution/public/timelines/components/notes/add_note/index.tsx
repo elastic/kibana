@@ -7,15 +7,11 @@
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
-import { MarkdownHint } from '../../../../common/components/markdown/markdown_hint';
-import {
-  AssociateNote,
-  GetNewNoteId,
-  updateAndAssociateNode,
-  UpdateInternalNewNote,
-  UpdateNote,
-} from '../helpers';
+import { appActions } from '../../../../common/store/app';
+import { Note } from '../../../../common/lib/note';
+import { AssociateNote, updateAndAssociateNode, UpdateInternalNewNote } from '../helpers';
 import * as i18n from '../translations';
 
 import { NewNote } from './new_note';
@@ -44,29 +40,30 @@ CancelButton.displayName = 'CancelButton';
 /** Displays an input for entering a new note, with an adjacent "Add" button */
 export const AddNote = React.memo<{
   associateNote: AssociateNote;
-  getNewNoteId: GetNewNoteId;
   newNote: string;
   onCancelAddNote?: () => void;
   updateNewNote: UpdateInternalNewNote;
-  updateNote: UpdateNote;
-}>(({ associateNote, getNewNoteId, newNote, onCancelAddNote, updateNewNote, updateNote }) => {
+}>(({ associateNote, newNote, onCancelAddNote, updateNewNote }) => {
+  const dispatch = useDispatch();
+
+  const updateNote = useCallback((note: Note) => dispatch(appActions.updateNote({ note })), [
+    dispatch,
+  ]);
+
   const handleClick = useCallback(
     () =>
       updateAndAssociateNode({
         associateNote,
-        getNewNoteId,
         newNote,
         updateNewNote,
         updateNote,
       }),
-    [associateNote, getNewNoteId, newNote, updateNewNote, updateNote]
+    [associateNote, newNote, updateNewNote, updateNote]
   );
+
   return (
     <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
       <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-      <EuiFlexItem grow={true}>
-        <MarkdownHint show={newNote.trim().length > 0} />
-      </EuiFlexItem>
       <ButtonsContainer gutterSize="none">
         {onCancelAddNote != null ? (
           <EuiFlexItem grow={false}>

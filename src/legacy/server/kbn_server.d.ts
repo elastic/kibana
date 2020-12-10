@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import {
   CoreSetup,
@@ -104,4 +104,4 @@ export default class KbnServer {
 }
 
 // Re-export commonly used hapi types.
-export { Server, Request, ResponseToolkit } from 'hapi';
+export { Server, Request, ResponseToolkit } from '@hapi/hapi';

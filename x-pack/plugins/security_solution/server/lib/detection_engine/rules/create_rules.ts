@@ -46,6 +46,8 @@ export const createRules = async ({
   threatFilters,
   threatIndex,
   threatLanguage,
+  concurrentSearches,
+  itemsPerSearch,
   threatQuery,
   threatMapping,
   threshold,
@@ -96,6 +98,8 @@ export const createRules = async ({
         threatFilters,
         threatIndex,
         threatQuery,
+        concurrentSearches,
+        itemsPerSearch,
         threatMapping,
         threatLanguage,
         timestampOverride,
@@ -110,6 +114,7 @@ export const createRules = async ({
       enabled,
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
+      notifyWhen: null,
     },
   });
 };

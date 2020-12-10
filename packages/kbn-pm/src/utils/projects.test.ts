@@ -223,16 +223,6 @@ describe('#topologicallyBatchProjects', () => {
 
     expect(expectedBatches).toMatchSnapshot();
   });
-
-  describe('batchByWorkspace = true', () => {
-    test('batches projects topologically based on their project dependencies and workspaces', async () => {
-      const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
-
-      const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
-
-      expect(expectedBatches).toEqual([['kibana'], ['bar', 'foo'], ['baz', 'zorge'], ['quux']]);
-    });
-  });
 });
 
 describe('#includeTransitiveProjects', () => {

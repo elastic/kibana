@@ -214,7 +214,6 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                           isOpen={isPopoverOpen}
                           closePopover={() => setIsPopoverOpen(false)}
                           panelPaddingSize="none"
-                          withTitle
                           anchorPosition="rightUp"
                           repositionOnScroll
                         >

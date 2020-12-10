@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
-import { isBasicAgg } from '../../../../../../plugins/vis_type_timeseries/common/agg_lookup';
+import { isBasicAgg } from '../../../../common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';
 
 export const seriesChangeHandler = (props, items) => (doc) => {

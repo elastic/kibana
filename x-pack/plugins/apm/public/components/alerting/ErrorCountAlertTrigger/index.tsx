@@ -10,8 +10,8 @@ import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 
@@ -34,7 +34,11 @@ export function ErrorCountAlertTrigger(props: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const { environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const defaults = {
     threshold: 25,

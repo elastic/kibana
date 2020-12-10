@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { AlertInstance } from './alert_instance';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
+  ElasticsearchClient,
   ILegacyClusterClient,
   ILegacyScopedClusterClient,
   KibanaRequest,
@@ -26,11 +27,12 @@ import {
   AlertInstanceState,
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
+  AlertsHealth,
+  AlertNotifyWhenType,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 declare module 'src/core/server' {
@@ -38,6 +40,7 @@ declare module 'src/core/server' {
     alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
+      getFrameworkHealth: () => Promise<AlertsHealth>;
     };
   }
 }
@@ -45,6 +48,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
@@ -52,7 +56,7 @@ export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
+  alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
 }
 
 export interface AlertExecutorOptions<
@@ -93,6 +97,7 @@ export interface AlertType<
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
+  recoveryActionGroup?: ActionGroup;
   executor: ({
     services,
     params,
@@ -144,9 +149,11 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
+  updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -157,6 +164,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
+  | 'notifyWhen'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'
@@ -168,6 +176,24 @@ export type AlertInfoParams = Pick<
 export interface AlertingPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
+}
+
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

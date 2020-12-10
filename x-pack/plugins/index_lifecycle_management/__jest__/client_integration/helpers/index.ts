@@ -17,4 +17,8 @@ export type TestSubjects =
   | 'hot-selectedMaxDocuments'
   | 'hot-selectedMaxAge'
   | 'hot-selectedMaxAgeUnits'
+  | 'policyTablePolicyNameLink'
+  | 'policyTitle'
+  | 'createPolicyButton'
+  | 'freezeSwitch'
   | string;

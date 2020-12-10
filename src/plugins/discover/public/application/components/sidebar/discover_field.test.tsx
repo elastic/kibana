@@ -21,7 +21,7 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
@@ -43,8 +43,6 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
-          return false;
         }
       },
     },
@@ -54,7 +52,6 @@ jest.mock('../../../kibana_services', () => ({
 function getComponent({
   selected = false,
   showDetails = false,
-  useShortDots = false,
   field,
 }: {
   selected?: boolean;
@@ -72,19 +69,16 @@ function getComponent({
 
   const finalField =
     field ??
-    new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    new IndexPatternField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
 
   const props = {
     indexPattern,
@@ -95,7 +89,6 @@ function getComponent({
     onRemoveField: jest.fn(),
     showDetails,
     selected,
-    useShortDots,
   };
   const comp = mountWithIntl(<DiscoverField {...props} />);
   return { comp, props };
@@ -118,17 +111,14 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField(
-      {
-        name: '_source',
-        type: '_source',
-        esTypes: ['_source'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      '_source'
-    );
+    const field = new IndexPatternField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const { comp, props } = getComponent({
       selected: true,
       field,

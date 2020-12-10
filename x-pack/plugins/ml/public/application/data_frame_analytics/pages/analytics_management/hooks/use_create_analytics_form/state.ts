@@ -93,6 +93,7 @@ export interface State {
     sourceIndexFieldsCheckFailed: boolean;
     standardizationEnabled: undefined | string;
     trainingPercent: number;
+    useEstimatedMml: boolean;
   };
   disabled: boolean;
   indexPatternsMap: SourceIndexMap;
@@ -161,6 +162,7 @@ export const getInitialState = (): State => ({
     sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
     trainingPercent: 80,
+    useEstimatedMml: true,
   },
   jobConfig: {},
   disabled:

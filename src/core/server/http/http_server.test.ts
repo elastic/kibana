@@ -72,6 +72,9 @@ beforeEach(() => {
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    cors: {
+      enabled: false,
+    },
   } as any;
 
   configWithSSL = {
@@ -79,7 +82,7 @@ beforeEach(() => {
     ssl: {
       enabled: true,
       certificate,
-      cipherSuites: ['cipherSuite'],
+      cipherSuites: ['TLS_AES_256_GCM_SHA384'],
       getSecureOptions: () => 0,
       key,
       redirectHttpFromPort: config.port + 1,

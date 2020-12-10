@@ -23,6 +23,8 @@ import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './bucket_agg_type';
 
+export const OTHER_BUCKET_SEPARATOR = '╰┄►';
+
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
  * @param aggNestedDsl: aggregation config DSL (top level)
@@ -55,7 +57,7 @@ const getAggResultBuckets = (
   aggWithOtherBucket: IBucketAggConfig,
   key: string
 ) => {
-  const keyParts = key.split('-');
+  const keyParts = key.split(OTHER_BUCKET_SEPARATOR);
   let responseAgg = response;
   for (const i in keyParts) {
     if (keyParts[i]) {
@@ -196,7 +198,7 @@ export const buildOtherBucketAgg = (
           bucket,
           newAgg.id,
           newFilters,
-          `${key}-${bucketKey.toString()}`
+          `${key}${OTHER_BUCKET_SEPARATOR}${bucketKey.toString()}`
         );
       });
       return;
@@ -252,7 +254,7 @@ export const mergeOtherBucketAggResponse = (
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
-    const bucketKey = key.replace(/^-/, '');
+    const bucketKey = key.replace(new RegExp(`^${OTHER_BUCKET_SEPARATOR}`), '');
     const aggResultBuckets = getAggResultBuckets(
       aggsConfig,
       updatedResponse.aggregations,

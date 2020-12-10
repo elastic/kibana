@@ -103,6 +103,7 @@ describe('#asScoped', () => {
 
     audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
       kibana: { space_id: 'default' },
       message: 'MESSAGE',
@@ -128,6 +129,26 @@ describe('#asScoped', () => {
     });
 
     audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  it('does not log to audit logger if no event was generated', async () => {
+    const audit = new AuditService(logger).setup({
+      license,
+      config: {
+        enabled: true,
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    audit.asScoped(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
   });
 });
@@ -337,7 +358,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -367,7 +388,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -405,7 +426,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -431,7 +452,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -460,7 +481,7 @@ describe('#getLogger', () => {
     const licenseWithFeatures = licenseMock.create();
 
     const features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures);
 
     licenseWithFeatures.features$ = features$.asObservable();
@@ -484,7 +505,7 @@ describe('#getLogger', () => {
 
     // perform license upgrade
     features$.next({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures);
 
     auditLogger.log(eventType, message);

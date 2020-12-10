@@ -10,19 +10,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
-import { ConditionalToolTip } from './conditional_tooltip';
 import { euiStyled } from '../../../../../../../observability/public';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
-import { NodeContextMenu } from './node_context_menu';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { NodeContextPopover } from '../node_details/overlay';
+
+import { NodeContextMenu } from './node_context_menu';
 
 const initialState = {
   isPopoverOpen: false,
+  isOverlayOpen: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -52,53 +55,79 @@ export const Node = class extends React.PureComponent<Props, State> {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
     });
+
+    const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
+
     return (
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        isPopoverOpen={isPopoverOpen}
-        closePopover={this.closePopover}
-        options={options}
-        currentTime={currentTime}
-        popoverPosition="downCenter"
-      >
-        <ConditionalToolTip
-          currentTime={currentTime}
-          formatter={formatter}
-          hidden={isPopoverOpen}
+      <>
+        <NodeContextMenu
           node={node}
-          options={options}
           nodeType={nodeType}
+          isPopoverOpen={isPopoverOpen}
+          closePopover={this.closePopover}
+          options={options}
+          currentTime={currentTime}
+          popoverPosition="downCenter"
+          openNewOverlay={this.toggleNewOverlay}
         >
-          <NodeContainer
-            data-test-subj="nodeContainer"
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
+          <ConditionalToolTip
+            currentTime={currentTime}
+            formatter={formatter}
+            hidden={isPopoverOpen}
+            node={node}
+            options={options}
+            nodeType={nodeType}
           >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode ? (
-                  <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
-                  </ValueInner>
-                ) : (
-                  ellipsisMode && (
+            <NodeContainer
+              data-test-subj="nodeContainer"
+              style={{ width: squareSize || 0, height: squareSize || 0 }}
+              onClick={this.togglePopover}
+            >
+              <SquareOuter color={color} style={nodeBorder}>
+                <SquareInner color={color}>
+                  {valueMode ? (
                     <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>...</Label>
+                      <Label color={color}>{node.name}</Label>
+                      <Value color={color}>{value}</Value>
                     </ValueInner>
-                  )
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
-        </ConditionalToolTip>
-      </NodeContextMenu>
+                  ) : (
+                    ellipsisMode && (
+                      <ValueInner aria-label={nodeAriaLabel}>
+                        <Label color={color}>...</Label>
+                      </ValueInner>
+                    )
+                  )}
+                </SquareInner>
+              </SquareOuter>
+            </NodeContainer>
+          </ConditionalToolTip>
+        </NodeContextMenu>
+        <NodeContextPopover
+          node={node}
+          nodeType={nodeType}
+          isOpen={this.state.isOverlayOpen}
+          options={options}
+          currentTime={currentTime}
+          onClose={this.toggleNewOverlay}
+        />
+      </>
     );
   }
 
   private togglePopover = () => {
-    this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    const { nodeType } = this.props;
+    if (nodeType === 'host') {
+      this.toggleNewOverlay();
+    } else {
+      this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    }
+  };
+
+  private toggleNewOverlay = () => {
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isOverlayOpen === true ? false : prevState.isPopoverOpen,
+      isOverlayOpen: !prevState.isOverlayOpen,
+    }));
   };
 
   private closePopover = () => {

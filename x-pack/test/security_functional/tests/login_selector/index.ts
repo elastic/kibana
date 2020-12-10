@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./basic_functionality'));
+    loadTestFile(require.resolve('./auth_provider_hint'));
   });
 }

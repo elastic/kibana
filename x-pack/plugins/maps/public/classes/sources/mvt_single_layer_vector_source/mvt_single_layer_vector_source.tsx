@@ -28,6 +28,7 @@ import {
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -66,7 +67,7 @@ export class MVTSingleLayerVectorSource
 
   constructor(
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: object
+    inspectorAdapters?: Adapters
   ) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
@@ -165,31 +166,27 @@ export class MVTSingleLayerVectorSource
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties() {
+  canFormatFeatureProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return this._descriptor.minSourceZoom;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(
+  async getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
-  ): MapExtent | null {
+  ): Promise<MapExtent | null> {
     return null;
   }
 
   getSyncMeta(): VectorSourceSyncMeta {
     return null;
-  }
-
-  getApplyGlobalQuery(): boolean {
-    return false;
   }
 
   isBoundsAware() {

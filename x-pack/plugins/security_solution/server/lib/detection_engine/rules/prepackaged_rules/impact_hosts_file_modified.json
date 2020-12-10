@@ -22,9 +22,12 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Host",
     "Linux",
     "Windows",
-    "macOS"
+    "macOS",
+    "Threat Detection",
+    "Impact"
   ],
   "threat": [
     {

@@ -105,7 +105,9 @@ describe('singleSearchAfter', () => {
       timestampOverride: undefined,
       buildRuleMessage,
     });
-    expect(searchErrors).toEqual(['reason: some reason, type: some type, caused by: some reason']);
+    expect(searchErrors).toEqual([
+      'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+    ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';

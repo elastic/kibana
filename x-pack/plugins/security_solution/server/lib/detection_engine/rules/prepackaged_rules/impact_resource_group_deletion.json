@@ -23,10 +23,11 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Cloud",
     "Azure",
-    "SecOps",
     "Continuous Monitoring",
-    "Logging"
+    "SecOps",
+    "Log Auditing"
   ],
   "threat": [
     {

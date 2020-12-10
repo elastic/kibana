@@ -21,9 +21,15 @@ import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { resolveSavedObjectsImportErrors } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
+
+interface RouteDependencies {
+  config: SavedObjectConfig;
+  coreUsageData: CoreUsageDataSetup;
+}
 
 interface FileStream extends Readable {
   hapi: {
@@ -31,7 +37,10 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedObjectConfig) => {
+export const registerResolveImportErrorsRoute = (
+  router: IRouter,
+  { config, coreUsageData }: RouteDependencies
+) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -72,19 +81,36 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      const { createNewCopies } = req.query;
+
+      const { headers } = req;
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient
+        .incrementSavedObjectsResolveImportErrors({ headers, createNewCopies })
+        .catch(() => {});
+
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
+      let readStream: Readable;
+      try {
+        readStream = await createSavedObjectsStreamFromNdJson(file);
+      } catch (e) {
+        return res.badRequest({
+          body: e,
+        });
+      }
+
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
-        readStream: createSavedObjectsStreamFromNdJson(file),
+        readStream,
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
-        createNewCopies: req.query.createNewCopies,
+        createNewCopies,
       });
 
       return res.ok({ body: result });

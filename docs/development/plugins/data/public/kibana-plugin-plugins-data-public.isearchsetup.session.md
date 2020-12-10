@@ -4,7 +4,7 @@
 
 ## ISearchSetup.session property
 
-session management 
+Current session management [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md)
 
 <b>Signature:</b>
 

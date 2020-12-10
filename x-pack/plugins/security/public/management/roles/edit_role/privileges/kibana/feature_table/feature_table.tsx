@@ -249,7 +249,7 @@ export class FeatureTable extends Component<Props, {}> {
       );
 
       const extraAction = (
-        <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
@@ -320,6 +320,15 @@ export class FeatureTable extends Component<Props, {}> {
         options={options}
         idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
         onChange={this.onChange(feature.id)}
+        legend={i18n.translate('xpack.security.management.editRole.featureTable.actionLegendText', {
+          defaultMessage: '{featureName} feature privilege',
+          values: {
+            featureName: feature.name,
+          },
+        })}
+        style={{
+          minWidth: 200,
+        }}
       />
     );
 

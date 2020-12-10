@@ -11,7 +11,7 @@ Choose an import tool based on the format of your geospatial data.
 
 *File Data Visualizer* indexes CSV files with latitude and longitude columns as a geo_point.
 
-. Open the side navigation menu, and click *Machine Learning*.
+. Open the main menu, then click *Machine Learning*.
 . Select the *Data Visualizer* tab, then click *Upload file*.
 . Use the file chooser to select a CSV file.
 . Click *Import*.
@@ -26,7 +26,7 @@ Choose an import tool based on the format of your geospatial data.
 
 *Upload GeoJSON* indexes GeoJSON features as a geo_point or geo_shape.
 
-. <<maps-create>>.
+. <<maps-create, Create a new map>>.
 . Click *Add layer*.
 . Select *Upload GeoJSON*.
 . Use the file chooser to select a GeoJSON file.

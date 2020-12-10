@@ -20,7 +20,6 @@ import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { IJoin } from '../classes/joins/join';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
@@ -34,6 +33,7 @@ import {
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
+  AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
   Goto,
@@ -62,11 +62,11 @@ export function createLayerInstance(
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source: source as ITMSSource });
     case VectorLayer.type:
-      const joins: IJoin[] = [];
+      const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
         vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source);
+          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
           joins.push(join);
         });
       }
@@ -94,7 +94,13 @@ export function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters?: Adapters): ISource {
+function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor | null,
+  inspectorAdapters?: Adapters
+): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
@@ -350,7 +356,7 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: IJoin) => {
+  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });
@@ -365,13 +371,25 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList)
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds);
-});
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const indexPatternIds: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    }
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {

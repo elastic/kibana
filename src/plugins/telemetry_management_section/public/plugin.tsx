@@ -38,16 +38,32 @@ export interface TelemetryManagementSectionPluginDepsSetup {
   advancedSettings: AdvancedSettingsSetup;
 }
 
-export class TelemetryManagementSectionPlugin implements Plugin {
+export interface TelemetryManagementSectionPluginSetup {
+  toggleSecuritySolutionExample: (enabled: boolean) => void;
+}
+
+export class TelemetryManagementSectionPlugin
+  implements Plugin<TelemetryManagementSectionPluginSetup> {
+  private showSecuritySolutionExample = false;
+  private shouldShowSecuritySolutionExample = () => {
+    return this.showSecuritySolutionExample;
+  };
+
   public setup(
     core: CoreSetup,
     { advancedSettings, telemetry: { telemetryService } }: TelemetryManagementSectionPluginDepsSetup
   ) {
     advancedSettings.component.register(
       advancedSettings.component.componentType.PAGE_FOOTER_COMPONENT,
-      telemetryManagementSectionWrapper(telemetryService),
+      telemetryManagementSectionWrapper(telemetryService, this.shouldShowSecuritySolutionExample),
       true
     );
+
+    return {
+      toggleSecuritySolutionExample: (enabled: boolean) => {
+        this.showSecuritySolutionExample = enabled;
+      },
+    };
   }
 
   public start(core: CoreStart) {}

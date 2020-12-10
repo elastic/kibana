@@ -15,12 +15,8 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
-import {
-  BoldCode,
-  StyledTime,
-  GeneratedText,
-  noTimestampRetrievedText,
-} from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
+import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -33,6 +29,7 @@ import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
+import * as nodeDataModel from '../../models/node_data';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -43,23 +40,24 @@ const eventDetailRequestError = i18n.translate(
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
-  eventID,
   eventCategory: eventType,
 }: {
   nodeID: string;
-  eventID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
+  const isTreeLoading = useSelector(selectors.isTreeLoading);
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
-  const isLoading = isEventLoading || isProcessTreeLoading;
+  const isNodeDataLoading = nodeStatus === 'loading';
+  const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
+
   return isLoading ? (
     <StyledPanel>
       <PanelLoading />
@@ -94,10 +92,15 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: SafeResolverEvent | null;
+  processEvent: SafeResolverEvent | undefined;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
-  const formattedDate = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const formattedDate =
+    useFormattedDate(timestamp) ||
+    i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
+      defaultMessage: 'No timestamp retrieved',
+    });
+
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
@@ -155,15 +158,20 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
       const section = {
         // Group the fields by their top-level namespace
         namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
-          title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: (
-            <CopyablePanelField
-              textToCopy={String(fieldValue)}
-              content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-            />
-          ),
-        })),
+        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
+          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+          const fieldName = [key, ...path].join('.');
+
+          return {
+            title: <GeneratedText>{fieldName}</GeneratedText>,
+            description: (
+              <CopyablePanelField
+                textToCopy={String(fieldValue)}
+                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+              />
+            ),
+          };
+        }),
       };
       returnValue.push(section);
     }
@@ -187,7 +195,10 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
             <StyledDescriptionList
               type="column"
               align="left"
-              titleProps={{ className: 'desc-title' }}
+              titleProps={{
+                className: 'desc-title',
+                'data-test-subj': 'resolver:panel:event-detail:event-field-title',
+              }}
               compressed
               listItems={descriptions}
             />

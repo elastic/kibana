@@ -99,4 +99,6 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
   );
 }
 
-export { PieOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { PieOptions as default };

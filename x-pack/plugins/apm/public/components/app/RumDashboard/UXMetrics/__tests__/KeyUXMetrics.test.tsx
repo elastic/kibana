@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import * as fetcherHook from '../../../../../hooks/useFetcher';
+import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { KeyUXMetrics } from '../KeyUXMetrics';
 
 describe('KeyUXMetrics', () => {
@@ -19,7 +19,7 @@ describe('KeyUXMetrics', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText } = render(
+    const { getAllByText } = render(
       <KeyUXMetrics
         loading={false}
         data={{
@@ -31,14 +31,31 @@ describe('KeyUXMetrics', () => {
           lcpRanks: [69, 17, 14],
           fidRanks: [83, 6, 11],
           clsRanks: [90, 7, 3],
+          coreVitalPages: 1000,
         }}
       />
     );
 
-    expect(getByText('Longest long task duration 271 ms')).toBeInTheDocument();
-    expect(getByText('Total long tasks duration 520 ms')).toBeInTheDocument();
-    expect(getByText('No. of long tasks 3')).toBeInTheDocument();
-    expect(getByText('Total blocking time 271 ms')).toBeInTheDocument();
-    expect(getByText('First contentful paint 1.27 s')).toBeInTheDocument();
+    const checkText = (text: string) => {
+      return (content: any, node: any) => {
+        return node?.textContent?.includes(text);
+      };
+    };
+
+    expect(
+      getAllByText(checkText('Longest long task duration271 ms'))[0]
+    ).toBeInTheDocument();
+    expect(
+      getAllByText(checkText('Total long tasks duration520 ms'))[0]
+    ).toBeInTheDocument();
+    expect(
+      getAllByText(checkText('No. of long tasks3'))[0]
+    ).toBeInTheDocument();
+    expect(
+      getAllByText(checkText('Total blocking time271 ms'))[0]
+    ).toBeInTheDocument();
+    expect(
+      getAllByText(checkText('First contentful paint1.27 s'))[0]
+    ).toBeInTheDocument();
   });
 });

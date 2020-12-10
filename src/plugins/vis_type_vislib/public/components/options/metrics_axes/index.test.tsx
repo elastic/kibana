@@ -21,7 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
-import { MetricsAxisOptions } from './index';
+import MetricsAxisOptions from './index';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { Positions } from '../../../utils/collections';

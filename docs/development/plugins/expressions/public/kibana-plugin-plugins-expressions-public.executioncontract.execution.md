@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-protected readonly execution: Execution<ExtraContext, Input, Output, InspectorAdapters>;
+protected readonly execution: Execution<Input, Output, InspectorAdapters>;
 ```

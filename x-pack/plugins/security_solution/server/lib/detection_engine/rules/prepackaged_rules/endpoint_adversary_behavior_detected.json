@@ -17,7 +17,7 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Endpoint"
+    "Endpoint Security"
   ],
   "type": "query",
   "version": 4

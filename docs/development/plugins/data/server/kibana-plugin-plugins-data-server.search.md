@@ -34,6 +34,7 @@ search: {
         siblingPipelineType: string;
         termsAggFilter: string[];
         toAbsoluteDates: typeof toAbsoluteDates;
+        calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
     getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;

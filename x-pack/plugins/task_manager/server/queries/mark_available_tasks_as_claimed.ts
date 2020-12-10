@@ -100,12 +100,32 @@ if (doc['task.runAt'].size()!=0) {
   },
 };
 
-export const updateFields = (fieldUpdates: {
-  [field: string]: string | number | Date;
-}): ScriptClause => ({
-  source: Object.keys(fieldUpdates)
-    .map((field) => `ctx._source.task.${field}=params.${field};`)
-    .join(' '),
+export const updateFieldsAndMarkAsFailed = (
+  fieldUpdates: {
+    [field: string]: string | number | Date;
+  },
+  claimTasksById: string[],
+  registeredTaskTypes: string[],
+  taskMaxAttempts: { [field: string]: number }
+): ScriptClause => ({
+  source: `
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
+  } else {
+    ctx._source.task.status = "unrecognized";
+  }
+  `,
   lang: 'painless',
-  params: fieldUpdates,
+  params: {
+    fieldUpdates,
+    claimTasksById,
+    registeredTaskTypes,
+    taskMaxAttempts,
+  },
 });

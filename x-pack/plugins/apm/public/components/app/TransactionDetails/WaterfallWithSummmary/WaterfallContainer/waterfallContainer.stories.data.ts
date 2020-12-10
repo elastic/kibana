@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
+import { IUrlParams } from '../../../../../context/url_params_context/types';
 
 export const location = {
   pathname: '/services/opbeans-go/transactions/view',

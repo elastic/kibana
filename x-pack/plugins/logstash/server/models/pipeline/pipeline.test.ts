@@ -10,8 +10,7 @@ describe('pipeline', () => {
   describe('Pipeline', () => {
     describe('fromUpstreamJSON factory method', () => {
       const upstreamJSON = {
-        _id: 'apache',
-        _source: {
+        apache: {
           description: 'this is an apache pipeline',
           pipeline_metadata: {
             version: 1,
@@ -21,25 +20,23 @@ describe('pipeline', () => {
           pipeline: 'input {} filter { grok {} }\n output {}',
         },
       };
+      const upstreamId = 'apache';
 
       it('returns correct Pipeline instance', () => {
         const pipeline = Pipeline.fromUpstreamJSON(upstreamJSON);
-        expect(pipeline.id).toBe(upstreamJSON._id);
-        expect(pipeline.description).toBe(upstreamJSON._source.description);
-        expect(pipeline.username).toBe(upstreamJSON._source.username);
-        expect(pipeline.pipeline).toBe(upstreamJSON._source.pipeline);
+        expect(pipeline.id).toBe(upstreamId);
+        expect(pipeline.description).toBe(upstreamJSON.apache.description);
+        expect(pipeline.username).toBe(upstreamJSON.apache.username);
+        expect(pipeline.pipeline).toBe(upstreamJSON.apache.pipeline);
       });
 
-      it('throws if pipeline argument does not contain an id property', () => {
-        const badJSON = {
-          // no _id
-          _source: upstreamJSON._source,
-        };
+      it('throws if pipeline argument does not contain id as a key', () => {
+        const badJSON = {};
         const testFromUpstreamJsonError = () => {
           return Pipeline.fromUpstreamJSON(badJSON);
         };
         expect(testFromUpstreamJsonError).toThrowError(
-          /upstreamPipeline argument must contain an id property/i
+          /upstreamPipeline argument must contain pipeline id as a key/i
         );
       });
     });

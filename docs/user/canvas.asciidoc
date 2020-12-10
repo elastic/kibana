@@ -17,7 +17,7 @@ With Canvas, you can:
 
 * Focus the data you want to display with filters.
 
-To begin, open the menu, then go to *Canvas*.
+To begin, open the main menu, then click *Canvas*.
 
 [role="screenshot"]
 image::images/canvas-gs-example.png[Getting started example]

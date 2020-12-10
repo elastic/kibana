@@ -21,9 +21,15 @@ import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
+
+interface RouteDependencies {
+  config: SavedObjectConfig;
+  coreUsageData: CoreUsageDataSetup;
+}
 
 interface FileStream extends Readable {
   hapi: {
@@ -31,7 +37,10 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) => {
+export const registerImportRoute = (
+  router: IRouter,
+  { config, coreUsageData }: RouteDependencies
+) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -65,16 +74,32 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
+
+      const { headers } = req;
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient
+        .incrementSavedObjectsImport({ headers, createNewCopies, overwrite })
+        .catch(() => {});
+
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
+      let readStream: Readable;
+      try {
+        readStream = await createSavedObjectsStreamFromNdJson(file);
+      } catch (e) {
+        return res.badRequest({
+          body: e,
+        });
+      }
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
-        readStream: createSavedObjectsStreamFromNdJson(file),
+        readStream,
         objectLimit: maxImportExportSize,
         overwrite,
         createNewCopies,

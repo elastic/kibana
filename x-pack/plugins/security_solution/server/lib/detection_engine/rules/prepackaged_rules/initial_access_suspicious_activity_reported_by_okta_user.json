@@ -24,10 +24,11 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Monitoring",
-    "Continuous Monitoring"
+    "Monitoring"
   ],
   "threat": [
     {

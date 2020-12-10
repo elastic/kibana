@@ -24,16 +24,20 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { FlashMessages } from '../../../shared/flash_messages';
+
 import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { CREDENTIALS_TITLE } from './constants';
 import { CredentialsList } from './credentials_list';
+import { CredentialsFlyout } from './credentials_flyout';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   );
 
-  const { dataLoading } = useValues(CredentialsLogic);
+  const { dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
   useEffect(() => {
     initializeCredentialsData();
@@ -44,25 +48,16 @@ export const Credentials: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-            defaultMessage: 'Credentials',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[CREDENTIALS_TITLE]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-                defaultMessage: 'Credentials',
-              })}
-            </h1>
+            <h1>{CREDENTIALS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContentBody>
+        {shouldShowCredentialsForm && <CredentialsFlyout />}
         <EuiPanel className="eui-textCenter">
           <EuiTitle size="s">
             <h2>
@@ -120,7 +115,8 @@ export const Credentials: React.FC = () => {
             )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <FlashMessages />
         <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
       </EuiPageContentBody>
     </>

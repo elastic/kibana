@@ -223,7 +223,8 @@ async function fetchLogEntryAnomalies(
 
   const results = decodeOrThrow(logEntryAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination, datasets)
+      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination, datasets),
+      jobIds
     )
   );
 

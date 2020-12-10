@@ -20,7 +20,7 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
-    "ingestManager",
+    "fleet",
     "ml",
     "newsfeed",
     "security",
@@ -28,9 +28,10 @@
     "usageCollection",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "telemetryManagementSection"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
+  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lists", "ml"]
 }

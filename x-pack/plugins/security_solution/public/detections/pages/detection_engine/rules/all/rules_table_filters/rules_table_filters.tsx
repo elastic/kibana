@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
+
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
@@ -24,6 +25,7 @@ interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
+  currentFilterTags: string[];
 }
 
 /**
@@ -36,6 +38,7 @@ const RulesTableFiltersComponent = ({
   onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
+  currentFilterTags,
 }: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -76,7 +79,7 @@ const RulesTableFiltersComponent = ({
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={false}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_RULES}
           fullWidth
@@ -93,6 +96,8 @@ const RulesTableFiltersComponent = ({
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
             tags={tags}
+            currentFilterTags={currentFilterTags}
+            data-test-subj="allRulesTagPopover"
           />
         </EuiFilterGroup>
       </EuiFlexItem>
@@ -102,7 +107,7 @@ const RulesTableFiltersComponent = ({
           <EuiFilterButton
             hasActiveFilters={showElasticRules}
             onClick={handleElasticRulesClick}
-            data-test-subj="show-elastic-rules-filter-button"
+            data-test-subj="showElasticRulesFilterButton"
             withNext
           >
             {i18n.ELASTIC_RULES}
@@ -111,7 +116,7 @@ const RulesTableFiltersComponent = ({
           <EuiFilterButton
             hasActiveFilters={showCustomRules}
             onClick={handleCustomRulesClick}
-            data-test-subj="show-custom-rules-filter-button"
+            data-test-subj="showCustomRulesFilterButton"
           >
             <>
               {i18n.CUSTOM_RULES}

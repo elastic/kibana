@@ -22,7 +22,7 @@ export const setupDashboardModeRequestInterceptor = ({
   getUiSettingsClient,
 }: DashboardModeRequestInterceptorDependencies) =>
   (async (request, response, toolkit) => {
-    const path = request.url.path || '';
+    const path = request.url.pathname;
     const isAppRequest = path.startsWith('/app/');
 
     if (!isAppRequest) {

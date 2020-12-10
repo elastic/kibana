@@ -17,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutBody,
-  EuiBetaBadge,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -25,37 +24,41 @@ import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionType, ActionConnector, IErrorObject } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  IErrorObject,
+  ActionTypeRegistryContract,
+} from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { PLUGIN } from '../../constants/plugin';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface ConnectorAddFlyoutProps {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   actionTypes?: ActionType[];
   onTestConnector?: (connector: ActionConnector) => void;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export const ConnectorAddFlyout = ({
-  addFlyoutVisible,
-  setAddFlyoutVisibility,
+const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
+  onClose,
   actionTypes,
   onTestConnector,
-}: ConnectorAddFlyoutProps) => {
+  reloadConnectors,
+  consumer,
+  actionTypeRegistry,
+}) => {
   let hasErrors = false;
   const {
     http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    reloadConnectors,
-    docLinks,
-    consumer,
-  } = useActionsConnectorsContext();
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
@@ -76,16 +79,10 @@ export const ConnectorAddFlyout = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
-    setActionType(undefined);
-    setConnector(initialConnector);
-  }, [setAddFlyoutVisibility, initialConnector]);
+    onClose();
+  }, [onClose]);
 
   const canSave = hasSaveActionsCapability(capabilities);
-
-  if (!addFlyoutVisible) {
-    return null;
-  }
 
   function onActionTypeChange(newActionType: ActionType) {
     setActionType(newActionType);
@@ -100,6 +97,7 @@ export const ConnectorAddFlyout = ({
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
         setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
   } else {
@@ -118,19 +116,15 @@ export const ConnectorAddFlyout = ({
         dispatch={dispatch}
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
-        http={http}
-        docLinks={docLinks}
-        capabilities={capabilities}
         consumer={consumer}
       />
     );
   }
-
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
               {
@@ -145,7 +139,7 @@ export const ConnectorAddFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
@@ -189,20 +183,6 @@ export const ConnectorAddFlyout = ({
                         actionTypeName: actionType.name,
                       }}
                     />
-                    &emsp;
-                    <EuiBetaBadge
-                      label="Beta"
-                      tooltipContent={i18n.translate(
-                        'xpack.triggersActionsUI.sections.addConnectorForm.betaBadgeTooltipContent',
-                        {
-                          defaultMessage:
-                            '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                          values: {
-                            pluginName: PLUGIN.getI18nName(i18n),
-                          },
-                        }
-                      )}
-                    />
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
@@ -215,20 +195,6 @@ export const ConnectorAddFlyout = ({
                   <FormattedMessage
                     defaultMessage="Select a connector"
                     id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
-                  />
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.addFlyout.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                        values: {
-                          pluginName: PLUGIN.getI18nName(i18n),
-                        },
-                      }
-                    )}
                   />
                 </h3>
               </EuiTitle>

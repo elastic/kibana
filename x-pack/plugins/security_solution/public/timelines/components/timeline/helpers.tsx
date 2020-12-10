@@ -104,8 +104,6 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  start,
-  end,
   isEventViewer,
 }: {
   config: EsQueryConfig;
@@ -115,8 +113,6 @@ export const combineQueries = ({
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  start: string;
-  end: string;
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };

@@ -14,7 +14,7 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
 import { ExpandableSectionResults } from '../expandable_section';
 
@@ -23,13 +23,13 @@ import { useExplorationResults } from './use_exploration_results';
 interface Props {
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   needsDestIndexPattern: boolean;
   searchQuery: ResultsSearchQuery;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, jobStatus, needsDestIndexPattern, searchQuery }) => {
+  ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
     const {
       services: {
         mlServices: { mlApiServices },

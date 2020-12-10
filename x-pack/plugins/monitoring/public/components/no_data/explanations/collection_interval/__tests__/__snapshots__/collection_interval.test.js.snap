@@ -431,6 +431,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             type="button"
           >
             <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
               disabled={true}
               element="button"
@@ -445,6 +446,11 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
                 data-test-subj="enableCollectionInterval"
                 disabled={true}
                 onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
                 type="button"
               >
                 <EuiButtonContent
@@ -751,6 +757,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             type="button"
           >
             <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
               element="button"
               fill={true}
@@ -762,6 +769,11 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
                 className="euiButton euiButton--primary euiButton--fill"
                 data-test-subj="enableCollectionInterval"
                 onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
                 type="button"
               >
                 <EuiButtonContent

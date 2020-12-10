@@ -19,8 +19,9 @@ import {
 type MethodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
 type PayloadType = 'params' | 'query' | 'body';
 
-interface IMockRouterProps {
+interface IMockRouter {
   method: MethodType;
+  path: string;
   payload?: PayloadType;
 }
 interface IMockRouterRequest {
@@ -28,17 +29,19 @@ interface IMockRouterRequest {
   query?: object;
   params?: object;
 }
-type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
+type MockRouterRequest = KibanaRequest | IMockRouterRequest;
 
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
+  public path: string;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, payload }: IMockRouterProps) {
+  constructor({ method, path, payload }: IMockRouter) {
     this.createRouter();
     this.method = method;
+    this.path = path;
     this.payload = payload;
   }
 
@@ -46,9 +49,14 @@ export class MockRouter {
     this.router = httpServiceMock.createRouter();
   };
 
-  public callRoute = async (request: TMockRouterRequest) => {
-    const [, handler] = this.router[this.method].mock.calls[0];
+  public callRoute = async (request: MockRouterRequest) => {
+    const routerCalls = this.router[this.method].mock.calls as any[];
+    if (!routerCalls.length) throw new Error('No routes registered.');
 
+    const route = routerCalls.find(([router]: any) => router.path === this.path);
+    if (!route) throw new Error('No matching registered routes found - check method/path keys');
+
+    const [, handler] = route;
     const context = {} as jest.Mocked<RequestHandlerContext>;
     await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
@@ -57,7 +65,7 @@ export class MockRouter {
    * Schema validation helpers
    */
 
-  public validateRoute = (request: TMockRouterRequest) => {
+  public validateRoute = (request: MockRouterRequest) => {
     if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
 
     const [config] = this.router[this.method].mock.calls[0];
@@ -69,11 +77,11 @@ export class MockRouter {
     payloadValidation.validate(payloadRequest);
   };
 
-  public shouldValidate = (request: TMockRouterRequest) => {
+  public shouldValidate = (request: MockRouterRequest) => {
     expect(() => this.validateRoute(request)).not.toThrow();
   };
 
-  public shouldThrow = (request: TMockRouterRequest) => {
+  public shouldThrow = (request: MockRouterRequest) => {
     expect(() => this.validateRoute(request)).toThrow();
   };
 }
@@ -81,7 +89,11 @@ export class MockRouter {
 /**
  * Example usage:
  */
-// const mockRouter = new MockRouter({ method: 'get', payload: 'body' });
+// const mockRouter = new MockRouter({
+//   method: 'get',
+//   path: '/api/app_search/test',
+//   payload: 'body'
+// });
 //
 // beforeEach(() => {
 //   jest.clearAllMocks();

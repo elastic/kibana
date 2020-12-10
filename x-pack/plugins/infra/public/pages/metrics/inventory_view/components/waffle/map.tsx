@@ -45,8 +45,8 @@ export const Map: React.FC<Props> = ({
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
   return (
-    <AutoSizer content>
-      {({ measureRef, content: { width = 0, height = 0 } }) => {
+    <AutoSizer bounds>
+      {({ measureRef, bounds: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
           <WaffleMapOuterContainer

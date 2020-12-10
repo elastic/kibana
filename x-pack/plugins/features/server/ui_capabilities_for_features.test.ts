@@ -92,7 +92,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -146,7 +145,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             catalogue: ['anotherFooEntry', 'anotherBarEntry'],
@@ -216,7 +214,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -247,7 +244,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: null,
@@ -292,7 +288,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -364,7 +359,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -385,7 +379,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'yetAnotherNewFeature',
             name: 'yet another new feature',
-            navLinkId: 'yetAnotherNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {

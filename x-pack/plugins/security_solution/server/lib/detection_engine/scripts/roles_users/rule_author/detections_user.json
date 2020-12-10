@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["rule_author"],
+  "full_name": "rule author",
+  "email": "detections-reader@example.com"
+}

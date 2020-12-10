@@ -26,6 +26,7 @@ import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -50,6 +51,7 @@ export interface MlStartDependencies {
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
+  spaces?: SpacesPluginStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;

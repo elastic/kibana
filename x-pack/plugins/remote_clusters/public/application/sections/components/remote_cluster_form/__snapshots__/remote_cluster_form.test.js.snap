@@ -1270,6 +1270,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                   >
                     <EuiButtonDisplay
                       aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
+                      baseClassName="euiButton"
                       color="secondary"
                       data-test-subj="remoteClusterFormSaveButton"
                       disabled={false}
@@ -1286,6 +1287,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         data-test-subj="remoteClusterFormSaveButton"
                         disabled={false}
                         onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
                         type="button"
                       >
                         <EuiButtonContent

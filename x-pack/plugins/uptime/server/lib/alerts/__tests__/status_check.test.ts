@@ -56,6 +56,8 @@ const mockOptions = (
   services = alertsMock.createAlertServices(),
   state = {}
 ): any => {
+  services.scopedClusterClient = jest.fn() as any;
+
   services.savedObjectsClient.get.mockResolvedValue({
     id: '',
     type: '',
@@ -94,19 +96,18 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
+            },
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
             },
           },
         ]
@@ -150,19 +151,18 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
+            },
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
             },
           },
         ]
@@ -282,7 +282,8 @@ describe('status check alert', () => {
       expect.assertions(5);
       toISOStringSpy.mockImplementation(() => 'foo date string');
       const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
-      mockGetter.mockReturnValue([
+
+      mockGetter.mockReturnValueOnce([
         {
           monitorId: 'first',
           location: 'harrisburg',
@@ -326,16 +327,10 @@ describe('status check alert', () => {
       const state = await alert.executor(options);
       const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
       expect(mockGetter).toHaveBeenCalledTimes(1);
+
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": Object {
               "bool": Object {
                 "filter": Array [
@@ -502,6 +497,12 @@ describe('status check alert', () => {
               "from": "now-15m",
               "to": "now",
             },
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -567,13 +568,6 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": Object {
               "bool": Object {
                 "filter": Array [
@@ -609,6 +603,12 @@ describe('status check alert', () => {
             "timerange": Object {
               "from": "now-30h",
               "to": "now",
+            },
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
             },
           },
         ]
@@ -754,17 +754,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}}",
             "range": 35,
             "rangeUnit": "d",
             "threshold": "99.34",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -809,17 +808,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"ur.port\\"}}],\\"minimum_should_match\\":1}}",
             "range": 23,
             "rangeUnit": "w",
             "threshold": "90",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -853,17 +851,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "range": 23,
             "rangeUnit": "w",
             "threshold": "90",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -1201,10 +1198,10 @@ describe('status check alert', () => {
     it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(getUniqueIdsByLoc(downItems, availItems)).toEqual(
         new Set<string>([
-          'firstharrisburg',
-          'firstfairbanks',
-          'secondharrisburg',
-          'secondfairbanks',
+          'first-harrisburg',
+          'first-fairbanks',
+          'second-harrisburg',
+          'second-fairbanks',
         ])
       );
     });

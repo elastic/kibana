@@ -18,7 +18,12 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../core/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsFindOptions,
+} from '../../../../core/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { VisTypeAlias } from '../vis_types';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -32,12 +37,14 @@ export async function findListItems({
   size,
   savedObjectsClient,
   mapSavedObjectApiHits,
+  references,
 }: {
   search: string;
   size: number;
   visTypes: VisTypeAlias[];
   savedObjectsClient: SavedObjectsClientContract;
   mapSavedObjectApiHits: SavedObjectLoader['mapSavedObjectApiHits'];
+  references?: SavedObjectsFindOptionsReference[];
 }) {
   const extensions = visTypes
     .map((v) => v.appExtensions?.visualizations)
@@ -50,13 +57,14 @@ export async function findListItems({
   }, {} as { [visType: string]: VisualizationsAppExtension });
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
-  const searchOptions = {
+  const searchOptions: SavedObjectsFindOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),
     search: search ? `${search}*` : undefined,
     perPage: size,
     page: 1,
     defaultSearchOperator: 'AND' as 'AND',
+    hasReference: references,
   };
 
   const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
@@ -69,7 +77,10 @@ export async function findListItems({
       const config = extensionByType[savedObject.type];
 
       if (config) {
-        return config.toListItem(savedObject);
+        return {
+          ...config.toListItem(savedObject),
+          references: savedObject.references,
+        };
       } else {
         return mapSavedObjectApiHits(savedObject);
       }

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { AggSelect } from './agg_select';
 import { METRIC, SERIES } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
@@ -63,7 +63,7 @@ describe('TSVB AggSelect', () => {
           "value": "count",
         },
         Object {
-          "label": "Positive Rate",
+          "label": "Counter Rate",
           "value": "positive_rate",
         },
         Object {
@@ -131,7 +131,7 @@ describe('TSVB AggSelect', () => {
           "value": "filter_ratio",
         },
         Object {
-          "label": "Positive Rate",
+          "label": "Counter Rate",
           "value": "positive_rate",
         },
         Object {

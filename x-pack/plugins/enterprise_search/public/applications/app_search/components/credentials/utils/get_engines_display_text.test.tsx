@@ -8,10 +8,10 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { getEnginesDisplayText } from './get_engines_display_text';
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 import { ApiTokenTypes } from '../constants';
 
-const apiToken: IApiToken = {
+const apiToken: ApiToken = {
   name: '',
   type: ApiTokenTypes.Private,
   read: true,

@@ -41,3 +41,10 @@ export const VIEW_ALL_CASES = i18n.translate(
     defaultMessage: 'View all cases',
   }
 );
+
+export const CASES_FILTER_CONTROL = i18n.translate(
+  'xpack.securitySolution.recentCases.controlLegend',
+  {
+    defaultMessage: 'Cases filter',
+  }
+);

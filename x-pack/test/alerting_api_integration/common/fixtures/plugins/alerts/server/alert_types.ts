@@ -7,6 +7,7 @@
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { times } from 'lodash';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   AlertType,
@@ -61,22 +62,36 @@ function getAlwaysFiringAlertType() {
         updatedBy,
       } = alertExecutorOptions;
       let group: string | null = 'default';
+      let subgroup: string | null = null;
       const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
       if (params.groupsToScheduleActionsInSeries) {
         const index = state.groupInSeriesIndex || 0;
-        group = params.groupsToScheduleActionsInSeries[index];
+        const [scheduledGroup, scheduledSubgroup] = (
+          params.groupsToScheduleActionsInSeries[index] ?? ''
+        ).split(':');
+
+        group = scheduledGroup;
+        subgroup = scheduledSubgroup;
       }
 
       if (group) {
-        services
+        const instance = services
           .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true })
-          .scheduleActions(group, {
+          .replaceState({ instanceStateValue: true });
+
+        if (subgroup) {
+          instance.scheduleActionsWithSubGroup(group, subgroup, {
             instanceContextValue: true,
           });
+        } else {
+          instance.scheduleActions(group, {
+            instanceContextValue: true,
+          });
+        }
       }
-      await services.callCluster('index', {
+
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -329,7 +344,11 @@ function getValidationAlertType() {
 
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
-    pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.boolean())),
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
+    reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State {
@@ -353,6 +372,18 @@ function getPatternFiringAlertType() {
         maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
       }
 
+      if (params.reference) {
+        await services.scopedClusterClient.index({
+          index: ES_TEST_INDEX_NAME,
+          refresh: 'wait_for',
+          body: {
+            reference: params.reference,
+            source: 'alert:test.patternFiring',
+            ...alertExecutorOptions,
+          },
+        });
+      }
+
       // get the pattern index, return if past it
       const patternIndex = state.patternIndex ?? 0;
       if (patternIndex >= maxPatternLength) {
@@ -361,8 +392,13 @@ function getPatternFiringAlertType() {
 
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
-        if (instancePattern[patternIndex]) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
           services.alertInstanceFactory(instanceId).scheduleActions('default');
+        } else if (typeof scheduleByPattern === 'string') {
+          services
+            .alertInstanceFactory(instanceId)
+            .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
       }
 
@@ -423,6 +459,21 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
+  const longRunningAlertType: AlertType = {
+    id: 'test.longRunning',
+    name: 'Test: Long Running',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    },
+  };
 
   alerts.registerType(getAlwaysFiringAlertType());
   alerts.registerType(getCumulativeFiringAlertType());
@@ -435,4 +486,5 @@ export function defineAlertTypes(
   alerts.registerType(onlyStateVariablesAlertType);
   alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
+  alerts.registerType(longRunningAlertType);
 }

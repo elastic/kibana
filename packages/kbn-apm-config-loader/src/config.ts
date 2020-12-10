@@ -26,32 +26,31 @@ import { readFileSync } from 'fs';
 import { ApmAgentConfig } from './types';
 
 const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
-  if (isDistributable) {
-    return {
-      active: false,
-      globalLabels: {},
-      // Do not use a centralized controlled config
-      centralConfig: false,
-      // Capture all exceptions that are not caught
-      logUncaughtExceptions: true,
-      // Can be performance intensive, disabling by default
-      breakdownMetrics: false,
-    };
-  }
+  // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 
   return {
-    active: false,
-    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    active: process.env.ELASTIC_APM_ACTIVE === 'true' || false,
+    environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
+
+    serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
     // the data is transmitted to, but due to how it's being hosted, it's easier,
     // for now, to simply leave it in.
-    secretToken: 'R0Gjg46pE9K9wGestd',
-    globalLabels: {},
-    breakdownMetrics: true,
-    centralConfig: false,
+    secretToken: 'ZQHYvrmXEx04ozge8F',
+
     logUncaughtExceptions: true,
+    globalLabels: {},
+    centralConfig: false,
+    metricsInterval: isDistributable ? '120s' : '30s',
+    transactionSampleRate: process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE
+      ? parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE)
+      : 1.0,
+
+    // Can be performance intensive, disabling by default
+    breakdownMetrics: isDistributable ? false : true,
   };
 };
 
@@ -84,7 +83,8 @@ export class ApmConfiguration {
         getDefaultConfig(this.isDistributable),
         this.getConfigFromKibanaConfig(),
         this.getDevConfig(),
-        this.getDistConfig()
+        this.getDistConfig(),
+        this.getCIConfig()
       );
 
       const rev = this.getGitRev();
@@ -143,6 +143,22 @@ export class ApmConfiguration {
       // Headers & body may contain sensitive info
       captureHeaders: false,
       captureBody: 'off',
+    };
+  }
+
+  private getCIConfig(): ApmAgentConfig {
+    if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
+      return {};
+    }
+
+    return {
+      globalLabels: {
+        branch: process.env.ghprbSourceBranch || '',
+        targetBranch: process.env.ghprbTargetBranch || '',
+        ciBuildNumber: process.env.BUILD_NUMBER || '',
+        isPr: process.env.GITHUB_PR_NUMBER ? true : false,
+        prId: process.env.GITHUB_PR_NUMBER || '',
+      },
     };
   }
 

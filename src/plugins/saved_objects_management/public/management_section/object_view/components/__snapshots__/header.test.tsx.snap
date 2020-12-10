@@ -59,6 +59,7 @@ exports[`Intro component renders correctly 1`] = `
                     size="s"
                   >
                     <EuiButtonDisplay
+                      baseClassName="euiButton"
                       data-test-subj="savedObjectEditViewInApp"
                       element="a"
                       href="/some-url"
@@ -69,8 +70,14 @@ exports[`Intro component renders correctly 1`] = `
                       <a
                         className="euiButton euiButton--primary euiButton--small"
                         data-test-subj="savedObjectEditViewInApp"
+                        disabled={false}
                         href="/some-url"
                         rel="noreferrer"
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
                       >
                         <EuiButtonContent
                           className="euiButton__content"
@@ -132,6 +139,7 @@ exports[`Intro component renders correctly 1`] = `
                     size="s"
                   >
                     <EuiButtonDisplay
+                      baseClassName="euiButton"
                       color="danger"
                       data-test-subj="savedObjectEditDelete"
                       element="button"
@@ -144,6 +152,11 @@ exports[`Intro component renders correctly 1`] = `
                         className="euiButton euiButton--danger euiButton--small"
                         data-test-subj="savedObjectEditDelete"
                         onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
                         type="button"
                       >
                         <EuiButtonContent

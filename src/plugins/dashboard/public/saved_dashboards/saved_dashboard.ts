@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
-import { extractReferences, injectReferences } from './saved_dashboard_references';
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
+import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
 
-import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
 import { createDashboardEditUrl } from '../dashboard_constants';
+import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
-export interface SavedObjectDashboard extends SavedObject {
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
+
+export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
   timeTo?: string;
@@ -41,8 +44,9 @@ export interface SavedObjectDashboard extends SavedObject {
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
-  savedObjectStart: SavedObjectsStart
-): new (id: string) => SavedObjectDashboard {
+  savedObjectStart: SavedObjectsStart,
+  embeddableStart: EmbeddableStart
+): new (id: string) => DashboardSavedObject {
   class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
@@ -77,8 +81,19 @@ export function createSavedDashboardClass(
         type: SavedDashboard.type,
         mapping: SavedDashboard.mapping,
         searchSource: SavedDashboard.searchSource,
-        extractReferences,
-        injectReferences,
+        extractReferences: (opts: {
+          attributes: SavedObjectAttributes;
+          references: SavedObjectReference[];
+        }) => extractReferences(opts, { embeddablePersistableStateService: embeddableStart }),
+        injectReferences: (so: DashboardSavedObject, references: SavedObjectReference[]) => {
+          const newAttributes = injectReferences(
+            { attributes: so._serialize().attributes, references },
+            {
+              embeddablePersistableStateService: embeddableStart,
+            }
+          );
+          Object.assign(so, newAttributes);
+        },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id,
@@ -115,5 +130,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
+  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
 }

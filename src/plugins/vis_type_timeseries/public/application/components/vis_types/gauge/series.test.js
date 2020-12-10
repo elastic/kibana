@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { GaugeSeries } from './series';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 const defaultProps = {
   disableAdd: true,

@@ -41,6 +41,8 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
@@ -162,6 +164,8 @@ const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
 const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
@@ -224,6 +228,46 @@ export function ElasticsearchPanel(props) {
       );
     }
     return null;
+  };
+
+  const showLicense = () => {
+    if (!props.showLicenseExpiration) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiDescriptionListTitle className="eui-textBreakWord">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
+            defaultMessage="License"
+          />
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription data-test-subj="esLicenseType">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiLink href={getSafeForExternalLink('#/license')}>
+                {capitalize(props.license.type)}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {props.license.expiry_date_in_millis === undefined ? (
+                  ''
+                ) : (
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
+                    defaultMessage="expires on {expiryDate}"
+                    values={{
+                      expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
+                    }}
+                  />
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiDescriptionListDescription>
+      </Fragment>
+    );
   };
 
   const statusColorMap = {
@@ -321,36 +365,7 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since')}
               </EuiDescriptionListDescription>
               {showMlJobs()}
-              <EuiDescriptionListTitle className="eui-textBreakWord">
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
-                  defaultMessage="License"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="esLicenseType">
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href={getSafeForExternalLink('#/license')}>
-                      {capitalize(props.license.type)}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      {props.license.expiry_date_in_millis === undefined ? (
-                        ''
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
-                          defaultMessage="expires on {expiryDate}"
-                          values={{
-                            expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
-                          }}
-                        />
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiDescriptionListDescription>
+              {showLicense()}
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

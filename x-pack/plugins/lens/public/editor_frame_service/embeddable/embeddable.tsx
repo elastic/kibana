@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
@@ -15,10 +16,11 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -42,15 +44,19 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { LensInspectorAdapters } from '../types';
 
-export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
+export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
 } & EmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
-export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
+export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+  palette?: PaletteOutput;
+  renderMode?: RenderMode;
+};
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -79,12 +85,13 @@ export class Embeddable
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
+  private activeData: LensInspectorAdapters | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
-    lastReloadRequestTime?: number;
+    searchSessionId?: string;
   } = {};
 
   constructor(
@@ -103,7 +110,9 @@ export class Embeddable
 
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
-    this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this.subscription = this.getUpdated$().subscribe(() =>
+      this.onContainerStateChanged(this.input)
+    );
 
     this.autoRefreshFetchSubscription = deps.timefilter
       .getAutoRefreshFetch$()
@@ -126,8 +135,20 @@ export class Embeddable
     }
   }
 
+  public getInspectorAdapters() {
+    return this.activeData;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes = await this.deps.attributeService.unwrapAttributes(input);
+    const attributes:
+      | LensSavedObjectAttributes
+      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.onFatalError(e);
+      return false;
+    });
+    if (!attributes) {
+      return;
+    }
     this.savedVis = {
       ...attributes,
       type: this.type,
@@ -143,24 +164,37 @@ export class Embeddable
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
+    if (this.handleContainerStateChanged(containerState)) this.reload();
+  }
+
+  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
+    let isDirty = false;
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
       !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !_.isEqual(containerState.query, this.externalSearchContext.query) ||
-      !_.isEqual(cleanedFilters, this.externalSearchContext.filters)
+      !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
+      this.externalSearchContext.searchSessionId !== containerState.searchSessionId
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
-        lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
         filters: cleanedFilters,
+        searchSessionId: containerState.searchSessionId,
       };
-
-      this.reload();
+      isDirty = true;
     }
+    return isDirty;
   }
+
+  private updateActiveData = (
+    data: unknown,
+    inspectorAdapters?: LensInspectorAdapters | undefined
+  ) => {
+    this.activeData = inspectorAdapters;
+  };
 
   /**
    *
@@ -172,12 +206,17 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized) {
       return;
     }
+    const input = this.getInput();
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        variables={input.palette ? { theme: { palette: input.palette } } : {}}
+        searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
+        onData$={this.updateActiveData}
+        renderMode={input.renderMode}
       />,
       domNode
     );
@@ -228,16 +267,9 @@ export class Embeddable
   };
 
   async reload() {
-    const currentTime = Date.now();
-    if (this.externalSearchContext.lastReloadRequestTime !== currentTime) {
-      this.externalSearchContext = {
-        ...this.externalSearchContext,
-        lastReloadRequestTime: currentTime,
-      };
-
-      if (this.domNode) {
-        this.render(this.domNode);
-      }
+    this.handleContainerStateChanged(this.input);
+    if (this.domNode) {
+      this.render(this.domNode);
     }
   }
 
@@ -245,8 +277,10 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = this.savedVis.references
-      .filter(({ type }) => type === 'index-pattern')
+    const promises = _.uniqBy(
+      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+      'id'
+    )
       .map(async ({ id }) => {
         try {
           return await this.deps.indexPatternService.get(id);

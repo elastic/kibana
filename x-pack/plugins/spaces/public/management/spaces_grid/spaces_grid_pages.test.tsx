@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
 import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
@@ -45,7 +45,6 @@ featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
-    icon: 'spacesApp',
     app: [],
     category: { id: 'foo', label: 'foo' },
     privileges: null,

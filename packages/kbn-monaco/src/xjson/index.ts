@@ -22,5 +22,6 @@
  */
 import './language';
 import { ID } from './constants';
+import { lexerRules, languageConfiguration } from './lexer_rules';
 
-export const XJsonLang = { ID };
+export const XJsonLang = { ID, lexerRules, languageConfiguration };

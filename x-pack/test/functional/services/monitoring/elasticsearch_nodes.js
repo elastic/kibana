@@ -86,6 +86,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
     async clickDiskCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_DISK_COL}"] > button`);
+      await this.waitForTableToFinishLoading();
     }
 
     async clickShardsCol() {

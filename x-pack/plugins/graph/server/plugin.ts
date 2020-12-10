@@ -49,11 +49,9 @@ export class GraphPlugin implements Plugin {
         }),
         order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
-        icon: 'graphApp',
-        navLinkId: 'graph',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
-        validLicenses: ['platinum', 'enterprise', 'trial'],
+        minimumLicense: 'platinum',
         privileges: {
           all: {
             app: ['graph', 'kibana'],
@@ -62,7 +60,7 @@ export class GraphPlugin implements Plugin {
               all: ['graph-workspace'],
               read: ['index-pattern'],
             },
-            ui: ['save', 'delete'],
+            ui: ['save', 'delete', 'show'],
           },
           read: {
             app: ['graph', 'kibana'],
@@ -71,7 +69,7 @@ export class GraphPlugin implements Plugin {
               all: [],
               read: ['index-pattern', 'graph-workspace'],
             },
-            ui: [],
+            ui: ['show'],
           },
         },
       });

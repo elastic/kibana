@@ -6,8 +6,8 @@
 
 export * from './models_list';
 
-export enum ModelsTableToConfigMapping {
-  id = 'model_id',
-  createdAt = 'create_time',
-  type = 'type',
-}
+export const ModelsTableToConfigMapping = {
+  id: 'model_id',
+  createdAt: 'create_time',
+  type: 'type',
+} as const;

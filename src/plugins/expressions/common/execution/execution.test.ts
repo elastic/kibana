@@ -38,8 +38,10 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
-    debug,
+    params: {
+      ...context,
+      debug,
+    },
   });
   return execution;
 };
@@ -68,7 +70,7 @@ describe('Execution', () => {
   test('creates default ExecutionContext', () => {
     const execution = createExecution();
     expect(execution.context).toMatchObject({
-      getInitialInput: expect.any(Function),
+      getSearchContext: expect.any(Function),
       variables: expect.any(Object),
       types: expect.any(Object),
     });
@@ -143,6 +145,7 @@ describe('Execution', () => {
       const execution = new Execution({
         executor,
         expression,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -153,6 +156,7 @@ describe('Execution', () => {
       const execution = new Execution({
         ast: parseExpression(expression),
         executor,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -189,6 +193,18 @@ describe('Execution', () => {
     test('context.inspectorAdapters is an object', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
       expect(typeof result).toBe('object');
+    });
+
+    test('context.getKibanaRequest is a function if provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+        kibanaRequest: {},
+      })) as any;
+      expect(typeof result).toBe('function');
+    });
+
+    test('context.getKibanaRequest is undefined if not provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      expect(typeof result).toBe('undefined');
     });
 
     test('unknown context key is undefined', async () => {
@@ -619,7 +635,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -637,7 +653,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -658,7 +674,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;

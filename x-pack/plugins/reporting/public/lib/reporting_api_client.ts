@@ -7,14 +7,20 @@
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
-import { DownloadReportFn, ManagementLinkFn } from '../';
-import { JobId, ReportApiJSON, ReportDocument, ReportSource } from '../../common/types';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_LIST_URL,
   REPORTING_MANAGEMENT_HOME,
-} from '../../constants';
+} from '../../common/constants';
+import {
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ReportDocument,
+  ReportSource,
+} from '../../common/types';
 import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {

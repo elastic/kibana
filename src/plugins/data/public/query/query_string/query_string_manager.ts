@@ -19,6 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';

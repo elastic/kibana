@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { EuiIconTip } from '@elastic/eui';
 import { SizeParamEditor, SizeParamEditorProps } from './size';
 import { aggParamCommonPropsMock } from './test_utils';
