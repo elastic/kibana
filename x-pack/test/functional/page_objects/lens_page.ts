@@ -270,7 +270,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('indexPattern-label-edit', label);
+      await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
       const formatInput = await testSubjects.find('indexPattern-dimension-format');

@@ -18,43 +18,20 @@
  */
 
 import { PainlessCompletionItem } from '../../types';
-import { lexerRules } from '../../lexer_rules';
 
 import {
   getStaticSuggestions,
   getFieldSuggestions,
   getClassMemberSuggestions,
-  getPrimitives,
   getConstructorSuggestions,
+  getKeywords,
+  getTypeSuggestions,
   Suggestion,
 } from './autocomplete';
 
-const keywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
-  return {
-    label: keyword,
-    kind: 'keyword',
-    documentation: 'Keyword: char',
-    insertText: keyword,
-  };
-});
+const keywords: PainlessCompletionItem[] = getKeywords();
 
 const testSuggestions: Suggestion[] = [
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: boolean',
-    insertText: 'boolean',
-    kind: 'type',
-    label: 'boolean',
-  },
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: int',
-    insertText: 'int',
-    kind: 'type',
-    label: 'int',
-  },
   {
     properties: [
       {
@@ -101,21 +78,9 @@ const testSuggestions: Suggestion[] = [
 describe('Autocomplete lib', () => {
   describe('Static suggestions', () => {
     test('returns static suggestions', () => {
-      expect(getStaticSuggestions(testSuggestions, false)).toEqual({
+      expect(getStaticSuggestions({ suggestions: testSuggestions })).toEqual({
         isIncomplete: false,
         suggestions: [
-          {
-            documentation: 'Primitive: boolean',
-            insertText: 'boolean',
-            kind: 'type',
-            label: 'boolean',
-          },
-          {
-            documentation: 'Primitive: int',
-            insertText: 'int',
-            kind: 'type',
-            label: 'int',
-          },
           {
             documentation: 'Class: Math',
             insertText: 'Math',
@@ -129,22 +94,31 @@ describe('Autocomplete lib', () => {
             label: 'ArithmeticException',
           },
           ...keywords,
+          ...getTypeSuggestions(),
         ],
       });
     });
 
     test('returns doc keyword when fields exist', () => {
-      const autocompletion = getStaticSuggestions(testSuggestions, true);
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        hasFields: true,
+      });
       const docSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'doc'
       );
       expect(Boolean(docSuggestion)).toBe(true);
     });
-  });
 
-  describe('getPrimitives()', () => {
-    test('returns primitive values', () => {
-      expect(getPrimitives(testSuggestions)).toEqual(['boolean', 'int']);
+    test('returns emit keyword for runtime fields', () => {
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        isRuntimeContext: true,
+      });
+      const emitSuggestion = autocompletion.suggestions.find(
+        (suggestion) => suggestion.label === 'emit'
+      );
+      expect(Boolean(emitSuggestion)).toBe(true);
     });
   });
 

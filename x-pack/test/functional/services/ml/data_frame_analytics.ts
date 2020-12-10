@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
 
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,

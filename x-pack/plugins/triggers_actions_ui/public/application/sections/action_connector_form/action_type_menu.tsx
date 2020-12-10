@@ -12,6 +12,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -35,7 +36,18 @@ export const ActionTypeMenu = ({
   useEffect(() => {
     (async () => {
       try {
-        const availableActionTypes = actionTypes ?? (await loadActionTypes({ http }));
+        /**
+         * Hidden action types will be hidden only on Alerts & Actions.
+         * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
+         * can use the hidden action types. For example, Cases or Detections of Security Solution.
+         *
+         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+         *  */
+        const availableActionTypes =
+          actionTypes ??
+          (await loadActionTypes({ http })).filter(
+            (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
+          );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
