@@ -16,7 +16,7 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
-import { Authentication, AuthenticationResult } from '../../authentication';
+import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
 import { Session } from '../../session_management';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
@@ -24,10 +24,11 @@ import { coreMock, httpServerMock } from '../../../../../../src/core/server/mock
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
@@ -48,8 +49,9 @@ describe('Change password', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
     session = routeParamsMock.session;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));

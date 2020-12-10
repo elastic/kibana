@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract } from '../../../../core/public';
-import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
+import { DashboardSavedObject } from '../../../../plugins/dashboard/public';
 
 export interface DashboardPickerProps {
   onChange: (dashboard: { name: string; id: string } | null) => void;
@@ -48,7 +48,7 @@ export function DashboardPicker(props: DashboardPickerProps) {
       setIsLoadingDashboards(true);
       setDashboards([]);
 
-      const { savedObjects } = await savedObjectsClient.find<SavedObjectDashboard>({
+      const { savedObjects } = await savedObjectsClient.find<DashboardSavedObject>({
         type: 'dashboard',
         search: query ? `${query}*` : '',
         searchFields: ['title'],
