@@ -178,6 +178,7 @@ export class BaseAlert {
         name,
         alertTypeId,
         throttle,
+        notifyWhen: null,
         schedule: { interval },
         actions: alertActions,
       },
@@ -200,11 +201,12 @@ export class BaseAlert {
           return accum;
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
-        if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
-          accum[instanceId] = alertInstance;
-          if (alertInstance.state) {
+        const filteredAlertInstance = this.filterAlertInstance(alertInstance, filters);
+        if (filteredAlertInstance) {
+          accum[instanceId] = filteredAlertInstance as RawAlertInstance;
+          if (filteredAlertInstance.state) {
             accum[instanceId].state = {
-              alertStates: (alertInstance.state as AlertInstanceState).alertStates,
+              alertStates: (filteredAlertInstance.state as AlertInstanceState).alertStates,
             };
           }
         }
@@ -220,15 +222,15 @@ export class BaseAlert {
     filterOnNodes: boolean = false
   ) {
     if (!filterOnNodes) {
-      return true;
+      return alertInstance;
     }
     const alertInstanceStates = alertInstance.state?.alertStates as AlertNodeState[];
     const nodeFilter = filters?.find((filter) => filter.nodeUuid);
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
-      return true;
+      return alertInstance;
     }
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
-    return Boolean(nodeAlerts.length);
+    const alertStates = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    return { state: { alertStates } };
   }
 
   protected async execute({

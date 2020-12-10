@@ -37,6 +37,7 @@ import {
   SetPriorityInputField,
   SearchableSnapshotField,
   useRolloverPath,
+  ShrinkField,
 } from '../shared_fields';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
@@ -235,6 +236,7 @@ export const HotPhase: FunctionComponent = () => {
         {isRolloverEnabled && (
           <>
             {<ForcemergeField phase="hot" />}
+            <ShrinkField phase="hot" />
             {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           </>
         )}

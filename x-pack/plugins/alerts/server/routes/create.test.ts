@@ -37,6 +37,7 @@ describe('createAlertRoute', () => {
       bar: true,
     },
     throttle: '30s',
+    notifyWhen: 'onActionGroupChange',
     actions: [
       {
         group: 'default',
@@ -57,6 +58,7 @@ describe('createAlertRoute', () => {
     apiKey: '',
     apiKeyOwner: '',
     mutedInstanceIds: [],
+    notifyWhen: 'onActionGroupChange',
     createdAt,
     updatedAt,
     id: '123',
@@ -111,6 +113,7 @@ describe('createAlertRoute', () => {
             "alertTypeId": "1",
             "consumer": "bar",
             "name": "abc",
+            "notifyWhen": "onActionGroupChange",
             "params": Object {
               "bar": true,
             },

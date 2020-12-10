@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeState = Record<string, any>;
@@ -69,6 +70,7 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;

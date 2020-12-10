@@ -68,21 +68,35 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     updatedBy,
   } = alertExecutorOptions;
   let group: string | null = 'default';
+      let subgroup: string | null = null;
   const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
-    group = params.groupsToScheduleActionsInSeries[index];
+        const [scheduledGroup, scheduledSubgroup] = (
+          params.groupsToScheduleActionsInSeries[index] ?? ''
+        ).split(':');
+
+        group = scheduledGroup;
+        subgroup = scheduledSubgroup;
   }
 
-  if (group) {
-    services
-      .alertInstanceFactory('1')
-      .replaceState({ instanceStateValue: true })
-      .scheduleActions(group, {
-        instanceContextValue: true,
-      });
-  }
+      if (group) {
+        const instance = services
+          .alertInstanceFactory('1')
+          .replaceState({ instanceStateValue: true });
+
+        if (subgroup) {
+          instance.scheduleActionsWithSubGroup(group, subgroup, {
+            instanceContextValue: true,
+          });
+        } else {
+          instance.scheduleActions(group, {
+            instanceContextValue: true,
+          });
+        }
+      }
+
   await services.scopedClusterClient.index({
     index: params.index,
     refresh: 'wait_for',
@@ -338,7 +352,10 @@ function getValidationAlertType() {
 
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
-    pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.boolean())),
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
@@ -384,8 +401,13 @@ function getPatternFiringAlertType() {
 
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
-        if (instancePattern[patternIndex]) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
           services.alertInstanceFactory(instanceId).scheduleActions('default');
+        } else if (typeof scheduleByPattern === 'string') {
+          services
+            .alertInstanceFactory(instanceId)
+            .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
       }
 

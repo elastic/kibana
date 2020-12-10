@@ -155,10 +155,15 @@ export class TaskRunner {
     alertInstance: AlertInstance,
     executionHandler: ReturnType<typeof createExecutionHandler>
   ) {
-    const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
-    alertInstance.updateLastScheduledActions(actionGroup);
+    const {
+      actionGroup,
+      subgroup: actionSubgroup,
+      context,
+      state,
+    } = alertInstance.getScheduledActionOptions()!;
+    alertInstance.updateLastScheduledActions(actionGroup, actionSubgroup);
     alertInstance.unscheduleActions();
-    return executionHandler({ actionGroup, context, state, alertInstanceId });
+    return executionHandler({ actionGroup, actionSubgroup, context, state, alertInstanceId });
   }
 
   async executeAlertInstances(
@@ -169,7 +174,16 @@ export class TaskRunner {
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
-    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
+    const {
+      throttle,
+      notifyWhen,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
@@ -255,24 +269,39 @@ export class TaskRunner {
         alertLabel,
       });
 
+      const instancesToExecute =
+        notifyWhen === 'onActionGroupChange'
+          ? Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            )
+          : Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const throttled = alertInstance.isThrottled(throttle);
+                const muted = mutedInstanceIdsSet.has(alertInstanceName);
+                const shouldExecuteAction = !throttled && !muted;
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                      muted ? 'muted' : 'throttled'
+                    }`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            );
+
       await Promise.all(
-        Object.entries(instancesWithScheduledActions)
-          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
-            const throttled = alertInstance.isThrottled(throttle);
-            const muted = mutedInstanceIdsSet.has(alertInstanceName);
-            const shouldExecuteAction = !throttled && !muted;
-            if (!shouldExecuteAction) {
-              this.logger.debug(
-                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                  muted ? 'muted' : 'throttled'
-                }`
-              );
-            }
-            return shouldExecuteAction;
-          })
-          .map(([id, alertInstance]: [string, AlertInstance]) =>
-            this.executeAlertInstance(id, alertInstance, executionHandler)
-          )
+        instancesToExecute.map(([id, alertInstance]: [string, AlertInstance]) =>
+          this.executeAlertInstance(id, alertInstance, executionHandler)
+        )
       );
     } else {
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
@@ -495,28 +524,40 @@ function generateNewAndRecoveredInstanceEvents(
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
   const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
-
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
   for (const id of recoveredAlertInstanceIds) {
-    const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
+    const { group: actionGroup, subgroup: actionSubgroup } =
+      recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const message = `${params.alertLabel} instance '${id}' has recovered`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup, actionSubgroup);
   }
 
   for (const id of newIds) {
-    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
+    const { actionGroup, subgroup: actionSubgroup } =
+      currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup);
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup, actionSubgroup);
   }
 
   for (const id of currentAlertInstanceIds) {
-    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
-    const message = `${params.alertLabel} active instance: '${id}' in actionGroup: '${actionGroup}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup);
+    const { actionGroup, subgroup: actionSubgroup } =
+      currentAlertInstances[id].getScheduledActionOptions() ?? {};
+    const message = `${params.alertLabel} active instance: '${id}' in ${
+      actionSubgroup
+        ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+        : `actionGroup: '${actionGroup}'`
+    }`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup, actionSubgroup);
   }
 
-  function logInstanceEvent(instanceId: string, action: string, message: string, group?: string) {
+  function logInstanceEvent(
+    instanceId: string,
+    action: string,
+    message: string,
+    group?: string,
+    subgroup?: string
+  ) {
     const event: IEvent = {
       event: {
         action,
@@ -525,6 +566,7 @@ function generateNewAndRecoveredInstanceEvents(
         alerting: {
           instance_id: instanceId,
           ...(group ? { action_group_id: group } : {}),
+          ...(subgroup ? { action_subgroup: subgroup } : {}),
         },
         saved_objects: [
           {

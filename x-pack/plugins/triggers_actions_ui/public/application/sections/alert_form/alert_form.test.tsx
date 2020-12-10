@@ -436,26 +436,6 @@ describe('alert_form', () => {
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
     });
 
-    it('should update throttle value', async () => {
-      const newThrottle = 17;
-      await setup();
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
-    });
-
-    it('should unset throttle value', async () => {
-      const newThrottle = '';
-      await setup();
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
-    });
-
     it('renders alert type description', async () => {
       await setup();
       const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');

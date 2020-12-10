@@ -33,8 +33,6 @@ import {
   EuiErrorBoundary,
   EuiToolTip,
 } from '@elastic/eui';
-import { some, filter, map, fold } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
@@ -69,6 +67,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
+import { AlertNotifyWhen } from './alert_notify_when';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
@@ -173,7 +172,7 @@ export const AlertForm = ({
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
@@ -605,22 +604,6 @@ export const AlertForm = ({
     </>
   );
 
-  const labelForAlertRenotify = (
-    <>
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Notify every"
-      />{' '}
-      <EuiIconTip
-        position="right"
-        type="questionInCircle"
-        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
-        })}
-      />
-    </>
-  );
-
   return (
     <EuiForm>
       <EuiFlexGrid columns={2}>
@@ -641,7 +624,6 @@ export const AlertForm = ({
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
-              compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
@@ -666,7 +648,6 @@ export const AlertForm = ({
             <EuiComboBox
               noSuggestions
               fullWidth
-              compressed
               data-test-subj="tagsComboBox"
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
@@ -707,7 +688,6 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   isInvalid={errors.interval.length > 0}
-                  compressed
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
@@ -722,7 +702,6 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   fullWidth
-                  compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
                   onChange={(e) => {
@@ -735,52 +714,25 @@ export const AlertForm = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={labelForAlertRenotify}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  compressed
-                  value={alertThrottle || ''}
-                  name="throttle"
-                  data-test-subj="throttleInput"
-                  onChange={(e) => {
-                    pipe(
-                      some(e.target.value.trim()),
-                      filter((value) => value !== ''),
-                      map((value) => parseInt(value, 10)),
-                      filter((value) => !isNaN(value)),
-                      fold(
-                        () => {
-                          // unset throttle
-                          setAlertThrottle(null);
-                          setAlertProperty('throttle', null);
-                        },
-                        (throttle) => {
-                          setAlertThrottle(throttle);
-                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
-                        }
-                      )
-                    );
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  compressed
-                  value={alertThrottleUnit}
-                  options={getTimeOptions(alertThrottle ?? 1)}
-                  onChange={(e) => {
-                    setAlertThrottleUnit(e.target.value);
-                    if (alertThrottle) {
-                      setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          <AlertNotifyWhen
+            alert={alert}
+            throttle={alertThrottle}
+            throttleUnit={alertThrottleUnit}
+            onNotifyWhenChange={useCallback(
+              (notifyWhen) => {
+                setAlertProperty('notifyWhen', notifyWhen);
+              },
+              [setAlertProperty]
+            )}
+            onThrottleChange={useCallback(
+              (throttle: number | null, throttleUnit: string) => {
+                setAlertThrottle(throttle);
+                setAlertThrottleUnit(throttleUnit);
+                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+              },
+              [setAlertProperty]
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
