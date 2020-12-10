@@ -1,5 +1,5 @@
 [[kibana-encryption-keys]]
-== kibana-encryption-keys
+=== Set up encryptions keys to protect sensitive information
 
 The `kibana-encryption-keys` command helps setup encryption keys used by {kib}
 to protect sensitive information during normal operations.
