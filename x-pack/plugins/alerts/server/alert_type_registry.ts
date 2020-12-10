@@ -99,8 +99,8 @@ export class AlertTypeRegistry {
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
     const normalizedAlertType = augmentActionGroupsWithReserved(alertType as AlertType);
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), normalizedAlertType);
 
+    this.alertTypes.set(alertIdSchema.validate(alertType.id), normalizedAlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
