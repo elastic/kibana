@@ -8,7 +8,12 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
-import { euiPaletteColorBlind, euiPalettePositive } from '@elastic/eui';
+import {
+  euiPaletteColorBlind,
+  euiPaletteGray,
+  euiPaletteNegative,
+  euiPalettePositive,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,6 +28,8 @@ export const OUTLIER_SCORE_FIELD = 'outlier_score';
 const SCATTERPLOT_SIZE = 125;
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+const COLOR_GRAY = euiPaletteGray(5)[0];
 const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
@@ -30,10 +37,10 @@ const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) 
   if (outliers) {
     return {
       condition: {
-        value: '#bd271e',
+        value: COLOR_OUTLIER,
         test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
       },
-      value: 'gray',
+      value: COLOR_GRAY,
     };
   }
 
@@ -105,7 +112,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
                   value: 1,
                   test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
                 },
-                value: 0.25,
+                value: 0.5,
               },
             }
           : {}),
