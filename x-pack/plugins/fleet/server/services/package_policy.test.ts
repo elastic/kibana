@@ -7,7 +7,7 @@
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
 import { packagePolicyService } from './package_policy';
-import { NewPackagePolicySchema, PackageInfo, PackagePolicySOAttributes } from '../types';
+import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'kibana/server';
