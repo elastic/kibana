@@ -12,10 +12,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const queryBar = getService('queryBar');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/85085
-  describe.skip('Endpoint Event Resolver', function () {
+  describe('Endpoint Event Resolver', function () {
     before(async () => {
       await pageObjects.hosts.navigateToSecurityHostsPage();
       await pageObjects.common.dismissBanner();
@@ -28,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
-        await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.events.file');
       });
       after(async () => {
@@ -194,114 +191,84 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
         await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
       });
-
-      it('Check Related Events for event.file Node', async () => {
-        const expectedData = [
-          '17 authentication',
-          '1 registry',
-          '17 session',
-          '8 file',
-          '1 registry',
-        ];
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
     });
 
-    describe('Resolver Tree events', function () {
-      const expectedData = [
-        '17 authentication',
-        '1 registry',
-        '17 session',
-        '80 registry',
-        '8 network',
-        '60 registry',
-      ];
+    describe('node related event pills', function () {
+      /**
+       * Verifies that the pills of a node have the correct text and link.
+       *
+       * @param id the node ID to verify the pills for.
+       * @param expectedPills a map of expected pills for all nodes
+       */
+      const verifyPills = async (id: string, expectedPills: Map<string, Set<string>>) => {
+        const relatedEventPills = await pageObjects.hosts.findNodePills(id);
+        const pillsForNode = expectedPills.get(id);
+        expect(relatedEventPills.length).to.equal(pillsForNode?.size);
+        for (const pill of relatedEventPills) {
+          const pillText = await pill._webElement.getText();
+          // check that we have the pill text in our expected map
+          expect(pillsForNode?.has(pillText)).to.equal(true);
+          await pill.click();
+          await pageObjects.common.sleep(100);
+
+          const lastBreadcrumbLink = await testSubjects.find('resolver:breadcrumbs:last');
+          const linkText = await lastBreadcrumbLink._webElement.getText();
+          // check that the breadcrumb has the same pill text
+          expect(pillText).to.equal(linkText);
+        }
+      };
+
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/events', { useCreate: true });
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
+        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
       });
       after(async () => {
         await pageObjects.hosts.deleteDataStreams();
       });
 
-      it('Check Related Events for event.process Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.process'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
+      describe('endpoint.alerts filter', () => {
+        before(async () => {
+          await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
+          await pageObjects.hosts.clickZoomOut();
+          await browser.setWindowSize(2100, 1500);
+        });
 
-      it('Check Related Events for event.security Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.security'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
+        it('has the correct pill text and links for the nodes in view', async () => {
+          const expectedData: Map<string, Set<string>> = new Map([
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTc2MzYtMTMyNDc2MTQ0NDIuOTU5MTE2NjAw',
+              new Set(['1 library']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTMxMTYtMTMyNDcyNDk0MjQuOTg4ODI4NjAw',
+              new Set(['157 file', '520 registry']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTUwODQtMTMyNDc2MTQ0NDIuOTcyODQ3MjAw',
+              new Set(),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTg2OTYtMTMyNDc2MTQ0MjEuNjc1MzY0OTAw',
+              new Set(['3 file']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTcyNjAtMTMyNDc2MTQ0MjIuMjQwNDI2MTAw',
+              new Set(),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTczMDAtMTMyNDc2MTQ0MjEuNjg2NzI4NTAw',
+              new Set(),
+            ],
+          ]);
 
-      it('Check Related Events for event.registry Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.registry'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
+          const visibleNodeIDs = await pageObjects.hosts.findVisibleNodeIDs();
 
-      it('Check Related Events for event.network Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.network'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
-
-      it('Check Related Events for event.library Node', async () => {
-        await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-        const expectedLibraryData = [
-          '1 authentication',
-          '1 session',
-          '329 network',
-          '1 library',
-          '1 library',
-        ];
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.library'
-        );
-        // This lines will move the resolver view for clear visibility  of the related events.
-        for (let i = 0; i < 7; i++) {
-          await (await testSubjects.find('resolver:graph-controls:west-button')).click();
-        }
-        await pageObjects.hosts.runNodeEvents(expectedLibraryData);
-      });
-
-      it('Check Related Events for event.alert Node', async () => {
-        await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-        const expectedAlertData = [
-          '1 library',
-          '157 file',
-          '520 registry',
-          '3 file',
-          '5 library',
-          '5 library',
-        ];
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
-        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
-        await browser.setWindowSize(2100, 1500);
-        for (let i = 0; i < 2; i++) {
-          await (await testSubjects.find('resolver:graph-controls:east-button')).click();
-        }
-        await pageObjects.hosts.runNodeEvents(expectedAlertData);
+          for (const id of visibleNodeIDs) {
+            // center the node in the view
+            await pageObjects.hosts.clickNodeLinkInPanel(id);
+            await verifyPills(id, expectedData);
+          }
+        });
       });
     });
   });
