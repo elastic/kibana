@@ -22,16 +22,20 @@ import { geoPoint, kibanaJSON } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
-  // Default DataGrid schemas: boolean, numeric, datetime, json, currency
+  // Default DataGrid schemas: boolean, numeric, datetime, json, currency, string
   switch (kbnType) {
-    case KBN_FIELD_TYPES.DATE:
-      return 'datetime';
+    case KBN_FIELD_TYPES.IP:
+    case KBN_FIELD_TYPES.GEO_SHAPE:
     case KBN_FIELD_TYPES.NUMBER:
       return 'numeric';
+    case KBN_FIELD_TYPES.BOOLEAN:
+      return 'boolean';
+    case KBN_FIELD_TYPES.STRING:
+      return 'string';
+    case KBN_FIELD_TYPES.DATE:
+      return 'datetime';
     case KBN_FIELD_TYPES._SOURCE:
       return kibanaJSON;
-    case KBN_FIELD_TYPES.OBJECT:
-      return 'json';
     case KBN_FIELD_TYPES.GEO_POINT:
       return geoPoint;
     default:
