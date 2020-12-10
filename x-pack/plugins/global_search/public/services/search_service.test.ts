@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchServerResultsMock, getDefaultPreferenceMock } from './search_service.test.mocks';
+import {
+  fetchServerResultsMock,
+  getDefaultPreferenceMock,
+  fetchServerSearchableTypesMock,
+} from './search_service.test.mocks';
 
 import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -41,10 +45,17 @@ describe('SearchService', () => {
 
   const createProvider = (
     id: string,
-    source: Observable<GlobalSearchProviderResult[]> = of([])
+    {
+      source = of([]),
+      types = [],
+    }: {
+      source?: Observable<GlobalSearchProviderResult[]>;
+      types?: string[] | Promise<string[]>;
+    } = {}
   ): jest.Mocked<GlobalSearchResultProvider> => ({
     id,
     find: jest.fn().mockImplementation((term, options, context) => source),
+    getSearchableTypes: jest.fn().mockReturnValue(types),
   });
 
   const expectedResult = (id: string) => expect.objectContaining({ id });
@@ -84,6 +95,9 @@ describe('SearchService', () => {
 
     fetchServerResultsMock.mockClear();
     fetchServerResultsMock.mockReturnValue(of());
+
+    fetchServerSearchableTypesMock.mockClear();
+    fetchServerSearchableTypesMock.mockResolvedValue([]);
 
     getDefaultPreferenceMock.mockClear();
     getDefaultPreferenceMock.mockReturnValue('default_pref');
@@ -189,7 +203,7 @@ describe('SearchService', () => {
             a: [providerResult('1')],
             b: [providerResult('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start(startDeps());
           const results = find({ term: 'foobar' }, {});
@@ -229,22 +243,20 @@ describe('SearchService', () => {
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           registerResultProvider(
-            createProvider(
-              'A',
-              hot('a---d-|', {
+            createProvider('A', {
+              source: hot('a---d-|', {
                 a: [providerResult('A1'), providerResult('A2')],
                 d: [providerResult('A3')],
-              })
-            )
+              }),
+            })
           );
           registerResultProvider(
-            createProvider(
-              'B',
-              hot('-b-c|  ', {
+            createProvider('B', {
+              source: hot('-b-c|  ', {
                 b: [providerResult('B1')],
                 c: [providerResult('B2'), providerResult('B3')],
-              })
-            )
+              }),
+            })
           );
 
           const { find } = service.start(startDeps());
@@ -272,13 +284,12 @@ describe('SearchService', () => {
           );
 
           registerResultProvider(
-            createProvider(
-              'A',
-              hot('a-b-|', {
+            createProvider('A', {
+              source: hot('a-b-|', {
                 a: [providerResult('P1')],
                 b: [providerResult('P2')],
-              })
-            )
+              }),
+            })
           );
 
           const { find } = service.start(startDeps());
@@ -302,7 +313,7 @@ describe('SearchService', () => {
             a: [providerResult('1')],
             b: [providerResult('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const aborted$ = hot('----a--|', { a: undefined });
 
@@ -326,7 +337,7 @@ describe('SearchService', () => {
             b: [providerResult('2')],
             c: [providerResult('3')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start(startDeps());
           const results = find({ term: 'foobar' }, {});
@@ -346,22 +357,20 @@ describe('SearchService', () => {
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           registerResultProvider(
-            createProvider(
-              'A',
-              hot('a---d-|', {
+            createProvider('A', {
+              source: hot('a---d-|', {
                 a: [providerResult('A1'), providerResult('A2')],
                 d: [providerResult('A3')],
-              })
-            )
+              }),
+            })
           );
           registerResultProvider(
-            createProvider(
-              'B',
-              hot('-b-c|  ', {
+            createProvider('B', {
+              source: hot('-b-c|  ', {
                 b: [providerResult('B1')],
                 c: [providerResult('B2'), providerResult('B3')],
-              })
-            )
+              }),
+            })
           );
 
           const { find } = service.start(startDeps());
@@ -394,7 +403,7 @@ describe('SearchService', () => {
           url: { path: '/foo', prependBasePath: false },
         });
 
-        const provider = createProvider('A', of([resultA, resultB]));
+        const provider = createProvider('A', { source: of([resultA, resultB]) });
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
@@ -423,7 +432,7 @@ describe('SearchService', () => {
             a: [providerResult('1')],
             b: [providerResult('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start(startDeps());
           const results = find({ term: 'foobar' }, {});
@@ -436,6 +445,92 @@ describe('SearchService', () => {
             )
           );
         });
+      });
+    });
+
+    describe('#getSearchableTypes()', () => {
+      it('returns the types registered by the provider', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        const provider = createProvider('A', { types: ['type-a', 'type-b'] });
+        registerResultProvider(provider);
+
+        const { getSearchableTypes } = service.start(startDeps());
+
+        const types = await getSearchableTypes();
+
+        expect(types).toEqual(['type-a', 'type-b']);
+      });
+
+      it('returns the types registered by the server', async () => {
+        fetchServerSearchableTypesMock.mockResolvedValue(['server-a', 'server-b']);
+
+        service.setup({
+          config: createConfig(),
+        });
+
+        const { getSearchableTypes } = service.start(startDeps());
+
+        const types = await getSearchableTypes();
+
+        expect(types).toEqual(['server-a', 'server-b']);
+      });
+
+      it('merges the types registered by the providers', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        const provider1 = createProvider('A', { types: ['type-a', 'type-b'] });
+        registerResultProvider(provider1);
+
+        const provider2 = createProvider('B', { types: ['type-c', 'type-d'] });
+        registerResultProvider(provider2);
+
+        const { getSearchableTypes } = service.start(startDeps());
+
+        const types = await getSearchableTypes();
+
+        expect(types.sort()).toEqual(['type-a', 'type-b', 'type-c', 'type-d']);
+      });
+
+      it('merges the types registered by the providers and the server', async () => {
+        fetchServerSearchableTypesMock.mockResolvedValue(['server-a', 'server-b']);
+
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        const provider1 = createProvider('A', { types: ['type-a', 'type-b'] });
+        registerResultProvider(provider1);
+
+        const { getSearchableTypes } = service.start(startDeps());
+
+        const types = await getSearchableTypes();
+
+        expect(types.sort()).toEqual(['server-a', 'server-b', 'type-a', 'type-b']);
+      });
+
+      it('removes duplicates', async () => {
+        fetchServerSearchableTypesMock.mockResolvedValue(['server-a', 'dupe-1']);
+
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        const provider1 = createProvider('A', { types: ['type-a', 'dupe-1', 'dupe-2'] });
+        registerResultProvider(provider1);
+
+        const provider2 = createProvider('B', { types: ['type-b', 'dupe-2'] });
+        registerResultProvider(provider2);
+
+        const { getSearchableTypes } = service.start(startDeps());
+
+        const types = await getSearchableTypes();
+
+        expect(types.sort()).toEqual(['dupe-1', 'dupe-2', 'server-a', 'type-a', 'type-b']);
       });
     });
   });
