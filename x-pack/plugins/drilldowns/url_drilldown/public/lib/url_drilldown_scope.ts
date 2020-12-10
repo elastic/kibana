@@ -61,9 +61,9 @@ interface EmbeddableUrlDrilldownContextScope {
   savedObjectId?: string;
 }
 
-export function getPanelVariables(
-  contextScopeInput: ContextScopeInput
-): EmbeddableUrlDrilldownContextScope {
+export function getPanelVariables(contextScopeInput: {
+  embeddable?: IEmbeddable;
+}): EmbeddableUrlDrilldownContextScope {
   function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
     if (val && typeof val === 'object' && 'embeddable' in val) return true;
     return false;
@@ -72,8 +72,8 @@ export function getPanelVariables(
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-
   const embeddable = contextScopeInput.embeddable;
+
   return getEmbeddableVariables(embeddable);
 }
 
