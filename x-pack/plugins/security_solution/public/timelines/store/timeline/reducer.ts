@@ -103,6 +103,7 @@ import {
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
 import { TimelineType } from '../../../../common/types/timeline';
+import { timelineDefaults } from './defaults';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -182,7 +183,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: {
       ...state.timelineById,
       [timelineId]: {
-        ...state.timelineById[timelineId],
+        ...(state.timelineById[timelineId] ?? timelineDefaults),
         expandedEvent: event,
       },
     },

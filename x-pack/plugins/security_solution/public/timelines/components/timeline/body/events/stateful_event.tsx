@@ -28,6 +28,7 @@ import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 interface Props {
   actionsColumnWidth: number;
@@ -78,7 +79,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId].expandedEvent
+    (state) => (state.timeline.timelineById[timelineId] ?? timelineDefaults).expandedEvent
   );
   const divElement = useRef<HTMLDivElement | null>(null);
 

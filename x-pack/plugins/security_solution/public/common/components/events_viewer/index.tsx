@@ -193,7 +193,7 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  onFlyoutCollapsed: ({ indexName, eventId }: { indexName: string; eventId: string }) => {
+  onFlyoutCollapsed: () => {
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId: TimelineId.detectionsPage,
