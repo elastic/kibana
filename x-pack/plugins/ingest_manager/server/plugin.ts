@@ -42,7 +42,8 @@ import {
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
-  registerAgentRoutes,
+  registerAgentAPIRoutes,
+  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
   registerOutputRoutes,
@@ -69,6 +70,7 @@ import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerIngestManagerUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
+import { makeRouterEnforcingSuperuser } from './routes/security';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -219,16 +221,18 @@ export class IngestManagerPlugin
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
+    // For all the routes we enforce the user to have role superuser
+    const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
 
     // Register rest of routes only if security is enabled
     if (this.security) {
-      registerSetupRoutes(router, config);
-      registerAgentPolicyRoutes(router);
-      registerPackagePolicyRoutes(router);
-      registerOutputRoutes(router);
-      registerSettingsRoutes(router);
-      registerDataStreamRoutes(router);
-      registerEPMRoutes(router);
+      registerSetupRoutes(routerSuperuserOnly, config);
+      registerAgentPolicyRoutes(routerSuperuserOnly);
+      registerPackagePolicyRoutes(routerSuperuserOnly);
+      registerOutputRoutes(routerSuperuserOnly);
+      registerSettingsRoutes(routerSuperuserOnly);
+      registerDataStreamRoutes(routerSuperuserOnly);
+      registerEPMRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -244,12 +248,14 @@ export class IngestManagerPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router, config);
-          registerEnrollmentApiKeyRoutes(router);
+          registerAgentAPIRoutes(routerSuperuserOnly, config);
+          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
-            router,
+            router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
+          // Do not enforce superuser role for Elastic Agent routes
+          registerElasticAgentRoutes(router, config);
         }
       }
     }
