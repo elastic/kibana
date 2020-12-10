@@ -128,6 +128,7 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
