@@ -73,28 +73,33 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
     );
     expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "customLabel": Array [
-            "prince",
-          ],
-          "enabled": Array [
-            true,
-          ],
-          "field": Array [
-            "bytes",
-          ],
-          "id": Array [
-            "percentiles.95",
-          ],
-          "percents": Array [
-            "[95]",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-        },
-        "function": "aggPercentiles",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "customLabel": Array [
+                "prince",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "percentiles.95",
+              ],
+              "percents": Array [
+                95,
+              ],
+              "schema": Array [
+                "metric",
+              ],
+            },
+            "function": "aggPercentiles",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

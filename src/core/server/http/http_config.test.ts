@@ -20,6 +20,7 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -329,6 +330,59 @@ describe('with compression', () => {
   });
 });
 
+describe('cors', () => {
+  describe('origin', () => {
+    it('list cannot be empty', () => {
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: [],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+              "[cors.origin]: types that failed validation:
+              - [cors.origin.0]: expected value to equal [*]
+              - [cors.origin.1]: array size is [0], but cannot be smaller than [1]"
+          `);
+    });
+
+    it('list of valid URLs', () => {
+      const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      expect(
+        config.schema.validate({
+          cors: { origin },
+        }).cors.origin
+      ).toStrictEqual(origin);
+
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: ['*://elastic.co/*'],
+          },
+        })
+      ).toThrow();
+    });
+
+    it('can be configured as "*" wildcard', () => {
+      expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
+    });
+  });
+  describe('credentials', () => {
+    it('cannot use wildcard origin if "credentials: true"', () => {
+      expect(
+        () => config.schema.validate({ cors: { credentials: true, origin: '*' } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+      expect(
+        () => config.schema.validate({ cors: { credentials: true } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
@@ -344,7 +398,7 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
