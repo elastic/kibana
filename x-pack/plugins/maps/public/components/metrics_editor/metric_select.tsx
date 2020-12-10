@@ -35,6 +35,12 @@ const AGG_OPTIONS = [
     value: AGG_TYPE.MIN,
   },
   {
+    label: i18n.translate('xpack.maps.metricSelect.percentileDropDownOptionLabel', {
+      defaultMessage: 'Percentile',
+    }),
+    value: AGG_TYPE.PERCENTILE,
+  },
+  {
     label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
       defaultMessage: 'Sum',
     }),
@@ -51,12 +57,6 @@ const AGG_OPTIONS = [
       defaultMessage: 'Unique count',
     }),
     value: AGG_TYPE.UNIQUE_COUNT,
-  },
-  {
-    label: i18n.translate('xpack.maps.metricSelect.percentileDropDownOptionLabel', {
-      defaultMessage: 'Percentile',
-    }),
-    value: AGG_TYPE.PERCENTILE,
   },
 ];
 
