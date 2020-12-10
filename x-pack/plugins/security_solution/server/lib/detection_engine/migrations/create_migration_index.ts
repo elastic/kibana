@@ -19,7 +19,7 @@ import { ElasticsearchClient } from 'src/core/server';
  *
  * @returns the name of the created index
  */
-export const createSignalsMigrationIndex = async ({
+export const createMigrationIndex = async ({
   esClient,
   index,
   version,

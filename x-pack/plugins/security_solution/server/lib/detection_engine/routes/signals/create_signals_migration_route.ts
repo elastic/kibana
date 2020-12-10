@@ -8,7 +8,6 @@ import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
@@ -35,7 +34,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;
-        const migrationService = signalsMigrationService(soClient);
+        const migrationService = signalsMigrationService({ esClient, soClient });
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -72,22 +71,16 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
                   );
                 }
 
-                const migrationDetails = await migrateSignals({
-                  esClient,
+                const migration = await migrationService.create({
                   index,
-                  version: currentVersion,
                   reindexOptions,
-                });
-                const migrationSavedObject = await migrationService.create({
-                  ...migrationDetails,
-                  status: 'pending',
                   version: currentVersion,
                 });
 
                 return {
-                  index,
-                  migration_id: migrationSavedObject.id,
-                  migration_index: migrationDetails.destinationIndex,
+                  index: migration.attributes.sourceIndex,
+                  migration_id: migration.id,
+                  migration_index: migration.attributes.destinationIndex,
                 };
               } catch (err) {
                 const error = transformError(err);

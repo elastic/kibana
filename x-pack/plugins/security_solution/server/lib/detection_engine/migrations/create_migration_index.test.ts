@@ -6,9 +6,9 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { createSignalsMigrationIndex } from './create_signals_migration_index';
+import { createMigrationIndex } from './create_migration_index';
 
-describe('createSignalsMigrationIndex', () => {
+describe('createMigrationIndex', () => {
   let esClient: ElasticsearchClient;
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('createSignalsMigrationIndex', () => {
   });
 
   it('creates an index suffixed with the template version', async () => {
-    await createSignalsMigrationIndex({ esClient, index: 'my-signals-index', version: 4 });
+    await createMigrationIndex({ esClient, index: 'my-signals-index', version: 4 });
 
     expect(esClient.indices.create).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'my-signals-index-r000004' })

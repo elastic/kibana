@@ -15,12 +15,6 @@ export interface MigrationStatus {
   version: number;
 }
 
-export interface MigrationDetails {
-  destinationIndex: string;
-  sourceIndex: string;
-  taskId: string;
-}
-
 export interface MigrationStatusSearchResponse {
   aggregations: {
     signals_indices: {
