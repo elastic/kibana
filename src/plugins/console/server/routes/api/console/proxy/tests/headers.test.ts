@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('../../../../../core/server/http/router/request', () => ({
+jest.mock('../../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { kibanaResponseFactory } from '../../../../../core/server';
+import { kibanaResponseFactory } from '../../../../../../../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../core/server/http/router/request';
+import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@kbn/expect';
-import * as requestModule from '../../lib/proxy_request';
+import * as requestModule from '../../../../../lib/proxy_request';
 
-import { createHandler } from '../../routes/api/console/proxy/create_handler';
+import { createHandler } from '../create_handler';
 
 import { createResponseStub } from './stubs';
 
