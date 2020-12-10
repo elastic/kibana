@@ -6,7 +6,7 @@
 
 import React, { memo } from 'react';
 import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { FleetTrustedAppsCard } from './components/trusted_apps_card';
+import { FleetTrustedAppsCard } from './components/fleet_trusted_apps_card';
 
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
