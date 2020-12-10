@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { wait, render } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 
@@ -26,7 +26,7 @@ test('ErrorEmbeddable renders an embeddable', async () => {
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
 
   expect(getByTestId('embeddableStackError')).toBeVisible();
-  await wait(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
+  await waitFor(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
   expect(getByText(/some error occurred/i)).toBeVisible();
 });
 
@@ -36,7 +36,7 @@ test('ErrorEmbeddable renders an embeddable with markdown message', async () => 
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
 
   expect(getByTestId('embeddableStackError')).toBeVisible();
-  await wait(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
+  await waitFor(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
   expect(getByText(/some link/i)).toMatchInlineSnapshot(`
     <a
       href="http://localhost:5601/takeMeThere"

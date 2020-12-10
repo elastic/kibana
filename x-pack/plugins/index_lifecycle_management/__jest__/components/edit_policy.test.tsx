@@ -324,7 +324,7 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', async () => {
+    test('should show errors when trying to save with no max size, no max age and no max docs', async () => {
       const rendered = mountWithIntl(component);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       await setPolicyName(rendered, 'mypolicy');
@@ -336,6 +336,11 @@ describe('edit policy', () => {
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation(rendered);
+      const maxDocsInput = findTestSubject(rendered, 'hot-selectedMaxDocuments');
+      await act(async () => {
+        maxDocsInput.simulate('change', { target: { value: '' } });
       });
       waitForFormLibValidation(rendered);
       await save(rendered);
@@ -482,7 +487,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
@@ -500,7 +505,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
