@@ -17,6 +17,7 @@ import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 
 const alertType: NormalizedAlertType = {
   id: 'test',
@@ -74,6 +75,7 @@ describe('Task Runner Factory', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry: alertTypeRegistryMock.create(),
   };
 
   beforeEach(() => {
