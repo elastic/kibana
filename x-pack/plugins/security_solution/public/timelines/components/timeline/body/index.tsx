@@ -14,8 +14,11 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
 import { useManageTimeline } from '../../manage_timeline';
-import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import {
+  ColumnHeaderOptions,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../../store/timeline/model';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
@@ -30,6 +33,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 
 interface OwnProps {
   browserFields: BrowserFields;
+  defaultModel: SubsetTimelineModel;
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
@@ -207,8 +211,8 @@ const makeMapStateToProps = () => {
     browserFields: BrowserFields
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+  const mapStateToProps = (state: State, { browserFields, id, defaultModel }: OwnProps) => {
+    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
       eventIdToNoteIds,
@@ -222,6 +226,7 @@ const makeMapStateToProps = () => {
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
+      defaultModel,
       eventIdToNoteIds,
       excludedRowRendererIds,
       isSelectAllChecked,

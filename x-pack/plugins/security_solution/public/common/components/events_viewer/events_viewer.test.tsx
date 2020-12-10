@@ -62,6 +62,7 @@ const eventsViewerDefaultProps = {
   browserFields: {},
   columns: [],
   dataProviders: [],
+  defaultModel: eventsDefaultModel,
   deletedEventIds: [],
   docValueFields: [],
   end: to,

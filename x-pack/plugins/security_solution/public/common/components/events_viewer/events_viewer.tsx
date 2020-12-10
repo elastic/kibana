@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty, some } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -104,8 +102,8 @@ interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  defaultModel: SubsetTimelineModel;
   deletedEventIds: Readonly<string[]>;
-  defaultModel?: SubsetTimelineModel;
   docValueFields: DocValueFields[];
   end: string;
   expandedEvent: TimelineExpandedEvent;
@@ -133,8 +131,8 @@ interface Props {
 const EventsViewerComponent: React.FC<Props> = ({
   browserFields,
   columns,
-  dataProviders,
   defaultModel,
+  dataProviders,
   deletedEventIds,
   docValueFields,
   end,
@@ -239,10 +237,13 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    if (!events || !some((e) => e._id === expandedEvent?.eventId, events)) {
+    if (
+      !events ||
+      (expandedEvent.eventId && !some((e) => e._id === expandedEvent.eventId, events))
+    ) {
       handleCloseExpandedEvent();
     }
-  }, [events, expandedEvent, handleCloseExpandedEvent, id, defaultModel]);
+  }, [events, expandedEvent, handleCloseExpandedEvent, id]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -310,6 +311,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     browserFields={browserFields}
+                    defaultModel={defaultModel}
                     data={nonDeletedEvents}
                     id={id}
                     isEventViewer={true}
@@ -348,7 +350,6 @@ export const EventsViewer = React.memo(
     prevProps.columns === nextProps.columns &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
-    deepEqual(prevProps.defaultModel, nextProps.defaultModel) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&

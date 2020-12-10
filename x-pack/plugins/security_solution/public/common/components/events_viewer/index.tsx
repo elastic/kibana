@@ -20,6 +20,7 @@ import { useFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { EventDetailsFlyout } from './event_details_flyout';
+import { eventsDefaultModel } from './default_model';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -107,10 +108,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       onFlyoutCollapsed({
         timelineId: id,
         event: {},
-        defaultModel,
       })
     );
-  }, [dispatch, id, onFlyoutCollapsed, defaultModel]);
+  }, [dispatch, id, onFlyoutCollapsed]);
 
   return (
     <>
@@ -162,7 +162,7 @@ const makeMapStateToProps = () => {
   const getEvents = timelineSelectors.getEventsByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const events: TimelineModel = getEvents(state, id) ?? eventsDefaultModel;
     const {
       columns,
       dataProviders,
@@ -179,6 +179,7 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
+      defaultModel,
       deletedEventIds,
       expandedEvent,
       excludedRowRendererIds,

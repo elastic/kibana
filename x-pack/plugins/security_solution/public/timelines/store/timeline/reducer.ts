@@ -103,7 +103,6 @@ import {
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
 import { TimelineType } from '../../../../common/types/timeline';
-import { timelineDefaults } from './defaults';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -178,12 +177,12 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event, defaultModel }) => ({
+  .case(toggleExpandedEvent, (state, { timelineId, event }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [timelineId]: {
-        ...(state.timelineById[timelineId] ?? defaultModel ?? timelineDefaults),
+        ...state.timelineById[timelineId],
         expandedEvent: event,
       },
     },

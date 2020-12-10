@@ -269,7 +269,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (!events || !some((e) => e._id === expandedEvent.eventId, events)) {
+    if (
+      !events ||
+      (expandedEvent.eventId && !some((e) => e._id === expandedEvent.eventId, events))
+    ) {
       handleOnEventClosed();
     }
   }, [expandedEvent, handleOnEventClosed, events]);
@@ -318,6 +321,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 className="timeline-flyout-body"
               >
                 <StatefulBody
+                  defaultModel={timelineDefaults}
                   browserFields={browserFields}
                   data={events}
                   id={timelineId}
