@@ -156,7 +156,7 @@ export const Layout = () => {
                         bottomMargin={height}
                         topMargin={topActionHeight}
                       />
-                      <BottomDrawer
+                      {view === 'map' && <BottomDrawer
                         measureRef={measureRef}
                         interval={interval}
                         formatter={formatter}
@@ -167,7 +167,7 @@ export const Layout = () => {
                           dataBounds={dataBounds}
                           legend={options.legend}
                         />
-                      </BottomDrawer>
+                      </BottomDrawer>}
                     </>
                   )}
                 </AutoSizer>
