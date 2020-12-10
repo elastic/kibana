@@ -6,22 +6,13 @@
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
 import { AlertPanel } from '../panel';
-import {
-  AlertMessage,
-  CommonAlertStatus,
-  CommonAlertState,
-  CommonAlert,
-  AlertState,
-} from '../../../common/types/alerts';
+import { CommonAlertStatus, CommonAlertState, CommonAlert } from '../../../common/types/alerts';
+import { getCalendar } from '../../../common/formatting';
 import { PanelItem } from '../types';
-import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
 import { sortByNewestAlert } from './sort_by_newest_alert';
+import { Legacy } from '../../legacy_shims';
 
-export function getAlertPanelsByNode(
-  panelTitle: string,
-  alerts: CommonAlertStatus[],
-  stateFilter: (state: AlertState) => boolean
-) {
+export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStatus[]) {
   const alertsByNodes: {
     [uuid: string]: {
       [alertName: string]: {
@@ -37,9 +28,7 @@ export function getAlertPanelsByNode(
 
   for (const { states, rawAlert } of alerts) {
     const { alertTypeId } = rawAlert;
-    for (const alertState of states.filter(
-      ({ firing, state: _state }) => firing && stateFilter(_state)
-    )) {
+    for (const alertState of states) {
       const { state } = alertState;
       statesByNodes[state.stackProductUuid] = statesByNodes[state.stackProductUuid] || [];
       statesByNodes[state.stackProductUuid].push(alertState);
@@ -68,14 +57,11 @@ export function getAlertPanelsByNode(
       title: panelTitle,
       items: [
         ...Object.keys(statesByNodes).map((nodeUuid, index) => {
-          const firingStates = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(
-            ({ state, firing }) => firing && stateFilter(state)
-          );
-
+          const states = statesByNodes[nodeUuid] as CommonAlertState[];
           return {
             name: (
               <EuiText>
-                {firingStates[0].state.stackProductName} ({firingStates.length})
+                {states[0].state.stackProductName} ({states.length})
               </EuiText>
             ),
             panel: index + 1,
@@ -93,9 +79,13 @@ export function getAlertPanelsByNode(
           panelItems.push({
             name: (
               <Fragment>
-                <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
+                <EuiText size="s">
+                  {getCalendar(
+                    alertState.state.ui.triggeredMS,
+                    Legacy.shims.uiSettings.get('dateFormat:tz')
+                  )}
+                </EuiText>
                 <EuiText size="s">{alert.name}</EuiText>
-                <EuiText size="s">{alertState.state.stackProductName}</EuiText>
               </Fragment>
             ),
             panel: ++secondaryPanelIndex,

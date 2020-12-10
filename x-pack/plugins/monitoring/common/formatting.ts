@@ -18,7 +18,7 @@ export const ROUNDED_FLOAT = '00.[00]';
  * @param date Either a numeric Unix timestamp or a {@code Date} object
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date, useUTC = false, timezone = null) {
+export function formatDateTimeLocal(date: number | Date, useUTC = false, timezone = null) {
   return useUTC
     ? moment.utc(date).format('LL LTS')
     : moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
@@ -29,6 +29,22 @@ export function formatDateTimeLocal(date, useUTC = false, timezone = null) {
  * @param {string} hash The complete hash
  * @return {string} The shortened hash
  */
-export function shortenPipelineHash(hash) {
+export function shortenPipelineHash(hash: string) {
   return hash.substr(0, 6);
+}
+
+export function getDateFromNow(timestamp: string | number | Date, tz: string) {
+  // const timestamp = state.state.ui.triggeredMS;
+  // const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
+  return moment(timestamp)
+    .tz(tz === 'Browser' ? moment.tz.guess() : tz)
+    .fromNow();
+}
+
+export function getCalendar(timestamp: string | number | Date, tz: string) {
+  // const timestamp = state.state.ui.triggeredMS;
+  // const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
+  return moment(timestamp)
+    .tz(tz === 'Browser' ? moment.tz.guess() : tz)
+    .calendar();
 }

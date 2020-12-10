@@ -34,6 +34,7 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { filterAlertStates } from '../../../alerts/lib/filter_alert_states';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -136,8 +137,10 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       return (
         <AlertsStatus
           showBadge={true}
-          alerts={alerts}
-          stateFilter={(state) => state.stackProductUuid === node.resolver}
+          alerts={filterAlertStates(
+            alerts,
+            ({ state }) => state.stackProductUuid === node.resolver
+          )}
         />
       );
     },

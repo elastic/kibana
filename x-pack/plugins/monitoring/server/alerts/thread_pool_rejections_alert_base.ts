@@ -13,7 +13,6 @@ import {
   AlertThreadPoolRejectionsState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  CommonAlertFilter,
   ThreadPoolRejectionsAlertParams,
   AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
@@ -22,7 +21,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert, RawAlertInstance } from '../../../alerts/common';
+import { Alert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -98,10 +97,6 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
         ccs,
       };
     });
-  }
-
-  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUuidFromAlertMeta(meta: AlertThreadPoolRejectionsStats) {

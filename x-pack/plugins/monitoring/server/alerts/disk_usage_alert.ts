@@ -16,7 +16,6 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  CommonAlertFilter,
   CommonAlertParams,
   AlertDiskUsageNodeStats,
 } from '../../common/types/alerts';
@@ -32,7 +31,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -93,10 +92,6 @@ export class DiskUsageAlert extends BaseAlert {
         ccs,
       };
     });
-  }
-
-  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUuidFromAlertMeta(meta: AlertDiskUsageNodeStats) {

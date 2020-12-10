@@ -113,7 +113,6 @@ describe('getAlertPanelsByNode', () => {
   }
 
   const panelTitle = 'Alerts';
-  const stateFilter = (state: AlertState) => true;
 
   it('should properly group for alerts in each category', () => {
     const alerts = [
@@ -121,13 +120,13 @@ describe('getAlertPanelsByNode', () => {
       getAlert(ALERT_DISK_USAGE, 1, 0),
       getAlert(ALERT_LICENSE_EXPIRATION, 2, 2),
     ];
-    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
+    const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();
   });
 
   it('should properly group for alerts in a single category', () => {
     const alerts = [getAlert(ALERT_MEMORY_USAGE, 2, 0)];
-    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
+    const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();
   });
 
@@ -137,7 +136,7 @@ describe('getAlertPanelsByNode', () => {
       getAlert(ALERT_CPU_USAGE, 0, 1),
       getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0, 0),
     ];
-    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
+    const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();
   });
 });

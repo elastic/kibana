@@ -58,7 +58,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, nodeId, ...props })
           />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout alerts={alerts} stateFilter={(state) => state.stackProductUuid === nodeId} />
+        <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

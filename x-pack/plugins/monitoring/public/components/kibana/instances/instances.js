@@ -90,14 +90,8 @@ const getColumns = (setupMode, alerts) => {
       field: 'isOnline',
       width: '175px',
       sortable: true,
-      render: (_field, instance) => {
-        return (
-          <AlertsStatus
-            showBadge={true}
-            alerts={alerts}
-            stateFilter={(state) => state.stackProductUuid === instance.kibana.uuid}
-          />
-        );
+      render: () => {
+        return <AlertsStatus showBadge={true} alerts={alerts} />;
       },
     },
     {

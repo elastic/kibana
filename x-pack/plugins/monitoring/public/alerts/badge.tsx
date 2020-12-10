@@ -11,13 +11,11 @@ import { CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertState } from '../../common/types/alerts';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { AlertsContext } from './context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
-import { getFiringAlertCount } from './lib/get_firing_alert_count';
 import {
   BEATS_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
@@ -47,16 +45,16 @@ const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType'
 
 interface Props {
   alerts: CommonAlertStatus[];
-  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { stateFilter = () => true } = props;
   // We do not always have the alerts that each consumer wants due to licensing
   const alerts = props.alerts.filter(Boolean);
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);
-  const alertCount = inSetupMode ? alerts.length : getFiringAlertCount(alerts, stateFilter);
+  const alertCount = inSetupMode
+    ? alerts.length
+    : alerts.reduce((sum, { states }) => sum + states.length, 0);
   const [showByNode, setShowByNode] = React.useState(
     !inSetupMode && alertCount > MAX_TO_SHOW_BY_CATEGORY
   );
@@ -73,9 +71,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
 
   let groupByType = GROUP_BY_NODE;
   for (const alert of alerts) {
-    for (const { state } of alert.states.filter(
-      ({ firing, state: _state }) => firing && stateFilter(_state)
-    )) {
+    for (const { state } of alert.states) {
       switch (state.stackProduct) {
         case ELASTICSEARCH_SYSTEM_ID:
         case LOGSTASH_SYSTEM_ID:
@@ -90,8 +86,8 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   const panels = showByNode
-    ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
-    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext, stateFilter);
+    ? getAlertPanelsByNode(PANEL_TITLE, alerts)
+    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext);
 
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(

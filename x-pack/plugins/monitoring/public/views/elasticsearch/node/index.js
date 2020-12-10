@@ -72,7 +72,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             ],
             filters: [
               {
-                nodeUuid: nodeName,
+                stackProductUuid: nodeName,
               },
             ],
           },

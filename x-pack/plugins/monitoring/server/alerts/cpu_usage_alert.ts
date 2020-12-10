@@ -17,7 +17,6 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  CommonAlertFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
@@ -32,7 +31,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -100,10 +99,6 @@ export class CpuUsageAlert extends BaseAlert {
         ccs: stat.ccs,
       };
     });
-  }
-
-  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUuidFromAlertMeta(meta: AlertCpuUsageNodeStats) {

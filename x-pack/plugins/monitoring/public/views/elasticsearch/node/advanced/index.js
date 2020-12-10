@@ -85,7 +85,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             ],
             filters: [
               {
-                nodeUuid: nodeName,
+                stackProductUuid: nodeName,
               },
             ],
           },

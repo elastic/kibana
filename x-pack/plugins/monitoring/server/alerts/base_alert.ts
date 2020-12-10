@@ -198,11 +198,15 @@ export class BaseAlert {
           return accum;
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
-        if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
+        if (alertInstance) {
           accum[instanceId] = alertInstance;
           if (alertInstance.state) {
             accum[instanceId].state = {
-              alertStates: (alertInstance.state as AlertInstanceState).alertStates,
+              alertStates: (alertInstance.state as AlertInstanceState).alertStates.filter(
+                (alertState: AlertState) => {
+                  return this.filterAlertState(alertState, filters);
+                }
+              ),
             };
           }
         }
@@ -212,23 +216,13 @@ export class BaseAlert {
     );
   }
 
-  protected filterAlertInstance(
-    alertInstance: RawAlertInstance,
-    filters: CommonAlertFilter[],
-    filterOnNodes: boolean = false
-  ) {
-    if (!filterOnNodes) {
-      return true;
+  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
+    for (const filter of filters) {
+      if (filter.stackProductUuid && filter.stackProductUuid !== alertState.stackProductUuid) {
+        return false;
+      }
     }
-    const alertInstanceStates = alertInstance.state?.alertStates as AlertState[];
-    const nodeFilter = filters?.find((filter) => filter.nodeUuid);
-    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
-      return true;
-    }
-    const nodeAlerts = alertInstanceStates.filter(
-      ({ stackProductUuid }) => stackProductUuid === nodeFilter.nodeUuid
-    );
-    return Boolean(nodeAlerts.length);
+    return true;
   }
 
   protected async execute({

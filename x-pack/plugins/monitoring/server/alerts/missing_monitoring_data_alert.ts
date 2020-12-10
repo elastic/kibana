@@ -13,7 +13,6 @@ import {
   AlertState,
   AlertMessage,
   AlertMessageTimeToken,
-  CommonAlertFilter,
   CommonAlertParams,
   AlertMissingData,
 } from '../../common/types/alerts';
@@ -26,7 +25,7 @@ import {
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
@@ -94,10 +93,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         ccs: missing.ccs,
       };
     });
-  }
-
-  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUuidFromAlertMeta(meta: AlertMissingData) {

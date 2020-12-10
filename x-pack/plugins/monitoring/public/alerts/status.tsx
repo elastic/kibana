@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiToolTip, EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { CommonAlertStatus, AlertMessage, AlertState } from '../../common/types/alerts';
+import { CommonAlertStatus, AlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 import { AlertsBadge } from './badge';
 import { isInSetupMode } from '../lib/setup_mode';
@@ -17,10 +17,9 @@ interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
   showOnlyCount: boolean;
-  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
+  const { alerts, showBadge = false, showOnlyCount = false } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alerts) {
@@ -30,15 +29,11 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
     const firingStates = alertStatus.states.filter((state) => state.firing);
-    const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
-    cnt += firingAndFilterStates.length;
+    cnt += firingStates.length;
     if (firingStates.length) {
       if (!atLeastOneDanger) {
         for (const state of alertStatus.states) {
-          if (
-            stateFilter(state.state) &&
-            (state.state as AlertState).ui.severity === AlertSeverity.Danger
-          ) {
+          if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
             atLeastOneDanger = true;
             break;
           }
@@ -71,7 +66,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge || inSetupMode) {
-    return <AlertsBadge alerts={Object.values(alerts)} stateFilter={stateFilter} />;
+    return <AlertsBadge alerts={Object.values(alerts)} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

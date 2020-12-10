@@ -16,7 +16,6 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  CommonAlertFilter,
   CommonAlertParams,
   AlertMemoryUsageNodeStats,
 } from '../../common/types/alerts';
@@ -32,7 +31,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
@@ -99,10 +98,6 @@ export class MemoryUsageAlert extends BaseAlert {
         ccs,
       };
     });
-  }
-
-  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUuidFromAlertMeta(meta: AlertMemoryUsageNodeStats) {

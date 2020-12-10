@@ -24,12 +24,12 @@ export interface CommonAlertStatus {
 
 export interface CommonAlertState {
   firing: boolean;
-  state: any;
+  state: AlertState;
   meta: AlertMeta;
 }
 
 export interface CommonAlertFilter {
-  nodeUuid?: string;
+  stackProductUuid?: string;
 }
 
 export interface CommonAlertParamDetail {
@@ -58,9 +58,7 @@ export interface AlertEnableAction {
 }
 
 export interface AlertInstanceState {
-  alertStates: Array<
-    AlertState | AlertCpuUsageState | AlertDiskUsageState | AlertThreadPoolRejectionsState
-  >;
+  alertStates: AlertState[];
   [x: string]: unknown;
 }
 

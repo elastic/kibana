@@ -25,10 +25,9 @@ import { AlertConfiguration } from './configuration';
 
 interface Props {
   alerts: AlertsByName;
-  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true } = props;
+  const { alerts } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (inSetupMode) {
@@ -39,12 +38,10 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   for (const alertTypeId of Object.keys(alerts)) {
     const alertInstance = alerts[alertTypeId];
     for (const state of alertInstance.states) {
-      if (state.firing && stateFilter(state.state)) {
-        list.push({
-          alert: alertInstance,
-          state,
-        });
-      }
+      list.push({
+        alert: alertInstance,
+        state,
+      });
     }
   }
 

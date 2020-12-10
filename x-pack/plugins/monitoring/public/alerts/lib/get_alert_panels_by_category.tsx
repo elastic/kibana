@@ -7,19 +7,18 @@ import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { ALERT_PANEL_MENU } from '../../../common/constants';
+import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import { IAlertsContext } from '../context';
-import { AlertMessage, AlertState, CommonAlertStatus } from '../../../common/types/alerts';
+import { CommonAlertStatus } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
-import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
-import { getDateFromNowForAlertState } from './get_date_from_now_for_alert_state';
 import { sortByNewestAlert } from './sort_by_newest_alert';
+import { Legacy } from '../../legacy_shims';
 
 export function getAlertPanelsByCategory(
   panelTitle: string,
   inSetupMode: boolean,
   alerts: CommonAlertStatus[],
-  alertsContext: IAlertsContext,
-  stateFilter: (state: AlertState) => boolean
+  alertsContext: IAlertsContext
 ) {
   const menu = [];
   for (const category of ALERT_PANEL_MENU) {
@@ -40,7 +39,7 @@ export function getAlertPanelsByCategory(
             const alertStatus = alertsContext.allAlerts[alertName];
             return {
               alert: alertStatus.rawAlert,
-              firingStates: [],
+              states: [],
               alertName,
             };
           }),
@@ -54,16 +53,13 @@ export function getAlertPanelsByCategory(
           ({ rawAlert: { alertTypeId } }) => alertName === alertTypeId
         );
         if (foundAlert && foundAlert.states.length > 0) {
-          const firingStates = foundAlert.states.filter(
-            (state) => state.firing && stateFilter(state.state)
-          );
-          if (firingStates.length > 0) {
+          if (foundAlert.states.length > 0) {
             firingAlertsInCategory.push({
               alert: foundAlert.rawAlert,
-              firingStates,
+              states: foundAlert.states,
               alertName,
             });
-            categoryFiringAlertCount += firingStates.length;
+            categoryFiringAlertCount += foundAlert.states.length;
           }
         }
       }
@@ -80,7 +76,7 @@ export function getAlertPanelsByCategory(
 
   for (const item of menu) {
     for (const alert of item.alerts) {
-      alert.firingStates.sort(sortByNewestAlert);
+      alert.states.sort(sortByNewestAlert);
     }
   }
 
@@ -145,13 +141,13 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName, firingStates }) => {
+        items: category.alerts.map(({ alertName, states }) => {
           const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
             <EuiText>{alertStatus.rawAlert.name}</EuiText>
           ) : (
             <EuiText>
-              {alertStatus.rawAlert.name} ({firingStates.length})
+              {alertStatus.rawAlert.name} ({states.length})
             </EuiText>
           );
           return {
@@ -169,14 +165,25 @@ export function getAlertPanelsByCategory(
       return count;
     }, menu.length);
     for (const category of menu) {
-      for (const { alert, firingStates } of category.alerts) {
+      for (const { alert, states } of category.alerts) {
         const items = [];
-        for (const alertState of firingStates) {
+        for (const alertState of states) {
           items.push({
             name: (
               <Fragment>
-                <EuiToolTip position="top" content={getFormattedDateForAlertState(alertState)}>
-                  <EuiText size="s">{getDateFromNowForAlertState(alertState)}</EuiText>
+                <EuiToolTip
+                  position="top"
+                  content={getCalendar(
+                    alertState.state.ui.triggeredMS,
+                    Legacy.shims.uiSettings.get('dateFormat:tz')
+                  )}
+                >
+                  <EuiText size="s">
+                    {getDateFromNow(
+                      alertState.state.ui.triggeredMS,
+                      Legacy.shims.uiSettings.get('dateFormat:tz')
+                    )}
+                  </EuiText>
                 </EuiToolTip>
                 <EuiText size="s">{alertState.state.stackProductName}</EuiText>
               </Fragment>
@@ -201,8 +208,8 @@ export function getAlertPanelsByCategory(
       return count;
     }, menu.length);
     for (const category of menu) {
-      for (const { alert, firingStates } of category.alerts) {
-        for (const state of firingStates) {
+      for (const { alert, states } of category.alerts) {
+        for (const state of states) {
           panels.push({
             id: ++tertiaryPanelIndex2,
             title: `${alert.name}`,
