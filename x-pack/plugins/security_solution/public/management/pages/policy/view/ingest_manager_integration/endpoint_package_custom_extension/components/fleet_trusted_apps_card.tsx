@@ -74,6 +74,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
             href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
             appPath={trustedAppsListUrlPath}
             appState={trustedAppRouteState}
+            data-test-subj="linkToTrustedApps"
           >
             <FormattedMessage
               id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"

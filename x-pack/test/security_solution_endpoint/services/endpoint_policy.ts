@@ -18,6 +18,7 @@ import {
 } from '../../../plugins/fleet/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
+import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -106,6 +107,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
   })();
 
   return {
+    /**
+     * Returns the endpoint package key for the currently installed package. This `pkgkey` can then
+     * be used to build URLs for Fleet pages or APIs
+     */
+    async getEndpointPkgKey() {
+      return pkgKeyFromPackageInfo((await retrieveEndpointPackageInfo())!);
+    },
+
     /**
      * Retrieves the full Agent policy, which mirrors what the Elastic Agent would get
      * once they checkin.

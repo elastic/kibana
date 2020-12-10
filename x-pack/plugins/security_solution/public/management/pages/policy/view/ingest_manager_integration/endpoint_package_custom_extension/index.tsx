@@ -11,9 +11,9 @@ import { FleetTrustedAppsCard } from './components/fleet_trusted_apps_card';
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     return (
-      <>
+      <div data-test-subj="fleetEndpointPackageCustomContent">
         <FleetTrustedAppsCard {...props} />
-      </>
+      </div>
     );
   }
 );
