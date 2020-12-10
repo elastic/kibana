@@ -46,29 +46,43 @@ const setupDeps = {
   context: contextSetup,
 };
 
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['http://1.2.3.4'],
-    maxPayload: new ByteSizeValue(1024),
-    autoListen: true,
-    healthCheck: {
-      delay: 2000,
-    },
-    ssl: {
-      verificationMode: 'none',
-    },
-    compression: { enabled: true },
-    xsrf: {
-      disableProtection: true,
-      allowlist: [],
-    },
-    customResponseHeaders: {},
-    requestId: {
-      allowFromAnyIp: true,
-      ipAllowlist: [],
-    },
-  } as any)
-);
+configService.atPath.mockImplementation((path) => {
+  if (path === 'server') {
+    return new BehaviorSubject({
+      hosts: ['http://1.2.3.4'],
+      maxPayload: new ByteSizeValue(1024),
+      autoListen: true,
+      healthCheck: {
+        delay: 2000,
+      },
+      ssl: {
+        verificationMode: 'none',
+      },
+      compression: { enabled: true },
+      xsrf: {
+        disableProtection: true,
+        allowlist: [],
+      },
+      customResponseHeaders: {},
+      requestId: {
+        allowFromAnyIp: true,
+        ipAllowlist: [],
+      },
+      cors: {
+        enabled: false,
+      },
+    } as any);
+  }
+  if (path === 'externalUrl') {
+    return new BehaviorSubject({
+      policy: [],
+    } as any);
+  }
+  if (path === 'csp') {
+    return new BehaviorSubject({} as any);
+  }
+  throw new Error(`Unexpected config path: ${path}`);
+});
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
