@@ -37,8 +37,8 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 . (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.
 
 [float]
-[id=self-managed, titleabbrev="Self-managed EMS"]
-=== Self-managed Elastic Maps Service
+[id=elastic-maps-server]
+=== Elastic Maps Server
 
 beta::[]
 
@@ -46,18 +46,24 @@ If you cannot connect to Elastic Maps Service from the Kibana server or browser 
 
 The self-managed version of Elastic Maps Service is offered as a Docker image that will provide both the EMS basemaps and EMS boundaries. You need first to download and run the image and after connecting it to your {es} cluster for license validation, it will guide you to download and configure the basemaps database that needs to be retrieved separately.
 
-IMPORTANT: This version of Elastic Maps Service basemaps does not support Vega, Coordinate, or the Region Visualizations, as it does not offer raster tiles.
+IMPORTANT: Elastic Maps Server does not serve raster tiles, needed by Vega, Coordinate, and the Region Visualizations.
 
-// TODO The url of the Docker image may change
-The Docker image is available at `docker.elastic.co/elastic-maps-service/ems-server:ubi` and the minimal requirement to run it is just to expose the port `8080`:
+Run the following command to download the image:
 
-[source,bash]
+["source","bash",subs="attributes"]
+----------------------------------
+docker pull {ems-docker-image}
+----------------------------------
+
+Then for the minimal execution, just run the image exposing the default port `8080`:
+
+["source","bash",subs="attributes"]
 ----------------------------------
 docker run --rm --init --publish 8080:8080 \
-  docker.elastic.co/elastic-maps-service/ems-server:ubi 
+  {ems-docker-image}
 ----------------------------------
 
-Once the server is running, follow instructions from the webpage served at the root.
+Once the server is running, follow instructions from the webpage served at `localhost:8080` to define a configuration file and download the basemaps database.
 
 // TODO: to be replaced by an screenshot from another computer 😓
 [role="screenshot"]
@@ -68,15 +74,19 @@ image::images/self-managed-instructions.png[Set-up instructions]
 [[self-managed-configuration]]
 ==== Configuration
 
-Self-managed Elastic Maps Service reads properties from a configuration file in YAML format that will be validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/ems-server.yaml`.
+Elastic Maps Server reads properties from a configuration file in YAML format that will be validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/ems-server.yaml`.
 
 General settings:
 
 // TODO Configuration settings are still in flux
 [cols="2*<"]
 |===
+| `hostname`:
+ | This setting specifies the host of the back end server. To allow remote users to connect, set the value to the IP address or DNS name of the Kibana server. *Default: `localhost`*. <<server-host,Equivalent {kib} setting>>.
+| `port`:
+ | This setting specifies the port used by the backend server. Default: *`8080`*. <<server-port,Equivalent {kib} setting>>. 
 | `ui:`
- | Controls if the status page and the layer list should be offered. *Default: `true`*
+ | Controls the display of the status page and the layer preview. *Default: `true`*
 
 | `logging.level:`
   | Verbosity of the server logs. Valid values are: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, and `silent`. *Default: `info`*
@@ -133,7 +143,7 @@ https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenS
 |===
 
 // TODO this is still a work in progress
-All configuration settings can be overridden by environment variables that are named with the following conditions: all letters are uppercase and replace YAML periods by underscores. For example `elasticsearch.ssl.certificate` could be overridden by the environment variable `ELASTICSEARCH_SSL_CERTIFICATE`.
+All configuration settings can be overridden by environment variables that are named with the following conditions: all letters are uppercase and replace YAML periods by underscores. For example `elasticsearch.ssl.certificate` could be overridden by the environment variable `ELASTICSEARCH_SSL_CERTIFICATE`. Boolean variables need to use the `true` or `false` strings.
 
 
 [float]
@@ -144,24 +154,25 @@ Boundaries:: World countries, global administrative regions, and countries regio
 
 Basemaps:: A minimal basemap is provided with the Docker image. This can be used for testing environments but won't be functional for normal operations. The full basemap (around 90GB file) needs to be mounted on the image for the server to run normally.
 
-TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co
+TIP: The available basemaps and boundaries can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co
 
 
 [float]
 [[self-managed-kibana]]
 ==== Kibana configuration
 
-Once the self-managed Elastic Maps Service is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
+Once the Elastic Maps Server is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
 
 
 [float]
 [[self-managed-check]]
 ==== Status check
 
-The self-managed Elastic Maps Service will run a status check periodically and it will be exposed in two different forms:
+The self-managed Elastic Maps Service will run a status check periodically and it will be exposed in three different forms:
 
-* The `/status` endpoint will expose details of the different components of the service.
-* The Docker https://docs.docker.com/engine/reference/builder/#healthcheck[`HEALTHCHECK`] instruction is run by default and will inform about the healthiness of the service.
+* At the root of the server a web page will render the status of the different services.
+* A JSON representation of the server status is available at the `/status` endpoint 
+* The Docker https://docs.docker.com/engine/reference/builder/#healthcheck[`HEALTHCHECK`] instruction is run by default and will inform about the healthiness of the service, running a process equivalent to the `/status` endpoint.
 
 IMPORTANT: The server won't respond to any data request if the license validation is not fulfilled.
 
@@ -170,4 +181,4 @@ IMPORTANT: The server won't respond to any data request if the license validatio
 [[self-managed-logging]]
 ==== Logging
 
-Logs are generated in JSON format and emitted to the standard output and to the file set by `path.logs` setting. The instance won't rotate the logs but it has the `logrotate` linux tool installed in the image. If no logging is desired, `/dev/null` can be mounted to the default log path at `/var/log/ems/ems.log`.
+Logs are generated in {ecs-ref}[ECS JSON format] and emitted to the standard output and to `/var/log/elastic-maps-server/elastic-maps-server.log`. The server won't rotate the logs automatically but the `logrotate` linux tool is installed in the image. Mount `/dev/null` to the default log path if you want to disable the output to that file. 

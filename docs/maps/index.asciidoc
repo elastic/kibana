@@ -1,3 +1,11 @@
+ifeval::["{release-state}"=="prerelease"]
+:ems-docker-image: ela-dockerstic.co/elastic-maps-service/elastic-maps-server-ubi8:{major-version}-SNAPSHOT 
+endif::[]
+
+ifeval::["{release-state}"!="prerelease"]
+:ems-docker-image: docker.elastic.co/elastic-maps-service/elastic-maps-server-ubi8:{major-version} 
+endif::[]
+
 [role="xpack"]
 [[maps]]
 = Maps
