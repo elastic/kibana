@@ -11,6 +11,7 @@ import { buildSignalsSearchQuery } from './build_signals_query';
 interface GetSignalsParams {
   from?: string;
   to?: string;
+  size?: number;
   ruleId: string;
   index: string;
   callCluster: AlertServices['callCluster'];
@@ -19,6 +20,7 @@ interface GetSignalsParams {
 export const getSignals = async ({
   from,
   to,
+  size,
   ruleId,
   index,
   callCluster,
@@ -32,6 +34,7 @@ export const getSignals = async ({
     ruleId,
     to,
     from,
+    size,
   });
 
   const result: SignalSearchResponse = await callCluster('search', query);

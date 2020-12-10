@@ -53,9 +53,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -67,9 +64,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -83,9 +77,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -97,9 +88,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -164,9 +152,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -179,9 +164,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -193,9 +175,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -210,9 +189,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -224,9 +200,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -289,9 +262,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -495,9 +465,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -578,9 +545,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -759,9 +723,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -854,9 +815,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -869,9 +827,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -883,9 +838,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,

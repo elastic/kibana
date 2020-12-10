@@ -6,7 +6,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE, NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { RuleAlertAttributes } from '../signals/types';
@@ -55,6 +55,7 @@ export const rulesNotificationAlertType = ({
     const results = await getSignals({
       from: fromInMs,
       to: toInMs,
+      size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
       callCluster: services.callCluster,
