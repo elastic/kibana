@@ -66,8 +66,8 @@ describe('Exceptions', () => {
   afterEach(() => {
     esArchiverUnload('auditbeat_for_exceptions');
     esArchiverUnload('auditbeat_for_exceptions2');
-    removeSignalsIndex();
     deleteCustomRule();
+    removeSignalsIndex();
   });
   context('From rule', () => {
     it('Creates an exception and deletes it', () => {
