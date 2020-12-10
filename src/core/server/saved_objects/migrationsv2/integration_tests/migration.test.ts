@@ -120,7 +120,7 @@ describe('migration v2', () => {
     });
   });
 
-  describe('migration from 7.7.2-xpack with 100k objects', () => {
+  describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
@@ -138,7 +138,7 @@ describe('migration v2', () => {
       const { body } = await esClient.count({
         index: migratedIndex,
       });
-      expect(body).toEqual({});
+      expect(body.count).toEqual(106014);
     });
   });
 
