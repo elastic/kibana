@@ -29,7 +29,7 @@ across restarts.
 `generate`::  Randomly generates passwords to the console.
 
 `-i, --interactive`:: Prompts you for which encryption keys to set and optionally
-save output to a sample configuration file
+where to save a sample configuration file.
 
 `-q, --quiet`:: Outputs the encryption keys without helper information.
 
