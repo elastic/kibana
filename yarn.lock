@@ -1365,10 +1365,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@29.3.1":
-  version "29.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.3.1.tgz#b20e4049bd37a7787a690bc777ec889a43a340cc"
-  integrity sha512-/C82VeUSy3vabkm3MpHZMuzBBOj1vA0M8EjDlqau555AT+BQVpNAGavC/XOdv33YEczs3a+aGLyrg+2OdISGWw==
+"@elastic/eui@29.3.2":
+  version "29.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.3.2.tgz#3390fadba5c2869f2518baddbf70309869a67710"
+  integrity sha512-/CuAIFyeTx5kWWSPAGjmnkxYv4umUQj0Rpds//saLWRJYXLBQ7XbJyUHpyS4/6M13/gdbsDrFMSawNbaMezTxg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1380,7 +1380,7 @@
     "@types/vfile-message" "^2.0.0"
     chroma-js "^2.1.0"
     classnames "^2.2.6"
-    highlight.js "^9.12.0"
+    highlight.js "^9.18.5"
     lodash "^4.17.20"
     numeral "^2.0.6"
     prop-types "^15.6.0"
@@ -1402,6 +1402,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^8.4.2"
+    url-parse "^1.4.7"
     uuid "^8.3.0"
     vfile "^4.2.0"
 
@@ -15046,10 +15047,15 @@ heavy@6.x.x:
     hoek "5.x.x"
     joi "13.x.x"
 
-highlight.js@9.15.10, highlight.js@^9.12.0, highlight.js@~9.15.0, highlight.js@~9.15.1:
+highlight.js@9.15.10, highlight.js@~9.15.0, highlight.js@~9.15.1:
   version "9.15.10"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.15.10.tgz#7b18ed75c90348c045eef9ed08ca1319a2219ad2"
   integrity sha512-RoV7OkQm0T3os3Dd2VHLNMoaoDVx77Wygln3n9l5YV172XonWG6rgQD3XnF/BuFFZw9A0TJgmMSO8FEWQgvcXw==
+
+highlight.js@^9.18.5:
+  version "9.18.5"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.18.5.tgz#d18a359867f378c138d6819edfc2a8acd5f29825"
+  integrity sha512-a5bFyofd/BHCX52/8i8uJkjr9DYwXIPnM/plwI6W7ezItLGqzt7X2G2nXuYSfsIJdkwwj/g9DG1LkcGJI/dDoA==
 
 highlight.js@~9.12.0:
   version "9.12.0"
@@ -27968,7 +27974,7 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.4.3:
+url-parse@^1.4.3, url-parse@^1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
   integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==

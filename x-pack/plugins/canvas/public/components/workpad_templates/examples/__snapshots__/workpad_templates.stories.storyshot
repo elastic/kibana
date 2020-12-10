@@ -64,6 +64,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -128,6 +129,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   <button
                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -275,6 +277,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 <button
                   aria-label="Clone workpad template 'test1'"
                   className="euiButtonEmpty euiButtonEmpty--primary"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
@@ -396,6 +399,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 <button
                   aria-label="Clone workpad template 'test2'"
                   className="euiButtonEmpty euiButtonEmpty--primary"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >

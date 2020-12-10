@@ -10,6 +10,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="white"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -37,6 +38,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="#666"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -64,6 +66,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="black"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -91,6 +94,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="#abc"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -118,6 +122,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="#def"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -145,6 +150,7 @@ exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
     <button
       aria-label="#abcdef"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -184,6 +190,7 @@ Array [
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -211,6 +218,7 @@ Array [
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -238,6 +246,7 @@ Array [
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -265,6 +274,7 @@ Array [
       <button
         aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -292,6 +302,7 @@ Array [
       <button
         aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -319,6 +330,7 @@ Array [
       <button
         aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -354,6 +366,7 @@ Array [
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -387,6 +400,7 @@ Array [
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -414,6 +428,7 @@ Array [
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -441,6 +456,7 @@ Array [
       <button
         aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -468,6 +484,7 @@ Array [
       <button
         aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -495,6 +512,7 @@ Array [
       <button
         aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -534,6 +552,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="white"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -561,6 +580,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="#666"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -588,6 +608,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="black"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -615,6 +636,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="#abc"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -642,6 +664,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="#def"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -669,6 +692,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] 
     <button
       aria-label="#abcdef"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -707,6 +731,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="white"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -740,6 +765,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="#666"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -767,6 +793,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="black"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -794,6 +821,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="#abc"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -825,6 +853,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="#def"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -852,6 +881,7 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
     <button
       aria-label="#abcdef"
       className="euiLink euiLink--primary canvasColorPalette__dot"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -891,6 +921,7 @@ Array [
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -918,6 +949,7 @@ Array [
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -945,6 +977,7 @@ Array [
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -980,6 +1013,7 @@ Array [
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -1013,6 +1047,7 @@ Array [
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -1040,6 +1075,7 @@ Array [
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {

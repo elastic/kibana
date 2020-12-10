@@ -246,6 +246,7 @@ Array [
                 />
                 <button
                   className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button euiButtonGroup__button--selected"
+                  disabled={false}
                   id="generated-id-true"
                   tabIndex={-1}
                   type="button"
@@ -275,6 +276,7 @@ Array [
                 />
                 <button
                   className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button"
+                  disabled={false}
                   id="generated-id-false"
                   tabIndex={-1}
                   type="button"
@@ -330,6 +332,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -629,6 +632,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -928,6 +932,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -1203,6 +1208,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
