@@ -93,5 +93,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
 };

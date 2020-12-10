@@ -6,12 +6,12 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { SpacesServiceSetup } from '../../spaces/server';
+import { SpacesServiceStart } from '../../spaces/server';
 
 export const getSpaceId = ({
   spaces,
   request,
 }: {
-  spaces: SpacesServiceSetup | undefined | null;
+  spaces: SpacesServiceStart | undefined | null;
   request: KibanaRequest;
 }): string => spaces?.getSpaceId(request) ?? 'default';
