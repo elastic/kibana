@@ -4,14 +4,17 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Quick Commit Checks', 'test/scripts/checks/commit/commit.sh'),
     kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
+    kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
     kibanaPipeline.scriptTask('Check Licenses', 'test/scripts/checks/licenses.sh'),
+    kibanaPipeline.scriptTask('Check Plugins With Circular Dependencies', 'test/scripts/checks/plugins_with_circular_deps.sh'),
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),
     kibanaPipeline.scriptTask('Test Hardening', 'test/scripts/checks/test_hardening.sh'),
@@ -33,8 +36,6 @@ def test() {
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
-    kibanaPipeline.scriptTask('X-Pack SIEM cyclic dependency', 'test/scripts/test/xpack_siem_cyclic_dependency.sh'),
-    kibanaPipeline.scriptTask('X-Pack List cyclic dependency', 'test/scripts/test/xpack_list_cyclic_dependency.sh'),
     kibanaPipeline.scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
   ])
 }
@@ -74,7 +75,7 @@ def functionalOss(Map params = [:]) {
     }
 
     if (config.serverIntegration) {
-      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
     }
   }
 }

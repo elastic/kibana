@@ -10,7 +10,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
-import { useApmPluginContext } from '../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 

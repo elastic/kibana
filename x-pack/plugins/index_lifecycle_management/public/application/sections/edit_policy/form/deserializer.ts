@@ -26,7 +26,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
     },
     warm: {
       enabled: Boolean(warm),
-      warmPhaseOnRollover: Boolean(warm?.min_age === '0ms'),
+      warmPhaseOnRollover: warm === undefined ? true : Boolean(warm.min_age === '0ms'),
       bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
     },

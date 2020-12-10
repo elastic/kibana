@@ -8,6 +8,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
@@ -82,7 +83,7 @@ describe('ResilientParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: 'alertId', description: '' }]}
+        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
         actionConnector={connector}
       />
     );

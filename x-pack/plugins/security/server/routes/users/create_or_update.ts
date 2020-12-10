@@ -9,7 +9,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineCreateOrUpdateUserRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/users/{username}',
@@ -28,7 +28,7 @@ export function defineCreateOrUpdateUserRoutes({ router, clusterClient }: RouteD
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await clusterClient.asScoped(request).callAsCurrentUser('shield.putUser', {
+        await context.core.elasticsearch.client.asCurrentUser.security.putUser({
           username: request.params.username,
           // Omit `username`, `enabled` and all fields with `null` value.
           body: Object.fromEntries(

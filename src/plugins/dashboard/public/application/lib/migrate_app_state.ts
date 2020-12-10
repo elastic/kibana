@@ -65,7 +65,11 @@ export function migrateAppState(
 
     if (usageCollection) {
       // This will help us figure out when to remove support for older style URLs.
-      usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
+      usageCollection.reportUiCounter(
+        'DashboardPanelVersionInUrl',
+        METRIC_TYPE.LOADED,
+        `${version}`
+      );
     }
 
     return semverSatisfies(version, '<7.3');

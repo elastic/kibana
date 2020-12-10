@@ -13,7 +13,6 @@ import { euiStyled } from '../../../../../observability/public';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
@@ -27,9 +26,10 @@ import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
 import { LogEntry } from '../../../../common/http_api';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -379,7 +379,7 @@ const WithColumnWidths: React.FunctionComponent<{
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
   }) => React.ReactElement<any> | null;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {
   const childParams = useColumnWidths({ columnConfigurations, scale });

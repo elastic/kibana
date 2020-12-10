@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
@@ -23,7 +23,7 @@ import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface Tab {
   key: string;
@@ -44,7 +44,7 @@ interface Props {
 }
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
-  const { agentName } = useApmService();
+  const { agentName } = useApmServiceContext();
   const { uiSettings } = useApmPluginContext().core;
 
   const overviewTab = {

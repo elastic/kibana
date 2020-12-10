@@ -153,15 +153,50 @@ export function insertNewColumn({
     }
   }
 
-  if (!field) {
-    throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
+  const invalidFieldName = (layer.incompleteColumns ?? {})[columnId]?.sourceField;
+  const invalidField = invalidFieldName ? indexPattern.getFieldByName(invalidFieldName) : undefined;
+
+  if (!field && invalidField) {
+    const possibleOperation = operationDefinition.getPossibleOperationForField(invalidField);
+    if (!possibleOperation) {
+      throw new Error(
+        `Tried to create an invalid operation ${operationDefinition.type} using previously selected field ${invalidField.name}`
+      );
+    }
+    const isBucketed = Boolean(possibleOperation.isBucketed);
+    if (isBucketed) {
+      return addBucket(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+        columnId
+      );
+    } else {
+      return addMetric(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+        columnId
+      );
+    }
+  } else if (!field) {
+    // Labels don't need to be updated because it's incomplete
+    return {
+      ...layer,
+      incompleteColumns: {
+        ...(layer.incompleteColumns ?? {}),
+        [columnId]: { operationType: op },
+      },
+    };
   }
 
   const possibleOperation = operationDefinition.getPossibleOperationForField(field);
   if (!possibleOperation) {
-    throw new Error(
-      `Tried to create an invalid operation ${operationDefinition.type} on ${field.name}`
-    );
+    return {
+      ...layer,
+      incompleteColumns: {
+        ...(layer.incompleteColumns ?? {}),
+        [columnId]: { operationType: op, sourceField: field.name },
+      },
+    };
   }
   const isBucketed = Boolean(possibleOperation.isBucketed);
   if (isBucketed) {
@@ -208,6 +243,8 @@ export function replaceColumn({
   if (isNewOperation) {
     let tempLayer = { ...layer };
 
+    tempLayer = resetIncomplete(tempLayer, columnId);
+
     if (previousDefinition.input === 'fullReference') {
       (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
         tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
@@ -217,8 +254,6 @@ export function replaceColumn({
     if (operationDefinition.input === 'fullReference') {
       const referenceIds = operationDefinition.requiredReferences.map(() => generateId());
 
-      const incompleteColumns = { ...(tempLayer.incompleteColumns || {}) };
-      delete incompleteColumns[columnId];
       const newColumns = {
         ...tempLayer.columns,
         [columnId]: operationDefinition.buildColumn({
@@ -232,7 +267,6 @@ export function replaceColumn({
         ...tempLayer,
         columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
         columns: newColumns,
-        incompleteColumns,
       };
     }
 
@@ -249,7 +283,13 @@ export function replaceColumn({
     }
 
     if (!field) {
-      throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
+      return {
+        ...tempLayer,
+        incompleteColumns: {
+          ...(tempLayer.incompleteColumns ?? {}),
+          [columnId]: { operationType: op },
+        },
+      };
     }
 
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
@@ -296,7 +336,7 @@ function addBucket(
   column: IndexPatternColumn,
   addedColumnId: string
 ): IndexPatternLayer {
-  const [buckets, metrics] = separateBucketColumns(layer);
+  const [buckets, metrics, references] = getExistingColumnGroups(layer);
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
     (columnId) => layer.columns[columnId].operationType === 'date_histogram'
@@ -310,17 +350,19 @@ function addBucket(
       addedColumnId,
       ...buckets.slice(oldDateHistogramIndex, buckets.length),
       ...metrics,
+      ...references,
     ];
   } else {
     // Insert the new bucket after existing buckets. Users will see the same data
     // they already had, with an extra level of detail.
-    updatedColumnOrder = [...buckets, addedColumnId, ...metrics];
+    updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
-  return {
-    ...layer,
+  const tempLayer = {
+    ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
+  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
 }
 
 function addMetric(
@@ -328,18 +370,15 @@ function addMetric(
   column: IndexPatternColumn,
   addedColumnId: string
 ): IndexPatternLayer {
-  return {
-    ...layer,
+  const tempLayer = {
+    ...resetIncomplete(layer, addedColumnId),
     columns: {
       ...layer.columns,
       [addedColumnId]: column,
     },
     columnOrder: [...layer.columnOrder, addedColumnId],
   };
-}
-
-function separateBucketColumns(layer: IndexPatternLayer) {
-  return partition(layer.columnOrder, (columnId) => layer.columns[columnId]?.isBucketed);
+  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
@@ -442,9 +481,24 @@ export function deleteColumn({
   return { ...newLayer, columnOrder: getColumnOrder(newLayer), incompleteColumns: newIncomplete };
 }
 
+// Derives column order from column object, respects existing columnOrder
+// when possible, but also allows new columns to be added to the order
 export function getColumnOrder(layer: IndexPatternLayer): string[] {
+  const entries = Object.entries(layer.columns);
+  entries.sort(([idA], [idB]) => {
+    const indexA = layer.columnOrder.indexOf(idA);
+    const indexB = layer.columnOrder.indexOf(idB);
+    if (indexA > -1 && indexB > -1) {
+      return indexA - indexB;
+    } else if (indexA > -1) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+
   const [direct, referenceBased] = _.partition(
-    Object.entries(layer.columns),
+    entries,
     ([id, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
   );
   // If a reference has another reference as input, put it last in sort order
@@ -463,6 +517,15 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     .map(([id]) => id)
     .concat(metrics.map(([id]) => id))
     .concat(referenceBased.map(([id]) => id));
+}
+
+// Splits existing columnOrder into the three categories
+function getExistingColumnGroups(layer: IndexPatternLayer): [string[], string[], string[]] {
+  const [direct, referenced] = partition(
+    layer.columnOrder,
+    (columnId) => layer.columns[columnId] && !('references' in layer.columns[columnId])
+  );
+  return [...partition(direct, (columnId) => layer.columns[columnId]?.isBucketed), referenced];
 }
 
 /**
@@ -600,4 +663,10 @@ function isOperationAllowedAsReference({
     (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
     hasValidMetadata
   );
+}
+
+export function resetIncomplete(layer: IndexPatternLayer, columnId: string): IndexPatternLayer {
+  const incompleteColumns = { ...(layer.incompleteColumns ?? {}) };
+  delete incompleteColumns[columnId];
+  return { ...layer, incompleteColumns };
 }

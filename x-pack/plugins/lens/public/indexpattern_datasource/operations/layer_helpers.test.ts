@@ -228,16 +228,22 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
 
-    it('should throw if the aggregation does not support the field', () => {
-      expect(() => {
+    it('should insert both incomplete states if the aggregation does not support the field', () => {
+      expect(
         insertNewColumn({
           layer: { indexPatternId: '1', columnOrder: [], columns: {} },
           columnId: 'col1',
           indexPattern,
           op: 'terms',
           field: indexPattern.fields[0],
-        });
-      }).toThrow();
+        })
+      ).toEqual(
+        expect.objectContaining({
+          incompleteColumns: {
+            col1: { operationType: 'terms', sourceField: 'timestamp' },
+          },
+        })
+      );
     });
 
     it('should put the terms agg ahead of the date histogram', () => {
@@ -531,8 +537,8 @@ describe('state_helpers', () => {
       }).toThrow();
     });
 
-    it('should throw if switching to a field-based operation without providing a field', () => {
-      expect(() => {
+    it('should set incompleteColumns when switching to a field-based operation without providing a field', () => {
+      expect(
         replaceColumn({
           layer: {
             indexPatternId: '1',
@@ -554,12 +560,19 @@ describe('state_helpers', () => {
           },
           columnId: 'col1',
           indexPattern,
-          op: 'date_histogram',
-        });
-      }).toThrow();
+          op: 'terms',
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'date_histogram' }) },
+          incompleteColumns: {
+            col1: { operationType: 'terms' },
+          },
+        })
+      );
     });
 
-    it('should carry over params from old column if the switching fields', () => {
+    it('should carry over params from old column if switching fields', () => {
       expect(
         replaceColumn({
           layer: {
@@ -592,7 +605,7 @@ describe('state_helpers', () => {
       );
     });
 
-    it('should transition from field-based to fieldless operation', () => {
+    it('should transition from field-based to fieldless operation, clearing incomplete', () => {
       expect(
         replaceColumn({
           layer: {
@@ -612,14 +625,20 @@ describe('state_helpers', () => {
                 },
               },
             },
+            incompleteColumns: {
+              col1: { operationType: 'terms' },
+            },
           },
           indexPattern,
           columnId: 'col1',
           op: 'filters',
-        }).columns.col1
+        })
       ).toEqual(
         expect.objectContaining({
-          operationType: 'filters',
+          columns: {
+            col1: expect.objectContaining({ operationType: 'filters' }),
+          },
+          incompleteColumns: {},
         })
       );
     });
@@ -944,6 +963,7 @@ describe('state_helpers', () => {
         isTransferable: jest.fn(),
         toExpression: jest.fn().mockReturnValue([]),
         getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
+        getDefaultLabel: () => 'Test reference',
       };
 
       const layer: IndexPatternLayer = {
@@ -1686,7 +1706,6 @@ describe('state_helpers', () => {
   describe('getErrorMessages', () => {
     it('should collect errors from the operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
-      // @ts-expect-error not statically analyzed
       operationDefinitionMap.testReference.getErrorMessage = mock;
       const errors = getErrorMessages({
         indexPatternId: '1',

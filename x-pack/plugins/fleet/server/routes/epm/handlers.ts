@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
+import mime from 'mime-types';
+import path from 'path';
 import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 import {
   GetInfoResponse,
@@ -15,6 +17,7 @@ import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
+  ASSETS_SAVED_OBJECT_TYPE,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -39,10 +42,13 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
+  getInstallation,
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
+import { getArchiveEntry } from '../../services/epm/archive/cache';
+import { PackageAsset, assetPathToObjectId } from '../../services/epm/archive/save_to_es';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -102,22 +108,65 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
 ) => {
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
-    const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+    const savedObjectsClient = context.core.savedObjects.client;
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const useLocalFile = pkgVersion === installation?.version;
 
-    const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
-    const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-      const value = registryResponse.headers.get(knownHeader);
-      if (value !== null) {
-        headers[knownHeader] = value;
+    if (useLocalFile) {
+      const archiveKey = `${pkgName}-${pkgVersion}/${filePath}`;
+      const archiveEntry = getArchiveEntry(archiveKey);
+      const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
+        ASSETS_SAVED_OBJECT_TYPE,
+        assetPathToObjectId(archiveKey)
+      );
+
+      if (!archiveEntry && !assetSavedObject) {
+        return response.custom({
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
+        });
       }
-      return headers;
-    }, {} as ResponseHeaders);
 
-    return response.custom({
-      body: registryResponse.body,
-      statusCode: registryResponse.status,
-      headers: proxiedHeaders,
-    });
+      const headerContentType =
+        assetSavedObject.attributes.media_type || mime.contentType(path.extname(archiveKey));
+      if (!headerContentType) {
+        return response.custom({
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
+        });
+      }
+
+      const { data_base64: base64, data_utf8: utf8 } = assetSavedObject.attributes;
+      // if we have a local Buffer, use that
+      // else, create one from the saved object (try utf8 first)
+      const responseBody =
+        archiveEntry || utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
+
+      return response.custom({
+        body: responseBody,
+        statusCode: 200,
+        headers: {
+          'cache-control': 'max-age=10, public',
+          'content-type': headerContentType,
+        },
+      });
+    } else {
+      const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+      const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+        const value = registryResponse.headers.get(knownHeader);
+        if (value !== null) {
+          headers[knownHeader] = value;
+        }
+        return headers;
+      }, {} as ResponseHeaders);
+
+      return response.custom({
+        body: registryResponse.body,
+        statusCode: registryResponse.status,
+        headers: proxiedHeaders,
+      });
+    }
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

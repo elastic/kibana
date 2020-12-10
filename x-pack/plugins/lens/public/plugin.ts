@@ -5,13 +5,16 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../src/plugins/visualizations/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
@@ -64,6 +67,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
+
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;

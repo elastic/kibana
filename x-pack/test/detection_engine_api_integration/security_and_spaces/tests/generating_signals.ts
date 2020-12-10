@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { orderBy } from 'lodash';
 
 import {
   EqlCreateSchema,
@@ -614,6 +615,158 @@ export default ({ getService }: FtrProviderContext) => {
           original_event: {
             kind: 'signal',
           },
+        });
+      });
+    });
+
+    /**
+     * Here we test the functionality of Severity and Risk Score overrides (also called "mappings"
+     * in the code). If the rule specifies a mapping, then the final Severity or Risk Score
+     * value of the signal will be taken from the mapped field of the source event.
+     */
+    describe('Signals generated from events with custom severity and risk score fields', () => {
+      beforeEach(async () => {
+        await esArchiver.load('signals/severity_risk_overrides');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('signals/severity_risk_overrides');
+      });
+
+      const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, id);
+        await waitForSignalsToBePresent(supertest, 4, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id]);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        return signalsOrderedByEventId;
+      };
+
+      it('should get default severity and risk score if there is no mapping', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['signal_overrides']),
+          severity: 'medium',
+          risk_score: 75,
+        };
+
+        const signals = await executeRuleAndGetSignals(rule);
+
+        expect(signals.length).equal(4);
+        signals.forEach((s) => {
+          expect(s.signal.rule.severity).equal('medium');
+          expect(s.signal.rule.severity_mapping).eql([]);
+
+          expect(s.signal.rule.risk_score).equal(75);
+          expect(s.signal.rule.risk_score_mapping).eql([]);
+        });
+      });
+
+      it('should get overridden severity if the rule has a mapping for it', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['signal_overrides']),
+          severity: 'medium',
+          severity_mapping: [
+            { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
+            { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
+          ],
+          risk_score: 75,
+        };
+
+        const signals = await executeRuleAndGetSignals(rule);
+        const severities = signals.map((s) => ({
+          id: s.signal.parent?.id,
+          value: s.signal.rule.severity,
+        }));
+
+        expect(signals.length).equal(4);
+        expect(severities).eql([
+          { id: '1', value: 'high' },
+          { id: '2', value: 'critical' },
+          { id: '3', value: 'critical' },
+          { id: '4', value: 'critical' },
+        ]);
+
+        signals.forEach((s) => {
+          expect(s.signal.rule.risk_score).equal(75);
+          expect(s.signal.rule.risk_score_mapping).eql([]);
+          expect(s.signal.rule.severity_mapping).eql([
+            { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
+            { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
+          ]);
+        });
+      });
+
+      it('should get overridden risk score if the rule has a mapping for it', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['signal_overrides']),
+          severity: 'medium',
+          risk_score: 75,
+          risk_score_mapping: [
+            { field: 'my_risk', operator: 'equals', value: '', risk_score: undefined },
+          ],
+        };
+
+        const signals = await executeRuleAndGetSignals(rule);
+        const riskScores = signals.map((s) => ({
+          id: s.signal.parent?.id,
+          value: s.signal.rule.risk_score,
+        }));
+
+        expect(signals.length).equal(4);
+        expect(riskScores).eql([
+          { id: '1', value: 31.14 },
+          { id: '2', value: 32.14 },
+          { id: '3', value: 33.14 },
+          { id: '4', value: 34.14 },
+        ]);
+
+        signals.forEach((s) => {
+          expect(s.signal.rule.severity).equal('medium');
+          expect(s.signal.rule.severity_mapping).eql([]);
+          expect(s.signal.rule.risk_score_mapping).eql([
+            { field: 'my_risk', operator: 'equals', value: '' },
+          ]);
+        });
+      });
+
+      it('should get overridden severity and risk score if the rule has both mappings', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['signal_overrides']),
+          severity: 'medium',
+          severity_mapping: [
+            { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
+            { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
+          ],
+          risk_score: 75,
+          risk_score_mapping: [
+            { field: 'my_risk', operator: 'equals', value: '', risk_score: undefined },
+          ],
+        };
+
+        const signals = await executeRuleAndGetSignals(rule);
+        const values = signals.map((s) => ({
+          id: s.signal.parent?.id,
+          severity: s.signal.rule.severity,
+          risk: s.signal.rule.risk_score,
+        }));
+
+        expect(signals.length).equal(4);
+        expect(values).eql([
+          { id: '1', severity: 'high', risk: 31.14 },
+          { id: '2', severity: 'critical', risk: 32.14 },
+          { id: '3', severity: 'critical', risk: 33.14 },
+          { id: '4', severity: 'critical', risk: 34.14 },
+        ]);
+
+        signals.forEach((s) => {
+          expect(s.signal.rule.severity_mapping).eql([
+            { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
+            { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
+          ]);
+          expect(s.signal.rule.risk_score_mapping).eql([
+            { field: 'my_risk', operator: 'equals', value: '' },
+          ]);
         });
       });
     });
