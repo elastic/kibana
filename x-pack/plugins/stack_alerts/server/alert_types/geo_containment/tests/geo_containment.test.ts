@@ -119,8 +119,10 @@ describe('geo_containment', () => {
   });
 
   describe('getActiveEntriesAndGenerateAlerts', () => {
+    const testAlertActionArr: unknown[] = [];
     afterEach(() => {
       jest.clearAllMocks();
+      testAlertActionArr.length = 0;
     });
 
     const currLocationMap = new Map([
@@ -154,7 +156,9 @@ describe('geo_containment', () => {
     ]);
     const emptyShapesIdsNamesMap = {};
 
-    const scheduleActions = jest.fn((x: string, y: Record<string, unknown>) => {});
+    const scheduleActions = jest.fn((alertInstance: string, context: Record<string, unknown>) => {
+      testAlertActionArr.push(context.entityId);
+    });
     const alertInstanceFactory = (x: string) => ({ scheduleActions });
     const currentDateTime = new Date();
 
@@ -169,6 +173,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
+      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
     });
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = {
@@ -188,6 +193,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
+      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
     });
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = {
@@ -208,6 +214,7 @@ describe('geo_containment', () => {
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
       expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
+      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
     });
     it('should remove "other" entries and schedule the expected number of actions', () => {
       const emptyPrevLocationMap = {};
@@ -227,6 +234,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
+      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
     });
   });
 });

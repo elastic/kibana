@@ -11,7 +11,7 @@ import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_qu
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
 
-interface LatestEntityLocation {
+export interface LatestEntityLocation {
   location: number[];
   shapeLocationId: string;
   dateInShape: string | null;
