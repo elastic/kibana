@@ -96,9 +96,9 @@ export const transactionGroupsOverviewRoute = createRoute({
     const {
       path: { serviceName },
       query: {
-        size,
         numBuckets,
         pageIndex,
+        size,
         sortDirection,
         sortField,
         transactionType,
