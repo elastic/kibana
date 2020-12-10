@@ -201,7 +201,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         {!needsPermissions && (
           <span>
             <FormattedMessage
-              id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.message"
+              id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
               defaultMessage="Document-level permissions are not yet available for this source. {link}"
               values={{
                 link: (
