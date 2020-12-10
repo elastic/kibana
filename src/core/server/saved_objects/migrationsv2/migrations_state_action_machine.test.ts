@@ -306,4 +306,103 @@ describe('migrationsStateActionMachine', () => {
       ]
     `);
   });
+  it('logs all state transitions and action responses when an action throws', async () => {
+    try {
+      await migrationStateActionMachine({
+        initialState: { ...initialState, reason: 'the fatal reason' } as State,
+        logger: mockLogger.get(),
+        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+        next: (state) => {
+          if (state.controlState === 'LEGACY_DELETE') throw new Error('this action throws');
+          return () => Promise.resolve('hello');
+        },
+      });
+    } catch (e) {
+      /** ignore */
+    }
+    // Ignore the first 4 log entries that come from our model
+    const executionLogLogs = loggingSystemMock.collect(mockLogger).info.slice(4);
+    expect(executionLogLogs).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "[.my-so-index] INIT RESPONSE",
+          "hello",
+        ],
+        Array [
+          "[.my-so-index] INIT -> LEGACY_REINDEX",
+          Object {
+            "controlState": "LEGACY_REINDEX",
+            "currentAlias": ".my-so-index",
+            "indexPrefix": ".my-so-index",
+            "kibanaVersion": "7.11.0",
+            "legacyIndex": ".my-so-index",
+            "logs": Array [
+              Object {
+                "level": "info",
+                "message": "Log from LEGACY_REINDEX control state",
+              },
+            ],
+            "outdatedDocuments": Array [],
+            "outdatedDocumentsQuery": Object {
+              "bool": Object {
+                "should": Array [],
+              },
+            },
+            "preMigrationScript": Object {
+              "_tag": "None",
+            },
+            "reason": "the fatal reason",
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetMappings": Object {
+              "properties": Object {},
+            },
+            "versionAlias": ".my-so-index_7.11.0",
+            "versionIndex": ".my-so-index_7.11.0_001",
+          },
+        ],
+        Array [
+          "[.my-so-index] LEGACY_REINDEX RESPONSE",
+          "hello",
+        ],
+        Array [
+          "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
+          Object {
+            "controlState": "LEGACY_DELETE",
+            "currentAlias": ".my-so-index",
+            "indexPrefix": ".my-so-index",
+            "kibanaVersion": "7.11.0",
+            "legacyIndex": ".my-so-index",
+            "logs": Array [
+              Object {
+                "level": "info",
+                "message": "Log from LEGACY_REINDEX control state",
+              },
+              Object {
+                "level": "info",
+                "message": "Log from LEGACY_DELETE control state",
+              },
+            ],
+            "outdatedDocuments": Array [],
+            "outdatedDocumentsQuery": Object {
+              "bool": Object {
+                "should": Array [],
+              },
+            },
+            "preMigrationScript": Object {
+              "_tag": "None",
+            },
+            "reason": "the fatal reason",
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetMappings": Object {
+              "properties": Object {},
+            },
+            "versionAlias": ".my-so-index_7.11.0",
+            "versionIndex": ".my-so-index_7.11.0_001",
+          },
+        ],
+      ]
+    `);
+  });
 });

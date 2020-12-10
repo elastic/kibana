@@ -25,6 +25,7 @@ import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
+import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
 
 /**
  * How many times to retry a failing step.
@@ -186,15 +187,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         stateP = {
           ...stateP,
-          // Skip to 'UPDATE_TARGET_MAPPINGS' to update the mappings and
-          // transform any outdated documents for in case a new plugin was
-          // installed / enabled.
-          controlState: 'UPDATE_TARGET_MAPPINGS',
+          // Skip to 'OUTDATED_DOCUMENTS_SEARCH' so that if a new plugin was
+          // installed / enabled we can transform any old documents and update
+          // the mappings for this plugin's types.
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          targetMappings: mergeMigrationMappingPropertyHashes(
+          targetMappings: disableUnknownTypeMappingFields(
             stateP.targetMappings,
             indices[aliases[stateP.currentAlias]].mappings
           ),
@@ -418,36 +419,61 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     return stateP;
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
+    const reindexTargetMappings: IndexMapping = {
+      // @ts-expect-error we don't allow plugins to set `dynamic`
+      dynamic: false,
+      properties: {
+        type: { type: 'keyword' },
+        migrationVersion: {
+          // @ts-expect-error we don't allow plugins to set `dynamic`
+          dynamic: 'true',
+          type: 'object',
+        },
+      },
+    };
     // If the write block is successfully in place, proceed to the next step.
     if (Either.isRight(res)) {
-      stateP = { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
+      stateP = {
+        ...stateP,
+        controlState: 'CREATE_REINDEX_TARGET',
+        reindexTargetMappings,
+      };
     } else if (Either.isLeft(res)) {
       if (res.left.type === 'index_not_found_exception') {
         // If the write block failed because the index doesn't exist, it means
         // another instance already completed the legacy pre-migration. Proceed
         // to the next step.
-        stateP = { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
+        stateP = {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `SET_SOURCE_WRITE_BLOCK failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
+        };
       }
     } else {
       return throwBadResponse(res);
     }
 
     return stateP;
-  } else if (stateP.controlState === 'CLONE_SOURCE_TO_TARGET') {
-    return { ...stateP, controlState: 'UPDATE_TARGET_MAPPINGS' };
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+  } else if (stateP.controlState === 'CREATE_REINDEX_TARGET') {
+    return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TARGET' };
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      stateP = {
+      return {
         ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        updateTargetMappingsTaskId: res.right.taskId,
+        controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK',
+        reindexSourceToTargetTaskId: res.right.taskId,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: `REINDEX_SOURCE_TO_TARGET: unexpected action response: ${JSON.stringify(res)}`,
       };
     }
-    return stateP;
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'pickup_updated_mappings_succeeded') {
+    if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
@@ -456,7 +482,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'FATAL',
-        reason: `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
+        reason: `REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
           res
         )}`,
       };
@@ -474,25 +500,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // If there are no more results we have transformed all outdated
         // documents and can proceed to the next step
-        if (Option.isSome(stateP.versionIndexReadyActions)) {
-          // If there are some versionIndexReadyActions we performed a full
-          // migration and need to point the aliases to our newly migrated
-          // index.
-          return {
-            ...stateP,
-            controlState: 'MARK_VERSION_INDEX_READY',
-            versionIndexReadyActions: stateP.versionIndexReadyActions,
-          };
-        } else {
-          // If there are none versionIndexReadyActions another instance
-          // already completed this migration and we only updated the mappings
-          // and transformed outdated documents for incase a new plugin was
-          // enabled.
-          return {
-            ...stateP,
-            controlState: 'DONE',
-          };
-        }
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS',
+        };
       }
     }
     return stateP;
@@ -508,6 +519,47 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'FATAL',
         reason: `OUTDATED_DOCUMENTS_TRANSFORM: unexpected action response: ${JSON.stringify(res)}`,
+      };
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      stateP = {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        updateTargetMappingsTaskId: res.right.taskId,
+      };
+    }
+    return stateP;
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res) && res.right === 'pickup_updated_mappings_succeeded') {
+      if (Option.isSome(stateP.versionIndexReadyActions)) {
+        // If there are some versionIndexReadyActions we performed a full
+        // migration and need to point the aliases to our newly migrated
+        // index.
+        return {
+          ...stateP,
+          controlState: 'MARK_VERSION_INDEX_READY',
+          versionIndexReadyActions: stateP.versionIndexReadyActions,
+        };
+      } else {
+        // If there are none versionIndexReadyActions another instance
+        // already completed this migration and we only updated the mappings
+        // and transformed outdated documents for incase a new plugin was
+        // enabled.
+        return {
+          ...stateP,
+          controlState: 'DONE',
+        };
+      }
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
+          res
+        )}`,
       };
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
@@ -544,14 +596,8 @@ export const createInitialState = ({
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
         bool: {
-          must: [
-            { exists: { field: type } },
-            {
-              bool: {
-                must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-              },
-            },
-          ],
+          must: { term: { type } },
+          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
         },
       })),
     },

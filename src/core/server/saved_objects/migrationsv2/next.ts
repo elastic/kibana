@@ -18,11 +18,12 @@
  */
 
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Option from 'fp-ts/lib/Option';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { pipe } from 'fp-ts/lib/pipeable';
 import {
   AllActionStates,
-  CloneSourceToTargetState,
+  ReindexSourceToTargetState,
   CreateNewTargetState,
   InitState,
   LegacyCreateReindexTargetState,
@@ -37,6 +38,8 @@ import {
   State,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
+  CreateReindexTargetState,
+  ReindexSourceToTargetWaitForTaskState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -63,8 +66,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex(client, state.targetIndex, state.targetMappings),
-    CLONE_SOURCE_TO_TARGET: (state: CloneSourceToTargetState) =>
-      Actions.cloneIndex(client, state.sourceIndex.value, state.targetIndex),
+    CREATE_REINDEX_TARGET: (state: CreateReindexTargetState) =>
+      Actions.createIndex(client, state.targetIndex, state.reindexTargetMappings),
+    REINDEX_SOURCE_TO_TARGET: (state: ReindexSourceToTargetState) =>
+      Actions.reindex(client, state.sourceIndex.value, state.targetIndex, Option.none),
+    REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: (state: ReindexSourceToTargetWaitForTaskState) =>
+      Actions.waitForReindexTask(client, state.reindexSourceToTargetTaskId, '60s'),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>

@@ -102,10 +102,37 @@ export type CreateNewTargetState = PostInitState & {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
-export type CloneSourceToTargetState = PostInitState & {
-  /** Create the target index by cloning the source index */
-  readonly controlState: 'CLONE_SOURCE_TO_TARGET';
+export type CreateReindexTargetState = PostInitState & {
+  /**
+   * Create a target index with mappings from the source index and registered
+   * plugins
+   */
+  readonly controlState: 'CREATE_REINDEX_TARGET';
   readonly sourceIndex: Option.Some<string>;
+  /**
+   * Special mappings set when creating the reindex target. These mappings
+   * have `dynamic: false` to allow for any kind of outdated document to be
+   * written to the index, but still define mappings for the
+   * `migrationVersion` and `type` fields so that we can search for and
+   * transform outdated documents.
+   */
+  readonly reindexTargetMappings: IndexMapping;
+};
+
+export type ReindexSourceToTargetState = PostInitState & {
+  /** Reindex documents from the source index into the target index */
+  readonly controlState: 'REINDEX_SOURCE_TO_TARGET';
+  readonly sourceIndex: Option.Some<string>;
+};
+
+export type ReindexSourceToTargetWaitForTaskState = PostInitState & {
+  /**
+   * Wait until reindexing documents from the source index into the target
+   * index has completed
+   */
+  readonly controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK';
+  readonly sourceIndex: Option.Some<string>;
+  readonly reindexSourceToTargetTaskId: string;
 };
 
 export type UpdateTargetMappingsState = PostInitState & {
@@ -201,7 +228,9 @@ export type State =
   | DoneState
   | SetSourceWriteBlockState
   | CreateNewTargetState
-  | CloneSourceToTargetState
+  | CreateReindexTargetState
+  | ReindexSourceToTargetState
+  | ReindexSourceToTargetWaitForTaskState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearch

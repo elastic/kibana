@@ -28,7 +28,7 @@ import {
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacyDeleteState,
-  CloneSourceToTargetState,
+  ReindexSourceToTargetState,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   OutdatedDocumentsSearch,
@@ -36,6 +36,8 @@ import {
   MarkVersionIndexReady,
   CreateNewTargetState,
   BaseState,
+  CreateReindexTargetState,
+  ReindexSourceToTargetWaitForTaskState,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -186,7 +188,7 @@ describe('migrations v2 model', () => {
         versionAlias: '.kibana_7.11.0',
         versionIndex: '.kibana_7.11.0_001',
       };
-      test('INIT -> UPDATE_TARGET_MAPPINGS if .kibana is already pointing to the target index', () => {
+      test('INIT -> OUTDATED_DOCUMENTS_SEARCH if .kibana is already pointing to the target index', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
             aliases: {
@@ -212,26 +214,29 @@ describe('migrations v2 model', () => {
         });
         const newState = model(initState, res);
 
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS');
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.targetMappings).toMatchInlineSnapshot(`
-            Object {
-              "_meta": Object {
-                "migrationMappingPropertyHashes": Object {
-                  "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
-                  "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
-                },
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
               },
-              "properties": Object {
-                "new_saved_object_type": Object {
-                  "properties": Object {
-                    "value": Object {
-                      "type": "text",
-                    },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
                   },
                 },
               },
-            }
-          `);
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -633,40 +638,75 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CLONE_SOURCE_TO_TARGET if action fails with index_not_found_exception', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> FATAL if action fails with index_not_found_exception', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
           type: 'index_not_found_exception',
         });
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CLONE_SOURCE_TO_TARGET');
+        expect(newState.controlState).toEqual('FATAL');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CLONE_SOURCE_TO_TARGET if action succeeds with set_write_block_succeeded', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TARGET if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
         );
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CLONE_SOURCE_TO_TARGET');
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TARGET');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('CLONE_SOURCE_TO_TARGET', () => {
-      const cloneSourceToTargetState: CloneSourceToTargetState = {
+    describe('CREATE_REINDEX_TARGET', () => {
+      const createReindexTargetState: CreateReindexTargetState = {
         ...baseState,
-        controlState: 'CLONE_SOURCE_TO_TARGET',
+        controlState: 'CREATE_REINDEX_TARGET',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        reindexTargetMappings: { properties: {} },
+      };
+      it('CREATE_REINDEX_TARGET -> REINDEX_SOURCE_TO_TARGET if action succeeds', () => {
+        const res: ResponseType<'CREATE_REINDEX_TARGET'> = Either.right('create_index_succeeded');
+        const newState = model(createReindexTargetState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_SOURCE_TO_TARGET', () => {
+      const reindexSourceToTargetState: ReindexSourceToTargetState = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TARGET',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('CLONE_SOURCE_TO_TARGET -> UPDATE_TARGET_MAPPINGS', () => {
-        const res: ResponseType<'CLONE_SOURCE_TO_TARGET'> = Either.right({
-          acknowledged: true,
-          shardsAcknowledged: true,
+      test('REINDEX_SOURCE_TO_TARGET -> REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET'> = Either.right({
+          taskId: 'reindex-task-id',
         });
-        const newState = model(cloneSourceToTargetState, res);
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS');
+        const newState = model(reindexSourceToTargetState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK', () => {
+      const reindexSourceToTargetWaitForState: ReindexSourceToTargetWaitForTaskState = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        reindexSourceToTargetTaskId: 'reindex-task-id',
+      };
+      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when reindex succeeds', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.right(
+          'reindex_succeeded'
+        );
+        const newState = model(reindexSourceToTargetWaitForState, res);
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -702,7 +742,24 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
       };
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH', () => {
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> MARK_VERSION_INDEX_READY if sone versionIndexReadyActions', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
+          'pickup_updated_mappings_succeeded'
+        );
+        const newState = model(
+          {
+            ...updateTargetMappingsWaitForTaskState,
+            versionIndexReadyActions: Option.some([
+              { add: { index: 'kibana-index', alias: 'my-alias' } },
+            ]),
+          },
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> DONE if none versionIndexReadyActions', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
           'pickup_updated_mappings_succeeded'
         );
@@ -710,7 +767,7 @@ describe('migrations v2 model', () => {
           updateTargetMappingsWaitForTaskState,
           res
         ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+        expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -736,7 +793,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('OUTDATED_DOCUMENTS_SEARCH -> MARK_VERSION_INDEX_READY if none outdated documents were found and some versionIndexReadyActions', () => {
+      test('OUTDATED_DOCUMENTS_SEARCH -> UPDATE_TARGET_MAPPINGS if none outdated documents were found and some versionIndexReadyActions', () => {
         const aliasActions = ([Symbol('alias action')] as unknown) as AliasAction[];
         const outdatedDocumentsSourchStateWithSomeVersionIndexReadyActions = {
           ...outdatedDocumentsSourchState,
@@ -751,17 +808,17 @@ describe('migrations v2 model', () => {
           outdatedDocumentsSourchStateWithSomeVersionIndexReadyActions,
           res
         ) as MarkVersionIndexReady;
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS');
         expect(newState.versionIndexReadyActions.value).toEqual(aliasActions);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('OUTDATED_DOCUMENTS_SEARCH -> DONE if none outdated documents were found and none versionIndexReadyActions', () => {
+      test('OUTDATED_DOCUMENTS_SEARCH -> UPDATE_TARGET_MAPPINGS if none outdated documents were found and none versionIndexReadyActions', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({
           outdatedDocuments: [],
         });
         const newState = model(outdatedDocumentsSourchState, res);
-        expect(newState.controlState).toEqual('DONE');
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -907,42 +964,30 @@ describe('migrations v2 model', () => {
             "should": Array [
               Object {
                 "bool": Object {
-                  "must": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "my_dashboard",
-                      },
+                  "must": Object {
+                    "term": Object {
+                      "type": "my_dashboard",
                     },
-                    Object {
-                      "bool": Object {
-                        "must_not": Object {
-                          "term": Object {
-                            "migrationVersion.my_dashboard": "7.10.1",
-                          },
-                        },
-                      },
+                  },
+                  "must_not": Object {
+                    "term": Object {
+                      "migrationVersion.my_dashboard": "7.10.1",
                     },
-                  ],
+                  },
                 },
               },
               Object {
                 "bool": Object {
-                  "must": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "my_viz",
-                      },
+                  "must": Object {
+                    "term": Object {
+                      "type": "my_viz",
                     },
-                    Object {
-                      "bool": Object {
-                        "must_not": Object {
-                          "term": Object {
-                            "migrationVersion.my_viz": "8.0.0",
-                          },
-                        },
-                      },
+                  },
+                  "must_not": Object {
+                    "term": Object {
+                      "migrationVersion.my_viz": "8.0.0",
                     },
-                  ],
+                  },
                 },
               },
             ],
