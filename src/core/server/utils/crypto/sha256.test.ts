@@ -17,10 +17,23 @@
  * under the License.
  */
 
-/** This module is intended for consumption by public to avoid import issues with server-side code */
-export { PluginOpaqueId } from './plugins/types';
-export * from './saved_objects/types';
-export * from './ui_settings/types';
-export * from './legacy/types';
-export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { ExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+import { createSHA256Hash } from './sha256';
+
+describe('createSHA256Hash', () => {
+  it('creates a hex-encoded hash by default', () => {
+    expect(createSHA256Hash('foo')).toMatchInlineSnapshot(
+      `"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"`
+    );
+  });
+
+  it('allows the output encoding to be changed', () => {
+    expect(createSHA256Hash('foo', 'base64')).toMatchInlineSnapshot(
+      `"LCa0a2j/xo/5m0U8HTBBNBNCLXBkg7+g+YpeiGJm564="`
+    );
+  });
+
+  it('accepts a buffer as input', () => {
+    const data = Buffer.from('foo', 'utf8');
+    expect(createSHA256Hash(data)).toEqual(createSHA256Hash('foo'));
+  });
+});
