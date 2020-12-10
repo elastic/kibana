@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -15,13 +11,10 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from 'src/core/server';
-import { signalsMigrationType } from './saved_object';
-import { signalsMigrationSavedObject, SignalsMigrationSOAttributes } from './saved_object_schema';
-import { validateEither } from '../../../../common/validate';
-// TODO move out
-import { toError, toPromise } from '../../../../../lists/public/common/fp_utils';
+import { signalsMigrationType } from './saved_objects';
+import { SignalsMigrationSOAttributes } from './saved_objects_schema';
 
-export interface SignalsMigrationSavedObjectsClient {
+export interface SignalsMigrationSOClient {
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<SignalsMigrationSOAttributes>>;
@@ -35,30 +28,14 @@ export interface SignalsMigrationSavedObjectsClient {
   delete: (id: string) => Promise<{}>;
 }
 
-export const rawRuleStatusSavedObjectsClientFactory = (
+export const signalsMigrationSOClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
-): SignalsMigrationSavedObjectsClient => ({
+): SignalsMigrationSOClient => ({
   find: (options) =>
     savedObjectsClient.find<SignalsMigrationSOAttributes>({
       ...options,
       type: signalsMigrationType,
     }),
-  create: (attributes) => savedObjectsClient.create(signalsMigrationType, attributes),
-  update: (id, attributes) => savedObjectsClient.update(signalsMigrationType, id, attributes),
-  delete: (id) => savedObjectsClient.delete(signalsMigrationType, id),
-});
-
-export const ruleStatusSavedObjectsClientFactory = (
-  savedObjectsClient: SavedObjectsClientContract
-): SignalsMigrationSavedObjectsClient => ({
-  find: (options) =>
-    pipe(
-      () => rawRuleStatusSavedObjectsClientFactory(savedObjectsClient).find(options),
-      (s) => tryCatch(s, toError),
-      chain((so) => fromEither(validateEither(signalsMigrationSavedObject, so))),
-      toPromise
-    ),
-
   create: (attributes) => savedObjectsClient.create(signalsMigrationType, attributes),
   update: (id, attributes) => savedObjectsClient.update(signalsMigrationType, id, attributes),
   delete: (id) => savedObjectsClient.delete(signalsMigrationType, id),

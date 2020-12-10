@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as t from 'io-ts';
+
+import { IsoDateString, PositiveInteger } from '../../../../common/detection_engine/schemas/types';
+
+const status = t.keyof({ success: null, failure: null, pending: null });
+
+const signalsMigrationSOWriteAttributes = {
+  sourceIndex: t.string,
+  destinationIndex: t.string,
+  status,
+  taskId: t.string,
+  version: PositiveInteger,
+};
+
+const signalsMigrationSOGeneratedAttributes = {
+  created: IsoDateString,
+  createdBy: t.string,
+  updated: IsoDateString,
+  updatedBy: t.string,
+};
+
+export const signalsMigrationSOCreateAttributes = t.exact(
+  t.type(signalsMigrationSOWriteAttributes)
+);
+export type SignalsMigrationSOCreateAttributes = t.TypeOf<
+  typeof signalsMigrationSOCreateAttributes
+>;
+
+export const signalsMigrationSOUpdateAttributes = t.exact(
+  t.partial(signalsMigrationSOWriteAttributes)
+);
+export type SignalsMigrationSOUpdateAttributes = t.TypeOf<
+  typeof signalsMigrationSOUpdateAttributes
+>;
+
+/*
+ * Attributes for our Signals Migration SO
+ */
+export const signalsMigrationSOAttributes = t.exact(
+  t.type({
+    ...signalsMigrationSOWriteAttributes,
+    ...signalsMigrationSOGeneratedAttributes,
+  })
+);
+export type SignalsMigrationSOAttributes = t.TypeOf<typeof signalsMigrationSOAttributes>;
+
+export const signalsMigrationSO = t.type({
+  id: t.string,
+  attributes: signalsMigrationSOAttributes,
+  type: t.string,
+});
+export type SignalsMigrationSO = t.TypeOf<typeof signalsMigrationSO>;
+
+export const signalsMigrationSOs = t.array(signalsMigrationSO);
