@@ -27,7 +27,7 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getContextScope, getEventScope, getEventVariableList } from './url_drilldown_scope';
+import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
@@ -101,10 +101,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
-    const { isValid, error } = urlDrilldownValidateUrlTemplate(
-      config.url,
-      await this.buildRuntimeScope(context)
-    );
+    const scope = this.buildRuntimeScope(context);
+    const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
 
     if (!isValid) {
       // eslint-disable-next-line no-console
@@ -116,8 +114,10 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return Promise.resolve(isValid);
   };
 
-  public readonly getHref = async (config: Config, context: ActionContext) =>
-    urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+  public readonly getHref = async (config: Config, context: ActionContext) => {
+    const scope = this.buildRuntimeScope(context);
+    return urlDrilldownCompileUrl(config.url.template, scope);
+  };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
     const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
@@ -131,7 +131,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   private buildRuntimeScope = (context: ActionContext) => {
     return {
       ...this.deps.getGlobalScope(),
-      context: getContextScope(context),
+      panel: getPanelVariables(context),
       event: getEventScope(context),
     };
   };
@@ -139,7 +139,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   private getVariableList = (context: ActionFactoryContext): string[] => {
     return [
       ...getEventVariableList(context).sort(),
-      ...Object.keys(getFlattenedObject(getContextScope(context))).sort(),
+      ...Object.keys(getFlattenedObject(getPanelVariables(context))).sort(),
       ...Object.keys(getFlattenedObject(this.deps.getGlobalScope())).sort(),
     ];
   };
