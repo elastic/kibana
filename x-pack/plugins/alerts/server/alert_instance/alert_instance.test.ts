@@ -72,10 +72,10 @@ describe('isThrottled', () => {
   });
 });
 
-describe('actionGroupHasChanged()', () => {
+describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   test('should be false if no last scheduled and nothing scheduled', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.actionGroupHasChanged()).toEqual(false);
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
   });
 
   test('should be false if group does not change', () => {
@@ -88,16 +88,24 @@ describe('actionGroupHasChanged()', () => {
       },
     });
     alertInstance.scheduleActions('default');
-    expect(alertInstance.actionGroupHasChanged()).toEqual(false);
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
   });
 
-  test('should be true if no last scheduled and group is scheduled', () => {
-    const alertInstance = new AlertInstance();
-    alertInstance.scheduleActions('default');
-    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+  test('should be false if group and subgroup does not change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
   });
 
-  test('should be true if last scheduled group and next action is undefined', () => {
+  test('should be false if group does not change and subgroup goes from undefined to defined', () => {
     const alertInstance = new AlertInstance({
       meta: {
         lastScheduledActions: {
@@ -106,7 +114,28 @@ describe('actionGroupHasChanged()', () => {
         },
       },
     });
-    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group does not change and subgroup goes from defined to undefined', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be true if no last scheduled and has scheduled action', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
   });
 
   test('should be true if group does change', () => {
@@ -119,7 +148,35 @@ describe('actionGroupHasChanged()', () => {
       },
     });
     alertInstance.scheduleActions('penguin');
-    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does change and subgroup does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('penguin', 'fish');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does not change and subgroup does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('default', 'fish');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
   });
 });
 

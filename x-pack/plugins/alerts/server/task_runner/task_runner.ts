@@ -270,7 +270,7 @@ export class TaskRunner {
         notifyWhen === 'onActionGroupChange'
           ? Object.entries(instancesWithScheduledActions).filter(
               ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
-                const shouldExecuteAction = alertInstance.actionGroupHasChanged();
+                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
                 if (!shouldExecuteAction) {
                   this.logger.debug(
                     `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`

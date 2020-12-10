@@ -638,7 +638,66 @@ describe('Task Runner', () => {
     );
     const taskRunner = new TaskRunner(
       alertType,
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: { lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() } },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subgroup1');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: {
+                  group: 'default',
+                  subgroup: 'newSubgroup',
+                  date: new Date().toISOString(),
+                },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
     alertsClient.get.mockResolvedValue({
