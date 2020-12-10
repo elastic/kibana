@@ -51,7 +51,7 @@ function selectedDateToParam(selectedDate: Moment | null) {
 
 export const TimerangePicker: React.FunctionComponent<{
   disabled?: boolean;
-  setTimeRange: (tr: TimeRange) => void;
+  setTimeRange: (tr?: TimeRange) => void;
   timeRange: { start: number | undefined; end: number | undefined };
   validationErrors?: TimeRangeValidationError[];
 }> = ({

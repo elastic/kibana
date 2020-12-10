@@ -11,13 +11,7 @@ import {
   AnomaliesTableRecord,
   JobExistResult,
 } from '../../../../../plugins/ml/public';
-import {
-  CreateMLJobSuccess,
-  DeleteJobResults,
-  MonitorIdParam,
-  HeartbeatIndicesParam,
-} from './types';
-import { TimeRange } from '../../components/monitor/ml/job_config/job_config';
+import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from './types';
 import { NewMLJobParams } from '../api/ml_anomaly';
 
 export const resetMLState = createAction('RESET_ML_STATE');

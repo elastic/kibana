@@ -119,7 +119,7 @@ export async function getTimeFieldRange(heartbeatIndices: string, monitorId: str
 export async function getBucketSpanEstimate(timeRange: TimeRange, monitorId: string) {
   return apiService.post('/api/ml/validate/estimate_bucket_span', {
     aggTypes: ['avg'],
-    duration: { start: timeRange.start, end: timeRange.gg ?? moment().valueOf() },
+    duration: { start: timeRange.start, end: timeRange.end ?? moment().valueOf() },
     fields: ['monitor.duration.us'],
     index: 'heartbeat-*',
     query: { bool: { filter: [{ term: { 'monitor.id': monitorId } }] } },

@@ -54,7 +54,7 @@ export const JobConfig = ({ bucketSpan, timeRange, setTimeRange, setBucketSpan }
           <EuiSwitch
             label={
               <FormattedMessage
-                id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
+                id="xpack.uptime.ml.enableAnomalyDetectionPanel.useFullData.label"
                 defaultMessage="Use full heartbeat-* data"
               />
             }

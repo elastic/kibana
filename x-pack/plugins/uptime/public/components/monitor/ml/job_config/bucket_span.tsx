@@ -23,7 +23,7 @@ import { TimeRange } from './job_config';
 import { useMonitorId } from '../../../../hooks';
 import { hasMLFeatureSelector } from '../../../../state/selectors';
 
-const startTimeLabel = i18n.translate('xpack.uptime.ml.jobConfig.startTimeLabel', {
+const startTimeLabel = i18n.translate('xpack.uptime.ml.jobConfig.bucketSpanLabel', {
   defaultMessage: 'Bucket span',
 });
 
