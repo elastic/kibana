@@ -28,7 +28,7 @@ export const findRulesRoute = (router: IRouter) => {
         ),
       },
       options: {
-        tags: ['access'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

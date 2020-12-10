@@ -5,18 +5,15 @@
  */
 import { BaseAlert } from './base_alert';
 
-describe('BaseAlert', () => {
-  describe('serialize', () => {
-    it('should serialize with a raw alert provided', () => {
-      const alert = new BaseAlert({} as any);
-      expect(alert.serialize()).not.toBeNull();
-    });
-    it('should not serialize without a raw alert provided', () => {
-      const alert = new BaseAlert();
-      expect(alert.serialize()).toBeNull();
-    });
-  });
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+    },
+  },
+}));
 
+describe('BaseAlert', () => {
   describe('create', () => {
     it('should create an alert if it does not exist', async () => {
       const alert = new BaseAlert();
@@ -54,11 +51,14 @@ describe('BaseAlert', () => {
               },
             },
           ],
-          alertTypeId: undefined,
+          alertTypeId: '',
           consumer: 'monitoring',
           enabled: true,
-          name: undefined,
-          params: {},
+          name: '',
+          params: {
+            duration: '1h',
+            threshold: 85,
+          },
           schedule: {
             interval: '1m',
           },

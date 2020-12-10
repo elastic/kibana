@@ -12,7 +12,7 @@ object QuickTests : BuildType({
   kibanaAgent(2)
 
   val testScripts = mapOf(
-    "Test Hardening" to ".ci/teamcity/tests/test_hardening.sh",
+    "Test Hardening" to ".ci/teamcity/checkes/test_hardening.sh",
     "Test Projects" to ".ci/teamcity/tests/test_projects.sh",
     "Mocha Tests" to ".ci/teamcity/tests/mocha.sh"
   )
