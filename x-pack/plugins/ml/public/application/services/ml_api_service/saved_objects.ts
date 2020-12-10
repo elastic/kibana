@@ -40,6 +40,14 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+  removeJobFromCurrentSpace(jobType: JobType, jobIds: string[]) {
+    const body = JSON.stringify({ jobType, jobIds });
+    return httpService.http<SavedObjectResult>({
+      path: `${basePath()}/saved_objects/remove_job_from_current_space`,
+      method: 'POST',
+      body,
+    });
+  },
   syncSavedObjects(simulate: boolean = false) {
     return httpService.http<SyncSavedObjectResponse>({
       path: `${basePath()}/saved_objects/sync`,

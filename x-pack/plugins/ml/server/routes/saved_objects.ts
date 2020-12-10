@@ -7,8 +7,15 @@
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
-import { jobsAndSpaces, syncJobObjects, jobTypeSchema } from './schemas/saved_objects';
+import {
+  jobsAndSpaces,
+  jobsAndCurrentSpace,
+  syncJobObjects,
+  jobTypeSchema,
+} from './schemas/saved_objects';
 import { jobIdsSchema } from './schemas/job_service_schema';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -174,6 +181,55 @@ export function savedObjectsRoutes(
         const { jobType, jobIds, spaces } = request.body;
 
         const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, spaces);
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
+   * @apiName RemoveJobsFromCurrentSpace
+   * @apiDescription Remove a list of jobs from the current space
+   *
+   * @apiSchema (body) jobsAndCurrentSpace
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/remove_job_from_current_space',
+      validate: {
+        body: jobsAndCurrentSpace,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
+
+        const currentSpaceId = await getCurrentSpaceId();
+        if (currentSpaceId === null) {
+          return response.ok({
+            body: jobIds.map((id) => ({
+              [id]: {
+                success: false,
+                error: 'CHANGE ME',
+              },
+            })),
+          });
+        }
+
+        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, [
+          currentSpaceId,
+        ]);
 
         return response.ok({
           body,
