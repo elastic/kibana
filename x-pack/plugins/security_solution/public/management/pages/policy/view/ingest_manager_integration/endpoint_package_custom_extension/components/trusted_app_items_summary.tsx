@@ -33,7 +33,7 @@ export const TrustedAppItemsSummary = memo(() => {
     <div className="eui-textRight">
       <SummaryStat value={total} color="primary">
         <FormattedMessage
-          id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.totalLabel"
+          id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.totalLabel"
           defaultMessage="Total"
         />
       </SummaryStat>

@@ -59,7 +59,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <EuiText>
             <h4>
               <FormattedMessage
-                id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
                 defaultMessage="Trusted Applications"
               />
             </h4>
@@ -77,7 +77,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
             data-test-subj="linkToTrustedApps"
           >
             <FormattedMessage
-              id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
+              id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
               defaultMessage="Manage trusted applications"
             />
           </LinkWithIcon>
