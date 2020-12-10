@@ -398,7 +398,6 @@ class PackagePolicyService {
 
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    schema: typeof NewPackagePolicySchema | typeof UpdatePackagePolicySchema,
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
@@ -410,13 +409,11 @@ class PackagePolicyService {
       let updatedNewData: NewPackagePolicy = newData;
 
       for (const callback of externalCallbacks) {
-        try {
-          updatedNewData = schema.validate(await callback(updatedNewData, context, request));
-        } catch (error) {
-          if (error.statusCode) {
-            error.statusCode = Number(error.statusCode);
-          }
-          throw error;
+        const result = await callback(updatedNewData, context, request);
+        if (externalCallbackType === 'packagePolicyCreate') {
+          updatedNewData = NewPackagePolicySchema.validate(result);
+        } else if (externalCallbackType === 'packagePolicyUpdate') {
+          updatedNewData = UpdatePackagePolicySchema.validate(result);
         }
       }
 

@@ -13,8 +13,6 @@ import {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
-  UpdatePackagePolicySchema,
-  NewPackagePolicySchema,
 } from '../../types';
 import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -82,7 +80,6 @@ export const createPackagePolicyHandler: RequestHandler<
   try {
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      NewPackagePolicySchema,
       newData,
       context,
       request
@@ -127,7 +124,6 @@ export const updatePackagePolicyHandler: RequestHandler<
   try {
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyUpdate',
-      UpdatePackagePolicySchema,
       newData,
       context,
       request
