@@ -10,7 +10,7 @@ import {
   ParseSearchQueryOptions,
   SavedObjectsTaggingApiUi,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../tags';
+import { ITagsCache } from '../services';
 
 export interface BuildParseSearchQueryOptions {
   cache: ITagsCache;

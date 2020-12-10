@@ -4,21 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef, useState, useCallback } from 'react';
-import uuid from 'uuid';
+import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../../common/containers/source';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -34,19 +31,14 @@ import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   actionsColumnWidth: number;
-  addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
-  onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
-  onUnPinEvent: OnUnPinEvent;
   isEventPinned: boolean;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
@@ -54,10 +46,7 @@ interface Props {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   timelineId: string;
-  updateNote: UpdateNote;
 }
-
-export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
 
@@ -70,32 +59,26 @@ EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWra
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  addNoteToEvent,
   browserFields,
   columnHeaders,
   columnRenderers,
   event,
   eventIdToNoteIds,
-  getNotesByIds,
   isEventViewer = false,
   isEventPinned = false,
   loadingEventIds,
-  onColumnResized,
-  onPinEvent,
   onRowSelected,
-  onUnPinEvent,
   refetch,
   onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
   timelineId,
-  updateNote,
 }) => {
   const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const { expandedEvent, status: timelineStatus } = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]
+  const expandedEvent = useDeepEqualSelector(
+    (state) => state.timeline.timelineById[timelineId].expandedEvent
   );
   const divElement = useRef<HTMLDivElement | null>(null);
 
@@ -108,6 +91,16 @@ const StatefulEventComponent: React.FC<Props> = ({
     const eventId = event._id;
     setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
   }, [event]);
+
+  const onPinEvent: OnPinEvent = useCallback(
+    (eventId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId })),
+    [dispatch, timelineId]
+  );
+
+  const onUnPinEvent: OnPinEvent = useCallback(
+    (eventId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId })),
+    [dispatch, timelineId]
+  );
 
   const handleOnEventToggled = useCallback(() => {
     const eventId = event._id;
@@ -131,12 +124,22 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const associateNote = useCallback(
     (noteId: string) => {
-      addNoteToEvent({ eventId: event._id, noteId });
+      dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
       if (!isEventPinned) {
         onPinEvent(event._id); // pin the event, because it has notes
       }
     },
-    [addNoteToEvent, event, isEventPinned, onPinEvent]
+    [dispatch, event, isEventPinned, onPinEvent, timelineId]
+  );
+
+  const RowRendererContent = useMemo(
+    () =>
+      getRowRenderer(event.ecs, rowRenderers).renderRow({
+        browserFields,
+        data: event.ecs,
+        timelineId,
+      }),
+    [browserFields, event.ecs, rowRenderers, timelineId]
   );
 
   return (
@@ -159,11 +162,9 @@ const StatefulEventComponent: React.FC<Props> = ({
         ecsData={event.ecs}
         eventIdToNoteIds={eventIdToNoteIds}
         expanded={isExpanded}
-        getNotesByIds={getNotesByIds}
         isEventPinned={isEventPinned}
         isEventViewer={isEventViewer}
         loadingEventIds={loadingEventIds}
-        onColumnResized={onColumnResized}
         onEventToggled={handleOnEventToggled}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
@@ -175,7 +176,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         showNotes={!!showNotes[event._id]}
         timelineId={timelineId}
         toggleShowNotes={onToggleShowNotes}
-        updateNote={updateNote}
       />
 
       <EventsTrSupplementContainerWrapper>
@@ -186,21 +186,13 @@ const StatefulEventComponent: React.FC<Props> = ({
           <NoteCards
             associateNote={associateNote}
             data-test-subj="note-cards"
-            getNewNoteId={getNewNoteId}
-            getNotesByIds={getNotesByIds}
             noteIds={eventIdToNoteIds[event._id] || emptyNotes}
             showAddNote={!!showNotes[event._id]}
-            status={timelineStatus}
             toggleShowAddNote={onToggleShowNotes}
-            updateNote={updateNote}
           />
         </EventsTrSupplement>
 
-        {getRowRenderer(event.ecs, rowRenderers).renderRow({
-          browserFields,
-          data: event.ecs,
-          timelineId,
-        })}
+        {RowRendererContent}
       </EventsTrSupplementContainerWrapper>
     </EventsTrGroup>
   );

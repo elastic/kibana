@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, KibanaIndexPatterns, SourcererScopeName, ManageScope } from './model';
+import { SourcererScopeById, ManageScope, KibanaIndexPatterns, SourcererScopeName } from './model';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -16,6 +17,13 @@ export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string |
 
 export const sourcererConfigIndexPatternsSelector = ({ sourcerer }: State): string[] =>
   sourcerer.configIndexPatterns;
+
+export const sourcererScopeIdSelector = (
+  { sourcerer }: State,
+  scopeId: SourcererScopeName
+): ManageScope => sourcerer.sourcererScopes[scopeId];
+
+export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
 
 export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
   sourcerer.sourcererScopes;
@@ -38,14 +46,14 @@ export const configIndexPatternsSelector = () =>
   );
 
 export const getIndexNamesSelectedSelector = () => {
-  const getScopesSelector = scopesSelector();
+  const getScopeSelector = scopeIdSelector();
   const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
   const mapStateToProps = (
     state: State,
     scopeId: SourcererScopeName
   ): { indexNames: string[]; previousIndexNames: string } => {
-    const scope = getScopesSelector(state)[scopeId];
+    const scope = getScopeSelector(state, scopeId);
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
     return {
       indexNames:
@@ -72,39 +80,28 @@ export const getAllExistingIndexNamesSelector = () => {
   return mapStateToProps;
 };
 
-export const defaultIndexNamesSelector = () => {
-  const getScopesSelector = scopesSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
-
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
-    const scope = getScopesSelector(state)[scopeId];
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
-    return scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns;
-  };
-
-  return mapStateToProps;
-};
-
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+
 export const getSourcererScopeSelector = () => {
-  const getScopesSelector = scopesSelector();
+  const getScopeIdSelector = scopeIdSelector();
+  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
+    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
+    return selectedPatterns.some((index) => index === 'logs-*')
+      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+      : selectedPatterns;
+  });
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
-    const selectedPatterns = getScopesSelector(state)[scopeId].selectedPatterns.some(
-      (index) => index === 'logs-*'
-    )
-      ? [...getScopesSelector(state)[scopeId].selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-      : getScopesSelector(state)[scopeId].selectedPatterns;
+    const scope = getScopeIdSelector(state, scopeId);
+    const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
     return {
-      ...getScopesSelector(state)[scopeId],
+      ...scope,
       selectedPatterns,
       indexPattern: {
-        ...getScopesSelector(state)[scopeId].indexPattern,
+        ...scope.indexPattern,
         title: selectedPatterns.join(),
       },
     };
   };
-
   return mapStateToProps;
 };

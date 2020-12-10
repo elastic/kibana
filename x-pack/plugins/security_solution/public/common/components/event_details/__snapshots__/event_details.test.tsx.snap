@@ -1,15 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EventDetails rendering should match snapshot 1`] = `
-<Details
+<Styled(EuiTabbedContent)
   data-test-subj="eventDetails"
->
-  <EuiTabbedContent
-    autoFocus="initial"
-    onTabClick={[Function]}
-    selectedTab={
-      Object {
-        "content": <Memo(EventFieldsBrowser)
+  onTabClick={[Function]}
+  selectedTab={
+    Object {
+      "content": <React.Fragment>
+        <EuiSpacer
+          size="l"
+        />
+        <Memo(EventFieldsBrowser)
           browserFields={
             Object {
               "agent": Object {
@@ -423,129 +424,6 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               },
             }
           }
-          columnHeaders={
-            Array [
-              Object {
-                "aggregatable": true,
-                "category": "base",
-                "columnHeaderType": "not-filtered",
-                "description": "Date/time when the event originated.
-For log events this is the date/time when the event was generated, and not when it was read.
-Required field for all events.",
-                "example": "2016-05-23T08:05:34.853Z",
-                "id": "@timestamp",
-                "type": "date",
-                "width": 190,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "event",
-                "columnHeaderType": "not-filtered",
-                "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
-                "example": "7",
-                "id": "event.severity",
-                "type": "long",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "event",
-                "columnHeaderType": "not-filtered",
-                "description": "Event category.
-This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
-                "example": "user-management",
-                "id": "event.category",
-                "type": "keyword",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "event",
-                "columnHeaderType": "not-filtered",
-                "description": "The action captured by the event.
-This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
-                "example": "user-password-change",
-                "id": "event.action",
-                "type": "keyword",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "host",
-                "columnHeaderType": "not-filtered",
-                "description": "Name of the host.
-It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
-                "example": "",
-                "id": "host.name",
-                "type": "keyword",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "source",
-                "columnHeaderType": "not-filtered",
-                "description": "IP address of the source.
-Can be one or multiple IPv4 or IPv6 addresses.",
-                "example": "",
-                "id": "source.ip",
-                "type": "ip",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "destination",
-                "columnHeaderType": "not-filtered",
-                "description": "IP address of the destination.
-Can be one or multiple IPv4 or IPv6 addresses.",
-                "example": "",
-                "id": "destination.ip",
-                "type": "ip",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "destination",
-                "columnHeaderType": "not-filtered",
-                "description": "Bytes sent from the source to the destination",
-                "example": "123",
-                "format": "bytes",
-                "id": "destination.bytes",
-                "type": "number",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "user",
-                "columnHeaderType": "not-filtered",
-                "description": "Short name or login of the user.",
-                "example": "albert",
-                "id": "user.name",
-                "type": "keyword",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": true,
-                "category": "base",
-                "columnHeaderType": "not-filtered",
-                "description": "Each document has an _id that uniquely identifies it",
-                "example": "Y-6TfmcB0WOhS6qyMv3s",
-                "id": "_id",
-                "type": "keyword",
-                "width": 180,
-              },
-              Object {
-                "aggregatable": false,
-                "category": "base",
-                "columnHeaderType": "not-filtered",
-                "description": "For log events the message field contains the log message.
-In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
-                "example": "Hello World",
-                "id": "message",
-                "type": "text",
-                "width": 180,
-              },
-            ]
-          }
           data={
             Array [
               Object {
@@ -691,18 +569,21 @@ In other use cases the message field can be used to concatenate different values
             ]
           }
           eventId="Y-6TfmcB0WOhS6qyMv3s"
-          onUpdateColumns={[MockFunction]}
           timelineId="test"
-          toggleColumn={[MockFunction]}
-        />,
-        "id": "table-view",
-        "name": "Table",
-      }
+        />
+      </React.Fragment>,
+      "id": "table-view",
+      "name": "Table",
     }
-    tabs={
-      Array [
-        Object {
-          "content": <Memo(EventFieldsBrowser)
+  }
+  tabs={
+    Array [
+      Object {
+        "content": <React.Fragment>
+          <EuiSpacer
+            size="l"
+          />
+          <Memo(EventFieldsBrowser)
             browserFields={
               Object {
                 "agent": Object {
@@ -1116,129 +997,6 @@ In other use cases the message field can be used to concatenate different values
                 },
               }
             }
-            columnHeaders={
-              Array [
-                Object {
-                  "aggregatable": true,
-                  "category": "base",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Date/time when the event originated.
-For log events this is the date/time when the event was generated, and not when it was read.
-Required field for all events.",
-                  "example": "2016-05-23T08:05:34.853Z",
-                  "id": "@timestamp",
-                  "type": "date",
-                  "width": 190,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "event",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
-                  "example": "7",
-                  "id": "event.severity",
-                  "type": "long",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "event",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Event category.
-This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
-                  "example": "user-management",
-                  "id": "event.category",
-                  "type": "keyword",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "event",
-                  "columnHeaderType": "not-filtered",
-                  "description": "The action captured by the event.
-This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
-                  "example": "user-password-change",
-                  "id": "event.action",
-                  "type": "keyword",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "host",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Name of the host.
-It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
-                  "example": "",
-                  "id": "host.name",
-                  "type": "keyword",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "source",
-                  "columnHeaderType": "not-filtered",
-                  "description": "IP address of the source.
-Can be one or multiple IPv4 or IPv6 addresses.",
-                  "example": "",
-                  "id": "source.ip",
-                  "type": "ip",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "destination",
-                  "columnHeaderType": "not-filtered",
-                  "description": "IP address of the destination.
-Can be one or multiple IPv4 or IPv6 addresses.",
-                  "example": "",
-                  "id": "destination.ip",
-                  "type": "ip",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "destination",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Bytes sent from the source to the destination",
-                  "example": "123",
-                  "format": "bytes",
-                  "id": "destination.bytes",
-                  "type": "number",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "user",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Short name or login of the user.",
-                  "example": "albert",
-                  "id": "user.name",
-                  "type": "keyword",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": true,
-                  "category": "base",
-                  "columnHeaderType": "not-filtered",
-                  "description": "Each document has an _id that uniquely identifies it",
-                  "example": "Y-6TfmcB0WOhS6qyMv3s",
-                  "id": "_id",
-                  "type": "keyword",
-                  "width": 180,
-                },
-                Object {
-                  "aggregatable": false,
-                  "category": "base",
-                  "columnHeaderType": "not-filtered",
-                  "description": "For log events the message field contains the log message.
-In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
-                  "example": "Hello World",
-                  "id": "message",
-                  "type": "text",
-                  "width": 180,
-                },
-              ]
-            }
             data={
               Array [
                 Object {
@@ -1384,15 +1142,18 @@ In other use cases the message field can be used to concatenate different values
               ]
             }
             eventId="Y-6TfmcB0WOhS6qyMv3s"
-            onUpdateColumns={[MockFunction]}
             timelineId="test"
-            toggleColumn={[MockFunction]}
-          />,
-          "id": "table-view",
-          "name": "Table",
-        },
-        Object {
-          "content": <Memo(JsonView)
+          />
+        </React.Fragment>,
+        "id": "table-view",
+        "name": "Table",
+      },
+      Object {
+        "content": <React.Fragment>
+          <EuiSpacer
+            size="m"
+          />
+          <Memo(JsonView)
             data={
               Array [
                 Object {
@@ -1537,12 +1298,12 @@ In other use cases the message field can be used to concatenate different values
                 },
               ]
             }
-          />,
-          "id": "json-view",
-          "name": "JSON View",
-        },
-      ]
-    }
-  />
-</Details>
+          />
+        </React.Fragment>,
+        "id": "json-view",
+        "name": "JSON View",
+      },
+    ]
+  }
+/>
 `;

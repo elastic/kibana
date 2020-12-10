@@ -17,6 +17,7 @@ import {
 import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import {
   HostsKpiStrategyResponse,
@@ -284,7 +285,21 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
         </InspectButtonContainer>
       </FlexItem>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.description === nextProps.description &&
+    prevProps.enableAreaChart === nextProps.enableAreaChart &&
+    prevProps.enableBarChart === nextProps.enableBarChart &&
+    prevProps.from === nextProps.from &&
+    prevProps.grow === nextProps.grow &&
+    prevProps.id === nextProps.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    prevProps.statKey === nextProps.statKey &&
+    prevProps.to === nextProps.to &&
+    deepEqual(prevProps.areaChart, nextProps.areaChart) &&
+    deepEqual(prevProps.barChart, nextProps.barChart) &&
+    deepEqual(prevProps.fields, nextProps.fields)
 );
 
 StatItemsComponent.displayName = 'StatItemsComponent';

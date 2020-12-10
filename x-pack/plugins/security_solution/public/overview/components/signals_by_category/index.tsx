@@ -5,11 +5,12 @@
  */
 
 import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { SetAbsoluteRangeDatePicker } from '../../../network/pages/types';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
@@ -26,7 +27,6 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   /** Override all defaults, and only display this field */
   onlyField?: string;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   timelineId?: string;
 }
@@ -38,12 +38,12 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   headerChildren,
   onlyField,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
   timelineId,
   to,
 }) => {
+  const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -51,14 +51,15 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({
-        id: setAbsoluteRangeDatePickerTarget,
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: setAbsoluteRangeDatePickerTarget,
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setAbsoluteRangeDatePicker]
+    [dispatch, setAbsoluteRangeDatePickerTarget]
   );
 
   return (

@@ -23,11 +23,11 @@ import {
   removeColumn,
   removeProvider,
   setEventsDeleted,
+  setActiveTabTimeline,
   setEventsLoading,
   setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
-  setKqlFilterQueryDraft,
   setSavedQueryId,
   setSelected,
   showCallOutUnauthorizedMsg,
@@ -76,7 +76,6 @@ import {
   setSelectedTimelineEvents,
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
-  updateKqlFilterQueryDraft,
   updateTimelineColumns,
   updateTimelineDescription,
   updateTimelineIsFavorite,
@@ -197,14 +196,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: applyKqlFilterQueryDraft({
       id,
       filterQuery,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(setKqlFilterQueryDraft, (state, { id, filterQueryDraft }) => ({
-    ...state,
-    timelineById: updateKqlFilterQueryDraft({
-      id,
-      filterQueryDraft,
       timelineById: state.timelineById,
     }),
   }))
@@ -516,6 +507,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         indexNames,
+      },
+    },
+  }))
+  .case(setActiveTabTimeline, (state, { id, activeTab }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        activeTab,
       },
     },
   }))

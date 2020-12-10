@@ -21,7 +21,8 @@ import {
 
 import { TrustedAppsService } from '../service';
 import { Pagination, TrustedAppsListPageState } from '../state';
-import { initialTrustedAppsPageState, trustedAppsPageReducer } from './reducer';
+import { initialTrustedAppsPageState } from './builders';
+import { trustedAppsPageReducer } from './reducer';
 import { createTrustedAppsPageMiddleware } from './middleware';
 
 const initialNow = 111111;
