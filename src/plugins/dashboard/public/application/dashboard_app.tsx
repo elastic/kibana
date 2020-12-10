@@ -44,6 +44,7 @@ import {
 import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
+import { DashboardContainerInput } from '.';
 
 export interface DashboardAppProps {
   history: History;
@@ -79,6 +80,7 @@ export function DashboardApp({
       if (!dashboardContainer || !dashboardStateManager) {
         return;
       }
+
       const changes = getChangesFromAppStateForContainerState({
         dashboardContainer,
         appStateDashboardInput: getDashboardContainerInput({
@@ -89,7 +91,21 @@ export function DashboardApp({
           query: data.query,
         }),
       });
+
       if (changes) {
+        // state keys change in which likely won't need a data fetch
+        const noRefetchKeys: Array<keyof DashboardContainerInput> = [
+          'viewMode',
+          'title',
+          'description',
+          'expandedPanelId',
+          'useMargins',
+          'isEmbeddedExternally',
+          'isFullScreenMode',
+        ];
+        const shouldRefetch = Object.keys(changes).some(
+          (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
+        );
         if (getSearchSessionIdFromURL(history)) {
           // going away from a background search results
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
@@ -97,7 +113,8 @@ export function DashboardApp({
 
         dashboardContainer.updateInput({
           ...changes,
-          searchSessionId: data.search.session.start(),
+          // do not start a new session if this is irrelevant state change to prevent excessive searches
+          ...(shouldRefetch && { searchSessionId: data.search.session.start() }),
         });
       }
     },
