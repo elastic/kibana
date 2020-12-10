@@ -18,11 +18,10 @@
  */
 
 import { countBy, get, groupBy, mapValues, max, min, values } from 'lodash';
+import { ElasticsearchClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
-import { LegacyAPICaller } from 'src/core/server';
 import { getPastDays } from './get_past_days';
-
 type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 
 interface VisSummary {
@@ -47,7 +46,7 @@ export interface VisualizationUsage {
  * Parse the response data into telemetry payload
  */
 export async function getStats(
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   index: string
 ): Promise<VisualizationUsage | undefined> {
   const searchParams = {
@@ -65,7 +64,7 @@ export async function getStats(
       },
     },
   };
-  const esResponse: ESResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
   const size = get(esResponse, 'hits.hits.length', 0);
   if (size < 1) {
     return;

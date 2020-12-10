@@ -58,10 +58,12 @@ describe('epicLocalStorage', () => {
   );
 
   let props = {} as QueryTabContentComponentProps;
-  const sort: Sort = {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  };
+  const sort: Sort[] = [
+    {
+      columnId: '@timestamp',
+      sortDirection: Direction.desc,
+    },
+  ];
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
 
@@ -159,10 +161,12 @@ describe('epicLocalStorage', () => {
     store.dispatch(
       updateSort({
         id: 'test',
-        sort: {
-          columnId: 'event.severity',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'event.severity',
+            sortDirection: Direction.desc,
+          },
+        ],
       })
     );
     await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());

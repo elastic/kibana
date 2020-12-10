@@ -190,6 +190,14 @@ describe('Task Runner', () => {
     expect(call.services.callCluster).toBeTruthy();
     expect(call.services).toBeTruthy();
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -222,7 +230,9 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subDefault');
       }
     );
     const taskRunner = new TaskRunner(
@@ -261,8 +271,159 @@ describe('Task Runner', () => {
       ]
     `);
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(3);
+    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'new-instance',
+      },
+      kibana: {
+        alerting: {
+          action_group_id: 'default',
+          action_subgroup: 'subDefault',
+          instance_id: '1',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message: "test:1: 'alert-name' created new instance: '1'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+      event: {
+        action: 'active-instance',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+          action_group_id: 'default',
+          action_subgroup: 'subDefault',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message:
+        "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+      event: {
+        action: 'execute-action',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+          action_group_id: 'default',
+          action_subgroup: 'subDefault',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+          {
+            id: '1',
+            namespace: undefined,
+            type: 'action',
+          },
+        ],
+      },
+      message:
+        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute',
+        outcome: 'success',
+      },
+      kibana: {
+        alerting: {
+          status: 'active',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message: "alert executed: test:1: 'alert-name'",
+    });
+  });
+
+  test('actionsPlugin.execute is skipped if muteAll is true', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      muteAll: true,
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `no scheduling of actions for alert test:1: 'alert-name': alert is muted.`
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
         action: 'new-instance',
@@ -304,32 +465,6 @@ describe('Task Runner', () => {
       message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
-      event: {
-        action: 'execute-action',
-      },
-      kibana: {
-        alerting: {
-          instance_id: '1',
-          action_group_id: 'default',
-        },
-        saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
-          },
-          {
-            id: '1',
-            namespace: undefined,
-            type: 'action',
-          },
-        ],
-      },
-      message:
-        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
-    });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
@@ -350,6 +485,52 @@ describe('Task Runner', () => {
       },
       message: "alert executed: test:1: 'alert-name'",
     });
+  });
+
+  test('skips firing actions for active instance if instance is muted', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertInstanceFactory('2').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      mutedInstanceIds: ['2'],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      `alert test:1: 'alert-name' has 2 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is muted`
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
   });
 
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {
@@ -472,6 +653,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -558,6 +740,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -566,6 +749,22 @@ describe('Task Runner', () => {
         },
       }
     `);
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `alert test:1: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
@@ -661,6 +860,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -738,6 +938,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
