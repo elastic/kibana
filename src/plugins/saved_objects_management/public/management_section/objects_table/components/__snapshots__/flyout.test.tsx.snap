@@ -180,6 +180,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "serverBasePath": "",
           },
           "delete": [MockFunction],
+          "externalUrl": Object {
+            "validateUrl": [MockFunction],
+          },
           "fetch": [MockFunction],
           "get": [MockFunction],
           "getLoadingCount$": [MockFunction],
