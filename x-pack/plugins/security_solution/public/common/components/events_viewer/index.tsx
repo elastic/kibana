@@ -148,7 +148,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         browserFields={browserFields}
         docValueFields={docValueFields}
         timelineId={id}
-        handleCloseExpandedEvent={handleCloseExpandedEvent}
       />
     </>
   );

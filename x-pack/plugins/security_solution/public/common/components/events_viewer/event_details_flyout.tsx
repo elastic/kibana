@@ -5,11 +5,12 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { some } from 'lodash/fp';
 
+import { useDispatch } from 'react-redux';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
   ExpandableEvent,
@@ -17,8 +18,7 @@ import {
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-
-export type HandleCloseExpandedEvent = () => void;
+import { timelineActions } from '../../../timelines/store/timeline';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
@@ -28,7 +28,6 @@ interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   timelineId: string;
-  handleCloseExpandedEvent: HandleCloseExpandedEvent;
 }
 
 const emptyExpandedEvent = {};
@@ -37,11 +36,15 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
   timelineId,
-  handleCloseExpandedEvent,
 }) => {
+  const dispatch = useDispatch();
   const expandedEvent = useDeepEqualSelector(
     (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
   );
+
+  const handleClearSelection = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId, event: emptyExpandedEvent }));
+  }, [dispatch, timelineId]);
 
   const [loading, detailsData] = useTimelineEventsDetails({
     docValueFields,
@@ -60,7 +63,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   }
 
   return (
-    <StyledEuiFlyout size="s" onClose={handleCloseExpandedEvent}>
+    <StyledEuiFlyout size="s" onClose={handleClearSelection}>
       <EuiFlyoutHeader hasBorder>
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
@@ -83,6 +86,5 @@ export const EventDetailsFlyout = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.handleCloseExpandedEvent === nextProps.handleCloseExpandedEvent
+    prevProps.timelineId === nextProps.timelineId
 );

@@ -360,15 +360,6 @@ export const CaseComponent = React.memo<CaseProps>(
       [dispatch]
     );
 
-    const handleCloseExpandedEvent = useCallback(() => {
-      dispatch(
-        timelineActions.toggleExpandedEvent({
-          timelineId: TimelineId.casePage,
-          event: {},
-        })
-      );
-    }, [dispatch]);
-
     // useEffect used for component's initialization
     useEffect(() => {
       if (init.current) {
@@ -492,7 +483,6 @@ export const CaseComponent = React.memo<CaseProps>(
           browserFields={browserFields}
           docValueFields={docValueFields}
           timelineId={TimelineId.casePage}
-          handleCloseExpandedEvent={handleCloseExpandedEvent}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
