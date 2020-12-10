@@ -41,6 +41,23 @@ import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
 import { TablesAdapter } from '../util/tables_adapter';
 
+/**
+ * AbortController is not available in Node until v15, so we
+ * need to temporarily mock it for plugins using expressions
+ * on the server.
+ *
+ * TODO: Remove this once Kibana is upgraded to Node 15.
+ */
+const getNewAbortController = (): AbortController => {
+  try {
+    return new AbortController();
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
+    return new polyfill.AbortController();
+  }
+};
+
 const createAbortErrorValue = () =>
   createError({
     message: 'The expression was aborted.',
@@ -88,7 +105,7 @@ export class Execution<
   /**
    * AbortController to cancel this Execution.
    */
-  private readonly abortController = new AbortController();
+  private readonly abortController = getNewAbortController();
 
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.

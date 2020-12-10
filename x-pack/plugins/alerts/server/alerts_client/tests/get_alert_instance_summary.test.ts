@@ -145,18 +145,21 @@ describe('getAlertInstanceSummary()', () => {
         "instances": Object {
           "instance-currently-active": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
           "instance-muted-no-activity": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-previously-active": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",

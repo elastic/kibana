@@ -70,7 +70,7 @@ export class AuditService {
   /**
    * @deprecated
    */
-  private allowAuditLogging = false;
+  private allowLegacyAuditLogging = false;
 
   private ecsLogger: Logger;
 
@@ -87,9 +87,11 @@ export class AuditService {
     getSpaceId,
   }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
-        this.allowAuditLogging = allowAuditLogging;
-      });
+      this.licenseFeaturesSubscription = license.features$.subscribe(
+        ({ allowLegacyAuditLogging }) => {
+          this.allowLegacyAuditLogging = allowLegacyAuditLogging;
+        }
+      );
     }
 
     // Configure logging during setup and when license changes
@@ -169,7 +171,7 @@ export class AuditService {
     const getLogger = (id?: string): LegacyAuditLogger => {
       return {
         log: (eventType: string, message: string, data?: Record<string, any>) => {
-          if (!this.allowAuditLogging) {
+          if (!this.allowLegacyAuditLogging) {
             return;
           }
 

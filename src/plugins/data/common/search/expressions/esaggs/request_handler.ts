@@ -29,14 +29,12 @@ import {
   Query,
   TimeRange,
 } from '../../../../common';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  IAggConfigs,
-  ISearchStartSearchSource,
-  tabifyAggResponse,
-} from '../../../../common/search';
 import { FormatFactory } from '../../../../common/field_formats/utils';
+
+import { IAggConfigs } from '../../aggs';
+import { ISearchStartSearchSource } from '../../search_source';
+import { tabifyAggResponse } from '../../tabify';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
 
 /** @internal */
 export interface RequestHandlerParams {
