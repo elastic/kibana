@@ -11,7 +11,7 @@ import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../.
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
-import { getEsPackage } from '../archive/save_to_es';
+import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 
 export { getFile, SearchParams } from '../registry';
