@@ -20,6 +20,7 @@ import {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
+  AlertNotifyWhenType,
 } from '../../alerts/common';
 export {
   Alert,
@@ -30,6 +31,7 @@ export {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
+  AlertNotifyWhenType,
 };
 export { ActionType };
 
@@ -127,6 +129,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 export interface ActionVariable {
   name: string;
   description: string;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 type AsActionVariables<Keys extends string> = {

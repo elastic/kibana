@@ -49,18 +49,18 @@ export class AncestryQueryHandler implements QueryHandler<SafeResolverAncestry> 
   private toMapOfNodes(results: SafeResolverEvent[]) {
     return results.reduce(
       (nodes: Map<string, SafeResolverLifecycleNode>, event: SafeResolverEvent) => {
-        const nodeId = entityIDSafeVersion(event);
-        if (!nodeId) {
+        const nodeID = entityIDSafeVersion(event);
+        if (!nodeID) {
           return nodes;
         }
 
-        let node = nodes.get(nodeId);
+        let node = nodes.get(nodeID);
         if (!node) {
-          node = createLifecycle(nodeId, []);
+          node = createLifecycle(nodeID, []);
         }
 
         node.lifecycle.push(event);
-        return nodes.set(nodeId, node);
+        return nodes.set(nodeID, node);
       },
       new Map()
     );

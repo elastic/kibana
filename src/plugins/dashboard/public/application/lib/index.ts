@@ -22,3 +22,5 @@ export { getAppStateDefaults } from './get_app_state_defaults';
 export { migrateAppState } from './migrate_app_state';
 export { getDashboardIdFromUrl } from './url';
 export { createSessionRestorationDataProvider } from './session_restoration';
+export { addHelpMenuToAppChrome } from './help_menu_util';
+export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';

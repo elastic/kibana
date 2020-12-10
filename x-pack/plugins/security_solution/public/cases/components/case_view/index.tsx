@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -11,9 +15,6 @@ import {
   EuiLoadingSpinner,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 
 import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
@@ -40,6 +41,13 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
+import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TimelineId } from '../../../../common/types/timeline';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { StatusActionButton } from '../status/button';
 
 import * as i18n from './translations';
@@ -78,12 +86,34 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
+interface Signal {
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
+interface SignalHit {
+  _id: string;
+  _index: string;
+  _source: {
+    signal: Signal;
+  };
+}
+
+export type Alert = {
+  _id: string;
+  _index: string;
+} & Signal;
+
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+    const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
+    const init = useRef(true);
 
     const {
       caseUserActions,
@@ -97,6 +127,39 @@ export const CaseComponent = React.memo<CaseProps>(
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
+
+    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
+      caseData.comments,
+    ]);
+
+    /**
+     * For the future developer: useSourcererScope is security solution dependent.
+     * You can use useSignalIndex as an alternative.
+     */
+    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
+      SourcererScopeName.detections
+    );
+
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
+      alertsQuery,
+      selectedPatterns[0]
+    );
+
+    const alerts = useMemo(
+      () =>
+        alertsData?.hits.hits.reduce<Record<string, Alert>>(
+          (acc, { _id, _index, _source }) => ({
+            ...acc,
+            [_id]: {
+              _id,
+              _index,
+              ..._source.signal,
+            },
+          }),
+          {}
+        ) ?? {},
+      [alertsData?.hits.hits]
+    );
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -266,10 +329,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
+      if (initLoadingData && !isLoadingUserActions && !isLoadingAlerts) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingAlerts, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -280,6 +343,39 @@ export const CaseComponent = React.memo<CaseProps>(
       }),
       [allCasesLink]
     );
+
+    const showAlert = useCallback(
+      (alertId: string, index: string) => {
+        dispatch(
+          timelineActions.toggleExpandedEvent({
+            timelineId: TimelineId.casePage,
+            event: {
+              eventId: alertId,
+              indexName: index,
+              loading: false,
+            },
+          })
+        );
+      },
+      [dispatch]
+    );
+
+    // useEffect used for component's initialization
+    useEffect(() => {
+      if (init.current) {
+        init.current = false;
+        // We need to create a timeline to show the details view
+        dispatch(
+          timelineActions.createTimeline({
+            id: TimelineId.casePage,
+            columns: [],
+            indexNames: [],
+            expandedEvent: {},
+            show: false,
+          })
+        );
+      }
+    }, [dispatch]);
 
     return (
       <>
@@ -327,6 +423,8 @@ export const CaseComponent = React.memo<CaseProps>(
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
+                      alerts={alerts}
+                      onShowAlertDetails={showAlert}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
@@ -381,6 +479,11 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
+        <EventDetailsFlyout
+          browserFields={browserFields}
+          docValueFields={docValueFields}
+          timelineId={TimelineId.casePage}
+        />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
     );

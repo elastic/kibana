@@ -154,10 +154,12 @@ class FilterEditorUI extends Component<Props, State> {
                     id: 'data.filter.filterEditor.createCustomLabelInputLabel',
                     defaultMessage: 'Custom label',
                   })}
+                  fullWidth
                 >
                   <EuiFieldText
                     value={`${this.state.customLabel}`}
                     onChange={this.onCustomLabelChange}
+                    fullWidth
                   />
                 </EuiFormRow>
               </div>
@@ -218,12 +220,14 @@ class FilterEditorUI extends Component<Props, State> {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.indexPatternSelectLabel',
               defaultMessage: 'Index Pattern',
             })}
           >
             <IndexPatternComboBox
+              fullWidth
               placeholder={this.props.intl.formatMessage({
                 id: 'data.filter.filterBar.indexPatternSelectPlaceholder',
                 defaultMessage: 'Select an index pattern',
@@ -263,12 +267,14 @@ class FilterEditorUI extends Component<Props, State> {
 
     return (
       <EuiFormRow
+        fullWidth
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.fieldSelectLabel',
           defaultMessage: 'Field',
         })}
       >
         <FieldComboBox
+          fullWidth
           id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
@@ -281,7 +287,6 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
-          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
@@ -293,12 +298,14 @@ class FilterEditorUI extends Component<Props, State> {
     const operators = selectedField ? getOperatorOptions(selectedField) : [];
     return (
       <EuiFormRow
+        fullWidth
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.operatorSelectLabel',
           defaultMessage: 'Operator',
         })}
       >
         <OperatorComboBox
+          fullWidth
           isDisabled={!selectedField}
           placeholder={
             selectedField
@@ -326,6 +333,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderCustomEditor() {
     return (
       <EuiFormRow
+        fullWidth
         label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
           defaultMessage: 'Elasticsearch Query DSL',
         })}
@@ -358,6 +366,7 @@ class FilterEditorUI extends Component<Props, State> {
             value={this.state.params}
             onChange={this.onParamsChange}
             data-test-subj="phraseValueInput"
+            fullWidth
           />
         );
       case 'phrases':
@@ -367,6 +376,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            fullWidth
           />
         );
       case 'range':
@@ -375,6 +385,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
+            fullWidth
           />
         );
     }
