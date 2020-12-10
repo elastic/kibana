@@ -53,7 +53,11 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
     }
   }, [content]);
 
-  return content != null ? (
+  if (!content) {
+    return null;
+  }
+
+  return (
     <>
       {isExpanded ? (
         <p>{content}</p>
@@ -68,7 +72,7 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
         </ReadMore>
       )}
     </>
-  ) : null;
+  );
 };
 
 export const LineClamp = React.memo(LineClampComponent);

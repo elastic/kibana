@@ -68,7 +68,7 @@ const ActionsComponent: React.FC<Props> = ({
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.EXPAND_EVENT}>
             <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              aria-label={i18n.COLLAPSE}
               data-test-subj="expand-event"
               disabled={expanded}
               iconType="arrowRight"

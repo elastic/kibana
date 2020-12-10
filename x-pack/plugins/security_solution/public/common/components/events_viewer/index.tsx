@@ -199,11 +199,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = () => ({
+const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   onFlyoutCollapsed: timelineActions.toggleExpandedEvent,
-});
+};
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
 

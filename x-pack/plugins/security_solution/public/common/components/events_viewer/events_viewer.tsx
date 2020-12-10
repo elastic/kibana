@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEmpty, findIndex } from 'lodash/fp';
+import { isEmpty, some } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -41,7 +43,6 @@ import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { ToggleExpandedEvent } from '../../../timelines/store/timeline/actions';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -120,7 +121,7 @@ interface Props {
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   query: Query;
-  handleCloseExpandedEvent: (args: ToggleExpandedEvent) => void;
+  handleCloseExpandedEvent: () => void;
   onRuleChange?: () => void;
   start: string;
   sort: Sort[];
@@ -238,12 +239,8 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    if (!events || findIndex((e) => e._id === expandedEvent?.eventId, events) < 0) {
-      handleCloseExpandedEvent({
-        timelineId: id,
-        event: {},
-        defaultModel,
-      });
+    if (!events || !some((e) => e._id === expandedEvent?.eventId, events)) {
+      handleCloseExpandedEvent();
     }
   }, [events, expandedEvent, handleCloseExpandedEvent, id, defaultModel]);
 
@@ -351,9 +348,11 @@ export const EventsViewer = React.memo(
     prevProps.columns === nextProps.columns &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
+    deepEqual(prevProps.defaultModel, nextProps.defaultModel) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
+    prevProps.handleCloseExpandedEvent === nextProps.handleCloseExpandedEvent &&
     prevProps.headerFilterGroup === nextProps.headerFilterGroup &&
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&

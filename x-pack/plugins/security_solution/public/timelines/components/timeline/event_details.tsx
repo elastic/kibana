@@ -83,5 +83,6 @@ export const EventDetails = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.handleOnEventClosed === nextProps.handleOnEventClosed
 );

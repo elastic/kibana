@@ -6,7 +6,6 @@
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-
 import { getOr, sortBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';

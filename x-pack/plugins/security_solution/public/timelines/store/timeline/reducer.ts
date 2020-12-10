@@ -178,18 +178,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event, defaultModel }) => {
-    return {
-      ...state,
-      timelineById: {
-        ...state.timelineById,
-        [timelineId]: {
-          ...(state.timelineById[timelineId] ?? defaultModel ?? timelineDefaults),
-          expandedEvent: event,
-        },
+  .case(toggleExpandedEvent, (state, { timelineId, event, defaultModel }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [timelineId]: {
+        ...(state.timelineById[timelineId] ?? defaultModel ?? timelineDefaults),
+        expandedEvent: event,
       },
-    };
-  })
+    },
+  }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),

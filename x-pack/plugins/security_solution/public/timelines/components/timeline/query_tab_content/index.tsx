@@ -13,7 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty, findIndex } from 'lodash/fp';
+import { isEmpty, some } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
@@ -269,7 +269,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (!events || findIndex((e) => e._id === expandedEvent.eventId, events) < 0) {
+    if (!events || !some((e) => e._id === expandedEvent.eventId, events)) {
       handleOnEventClosed();
     }
   }, [expandedEvent, handleOnEventClosed, events]);
@@ -448,6 +448,7 @@ const QueryTabContent = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+      prevProps.onEventClosed === nextProps.onEventClosed &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&

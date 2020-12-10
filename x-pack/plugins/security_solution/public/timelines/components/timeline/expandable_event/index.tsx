@@ -99,14 +99,16 @@ export const ExpandableEvent = React.memo<Props>(
     return (
       <>
         {message && (
-          <EuiDescriptionList data-test-subj="event-message" compressed>
-            <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <LineClamp content={message} />
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
+          <>
+            <EuiDescriptionList data-test-subj="event-message" compressed>
+              <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <LineClamp content={message} />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+            <EuiSpacer size="m" />
+          </>
         )}
-        <EuiSpacer size="m" />
         <EventDetails
           browserFields={browserFields}
           data={detailsData!}
