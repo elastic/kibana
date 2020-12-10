@@ -23,9 +23,9 @@ import { asTransactionRate } from '../../../../../common/utils/formatters';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { LicenseContext } from '../../../../context/license/license_context';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { ITransactionChartData } from '../../../../selectors/chart_selectors';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
+import { useTransactionThroughputChartsFetcher } from '../../../../hooks/use_transaction_throughput_chart_fetcher';
 import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
@@ -33,22 +33,24 @@ import { getResponseTimeTickFormatter } from './helper';
 import { MLHeader } from './ml_header';
 import { useFormatter } from './use_formatter';
 
-interface TransactionChartProps {
-  charts: ITransactionChartData;
-  urlParams: IUrlParams;
-  fetchStatus: FETCH_STATUS;
-}
-
-export function TransactionCharts({
-  charts,
-  urlParams,
-  fetchStatus,
-}: TransactionChartProps) {
+export function TransactionCharts() {
+  const { urlParams } = useUrlParams();
   const { transactionType } = urlParams;
 
-  const { responseTimeSeries, tpmSeries, anomalySeries } = charts;
+  const {
+    latencyChartsData,
+    latencyChartsStatus,
+  } = useTransactionLatencyChartsFetcher();
 
-  const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
+  const {
+    throughputChartsData,
+    throughputChartsStatus,
+  } = useTransactionThroughputChartsFetcher();
+
+  const { latencyTimeseries, anomalyTimeseries, mlJobId } = latencyChartsData;
+  const { throughputTimeseries } = throughputChartsData;
+
+  const { formatter, toggleSerie } = useFormatter(latencyTimeseries);
 
   return (
     <>
@@ -69,17 +71,17 @@ export function TransactionCharts({
                         hasValidMlLicense={
                           license?.getFeature('ml').isAvailable
                         }
-                        mlJobId={charts.mlJobId}
+                        mlJobId={mlJobId}
                       />
                     )}
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>
                 <TimeseriesChart
-                  fetchStatus={fetchStatus}
+                  fetchStatus={latencyChartsStatus}
                   id="transactionDuration"
-                  timeseries={responseTimeSeries || []}
+                  timeseries={latencyTimeseries}
                   yLabelFormat={getResponseTimeTickFormatter(formatter)}
-                  anomalySeries={anomalySeries}
+                  anomalySeries={anomalyTimeseries}
                   onToggleLegend={(serie) => {
                     if (serie) {
                       toggleSerie(serie);
@@ -95,9 +97,9 @@ export function TransactionCharts({
                   <span>{tpmLabel(transactionType)}</span>
                 </EuiTitle>
                 <TimeseriesChart
-                  fetchStatus={fetchStatus}
+                  fetchStatus={throughputChartsStatus}
                   id="requestPerMinutes"
-                  timeseries={tpmSeries || []}
+                  timeseries={throughputTimeseries}
                   yLabelFormat={asTransactionRate}
                 />
               </EuiPanel>
