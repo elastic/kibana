@@ -153,7 +153,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 3,
     "title": "monitoring_alert_jvm_memory_usage_label",
@@ -214,7 +213,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 4,
     "title": "monitoring_alert_jvm_memory_usage_label",
@@ -502,7 +500,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 7,
     "title": "monitoring_alert_nodes_changed_label",
@@ -563,7 +560,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 8,
     "title": "monitoring_alert_nodes_changed_label",
@@ -624,7 +620,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 9,
     "title": "monitoring_alert_disk_usage_label",
@@ -685,7 +680,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 10,
     "title": "monitoring_alert_license_expiration_label",
@@ -746,7 +740,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 11,
     "title": "monitoring_alert_license_expiration_label",
@@ -811,7 +804,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 2,
     "title": "monitoring_alert_jvm_memory_usage_label",
@@ -912,7 +904,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 4,
     "title": "monitoring_alert_nodes_changed_label",
@@ -948,7 +939,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 5,
     "title": "monitoring_alert_disk_usage_label",
@@ -984,7 +974,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 6,
     "title": "monitoring_alert_license_expiration_label",
@@ -1085,7 +1074,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 4,
     "title": "monitoring_alert_logstash_version_mismatch_label",
@@ -1121,7 +1109,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 5,
     "title": "monitoring_alert_cpu_usage_label",
@@ -1157,7 +1144,6 @@ Array [
           "updatedBy": null,
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 6,
     "title": "monitoring_alert_thread_pool_write_rejections_label",

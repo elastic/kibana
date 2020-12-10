@@ -159,7 +159,6 @@ describe('getAlertPanelsByCategory', () => {
 
   const panelTitle = 'Alerts';
   const stateFilter = (state: AlertState) => true;
-  const nextStepsFilter = (nextStep: AlertMessage) => true;
 
   describe('non setup mode', () => {
     it('should properly group for alerts in each category', () => {
@@ -173,8 +172,7 @@ describe('getAlertPanelsByCategory', () => {
         false,
         alerts,
         alertsContext,
-        stateFilter,
-        nextStepsFilter
+        stateFilter
       );
       expect(result).toMatchSnapshot();
     });
@@ -186,8 +184,7 @@ describe('getAlertPanelsByCategory', () => {
         false,
         alerts,
         alertsContext,
-        stateFilter,
-        nextStepsFilter
+        stateFilter
       );
       expect(result).toMatchSnapshot();
     });
@@ -203,8 +200,7 @@ describe('getAlertPanelsByCategory', () => {
         false,
         alerts,
         alertsContext,
-        stateFilter,
-        nextStepsFilter
+        stateFilter
       );
       expect(result).toMatchSnapshot();
     });
@@ -217,27 +213,13 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_DISK_USAGE, 1, 0),
         getAlert(ALERT_LICENSE_EXPIRATION, 2, 2),
       ];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        true,
-        alerts,
-        alertsContext,
-        stateFilter,
-        nextStepsFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
       const alerts = [getAlert(ALERT_MEMORY_USAGE, 2, 0)];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        true,
-        alerts,
-        alertsContext,
-        stateFilter,
-        nextStepsFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
@@ -247,14 +229,7 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_CPU_USAGE, 0, 1),
         getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0, 0),
       ];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        true,
-        alerts,
-        alertsContext,
-        stateFilter,
-        nextStepsFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
   });

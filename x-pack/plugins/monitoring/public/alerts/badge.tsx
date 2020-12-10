@@ -11,7 +11,7 @@ import { CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertMessage, AlertState } from '../../common/types/alerts';
+import { AlertState } from '../../common/types/alerts';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { AlertsContext } from './context';
@@ -48,10 +48,9 @@ const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType'
 interface Props {
   alerts: CommonAlertStatus[];
   stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { stateFilter = () => true } = props;
   // We do not always have the alerts that each consumer wants due to licensing
   const alerts = props.alerts.filter(Boolean);
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
@@ -91,15 +90,8 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   const panels = showByNode
-    ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter, nextStepsFilter)
-    : getAlertPanelsByCategory(
-        PANEL_TITLE,
-        inSetupMode,
-        alerts,
-        alertsContext,
-        stateFilter,
-        nextStepsFilter
-      );
+    ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
+    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext, stateFilter);
 
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(

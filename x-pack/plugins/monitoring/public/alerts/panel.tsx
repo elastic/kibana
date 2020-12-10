@@ -21,10 +21,9 @@ import { AlertConfiguration } from './configuration';
 interface Props {
   alert: CommonAlert;
   alertState?: CommonAlertState;
-  nextStepsFilter?: (nextStep: AlertMessage) => boolean;
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
-  const { alert, alertState, nextStepsFilter = () => true } = props;
+  const { alert, alertState } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alert) {
@@ -42,11 +41,9 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const nextStepsUi =
     alertState.state.ui.message.nextSteps && alertState.state.ui.message.nextSteps.length ? (
       <EuiListGroup>
-        {alertState.state.ui.message.nextSteps
-          .filter(nextStepsFilter)
-          .map((step: AlertMessage, index: number) => (
-            <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
-          ))}
+        {alertState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
+          <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
+        ))}
       </EuiListGroup>
     ) : null;
 

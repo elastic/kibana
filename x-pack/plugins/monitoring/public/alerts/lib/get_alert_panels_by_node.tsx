@@ -20,8 +20,7 @@ import { sortByNewestAlert } from './sort_by_newest_alert';
 export function getAlertPanelsByNode(
   panelTitle: string,
   alerts: CommonAlertStatus[],
-  stateFilter: (state: AlertState) => boolean,
-  nextStepsFilter: (nextStep: AlertMessage) => boolean
+  stateFilter: (state: AlertState) => boolean
 ) {
   const alertsByNodes: {
     [uuid: string]: {
@@ -118,9 +117,7 @@ export function getAlertPanelsByNode(
             id: ++tertiaryPanelIndex,
             title: alert.name,
             width: 400,
-            content: (
-              <AlertPanel alert={alert} alertState={alertState} nextStepsFilter={nextStepsFilter} />
-            ),
+            content: <AlertPanel alert={alert} alertState={alertState} />,
           });
         }
       }

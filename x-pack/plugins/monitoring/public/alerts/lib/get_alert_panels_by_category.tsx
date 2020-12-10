@@ -19,8 +19,7 @@ export function getAlertPanelsByCategory(
   inSetupMode: boolean,
   alerts: CommonAlertStatus[],
   alertsContext: IAlertsContext,
-  stateFilter: (state: AlertState) => boolean,
-  nextStepsFilter: (nextStep: AlertMessage) => boolean
+  stateFilter: (state: AlertState) => boolean
 ) {
   const menu = [];
   for (const category of ALERT_PANEL_MENU) {
@@ -135,7 +134,7 @@ export function getAlertPanelsByCategory(
           id: ++tertiaryPanelIndex,
           title: `${alert.name}`,
           width: 400,
-          content: <AlertPanel alert={alertStatus.rawAlert} nextStepsFilter={nextStepsFilter} />,
+          content: <AlertPanel alert={alertStatus.rawAlert} />,
         });
       }
     }
@@ -208,9 +207,7 @@ export function getAlertPanelsByCategory(
             id: ++tertiaryPanelIndex2,
             title: `${alert.name}`,
             width: 400,
-            content: (
-              <AlertPanel alert={alert} alertState={state} nextStepsFilter={nextStepsFilter} />
-            ),
+            content: <AlertPanel alert={alert} alertState={state} />,
           });
         }
       }

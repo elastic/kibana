@@ -143,7 +143,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 3,
     "title": "monitoring_alert_jvm_memory_usage_label",
@@ -204,7 +203,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 4,
     "title": "monitoring_alert_jvm_memory_usage_label",
@@ -406,7 +404,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 3,
     "title": "monitoring_alert_nodes_changed_label",
@@ -467,7 +464,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 4,
     "title": "monitoring_alert_disk_usage_label",
@@ -528,7 +524,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 5,
     "title": "monitoring_alert_license_expiration_label",
@@ -589,7 +584,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 6,
     "title": "monitoring_alert_nodes_changed_label",
@@ -650,7 +644,6 @@ Array [
           },
         }
       }
-      nextStepsFilter={[Function]}
     />,
     "id": 7,
     "title": "monitoring_alert_license_expiration_label",

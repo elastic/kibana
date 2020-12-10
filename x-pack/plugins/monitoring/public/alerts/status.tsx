@@ -18,16 +18,9 @@ interface Props {
   showBadge: boolean;
   showOnlyCount: boolean;
   stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const {
-    alerts,
-    showBadge = false,
-    showOnlyCount = false,
-    stateFilter = () => true,
-    nextStepsFilter = () => true,
-  } = props;
+  const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alerts) {
@@ -78,13 +71,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge || inSetupMode) {
-    return (
-      <AlertsBadge
-        alerts={Object.values(alerts)}
-        stateFilter={stateFilter}
-        nextStepsFilter={nextStepsFilter}
-      />
-    );
+    return <AlertsBadge alerts={Object.values(alerts)} stateFilter={stateFilter} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

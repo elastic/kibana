@@ -26,10 +26,9 @@ import { AlertConfiguration } from './configuration';
 interface Props {
   alerts: AlertsByName;
   stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { alerts, stateFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (inSetupMode) {
@@ -84,11 +83,9 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             paddingLeft: `0.5rem`,
           }}
         >
-          {(status.state.state.ui.message.nextSteps || [])
-            .filter(nextStepsFilter)
-            .map((step: AlertMessage) => {
-              return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
-            })}
+          {(status.state.state.ui.message.nextSteps || []).map((step: AlertMessage) => {
+            return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
+          })}
           <EuiListGroupItem
             label={<AlertConfiguration alert={status.alert.rawAlert} compressed />}
           />
