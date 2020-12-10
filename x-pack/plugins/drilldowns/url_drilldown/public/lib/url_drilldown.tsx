@@ -138,11 +138,13 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     };
   };
 
-  private readonly getVariableList = (context: ActionFactoryContext): string[] => {
-    return [
-      ...getEventVariableList(context).sort(),
-      ...Object.keys(getFlattenedObject(getPanelVariables(context))).sort(),
-      ...Object.keys(getFlattenedObject(this.deps.getGlobalScope())).sort(),
-    ];
+  public readonly getVariableList = (context: ActionFactoryContext): string[] => {
+    const eventVariables = getEventVariableList(context);
+    const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
+      (key) => 'context.panel.' + key
+    );
+    const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
+
+    return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
   };
 }
