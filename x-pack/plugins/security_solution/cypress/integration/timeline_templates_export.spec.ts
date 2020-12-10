@@ -5,41 +5,40 @@
  */
 
 import { exportTimeline } from '../tasks/timelines';
-import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { timeline as timelineTemplate } from '../objects/timeline';
+import {
+  expectedExportedTimelineTemplate,
+  timeline as timelineTemplate,
+} from '../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../urls/navigation';
-import { addNameToTimeline, closeTimeline, createNewTimelineTemplate } from '../tasks/timeline';
+import {
+  createTimelineTemplate,
+  deleteTimeline as deleteTimelineTemplate,
+} from '../tasks/api_calls/timelines';
 
 describe('Export timelines', () => {
+  let templateResponse: Cypress.Response;
+  let templateId: string;
+
   before(() => {
-    esArchiverLoad('timeline');
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
-    cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    createTimelineTemplate(timelineTemplate).then((response) => {
+      templateResponse = response;
+      templateId = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
-  it('Exports a custom timeline template', async () => {
+  after(() => {
+    deleteTimelineTemplate(templateId);
+  });
+
+  it('Exports a custom timeline template', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    createNewTimelineTemplate();
-    addNameToTimeline(timelineTemplate.title);
-    closeTimeline();
+    exportTimeline(templateId!);
 
-    const result = await cy.wait('@timeline').promisify();
-
-    const timelineId = JSON.parse(result.xhr.responseText).data.persistTimeline.timeline
-      .savedObjectId;
-    const templateTimelineId = JSON.parse(result.xhr.responseText).data.persistTimeline.timeline
-      .templateTimelineId;
-
-    await exportTimeline(timelineId);
-
-    cy.wait('@export').then((response) => {
-      cy.wrap(JSON.parse(response.xhr.responseText).templateTimelineId).should(
-        'eql',
-        templateTimelineId
-      );
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response!.body).should('eql', expectedExportedTimelineTemplate(templateResponse));
     });
   });
 });

@@ -124,7 +124,7 @@ export interface TimelineModel {
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort;
+  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */

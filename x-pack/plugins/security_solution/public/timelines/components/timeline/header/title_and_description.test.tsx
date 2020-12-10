@@ -7,19 +7,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { TimelineTitleAndDescription } from './title_and_description';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn(),
-}));
-
-jest.mock('../../../../timelines/store/timeline', () => ({
-  timelineSelectors: {
-    selectTimeline: jest.fn(),
-  },
+  useDeepEqualSelector: jest.fn(),
 }));
 
 jest.mock('../properties/use_create_timeline', () => ({
@@ -47,7 +41,7 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
         savedObjectId: null,
@@ -60,7 +54,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
@@ -78,7 +72,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show correct header for save timeline template modal', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
         savedObjectId: null,
@@ -124,7 +118,7 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
         savedObjectId: '1234',
@@ -137,7 +131,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
@@ -155,7 +149,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show correct header for save timeline template modal', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
         savedObjectId: '1234',
@@ -197,7 +191,7 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
         savedObjectId: null,
@@ -211,7 +205,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
@@ -237,7 +231,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('get discardTimelineTemplateButton with correct props', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
         savedObjectId: null,
