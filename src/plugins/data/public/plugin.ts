@@ -48,7 +48,6 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../embeddable/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -125,14 +124,14 @@ export class DataPublicPlugin
     );
 
     uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
+      'SELECT_RANGE_TRIGGER',
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
+      'VALUE_CLICK_TRIGGER',
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
