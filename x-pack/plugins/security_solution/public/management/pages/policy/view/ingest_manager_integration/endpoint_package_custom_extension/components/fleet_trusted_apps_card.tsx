@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { ApplicationStart } from 'kibana/public';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,6 +19,7 @@ import { TrustedAppsListPageRouteState } from '../../../../../../../../common/en
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { LinkWithIcon } from './link_with_icon';
+import { TrustedAppItemsSummary } from './trusted_app_items_summary';
 
 export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
   const {
@@ -26,7 +27,6 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
       application: { getUrlForApp },
     },
   } = useKibana<{ application: ApplicationStart }>();
-  const [total] = useState<number>(0);
 
   const trustedAppsListUrlPath = getTrustedAppsListPath();
 
@@ -54,25 +54,19 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem>
           <EuiText>
             <h4>
               <FormattedMessage
-                id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppLabel"
+                id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
                 defaultMessage="Trusted Applications"
               />
             </h4>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.xpack.securitySolution.endpoint.fleetCustomExtension.totalLabel"
-              defaultMessage="Total"
-            />
-            <EuiBadge color="primary">{total}</EuiBadge>
-          </EuiText>
+          <TrustedAppItemsSummary />
         </EuiFlexItem>
         <EuiFlexItem>
           <LinkWithIcon
