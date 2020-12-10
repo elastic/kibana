@@ -13,6 +13,8 @@ import {
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
+  PackageSpecManifest,
+  PackageSpecDataStreamManifest,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { unpackBufferEntries } from './index';
@@ -211,7 +213,10 @@ function parseAndVerifyDataStreams(
 
   return dataStreams;
 }
-function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+function parseAndVerifyStreams(
+  manifest: PackageSpecDataStreamManifest,
+  dataStreamPath: string
+): RegistryStream[] {
   const streams: RegistryStream[] = [];
   const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
@@ -278,10 +283,10 @@ function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVars
   }
   return vars;
 }
-function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+function parseAndVerifyPolicyTemplates(manifest: PackageSpecManifest): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
-  if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
+  if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
     manifestPolicyTemplates.forEach((policyTemplate: any) => {
       const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
       if (!(name && policyTemplateTitle && description && inputs)) {

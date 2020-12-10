@@ -11,5 +11,6 @@ export * from './data_stream';
 export * from './output';
 export * from './epm';
 export * from './package_spec';
+export * from './package_spec_data_stream';
 export * from './enrollment_api_key';
 export * from './settings';
