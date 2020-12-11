@@ -287,13 +287,15 @@ export function parseAndVerifyPolicyTemplates(
   if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
     manifestPolicyTemplates.forEach((policyTemplate: any) => {
       const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
-      if (!(name && policyTemplateTitle && description && inputs)) {
+      if (!(name && policyTemplateTitle && description)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in policy template: ${policyTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${policyTemplate}`
         );
       }
-
-      const parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      let parsedInputs: RegistryInput[] | undefined = [];
+      if (inputs) {
+        parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      }
 
       // defaults to true if undefined, but may be explicitly set to false.
       let parsedMultiple = true;
