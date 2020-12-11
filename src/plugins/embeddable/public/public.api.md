@@ -32,8 +32,7 @@ import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import { ExclusiveUnion } from '@elastic/eui';
-import { ExpressionAstFunction } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup as HttpSetup_2 } from 'kibana/public';
@@ -312,6 +311,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
+    getUpdated$(): Readonly<Rx.Observable<void>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)
