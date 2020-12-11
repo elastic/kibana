@@ -284,3 +284,9 @@ export const setActiveTabTimeline = actionCreator<{
   id: string;
   activeTab: TimelineTabs;
 }>('SET_ACTIVE_TAB_TIMELINE');
+
+export const toggleModalSaveTimeline = actionCreator<{
+  id: string;
+  showModalSaveTimeline: boolean;
+  nextAppId?: string;
+}>('TOGGLE_MODAL_SAVE_TIMELINE');

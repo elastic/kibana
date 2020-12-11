@@ -116,6 +116,10 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
+  saveModal: {
+    show: boolean;
+    nextAppId?: string;
+  };
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;

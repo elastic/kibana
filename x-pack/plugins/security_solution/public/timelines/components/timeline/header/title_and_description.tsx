@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
@@ -32,11 +32,16 @@ import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
+  closeSaveTimeline: () => void;
   initialFocus: 'title' | 'description';
+  openSaveTimeline: () => void;
   timelineId: string;
-  toggleSaveTimeline: () => void;
   showWarning?: boolean;
 }
+
+const StyledEuiOverlayMask = styled(EuiOverlayMask)`
+  z-index: ${({ theme }) => theme.eui.euiZLevel6 - 1};
+`;
 
 const Wrapper = styled(EuiModalBody)`
   .euiFormRow {
@@ -66,13 +71,13 @@ const usePrevious = (value: unknown) => {
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ initialFocus, timelineId, toggleSaveTimeline, showWarning }) => {
+  ({ closeSaveTimeline, initialFocus, openSaveTimeline, timelineId, showWarning }) => {
     // TODO: Refactor to use useForm() instead
     const [isFormSubmitted, setFormSubmitted] = useState(false);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
 
-    const { isSaving, savedObjectId, title, timelineType } = timeline;
+    const { isSaving, status, title, timelineType } = timeline;
 
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
@@ -108,12 +113,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
     useEffect(() => {
       if (isFormSubmitted && !isSaving && prevIsSaving) {
-        toggleSaveTimeline();
+        closeSaveTimeline();
       }
-    }, [isFormSubmitted, isSaving, prevIsSaving, toggleSaveTimeline]);
+    }, [isFormSubmitted, isSaving, prevIsSaving, closeSaveTimeline]);
 
     const modalHeader =
-      savedObjectId == null
+      status === TimelineStatus.draft
         ? timelineType === TimelineType.template
           ? i18n.SAVE_TIMELINE_TEMPLATE
           : i18n.SAVE_TIMELINE
@@ -122,7 +127,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
         : i18n.NAME_TIMELINE;
 
     const saveButtonTitle =
-      savedObjectId == null && showWarning
+      status === TimelineStatus.draft && showWarning
         ? timelineType === TimelineType.template
           ? i18n.SAVE_TIMELINE_TEMPLATE
           : i18n.SAVE_TIMELINE
@@ -132,14 +137,15 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       timelineType,
     ]);
 
-    const descriptionLabel = savedObjectId == null ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
+    const descriptionLabel =
+      status === TimelineStatus.draft ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
 
     return (
-      <EuiOverlayMask>
+      <StyledEuiOverlayMask>
         <EuiModal
           data-test-subj="save-timeline-modal"
           maxWidth={NOTES_PANEL_WIDTH}
-          onClose={toggleSaveTimeline}
+          onClose={closeSaveTimeline}
         >
           {isSaving && (
             <EuiProgress
@@ -192,12 +198,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             <EuiFlexItem grow={false}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false} component="span">
-                  {savedObjectId == null && showWarning ? (
+                  {status === TimelineStatus.draft && showWarning ? (
                     discardTimelineButton
                   ) : (
                     <EuiButton
                       fill={false}
-                      onClick={toggleSaveTimeline}
+                      onClick={openSaveTimeline}
                       isDisabled={isSaving}
                       data-test-subj="close-button"
                     >
@@ -219,7 +225,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             </EuiFlexItem>
           </Wrapper>
         </EuiModal>
-      </EuiOverlayMask>
+      </StyledEuiOverlayMask>
     );
   }
 );
