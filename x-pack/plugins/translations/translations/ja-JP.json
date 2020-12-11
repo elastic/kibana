@@ -17737,7 +17737,6 @@
     "xpack.securitySolution.notes.notesTitle": "メモ",
     "xpack.securitySolution.notes.previewMarkdownTitle": "プレビュー（マークダウン）",
     "xpack.securitySolution.notes.search.FilterByUserOrNotePlaceholder": "ユーザーまたはメモでフィルター",
-    "xpack.securitySolution.open.timeline.allActionsTooltip": "すべてのアクション",
     "xpack.securitySolution.open.timeline.batchActionsTitle": "一斉アクション",
     "xpack.securitySolution.open.timeline.cancelButton": "キャンセル",
     "xpack.securitySolution.open.timeline.collapseButton": "縮小",

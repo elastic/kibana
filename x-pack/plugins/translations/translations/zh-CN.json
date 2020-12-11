@@ -17755,7 +17755,6 @@
     "xpack.securitySolution.notes.notesTitle": "备注",
     "xpack.securitySolution.notes.previewMarkdownTitle": "预览 (Markdown)",
     "xpack.securitySolution.notes.search.FilterByUserOrNotePlaceholder": "按用户或备注筛选",
-    "xpack.securitySolution.open.timeline.allActionsTooltip": "所有操作",
     "xpack.securitySolution.open.timeline.batchActionsTitle": "批处理操作",
     "xpack.securitySolution.open.timeline.cancelButton": "取消",
     "xpack.securitySolution.open.timeline.collapseButton": "折叠",
