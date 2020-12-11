@@ -252,7 +252,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ timelineId, event: {} });
+    onEventClosed({ timelineId });
     setShowEventDetailsColumn(false);
 
     if (timelineId === TimelineId.active) {
