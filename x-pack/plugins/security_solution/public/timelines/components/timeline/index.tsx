@@ -17,19 +17,12 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { TimelineType } from '../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
-import { HideShowContainer } from './styles';
+import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
-
-const TimelineContainer = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-`;
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -42,13 +35,24 @@ export interface Props {
   timelineId: string;
 }
 
+const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const isSaving = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
+  );
+
+  return isSaving ? <EuiProgress size="s" color="primary" position="absolute" /> : null;
+};
+
+const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
+
 const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { graphEventId, isSaving, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
+  const { graphEventId, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'isSaving', 'savedObjectId', 'timelineType'],
+      ['graphEventId', 'savedObjectId', 'timelineType'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -70,8 +74,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   }, []);
 
   return (
-    <TimelineContainer data-test-subj="timeline">
-      {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
+    <TimelineContainer data-test-subj="timeline" data-timeline-id={timelineId}>
+      <TimelineSavingProgress timelineId={timelineId} />
       {timelineType === TimelineType.template && (
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}

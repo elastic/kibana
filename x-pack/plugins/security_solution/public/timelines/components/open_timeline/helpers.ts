@@ -108,21 +108,20 @@ const parseString = (params: string) => {
   }
 };
 
-const setTimelineColumn = (col: ColumnHeaderResult) => {
-  const timelineCols: ColumnHeaderOptions = {
-    ...col,
-    columnHeaderType: defaultColumnHeaderType,
-    id: col.id != null ? col.id : 'unknown',
-    placeholder: col.placeholder != null ? col.placeholder : undefined,
-    category: col.category != null ? col.category : undefined,
-    description: col.description != null ? col.description : undefined,
-    example: col.example != null ? col.example : undefined,
-    type: col.type != null ? col.type : undefined,
-    aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-    width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
-  };
-  return timelineCols;
-};
+const setTimelineColumn = (col: ColumnHeaderResult) =>
+  Object.entries(col).reduce<ColumnHeaderOptions>(
+    (acc, [key, value]) => {
+      if (key !== 'id' && value != null) {
+        return { ...acc, [key]: value };
+      }
+      return acc;
+    },
+    {
+      columnHeaderType: defaultColumnHeaderType,
+      id: col.id != null ? col.id : 'unknown',
+      width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+    }
+  );
 
 const setTimelineFilters = (filter: FilterTimelineResult) => ({
   $state: {

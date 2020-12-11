@@ -52,6 +52,14 @@ export class BasePathProxyServer {
     return this.devConfig.basePathProxyTargetPort;
   }
 
+  public get host() {
+    return this.httpConfig.host;
+  }
+
+  public get port() {
+    return this.httpConfig.port;
+  }
+
   constructor(
     private readonly log: Logger,
     private readonly httpConfig: HttpConfig,
@@ -92,7 +100,10 @@ export class BasePathProxyServer {
     await this.server.start();
 
     this.log.info(
-      `basepath proxy server running at ${this.server.info.uri}${this.httpConfig.basePath}`
+      `basepath proxy server running at ${Url.format({
+        host: this.server.info.uri,
+        pathname: this.httpConfig.basePath,
+      })}`
     );
   }
 

@@ -160,12 +160,9 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const content = useMemo(() => (title.length ? title : placeholder), [title, placeholder]);
 
   return (
-    <>
-      <EuiText>
-        <h3 data-test-subj="timeline-title">{content}</h3>
-      </EuiText>
-      <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
-    </>
+    <EuiText>
+      <h3 data-test-subj="timeline-title">{content}</h3>
+    </EuiText>
   );
 };
 
@@ -182,12 +179,9 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   ]);
 
   return (
-    <>
-      <EuiText size="s" data-test-subj="timeline-description">
-        {content}
-      </EuiText>
-      <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
-    </>
+    <EuiText size="s" data-test-subj="timeline-description">
+      {content}
+    </EuiText>
   );
 };
 
@@ -233,9 +227,11 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
       <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
         <RowFlexItem>
           <TimelineName timelineId={timelineId} />
+          <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
         </RowFlexItem>
         <RowFlexItem>
           <TimelineDescription timelineId={timelineId} />
+          <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
         </RowFlexItem>
         <EuiFlexItem>
           <TimelineStatusInfo timelineId={timelineId} />
