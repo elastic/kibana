@@ -147,6 +147,7 @@ export async function getAsset(opts: {
 
   return storedAsset;
 }
+
 export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
@@ -162,22 +163,13 @@ export const getEsPackage = async (
   // so we don't need to do this again as this was already done either in registry or through upload
 
   const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
-  const soResManifest = await savedObjectsClient.find<PackageAsset>({
-    type: ASSETS_SAVED_OBJECT_TYPE,
-    perPage: 1,
-    page: 1,
-    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${manifestPath}`,
-  });
-  const packageInfo = yaml.load(soResManifest.saved_objects[0].attributes.data_utf8);
+  const soResManifest = await getAsset({ path: manifestPath, savedObjectsClient });
+  if (!soResManifest) throw new Error(`cannot find ${manifestPath}`);
+  const packageInfo = yaml.load(soResManifest.data_utf8);
 
   const readmePath = `${pkgName}-${pkgVersion}/docs/README.md`;
-  const readmeRes = await savedObjectsClient.find<PackageAsset>({
-    type: ASSETS_SAVED_OBJECT_TYPE,
-    perPage: 1,
-    page: 1,
-    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${readmePath}`,
-  });
-  if (readmeRes.total > 0) {
+  const readmeRes = await getAsset({ path: readmePath, savedObjectsClient });
+  if (readmeRes) {
     packageInfo.readme = `package/${readmePath}`;
   }
 
@@ -195,15 +187,12 @@ export const getEsPackage = async (
   await Promise.all(
     dataStreamPaths.map(async (dataStreamPath) => {
       const dataStreamManifestPath = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
-      const soResDataStreamManifest = await savedObjectsClient.find<PackageAsset>({
-        type: ASSETS_SAVED_OBJECT_TYPE,
-        perPage: 1,
-        page: 1,
-        filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${dataStreamManifestPath}`,
+      const soResDataStreamManifest = await getAsset({
+        path: dataStreamManifestPath,
+        savedObjectsClient,
       });
-      const dataStreamManifest = yaml.load(
-        soResDataStreamManifest.saved_objects[0].attributes.data_utf8
-      );
+      if (!soResDataStreamManifest) throw new Error(`cannot find ${dataStreamPath}`);
+      const dataStreamManifest = yaml.load(soResDataStreamManifest.data_utf8);
 
       const {
         title: dataStreamTitle,
