@@ -130,6 +130,9 @@ describe('migrationsStateActionMachine', () => {
           Array [
             "[.my-so-index] LEGACY_DELETE -> DONE",
           ],
+          Array [
+            "[.my-so-index] Migration completed after 0ms",
+          ],
         ],
         "log": Array [],
         "trace": Array [],

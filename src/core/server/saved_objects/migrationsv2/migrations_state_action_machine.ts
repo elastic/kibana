@@ -18,6 +18,7 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
@@ -94,6 +95,7 @@ export async function migrationStateActionMachine({
   model: Model<State>;
 }) {
   const executionLog: ExecutionLog = [];
+  const starteTime = performance.now();
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -127,19 +129,23 @@ export async function migrationStateActionMachine({
       }
     );
 
+    const elapsedMs = performance.now() - starteTime;
     if (finalState.controlState === 'DONE') {
+      logger.info(
+        indexLogMessagePrefix(finalState) + `Migration completed after ${Math.round(elapsedMs)}ms`
+      );
       if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {
         return {
           status: 'migrated' as const,
           destIndex: finalState.targetIndex,
           sourceIndex: finalState.sourceIndex.value,
-          elapsedMs: 0,
+          elapsedMs,
         };
       } else {
         return {
           status: 'patched' as const,
           destIndex: finalState.targetIndex,
-          elapsedMs: 0,
+          elapsedMs,
         };
       }
     } else if (finalState.controlState === 'FATAL') {
