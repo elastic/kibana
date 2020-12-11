@@ -320,7 +320,7 @@ export interface IndexTemplate {
     mappings: any;
     aliases: object;
   };
-  data_stream: object;
+  data_stream: { hidden?: boolean };
   composed_of: string[];
   _meta: object;
 }

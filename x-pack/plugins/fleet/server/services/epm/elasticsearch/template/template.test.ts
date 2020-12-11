@@ -65,24 +65,24 @@ test('adds hidden field correctly', () => {
 
   const templateWithHidden = getTemplate({
     type: 'logs',
-    templateWithHiddenName,
+    templateName: templateWithHiddenName,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
     hidden: true,
   });
-  expect(templateWithHidden.data_stream.hidden.toStrictEqual(true));
+  expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
   const templateWithoutHiddenName = 'logs-nginx-access-efgh';
 
-  const template = getTemplate({
+  const templateWithoutHidden = getTemplate({
     type: 'logs',
-    templateWithoutHiddenName,
+    templateName: templateWithoutHiddenName,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
   });
-  expect(template.data_stream.hidden.toStrictEqual(false));
+  expect(templateWithoutHidden.data_stream.hidden).toEqual(false);
 });
 
 test('tests loading base.yml', () => {
