@@ -13,10 +13,9 @@
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
   "requiredBundles": [
-    "embeddable",
-    "inspector",
-    "kibanaReact",
+    "usageCollection",
     "kibanaUtils",
-    "usageCollection"
+    "kibanaReact",
+    "inspector"
   ]
 }
