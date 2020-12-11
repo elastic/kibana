@@ -8,7 +8,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { Raw, Snippet } from '../../types';
+import { FieldType, Raw, Snippet } from './types';
 
 import './result_field_value.scss';
 
@@ -40,7 +40,7 @@ const isFieldValueEmpty = (type?: string, raw?: Raw, snippet?: Snippet) => {
 interface Props {
   raw?: Raw;
   snippet?: Snippet;
-  type?: string;
+  type?: FieldType;
   className?: string;
 }
 
