@@ -56,7 +56,7 @@ export interface UseTimelineEventsProps {
   fields: string[];
   indexNames: string[];
   limit: number;
-  sort: SortField;
+  sort: SortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
 }
@@ -65,10 +65,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = {
-  field: '@timestamp',
-  direction: Direction.asc,
-};
+export const initSortDefault = [
+  {
+    field: '@timestamp',
+    direction: Direction.asc,
+  },
+];
 
 function usePreviousRequest(value: TimelineEventsAllRequestOptions | null) {
   const ref = useRef<TimelineEventsAllRequestOptions | null>(value);

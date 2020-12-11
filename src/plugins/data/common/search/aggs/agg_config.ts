@@ -23,7 +23,7 @@ import { Assign, Ensure } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import {
-  ExpressionAstFunction,
+  ExpressionAstExpression,
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
@@ -316,9 +316,9 @@ export class AggConfig {
   }
 
   /**
-   * @returns Returns an ExpressionAst representing the function for this agg type.
+   * @returns Returns an ExpressionAst representing the this agg type.
    */
-  toExpressionAst(): ExpressionAstFunction | undefined {
+  toExpressionAst(): ExpressionAstExpression | undefined {
     const functionName = this.type && this.type.expressionName;
     const { type, ...rest } = this.serialize();
     if (!functionName || !rest.params) {
@@ -334,13 +334,16 @@ export class AggConfig {
         // If the param provides `toExpressionAst`, we call it with the value
         const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
         if (paramExpressionAst) {
-          acc[key] = [
-            {
-              type: 'expression',
-              chain: [paramExpressionAst],
-            },
-          ];
+          acc[key] = [paramExpressionAst];
         }
+      } else if (value && Array.isArray(value)) {
+        // For array params which don't provide `toExpressionAst`, we stringify
+        // if it's an array of objects, otherwise we keep it as-is
+        const definedValues = value.filter(
+          (v) => typeof v !== 'undefined' && v !== null
+        ) as ExpressionAstArgument[];
+        acc[key] =
+          typeof definedValues[0] === 'object' ? [JSON.stringify(definedValues)] : definedValues;
       } else if (typeof value === 'object') {
         // For object params which don't provide `toExpressionAst`, we stringify
         acc[key] = [JSON.stringify(value)];
@@ -353,15 +356,20 @@ export class AggConfig {
     }, {} as Record<string, ExpressionAstArgument[]>);
 
     return {
-      type: 'function',
-      function: functionName,
-      arguments: {
-        ...params,
-        // Expression args which are provided to all functions
-        id: [this.id],
-        enabled: [this.enabled],
-        ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
-      },
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: functionName,
+          arguments: {
+            ...params,
+            // Expression args which are provided to all functions
+            id: [this.id],
+            enabled: [this.enabled],
+            ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
+          },
+        },
+      ],
     };
   }
 

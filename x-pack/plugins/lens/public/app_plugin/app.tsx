@@ -690,7 +690,7 @@ export function App({
       </div>
       <SaveModal
         isVisible={state.isSaveModalVisible}
-        originatingApp={incomingState?.originatingApp}
+        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsClient={savedObjectsClient}
         savedObjectsTagging={savedObjectsTagging}
