@@ -22,7 +22,7 @@ import { KibanaMetric } from '../metrics';
  *  - requests
  *  - response times
  */
-export async function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
+export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanas');
 
   const config = req.server.config();
@@ -63,7 +63,7 @@ export async function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const instances = await callWithRequest(req, 'search', params).then((resp) => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     const instances = get(resp, 'hits.hits', []);
 
     return instances.map((hit) => {
@@ -73,6 +73,4 @@ export async function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
       };
     });
   });
-
-  return instances;
 }

@@ -71,7 +71,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge || inSetupMode) {
-    return <AlertsBadge alerts={Object.values(alerts)} stateFilter={stateFilter} />;
+    return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

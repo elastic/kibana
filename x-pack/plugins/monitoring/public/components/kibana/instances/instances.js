@@ -90,9 +90,7 @@ const getColumns = (setupMode, alerts) => {
       field: 'isOnline',
       width: '175px',
       sortable: true,
-      render: () => {
-        return <AlertsStatus showBadge={true} alerts={alerts} />;
-      },
+      render: () => <AlertsStatus showBadge={true} alerts={alerts} />,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {

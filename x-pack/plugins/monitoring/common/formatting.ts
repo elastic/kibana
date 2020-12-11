@@ -34,16 +34,12 @@ export function shortenPipelineHash(hash: string) {
 }
 
 export function getDateFromNow(timestamp: string | number | Date, tz: string) {
-  // const timestamp = state.state.ui.triggeredMS;
-  // const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
   return moment(timestamp)
     .tz(tz === 'Browser' ? moment.tz.guess() : tz)
     .fromNow();
 }
 
 export function getCalendar(timestamp: string | number | Date, tz: string) {
-  // const timestamp = state.state.ui.triggeredMS;
-  // const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
   return moment(timestamp)
     .tz(tz === 'Browser' ? moment.tz.guess() : tz)
     .calendar();

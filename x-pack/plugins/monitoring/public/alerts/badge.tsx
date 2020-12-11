@@ -44,13 +44,13 @@ const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType'
 });
 
 interface Props {
-  alerts: CommonAlertStatus[];
+  alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
   // We do not always have the alerts that each consumer wants due to licensing
   const { stateFilter = () => true } = props;
-  const alerts = props.alerts.filter(Boolean);
+  const alerts = Object.values(props.alerts).filter((alertItem) => Boolean(alertItem?.rawAlert));
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);

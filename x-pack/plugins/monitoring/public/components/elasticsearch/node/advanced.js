@@ -20,7 +20,7 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertsCallout } from '../../../alerts/callout';
 
-export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
+export const AdvancedNode = ({ nodeSummary, metrics, alerts, nodeId, ...props }) => {
   const metricsToShow = [
     metrics.node_gc,
     metrics.node_gc_time,
@@ -54,7 +54,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
           <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout alerts={alerts} />
+        <AlertsCallout alerts={alerts} stateFilter={(state) => state.nodeId === nodeId} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
