@@ -315,7 +315,6 @@ export async function installTemplate({
     packageName,
     composedOfTemplates,
     ilmPolicy: dataStream.ilm_policy,
-    hidden: dataStream.hidden,
   });
 
   // TODO: Check return values for errors
