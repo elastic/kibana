@@ -118,7 +118,7 @@ describe('POST /api/saved_objects/_export', () => {
       })
     );
     expect(coreUsageStatsClient.incrementSavedObjectsExport).toHaveBeenCalledWith({
-      headers: expect.anything(),
+      request: expect.anything(),
       types: ['search'],
       supportedTypes: ['index-pattern', 'search'],
     });

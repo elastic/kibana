@@ -1520,10 +1520,22 @@
         "apiCalls.savedObjectsImport.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsImport.kibanaRequest.yes": {
+        "apiCalls.savedObjectsImport.namespace.default.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsImport.kibanaRequest.no": {
+        "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no": {
           "type": "long"
         },
         "apiCalls.savedObjectsImport.createNewCopiesEnabled.yes": {
@@ -1541,10 +1553,22 @@
         "apiCalls.savedObjectsResolveImportErrors.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes": {
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no": {
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no": {
           "type": "long"
         },
         "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes": {
@@ -1556,10 +1580,22 @@
         "apiCalls.savedObjectsExport.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsExport.kibanaRequest.yes": {
+        "apiCalls.savedObjectsExport.namespace.default.total": {
           "type": "long"
         },
-        "apiCalls.savedObjectsExport.kibanaRequest.no": {
+        "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no": {
           "type": "long"
         },
         "apiCalls.savedObjectsExport.allTypesSelected.yes": {

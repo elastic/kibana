@@ -117,7 +117,7 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
     expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
-      headers: expect.anything(),
+      request: expect.anything(),
       createNewCopies: false,
     });
   });

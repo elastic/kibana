@@ -19,16 +19,18 @@
 
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import { CoreUsageStats } from './types';
+import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
 import {
-  Headers,
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsExportOptions,
+  KibanaRequest,
+  IBasePath,
 } from '..';
 
 interface BaseIncrementOptions {
-  headers?: Headers;
+  request: KibanaRequest;
 }
 /** @internal */
 export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
@@ -44,29 +46,26 @@ export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 const ALL_COUNTER_FIELDS = [
-  `${IMPORT_STATS_PREFIX}.total`,
-  `${IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
-  `${IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+  // Saved Objects Management APIs
+  ...getAllCommonFields(IMPORT_STATS_PREFIX),
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
-  `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
-  `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
-  `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+  ...getAllCommonFields(RESOLVE_IMPORT_STATS_PREFIX),
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-  `${EXPORT_STATS_PREFIX}.total`,
-  `${EXPORT_STATS_PREFIX}.kibanaRequest.yes`,
-  `${EXPORT_STATS_PREFIX}.kibanaRequest.no`,
+  ...getAllCommonFields(EXPORT_STATS_PREFIX),
   `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
   `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
 ];
+const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
 /** @internal */
 export class CoreUsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
+    private readonly basePath: IBasePath,
     private readonly repositoryPromise: Promise<ISavedObjectsRepository>
   ) {}
 
@@ -88,66 +87,91 @@ export class CoreUsageStatsClient {
     return coreUsageStats;
   }
 
-  public async incrementSavedObjectsImport({
-    headers,
-    createNewCopies,
-    overwrite,
-  }: IncrementSavedObjectsImportOptions) {
-    const isKibanaRequest = getIsKibanaRequest(headers);
+  public async incrementSavedObjectsImport(options: IncrementSavedObjectsImportOptions) {
+    const { createNewCopies, overwrite } = options;
     const counterFieldNames = [
-      'total',
-      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
       `overwriteEnabled.${overwrite ? 'yes' : 'no'}`,
     ];
-    await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX);
+    await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX, options);
   }
 
-  public async incrementSavedObjectsResolveImportErrors({
-    headers,
-    createNewCopies,
-  }: IncrementSavedObjectsResolveImportErrorsOptions) {
-    const isKibanaRequest = getIsKibanaRequest(headers);
-    const counterFieldNames = [
-      'total',
-      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
-      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
-    ];
-    await this.updateUsageStats(counterFieldNames, RESOLVE_IMPORT_STATS_PREFIX);
+  public async incrementSavedObjectsResolveImportErrors(
+    options: IncrementSavedObjectsResolveImportErrorsOptions
+  ) {
+    const { createNewCopies } = options;
+    const counterFieldNames = [`createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`];
+    await this.updateUsageStats(counterFieldNames, RESOLVE_IMPORT_STATS_PREFIX, options);
   }
 
-  public async incrementSavedObjectsExport({
-    headers,
-    types,
-    supportedTypes,
-  }: IncrementSavedObjectsExportOptions) {
-    const isKibanaRequest = getIsKibanaRequest(headers);
+  public async incrementSavedObjectsExport(options: IncrementSavedObjectsExportOptions) {
+    const { types, supportedTypes } = options;
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
-    const counterFieldNames = [
-      'total',
-      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
-      `allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`,
-    ];
-    await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX);
+    const counterFieldNames = [`allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`];
+    await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX, options);
   }
 
-  private async updateUsageStats(counterFieldNames: string[], prefix: string) {
+  private async updateUsageStats(
+    counterFieldNames: string[],
+    prefix: string,
+    { request }: BaseIncrementOptions
+  ) {
     const options = { refresh: false };
     try {
       const repository = await this.repositoryPromise;
+      const fields = [...this.getCommonFieldsToIncrement(request), ...counterFieldNames];
       await repository.incrementCounter(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
-        counterFieldNames.map((x) => `${prefix}.${x}`),
+        fields.map((x) => `${prefix}.${x}`),
         options
       );
     } catch (err) {
       // do nothing
     }
   }
+
+  private getIsDefaultNamespace(request: KibanaRequest) {
+    const requestBasePath = this.basePath.get(request); // obtain the original request basePath, as it may have been modified by a request interceptor
+    const pathToCheck = this.basePath.remove(requestBasePath); // remove the server basePath from the request basePath
+    const matchResult = pathToCheck.match(SPACE_CONTEXT_REGEX); // Look for `/s/space-url-context` in the base path
+
+    if (!matchResult || matchResult.length === 0) {
+      return true;
+    }
+
+    // Ignoring first result, we only want the capture group result at index 1
+    const [, spaceId] = matchResult;
+
+    return spaceId === DEFAULT_NAMESPACE_STRING;
+  }
+
+  private getCommonFieldsToIncrement(request: KibanaRequest) {
+    const isKibanaRequest = getIsKibanaRequest(request);
+    const isDefaultNamespace = this.getIsDefaultNamespace(request);
+    const namespaceField = isDefaultNamespace ? 'default' : 'custom';
+    const counterFieldNames = [
+      'total',
+      `namespace.${namespaceField}.total`,
+      `namespace.${namespaceField}.kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+    ];
+    return counterFieldNames;
+  }
 }
 
-function getIsKibanaRequest(headers?: Headers) {
+function getAllCommonFields(prefix: string) {
+  return [
+    'total',
+    'namespace.default.total',
+    'namespace.default.kibanaRequest.yes',
+    'namespace.default.kibanaRequest.no',
+    'namespace.custom.total',
+    'namespace.custom.kibanaRequest.yes',
+    'namespace.custom.kibanaRequest.no',
+  ].map((x) => `${prefix}.${x}`);
+}
+
+function getIsKibanaRequest({ headers }: KibanaRequest) {
   // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
   return headers && headers['kbn-version'] && headers.origin && headers.referer;
