@@ -17,7 +17,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage, AlertState } from '../../common/types/alerts';
+import { AlertMessage } from '../../common/types/alerts';
 import { AlertsByName } from './types';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
