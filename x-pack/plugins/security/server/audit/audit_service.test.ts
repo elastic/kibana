@@ -358,7 +358,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -388,7 +388,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -426,7 +426,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -452,7 +452,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -481,7 +481,7 @@ describe('#getLogger', () => {
     const licenseWithFeatures = licenseMock.create();
 
     const features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures);
 
     licenseWithFeatures.features$ = features$.asObservable();
@@ -505,7 +505,7 @@ describe('#getLogger', () => {
 
     // perform license upgrade
     features$.next({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures);
 
     auditLogger.log(eventType, message);
