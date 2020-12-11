@@ -9,6 +9,8 @@ import {
   EuiFlexGroup,
   EuiFormRow,
   EuiFlexItem,
+  EuiOverlayMask,
+  EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiSpacer,
@@ -18,19 +20,22 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+
 import { TimelineType } from '../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
 import { Description, Name } from '../properties/helpers';
+import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
 import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
-  showWarning?: boolean;
+  initialFocus: 'title' | 'description';
   timelineId: string;
   toggleSaveTimeline: () => void;
+  showWarning?: boolean;
 }
 
 const Wrapper = styled(EuiModalBody)`
@@ -61,7 +66,7 @@ const usePrevious = (value: unknown) => {
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ timelineId, toggleSaveTimeline, showWarning }) => {
+  ({ initialFocus, timelineId, toggleSaveTimeline, showWarning }) => {
     const timeline = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
@@ -127,7 +132,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const descriptionLabel = savedObjectId == null ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
 
     return (
-      <>
+      <EuiOverlayMask>
+      <EuiModal
+        data-test-subj="save-timeline-modal"
+        maxWidth={NOTES_PANEL_WIDTH}
+        onClose={toggleSaveTimeline}
+      >
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
         )}
@@ -148,7 +158,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
           <EuiFlexItem grow={true}>
             <EuiFormRow label={TIMELINE_TITLE}>
               <Name
-                autoFocus={true}
+                autoFocus={initialFocus === 'title'}
                 disableTooltip={true}
                 disableAutoSave={true}
                 disabled={isSaving}
@@ -161,12 +171,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
           <EuiFlexItem grow={true}>
             <EuiFormRow label={descriptionLabel}>
               <Description
+                autoFocus={initialFocus === 'description'}
                 data-test-subj="save-timeline-description"
                 disableTooltip={true}
                 disableAutoSave={true}
                 disabled={isSaving}
                 timelineId={timelineId}
-                isTextArea={true}
               />
             </EuiFormRow>
             <EuiSpacer />
@@ -200,7 +210,8 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             </EuiFlexGroup>
           </EuiFlexItem>
         </Wrapper>
-      </>
+      </EuiModal>
+      </EuiOverlayMask>
     );
   }
 );

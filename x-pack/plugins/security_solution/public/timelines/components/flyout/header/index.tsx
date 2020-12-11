@@ -11,7 +11,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
-  EuiTextColor,
+  EuiTextColor
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
@@ -32,6 +32,8 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
+import { getTimelineStatusByIdSelector } from './selectors';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -49,9 +51,9 @@ interface FlyoutHeaderPanelProps {
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { dataProviders, kqlQuery, title, timelineType, show } = useDeepEqualSelector((state) =>
+  const { activeTab, dataProviders, kqlQuery, title, timelineType, status: timelineStatus, updated, show } = useDeepEqualSelector((state) =>
     pick(
-      ['dataProviders', 'kqlQuery', 'title', 'timelineType', 'show'],
+      ['activeTab', 'dataProviders', 'kqlQuery', 'status', 'title', 'timelineType', 'updated', 'show'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -74,22 +76,26 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             timelineId={timelineId}
             timelineType={timelineType}
             timelineTitle={title}
+            timelineStatus={timelineStatus}
             isOpen={show}
+            updated={updated}
           />
         </EuiFlexItem>
         {show && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <InspectButton
-                  compact
-                  queryId={timelineId}
-                  inputId="timeline"
-                  inspectIndex={0}
-                  isDisabled={!isDataInTimeline}
-                  title={i18n.INSPECT_TIMELINE_TITLE}
-                />
-              </EuiFlexItem>
+              {activeTab === TimelineTabs.query && (
+                <EuiFlexItem grow={false}>
+                  <InspectButton
+                    compact
+                    queryId={timelineId}
+                    inputId="timeline"
+                    inspectIndex={0}
+                    isDisabled={!isDataInTimeline}
+                    title={i18n.INSPECT_TIMELINE_TITLE}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.CLOSE_TIMELINE}>
                   <EuiButtonIcon
@@ -140,7 +146,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       <EuiText>
         <h3 data-test-subj="timeline-title">{content}</h3>
       </EuiText>
-      <SaveTimelineButton timelineId={timelineId} />
+      <SaveTimelineButton timelineId={timelineId} initialFocus='title'/>
     </>
   );
 };
@@ -162,7 +168,7 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
       <EuiText size="s" data-test-subj="timeline-description">
         {content}
       </EuiText>
-      <SaveTimelineButton timelineId={timelineId} />
+      <SaveTimelineButton timelineId={timelineId} initialFocus='description' />
     </>
   );
 };
@@ -170,10 +176,9 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    pick(['status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
-  );
+    getTimelineStatus(state, timelineId));
 
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
 
@@ -181,7 +186,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
     return (
       <EuiText size="xs">
         <EuiTextColor color="warning" data-test-subj="timeline-status">
-          {'Unsaved'}
+          {i18n.UNSAVED}
         </EuiTextColor>
       </EuiText>
     );

@@ -38,8 +38,6 @@ const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
 
 Main.displayName = 'Main';
 
-const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
-
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -91,11 +89,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout
-                timelineId={TimelineId.active}
-                onAppLeave={onAppLeave}
-                usersViewing={usersViewing}
-              />
+              <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
             </>
           )}
 

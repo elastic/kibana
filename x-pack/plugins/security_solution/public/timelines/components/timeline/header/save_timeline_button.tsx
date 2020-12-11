@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiOverlayMask, EuiModal, EuiToolTip } from '@elastic/eui';
-
+import { EuiButtonIcon,  EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 
 import { TimelineTitleAndDescription } from './title_and_description';
 import { EDIT } from './translations';
 
 export interface SaveTimelineComponentProps {
+  initialFocus: 'title' | 'description';
   timelineId: string;
   toolTip?: string;
 }
 
 export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
-  ({ timelineId, toolTip }) => {
+  ({ initialFocus, timelineId, toolTip }) => {
     const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
     const onToggleSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay((prevShowSaveTimelineOverlay) => !prevShowSaveTimelineOverlay);
@@ -39,18 +38,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
     return showSaveTimelineOverlay ? (
       <>
         {saveTimelineButtonIcon}
-        <EuiOverlayMask>
-          <EuiModal
-            data-test-subj="save-timeline-modal"
-            maxWidth={NOTES_PANEL_WIDTH}
-            onClose={onToggleSaveTimeline}
-          >
-            <TimelineTitleAndDescription
-              timelineId={timelineId}
-              toggleSaveTimeline={onToggleSaveTimeline}
-            />
-          </EuiModal>
-        </EuiOverlayMask>
+          <TimelineTitleAndDescription
+            initialFocus={initialFocus}
+            timelineId={timelineId}
+            toggleSaveTimeline={onToggleSaveTimeline}
+          />
       </>
     ) : (
       <EuiToolTip content={toolTip ?? ''} data-test-subj="save-timeline-btn-tooltip">
