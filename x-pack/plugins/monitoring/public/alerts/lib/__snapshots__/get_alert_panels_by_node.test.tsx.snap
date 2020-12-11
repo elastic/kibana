@@ -41,11 +41,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -62,11 +68,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -230,11 +242,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -245,11 +263,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -260,11 +284,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -281,11 +311,17 @@ Array [
     "items": Array [
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >
@@ -296,11 +332,17 @@ Array [
       },
       Object {
         "name": <React.Fragment>
-          <EuiText
-            size="s"
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
           >
-            triggered:0
-          </EuiText>
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
           <EuiText
             size="s"
           >

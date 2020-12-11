@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { CommonAlertStatus, CommonAlertState, CommonAlert } from '../../../common/types/alerts';
-import { getCalendar } from '../../../common/formatting';
+import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
@@ -79,12 +79,20 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
           panelItems.push({
             name: (
               <Fragment>
-                <EuiText size="s">
-                  {getCalendar(
+                <EuiToolTip
+                  position="top"
+                  content={getCalendar(
                     alertState.state.ui.triggeredMS,
                     Legacy.shims.uiSettings.get('dateFormat:tz')
                   )}
-                </EuiText>
+                >
+                  <EuiText size="s">
+                    {getDateFromNow(
+                      alertState.state.ui.triggeredMS,
+                      Legacy.shims.uiSettings.get('dateFormat:tz')
+                    )}
+                  </EuiText>
+                </EuiToolTip>
                 <EuiText size="s">{alert.name}</EuiText>
               </Fragment>
             ),
