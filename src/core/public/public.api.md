@@ -57,6 +57,7 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
+    meta?: AppMeta;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
@@ -137,6 +138,11 @@ export interface ApplicationStart {
 }
 
 // @public
+export interface AppMeta {
+    keywords?: string[];
+}
+
+// @public
 export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public @deprecated
@@ -185,9 +191,11 @@ export type AppSearchDeepLink = {
 } & ({
     path: string;
     searchDeepLinks?: AppSearchDeepLink[];
+    meta?: AppMeta;
 } | {
     path?: string;
     searchDeepLinks: AppSearchDeepLink[];
+    meta?: AppMeta;
 });
 
 // @public
@@ -200,7 +208,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks' | 'meta'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -1007,16 +1015,23 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks' | 'meta'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+    meta: PublicAppMetaInfo;
 };
 
 // @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords'> & {
+    keywords: string[];
+};
+
+// @public
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'meta'> & {
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+    meta: PublicAppMetaInfo;
 };
 
 // @public

@@ -25,12 +25,12 @@ core.application.register({
   id: 'my_app',
   title: 'My App',
   searchDeepLinks: [
-    { id: 'sub1', title: 'Sub1', path: '/sub1' },
+    { id: 'sub1', title: 'Sub1', path: '/sub1', meta: { keywords: ['subpath1'] } },
     {
       id: 'sub2',
       title: 'Sub2',
       searchDeepLinks: [
-        { id: 'subsub', title: 'SubSub', path: '/sub2/sub' }
+        { id: 'subsub', title: 'SubSub', path: '/sub2/sub', meta: { keywords: ['subpath2'] } }
       ]
     }
   ],
