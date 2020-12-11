@@ -42,7 +42,7 @@ export class MemoryUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_MEMORY_USAGE,
       name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
-      accessorKey: 'diskUsage',
+      accessorKey: 'memoryUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
