@@ -33,14 +33,15 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${INCIDENT_URL}`;
-  const fieldsUrl = `${url}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${INCIDENT_URL}`;
+  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
   const getIncidentViewURL = (id: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}${id}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}${id}`;
   };
 
   const checkInstance = (res: AxiosResponse) => {

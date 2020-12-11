@@ -48,21 +48,22 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/issue`;
-  const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue`;
+  const capabilitiesUrl = `${urlWithoutTrailingSlash}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
-  const getIssueTypesOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
-  const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
-  const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
-  const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
-  const searchUrl = `${url}/${BASE_URL}/search`;
+  const getIssueTypesOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypeFieldsOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
+  const getIssueTypesUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
+  const getIssueTypeFieldsUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
+  const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
 
   const getIncidentViewURL = (key: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}/${key}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   };
 
   const getCommentsURL = (issueId: string) => {

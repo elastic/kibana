@@ -38,7 +38,11 @@ Object {
   "compression": Object {
     "enabled": true,
   },
-  "cors": false,
+  "cors": Object {
+    "credentials": false,
+    "enabled": false,
+    "origin": "*",
+  },
   "customResponseHeaders": Object {},
   "host": "localhost",
   "keepaliveTimeout": 120000,

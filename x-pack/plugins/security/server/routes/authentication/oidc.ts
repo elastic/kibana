@@ -23,7 +23,7 @@ export function defineOIDCRoutes({
   router,
   httpResources,
   logger,
-  authc,
+  getAuthenticationService,
   basePath,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
@@ -241,7 +241,7 @@ export function defineOIDCRoutes({
     try {
       // We handle the fact that the user might get redirected to Kibana while already having a session
       // Return an error notifying the user they are already logged in.
-      const authenticationResult = await authc.login(request, {
+      const authenticationResult = await getAuthenticationService().login(request, {
         provider: { type: OIDCAuthenticationProvider.type },
         value: loginAttempt,
       });
