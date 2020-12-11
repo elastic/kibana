@@ -41,10 +41,6 @@ export interface BaseState extends ControlState {
   readonly retryCount: number;
   readonly retryDelay: number;
   readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
-}
-
-export type InitState = BaseState & {
-  readonly controlState: 'INIT';
   /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
@@ -59,6 +55,10 @@ export type InitState = BaseState & {
    * The index used by this version of Kibana e.g. `.kibana_7.11.0_001`
    */
   readonly versionIndex: string;
+}
+
+export type InitState = BaseState & {
+  readonly controlState: 'INIT';
 };
 
 export type PostInitState = BaseState & {
@@ -171,6 +171,23 @@ export type MarkVersionIndexReady = PostInitState & {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
+export type MarkVersionIndexReadyConflict = PostInitState & {
+  /**
+   * If the MARK_VERSION_INDEX_READY step fails another instance was
+   * performing the migration in parallel and won the race to marking the
+   * migration as complete. This step ensures that the instance that won the
+   * race is running the same version of Kibana, if it does, the migration is
+   * complete and we can go to DONE.
+   *
+   * If it was a different version of Kibana that completed the migration fail
+   * the migration by going to FATAL. If this instance restarts it will either
+   * notice that a newer version already completed the migration and refuse to
+   * start up, or if it was an older version that completed the migration
+   * start a new migration to the latest version.
+   */
+  readonly controlState: 'MARK_VERSION_INDEX_READY_CONFLICT';
+};
+
 /**
  * If we're migrating from a legacy index we need to perform some additional
  * steps to prepare this index so that it can be used as a migration 'source'.
@@ -236,6 +253,7 @@ export type State =
   | OutdatedDocumentsSearch
   | OutdatedDocumentsTransform
   | MarkVersionIndexReady
+  | MarkVersionIndexReadyConflict
   | LegacyCreateReindexTargetState
   | LegacySetWriteBlockState
   | LegacyReindexState

@@ -46,7 +46,7 @@ export const isRetryableEsClientResponse = (
  * TODO (profile/tune): How much smaller can we make this number before it
  * starts impacting how long migrations take to perform?
  */
-const BATCH_SIZE = 100;
+const BATCH_SIZE = 1000;
 const DEFAULT_TIMEOUT = '60s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 const INDEX_AUTO_EXPAND_REPLICAS = '0-1';

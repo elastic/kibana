@@ -24,14 +24,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import {
   AllActionStates,
   ReindexSourceToTargetState,
-  CreateNewTargetState,
+  MarkVersionIndexReady,
   InitState,
   LegacyCreateReindexTargetState,
   LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  MarkVersionIndexReady,
   OutdatedDocumentsSearch,
   OutdatedDocumentsTransform,
   SetSourceWriteBlockState,
@@ -40,6 +39,8 @@ import {
   UpdateTargetMappingsWaitForTaskState,
   CreateReindexTargetState,
   ReindexSourceToTargetWaitForTaskState,
+  MarkVersionIndexReadyConflict,
+  CreateNewTargetState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -92,6 +93,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
+    MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
+      Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
       Actions.setWriteBlock(client, state.legacyIndex),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>

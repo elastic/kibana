@@ -20,7 +20,7 @@ import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { cloneDeep } from 'lodash';
-import { AliasAction, RetryableEsClientError } from './actions';
+import { AliasAction, FetchIndexResponse, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
@@ -109,6 +109,19 @@ function indexVersion(indexName?: string): string | undefined {
   return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
+/**
+ * Creates a record of alias -> index name pairs
+ */
+function getAliases(indices: FetchIndexResponse) {
+  return Object.keys(indices).reduce((acc, index) => {
+    Object.keys(indices[index].aliases || {}).forEach((alias) => {
+      // TODO throw if multiple .kibana aliases point to the same index?
+      acc[alias] = index;
+    });
+    return acc;
+  }, {} as Record<string, string>);
+}
+
 const delayRetryState = <S extends State>(state: S, left: RetryableEsClientError): S => {
   if (state.retryCount === MAX_RETRY_ATTEMPTS) {
     return {
@@ -169,13 +182,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       const indices = res.right;
-      const aliases = Object.keys(indices).reduce((acc, index) => {
-        Object.keys(indices[index].aliases || {}).forEach((alias) => {
-          // TODO throw if multiple .kibana aliases point to the same index?
-          acc[alias] = index;
-        });
-        return acc;
-      }, {} as Record<string, string>);
+      const aliases = getAliases(indices);
 
       if (
         // `.kibana` and the version specific aliases both exists and
@@ -568,7 +575,55 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       controlState: 'MARK_VERSION_INDEX_READY',
     };
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
-    return { ...stateP, controlState: 'DONE' };
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'DONE' };
+    } else {
+      if (res.left.type === 'alias_not_found_exception') {
+        // the versionIndexReadyActions checks that the currentAlias is still
+        // pointing to the source index. If this fails with an
+        // alias_not_found_exception another instance has completed a
+        // migration from the same source.
+        return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `MARK_VERSION_INDEX_READY: unexpected action response: ${JSON.stringify(res)}`,
+        };
+      }
+    }
+  } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY_CONFLICT') {
+    // If another instance completed a migration from the same source we need
+    // to check that the completed migration was performed by a Kibana that's
+    // on the same version as this instance.
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      const indices = res.right;
+      const aliases = getAliases(indices);
+      if (
+        aliases[stateP.currentAlias] != null &&
+        aliases[stateP.versionAlias] != null &&
+        aliases[stateP.currentAlias] === aliases[stateP.versionAlias]
+      ) {
+        // If the current and version aliases are pointing to the same index
+        // the migration was completed by another instance on the same version
+        // and it's safe to start serving traffic.
+        return { ...stateP, controlState: 'DONE' };
+      } else {
+        // Fail the migration, the instance that completed the migration is
+        // running a different version of Kibana. This avoids a situation where
+        // we loose acknowledged writes because two versions are both
+        // accepting writes, but are writing into difference indices.
+        const conflictingKibanaVersion =
+          indexVersion(aliases[stateP.currentAlias]) ?? aliases[stateP.currentAlias];
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
+        };
+      }
+    }
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     return stateP;
   } else {

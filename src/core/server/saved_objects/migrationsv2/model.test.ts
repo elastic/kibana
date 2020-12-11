@@ -34,10 +34,11 @@ import {
   OutdatedDocumentsSearch,
   OutdatedDocumentsTransform,
   MarkVersionIndexReady,
-  CreateNewTargetState,
   BaseState,
   CreateReindexTargetState,
   ReindexSourceToTargetWaitForTaskState,
+  MarkVersionIndexReadyConflict,
+  CreateNewTargetState,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -69,15 +70,15 @@ describe('migrations v2 model', () => {
       },
     },
     preMigrationScript: Option.none,
+    currentAlias: '.kibana',
+    versionAlias: '.kibana_7.11.0',
+    versionIndex: '.kibana_7.11.0_001',
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
     let state: State = {
       ...baseState,
       controlState: 'INIT',
-      currentAlias: '.kibana',
-      versionAlias: '.kibana_7.11.0',
-      versionIndex: '.kibana_7.11.0_001',
     };
     const retryableError: RetryableEsClientError = {
       type: 'retryable_es_client_error',
@@ -711,67 +712,6 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('UPDATE_TARGET_MAPPINGS', () => {
-      const updateTargetMappingsState: UpdateTargetMappingsState = {
-        ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
-        versionIndexReadyActions: Option.none,
-        sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-      };
-      test('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS'> = Either.right({
-          taskId: 'update target mappings task',
-        });
-        const newState = model(
-          updateTargetMappingsState,
-          res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
-        expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-    });
-    describe('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsWaitForTaskState = {
-        ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        versionIndexReadyActions: Option.none,
-        sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        updateTargetMappingsTaskId: 'update target mappings task',
-      };
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> MARK_VERSION_INDEX_READY if sone versionIndexReadyActions', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
-          'pickup_updated_mappings_succeeded'
-        );
-        const newState = model(
-          {
-            ...updateTargetMappingsWaitForTaskState,
-            versionIndexReadyActions: Option.some([
-              { add: { index: 'kibana-index', alias: 'my-alias' } },
-            ]),
-          },
-          res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> DONE if none versionIndexReadyActions', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
-          'pickup_updated_mappings_succeeded'
-        );
-        const newState = model(
-          updateTargetMappingsWaitForTaskState,
-          res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('DONE');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-    });
     describe('OUTDATED_DOCUMENTS_SEARCH', () => {
       const outdatedDocumentsSourchState: OutdatedDocumentsSearch = {
         ...baseState,
@@ -845,6 +785,67 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+    describe('UPDATE_TARGET_MAPPINGS', () => {
+      const updateTargetMappingsState: UpdateTargetMappingsState = {
+        ...baseState,
+        controlState: 'UPDATE_TARGET_MAPPINGS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      test('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS'> = Either.right({
+          taskId: 'update target mappings task',
+        });
+        const newState = model(
+          updateTargetMappingsState,
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
+      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsWaitForTaskState = {
+        ...baseState,
+        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        updateTargetMappingsTaskId: 'update target mappings task',
+      };
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> MARK_VERSION_INDEX_READY if some versionIndexReadyActions', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
+          'pickup_updated_mappings_succeeded'
+        );
+        const newState = model(
+          {
+            ...updateTargetMappingsWaitForTaskState,
+            versionIndexReadyActions: Option.some([
+              { add: { index: 'kibana-index', alias: 'my-alias' } },
+            ]),
+          },
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> DONE if none versionIndexReadyActions', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
+          'pickup_updated_mappings_succeeded'
+        );
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('DONE');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
     describe('CREATE_NEW_TARGET', () => {
       const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
         AliasAction[]
@@ -860,6 +861,93 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('MARK_VERSION_INDEX_READY', () => {
+      const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
+        AliasAction[]
+      >;
+      const markVersionIndexReadyState: MarkVersionIndexReady = {
+        ...baseState,
+        controlState: 'MARK_VERSION_INDEX_READY',
+        versionIndexReadyActions: aliasActions,
+        sourceIndex: Option.none as Option.None,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      test('MARK_VERSION_INDEX_READY -> DONE if the action succeeded', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(markVersionIndexReadyState, res);
+        expect(newState.controlState).toEqual('DONE');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if someone else removed the current alias from the source index', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+        const newState = model(markVersionIndexReadyState, res);
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_CONFLICT');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('MARK_VERSION_INDEX_READY_CONFLICT', () => {
+      const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
+        AliasAction[]
+      >;
+      const markVersionIndexConflictState: MarkVersionIndexReadyConflict = {
+        ...baseState,
+        controlState: 'MARK_VERSION_INDEX_READY_CONFLICT',
+        versionIndexReadyActions: aliasActions,
+        sourceIndex: Option.none as Option.None,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      test('MARK_VERSION_INDEX_CONFLICT -> DONE if the current alias is pointing to the version alias', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.11.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.12.0_001': {
+            aliases: { '.kibana_7.12.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(markVersionIndexConflictState, res);
+        expect(newState.controlState).toEqual('DONE');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('MARK_VERSION_INDEX_READY_CONFLICT -> FATAL if the current alias is pointing to a different version index', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(markVersionIndexConflictState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version 7.12.0 completed this migration (this instance is running 7.11.0). Ensure that all Kibana instances are running on same version and try again."`
+        );
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
