@@ -72,9 +72,10 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   }, [timelineStatus, updated]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <ButtonWrapper grow={false}>
         <EuiButtonEmpty
+          flush="both"
           data-test-subj="flyoutOverlay"
           size="s"
           isSelected={isOpen}

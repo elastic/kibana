@@ -53,8 +53,16 @@ import * as i18n from './translations';
 import { timelineActions } from '../../../../store/timeline';
 
 const SortingColumnsContainer = styled.div`
-  .euiPopover .euiButtonEmpty .euiButtonContent .euiButtonEmpty__text {
-    display: none;
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiPopover .euiButtonEmpty .euiButtonContent {
+    padding: 0;
+
+    .euiButtonEmpty__text {
+      display: none;
+    }
   }
 `;
 

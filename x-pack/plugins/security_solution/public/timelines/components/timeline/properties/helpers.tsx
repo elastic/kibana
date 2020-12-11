@@ -130,6 +130,7 @@ export const Description = React.memo<DescriptionProps>(
           autoFocus={autoFocus}
           data-test-subj="timeline-description-textarea"
           aria-label={i18n.TIMELINE_DESCRIPTION}
+          fullWidth
           onChange={onDescriptionChanged}
           placeholder={i18n.DESCRIPTION}
           value={description}
