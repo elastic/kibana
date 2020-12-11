@@ -28,7 +28,6 @@ import { TimelineInput } from '../../../store/timeline/actions';
 import { Description, Name } from '../properties/helpers';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
-import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
@@ -38,10 +37,6 @@ interface TimelineTitleAndDescriptionProps {
   timelineId: string;
   showWarning?: boolean;
 }
-
-const StyledEuiOverlayMask = styled(EuiOverlayMask)`
-  z-index: ${({ theme }) => theme.eui.euiZLevel6 - 1};
-`;
 
 const Wrapper = styled(EuiModalBody)`
   .euiFormRow {
@@ -95,21 +90,14 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       setFormSubmitted(true);
     }, [onSaveTimeline, timeline, timelineId]);
 
-    const { getButton } = useCreateTimelineButton({ timelineId, timelineType });
-
-    const discardTimelineButton = useMemo(
-      () =>
-        getButton({
-          title:
-            timelineType === TimelineType.template
-              ? i18n.DISCARD_TIMELINE_TEMPLATE
-              : i18n.DISCARD_TIMELINE,
-          outline: true,
-          iconType: '',
-          fill: false,
-        }),
-      [getButton, timelineType]
-    );
+    const closeModalText = useMemo(() => {
+      if (status === TimelineStatus.draft && showWarning) {
+        return timelineType === TimelineType.template
+          ? i18n.DISCARD_TIMELINE_TEMPLATE
+          : i18n.DISCARD_TIMELINE;
+      }
+      return i18n.CLOSE_MODAL;
+    }, [showWarning, status, timelineType]);
 
     useEffect(() => {
       if (isFormSubmitted && !isSaving && prevIsSaving) {
@@ -141,7 +129,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       status === TimelineStatus.draft ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
 
     return (
-      <StyledEuiOverlayMask>
+      <EuiOverlayMask>
         <EuiModal
           data-test-subj="save-timeline-modal"
           maxWidth={NOTES_PANEL_WIDTH}
@@ -198,18 +186,14 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             <EuiFlexItem grow={false}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false} component="span">
-                  {status === TimelineStatus.draft && showWarning ? (
-                    discardTimelineButton
-                  ) : (
-                    <EuiButton
-                      fill={false}
-                      onClick={openSaveTimeline}
-                      isDisabled={isSaving}
-                      data-test-subj="close-button"
-                    >
-                      {i18n.CLOSE_MODAL}
-                    </EuiButton>
-                  )}
+                  <EuiButton
+                    fill={false}
+                    onClick={closeSaveTimeline}
+                    isDisabled={isSaving}
+                    data-test-subj="close-button"
+                  >
+                    {closeModalText}
+                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} component="span">
                   <EuiButton
@@ -225,7 +209,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             </EuiFlexItem>
           </Wrapper>
         </EuiModal>
-      </StyledEuiOverlayMask>
+      </EuiOverlayMask>
     );
   }
 );

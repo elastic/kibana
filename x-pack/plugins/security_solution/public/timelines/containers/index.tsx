@@ -72,14 +72,6 @@ export const initSortDefault = [
   },
 ];
 
-function usePreviousRequest(value: TimelineEventsAllRequestOptions | null) {
-  const ref = useRef<TimelineEventsAllRequestOptions | null>(value);
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
@@ -105,7 +97,7 @@ export const useTimelineEvents = ({
   const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
     null
   );
-  const prevTimelineRequest = usePreviousRequest(timelineRequest);
+  const prevTimelineRequest = useRef<TimelineEventsAllRequestOptions | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -159,6 +151,7 @@ export const useTimelineEvents = ({
       }
       let didCancel = false;
       const asyncSearch = async () => {
+        prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
@@ -220,9 +213,9 @@ export const useTimelineEvents = ({
         pageName !== activeTimeline.getPageName()
       ) {
         activeTimeline.setPageName(pageName);
-
         abortCtrl.current.abort();
         setLoading(false);
+        prevTimelineRequest.current = activeTimeline.getRequest();
         refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
         setTimelineResponse((prevResp) => {
           const resp = activeTimeline.getResponse();
@@ -331,8 +324,9 @@ export const useTimelineEvents = ({
       id !== TimelineId.active ||
       timerangeKind === 'absolute' ||
       !deepEqual(prevTimelineRequest, timelineRequest)
-    )
+    ) {
       timelineSearch(timelineRequest);
+    }
   }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
 
   return [loading, timelineResponse];

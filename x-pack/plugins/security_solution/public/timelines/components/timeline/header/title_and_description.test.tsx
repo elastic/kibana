@@ -61,7 +61,7 @@ describe('TimelineTitleAndDescription', () => {
       mockGetButton.mockClear();
     });
 
-    test('show proress bar while saving', () => {
+    test('show process bar while saving', () => {
       const component = shallow(<TimelineTitleAndDescription {...props} />);
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
@@ -225,17 +225,9 @@ describe('TimelineTitleAndDescription', () => {
 
     test('Show discardTimelineButton', () => {
       const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="mock-discard-button"]').exists()).toEqual(true);
-    });
-
-    test('get discardTimelineButton with correct props', () => {
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE,
-        outline: true,
-        iconType: '',
-        fill: false,
-      });
+      expect(component.find('[data-test-subj="close-button"]').dive().text()).toEqual(
+        'Discard Timeline'
+      );
     });
 
     test('get discardTimelineTemplateButton with correct props', () => {
@@ -246,13 +238,10 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE_TEMPLATE,
-        outline: true,
-        iconType: '',
-        fill: false,
-      });
+      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      expect(component.find('[data-test-subj="close-button"]').dive().text()).toEqual(
+        'Discard Timeline Template'
+      );
     });
 
     test('Show saveButton', () => {

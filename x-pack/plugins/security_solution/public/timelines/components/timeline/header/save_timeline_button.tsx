@@ -8,10 +8,11 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store/timeline';
+import { useCreateTimeline } from '../properties/use_create_timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
 import { TimelineTitleAndDescription } from './title_and_description';
 import { EDIT } from './translations';
@@ -31,6 +32,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
       getTimelineSaveModal(state, timelineId)
     );
     const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
+
+    const handleCreateNewTimeline = useCreateTimeline({
+      timelineId: TimelineId.active,
+      timelineType: TimelineType.default,
+    });
     const closeSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(false);
       if (show) {
@@ -43,11 +49,19 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
         );
       }
       if (nextAppId) {
+        handleCreateNewTimeline();
         // We need to do that to allow the reducer to update
         // to avoid to ask again if the user want to save the timeline again
         setTimeout(() => navigateToApp(nextAppId), 0);
       }
-    }, [dispatch, navigateToApp, nextAppId, setShowSaveTimelineOverlay, show]);
+    }, [
+      dispatch,
+      handleCreateNewTimeline,
+      navigateToApp,
+      nextAppId,
+      setShowSaveTimelineOverlay,
+      show,
+    ]);
 
     const openSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(true);

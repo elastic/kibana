@@ -143,7 +143,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
     });
 
-    test('it does NOT render the timeline table when the source is loading', () => {
+    test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererScope as jest.Mock).mockReturnValue({
         browserFields: {},
         docValueFields: [],
@@ -157,7 +157,8 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the timeline table when start is empty', () => {
@@ -167,7 +168,8 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the timeline table when end is empty', () => {
@@ -177,7 +179,8 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {

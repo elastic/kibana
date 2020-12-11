@@ -41,27 +41,28 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       if (show) {
         dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
       }
-
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes('securitySolution') &&
         timelineStatus === TimelineStatus.draft &&
         updated != null
       ) {
-        dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
-        dispatch(
-          timelineActions.setActiveTabTimeline({
-            id: TimelineId.active,
-            activeTab: TimelineTabs.query,
-          })
-        );
-        dispatch(
-          timelineActions.toggleModalSaveTimeline({
-            id: TimelineId.active,
-            showModalSaveTimeline: true,
-            nextAppId,
-          })
-        );
+        const showSaveTimelineModal = () => {
+          dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
+          dispatch(
+            timelineActions.setActiveTabTimeline({
+              id: TimelineId.active,
+              activeTab: TimelineTabs.query,
+            })
+          );
+          dispatch(
+            timelineActions.toggleModalSaveTimeline({
+              id: TimelineId.active,
+              showModalSaveTimeline: true,
+              nextAppId,
+            })
+          );
+        };
 
         return actions.confirm(
           i18n.translate('xpack.securitySolution.timeline.unsavedWorkMessage', {
@@ -69,7 +70,8 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
           }),
           i18n.translate('xpack.securitySolution.timeline.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
-          })
+          }),
+          showSaveTimelineModal
         );
       } else {
         return actions.default();

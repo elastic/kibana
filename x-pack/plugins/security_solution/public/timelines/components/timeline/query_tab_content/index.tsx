@@ -315,7 +315,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               className="timeline-flyout-footer"
             >
               <Footer
-                activePage={pageInfo.activePage}
+                activePage={pageInfo?.activePage ?? 0}
                 data-test-subj="timeline-footer"
                 updatedAt={updatedAt}
                 height={footerHeight}
