@@ -5,21 +5,20 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
-import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import { deleteSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/delete_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { BadRequestError } from '../../errors/bad_request_error';
-import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
-import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
+import { BadRequestError } from '../../errors/bad_request_error';
+import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 
-export const finalizeSignalsMigrationRoute = (router: IRouter) => {
-  router.post(
+export const deleteSignalsMigrationRoute = (router: IRouter) => {
+  router.delete(
     {
-      path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+      path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
       validate: {
-        body: buildRouteValidation(finalizeSignalsMigrationSchema),
+        body: buildRouteValidation(deleteSignalsMigrationSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -27,22 +26,24 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const soClient = context.core.savedObjects.client;
       const { index: indices } = request.body;
 
       try {
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const soClient = context.core.savedObjects.client;
+        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
+
+        const signalsAlias = appClient.getSignalsIndex();
         const migrationsByIndex = await getMigrationSavedObjectsByIndex({
-          soClient,
           index: indices,
+          soClient,
         });
 
-        const finalizeResults = await Promise.all(
+        const deletionResults = await Promise.all(
           indices.map(async (index) => {
             try {
               const migrations = migrationsByIndex[index] ?? [];
@@ -50,42 +51,34 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
                 throw new BadRequestError('The specified index has no migrations');
               }
 
-              const finalizedMigration = await migrationService.finalize({
-                migration: migrations[0],
-                signalsAlias: appClient.getSignalsIndex(),
-              });
-
-              if (isMigrationFailed(finalizedMigration)) {
-                throw new BadRequestError(
-                  finalizedMigration.attributes.error ??
-                    "The specified index's latest migration was not successful."
-                );
-              }
+              const deletedMigrations = await Promise.all(
+                migrations.map((migration) =>
+                  migrationService.delete({
+                    migration,
+                    signalsAlias,
+                  })
+                )
+              );
 
               return {
                 index,
-                completed: !isMigrationSuccess(finalizedMigration),
-                migration_id: finalizedMigration.id,
-                migration_index: finalizedMigration.attributes.destinationIndex,
+                migrations: deletedMigrations,
               };
             } catch (err) {
               const error = transformError(err);
               return {
                 index,
+                migrations: null,
                 error: {
                   message: error.message,
                   status_code: error.statusCode,
                 },
-                migration_id: null,
-                migration_index: null,
               };
             }
           })
         );
 
-        return response.ok({
-          body: { indices: finalizeResults },
-        });
+        return response.ok({ body: { indices: deletionResults } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
