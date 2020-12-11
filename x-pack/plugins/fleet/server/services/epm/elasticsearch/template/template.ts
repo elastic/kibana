@@ -263,7 +263,6 @@ function getBaseTemplate(
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
-  ilmPolicy?: string | undefined,
   hidden?: boolean | false
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
@@ -288,7 +287,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: ilmPolicy ? ilmPolicy : type,
+            name: type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
