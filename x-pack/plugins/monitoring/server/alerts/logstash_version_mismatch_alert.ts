@@ -14,11 +14,7 @@ import {
   LegacyAlert,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import {
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  LEGACY_ALERT_DETAILS,
-  LOGSTASH_SYSTEM_ID,
-} from '../../common/constants';
+import { ALERT_LOGSTASH_VERSION_MISMATCH, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';

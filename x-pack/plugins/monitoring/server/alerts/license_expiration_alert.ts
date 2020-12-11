@@ -21,7 +21,6 @@ import {
   ALERT_LICENSE_EXPIRATION,
   FORMAT_DURATION_TEMPLATE_SHORT,
   LEGACY_ALERT_DETAILS,
-  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { AlertMessageTokenType } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
