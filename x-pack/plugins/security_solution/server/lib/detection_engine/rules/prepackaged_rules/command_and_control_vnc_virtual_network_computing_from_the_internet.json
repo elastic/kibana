@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "VNC (Virtual Network Computing) from the Internet",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port >= 5800 and destination.port <= 5810 and not source.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\") and destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port >= 5800 and destination.port <= 5810 and not source.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" ) and destination.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 )",
   "risk_score": 73,
   "rule_id": "5700cb81-df44-46aa-a5d7-337798f53eb8",
   "severity": "high",
@@ -58,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }
