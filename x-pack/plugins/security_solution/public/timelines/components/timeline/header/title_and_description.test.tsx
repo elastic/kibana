@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { TimelineTitleAndDescription } from './title_and_description';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useCreateTimelineButton } from '../properties/use_create_timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
@@ -31,8 +31,10 @@ jest.mock('react-redux', () => {
 describe('TimelineTitleAndDescription', () => {
   describe('save timeline', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
+      openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
       updateTitle: jest.fn(),
       updateDescription: jest.fn(),
@@ -44,7 +46,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.default,
       });
@@ -75,7 +77,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
@@ -108,6 +110,9 @@ describe('TimelineTitleAndDescription', () => {
 
   describe('update timeline', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
+      openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
@@ -121,7 +126,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: '1234',
+        status: TimelineStatus.active,
         title: 'my timeline',
         timelineType: TimelineType.default,
       });
@@ -136,7 +141,7 @@ describe('TimelineTitleAndDescription', () => {
       mockGetButton.mockClear();
     });
 
-    test('show proress bar while saving', () => {
+    test('show process bar while saving', () => {
       const component = shallow(<TimelineTitleAndDescription {...props} />);
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
@@ -152,7 +157,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: '1234',
+        status: TimelineStatus.active,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
@@ -180,6 +185,9 @@ describe('TimelineTitleAndDescription', () => {
 
   describe('showWarning', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
+      openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
@@ -194,7 +202,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.default,
         showWarnging: true,
@@ -234,7 +242,7 @@ describe('TimelineTitleAndDescription', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });

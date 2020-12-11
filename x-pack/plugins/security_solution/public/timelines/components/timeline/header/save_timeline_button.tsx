@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store/timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
 import { TimelineTitleAndDescription } from './title_and_description';

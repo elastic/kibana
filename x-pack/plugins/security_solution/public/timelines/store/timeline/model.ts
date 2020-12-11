@@ -116,7 +116,7 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
-  saveModal: {
+  saveModal?: {
     show: boolean;
     nextAppId?: string;
   };
