@@ -125,9 +125,8 @@ describe('CpuUsageAlert', () => {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
             cpuUsage,
-            stackProduct: 'elasticsearch',
-            stackProductName: nodeName,
-            stackProductUuid: nodeId,
+            nodeId,
+            nodeName,
             ui: {
               isFiring: true,
               message: {

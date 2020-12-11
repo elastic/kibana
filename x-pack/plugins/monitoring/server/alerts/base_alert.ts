@@ -62,6 +62,7 @@ interface AlertOptions {
   defaultParams?: CommonAlertParams;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
+  accessorKey?: string;
 }
 
 type CallCluster = (
@@ -338,24 +339,30 @@ export class BaseAlert {
         continue;
       }
 
-      const firingUuids = nodes
+      const firingNodeUuids = nodes
         .filter((node) => node.shouldFire)
         .map((node) => node.meta.nodeId)
         .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingUuids}`;
+      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertState[] = [];
+      const newAlertStates: AlertNodeState[] = [];
+      const key = this.alertOptions.accessorKey;
       for (const node of nodes) {
         if (!node.shouldFire) {
           continue;
         }
-
-        const alertState = this.getDefaultAlertState(cluster, node) as AlertState;
-        alertState.ui.triggeredMS = currentUTC;
-        alertState.ui.isFiring = true;
-        alertState.ui.severity = node.severity;
-        alertState.ui.message = this.getUiMessage(alertState, node);
-        newAlertStates.push(alertState);
+        const stat = node.meta as AlertNodeState;
+        const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
+        if (key) {
+          nodeState[key] = stat[key];
+        }
+        nodeState.nodeId = stat.nodeId || node.nodeId!;
+        nodeState.nodeName = stat.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.ui.triggeredMS = currentUTC;
+        nodeState.ui.isFiring = true;
+        nodeState.ui.severity = node.severity;
+        nodeState.ui.message = this.getUiMessage(nodeState, node);
+        newAlertStates.push(nodeState);
       }
 
       const alertInstanceState = { alertStates: newAlertStates };
@@ -401,12 +408,9 @@ export class BaseAlert {
     return {
       cluster,
       ccs: item.ccs,
-      stackProduct: '',
-      stackProductName: '',
-      stackProductUuid: '',
       ui: {
         isFiring: false,
-        message: { text: '' },
+        message: null,
         severity: AlertSeverity.Success,
         triggeredMS: 0,
         lastCheckedMS: 0,

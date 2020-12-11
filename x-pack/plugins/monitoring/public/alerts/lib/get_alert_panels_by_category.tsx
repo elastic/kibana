@@ -185,7 +185,7 @@ export function getAlertPanelsByCategory(
                     )}
                   </EuiText>
                 </EuiToolTip>
-                <EuiText size="s">{alertState.state.stackProductName}</EuiText>
+                <EuiText size="s">{alertState.state.nodeName}</EuiText>
               </Fragment>
             ),
             panel: ++tertiaryPanelIndex,

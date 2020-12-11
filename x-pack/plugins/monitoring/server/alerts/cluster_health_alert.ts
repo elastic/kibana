@@ -96,16 +96,6 @@ export class ClusterHealthAlert extends BaseAlert {
     };
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const defaultState = super.getDefaultAlertState(cluster, item);
-    return {
-      ...defaultState,
-      stackProduct: ELASTICSEARCH_SYSTEM_ID,
-      stackProductName: '',
-      stackProductUuid: '',
-    };
-  }
-
   protected async executeActions(
     instance: AlertInstance,
     alertState: AlertState,

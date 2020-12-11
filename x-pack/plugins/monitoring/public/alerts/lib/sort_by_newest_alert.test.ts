@@ -29,9 +29,8 @@ describe('sortByNewestAlert', () => {
           ...ui,
           triggeredMS: 2,
         },
-        stackProduct: 'elasticsearch',
-        stackProductUuid: `es1`,
-        stackProductName: `es_name_1`,
+        nodeId: `es1`,
+        nodeName: `es_name_1`,
       },
     };
     const b = {
@@ -43,9 +42,8 @@ describe('sortByNewestAlert', () => {
           ...ui,
           triggeredMS: 1,
         },
-        stackProduct: 'elasticsearch',
-        stackProductUuid: `es1`,
-        stackProductName: `es_name_1`,
+        nodeId: `es1`,
+        nodeName: `es_name_1`,
       },
     };
     expect(sortByNewestAlert(a, b)).toBe(-1);

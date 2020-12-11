@@ -7,6 +7,8 @@
 import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
+export type CommonAlert = Alert | SanitizedAlert;
+
 export interface CommonAlertStatus {
   states: CommonAlertState[];
   rawAlert: Alert | SanitizedAlert;

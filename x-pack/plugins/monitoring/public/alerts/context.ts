@@ -5,15 +5,12 @@
  */
 
 import React from 'react';
-import { AlertState } from '../../common/types/alerts';
 import { AlertsByName } from './types';
 
 export interface IAlertsContext {
   allAlerts: AlertsByName;
-  filterOutAlertStates: (alertState: AlertState) => boolean;
 }
 
 export const AlertsContext = React.createContext({
   allAlerts: {} as AlertsByName,
-  filterOutAlertStates: () => true,
 });

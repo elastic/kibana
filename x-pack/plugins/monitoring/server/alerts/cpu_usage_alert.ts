@@ -18,11 +18,11 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   CommonAlertParams,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ELASTICSEARCH_SYSTEM_ID,
   ALERT_CPU_USAGE,
   ALERT_DETAILS,
 } from '../../common/constants';
@@ -31,7 +31,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -42,6 +42,7 @@ export class CpuUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_CPU_USAGE,
       name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+      accessorKey: 'cpuUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
@@ -101,19 +102,14 @@ export class CpuUsageAlert extends BaseAlert {
     });
   }
 
-  protected getUuidFromAlertMeta(meta: AlertCpuUsageNodeStats) {
-    return meta.nodeId;
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const stat = item.meta as AlertCpuUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
-      stackProduct: ELASTICSEARCH_SYSTEM_ID,
-      stackProductUuid: stat.nodeId,
-      stackProductName: stat.nodeName || stat.nodeId,
-      cpuUsage: stat.cpuUsage,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Danger,
@@ -211,9 +207,7 @@ export class CpuUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes
-          .map(({ stackProductName, cpuUsage }) => `${stackProductName}:${cpuUsage}`)
-          .toString(),
+        nodes: firingNodes.map(({ nodeName, cpuUsage }) => `${nodeName}:${cpuUsage}`).toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

@@ -18,20 +18,20 @@ import {
   AlertInstanceState,
   CommonAlertParams,
   AlertMemoryUsageNodeStats,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_MEMORY_USAGE,
   ALERT_DETAILS,
-  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
@@ -42,6 +42,7 @@ export class MemoryUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_MEMORY_USAGE,
       name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
+      accessorKey: 'diskUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
@@ -100,19 +101,14 @@ export class MemoryUsageAlert extends BaseAlert {
     });
   }
 
-  protected getUuidFromAlertMeta(meta: AlertMemoryUsageNodeStats) {
-    return meta.nodeId;
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const stat = item.meta as AlertMemoryUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
-      stackProduct: ELASTICSEARCH_SYSTEM_ID,
-      stackProductUuid: stat.nodeId,
-      stackProductName: stat.nodeName || stat.nodeId,
-      memoryUsage: stat.memoryUsage,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Warning,
@@ -235,7 +231,7 @@ export class MemoryUsageAlert extends BaseAlert {
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         nodes: firingNodes
-          .map((state) => `${state.stackProductName}:${state.memoryUsage.toFixed(2)}`)
+          .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`)
           .join(','),
         count: firingCount,
         clusterName: cluster.clusterName,

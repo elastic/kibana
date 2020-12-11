@@ -128,10 +128,9 @@ describe('MissingMonitoringDataAlert', () => {
           {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
+            nodeId,
+            nodeName,
             gapDuration,
-            stackProduct: ELASTICSEARCH_SYSTEM_ID,
-            stackProductName: nodeName,
-            stackProductUuid: nodeId,
             ui: {
               isFiring: true,
               message: {

@@ -30,15 +30,15 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
     const { alertTypeId } = rawAlert;
     for (const alertState of states) {
       const { state } = alertState;
-      statesByNodes[state.stackProductUuid] = statesByNodes[state.stackProductUuid] || [];
-      statesByNodes[state.stackProductUuid].push(alertState);
+      statesByNodes[state.nodeId] = statesByNodes[state.nodeId] || [];
+      statesByNodes[state.nodeId].push(alertState);
 
-      alertsByNodes[state.stackProductUuid] = alertsByNodes[state.stackProductUuid] || {};
-      alertsByNodes[state.stackProductUuid][alertTypeId] = alertsByNodes[
-        alertState.state.stackProductUuid
-      ][alertTypeId] || { alert: rawAlert, states: [], count: 0 };
-      alertsByNodes[state.stackProductUuid][alertTypeId].count++;
-      alertsByNodes[state.stackProductUuid][alertTypeId].states.push(alertState);
+      alertsByNodes[state.nodeId] = alertsByNodes[state.nodeId] || {};
+      alertsByNodes[state.nodeId][alertTypeId] = alertsByNodes[alertState.state.nodeId][
+        alertTypeId
+      ] || { alert: rawAlert, states: [], count: 0 };
+      alertsByNodes[state.nodeId][alertTypeId].count++;
+      alertsByNodes[state.nodeId][alertTypeId].states.push(alertState);
     }
   }
 
@@ -61,7 +61,7 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
           return {
             name: (
               <EuiText>
-                {states[0].state.stackProductName} ({states.length})
+                {states[0].state.nodeName} ({states.length})
               </EuiText>
             ),
             panel: index + 1,
@@ -75,7 +75,7 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
       let title = '';
       for (const { alert, states } of alertsForNode) {
         for (const alertState of states) {
-          title = alertState.state.stackProductName;
+          title = alertState.state.nodeName;
           panelItems.push({
             name: (
               <Fragment>

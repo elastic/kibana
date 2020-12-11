@@ -48,16 +48,6 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     });
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const base = super.getDefaultAlertState(cluster, item);
-    return {
-      ...base,
-      stackProduct: LOGSTASH_SYSTEM_ID,
-      stackProductUuid: '',
-      stackProductName: '',
-    };
-  }
-
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const legacyAlert = item.meta as LegacyAlert;
     const versions = this.getVersions(legacyAlert);

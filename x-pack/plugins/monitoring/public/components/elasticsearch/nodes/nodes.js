@@ -34,7 +34,6 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { filterAlertStates } from '../../../alerts/lib/filter_alert_states';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -131,18 +130,9 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    // width: '175px',
     sortable: true,
-    render: (_field, node) => {
-      return (
-        <AlertsStatus
-          showBadge={true}
-          alerts={filterAlertStates(
-            alerts,
-            ({ state }) => state.stackProductUuid === node.resolver
-          )}
-        />
-      );
+    render: () => {
+      return <AlertsStatus showBadge={true} alerts={alerts} />;
     },
   });
 
@@ -315,7 +305,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
-
   if (
     setupMode &&
     setupMode.enabled &&
@@ -331,6 +320,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
       }),
       {}
     );
+
     nodes.push(
       ...Object.entries(setupMode.data.byUuid).reduce((nodes, [nodeUuid, instance]) => {
         if (!nodesByUuid[nodeUuid] && instance.node) {

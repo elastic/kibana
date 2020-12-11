@@ -125,9 +125,6 @@ describe('LogstashVersionMismatchAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
-            stackProduct: 'logstash',
-            stackProductName: '',
-            stackProductUuid: '',
             ui: {
               isFiring: true,
               message: {

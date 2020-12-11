@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertMessage, AlertState, CommonAlertState } from '../../../common/types/alerts';
 import {
   ALERT_CPU_USAGE,
   ALERT_LOGSTASH_VERSION_MISMATCH,
@@ -30,14 +29,9 @@ jest.mock('../../legacy_shims', () => ({
   },
 }));
 
-jest.mock('./get_formatted_date_for_alert_state', () => ({
-  getFormattedDateForAlertState: (alertState: CommonAlertState) =>
-    `triggered:${alertState.state.ui.triggeredMS}`,
-}));
-
-jest.mock('./get_date_from_now_for_alert_state', () => ({
-  getDateFromNowForAlertState: (alertState: CommonAlertState) =>
-    `triggered:${alertState.state.ui.triggeredMS}`,
+jest.mock('../../../common/formatting', () => ({
+  getDateFromNow: (timestamp: number) => `triggered:${timestamp}`,
+  getCalendar: (timestamp: number) => `triggered:${timestamp}`,
 }));
 
 describe('getAlertPanelsByNode', () => {
@@ -52,7 +46,7 @@ describe('getAlertPanelsByNode', () => {
 
   const cluster = { clusterUuid: '1', clusterName: 'one' };
 
-  function getAlert(type: string, firingCount: number, nonFiringCount: number) {
+  function getAlert(type: string, firingCount: number) {
     const states = [];
 
     for (let fi = 0; fi < firingCount; fi++) {
@@ -62,23 +56,8 @@ describe('getAlertPanelsByNode', () => {
         state: {
           cluster,
           ui,
-          stackProduct: 'elasticsearch',
-          stackProductUuid: `es${fi}`,
-          stackProductName: `es_name_${fi}`,
-        },
-      });
-    }
-
-    for (let nfi = 0; nfi < firingCount; nfi++) {
-      states.push({
-        firing: false,
-        meta: {},
-        state: {
-          cluster,
-          ui,
-          stackProduct: 'elasticsearch',
-          stackProductUuid: `es${nfi}`,
-          stackProductName: `es_name_${nfi}`,
+          nodeId: `es${fi}`,
+          nodeName: `es_name_${fi}`,
         },
       });
     }
@@ -116,25 +95,25 @@ describe('getAlertPanelsByNode', () => {
 
   it('should properly group for alerts in each category', () => {
     const alerts = [
-      getAlert(ALERT_NODES_CHANGED, 2, 0),
-      getAlert(ALERT_DISK_USAGE, 1, 0),
-      getAlert(ALERT_LICENSE_EXPIRATION, 2, 2),
+      getAlert(ALERT_NODES_CHANGED, 2),
+      getAlert(ALERT_DISK_USAGE, 1),
+      getAlert(ALERT_LICENSE_EXPIRATION, 2),
     ];
     const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();
   });
 
   it('should properly group for alerts in a single category', () => {
-    const alerts = [getAlert(ALERT_MEMORY_USAGE, 2, 0)];
+    const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
     const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();
   });
 
   it('should not show any alert if none are firing', () => {
     const alerts = [
-      getAlert(ALERT_LOGSTASH_VERSION_MISMATCH, 0, 2),
-      getAlert(ALERT_CPU_USAGE, 0, 1),
-      getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0, 0),
+      getAlert(ALERT_LOGSTASH_VERSION_MISMATCH, 0),
+      getAlert(ALERT_CPU_USAGE, 0),
+      getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
     ];
     const result = getAlertPanelsByNode(panelTitle, alerts);
     expect(result).toMatchSnapshot();

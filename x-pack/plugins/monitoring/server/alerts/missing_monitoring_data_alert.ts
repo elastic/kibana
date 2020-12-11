@@ -14,18 +14,17 @@ import {
   AlertMessage,
   AlertMessageTimeToken,
   CommonAlertParams,
-  AlertMissingData,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DETAILS,
-  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
@@ -40,6 +39,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_MISSING_MONITORING_DATA,
       name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
+      accessorKey: 'gapDuration',
       defaultParams: {
         duration: '15m',
         limit: '1d',
@@ -95,19 +95,14 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     });
   }
 
-  protected getUuidFromAlertMeta(meta: AlertMissingData) {
-    return meta.nodeId;
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const stat = item.meta as AlertMissingData;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
-      stackProduct: ELASTICSEARCH_SYSTEM_ID,
-      stackProductUuid: stat.nodeId,
-      stackProductName: stat.nodeName || stat.nodeId,
-      gapDuration: stat.gapDuration,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Danger,
@@ -202,7 +197,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map((state) => `node: ${state.stackProductName}`).toString(),
+        nodes: firingNodes.map((state) => `node: ${state.nodeName}`).toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

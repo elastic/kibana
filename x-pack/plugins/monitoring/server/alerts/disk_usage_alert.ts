@@ -18,20 +18,20 @@ import {
   AlertInstanceState,
   CommonAlertParams,
   AlertDiskUsageNodeStats,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DISK_USAGE,
   ALERT_DETAILS,
-  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -41,6 +41,7 @@ export class DiskUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_DISK_USAGE,
       name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
+      accessorKey: 'diskUsage',
       defaultParams: {
         threshold: 80,
         duration: '5m',
@@ -94,19 +95,14 @@ export class DiskUsageAlert extends BaseAlert {
     });
   }
 
-  protected getUuidFromAlertMeta(meta: AlertDiskUsageNodeStats) {
-    return meta.nodeId;
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const stat = item.meta as AlertDiskUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
-      stackProduct: ELASTICSEARCH_SYSTEM_ID,
-      stackProductUuid: stat.nodeId,
-      stackProductName: stat.nodeName || stat.nodeId,
-      diskUsage: stat.diskUsage,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Warning,
@@ -222,7 +218,7 @@ export class DiskUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map((state) => `${state.stackProductName}:${state.diskUsage}`).join(','),
+        nodes: firingNodes.map((state) => `${state.nodeName}:${state.diskUsage}`).join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

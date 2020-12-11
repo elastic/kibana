@@ -90,9 +90,6 @@ describe('fetchStatus', () => {
   it('should return alerts that are firing', async () => {
     alertStates = [
       {
-        stackProductUuid: '',
-        stackProductName: '',
-        stackProduct: '',
         cluster: defaultClusterState,
         ui: {
           ...defaultUiState,
