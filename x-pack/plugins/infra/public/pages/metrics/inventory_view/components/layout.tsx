@@ -156,18 +156,20 @@ export const Layout = () => {
                         bottomMargin={height}
                         topMargin={topActionHeight}
                       />
-                      <BottomDrawer
-                        measureRef={measureRef}
-                        interval={interval}
-                        formatter={formatter}
-                      >
-                        <Legend
+                      {view === 'map' && (
+                        <BottomDrawer
+                          measureRef={measureRef}
+                          interval={interval}
                           formatter={formatter}
-                          bounds={bounds}
-                          dataBounds={dataBounds}
-                          legend={options.legend}
-                        />
-                      </BottomDrawer>
+                        >
+                          <Legend
+                            formatter={formatter}
+                            bounds={bounds}
+                            dataBounds={dataBounds}
+                            legend={options.legend}
+                          />
+                        </BottomDrawer>
+                      )}
                     </>
                   )}
                 </AutoSizer>
