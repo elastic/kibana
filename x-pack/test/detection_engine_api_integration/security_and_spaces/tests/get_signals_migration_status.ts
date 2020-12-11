@@ -19,104 +19,93 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Migrating signals', () => {
+  describe('Signals migration status', () => {
+    let legacySignalsIndexName: string;
     beforeEach(async () => {
       await createSignalsIndex(supertest);
+      legacySignalsIndexName = getIndexNameFromLoad(
+        await esArchiver.load('signals/legacy_signals_index')
+      );
     });
 
     afterEach(async () => {
+      await esArchiver.unload('signals/legacy_signals_index');
       await deleteSignalsIndex(supertest);
     });
 
-    describe('migration status of signals indexes', async () => {
-      let legacySignalsIndexName: string;
+    it('returns no indexes if no signals exist in the specified range', async () => {
+      const { body } = await supertest
+        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+        .query({ from: '2020-10-20' })
+        .set('kbn-xsrf', 'true')
+        .expect(200);
 
-      beforeEach(async () => {
-        legacySignalsIndexName = getIndexNameFromLoad(
-          await esArchiver.load('signals/legacy_signals_index')
-        );
-      });
+      expect(body.indices).to.eql([]);
+    });
 
-      afterEach(async () => {
-        await esArchiver.unload('signals/legacy_signals_index');
-      });
+    it('includes an index if its signals are within the specified range', async () => {
+      const {
+        body: { indices },
+      } = await supertest
+        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+        .query({ from: '2020-10-10' })
+        .set('kbn-xsrf', 'true')
+        .expect(200);
 
-      it('returns no indexes if no signals exist in the specified range', async () => {
-        const { body } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .query({ from: '2020-10-20' })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+      expect(indices).length(1);
+      expect(indices[0].index).to.eql(legacySignalsIndexName);
+    });
 
-        expect(body.indices).to.eql([]);
-      });
+    it("returns the mappings version and a breakdown of signals' version", async () => {
+      const outdatedIndexName = getIndexNameFromLoad(
+        await esArchiver.load('signals/outdated_signals_index')
+      );
 
-      it('includes an index if its signals are within the specified range', async () => {
-        const {
-          body: { indices },
-        } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .query({ from: '2020-10-10' })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+      const { body } = await supertest
+        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+        .query({ from: '2020-10-10' })
+        .set('kbn-xsrf', 'true')
+        .expect(200);
 
-        expect(indices).length(1);
-        expect(indices[0].name).to.eql(legacySignalsIndexName);
-      });
+      expect(body.indices).to.eql([
+        {
+          index: legacySignalsIndexName,
+          is_outdated: true,
+          migration_ids: [],
+          signal_versions: [
+            {
+              count: 1,
+              version: 0,
+            },
+          ],
+          version: 1,
+        },
+        {
+          is_outdated: true,
+          index: outdatedIndexName,
+          migration_ids: [],
+          signal_versions: [
+            {
+              count: 1,
+              version: 3,
+            },
+          ],
+          version: 3,
+        },
+      ]);
 
-      it("returns the mappings version and a breakdown of signals' version", async () => {
-        const outdatedIndexName = getIndexNameFromLoad(
-          await esArchiver.load('signals/outdated_signals_index')
-        );
+      await esArchiver.unload('signals/outdated_signals_index');
+    });
 
-        const { body } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .query({ from: '2020-10-10' })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+    it('rejects the request if the user does not have sufficient privileges', async () => {
+      await createUserAndRole(security, ROLES.t1_analyst);
 
-        expect(body.indices).to.eql([
-          {
-            name: legacySignalsIndexName,
-            is_outdated: true,
-            migrations: [],
-            signal_versions: [
-              {
-                doc_count: 1,
-                key: 0,
-              },
-            ],
-            version: 1,
-          },
-          {
-            is_outdated: true,
-            name: outdatedIndexName,
-            migrations: [],
-            signal_versions: [
-              {
-                doc_count: 1,
-                key: 3,
-              },
-            ],
-            version: 3,
-          },
-        ]);
-
-        await esArchiver.unload('signals/outdated_signals_index');
-      });
-
-      it.todo('does not include migrations that have been deleted');
-
-      it('rejects the request if the user does not have sufficient privileges', async () => {
-        await createUserAndRole(security, ROLES.t1_analyst);
-
-        await supertestWithoutAuth
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(ROLES.t1_analyst, 'changeme')
-          .query({ from: '2020-10-10' })
-          .expect(403);
-      });
+      await supertestWithoutAuth
+        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+        .set('kbn-xsrf', 'true')
+        .auth(ROLES.t1_analyst, 'changeme')
+        .query({ from: '2020-10-10' })
+        .expect(403);
     });
   });
 };

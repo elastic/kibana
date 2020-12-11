@@ -14,7 +14,7 @@ import { SignalsReindexOptions } from '../../../../../common/detection_engine/sc
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema.mock';
 
-describe('query for signal', () => {
+describe('creating signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 

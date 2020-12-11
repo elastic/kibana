@@ -8,7 +8,7 @@ import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_respons
 import { requestContextMock, serverMock } from '../__mocks__';
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
 
-describe('query for signal', () => {
+describe('finalizing signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 

@@ -8,10 +8,10 @@ import * as t from 'io-ts';
 
 import { from } from '../common/schemas';
 
-export const getMigrationStatusSchema = t.exact(
+export const getSignalsMigrationStatusSchema = t.exact(
   t.type({
     from,
   })
 );
 
-export type GetMigrationStatusSchema = t.TypeOf<typeof getMigrationStatusSchema>;
+export type GetSignalsMigrationStatusSchema = t.TypeOf<typeof getSignalsMigrationStatusSchema>;

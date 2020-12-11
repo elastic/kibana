@@ -7,11 +7,11 @@
 import { SignalsMigrationSOClient } from './saved_objects_client';
 
 const create = () =>
-  (({
+  ({
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
     update: jest.fn(),
-  } as unknown) as jest.Mocked<SignalsMigrationSOClient>);
+  } as jest.Mocked<SignalsMigrationSOClient>);
 
 export const savedObjectClientMock = { create };

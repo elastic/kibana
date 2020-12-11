@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createMigrationIndex } from './create_migration_index';
 
 describe('createMigrationIndex', () => {
-  let esClient: ElasticsearchClient;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();

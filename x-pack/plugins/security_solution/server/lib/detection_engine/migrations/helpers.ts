@@ -20,6 +20,9 @@ export const isMigrationSuccess = (migration: SignalsMigrationSO): boolean =>
 export const isMigrationFailed = (migration: SignalsMigrationSO): boolean =>
   migration.attributes.status === 'failure';
 
+export const isMigrationDeleted = (migration: SignalsMigrationSO): boolean =>
+  migration.attributes.deleted === true;
+
 export const isOutdated = ({ current, target }: { current: number; target: number }): boolean =>
   current < target;
 

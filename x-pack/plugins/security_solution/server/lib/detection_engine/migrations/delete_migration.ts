@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { isMigrationFailed, isMigrationPending } from './helpers';
+import { isMigrationDeleted, isMigrationFailed, isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { SignalsMigrationSO } from './saved_objects_schema';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
@@ -35,7 +35,7 @@ export const deleteMigration = async ({
   signalsAlias: string;
   soClient: SavedObjectsClientContract;
 }): Promise<SignalsMigrationSO> => {
-  if (isMigrationPending(migration)) {
+  if (isMigrationPending(migration) || isMigrationDeleted(migration)) {
     return migration;
   }
 

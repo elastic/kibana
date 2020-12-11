@@ -6,14 +6,14 @@
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
-import { getMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_migration_status_schema';
+import { getSignalsMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
-import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
+import { isMigrationDeleted, isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse, transformError } from '../utils';
 
@@ -22,7 +22,7 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
       validate: {
-        query: buildRouteValidation(getMigrationStatusSchema),
+        query: buildRouteValidation(getSignalsMigrationStatusSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -71,7 +71,7 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
             index,
             version,
             signal_versions: signalVersions,
-            migration_ids: migrations.map((m) => m.id),
+            migration_ids: migrations.filter((m) => !isMigrationDeleted(m)).map((m) => m.id),
             is_outdated:
               isOutdated({ current: version, target: currentVersion }) ||
               signalsAreOutdated({ signalVersions, target: currentVersion }),
