@@ -38,9 +38,9 @@ export function isConfirmAction(action: AppLeaveAction): action is AppLeaveConfi
   return action.type === AppLeaveActionType.confirm;
 }
 
-export function getLeaveAction(handler?: AppLeaveHandler): AppLeaveAction {
+export function getLeaveAction(handler?: AppLeaveHandler, nextAppId?: string): AppLeaveAction {
   if (!handler) {
     return appLeaveActionFactory.default();
   }
-  return handler(appLeaveActionFactory);
+  return handler(appLeaveActionFactory, nextAppId);
 }

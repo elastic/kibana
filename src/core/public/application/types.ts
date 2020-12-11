@@ -578,7 +578,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  */
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (
+  factory: AppLeaveActionFactory,
+  nextAppId?: string
+) => AppLeaveAction;
 
 /**
  * Possible type of actions on application leave.
