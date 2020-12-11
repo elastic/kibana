@@ -173,23 +173,35 @@ describe('KibanaMigrator', () => {
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
         await migrator.runMigrations();
 
-        // Basic assertions that we're creating and cloning the expected indices
-        expect(options.client.indices.create).toHaveBeenCalledTimes(2);
+        // Basic assertions that we're creating and reindexing the expected indices
+        expect(options.client.indices.create).toHaveBeenCalledTimes(3);
         expect(options.client.indices.create.mock.calls).toEqual(
           expect.arrayContaining([
+            // LEGACY_CREATE_REINDEX_TARGET
             expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
+            // CREATE_REINDEX_TARGET
+            expect.arrayContaining([expect.objectContaining({ index: '.my-index_8.2.3_001' })]),
+            // CREATE_NEW_TARGET
             expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
           ])
         );
-        expect(options.client.indices.clone.mock.calls).toEqual(
-          expect.arrayContaining([
-            expect.arrayContaining([
-              expect.objectContaining({
-                index: '.my-index_pre8.2.3_001',
-                target: '.my-index_8.2.3_001',
-              }),
-            ]),
-          ])
+        // LEGACY_REINDEX
+        expect(options.client.reindex.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              source: expect.objectContaining({ index: '.my-index' }),
+              dest: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
+            }),
+          })
+        );
+        // REINDEX_SOURCE_TO_TARGET
+        expect(options.client.reindex.mock.calls[1][0]).toEqual(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              source: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
+              dest: expect.objectContaining({ index: '.my-index_8.2.3_001' }),
+            }),
+          })
         );
         const { status } = await migratorStatus;
         return expect(status).toEqual('completed');
