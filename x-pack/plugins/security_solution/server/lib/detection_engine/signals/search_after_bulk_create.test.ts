@@ -15,7 +15,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { checkMappingForTimestampFields } from './utils';
+import { timestampFieldCheck } from './utils';
 import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
@@ -30,7 +30,7 @@ jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
   return {
     ...original,
-    checkMappingForTimestampFields: jest.fn(),
+    timestampFieldCheck: jest.fn(),
   };
 });
 
@@ -44,11 +44,9 @@ const buildRuleMessage = buildRuleMessageFactory({
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let listClient = listMock.getListClient();
-  (checkMappingForTimestampFields as jest.Mock).mockImplementation(
-    (indexPattern: string[], t, s, l, b) => ({
-      '@timestamp': [...indexPattern],
-    })
-  );
+  (timestampFieldCheck as jest.Mock).mockImplementation((indexPattern: string[], t, s, l, b) => ({
+    '@timestamp': [...indexPattern],
+  }));
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   beforeEach(() => {
     jest.clearAllMocks();
