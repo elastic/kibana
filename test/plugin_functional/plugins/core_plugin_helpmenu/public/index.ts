@@ -17,14 +17,8 @@
  * under the License.
  */
 
-export { LoadingIndicator } from './loading_indicator';
-export {
-  Header,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  NavType,
-} from './header';
+import { PluginInitializer } from 'kibana/public';
+import { CoreHelpMenuPlugin, CoreHelpMenuPluginSetup, CoreHelpMenuPluginStart } from './plugin';
+
+export const plugin: PluginInitializer<CoreHelpMenuPluginSetup, CoreHelpMenuPluginStart> = () =>
+  new CoreHelpMenuPlugin();
