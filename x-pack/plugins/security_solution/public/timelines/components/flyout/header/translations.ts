@@ -20,12 +20,9 @@ export const AUTOSAVED = i18n.translate(
   }
 );
 
-export const UNSAVED = i18n.translate(
-  'xpack.securitySolution.timeline.properties.unSavedLabel',
-  {
-    defaultMessage: 'Unsaved',
-  }
-);
+export const UNSAVED = i18n.translate('xpack.securitySolution.timeline.properties.unSavedLabel', {
+  defaultMessage: 'Unsaved',
+});
 
 export const INSPECT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.inspectTimelineTitle',

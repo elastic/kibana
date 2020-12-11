@@ -11,7 +11,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
-  EuiTextColor
+  EuiTextColor,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
@@ -51,9 +51,27 @@ interface FlyoutHeaderPanelProps {
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { activeTab, dataProviders, kqlQuery, title, timelineType, status: timelineStatus, updated, show } = useDeepEqualSelector((state) =>
+  const {
+    activeTab,
+    dataProviders,
+    kqlQuery,
+    title,
+    timelineType,
+    status: timelineStatus,
+    updated,
+    show,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['activeTab', 'dataProviders', 'kqlQuery', 'status', 'title', 'timelineType', 'updated', 'show'],
+      [
+        'activeTab',
+        'dataProviders',
+        'kqlQuery',
+        'status',
+        'title',
+        'timelineType',
+        'updated',
+        'show',
+      ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -146,7 +164,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       <EuiText>
         <h3 data-test-subj="timeline-title">{content}</h3>
       </EuiText>
-      <SaveTimelineButton timelineId={timelineId} initialFocus='title'/>
+      <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
     </>
   );
 };
@@ -168,7 +186,7 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
       <EuiText size="s" data-test-subj="timeline-description">
         {content}
       </EuiText>
-      <SaveTimelineButton timelineId={timelineId} initialFocus='description' />
+      <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
     </>
   );
 };
@@ -178,7 +196,8 @@ const TimelineDescription = React.memo(TimelineDescriptionComponent);
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineStatus(state, timelineId));
+    getTimelineStatus(state, timelineId)
+  );
 
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
 

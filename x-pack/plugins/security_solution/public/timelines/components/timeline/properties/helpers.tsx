@@ -124,17 +124,18 @@ export const Description = React.memo<DescriptionProps>(
     );
 
     const inputField = useMemo(
-      () =>
-          <EuiTextArea
-            autoFocus={autoFocus}
-            data-test-subj="timeline-description-textarea"
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            onChange={onDescriptionChanged}
-            placeholder={i18n.DESCRIPTION}
-            value={description}
-            disabled={disabled}
-          />
-      , [autoFocus, description, onDescriptionChanged, disabled]
+      () => (
+        <EuiTextArea
+          autoFocus={autoFocus}
+          data-test-subj="timeline-description-textarea"
+          aria-label={i18n.TIMELINE_DESCRIPTION}
+          onChange={onDescriptionChanged}
+          placeholder={i18n.DESCRIPTION}
+          value={description}
+          disabled={disabled}
+        />
+      ),
+      [autoFocus, description, onDescriptionChanged, disabled]
     );
 
     return (

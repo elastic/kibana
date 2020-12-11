@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon,  EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { TimelineTitleAndDescription } from './title_and_description';
@@ -38,11 +38,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
     return showSaveTimelineOverlay ? (
       <>
         {saveTimelineButtonIcon}
-          <TimelineTitleAndDescription
-            initialFocus={initialFocus}
-            timelineId={timelineId}
-            toggleSaveTimeline={onToggleSaveTimeline}
-          />
+        <TimelineTitleAndDescription
+          initialFocus={initialFocus}
+          timelineId={timelineId}
+          toggleSaveTimeline={onToggleSaveTimeline}
+        />
       </>
     ) : (
       <EuiToolTip content={toolTip ?? ''} data-test-subj="save-timeline-btn-tooltip">
