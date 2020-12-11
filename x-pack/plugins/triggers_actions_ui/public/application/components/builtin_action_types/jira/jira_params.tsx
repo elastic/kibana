@@ -97,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
       if (!incident.priority && priorities.length > 0) {
-        editSubActionProperty('priority', priorities[0].id ?? '');
+        editSubActionProperty('priority', priorities[0].name ?? '');
       }
       return priorities.map((p: { id: string; name: string }) => {
         return {
