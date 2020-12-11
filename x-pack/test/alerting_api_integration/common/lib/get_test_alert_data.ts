@@ -13,6 +13,7 @@ export function getTestAlertData(overwrites = {}) {
     consumer: 'alertsFixture',
     schedule: { interval: '1m' },
     throttle: '1m',
+    notifyWhen: 'onThrottleInterval',
     actions: [],
     params: {},
     ...overwrites,

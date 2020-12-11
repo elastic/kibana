@@ -47,7 +47,12 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
             break;
           }
           // eslint-disable-next-line no-console
-          console.log('action', actionStatePair.action, 'state', actionStatePair.state);
+          console.log(
+            'action',
+            JSON.stringify(actionStatePair.action, null, 2),
+            'state',
+            JSON.stringify(actionStatePair.state, null, 2)
+          );
         }
       })();
       return () => {

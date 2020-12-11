@@ -25,6 +25,7 @@ import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http'
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
+import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -40,6 +41,7 @@ export interface RenderingMetadata {
     branch: string;
     basePath: string;
     serverBasePath: string;
+    publicBaseUrl?: string;
     env: {
       mode: EnvironmentMode;
       packageInfo: PackageInfo;
@@ -49,6 +51,7 @@ export interface RenderingMetadata {
       translationsUrl: string;
     };
     csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
+    externalUrl: { policy: IExternalUrlPolicy[] };
     vars: Record<string, any>;
     uiPlugins: Array<{
       id: string;
