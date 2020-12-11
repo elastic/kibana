@@ -4,32 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
+import { FormattedRelative } from '@kbn/i18n/react';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
+import * as i18n from './translations';
 
 const ButtonWrapper = styled(EuiFlexItem)`
   flex-direction: row;
   align-items: center;
 `;
 
+const EuiHealthStyled = styled(EuiHealth)`
+  display: block;
+`;
+
 interface ActiveTimelinesProps {
   timelineId: string;
+  timelineStatus: TimelineStatus;
   timelineTitle: string;
   timelineType: TimelineType;
   isOpen: boolean;
+  updated?: number;
 }
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineId,
+  timelineStatus,
   timelineType,
   timelineTitle,
+  updated,
   isOpen,
 }) => {
   const dispatch = useDispatch();
@@ -45,6 +55,22 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
 
+  const tooltipContent = useMemo(() => {
+    if (timelineStatus === TimelineStatus.draft) {
+      return <>{i18n.UNSAVED}</>;
+    }
+    return (
+      <>
+        {i18n.AUTOSAVED}{' '}
+        <FormattedRelative
+          data-test-subj="timeline-status"
+          key="timeline-status-autosaved"
+          value={new Date(updated!)}
+        />
+      </>
+    );
+  }, [timelineStatus, updated]);
+
   return (
     <EuiFlexGroup>
       <ButtonWrapper grow={false}>
@@ -54,7 +80,16 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
           isSelected={isOpen}
           onClick={handleToggleOpen}
         >
-          {title}
+          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content={tooltipContent}>
+                <EuiHealthStyled
+                  color={timelineStatus === TimelineStatus.draft ? 'warning' : 'success'}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow>{title}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiButtonEmpty>
       </ButtonWrapper>
     </EuiFlexGroup>
