@@ -345,11 +345,13 @@ const EventsViewerComponent: React.FC<Props> = ({
 
 export const EventsViewer = React.memo(
   EventsViewerComponent,
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
+    deepEqual(prevProps.defaultModel, nextProps.defaultModel) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
