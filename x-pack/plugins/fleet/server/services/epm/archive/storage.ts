@@ -151,11 +151,16 @@ export async function getAsset(opts: {
 export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
-  packageAssets: SavedObjectsBulkGetObject[],
+  packageAssets: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const soRes = await savedObjectsClient.bulkGet<PackageAsset>(packageAssets);
+  const bulkBody: SavedObjectsBulkGetObject[] = packageAssets.map((ref) => ({
+    id: ref.id,
+    type: ref.type,
+    fields: ['asset_path'],
+  }));
+  const soRes = await savedObjectsClient.bulkGet<PackageAsset>(bulkBody);
   const paths = soRes.saved_objects.map((asset) => asset.attributes.asset_path);
 
   // create the packageInfo
