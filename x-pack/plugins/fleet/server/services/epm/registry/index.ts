@@ -110,6 +110,15 @@ export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<Re
   return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
 }
 
+export async function getFile(
+  pkgName: string,
+  pkgVersion: string,
+  relPath: string
+): Promise<Response> {
+  const filePath = `/package/${pkgName}/${pkgVersion}/${relPath}`;
+  return fetchFile(filePath);
+}
+
 export async function fetchFile(filePath: string): Promise<Response> {
   const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
