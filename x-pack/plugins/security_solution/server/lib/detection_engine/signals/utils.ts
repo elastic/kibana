@@ -668,7 +668,7 @@ export interface TimestampsAndIndices {
   [timestampString: string]: string[]; // maps timestampString like @timestamp or 'event.ingested' to the indices that contain that timestamp mapping
 }
 
-export const checkMappingForTimestampFields = async (
+export const checkIndexMappingsForTimestampFields = async (
   indices: string[],
   timestamps: string[],
   services: AlertServices,
@@ -774,23 +774,32 @@ export const findIndicesWithTimestampAndWithout = (
   return [successIndexes, failingIndexes];
 };
 
-export interface PreCheckRuleResultInterface {
-  result: 'success' | 'partial failure' | 'error';
-  failingIndexes: string[];
-  successIndexes: string[];
-  resultMessages: string[];
-  timestampsAndIndices: TimestampsAndIndices;
-}
-
-// run privilege checks before rule execution begins
-export const preExecutionRuleCheck = async (
+/**
+ * The basic gist is find all indices that have the given timestamp(s)
+ * If there is a timestamp override, ensure all indices for all index
+ * patterns have that timestamp override. If an index pattern does not,
+ * check if that index has an '@timestamp' field and default to that.
+ *
+ * If no timestamp override field is found, use the '@timestamp' field.
+ * If an index in a given index pattern is missing the '@timestamp' field
+ * set the status of the rule to be a partial failure
+ *
+ * If all index patterns are missing the '@timestamp' field and the override
+ * set the status to error.
+ * @param indices string[]
+ * @param timestamps string[]
+ * @param services AlertServices
+ * @param logger Logger
+ * @param buildRuleMessage
+ */
+export const timestampFieldCheck = async (
   indices: string[],
   timestamps: string[],
   services: AlertServices,
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<PreCheckRuleResultInterface> => {
-  const timestampsAndIndices = await checkMappingForTimestampFields(
+  const timestampsAndIndices = await checkIndexMappingsForTimestampFields(
     indices,
     timestamps,
     services,
@@ -798,7 +807,7 @@ export const preExecutionRuleCheck = async (
     buildRuleMessage
   );
 
-  // get all indices which match the given index pattern
+  // get all indices which match the given index pattern(s)
   // we will use this for determining which indices within
   // a given index pattern are missing timestamp field(s)
   const indexPatternIndices = await getIndexesMatchingIndexPatterns(
@@ -808,29 +817,26 @@ export const preExecutionRuleCheck = async (
     buildRuleMessage
   );
 
-  /**
-   * if timestampsAndIndices[timestampOverride].length === Object.values(indexPatternIndices).length
-   * then skip the @timestamp field since we have all of the indices in the timestamp override.
-   */
+  if (isEmpty(indexPatternIndices)) {
+    throw Error(`No indices found given index patterns: ${JSON.stringify(indices, null, 2)}`);
+  }
 
-  const timestampOverrideIfThereIsOne = Object.keys(timestampsAndIndices).filter(
+  // if timestampsAndIndices[timestampOverride].length === Object.values(indexPatternIndices).length
+  // then skip the @timestamp field since we have all of the indices in the timestamp override.
+  const timestampOverrideField = Object.keys(timestampsAndIndices).filter(
     (timestamp) => timestamp !== '@timestamp'
   )[0];
 
   if (
-    timestampOverrideIfThereIsOne != null &&
-    Object.keys(timestampsAndIndices).includes(timestampOverrideIfThereIsOne)
+    timestampOverrideField != null &&
+    Object.keys(timestampsAndIndices).includes(timestampOverrideField)
   ) {
     if (
-      timestampsAndIndices[timestampOverrideIfThereIsOne].length ===
+      timestampsAndIndices[timestampOverrideField].length ===
       Object.values(indexPatternIndices).flat(2).length
     ) {
       delete timestampsAndIndices['@timestamp'];
     }
-  }
-
-  if (isEmpty(indexPatternIndices)) {
-    throw Error(`No indices found given index patterns: ${JSON.stringify(indices, null, 2)}`);
   }
 
   const timestampKeys = Object.keys(timestampsAndIndices);
@@ -844,9 +850,13 @@ export const preExecutionRuleCheck = async (
     {} as Record<string, RegExp>
   );
 
+  if (isEmpty(indexPatternIndices)) {
+    throw Error(`No indices found given index patterns: ${JSON.stringify(indices, null, 2)}`);
+  }
+
   /**
    * Compute our return object based off of what indexes contain the timestamp override (if provided)
-   * or are missing the @timestamp field and generate a status (error, partial failure, success)
+   * or are missing the '@timestamp' field and generate a status (error, partial failure, success)
    */
   const toReturn: PreCheckRuleResultInterface = timestampKeys.reduce(
     (acc, timestamp) => {
@@ -872,10 +882,10 @@ export const preExecutionRuleCheck = async (
         };
       }
 
-      // find all indexes that match given pattern
-      // make sure the length of all indexes that
-      // match pattern in timestampsAndIndices[timestamp] is equal to
-      const [successIndexes, failedIndexes] = findIndicesWithTimestampAndWithout(
+      const [
+        indexesWithTimestampField,
+        indexesWithNoTimestampField,
+      ] = findIndicesWithTimestampAndWithout(
         indexPatternRegEx,
         indexPatternIndices,
         timestampsAndIndices,
@@ -884,8 +894,8 @@ export const preExecutionRuleCheck = async (
         buildRuleMessage
       );
 
-      const tempFailedIdxs = failedIndexes.filter(
-        (idx) => !timestampsAndIndices[timestampOverrideIfThereIsOne].some((indx) => indx === idx)
+      const tempFailedIdxs = indexesWithNoTimestampField.filter(
+        (idx) => !timestampsAndIndices[timestampOverrideField].some((indx) => indx === idx)
       );
 
       const resultMessages =
@@ -894,9 +904,15 @@ export const preExecutionRuleCheck = async (
               ...acc.resultMessages,
               `The ${
                 timestamp !== '@timestamp' ? 'timestamp override' : ''
-              } field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-                tempFailedIdxs
-              )}`,
+              } field ${timestamp} was not found in any of the following index patterns ${
+                tempFailedIdxs.length > 5
+                  ? JSON.stringify([
+                      Object.keys(indexPatternRegEx).find((indexPattern) =>
+                        indexPatternRegEx[indexPattern].test(tempFailedIdxs[0])
+                      ),
+                    ])
+                  : JSON.stringify(tempFailedIdxs)
+              }`,
             ]
           : [...acc.resultMessages];
       const failingIndexes =
@@ -904,10 +920,26 @@ export const preExecutionRuleCheck = async (
           ? [...acc.failingIndexes, ...tempFailedIdxs]
           : [...acc.failingIndexes];
       return {
-        result: failedIndexes.length > 0 ? 'partial failure' : acc.result,
+        result: ((): 'success' | 'partial failure' | 'error' => {
+          if (
+            indexesWithNoTimestampField.length > 0 &&
+            (acc.successIndexes.length > 0 || indexesWithTimestampField.length > 0)
+          ) {
+            return 'partial failure';
+          } else if (
+            acc.failingIndexes.length >= 0 &&
+            indexesWithNoTimestampField.length >= 0 &&
+            acc.successIndexes.length === 0 &&
+            indexesWithTimestampField.length === 0 &&
+            acc.result === 'error'
+          ) {
+            return 'error';
+          }
+          return acc.result;
+        })(),
         resultMessages,
         failingIndexes,
-        successIndexes: [...acc.successIndexes, ...successIndexes],
+        successIndexes: [...acc.successIndexes, ...indexesWithTimestampField],
         timestampsAndIndices,
       };
     },
@@ -921,4 +953,25 @@ export const preExecutionRuleCheck = async (
   );
 
   return toReturn;
+};
+
+export interface PreCheckRuleResultInterface {
+  result: 'success' | 'partial failure' | 'error';
+  failingIndexes: string[];
+  successIndexes: string[];
+  resultMessages: string[];
+  timestampsAndIndices: TimestampsAndIndices;
+}
+
+// run privilege checks before rule execution begins
+// currently the only check is for the timestampFields
+// in the future we will add more.
+export const preExecutionRuleCheck = async (
+  indices: string[],
+  timestamps: string[],
+  services: AlertServices,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+): Promise<PreCheckRuleResultInterface> => {
+  return timestampFieldCheck(indices, timestamps, services, logger, buildRuleMessage);
 };
