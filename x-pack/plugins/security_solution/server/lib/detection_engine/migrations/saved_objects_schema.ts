@@ -7,12 +7,14 @@
 import * as t from 'io-ts';
 
 import { IsoDateString, PositiveInteger } from '../../../../common/detection_engine/schemas/types';
+import { unionWithNullType } from '../../../../common/utility_types';
 
 const status = t.keyof({ success: null, failure: null, pending: null });
 
 const signalsMigrationSOWriteAttributes = {
-  sourceIndex: t.string,
   destinationIndex: t.string,
+  error: unionWithNullType(t.string),
+  sourceIndex: t.string,
   status,
   taskId: t.string,
   version: PositiveInteger,

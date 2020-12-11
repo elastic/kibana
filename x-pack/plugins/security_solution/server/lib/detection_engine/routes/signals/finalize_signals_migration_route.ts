@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReindexResponse } from 'elasticsearch';
-
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { BadRequestError } from '../../errors/bad_request_error';
-import { getIndexCount } from '../../index/get_index_count';
 import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
-import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
-import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
-
-interface TaskResponse {
-  completed: boolean;
-  response?: ReindexResponse;
-  task: { description?: string };
-}
 
 export const finalizeSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -61,63 +50,23 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
                 throw new BadRequestError('The specified index has no migrations');
               }
 
-              const [migration] = migrations;
-              if (isMigrationFailed(migration)) {
+              const finalizedMigration = await migrationService.finalize({
+                migration: migrations[0],
+                signalsAlias: appClient.getSignalsIndex(),
+              });
+
+              if (isMigrationFailed(finalizedMigration)) {
                 throw new BadRequestError(
-                  "The specified index's latest migration was not successful."
-                );
-              }
-              if (isMigrationSuccess(migration)) {
-                return {
-                  index,
-                  completed: true,
-                  migration_id: migration.id,
-                  migration_index: migration.attributes.destinationIndex,
-                };
-              }
-
-              const { destinationIndex, sourceIndex, taskId } = migration.attributes;
-              const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
-
-              if (!task.completed) {
-                return {
-                  index,
-                  completed: false,
-                  migration_id: migration.id,
-                  migration_index: migration.attributes.destinationIndex,
-                };
-              }
-
-              const sourceCount = await getIndexCount({ esClient, index: sourceIndex });
-              const destinationCount = await getIndexCount({ esClient, index: destinationIndex });
-              if (sourceCount !== destinationCount) {
-                await migrationService.update(migration.id, { status: 'failure' });
-                throw new BadRequestError(
-                  `The source and destination indexes have different document counts. Source [${sourceIndex}] has [${sourceCount}] documents, while destination [${destinationIndex}] has [${destinationCount}] documents.`
+                  finalizedMigration.attributes.error ??
+                    "The specified index's latest migration was not successful."
                 );
               }
 
-              // all checks passed, we can finalize this migration
-              const signalsAlias = appClient.getSignalsIndex();
-              await replaceSignalsIndexAlias({
-                alias: signalsAlias,
-                esClient,
-                newIndex: destinationIndex,
-                oldIndex: sourceIndex,
-              });
-
-              await applyMigrationCleanupPolicy({
-                alias: signalsAlias,
-                esClient,
-                index: sourceIndex,
-              });
-              await esClient.delete({ index: '.tasks', id: taskId });
-              await migrationService.update(migration.id, { status: 'success' });
               return {
                 index,
-                completed: true,
-                migration_id: migration.id,
-                migration_index: migration.attributes.destinationIndex,
+                completed: !isMigrationSuccess(finalizedMigration),
+                migration_id: finalizedMigration.id,
+                migration_index: finalizedMigration.attributes.destinationIndex,
               };
             } catch (err) {
               const error = transformError(err);

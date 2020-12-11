@@ -4,23 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsUpdateResponse,
-  SavedObjectsFindOptions,
-} from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
-import {
-  SignalsMigrationSO,
-  SignalsMigrationSOAttributes,
-  SignalsMigrationSOUpdateAttributes,
-} from './saved_objects_schema';
-import { findMigrationSavedObjects } from './find_migration_saved_objects';
+import { SignalsMigrationSO } from './saved_objects_schema';
 import { createMigrationSavedObject } from './create_migration_saved_object';
-import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { deleteMigrationSavedObject } from './delete_migration_saved_object';
 import { createMigration } from './create_migration';
+import { finalizeMigration } from './finalize_migration';
 
 export interface CreateParams {
   index: string;
@@ -28,13 +18,14 @@ export interface CreateParams {
   reindexOptions: SignalsReindexOptions;
 }
 
+export interface FinalizeParams {
+  signalsAlias: string;
+  migration: SignalsMigrationSO;
+}
+
 export interface SignalsMigrationService {
-  find: (options?: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SignalsMigrationSO[]>;
   create: (params: CreateParams) => Promise<SignalsMigrationSO>;
-  update: (
-    id: string,
-    attributes: SignalsMigrationSOUpdateAttributes
-  ) => Promise<SavedObjectsUpdateResponse<SignalsMigrationSOAttributes>>;
+  finalize: (params: FinalizeParams) => Promise<SignalsMigrationSO>;
   delete: (id: string) => Promise<void>;
 }
 
@@ -48,7 +39,6 @@ export const signalsMigrationService = ({
   username: string;
 }): SignalsMigrationService => {
   return {
-    find: (options) => findMigrationSavedObjects({ options, soClient }),
     create: async ({ index, reindexOptions, version }) => {
       const migrationInfo = await createMigration({
         esClient,
@@ -58,12 +48,18 @@ export const signalsMigrationService = ({
       });
 
       return createMigrationSavedObject({
-        attributes: { ...migrationInfo, status: 'pending' },
+        attributes: { ...migrationInfo, status: 'pending', error: null },
         soClient,
         username,
       });
     },
-    update: (id, attributes) => updateMigrationSavedObject({ attributes, id, username, soClient }),
+    finalize: ({ migration, signalsAlias }) =>
+      finalizeMigration({
+        esClient,
+        migration,
+        signalsAlias,
+        soClient,
+      }),
     delete: (id) => deleteMigrationSavedObject({ id, soClient }),
   };
 };

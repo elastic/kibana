@@ -19,6 +19,9 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    error: {
+      type: 'text',
+    },
     taskId: {
       type: 'keyword',
     },
