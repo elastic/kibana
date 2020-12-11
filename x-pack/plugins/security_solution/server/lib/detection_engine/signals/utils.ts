@@ -790,13 +790,6 @@ export const preExecutionRuleCheck = async (
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<PreCheckRuleResultInterface> => {
-  let toReturn: PreCheckRuleResultInterface = {
-    result: 'success',
-    resultMessages: [],
-    successIndexes: [],
-    failingIndexes: [],
-    timestampsAndIndices: {},
-  };
   const timestampsAndIndices = await checkMappingForTimestampFields(
     indices,
     timestamps,
@@ -815,6 +808,27 @@ export const preExecutionRuleCheck = async (
     buildRuleMessage
   );
 
+  /**
+   * if timestampsAndIndices[timestampOverride].length === Object.values(indexPatternIndices).length
+   * then skip the @timestamp field since we have all of the indices in the timestamp override.
+   */
+
+  const timestampOverrideIfThereIsOne = Object.keys(timestampsAndIndices).filter(
+    (timestamp) => timestamp !== '@timestamp'
+  )[0];
+
+  if (
+    timestampOverrideIfThereIsOne != null &&
+    Object.keys(timestampsAndIndices).includes(timestampOverrideIfThereIsOne)
+  ) {
+    if (
+      timestampsAndIndices[timestampOverrideIfThereIsOne].length ===
+      Object.values(indexPatternIndices).flat(2).length
+    ) {
+      delete timestampsAndIndices['@timestamp'];
+    }
+  }
+
   if (isEmpty(indexPatternIndices)) {
     throw Error(`No indices found given index patterns: ${JSON.stringify(indices, null, 2)}`);
   }
@@ -830,7 +844,11 @@ export const preExecutionRuleCheck = async (
     {} as Record<string, RegExp>
   );
 
-  toReturn = timestampKeys.reduce(
+  /**
+   * Compute our return object based off of what indexes contain the timestamp override (if provided)
+   * or are missing the @timestamp field and generate a status (error, partial failure, success)
+   */
+  const toReturn: PreCheckRuleResultInterface = timestampKeys.reduce(
     (acc, timestamp) => {
       if (timestampsAndIndices[timestamp] == null || timestampsAndIndices[timestamp].length === 0) {
         logger.error(
@@ -857,7 +875,7 @@ export const preExecutionRuleCheck = async (
       // find all indexes that match given pattern
       // make sure the length of all indexes that
       // match pattern in timestampsAndIndices[timestamp] is equal to
-      const [successIndexes, failingIndexes] = findIndicesWithTimestampAndWithout(
+      const [successIndexes, failedIndexes] = findIndicesWithTimestampAndWithout(
         indexPatternRegEx,
         indexPatternIndices,
         timestampsAndIndices,
@@ -866,26 +884,41 @@ export const preExecutionRuleCheck = async (
         buildRuleMessage
       );
 
+      const tempFailedIdxs = failedIndexes.filter(
+        (idx) => !timestampsAndIndices[timestampOverrideIfThereIsOne].some((indx) => indx === idx)
+      );
+
       const resultMessages =
-        failingIndexes.length > 0
+        tempFailedIdxs.length > 0
           ? [
               ...acc.resultMessages,
-              `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-                failingIndexes
+              `The ${
+                timestamp !== '@timestamp' ? 'timestamp override' : ''
+              } field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
+                tempFailedIdxs
               )}`,
             ]
           : [...acc.resultMessages];
-
+      const failingIndexes =
+        tempFailedIdxs.length > 0
+          ? [...acc.failingIndexes, ...tempFailedIdxs]
+          : [...acc.failingIndexes];
       return {
-        result:
-          acc.result !== 'success' || failingIndexes.length > 0 ? 'partial failure' : acc.result,
+        result: failedIndexes.length > 0 ? 'partial failure' : acc.result,
         resultMessages,
-        failingIndexes: [...acc.failingIndexes, ...failingIndexes],
+        failingIndexes,
         successIndexes: [...acc.successIndexes, ...successIndexes],
         timestampsAndIndices,
       };
     },
-    { ...toReturn } as PreCheckRuleResultInterface
+    {
+      result: 'success',
+      resultMessages: [],
+      successIndexes: [],
+      failingIndexes: [],
+      timestampsAndIndices: {},
+    } as PreCheckRuleResultInterface
   );
+
   return toReturn;
 };

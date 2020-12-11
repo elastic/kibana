@@ -1411,16 +1411,57 @@ describe('utils', () => {
         timestampsAndIndices: { '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'] },
       });
     });
-    test('it should return success and failures when some indexes in index pattern contain timestamp field', async () => {
+    test('it should return error when indexes in index pattern do not contain timestamp field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {};
+        } else if (endpoint === 'cat.indices') {
+          return [
+            {
+              index: 'auditbeat-7.8.0-2020.10.22-000002',
+            },
+          ];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*'],
+        ['@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toEqual({
+        result: 'error',
+        resultMessages: [
+          'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
+        ],
+        failingIndexes: ['auditbeat-*'],
+        successIndexes: [],
+        timestampsAndIndices: { '@timestamp': [] },
+      });
+    });
+    test('it should return success all indexes in index pattern contain timestamp override field event.ingested', async () => {
       alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
         if (endpoint === 'indices.getFieldMapping') {
           return {
             'auditbeat-7.8.0-2020.10.22-000002': {
               mappings: {
-                '@timestamp': {
-                  full_name: '@timestamp',
+                'event.ingested': {
+                  full_name: 'event.ingested',
                   mapping: {
-                    '@timestamp': {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+            'auditbeat-7.9.0-2020.11.22-999999': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
                       type: 'date',
                     },
                   },
@@ -1441,7 +1482,58 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['@timestamp'],
+        ['event.ingested', '@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toMatchObject({
+        result: 'success',
+        resultMessages: [],
+        failingIndexes: [],
+        successIndexes: ['auditbeat-7.8.0-2020.10.22-000002', 'auditbeat-7.9.0-2020.11.22-999999'],
+        timestampsAndIndices: {
+          'event.ingested': [
+            'auditbeat-7.8.0-2020.10.22-000002',
+            'auditbeat-7.9.0-2020.11.22-999999',
+          ],
+        },
+      });
+    });
+
+    test('it should return partial failure when some indexes in a single index pattern are missing event.ingested field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else if (endpoint === 'cat.indices') {
+          return _options?.index === 'auditbeat-*'
+            ? [
+                {
+                  index: 'auditbeat-7.8.0-2020.10.22-000002',
+                },
+                {
+                  index: 'auditbeat-7.9.0-2020.11.22-999999',
+                },
+              ]
+            : [];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*'],
+        ['event.ingested', '@timestamp'],
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1449,11 +1541,135 @@ describe('utils', () => {
       expect(res).toMatchObject({
         result: 'partial failure',
         resultMessages: [
-          'The field @timestamp was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"]',
+          'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"]',
         ],
-        failingIndexes: ['auditbeat-7.9.0-2020.11.22-999999'],
+        failingIndexes: ['auditbeat-*', 'auditbeat-7.9.0-2020.11.22-999999'],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
-        timestampsAndIndices: { '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'] },
+        timestampsAndIndices: { 'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002'] },
+      });
+    });
+    test('it should return success when all indexes in index pattern contain override field even if some / all are missing @timestamp field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+            'myfakeindex-000001': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else if (endpoint === 'cat.indices') {
+          return _options?.index === 'auditbeat-*'
+            ? [
+                {
+                  index: 'auditbeat-7.8.0-2020.10.22-000002',
+                },
+              ]
+            : [
+                {
+                  index: 'myfakeindex-000001',
+                },
+              ];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*', 'myfakeindex*'],
+        ['event.ingested', '@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toMatchObject({
+        result: 'success',
+        resultMessages: [],
+        failingIndexes: [],
+        successIndexes: ['myfakeindex-000001', 'auditbeat-7.8.0-2020.10.22-000002'],
+        timestampsAndIndices: {
+          'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002', 'myfakeindex-000001'],
+        },
+      });
+    });
+    test('it should return partial failure when some indexes in some index patterns do not contain override field but have the @timestamp field', async () => {
+      alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
+        if (endpoint === 'indices.getFieldMapping') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+            'myfakeindex-000001': {
+              mappings: {
+                '@timestamp': {
+                  full_name: '@timestamp',
+                  mapping: {
+                    '@timestamp': {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else if (endpoint === 'cat.indices') {
+          return _options?.index === 'auditbeat-*'
+            ? [
+                {
+                  index: 'auditbeat-7.8.0-2020.10.22-000002',
+                },
+              ]
+            : [
+                {
+                  index: 'myfakeindex-000001',
+                },
+              ];
+        }
+      });
+      const res = await preExecutionRuleCheck(
+        ['auditbeat-*', 'myfakeindex*'],
+        ['event.ingested', '@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toMatchObject({
+        result: 'partial failure',
+        resultMessages: [
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["myfakeindex-000001"]',
+        ],
+        failingIndexes: ['myfakeindex-000001'],
+        successIndexes: ['myfakeindex-000001', 'auditbeat-7.8.0-2020.10.22-000002'],
+        timestampsAndIndices: {
+          'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002'],
+          '@timestamp': ['myfakeindex-000001'],
+        },
       });
     });
   });
