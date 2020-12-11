@@ -82,7 +82,7 @@ test('adds hidden field correctly', () => {
     mappings: { properties: {} },
     composedOfTemplates: [],
   });
-  expect(templateWithoutHidden.data_stream.hidden).toEqual(false);
+  expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
 });
 
 test('tests loading base.yml', () => {
