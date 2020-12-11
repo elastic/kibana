@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { signalsMigrationService } from './migration_service';
+import { SignalsMigrationService } from './migration_service';
 import { SignalsMigrationSO, SignalsMigrationSOAttributes } from './saved_objects_schema';
 import { signalsMigrationType } from './saved_objects';
 

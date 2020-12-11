@@ -12,12 +12,12 @@ import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { BadRequestError } from '../../errors/bad_request_error';
 import { getIndexCount } from '../../index/get_index_count';
-import { getMigrations } from '../../migrations/get_migration_status';
 import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
+import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 
 interface TaskResponse {
   completed: boolean;
@@ -47,8 +47,11 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const migrationService = signalsMigrationService(soClient);
-        const migrationsByIndex = await getMigrations({ soClient, index: indices });
+        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
+        const migrationsByIndex = await getMigrationSavedObjectsByIndex({
+          soClient,
+          index: indices,
+        });
 
         const finalizeResults = await Promise.all(
           indices.map(async (index) => {

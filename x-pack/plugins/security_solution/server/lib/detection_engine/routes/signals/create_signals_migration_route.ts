@@ -10,11 +10,12 @@ import { createSignalsMigrationSchema } from '../../../../../common/detection_en
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse, transformError } from '../utils';
 import { getTemplateVersion } from '../index/check_template_version';
-import { getMigrationStatus } from '../../migrations/get_migration_status';
-import { indexIsOutdated } from '../../migrations/helpers';
+import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { BadRequestError } from '../../errors/bad_request_error';
 import { signalsMigrationService } from '../../migrations/migration_service';
+import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
+import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -34,7 +35,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;
-        const migrationService = signalsMigrationService({ esClient, soClient });
+        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -56,11 +57,18 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
           );
         }
 
-        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
+        const indexVersionsByIndex = await getIndexVersionsByIndex({ esClient, index: indices });
+        const signalVersionsByIndex = await getSignalVersionsByIndex({ esClient, index: indices });
+
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
-            const status = migrationStatuses.find(({ name }) => name === index);
-            if (indexIsOutdated({ status, version: currentVersion })) {
+            const indexVersion = indexVersionsByIndex[index] ?? 0;
+            const signalVersions = signalVersionsByIndex[index] ?? [];
+
+            if (
+              isOutdated({ current: indexVersion, target: currentVersion }) ||
+              signalsAreOutdated({ signalVersions, target: currentVersion })
+            ) {
               try {
                 const isWriteIndex = signalsIndexAliases.some(
                   (alias) => alias.isWriteIndex && alias.index === index

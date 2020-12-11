@@ -9,7 +9,7 @@ import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { fold } from 'fp-ts/lib/Either';
 
 import { SignalsMigrationSO } from './saved_objects_schema';
-import { MigrationStatus } from './types';
+import { SignalVersion } from './get_signal_versions_by_index';
 
 export const isMigrationPending = (migration: SignalsMigrationSO): boolean =>
   migration.attributes.status === 'pending';
@@ -23,36 +23,17 @@ export const isMigrationFailed = (migration: SignalsMigrationSO): boolean =>
 export const isOutdated = ({ current, target }: { current: number; target: number }): boolean =>
   current < target;
 
-const mappingsAreOutdated = ({
-  status,
-  version,
+export const signalsAreOutdated = ({
+  signalVersions,
+  target,
 }: {
-  status: MigrationStatus;
-  version: number;
-}): boolean => isOutdated({ current: status.version, target: version });
-
-const signalsAreOutdated = ({
-  status,
-  version,
-}: {
-  status: MigrationStatus;
-  version: number;
+  signalVersions: SignalVersion[];
+  target: number;
 }): boolean =>
-  status.signal_versions.some((signalVersion) => {
-    return (
-      signalVersion.doc_count > 0 && isOutdated({ current: signalVersion.key, target: version })
-    );
-  });
-
-export const indexIsOutdated = ({
-  status,
-  version,
-}: {
-  status?: MigrationStatus;
-  version: number;
-}): boolean =>
-  status != null &&
-  (mappingsAreOutdated({ status, version }) || signalsAreOutdated({ status, version }));
+  signalVersions.some(
+    (signalVersion) =>
+      signalVersion.count > 0 && isOutdated({ current: signalVersion.version, target })
+  );
 
 export const getIsoDateString = () => new Date().toISOString();
 

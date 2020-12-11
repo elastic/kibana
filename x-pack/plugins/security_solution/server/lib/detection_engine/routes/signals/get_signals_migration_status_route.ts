@@ -9,9 +9,11 @@ import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../co
 import { getMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_migration_status_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexAliases } from '../../index/get_index_aliases';
-import { getMigrations, getMigrationStatus } from '../../migrations/get_migration_status';
+import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
+import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
-import { indexIsOutdated } from '../../migrations/helpers';
+import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
+import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse, transformError } from '../utils';
 
@@ -47,18 +49,36 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
           index: signalsIndices,
           from,
         });
-        const migrationsByIndex = await getMigrations({ index: indicesInRange, soClient });
-        const migrationStatuses = await getMigrationStatus({
+        const migrationsByIndex = await getMigrationSavedObjectsByIndex({
+          index: indicesInRange,
+          soClient,
+        });
+        const indexVersionsByIndex = await getIndexVersionsByIndex({
           esClient,
           index: indicesInRange,
         });
-        const enrichedStatuses = migrationStatuses.map((status) => ({
-          ...status,
-          is_outdated: indexIsOutdated({ status, version: currentVersion }),
-          migrations: migrationsByIndex[status.name]?.map((m) => m.id) ?? [],
-        }));
+        const signalVersionsByIndex = await getSignalVersionsByIndex({
+          esClient,
+          index: indicesInRange,
+        });
 
-        return response.ok({ body: { indices: enrichedStatuses } });
+        const indexStatuses = indicesInRange.map((index) => {
+          const version = indexVersionsByIndex[index] ?? 0;
+          const signalVersions = signalVersionsByIndex[index] ?? [];
+          const migrations = migrationsByIndex[index] ?? [];
+
+          return {
+            index,
+            version,
+            signal_versions: signalVersions,
+            migration_ids: migrations.map((m) => m.id),
+            is_outdated:
+              isOutdated({ current: version, target: currentVersion }) ||
+              signalsAreOutdated({ signalVersions, target: currentVersion }),
+          };
+        });
+
+        return response.ok({ body: { indices: indexStatuses } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
