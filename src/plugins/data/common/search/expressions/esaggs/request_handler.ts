@@ -176,7 +176,7 @@ export const handleRequest = async ({
   // response data incorrectly in the inspector.
   let response = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (typeof agg.type.postFlightRequest === 'function') {
+    if (typeof agg.type.postFlightRequest === 'function' && agg.enabled) {
       response = await agg.type.postFlightRequest(
         response,
         aggs,
