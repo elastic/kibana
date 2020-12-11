@@ -208,8 +208,8 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface RegistryDataStream {
   type: string;
-  hidden: boolean;
-  ilm_policy: string;
+  hidden?: boolean;
+  ilm_policy?: string;
   dataset: string;
   title: string;
   release: string;
