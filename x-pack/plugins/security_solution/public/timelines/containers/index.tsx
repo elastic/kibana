@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -334,6 +334,31 @@ export const useTimelineEvents = ({
     )
       timelineSearch(timelineRequest);
   }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
+
+  /*
+    cleanup timeline events response when the filters were removed completely
+    to avoid displaying previous query results
+  */
+  useEffect(() => {
+    if (isEmpty(filterQuery)) {
+      setTimelineResponse({
+        id,
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: refetchGrid,
+        totalCount: -1,
+        pageInfo: {
+          activePage: 0,
+          querySize: 0,
+        },
+        events: [],
+        loadPage: wrappedLoadPage,
+        updatedAt: 0,
+      });
+    }
+  }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
 
   return [loading, timelineResponse];
 };

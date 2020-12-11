@@ -160,18 +160,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
-  const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
-
-  useEffect(() => {
-    // it should changed only once to true and then stay visible till the component umount
-    setShowEventDetailsColumn((current) => {
-      if (showEventDetails && !current) {
-        return true;
-      }
-      return current;
-    });
-  }, [showEventDetails]);
-
   const {
     browserFields,
     docValueFields,
@@ -253,7 +241,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const handleOnEventClosed = useCallback(() => {
     onEventClosed({ timelineId });
-    setShowEventDetailsColumn(false);
 
     if (timelineId === TimelineId.active) {
       activeTimeline.toggleExpandedEvent({
@@ -271,7 +258,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
       handleOnEventClosed();
     }
-  }, [expandedEvent, handleOnEventClosed, events]);
+  }, [expandedEvent, handleOnEventClosed, events, combinedQueries]);
 
   return (
     <>
@@ -346,7 +333,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </EventDetailsWidthProvider>
           ) : null}
         </ScrollableFlexItem>
-        {showEventDetailsColumn && (
+        {showEventDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
