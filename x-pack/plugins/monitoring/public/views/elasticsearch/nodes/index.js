@@ -24,7 +24,6 @@ import {
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
 } from '../../../../common/constants';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
@@ -100,7 +99,6 @@ uiRoutes.when('/elasticsearch/nodes', {
               ALERT_THREAD_POOL_WRITE_REJECTIONS,
               ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
-              ALERT_ELASTICSEARCH_VERSION_MISMATCH,
             ],
           },
         },

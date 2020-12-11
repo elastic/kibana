@@ -18,6 +18,7 @@ import {
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
 import { AlertExecutionStatusValues } from '../../../../alerts/common';
+import { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
@@ -92,6 +93,7 @@ describe('getAlertPanelsByNode', () => {
   }
 
   const panelTitle = 'Alerts';
+  const stateFilter = (state: AlertState) => true;
 
   it('should properly group for alerts in each category', () => {
     const alerts = [
@@ -99,13 +101,13 @@ describe('getAlertPanelsByNode', () => {
       getAlert(ALERT_DISK_USAGE, 1),
       getAlert(ALERT_LICENSE_EXPIRATION, 2),
     ];
-    const result = getAlertPanelsByNode(panelTitle, alerts);
+    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();
   });
 
   it('should properly group for alerts in a single category', () => {
     const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
-    const result = getAlertPanelsByNode(panelTitle, alerts);
+    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();
   });
 
@@ -115,7 +117,7 @@ describe('getAlertPanelsByNode', () => {
       getAlert(ALERT_CPU_USAGE, 0),
       getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
     ];
-    const result = getAlertPanelsByNode(panelTitle, alerts);
+    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();
   });
 });

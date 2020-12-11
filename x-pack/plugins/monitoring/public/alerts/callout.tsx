@@ -17,7 +17,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage } from '../../common/types/alerts';
+import { AlertMessage, AlertState } from '../../common/types/alerts';
 import { AlertsByName } from './types';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
@@ -25,9 +25,10 @@ import { AlertConfiguration } from './configuration';
 
 interface Props {
   alerts: AlertsByName;
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts } = props;
+  const { alerts, stateFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (inSetupMode) {
@@ -37,7 +38,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   const list = [];
   for (const alertTypeId of Object.keys(alerts)) {
     const alertInstance = alerts[alertTypeId];
-    for (const state of alertInstance.states) {
+    for (const state of alertInstance.states.filter(({ state: _state }) => stateFilter(_state))) {
       list.push({
         alert: alertInstance,
         state,

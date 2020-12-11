@@ -20,6 +20,7 @@ import {
 } from '../../../common/constants';
 import { AlertsByName } from '../types';
 import { AlertExecutionStatusValues } from '../../../../alerts/common';
+import { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
@@ -133,6 +134,7 @@ describe('getAlertPanelsByCategory', () => {
     allAlerts: getAllAlerts(),
   };
 
+  const stateFilter = (state: AlertState) => true;
   const panelTitle = 'Alerts';
 
   describe('non setup mode', () => {
@@ -142,13 +144,25 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_DISK_USAGE, 1),
         getAlert(ALERT_LICENSE_EXPIRATION, 2),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, false, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(
+        panelTitle,
+        false,
+        alerts,
+        alertsContext,
+        stateFilter
+      );
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
       const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
-      const result = getAlertPanelsByCategory(panelTitle, false, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(
+        panelTitle,
+        false,
+        alerts,
+        alertsContext,
+        stateFilter
+      );
       expect(result).toMatchSnapshot();
     });
 
@@ -158,7 +172,13 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_CPU_USAGE, 0),
         getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, false, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(
+        panelTitle,
+        false,
+        alerts,
+        alertsContext,
+        stateFilter
+      );
       expect(result).toMatchSnapshot();
     });
   });
@@ -170,13 +190,13 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_DISK_USAGE, 1),
         getAlert(ALERT_LICENSE_EXPIRATION, 2),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
       const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
@@ -186,7 +206,7 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_CPU_USAGE, 0),
         getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
       expect(result).toMatchSnapshot();
     });
   });

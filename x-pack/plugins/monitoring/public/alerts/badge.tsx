@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiPopover, EuiBadge, EuiSwitch } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types/alerts';
+import { AlertState, CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
@@ -45,16 +45,21 @@ const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType'
 
 interface Props {
   alerts: CommonAlertStatus[];
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
   // We do not always have the alerts that each consumer wants due to licensing
+  const { stateFilter = () => true } = props;
   const alerts = props.alerts.filter(Boolean);
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);
   const alertCount = inSetupMode
     ? alerts.length
-    : alerts.reduce((sum, { states }) => sum + states.length, 0);
+    : alerts.reduce(
+        (sum, { states }) => sum + states.filter(({ state }) => stateFilter(state)).length,
+        0
+      );
   const [showByNode, setShowByNode] = React.useState(
     !inSetupMode && alertCount > MAX_TO_SHOW_BY_CATEGORY
   );
@@ -86,8 +91,8 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   const panels = showByNode
-    ? getAlertPanelsByNode(PANEL_TITLE, alerts)
-    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext);
+    ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
+    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext, stateFilter);
 
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(

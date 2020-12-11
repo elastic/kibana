@@ -17,9 +17,10 @@ interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
   showOnlyCount: boolean;
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const { alerts, showBadge = false, showOnlyCount = false } = props;
+  const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alerts) {
@@ -29,11 +30,15 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
     const firingStates = alertStatus.states.filter((state) => state.firing);
-    cnt += firingStates.length;
+    const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
+    cnt += firingAndFilterStates.length;
     if (firingStates.length) {
       if (!atLeastOneDanger) {
         for (const state of alertStatus.states) {
-          if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
+          if (
+            stateFilter(state.state) &&
+            (state.state as AlertState).ui.severity === AlertSeverity.Danger
+          ) {
             atLeastOneDanger = true;
             break;
           }
@@ -66,7 +71,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge || inSetupMode) {
-    return <AlertsBadge alerts={Object.values(alerts)} />;
+    return <AlertsBadge alerts={Object.values(alerts)} stateFilter={stateFilter} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

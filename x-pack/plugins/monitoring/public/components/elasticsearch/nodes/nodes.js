@@ -131,8 +131,14 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     }),
     field: 'alerts',
     sortable: true,
-    render: () => {
-      return <AlertsStatus showBadge={true} alerts={alerts} />;
+    render: (_field, node) => {
+      return (
+        <AlertsStatus
+          showBadge={true}
+          alerts={alerts}
+          stateFilter={(state) => state.nodeId === node.resolver}
+        />
+      );
     },
   });
 

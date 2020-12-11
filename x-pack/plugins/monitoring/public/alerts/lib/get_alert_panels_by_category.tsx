@@ -9,7 +9,7 @@ import { AlertPanel } from '../panel';
 import { ALERT_PANEL_MENU } from '../../../common/constants';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import { IAlertsContext } from '../context';
-import { CommonAlertStatus } from '../../../common/types/alerts';
+import { AlertState, CommonAlertStatus } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
@@ -18,7 +18,8 @@ export function getAlertPanelsByCategory(
   panelTitle: string,
   inSetupMode: boolean,
   alerts: CommonAlertStatus[],
-  alertsContext: IAlertsContext
+  alertsContext: IAlertsContext,
+  stateFilter: (state: AlertState) => boolean
 ) {
   const menu = [];
   for (const category of ALERT_PANEL_MENU) {
@@ -53,7 +54,8 @@ export function getAlertPanelsByCategory(
           ({ rawAlert: { alertTypeId } }) => alertName === alertTypeId
         );
         if (foundAlert && foundAlert.states.length > 0) {
-          if (foundAlert.states.length > 0) {
+          const states = foundAlert.states.filter(({ state }) => stateFilter(state));
+          if (states.length > 0) {
             firingAlertsInCategory.push({
               alert: foundAlert.rawAlert,
               states: foundAlert.states,

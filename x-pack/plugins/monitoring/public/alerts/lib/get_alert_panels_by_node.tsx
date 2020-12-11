@@ -6,13 +6,22 @@
 import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
-import { CommonAlertStatus, CommonAlertState, CommonAlert } from '../../../common/types/alerts';
+import {
+  CommonAlertStatus,
+  CommonAlertState,
+  CommonAlert,
+  AlertState,
+} from '../../../common/types/alerts';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
 
-export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStatus[]) {
+export function getAlertPanelsByNode(
+  panelTitle: string,
+  alerts: CommonAlertStatus[],
+  stateFilter: (state: AlertState) => boolean
+) {
   const alertsByNodes: {
     [uuid: string]: {
       [alertName: string]: {
@@ -28,7 +37,7 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
 
   for (const { states, rawAlert } of alerts) {
     const { alertTypeId } = rawAlert;
-    for (const alertState of states) {
+    for (const alertState of states.filter(({ state: _state }) => stateFilter(_state))) {
       const { state } = alertState;
       statesByNodes[state.nodeId] = statesByNodes[state.nodeId] || [];
       statesByNodes[state.nodeId].push(alertState);
@@ -57,7 +66,9 @@ export function getAlertPanelsByNode(panelTitle: string, alerts: CommonAlertStat
       title: panelTitle,
       items: [
         ...Object.keys(statesByNodes).map((nodeUuid, index) => {
-          const states = statesByNodes[nodeUuid] as CommonAlertState[];
+          const states = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(({ state }) =>
+            stateFilter(state)
+          );
           return {
             name: (
               <EuiText>
