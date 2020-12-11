@@ -1,8 +1,7 @@
 {
   "xpack.info": {
     "url_params": {
-      "categories": [],
-      "accept_enterprise": "__flag__"
+      "categories": []
     },
     "methods": [
       "GET"

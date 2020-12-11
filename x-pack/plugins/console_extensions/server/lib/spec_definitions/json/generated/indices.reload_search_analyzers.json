@@ -6,7 +6,6 @@
       "expand_wildcards": [
         "open",
         "closed",
-        "hidden",
         "none",
         "all"
       ]

@@ -24,7 +24,9 @@
     ],
     "patterns": [
       "{indices}/_termvectors/{id}",
-      "{indices}/_termvectors"
+      "{indices}/_termvectors",
+      "{indices}/{type}/{id}/_termvectors",
+      "{indices}/{type}/_termvectors"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
   }

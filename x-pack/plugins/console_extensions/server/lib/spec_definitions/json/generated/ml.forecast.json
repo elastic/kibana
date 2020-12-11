@@ -2,15 +2,13 @@
   "ml.forecast": {
     "url_params": {
       "duration": "",
-      "expires_in": "",
-      "max_model_memory": ""
+      "expires_in": ""
     },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_forecast"
-    ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-forecast.html"
+    ]
   }
 }
