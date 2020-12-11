@@ -21,6 +21,8 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
+import { HideShowContainer } from './styles';
+import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -50,6 +52,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -74,7 +77,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       )}
 
       <FlyoutHeaderPanel timelineId={timelineId} />
-      <FlyoutHeader timelineId={timelineId} />
+      <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeader timelineId={timelineId} />
+      </HideShowContainer>
 
       <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
     </TimelineContainer>

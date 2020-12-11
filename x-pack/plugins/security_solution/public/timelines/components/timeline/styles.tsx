@@ -374,3 +374,11 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
 export const EventsLoading = styled(EuiLoadingSpinner)`
   vertical-align: middle;
 `;
+
+export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
+  ({ $isVisible = false }) => ({
+    style: {
+      display: $isVisible ? 'block' : 'none',
+    },
+  })
+)<{ $isVisible: boolean }>``;
