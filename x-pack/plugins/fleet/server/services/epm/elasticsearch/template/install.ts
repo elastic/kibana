@@ -314,7 +314,6 @@ export async function installTemplate({
     pipelineName,
     packageName,
     composedOfTemplates,
-    ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });
 

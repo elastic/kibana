@@ -23,7 +23,6 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
-import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 export async function removeInstallation(options: {
@@ -94,8 +93,6 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
       return deleteTemplate(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(callCluster, [id]);
-    } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
-      return deleteIlms(callCluster, [id]);
     }
   });
 }

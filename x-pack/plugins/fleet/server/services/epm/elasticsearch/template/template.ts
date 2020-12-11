@@ -45,7 +45,6 @@ export function getTemplate({
   pipelineName,
   packageName,
   composedOfTemplates,
-  ilmPolicy,
   hidden,
 }: {
   type: string;
@@ -54,7 +53,6 @@ export function getTemplate({
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
-  ilmPolicy?: string | undefined;
   hidden?: boolean | false;
 }): IndexTemplate {
   const template = getBaseTemplate(
@@ -63,7 +61,6 @@ export function getTemplate({
     mappings,
     packageName,
     composedOfTemplates,
-    ilmPolicy,
     hidden
   );
   if (pipelineName) {

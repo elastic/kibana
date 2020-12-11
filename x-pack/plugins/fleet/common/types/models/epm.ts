@@ -65,7 +65,6 @@ export enum ElasticsearchAssetType {
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
-  dataStreamIlmPolicy = 'data_stream_ilm_policy',
 }
 
 export type DataType = typeof dataTypes;
@@ -209,7 +208,6 @@ export type ElasticsearchAssetTypeToParts = Record<
 export interface RegistryDataStream {
   type: string;
   hidden?: boolean;
-  ilm_policy?: string;
   dataset: string;
   title: string;
   release: string;

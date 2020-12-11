@@ -460,10 +460,6 @@ const expectAssetsInstalled = ({
       ],
       installed_es: [
         {
-          id: 'logs-all_assets.test_logs-all_assets',
-          type: 'data_stream_ilm_policy',
-        },
-        {
           id: 'logs-all_assets.test_logs',
           type: 'index_template',
         },
