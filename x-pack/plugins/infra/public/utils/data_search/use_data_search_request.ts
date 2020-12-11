@@ -5,17 +5,15 @@
  */
 
 import { useCallback } from 'react';
-import { Observable, of, Subject } from 'rxjs';
-import { catchError, map, share, startWith, switchMap, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { map, share, switchMap, tap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from '../../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/public';
-import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { tapUnsubscribe, useLatest, useObservable, useObservableState } from '../use_observable';
+import { tapUnsubscribe, useObservable } from '../use_observable';
 
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
   ...args: Args
