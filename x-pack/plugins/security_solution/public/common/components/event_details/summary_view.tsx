@@ -8,7 +8,6 @@ import { get, getOr } from 'lodash/fp';
 import {
   EuiTitle,
   EuiDescriptionList,
-  EuiSpacer,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiInMemoryTable,
@@ -71,6 +70,10 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableRowCell {
     border: none;
   }
+`;
+
+const StyledEuiDescriptionList = styled(EuiDescriptionList)`
+  padding: 24px 4px 4px;
 `;
 
 const getTitle = (title: SummaryRow['title']) => (
@@ -190,15 +193,12 @@ export const SummaryViewComponent: React.FC<{
         compressed
       />
       {maybeRule?.note && (
-        <>
-          <EuiSpacer />
-          <EuiDescriptionList data-test-subj="summary-view-guide" compressed>
-            <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <LineClamp content={maybeRule.note} />
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </>
+        <StyledEuiDescriptionList data-test-subj="summary-view-guide" compressed>
+          <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <LineClamp content={maybeRule?.note} />
+          </EuiDescriptionListDescription>
+        </StyledEuiDescriptionList>
       )}
     </>
   );
