@@ -13,6 +13,7 @@ const status = t.keyof({ success: null, failure: null, pending: null });
 
 const signalsMigrationSOWriteAttributes = {
   destinationIndex: t.string,
+  deleted: t.boolean,
   error: unionWithNullType(t.string),
   sourceIndex: t.string,
   status,

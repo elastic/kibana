@@ -28,6 +28,9 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
     status: {
       type: 'keyword',
     },
+    deleted: {
+      type: 'boolean',
+    },
     created: {
       type: 'date',
     },

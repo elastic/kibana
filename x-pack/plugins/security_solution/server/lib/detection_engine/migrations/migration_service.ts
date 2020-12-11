@@ -8,9 +8,9 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server
 import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { SignalsMigrationSO } from './saved_objects_schema';
 import { createMigrationSavedObject } from './create_migration_saved_object';
-import { deleteMigrationSavedObject } from './delete_migration_saved_object';
 import { createMigration } from './create_migration';
 import { finalizeMigration } from './finalize_migration';
+import { deleteMigration } from './delete_migration';
 
 export interface CreateParams {
   index: string;
@@ -23,10 +23,15 @@ export interface FinalizeParams {
   migration: SignalsMigrationSO;
 }
 
+export interface DeleteParams {
+  signalsAlias: string;
+  migration: SignalsMigrationSO;
+}
+
 export interface SignalsMigrationService {
   create: (params: CreateParams) => Promise<SignalsMigrationSO>;
   finalize: (params: FinalizeParams) => Promise<SignalsMigrationSO>;
-  delete: (id: string) => Promise<void>;
+  delete: (params: DeleteParams) => Promise<SignalsMigrationSO>;
 }
 
 export const signalsMigrationService = ({
@@ -48,7 +53,7 @@ export const signalsMigrationService = ({
       });
 
       return createMigrationSavedObject({
-        attributes: { ...migrationInfo, status: 'pending', error: null },
+        attributes: { ...migrationInfo, status: 'pending', error: null, deleted: false },
         soClient,
         username,
       });
@@ -60,6 +65,12 @@ export const signalsMigrationService = ({
         signalsAlias,
         soClient,
       }),
-    delete: (id) => deleteMigrationSavedObject({ id, soClient }),
+    delete: ({ migration, signalsAlias }) =>
+      deleteMigration({
+        esClient,
+        migration,
+        signalsAlias,
+        soClient,
+      }),
   };
 };

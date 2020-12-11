@@ -22,6 +22,7 @@ import { updateMigrationSavedObject } from './update_migration_saved_object';
  * @param esClient An {@link ElasticsearchClient}
  * @param soClient An {@link SavedObjectsClientContract}
  * @param migration the migration to be finalized {@link SignalsMigrationSO}
+ * @param signalsAlias the alias for signals indices
  *
  * @returns the migration SavedObject {@link SignalsMigrationSO}
  * @throws if the migration is invalid or a client throws

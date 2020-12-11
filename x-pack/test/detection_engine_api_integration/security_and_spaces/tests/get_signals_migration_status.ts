@@ -105,6 +105,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.unload('signals/outdated_signals_index');
       });
 
+      it.todo('does not include migrations that have been deleted');
+
       it('rejects the request if the user does not have sufficient privileges', async () => {
         await createUserAndRole(security, ROLES.t1_analyst);
 
