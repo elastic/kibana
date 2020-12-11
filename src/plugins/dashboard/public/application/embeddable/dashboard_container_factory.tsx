@@ -18,30 +18,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { CoreStart } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { EmbeddableFactory, EmbeddableStart } from '../../../../embeddable/public';
 import {
-  ContainerOutput,
-  EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   Container,
-} from '../../embeddable_plugin';
-import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
+  ErrorEmbeddable,
+  ContainerOutput,
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+} from '../../services/embeddable';
+import {
+  DashboardContainer,
+  DashboardContainerInput,
+  DashboardContainerServices,
+} from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-
-interface StartServices {
-  capabilities: CoreStart['application']['capabilities'];
-  application: CoreStart['application'];
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  embeddable: EmbeddableStart;
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
-  ExitFullScreenButton: React.ComponentType<any>;
-  uiActions: UiActionsStart;
-}
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -54,11 +43,11 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(private readonly getStartServices: () => Promise<StartServices>) {}
+  constructor(private readonly getStartServices: () => Promise<DashboardContainerServices>) {}
 
   public isEditable = async () => {
-    const { capabilities } = await this.getStartServices();
-    return !!capabilities.createNew && !!capabilities.showWriteControls;
+    // Currently unused for dashboards
+    return false;
   };
 
   public readonly getDisplayName = () => {
@@ -81,7 +70,6 @@ export class DashboardContainerFactoryDefinition
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
-    const stateTransfer = services.embeddable.getStateTransfer();
-    return new DashboardContainer(initialInput, services, stateTransfer, parent);
+    return new DashboardContainer(initialInput, services, parent);
   };
 }
