@@ -187,6 +187,7 @@ const StatefulEventComponent: React.FC<Props> = ({
             data-test-subj="note-cards"
             noteIds={eventIdToNoteIds[event._id] || emptyNotes}
             showAddNote={!!showNotes[event._id]}
+            timelineId={timelineId}
             toggleShowAddNote={onToggleShowNotes}
           />
         </EventsTrSupplement>

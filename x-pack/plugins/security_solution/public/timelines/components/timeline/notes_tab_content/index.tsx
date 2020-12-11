@@ -15,10 +15,12 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus } from '../../../../../common/types/timeline';
@@ -29,6 +31,7 @@ import { NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../../../../cases/translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
+import { EventDetails } from '../event_details';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -85,10 +88,10 @@ const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
   const List = useMemo(
     () =>
       users.map((user) => (
-        <>
+        <Fragment key={user.updatedBy!}>
           <UsernameWithAvatar key={user.updatedBy!} username={user.updatedBy!} />
           <EuiSpacer size="s" />
-        </>
+        </Fragment>
       )),
     [users]
   );
@@ -119,12 +122,19 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { createdBy, savedObjectId, status: timelineStatus } = useDeepEqualSelector((state) =>
+  const {
+    createdBy,
+    expandedEvent,
+    savedObjectId,
+    status: timelineStatus,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['createdBy', 'status', 'savedObjectId'],
+      ['createdBy', 'expandedEvent', 'status', 'savedObjectId'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+
+  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
 
   const getNotesByTimelineSavedObjectId = useMemo(
     () => appSelectors.selectNotesByTimelineSavedObjectIdSelector(),
@@ -135,9 +145,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   const notes: TimelineResultNote[] = useDeepEqualSelector((state) => {
     const notesByTimelineId = getNotesByTimelineSavedObjectId(state, savedObjectId);
 
-    console.error('aaa', notesByTimelineId);
-
     return notesByTimelineId.map((note) => ({
+      eventId: note.eventId,
       savedObjectId: note.saveObjectId,
       note: note.note,
       noteId: note.id,
@@ -153,23 +162,21 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     [dispatch, timelineId]
   );
 
-  return (
-    <FullWidthFlexGroup>
-      <ScrollableFlexItem grow={2}>
-        <StyledPanel paddingSize="s">
-          <EuiTitle>
-            <h3>{NOTES}</h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <NotePreviews notes={notes} />
-          <EuiSpacer size="s" />
-          {!isImmutable && (
-            <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
-          )}
-        </StyledPanel>
-      </ScrollableFlexItem>
-      <VerticalRule />
-      <ScrollableFlexItem grow={1}>
+  const EventDetailsContent = useMemo(
+    () =>
+      expandedEvent.eventId ? (
+        <EventDetails
+          browserFields={browserFields}
+          docValueFields={docValueFields}
+          timelineId={timelineId}
+        />
+      ) : null,
+    [browserFields, docValueFields, expandedEvent.eventId, timelineId]
+  );
+
+  const SidebarContent = useMemo(
+    () => (
+      <>
         {createdBy && (
           <>
             <EuiSpacer size="m" />
@@ -182,7 +189,28 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           </>
         )}
         <Participants users={participants} />
+      </>
+    ),
+    [createdBy, participants]
+  );
+
+  return (
+    <FullWidthFlexGroup>
+      <ScrollableFlexItem grow={2}>
+        <StyledPanel paddingSize="s">
+          <EuiTitle>
+            <h3>{NOTES}</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <NotePreviews notes={notes} timelineId={timelineId} />
+          <EuiSpacer size="s" />
+          {!isImmutable && (
+            <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
+          )}
+        </StyledPanel>
       </ScrollableFlexItem>
+      <VerticalRule />
+      <ScrollableFlexItem grow={1}>{EventDetailsContent ?? SidebarContent}</ScrollableFlexItem>
     </FullWidthFlexGroup>
   );
 };
