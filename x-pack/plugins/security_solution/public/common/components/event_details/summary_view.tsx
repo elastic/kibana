@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
 
+import { get, getOr } from 'lodash/fp';
 import {
   EuiTitle,
   EuiDescriptionList,
@@ -14,9 +14,9 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-
-import { get, getOr } from 'lodash/fp';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import * as i18n from './translations';

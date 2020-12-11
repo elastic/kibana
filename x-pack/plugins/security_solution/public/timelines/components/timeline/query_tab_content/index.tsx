@@ -259,7 +259,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       activeTimeline.toggleExpandedEvent({
         eventId: expandedEvent.eventId!,
         indexName: expandedEvent.indexName!,
-        loading: false,
       });
     }
   }, [timelineId, onEventClosed, expandedEvent.eventId, expandedEvent.indexName]);
@@ -269,10 +268,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (
-      !events ||
-      (expandedEvent.eventId && !some((e) => e._id === expandedEvent.eventId, events))
-    ) {
+    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
       handleOnEventClosed();
     }
   }, [expandedEvent, handleOnEventClosed, events]);
@@ -321,7 +317,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 className="timeline-flyout-body"
               >
                 <StatefulBody
-                  defaultModel={timelineDefaults}
                   browserFields={browserFields}
                   data={events}
                   id={timelineId}

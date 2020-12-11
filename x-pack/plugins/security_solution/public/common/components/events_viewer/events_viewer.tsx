@@ -9,16 +9,14 @@ import { isEmpty, some } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
 
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import {
-  ColumnHeaderOptions,
-  KqlMode,
-  SubsetTimelineModel,
-} from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -102,7 +100,6 @@ interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
-  defaultModel: SubsetTimelineModel;
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
@@ -119,7 +116,6 @@ interface Props {
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   query: Query;
-  handleCloseExpandedEvent: () => void;
   onRuleChange?: () => void;
   start: string;
   sort: Sort[];
@@ -131,7 +127,6 @@ interface Props {
 const EventsViewerComponent: React.FC<Props> = ({
   browserFields,
   columns,
-  defaultModel,
   dataProviders,
   deletedEventIds,
   docValueFields,
@@ -149,12 +144,12 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   query,
   onRuleChange,
-  handleCloseExpandedEvent,
   start,
   sort,
   utilityBar,
   graphEventId,
 }) => {
+  const dispatch = useDispatch();
   const { globalFullScreen, timelineFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
@@ -237,13 +232,10 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    if (
-      !events ||
-      (expandedEvent.eventId && !some((e) => e._id === expandedEvent.eventId, events))
-    ) {
-      handleCloseExpandedEvent();
+    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
     }
-  }, [events, expandedEvent, handleCloseExpandedEvent, id]);
+  }, [dispatch, events, expandedEvent, id]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -311,7 +303,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     browserFields={browserFields}
-                    defaultModel={defaultModel}
                     data={nonDeletedEvents}
                     id={id}
                     isEventViewer={true}
@@ -345,17 +336,14 @@ const EventsViewerComponent: React.FC<Props> = ({
 
 export const EventsViewer = React.memo(
   EventsViewerComponent,
-  // eslint-disable-next-line complexity
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
-    deepEqual(prevProps.defaultModel, nextProps.defaultModel) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
-    prevProps.handleCloseExpandedEvent === nextProps.handleCloseExpandedEvent &&
     prevProps.headerFilterGroup === nextProps.headerFilterGroup &&
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&

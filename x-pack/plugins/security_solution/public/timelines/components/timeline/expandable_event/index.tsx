@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
-
+import { find } from 'lodash/fp';
 import {
   EuiButtonIcon,
   EuiTextColor,
@@ -18,9 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { find } from 'lodash/fp';
-
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
+
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
@@ -29,8 +28,8 @@ import {
   View,
 } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import * as i18n from './translations';
 import { LineClamp } from '../../../../common/components/line_clamp';
+import * as i18n from './translations';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

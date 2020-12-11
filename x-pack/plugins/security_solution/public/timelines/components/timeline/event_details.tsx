@@ -10,10 +10,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { some } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { some } from 'lodash/fp';
 
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import {

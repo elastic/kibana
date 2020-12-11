@@ -107,19 +107,19 @@ const StatefulEventComponent: React.FC<Props> = ({
   const handleOnEventToggled = useCallback(() => {
     const eventId = event._id;
     const indexName = event._index!;
+
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
         event: {
           eventId,
           indexName,
-          loading: false,
         },
       })
     );
 
     if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({ eventId, indexName, loading: false });
+      activeTimeline.toggleExpandedEvent({ eventId, indexName });
     }
   }, [dispatch, event._id, event._index, timelineId]);
 

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 

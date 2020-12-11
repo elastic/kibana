@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useEffect, useCallback } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import React, { useMemo, useEffect } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
@@ -48,7 +48,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
   dataProviders,
-  defaultModel,
   deletedEventIds,
   deleteEventQuery,
   end,
@@ -64,7 +63,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   pageFilters,
   query,
   onRuleChange,
-  onFlyoutCollapsed,
   start,
   scopeId,
   showCheckboxes,
@@ -101,15 +99,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-  const dispatch = useDispatch();
-  const handleCloseExpandedEvent = useCallback(() => {
-    dispatch(
-      onFlyoutCollapsed({
-        timelineId: id,
-        event: {},
-      })
-    );
-  }, [dispatch, id, onFlyoutCollapsed]);
 
   return (
     <>
@@ -118,7 +107,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           <EventsViewer
             browserFields={browserFields}
             columns={columns}
-            defaultModel={defaultModel}
             docValueFields={docValueFields}
             id={id}
             dataProviders={dataProviders!}
@@ -136,7 +124,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             kqlMode={kqlMode}
             query={query}
             onRuleChange={onRuleChange}
-            handleCloseExpandedEvent={handleCloseExpandedEvent}
             start={start}
             sort={sort}
             utilityBar={utilityBar}
@@ -157,10 +144,10 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getEvents = timelineSelectors.getEventsByIdSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
       dataProviders,
@@ -173,12 +160,11 @@ const makeMapStateToProps = () => {
       kqlMode,
       sort,
       showCheckboxes,
-    } = events;
+    } = timeline;
 
     return {
       columns,
       dataProviders,
-      defaultModel,
       deletedEventIds,
       expandedEvent,
       excludedRowRendererIds,
@@ -202,7 +188,6 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  onFlyoutCollapsed: timelineActions.toggleExpandedEvent,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

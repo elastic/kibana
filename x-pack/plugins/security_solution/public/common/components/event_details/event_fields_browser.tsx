@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getOr, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { getOr, sortBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
