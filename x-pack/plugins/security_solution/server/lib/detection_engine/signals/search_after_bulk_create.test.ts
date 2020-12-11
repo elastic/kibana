@@ -52,7 +52,6 @@ describe('searchAfterAndBulkCreate', () => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
-    inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createAlertServices();
   });
 
