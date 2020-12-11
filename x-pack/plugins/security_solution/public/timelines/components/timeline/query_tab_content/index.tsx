@@ -21,7 +21,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { Direction } from '../../../../../common/search_strategy';
+import { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -136,6 +136,8 @@ interface OwnProps {
   timelineId: string;
 }
 
+const EMPTY_EVENTS: TimelineItem[] = [];
+
 export type Props = OwnProps & PropsFromRedux;
 
 export const QueryTabContentComponent: React.FC<Props> = ({
@@ -197,6 +199,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         kqlMode,
       }),
     [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
+  );
+
+  const isBlankTimeline: boolean = useMemo(
+    () => isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query),
+    [dataProviders, filters, kqlQuery]
   );
 
   const canQueryTimeline = useMemo(
@@ -293,41 +300,36 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               </TimelineHeaderContainer>
             </StyledEuiFlyoutHeader>
           </HideShowContainer>
-          {canQueryTimeline ? (
-            <EventDetailsWidthProvider>
-              <StyledEuiFlyoutBody
-                data-test-subj="eui-flyout-body"
-                className="timeline-flyout-body"
-              >
-                <StatefulBody
-                  browserFields={browserFields}
-                  data={events}
-                  id={timelineId}
-                  refetch={refetch}
-                  sort={sort}
-                />
-              </StyledEuiFlyoutBody>
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
-              >
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={timelineId}
-                  isLive={isLive}
-                  isLoading={isQueryLoading || loadingSourcerer}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangePage={loadPage}
-                  totalCount={totalCount}
-                />
-              </StyledEuiFlyoutFooter>
-            </EventDetailsWidthProvider>
-          ) : null}
+          <EventDetailsWidthProvider>
+            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+              <StatefulBody
+                browserFields={browserFields}
+                data={isBlankTimeline ? EMPTY_EVENTS : events}
+                id={timelineId}
+                refetch={refetch}
+                sort={sort}
+              />
+            </StyledEuiFlyoutBody>
+            <StyledEuiFlyoutFooter
+              data-test-subj="eui-flyout-footer"
+              className="timeline-flyout-footer"
+            >
+              <Footer
+                activePage={pageInfo.activePage}
+                data-test-subj="timeline-footer"
+                updatedAt={updatedAt}
+                height={footerHeight}
+                id={timelineId}
+                isLive={isLive}
+                isLoading={isQueryLoading || loadingSourcerer}
+                itemsCount={isBlankTimeline ? 0 : events.length}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                onChangePage={loadPage}
+                totalCount={isBlankTimeline ? 0 : totalCount}
+              />
+            </StyledEuiFlyoutFooter>
+          </EventDetailsWidthProvider>
         </ScrollableFlexItem>
         {showEventDetailsColumn && (
           <>

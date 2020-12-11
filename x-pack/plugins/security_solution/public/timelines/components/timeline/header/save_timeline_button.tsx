@@ -69,6 +69,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
       <>
         {saveTimelineButtonIcon}
         <TimelineTitleAndDescription
+          data-test-subj="save-timeline-modal-comp"
           closeSaveTimeline={closeSaveTimeline}
           initialFocus={initialFocus}
           openSaveTimeline={openSaveTimeline}

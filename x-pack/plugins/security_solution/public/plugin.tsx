@@ -422,7 +422,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           management: managementSubPlugin,
         },
         configIndexPatterns,
-        signal,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
@@ -435,8 +434,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             }
           )
           .toPromise(),
-        coreStart.http.fetch<{ name: string }>(DETECTION_ENGINE_INDEX_URL, { method: 'GET' }),
       ]);
+
+      let signal = {};
+      try {
+        signal = await coreStart.http.fetch<{ name: string }>(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
+      } catch {
+        signal = { name: null };
+      }
 
       const { apolloClient } = composeLibs(coreStart);
       const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
