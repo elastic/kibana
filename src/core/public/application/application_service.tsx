@@ -349,6 +349,9 @@ export class ApplicationService {
         'data-test-subj': 'appLeaveConfirmModal',
       });
       if (!confirmed) {
+        if (action.callback) {
+          action.callback();
+        }
         return false;
       }
     }
