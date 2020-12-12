@@ -181,7 +181,7 @@ describe('migration actions', () => {
       }
     });
     it('resolves right if cloning into a new target index', () => {
-      const task = cloneIndex(client, 'existing_index_with_docs', 'yellow_then_green_index');
+      const task = cloneIndex(client, 'existing_index_with_write_block', 'yellow_then_green_index');
       expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -208,7 +208,7 @@ describe('migration actions', () => {
       // Call clone even though the index already exists
       const cloneIndexPromise = cloneIndex(
         client,
-        'existing_index_with_docs',
+        'existing_index_with_write_block',
         'yellow_then_green_index'
       )();
       let indexGreen = false;
