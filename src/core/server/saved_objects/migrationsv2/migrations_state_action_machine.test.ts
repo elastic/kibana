@@ -23,6 +23,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { AllControlStates, State } from './types';
 import { createInitialState } from './model';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 
 describe('migrationsStateActionMachine', () => {
   beforeEach(() => {
@@ -230,6 +232,18 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexTargetMappings": Object {
+              "dynamic": false,
+              "properties": Object {
+                "migrationVersion": Object {
+                  "dynamic": "true",
+                  "type": "object",
+                },
+                "type": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "retryCount": 0,
             "retryDelay": 0,
             "targetMappings": Object {
@@ -276,6 +290,18 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexTargetMappings": Object {
+              "dynamic": false,
+              "properties": Object {
+                "migrationVersion": Object {
+                  "dynamic": "true",
+                  "type": "object",
+                },
+                "type": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "retryCount": 0,
             "retryDelay": 0,
             "targetMappings": Object {
@@ -286,6 +312,42 @@ describe('migrationsStateActionMachine', () => {
           },
         ],
       ]
+    `);
+  });
+  it('rejects and logs the error when an action throws with an ResponseError', async () => {
+    await expect(
+      migrationStateActionMachine({
+        initialState: { ...initialState, reason: 'the fatal reason' } as State,
+        logger: mockLogger.get(),
+        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+        next: () => {
+          throw new ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              body: { error: { type: 'snapshot_in_progress_exception', reason: 'error reason' } },
+            })
+          );
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again.]`
+    );
+    expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
+      Object {
+        "debug": Array [],
+        "error": Array [
+          Array [
+            "[.my-so-index] [snapshot_in_progress_exception]: error reason",
+          ],
+          Array [
+            "[.my-so-index] migration failed, dumping execution log:",
+          ],
+        ],
+        "fatal": Array [],
+        "info": Array [],
+        "log": Array [],
+        "trace": Array [],
+        "warn": Array [],
+      }
     `);
   });
   it('rejects and logs the error when an action throws', async () => {
@@ -299,14 +361,25 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again.]`
     );
-    expect(loggingSystemMock.collect(mockLogger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          [Error: this action throws],
+    expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
+      Object {
+        "debug": Array [],
+        "error": Array [
+          Array [
+            [Error: this action throws],
+          ],
+          Array [
+            "[.my-so-index] migration failed, dumping execution log:",
+          ],
         ],
-      ]
+        "fatal": Array [],
+        "info": Array [],
+        "log": Array [],
+        "trace": Array [],
+        "warn": Array [],
+      }
     `);
   });
   it('logs all state transitions and action responses when an action throws', async () => {
@@ -355,6 +428,18 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexTargetMappings": Object {
+              "dynamic": false,
+              "properties": Object {
+                "migrationVersion": Object {
+                  "dynamic": "true",
+                  "type": "object",
+                },
+                "type": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "retryCount": 0,
             "retryDelay": 0,
             "targetMappings": Object {
@@ -396,6 +481,18 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexTargetMappings": Object {
+              "dynamic": false,
+              "properties": Object {
+                "migrationVersion": Object {
+                  "dynamic": "true",
+                  "type": "object",
+                },
+                "type": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "retryCount": 0,
             "retryDelay": 0,
             "targetMappings": Object {

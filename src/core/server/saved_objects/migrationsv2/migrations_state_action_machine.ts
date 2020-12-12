@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
@@ -28,48 +29,47 @@ type ExecutionLog = Array<
       type: 'transition';
       prevControlState: State['controlState'];
       controlState: State['controlState'];
-      indexLogMessagePrefix: string;
       state: State;
     }
   | {
       type: 'response';
       controlState: State['controlState'];
-      indexLogMessagePrefix: string;
       res: unknown;
     }
 >;
 
-// Since saved object index names usually start with a `.` and can be
-// configured by users to include several `.`'s we can't use a logger tag to
-// indicate which messages come from which index upgrade.
-const indexLogMessagePrefix = (state: State) => `[${state.indexPrefix}] `;
-
-const logStateTransition = (logger: Logger, oldState: State, newState: State) => {
+const logStateTransition = (
+  logger: Logger,
+  logMessagePrefix: string,
+  oldState: State,
+  newState: State
+) => {
   if (newState.logs.length > oldState.logs.length) {
     newState.logs
       .slice(oldState.logs.length)
-      .forEach((log) => logger[log.level](indexLogMessagePrefix(newState) + log.message));
+      .forEach((log) => logger[log.level](logMessagePrefix + log.message));
   }
 
-  logger.info(
-    indexLogMessagePrefix(newState) + `${oldState.controlState} -> ${newState.controlState}`
-  );
+  logger.info(logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}`);
 };
 
-const logActionResponse = (logger: Logger, state: State, res: unknown) => {
-  logger.debug(indexLogMessagePrefix(state) + `${state.controlState} RESPONSE`, res as LogMeta);
+const logActionResponse = (
+  logger: Logger,
+  logMessagePrefix: string,
+  state: State,
+  res: unknown
+) => {
+  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
 };
 
-const dumpExecutionLog = (logger: Logger, executionLog: ExecutionLog) => {
+const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog: ExecutionLog) => {
+  logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {
     if (log.type === 'transition') {
-      logger.info(
-        log.indexLogMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
-        log.state
-      );
+      logger.info(logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`, log.state);
     }
     if (log.type === 'response') {
-      logger.info(log.indexLogMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
+      logger.info(logMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
     }
   });
 };
@@ -96,6 +96,10 @@ export async function migrationStateActionMachine({
 }) {
   const executionLog: ExecutionLog = [];
   const starteTime = performance.now();
+  // Since saved object index names usually start with a `.` and can be
+  // configured by users to include several `.`'s we can't use a logger tag to
+  // indicate which messages come from which index upgrade.
+  const logMessagePrefix = `[${initialState.indexPrefix}] `;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -104,10 +108,9 @@ export async function migrationStateActionMachine({
         executionLog.push({
           type: 'response',
           res,
-          indexLogMessagePrefix: indexLogMessagePrefix(state),
           controlState: state.controlState,
         });
-        logActionResponse(logger, state, res);
+        logActionResponse(logger, logMessagePrefix, state, res);
         const newState = model(state, res);
         // Redact the state to reduce the memory consumption and so that we
         // don't log sensitive information inside documents by only keeping
@@ -122,18 +125,15 @@ export async function migrationStateActionMachine({
           state: redactedNewState,
           controlState: newState.controlState,
           prevControlState: state.controlState,
-          indexLogMessagePrefix: indexLogMessagePrefix(state),
         });
-        logStateTransition(logger, state, redactedNewState as State);
+        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State);
         return newState;
       }
     );
 
     const elapsedMs = performance.now() - starteTime;
     if (finalState.controlState === 'DONE') {
-      logger.info(
-        indexLogMessagePrefix(finalState) + `Migration completed after ${Math.round(elapsedMs)}ms`
-      );
+      logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
       if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {
         return {
           status: 'migrated' as const,
@@ -149,7 +149,7 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
-      dumpExecutionLog(logger, executionLog);
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
       return Promise.reject(
         new Error(
           `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
@@ -160,10 +160,16 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
-    dumpExecutionLog(logger, executionLog);
-    logger.error(e);
+    if (e instanceof EsErrors.ResponseError) {
+      logger.error(
+        logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
+      );
+    } else {
+      logger.error(e);
+    }
+    dumpExecutionLog(logger, logMessagePrefix, executionLog);
     throw new Error(
-      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster`
+      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again.`
     );
   }
 }
