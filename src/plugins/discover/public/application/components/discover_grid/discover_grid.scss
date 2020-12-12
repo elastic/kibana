@@ -46,8 +46,8 @@
   width: 100%;
 }
 
-.dscApp .dscFormatSource {
-  word-break: break-word;
+.dscFormatSource {
+  @include euiTextTruncate;
 }
 
 .dscFormatSource__title {
