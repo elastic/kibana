@@ -26,8 +26,9 @@ import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 interface Props {
   actionsColumnWidth: number;
@@ -77,8 +78,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId].expandedEvent
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent
   );
   const divElement = useRef<HTMLDivElement | null>(null);
 
@@ -112,13 +114,12 @@ const StatefulEventComponent: React.FC<Props> = ({
         event: {
           eventId,
           indexName,
-          loading: false,
         },
       })
     );
 
     if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({ eventId, indexName, loading: false });
+      activeTimeline.toggleExpandedEvent({ eventId, indexName });
     }
   }, [dispatch, event._id, event._index, timelineId]);
 
