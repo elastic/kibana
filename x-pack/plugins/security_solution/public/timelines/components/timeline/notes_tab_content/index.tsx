@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, uniqBy } from 'lodash/fp';
+import { filter, pick, uniqBy } from 'lodash/fp';
 import {
   EuiAvatar,
   EuiFlexGroup,
@@ -139,7 +139,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   const isImmutable = timelineStatus === TimelineStatus.immutable;
   const notes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
 
-  const participants = useMemo(() => uniqBy('updatedBy', notes), [notes]);
+  // filter for savedObjectId to make sure we don't display `elastic` user while saving the note
+  const participants = useMemo(() => uniqBy('updatedBy', filter('savedObjectId', notes)), [notes]);
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
