@@ -71,7 +71,10 @@ describe('migrationsStateActionMachine', () => {
       model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
       next,
     });
-    expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
+    const logs = loggingSystemMock.collect(mockLogger);
+    const doneLog = logs.info.splice(8, 1)[0][0];
+    expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
+    expect(logs).toMatchInlineSnapshot(`
       Object {
         "debug": Array [
           Array [
@@ -129,9 +132,6 @@ describe('migrationsStateActionMachine', () => {
           ],
           Array [
             "[.my-so-index] LEGACY_DELETE -> DONE",
-          ],
-          Array [
-            "[.my-so-index] Migration completed after 0ms",
           ],
         ],
         "log": Array [],
