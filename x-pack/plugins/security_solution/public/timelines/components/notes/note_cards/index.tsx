@@ -27,6 +27,10 @@ const NoteCardsCompContainer = styled(EuiPanel)`
   border: none;
   background-color: transparent;
   box-shadow: none;
+
+  &.euiPanel--plain {
+    background-color: transparent;
+  }
 `;
 NoteCardsCompContainer.displayName = 'NoteCardsCompContainer';
 
