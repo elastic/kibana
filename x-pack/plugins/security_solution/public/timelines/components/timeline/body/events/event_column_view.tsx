@@ -11,6 +11,7 @@ import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { timelineSelectors } from '../../../../store/timeline';
 import { AssociateNote } from '../../../notes/helpers';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
@@ -85,8 +86,9 @@ export const EventColumnView = React.memo<Props>(
     timelineId,
     toggleShowNotes,
   }) => {
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const { timelineType, status } = useDeepEqualSelector((state) =>
-      pick(['timelineType', 'status'], state.timeline.timelineById[timelineId])
+      pick(['timelineType', 'status'], getTimeline(state, timelineId))
     );
 
     const handlePinClicked = useCallback(
