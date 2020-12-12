@@ -542,6 +542,76 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
@@ -559,6 +629,34 @@ export interface CoreUsageStats {
     'apiCalls.savedObjectsExport.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsExport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
     // (undocumented)
@@ -599,6 +697,20 @@ export interface CoreUsageStats {
     'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsResolveImportErrors.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.total'?: number;
 }
 
 // @public (undocumented)

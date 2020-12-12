@@ -29,7 +29,8 @@ import {
   IBasePath,
 } from '..';
 
-interface BaseIncrementOptions {
+/** @internal */
+export interface BaseIncrementOptions {
   request: KibanaRequest;
 }
 /** @internal */
@@ -42,10 +43,27 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
   Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
 
+export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
+export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
+export const BULK_UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkUpdate';
+export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
+export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
+export const FIND_STATS_PREFIX = 'apiCalls.savedObjectsFind';
+export const GET_STATS_PREFIX = 'apiCalls.savedObjectsGet';
+export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 const ALL_COUNTER_FIELDS = [
+  // Saved Objects Client APIs
+  ...getAllCommonFields(BULK_CREATE_STATS_PREFIX),
+  ...getAllCommonFields(BULK_GET_STATS_PREFIX),
+  ...getAllCommonFields(BULK_UPDATE_STATS_PREFIX),
+  ...getAllCommonFields(CREATE_STATS_PREFIX),
+  ...getAllCommonFields(DELETE_STATS_PREFIX),
+  ...getAllCommonFields(FIND_STATS_PREFIX),
+  ...getAllCommonFields(GET_STATS_PREFIX),
+  ...getAllCommonFields(UPDATE_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getAllCommonFields(IMPORT_STATS_PREFIX),
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
@@ -85,6 +103,38 @@ export class CoreUsageStatsClient {
       // do nothing
     }
     return coreUsageStats;
+  }
+
+  public async incrementSavedObjectsBulkCreate(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], BULK_CREATE_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsBulkGet(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], BULK_GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsBulkUpdate(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], BULK_UPDATE_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsCreate(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], CREATE_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsDelete(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], DELETE_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsFind(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], FIND_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsGet(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsUpdate(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], UPDATE_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsImport(options: IncrementSavedObjectsImportOptions) {
