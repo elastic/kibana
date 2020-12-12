@@ -494,7 +494,7 @@ export class SearchSource {
     body.stored_fields = storedFields;
 
     // apply source filters from index pattern if specified by the user
-    let filteredDocvalueFields = docvalueFields || [];
+    let filteredDocvalueFields = docvalueFields;
     if (index) {
       const sourceFilters = index.getSourceFiltering();
       if (!body.hasOwnProperty('_source')) {

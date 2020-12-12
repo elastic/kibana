@@ -75,7 +75,7 @@ const indexPattern = ({
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
-  getComputedFields: () => ({}),
+  getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
   timeFieldName: 'date',
