@@ -127,7 +127,7 @@ export const DataVisualizerDataGrid = ({
           />
         );
       },
-      'data-test-subj': 'mlDataVisualizerGridDetailsToggleColumn',
+      'data-test-subj': 'mlDataVisualizerTableColumnDetailsToggle',
     };
 
     return [
@@ -143,7 +143,7 @@ export const DataVisualizerDataGrid = ({
         width: '75px',
         sortable: true,
         align: CENTER_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerGridTypeColumn',
+        'data-test-subj': 'mlDataVisualizerTableColumnType',
       },
       {
         field: 'fieldName',
@@ -158,7 +158,7 @@ export const DataVisualizerDataGrid = ({
           </EuiText>
         ),
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerGridNameColumn',
+        'data-test-subj': 'mlDataVisualizerTableColumnName',
       },
       {
         field: 'docCount',
@@ -173,7 +173,7 @@ export const DataVisualizerDataGrid = ({
         render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
         sortable: (item: FieldVisConfig) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerGridDocumentsCountColumn',
+        'data-test-subj': 'mlDataVisualizerTableColumnDocumentsCount',
       },
       {
         field: 'stats.cardinality',
@@ -188,7 +188,7 @@ export const DataVisualizerDataGrid = ({
         render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerGridDistinctValuesColumn',
+        'data-test-subj': 'mlDataVisualizerTableColumnDistinctValues',
       },
       {
         name: (
@@ -222,7 +222,7 @@ export const DataVisualizerDataGrid = ({
           return null;
         },
         align: LEFT_ALIGNMENT as HorizontalAlignment,
-        'data-test-subj': 'mlDataVisualizerGridDistributionColumn',
+        'data-test-subj': 'mlDataVisualizerTableColumnDistribution',
       },
     ];
   }, [expandAll, showDistributions, updatePageState]);

@@ -124,8 +124,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should load data for full time range');
           await ml.dataVisualizerIndexBased.clickUseFullDataButton(ecExpectedTotalCount);
 
-          await ml.testExecution.logTestStep('should display the panels of fields');
-          await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(ecExpectedFieldPanelCount);
+          await ml.testExecution.logTestStep('should display the data visualizer table');
+          await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
+
+          // await ml.testExecution.logTestStep('should display the panels of fields');
+          // await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(ecExpectedFieldPanelCount);
 
           await ml.testExecution.logTestStep('should not display the actions panel with cards');
           await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();

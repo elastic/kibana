@@ -37,7 +37,7 @@ export const TopValuesPreview: FC<FieldDataCardProps> = ({ config }) => {
       chartData={chartData}
       columnType={columnType}
       dataTestSubj={`mlDataGridChart-${config.fieldName}`}
-      compressed={true}
+      hideLabel={true}
     />
   );
 };

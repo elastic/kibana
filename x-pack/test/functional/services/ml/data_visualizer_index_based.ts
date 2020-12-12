@@ -37,6 +37,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
     },
 
+    async assertDataVisualizerTableExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerTable`);
+    },
+
     async assertFieldsPanelsExist(expectedPanelCount: number) {
       const allPanels = await testSubjects.findAll('~mlDataVisualizerFieldsPanel');
       expect(allPanels).to.have.length(

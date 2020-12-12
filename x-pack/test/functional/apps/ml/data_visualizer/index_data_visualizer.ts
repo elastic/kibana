@@ -326,107 +326,109 @@ export default function ({ getService }: FtrProviderContext) {
         testData.expected.totalDocCountFormatted
       );
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the panels of fields`);
-      await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(testData.expected.fieldsPanelCount);
-
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
-      await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([ML_JOB_FIELD_TYPES.NUMBER]);
-
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays the expected document count card`
+        `${testData.suiteTitle} displays the data visualizer table`
       );
-      await ml.dataVisualizerIndexBased.assertCardExists(
-        testData.expected.documentCountCard.type,
-        testData.expected.documentCountCard.fieldName
-      );
-      await ml.dataVisualizerIndexBased.assertDocumentCountCardContents();
+      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays the expected metric field cards and contents`
-      );
-
-      if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected metric field cards and contents`
-        );
-        for (const fieldCard of testData.expected.metricCards as MetricFieldVisConfig[]) {
-          await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
-          await ml.dataVisualizerIndexBased.assertNumberCardContents(
-            fieldCard.fieldName!,
-            fieldCard.docCountFormatted,
-            fieldCard.statsMaxDecimalPlaces,
-            fieldCard.selectedDetailsMode,
-            fieldCard.topValuesCount
-          );
-        }
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} filters metric fields cards with search`
-        );
-        await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
-          ['number'],
-          testData.metricFieldsFilter,
-          testData.expected.metricFieldsFilterCardCount
-        );
-      }
-
-      if (
-        testData.expected.nonMetricCards !== undefined &&
-        testData.expected.nonMetricCards.length > 0
-      ) {
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the non-metric Fields panel`
-        );
-        await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
-          getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[])
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected non-metric field cards and contents`
-        );
-        for (const fieldCard of testData.expected.nonMetricCards!) {
-          await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
-          await ml.dataVisualizerIndexBased.assertNonMetricCardContents(
-            fieldCard.type,
-            fieldCard.fieldName!,
-            fieldCard.exampleCount
-          );
-        }
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} sets the non metric field types input`
-        );
-        const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
-          testData.expected.nonMetricCards as FieldVisConfig[]
-        );
-        await ml.dataVisualizerIndexBased.assertFieldsPanelTypeInputExists(fieldTypes);
-        await ml.dataVisualizerIndexBased.setFieldsPanelTypeInputValue(
-          fieldTypes,
-          testData.nonMetricFieldsTypeFilter,
-          testData.expected.nonMetricFieldsTypeFilterCardCount
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} filters non-metric fields cards with search`
-        );
-        await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
-          fieldTypes,
-          testData.nonMetricFieldsFilter,
-          testData.expected.nonMetricFieldsFilterCardCount
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} sample size control changes non-metric field cards doc count`
-        );
-        await ml.dataVisualizerIndexBased.clearFieldsPanelSearchInput(fieldTypes);
-        await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
-        await ml.dataVisualizerIndexBased.setSampleSizeInputValue(
-          1000,
-          ML_JOB_FIELD_TYPES.KEYWORD,
-          'airline',
-          '1,000'
-        );
-      }
+      // await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
+      // await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([ML_JOB_FIELD_TYPES.NUMBER]);
+      //
+      // await ml.testExecution.logTestStep(
+      //   `${testData.suiteTitle} displays the expected document count card`
+      // );
+      // await ml.dataVisualizerIndexBased.assertCardExists(
+      //   testData.expected.documentCountCard.type,
+      //   testData.expected.documentCountCard.fieldName
+      // );
+      // await ml.dataVisualizerIndexBased.assertDocumentCountCardContents();
+      //
+      // await ml.testExecution.logTestStep(
+      //   `${testData.suiteTitle} displays the expected metric field cards and contents`
+      // );
+      //
+      // if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} displays the expected metric field cards and contents`
+      //   );
+      //   for (const fieldCard of testData.expected.metricCards as MetricFieldVisConfig[]) {
+      //     await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
+      //     await ml.dataVisualizerIndexBased.assertNumberCardContents(
+      //       fieldCard.fieldName!,
+      //       fieldCard.docCountFormatted,
+      //       fieldCard.statsMaxDecimalPlaces,
+      //       fieldCard.selectedDetailsMode,
+      //       fieldCard.topValuesCount
+      //     );
+      //   }
+      //
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} filters metric fields cards with search`
+      //   );
+      //   await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
+      //     ['number'],
+      //     testData.metricFieldsFilter,
+      //     testData.expected.metricFieldsFilterCardCount
+      //   );
+      // }
+      //
+      // if (
+      //   testData.expected.nonMetricCards !== undefined &&
+      //   testData.expected.nonMetricCards.length > 0
+      // ) {
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} displays the non-metric Fields panel`
+      //   );
+      //   await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
+      //     getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[])
+      //   );
+      //
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} displays the expected non-metric field cards and contents`
+      //   );
+      //   for (const fieldCard of testData.expected.nonMetricCards!) {
+      //     await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
+      //     await ml.dataVisualizerIndexBased.assertNonMetricCardContents(
+      //       fieldCard.type,
+      //       fieldCard.fieldName!,
+      //       fieldCard.exampleCount
+      //     );
+      //   }
+      //
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} sets the non metric field types input`
+      //   );
+      //   const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
+      //     testData.expected.nonMetricCards as FieldVisConfig[]
+      //   );
+      //   await ml.dataVisualizerIndexBased.assertFieldsPanelTypeInputExists(fieldTypes);
+      //   await ml.dataVisualizerIndexBased.setFieldsPanelTypeInputValue(
+      //     fieldTypes,
+      //     testData.nonMetricFieldsTypeFilter,
+      //     testData.expected.nonMetricFieldsTypeFilterCardCount
+      //   );
+      //
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} filters non-metric fields cards with search`
+      //   );
+      //   await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
+      //     fieldTypes,
+      //     testData.nonMetricFieldsFilter,
+      //     testData.expected.nonMetricFieldsFilterCardCount
+      //   );
+      //
+      //   await ml.testExecution.logTestStep(
+      //     `${testData.suiteTitle} sample size control changes non-metric field cards doc count`
+      //   );
+      //   await ml.dataVisualizerIndexBased.clearFieldsPanelSearchInput(fieldTypes);
+      //   await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
+      //   await ml.dataVisualizerIndexBased.setSampleSizeInputValue(
+      //     1000,
+      //     ML_JOB_FIELD_TYPES.KEYWORD,
+      //     'airline',
+      //     '1,000'
+      //   );
+      // }
     });
   }
 
