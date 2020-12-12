@@ -371,11 +371,11 @@ describe('migration actions', () => {
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
       // Assert that existing documents weren't overrided, but that missing
       // documents were added by the reindex
       const results = ((await searchForOutdatedDocuments(
@@ -392,6 +392,72 @@ describe('migration actions', () => {
         ]
       `);
     });
+    it('resolves left incompatible_mapping_exception if all reindex failures are due to a strict_dynamic_mapping_exception', async () => {
+      // Simulates one instance having completed the UPDATE_TARGET_MAPPINGS
+      // step which makes the mappings incompatible with outdated documents.
+      // If another instance then tries a reindex it will get a
+      // strict_dynamic_mapping_exception even if the documents already exist
+      // and should ignore this error.
+
+      // Create an index with incompatible mappings
+      await createIndex(client, 'reindex_target_5', {
+        dynamic: 'strict',
+        properties: {
+          /** no title field */
+        },
+      })();
+
+      const {
+        right: { taskId: reindexTaskId },
+      } = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'reindex_target_5',
+        Option.none
+      )()) as Either.Right<ReindexResponse>;
+      const task = waitForReindexTask(client, reindexTaskId, '10s');
+
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_mapping_exception",
+          },
+        }
+      `);
+    });
+    it('resolves left incompatible_mapping_exception if all reindex failures are due to a mapper_parsing_exception', async () => {
+      // Simulates one instance having completed the UPDATE_TARGET_MAPPINGS
+      // step which makes the mappings incompatible with outdated documents.
+      // If another instance then tries a reindex it will get a
+      // strict_dynamic_mapping_exception even if the documents already exist
+      // and should ignore this error.
+
+      // Create an index with incompatible mappings
+      await createIndex(client, 'reindex_target_6', {
+        dynamic: 'false',
+        properties: { title: { type: 'integer' } }, // integer is incompatible with string title
+      })();
+
+      const {
+        right: { taskId: reindexTaskId },
+      } = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'reindex_target_6',
+        Option.none
+      )()) as Either.Right<ReindexResponse>;
+      const task = waitForReindexTask(client, reindexTaskId, '10s');
+
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "type": "incompatible_mapping_exception",
+            },
+          }
+      `);
+    });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       const res = (await reindex(
         client,
@@ -401,13 +467,13 @@ describe('migration actions', () => {
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       return expect(task()).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "_tag": "Left",
-                            "left": Object {
-                              "index": "no_such_index",
-                              "type": "index_not_found_exception",
-                            },
-                          }
+                            Object {
+                              "_tag": "Left",
+                              "left": Object {
+                                "index": "no_such_index",
+                                "type": "index_not_found_exception",
+                              },
+                            }
                     `);
     });
     it('resolves left target_index_had_write_block if all failures are due to a write block', async () => {
@@ -421,12 +487,12 @@ describe('migration actions', () => {
       const task = waitForReindexTask(client, res.right.taskId, '10s');
 
       return expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Left",
-                          "left": Object {
-                            "type": "target_index_had_write_block",
-                          },
-                        }
+                          Object {
+                            "_tag": "Left",
+                            "left": Object {
+                              "type": "target_index_had_write_block",
+                            },
+                          }
                     `);
     });
   });

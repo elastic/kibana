@@ -69,6 +69,7 @@ describe('migrations v2 model', () => {
         },
       },
     },
+    reindexTargetMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
     versionAlias: '.kibana_7.11.0',
@@ -671,10 +672,19 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
         reindexSourceToTargetTaskId: 'reindex-task-id',
       };
-      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when reindex succeeds', () => {
+      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.right(
           'reindex_succeeded'
         );
+        const newState = model(reindexSourceToTargetWaitForState, res);
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when response is left incompatible_mapping_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.left({
+          type: 'incompatible_mapping_exception',
+        });
         const newState = model(reindexSourceToTargetWaitForState, res);
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.retryCount).toEqual(0);

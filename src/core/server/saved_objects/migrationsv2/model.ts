@@ -483,7 +483,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       const left = res.left;
-      if (left.type === 'strict_dynamic_mapping_exception') {
+      if (left.type === 'incompatible_mapping_exception') {
         // We create the target with a permissive `dynamic: false` mapping but
         // once another instance reaches the UPDATE_TARGET_MAPPINGS step it
         // will set the mappings to `dynamic: strict`. The reindex operation

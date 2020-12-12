@@ -374,6 +374,10 @@ export const reindex = (
     .catch(catchRetryableEsClientErrors);
 };
 
+interface WaitForReindexTaskFailure {
+  cause: { type: string; reason: string };
+}
+
 export const waitForReindexTask = flow(
   waitForTask,
   TaskEither.chain(
@@ -382,16 +386,18 @@ export const waitForReindexTask = flow(
     ): TaskEither.TaskEither<
       | { type: 'index_not_found_exception'; index: string }
       | { type: 'target_index_had_write_block' }
+      | { type: 'incompatible_mapping_exception' }
       | RetryableEsClientError,
       'reindex_succeeded'
     > => {
-      const failureIsAWriteBlock = ({
-        cause: { type, reason },
-      }: {
-        cause: { type: string; reason: string };
-      }) =>
+      const failureIsAWriteBlock = ({ cause: { type, reason } }: WaitForReindexTaskFailure) =>
         type === 'cluster_block_exception' &&
         reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/index write \(api\)\]/);
+
+      const failureIsIncompatibleMappingException = ({
+        cause: { type, reason },
+      }: WaitForReindexTaskFailure) =>
+        type === 'strict_dynamic_mapping_exception' || type === 'mapper_parsing_exception';
 
       if (Option.isSome(res.error)) {
         if (res.error.value.type === 'index_not_found_exception') {
@@ -405,6 +411,8 @@ export const waitForReindexTask = flow(
       } else if (Option.isSome(res.failures)) {
         if (res.failures.value.every(failureIsAWriteBlock)) {
           return TaskEither.left({ type: 'target_index_had_write_block' as const });
+        } else if (res.failures.value.every(failureIsIncompatibleMappingException)) {
+          return TaskEither.left({ type: 'incompatible_mapping_exception' as const });
         } else {
           throw new Error(
             'Reindex failed with the following failures:\n' + JSON.stringify(res.failures.value)
