@@ -66,9 +66,9 @@ export interface DiscoverProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
-  fetchError: Error;
+  fetchError?: Error;
   fieldCounts: Record<string, number>;
-  histogramData: Chart;
+  histogramData?: Chart;
   hits: number;
   indexPattern: IndexPattern;
   minimumVisibleRows: number;
@@ -300,7 +300,7 @@ export function DiscoverLegacy({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && rows.length !== 0 && (
+                          {opts.chartAggConfigs && rows.length !== 0 && histogramData && (
                             <div className="dscHistogram" data-test-subj="discoverChart">
                               <DiscoverHistogram
                                 chartData={histogramData}
