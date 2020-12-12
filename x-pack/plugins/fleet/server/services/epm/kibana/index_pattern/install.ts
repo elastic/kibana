@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_PLACEHOLDER_SUFFIX,
@@ -14,11 +14,7 @@ import { dataTypes, installationStatuses } from '../../../../../common/constants
 import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
 import { RegistryPackage, CallESAsCurrentUser, DataType } from '../../../../types';
 import { appContextService } from '../../../../services';
-import {
-  getInstallationObject,
-  getPackageFromSource,
-  getPackageSavedObjects,
-} from '../../packages/get';
+import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -89,12 +85,12 @@ export async function installIndexPatterns(
   );
 
   const packagesToFetch = installedPackagesSavedObjects.reduce<
-    Array<{ name: string; version: string; installedPkgSO: SavedObject<Installation> | undefined }>
+    Array<{ name: string; version: string; installation: Installation | undefined }>
   >((acc, pkgSO) => {
     acc.push({
       name: pkgSO.attributes.name,
       version: pkgSO.attributes.version,
-      installedPkgSO: pkgSO,
+      installation: pkgSO.attributes,
     });
     return acc;
   }, []);
@@ -111,7 +107,7 @@ export async function installIndexPatterns(
       packagesToFetch.push({
         name: pkgName,
         version: pkgVersion,
-        installedPkgSO: await getInstallationObject({ savedObjectsClient, pkgName }),
+        installation: await getInstallation({ savedObjectsClient, pkgName }),
       });
     }
   }
@@ -120,7 +116,7 @@ export async function installIndexPatterns(
     getPackageFromSource({
       pkgName: pkg.name,
       pkgVersion: pkg.version,
-      installedPkgSO: pkg.installedPkgSO,
+      installation: pkg.installation,
       savedObjectsClient,
     })
   );

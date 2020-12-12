@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
@@ -100,7 +100,7 @@ export async function getPackageInfo(options: {
     pkgName,
     pkgVersion,
     savedObjectsClient,
-    installedPkgSO: savedObject,
+    installation: savedObject?.attributes,
   });
   const { paths, packageInfo } = getPackageRes;
 
@@ -126,15 +126,15 @@ type GetPackageResponse = PackageResponse | undefined;
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
-  installedPkgSO?: SavedObject<Installation>;
+  installation?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<PackageResponse> {
-  const { pkgName, pkgVersion, installedPkgSO, savedObjectsClient } = options;
+  const { pkgName, pkgVersion, installation, savedObjectsClient } = options;
   let res: GetPackageResponse;
   // if the package is installed
 
-  if (installedPkgSO && installedPkgSO.attributes.version === pkgVersion) {
-    const { install_source: pkgInstallSource } = installedPkgSO.attributes;
+  if (installation && installation.version === pkgVersion) {
+    const { install_source: pkgInstallSource } = installation;
     // check cache
     res = getArchivePackage({
       name: pkgName,
@@ -145,7 +145,7 @@ export async function getPackageFromSource(options: {
       res = await getEsPackage(
         pkgName,
         pkgVersion,
-        installedPkgSO.attributes.package_assets,
+        installation.package_assets,
         savedObjectsClient
       );
     }
