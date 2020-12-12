@@ -40,7 +40,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
           event: {
             eventId,
             // we don't store yet info about event index name in note
-            indexName: '*',
+            indexName: '',
             loading: false,
           },
         })

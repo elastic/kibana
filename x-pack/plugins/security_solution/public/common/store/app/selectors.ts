@@ -10,6 +10,7 @@ import { createSelector } from 'reselect';
 import { Note } from '../../lib/note';
 import { ErrorModel, NotesById } from './model';
 import { State } from '../types';
+import { TimelineResultNote } from '../../../timelines/components/open_timeline/types';
 
 const selectNotesById = (state: State): NotesById => state.app.notesById;
 
@@ -25,16 +26,15 @@ export const getNotes = memoizeOne((notesById: NotesById, noteIds: string[]): No
   }, [])
 );
 
-export const selectNotesByTimelineSavedObjectId = (
-  state: State,
-  timelineSavedObjectId: string
-): Note[] =>
-  values(state.app.notesById).reduce((acc: Note[], note: Note) => {
-    if (note.timelineId === timelineSavedObjectId) {
-      return [...acc, note];
-    }
-    return acc;
-  }, []);
+export const getNotesAsCommentsList = (notesById: NotesById): TimelineResultNote[] =>
+  values(notesById).map((note) => ({
+    eventId: note.eventId,
+    savedObjectId: note.saveObjectId,
+    note: note.note,
+    noteId: note.id,
+    updated: (note.lastEdit ?? note.created).getTime(),
+    updatedBy: note.user,
+  }));
 
 export const selectNotesByIdSelector = createSelector(
   selectNotesById,
@@ -44,7 +44,7 @@ export const selectNotesByIdSelector = createSelector(
 export const notesByIdsSelector = () =>
   createSelector(selectNotesById, (notesById: NotesById) => notesById);
 
-export const selectNotesByTimelineSavedObjectIdSelector = () =>
-  createSelector(selectNotesByTimelineSavedObjectId, (notes: Note[]) => notes);
+export const selectNotesAsCommentsListSelector = () =>
+  createSelector(selectNotesById, getNotesAsCommentsList);
 
 export const errorsSelector = () => createSelector(getErrors, (errors) => errors);

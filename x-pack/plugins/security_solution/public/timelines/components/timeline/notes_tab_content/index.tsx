@@ -27,7 +27,7 @@ import { TimelineStatus } from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddNote } from '../../notes/add_note';
-import { NOTES } from '../../notes/translations';
+import { CREATED_BY, NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../../../../cases/translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
@@ -122,38 +122,22 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const {
-    createdBy,
-    expandedEvent,
-    savedObjectId,
-    status: timelineStatus,
-  } = useDeepEqualSelector((state) =>
+  const { createdBy, expandedEvent, status: timelineStatus } = useDeepEqualSelector((state) =>
     pick(
-      ['createdBy', 'expandedEvent', 'status', 'savedObjectId'],
+      ['createdBy', 'expandedEvent', 'status'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
 
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
 
-  const getNotesByTimelineSavedObjectId = useMemo(
-    () => appSelectors.selectNotesByTimelineSavedObjectIdSelector(),
+  const getNotesAsCommentsList = useMemo(
+    () => appSelectors.selectNotesAsCommentsListSelector(),
     []
   );
   const [newNote, setNewNote] = useState('');
   const isImmutable = timelineStatus === TimelineStatus.immutable;
-  const notes: TimelineResultNote[] = useDeepEqualSelector((state) => {
-    const notesByTimelineId = getNotesByTimelineSavedObjectId(state, savedObjectId);
-
-    return notesByTimelineId.map((note) => ({
-      eventId: note.eventId,
-      savedObjectId: note.saveObjectId,
-      note: note.note,
-      noteId: note.id,
-      updated: (note.lastEdit ?? note.created).getTime(),
-      updatedBy: note.user,
-    }));
-  });
+  const notes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
 
   const participants = useMemo(() => uniqBy('updatedBy', notes), [notes]);
 
@@ -181,7 +165,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           <>
             <EuiSpacer size="m" />
             <EuiTitle size="xs">
-              <h4>{'Created by'}</h4>
+              <h4>{CREATED_BY}</h4>
             </EuiTitle>
             <EuiHorizontalRule margin="s" />
             <UsernameWithAvatar username={createdBy} />
