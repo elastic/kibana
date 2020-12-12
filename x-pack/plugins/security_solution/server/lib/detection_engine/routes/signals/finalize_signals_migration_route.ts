@@ -9,7 +9,7 @@ import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { BadRequestError } from '../../errors/bad_request_error';
-import { isMigrationFailed, isMigrationSuccess } from '../../migrations/helpers';
+import { isMigrationFailed, isMigrationPending } from '../../migrations/helpers';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
@@ -64,7 +64,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
 
               return {
                 index,
-                completed: !isMigrationSuccess(finalizedMigration),
+                completed: !isMigrationPending(finalizedMigration),
                 migration_id: finalizedMigration.id,
                 migration_index: finalizedMigration.attributes.destinationIndex,
               };

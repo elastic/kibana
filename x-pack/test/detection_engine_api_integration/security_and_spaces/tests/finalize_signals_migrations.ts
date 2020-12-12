@@ -24,7 +24,7 @@ import {
 import { createUserAndRole } from '../roles_users_utils';
 
 interface StatusResponse {
-  name: string;
+  index: string;
   is_outdated: boolean;
 }
 
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
       const statusResponses: StatusResponse[] = body.indices;
-      const indicesBefore = statusResponses.map((index) => index.name);
+      const indicesBefore = statusResponses.map((index) => index.index);
 
       expect(indicesBefore).to.contain(createdMigration.index);
       expect(indicesBefore).not.to.contain(createdMigration.migration_index);
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
         return statusAfter.some((s) => !s.is_outdated);
       }, `polling finalize_migration until complete`);
 
-      const indicesAfter = statusAfter.map((s) => s.name);
+      const indicesAfter = statusAfter.map((s) => s.index);
 
       expect(indicesAfter).to.contain(createdMigration.migration_index);
       expect(indicesAfter).not.to.contain(createdMigration.index);
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
-      expect(statusAfter.map((s) => s.name)).to.eql(
+      expect(statusAfter.map((s) => s.index)).to.eql(
         createdMigrations.map((c) => c.migration_index)
       );
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
-      const indicesAfter = statusAfter.map((index) => index.name);
+      const indicesAfter = statusAfter.map((index) => index.index);
 
       expect(indicesAfter).to.contain(createdMigration.migration_index);
       expect(indicesAfter).not.to.contain(createdMigration.index);
