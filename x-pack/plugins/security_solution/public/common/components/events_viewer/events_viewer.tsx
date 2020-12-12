@@ -5,14 +5,16 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, some } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
 
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
@@ -35,7 +37,7 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -101,6 +103,7 @@ interface Props {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
+  expandedEvent: TimelineExpandedEvent;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
@@ -115,7 +118,7 @@ interface Props {
   query: Query;
   onRuleChange?: () => void;
   start: string;
-  sort: Sort;
+  sort: Sort[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -128,6 +131,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   docValueFields,
   end,
+  expandedEvent,
   filters,
   headerFilterGroup,
   id,
@@ -145,6 +149,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
+  const dispatch = useDispatch();
   const { globalFullScreen, timelineFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
@@ -202,11 +207,12 @@ const EventsViewerComponent: React.FC<Props> = ({
   ]);
 
   const sortField = useMemo(
-    () => ({
-      field: sort.columnId,
-      direction: sort.sortDirection as Direction,
-    }),
-    [sort.columnId, sort.sortDirection]
+    () =>
+      sort.map(({ columnId, sortDirection }) => ({
+        field: columnId,
+        direction: sortDirection as Direction,
+      })),
+    [sort]
   );
 
   const [
@@ -224,6 +230,12 @@ const EventsViewerComponent: React.FC<Props> = ({
     endDate: end,
     skip: !canQueryTimeline,
   });
+
+  useEffect(() => {
+    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
+    }
+  }, [dispatch, events, expandedEvent, id]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -341,7 +353,7 @@ export const EventsViewer = React.memo(
     prevProps.kqlMode === nextProps.kqlMode &&
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.utilityBar === nextProps.utilityBar &&
     prevProps.graphEventId === nextProps.graphEventId
 );

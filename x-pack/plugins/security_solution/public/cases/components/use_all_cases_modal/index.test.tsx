@@ -5,13 +5,13 @@
  */
 
 /* eslint-disable react/display-name */
-
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../common/lib/kibana';
 import '../../../common/mock/match_media';
-import { TimelineId } from '../../../../common/types/timeline';
 import { useAllCasesModal, UseAllCasesModalProps, UseAllCasesModalReturnedValues } from '.';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -26,10 +26,22 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../all_cases', () => {
+  return {
+    AllCases: ({ onRowClick }: { onRowClick: ({ id }: { id: string }) => void }) => {
+      return (
+        <button type="button" onClick={() => onRowClick({ id: 'case-id' })}>
+          {'case-row'}
+        </button>
+      );
+    },
+  };
+});
 
 jest.mock('../../../common/hooks/use_selector');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const onRowClick = jest.fn();
 
 describe('useAllCasesModal', () => {
   let navigateToApp: jest.Mock;
@@ -42,51 +54,51 @@ describe('useAllCasesModal', () => {
 
   it('init', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
+      () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
-    expect(result.current.showModal).toBe(false);
+    expect(result.current.isModalOpen).toBe(false);
   });
 
   it('opens the modal', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
+      () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
     act(() => {
-      result.current.onOpenModal();
+      result.current.openModal();
     });
 
-    expect(result.current.showModal).toBe(true);
+    expect(result.current.isModalOpen).toBe(true);
   });
 
   it('closes the modal', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
+      () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
     act(() => {
-      result.current.onOpenModal();
-      result.current.onCloseModal();
+      result.current.openModal();
+      result.current.closeModal();
     });
 
-    expect(result.current.showModal).toBe(false);
+    expect(result.current.isModalOpen).toBe(false);
   });
 
   it('returns a memoized value', async () => {
     const { result, rerender } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
+      () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -99,49 +111,24 @@ describe('useAllCasesModal', () => {
 
   it('closes the modal when clicking a row', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
+      () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
     act(() => {
-      result.current.onOpenModal();
-      result.current.onRowClick();
+      result.current.openModal();
     });
 
-    expect(result.current.showModal).toBe(false);
-  });
-
-  it('navigates to the correct path without id', async () => {
-    const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
-      {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-      }
-    );
+    const modal = result.current.modal;
+    render(<>{modal}</>);
 
     act(() => {
-      result.current.onOpenModal();
-      result.current.onRowClick();
+      userEvent.click(screen.getByText('case-row'));
     });
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
-  });
-
-  it('navigates to the correct path with id', async () => {
-    const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ timelineId: TimelineId.test }),
-      {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-      }
-    );
-
-    act(() => {
-      result.current.onOpenModal();
-      result.current.onRowClick('case-id');
-    });
-
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/case-id' });
+    expect(result.current.isModalOpen).toBe(false);
+    expect(onRowClick).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

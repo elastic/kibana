@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['auditbeat_process_hosts_ecs', 'siem_auditbeat'],
+        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
       },
     },
   ];
