@@ -73,17 +73,17 @@ export const EXPAND = i18n.translate(
   }
 );
 
+export const EXPAND_EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.expandEventTooltip',
+  {
+    defaultMessage: 'Expand event',
+  }
+);
+
 export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
   {
     defaultMessage: 'Collapse',
-  }
-);
-
-export const COLLAPSE_EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.collapseEventTooltip',
-  {
-    defaultMessage: 'Collapse event',
   }
 );
 
