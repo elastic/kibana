@@ -13,8 +13,8 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect } from 'react';
+import { isEmpty, some } from 'lodash/fp';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -32,7 +32,7 @@ import { combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -45,6 +45,8 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
+import { activeTimeline } from '../../../containers/active_timeline_context';
+import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -141,6 +143,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   dataProviders,
   end,
   eventType,
+  expandedEvent,
   filters,
   timelineId,
   isLive,
@@ -148,6 +151,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  onEventClosed,
   showCallOutUnauthorizedMsg,
   showEventDetails,
   start,
@@ -156,18 +160,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
-  const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
-
-  useEffect(() => {
-    // it should changed only once to true and then stay visible till the component umount
-    setShowEventDetailsColumn((current) => {
-      if (showEventDetails && !current) {
-        return true;
-      }
-      return current;
-    });
-  }, [showEventDetails]);
-
   const {
     browserFields,
     docValueFields,
@@ -247,9 +239,26 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
+  const handleOnEventClosed = useCallback(() => {
+    onEventClosed({ timelineId });
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({
+        eventId: expandedEvent.eventId!,
+        indexName: expandedEvent.indexName!,
+      });
+    }
+  }, [timelineId, onEventClosed, expandedEvent.eventId, expandedEvent.indexName]);
+
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+
+  useEffect(() => {
+    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+      handleOnEventClosed();
+    }
+  }, [expandedEvent, handleOnEventClosed, events, combinedQueries]);
 
   return (
     <>
@@ -324,7 +333,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </EventDetailsWidthProvider>
           ) : null}
         </ScrollableFlexItem>
-        {showEventDetailsColumn && (
+        {showEventDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
@@ -332,6 +341,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 timelineId={timelineId}
+                handleOnEventClosed={handleOnEventClosed}
               />
             </ScrollableFlexItem>
           </>
@@ -375,6 +385,7 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
+      expandedEvent,
       filters: timelineFilter,
       timelineId,
       isLive: input.policy.kind === 'interval',
@@ -404,6 +415,9 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
       })
     );
   },
+  onEventClosed: (args: ToggleExpandedEvent) => {
+    dispatch(timelineActions.toggleExpandedEvent(args));
+  },
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
@@ -420,6 +434,7 @@ const QueryTabContent = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+      prevProps.onEventClosed === nextProps.onEventClosed &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&
