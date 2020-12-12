@@ -142,12 +142,10 @@ export async function getPackageFromSource(options: {
     });
     // check storage
     if (!res) {
-      res = await getEsPackage(
-        pkgName,
-        pkgVersion,
-        installation.package_assets,
-        savedObjectsClient
-      );
+      res = await getEsPackage({
+        references: installation.package_assets,
+        savedObjectsClient,
+      });
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {
