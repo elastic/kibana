@@ -12,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const log = getService('log');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Home page', function () {
     before(async () => {
@@ -48,8 +49,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/data_streams`);
 
         // Verify content
-        const dataStreamList = await testSubjects.exists('dataStreamList');
-        expect(dataStreamList).to.be(true);
+        await retry.waitFor('Wait until the app title shows up', async () => {
+          return await testSubjects.isDisplayed('dataStreamsEmptyPromptTemplateLink');
+        });
       });
     });
 

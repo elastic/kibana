@@ -87,7 +87,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
-          <h1 data-test-subj="title">
+          <h1 data-test-subj="dataStreamsEmptyMessage">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsTitle"
               defaultMessage="You don't have any data streams yet"
