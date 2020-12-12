@@ -181,6 +181,7 @@ export interface LegacyAlert {
   message: string;
   resolved_timestamp: string;
   metadata: LegacyAlertMetadata;
+  nodeName: string;
   nodes?: LegacyAlertNodesChangedList;
 }
 

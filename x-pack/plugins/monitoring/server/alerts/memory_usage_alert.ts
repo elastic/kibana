@@ -106,14 +106,9 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const base = super.getDefaultAlertState(cluster, item);
-    return {
-      ...base,
-      ui: {
-        ...base.ui,
-        severity: AlertSeverity.Warning,
-      },
-    };
+    const currentState = super.getDefaultAlertState(cluster, item);
+    currentState.ui.severity = AlertSeverity.Warning;
+    return currentState;
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {

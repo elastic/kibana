@@ -42,6 +42,7 @@ import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 interface LegacyOptions {
   watchName: string;
+  nodeNameLabel: string;
   changeDataValues?: Partial<AlertData>;
 }
 
@@ -321,6 +322,7 @@ export class BaseAlert {
         shouldFire: !legacyAlert.resolved_timestamp,
         severity: mapLegacySeverity(legacyAlert.metadata.severity),
         meta: legacyAlert,
+        nodeName: this.alertOptions.legacy!.nodeNameLabel,
         ...this.alertOptions.legacy!.changeDataValues,
       };
     });
@@ -393,6 +395,7 @@ export class BaseAlert {
       }
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
       const alertState: AlertState = this.getDefaultAlertState(cluster!, item);
+      alertState.nodeName = item.nodeName;
       alertState.ui.triggeredMS = currentUTC;
       alertState.ui.isFiring = true;
       alertState.ui.severity = item.severity;

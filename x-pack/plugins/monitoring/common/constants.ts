@@ -460,6 +460,7 @@ export const ALERT_PANEL_MENU = [
     }),
     alerts: [
       { alertName: ALERT_NODES_CHANGED },
+      { alertName: ALERT_CLUSTER_HEALTH },
       { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH },
       { alertName: ALERT_KIBANA_VERSION_MISMATCH },
       { alertName: ALERT_LOGSTASH_VERSION_MISMATCH },

@@ -16,12 +16,6 @@ import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { AlertsContext } from './context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
-import {
-  BEATS_SYSTEM_ID,
-  ELASTICSEARCH_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
-} from '../../common/constants';
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 
@@ -33,10 +27,6 @@ const PANEL_TITLE = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
 
 const GROUP_BY_NODE = i18n.translate('xpack.monitoring.alerts.badge.groupByNode', {
   defaultMessage: 'Group by node',
-});
-
-const GROUP_BY_INSTANCE = i18n.translate('xpack.monitoring.alerts.badge.groupByInstace', {
-  defaultMessage: 'Group by instance',
 });
 
 const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType', {
@@ -74,22 +64,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     return null;
   }
 
-  let groupByType = GROUP_BY_NODE;
-  for (const alert of alerts) {
-    for (const { state } of alert.states) {
-      switch (state.stackProduct) {
-        case ELASTICSEARCH_SYSTEM_ID:
-        case LOGSTASH_SYSTEM_ID:
-          groupByType = GROUP_BY_NODE;
-          break;
-        case KIBANA_SYSTEM_ID:
-        case BEATS_SYSTEM_ID:
-          groupByType = GROUP_BY_INSTANCE;
-          break;
-      }
-    }
-  }
-
+  const groupByType = GROUP_BY_NODE;
   const panels = showByNode
     ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
     : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext, stateFilter);
