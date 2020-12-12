@@ -45,8 +45,8 @@ describe('finalizing signals migrations', () => {
   it('returns an inline error if the latest migration failed', async () => {
     (getMigrationSavedObjectsByIndex as jest.Mock).mockResolvedValue({
       'my-signals-index': [
-        getSignalsMigrationSavedObjectMock(),
         getSignalsMigrationSavedObjectMock({ status: 'failure' }),
+        getSignalsMigrationSavedObjectMock(),
       ],
     });
 

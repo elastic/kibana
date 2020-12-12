@@ -6,7 +6,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { getIndexCount } from '../index/get_index_count';
-import { isMigrationFailed, isMigrationSuccess } from './helpers';
+import { isMigrationDeleted, isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { replaceSignalsIndexAlias } from './replace_signals_index_alias';
 import { SignalsMigrationSO } from './saved_objects_schema';
@@ -38,7 +38,7 @@ export const finalizeMigration = async ({
   signalsAlias: string;
   soClient: SavedObjectsClientContract;
 }): Promise<SignalsMigrationSO> => {
-  if (isMigrationFailed(migration) || isMigrationSuccess(migration)) {
+  if (isMigrationDeleted(migration) || !isMigrationPending(migration)) {
     return migration;
   }
 

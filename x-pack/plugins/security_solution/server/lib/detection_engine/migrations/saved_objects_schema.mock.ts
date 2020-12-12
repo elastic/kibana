@@ -17,7 +17,7 @@ export const getSignalsMigrationSavedObjectMock = (
     sourceIndex: 'sourceIndex',
     deleted: false,
     error: null,
-    status: 'success',
+    status: 'pending',
     taskId: 'taskid',
     version: 14,
     createdBy: 'username',
