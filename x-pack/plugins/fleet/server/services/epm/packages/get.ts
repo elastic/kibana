@@ -12,7 +12,7 @@ import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
-import { getArchivePackage } from '../archive';
+import { getArchivePackage, setPackageInfo, setArchiveFilelist } from '../archive';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -163,10 +163,16 @@ export async function getPackageFromSource(options: {
     // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
+
   if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+
+  const { paths, packageInfo } = res;
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+  setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
+
   return {
-    paths: res.paths,
-    packageInfo: res.packageInfo,
+    paths,
+    packageInfo,
   };
 }
 

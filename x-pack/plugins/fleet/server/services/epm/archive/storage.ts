@@ -5,26 +5,18 @@
  */
 
 import { extname } from 'path';
-import { uniq } from 'lodash';
-import yaml from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkGetObject,
-} from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
-  RegistryDataStream,
 } from '../../../../common';
-import { getArchiveEntry } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
-import { pkgToPkgKey } from '../registry';
+import { ArchiveEntry, getArchiveEntry, setArchiveEntry } from './index';
+import { preloadManifests, parseAndVerifyArchive } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -154,76 +146,25 @@ export const getEsPackage = async (
   packageAssets: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const bulkBody: SavedObjectsBulkGetObject[] = packageAssets.map((ref) => ({
-    id: ref.id,
-    type: ref.type,
-    fields: ['asset_path'],
-  }));
-  const soRes = await savedObjectsClient.bulkGet<PackageAsset>(bulkBody);
-  const paths = soRes.saved_objects.map((asset) => asset.attributes.asset_path);
+  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(packageAssets);
+  const entries: ArchiveEntry[] = bulkRes.saved_objects.map((so) => {
+    const { asset_path: path, data_utf8: utf8, data_base64: base64 } = so.attributes;
+    const buffer = utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
 
-  // create the packageInfo
-  // TODO: this is mostly copied from validtion.ts, but we should save packageInfo somewhere
-  // so we don't need to do this again as this was already done either in registry or through upload
+    if (path && buffer) setArchiveEntry(path, buffer);
 
-  const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
-  const soResManifest = await getAsset({ path: manifestPath, savedObjectsClient });
-  if (!soResManifest) throw new Error(`cannot find ${manifestPath}`);
-  const packageInfo = yaml.load(soResManifest.data_utf8);
+    return {
+      path,
+      buffer,
+    };
+  });
+  preloadManifests(entries);
 
-  const readmePath = `${pkgName}-${pkgVersion}/docs/README.md`;
-  const readmeRes = await getAsset({ path: readmePath, savedObjectsClient });
-  if (readmeRes) {
-    packageInfo.readme = `package/${readmePath}`;
-  }
+  const paths: string[] = entries.map(({ path }) => path);
+  const packageInfo = parseAndVerifyArchive(paths);
 
-  let dataStreamPaths: string[] = [];
-  const dataStreams: RegistryDataStream[] = [];
-  paths
-    .filter((path) => path.startsWith(`${pkgKey}/data_stream/`))
-    .forEach((path) => {
-      const parts = path.split('/');
-      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
-    });
-
-  dataStreamPaths = uniq(dataStreamPaths);
-
-  await Promise.all(
-    dataStreamPaths.map(async (dataStreamPath) => {
-      const dataStreamManifestPath = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
-      const soResDataStreamManifest = await getAsset({
-        path: dataStreamManifestPath,
-        savedObjectsClient,
-      });
-      if (!soResDataStreamManifest) throw new Error(`cannot find ${dataStreamPath}`);
-      const dataStreamManifest = yaml.load(soResDataStreamManifest.data_utf8);
-
-      const {
-        title: dataStreamTitle,
-        release,
-        ingest_pipeline: ingestPipeline,
-        type,
-        dataset,
-      } = dataStreamManifest;
-      const streams = parseAndVerifyStreams(dataStreamManifest, dataStreamPath);
-
-      dataStreams.push({
-        dataset: dataset || `${pkgName}.${dataStreamPath}`,
-        title: dataStreamTitle,
-        release,
-        package: pkgName,
-        ingest_pipeline: ingestPipeline || 'default',
-        path: dataStreamPath,
-        type,
-        streams,
-      });
-    })
-  );
-  packageInfo.policy_templates = parseAndVerifyPolicyTemplates(packageInfo);
-  packageInfo.data_streams = dataStreams;
   return {
-    paths,
     packageInfo,
+    paths,
   };
 };
