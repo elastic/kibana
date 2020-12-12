@@ -181,6 +181,19 @@ describe('getAlertPanelsByCategory', () => {
       );
       expect(result).toMatchSnapshot();
     });
+
+    it('should allow for state filtering', () => {
+      const alerts = [getAlert(ALERT_CPU_USAGE, 2)];
+      const customStateFilter = (state: AlertState) => state.nodeName === 'es_name_0';
+      const result = getAlertPanelsByCategory(
+        panelTitle,
+        false,
+        alerts,
+        alertsContext,
+        customStateFilter
+      );
+      expect(result).toMatchSnapshot();
+    });
   });
 
   describe('setup mode', () => {

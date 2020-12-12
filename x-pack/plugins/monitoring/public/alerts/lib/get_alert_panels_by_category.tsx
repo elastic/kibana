@@ -61,7 +61,7 @@ export function getAlertPanelsByCategory(
               states: foundAlert.states,
               alertName,
             });
-            categoryFiringAlertCount += foundAlert.states.length;
+            categoryFiringAlertCount += states.length;
           }
         }
       }
@@ -144,12 +144,13 @@ export function getAlertPanelsByCategory(
         id: nodeIndex + 1,
         title: `${category.label}`,
         items: category.alerts.map(({ alertName, states }) => {
+          const filteredStates = states.filter(({ state }) => stateFilter(state));
           const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
             <EuiText>{alertStatus.rawAlert.name}</EuiText>
           ) : (
             <EuiText>
-              {alertStatus.rawAlert.name} ({states.length})
+              {alertStatus.rawAlert.name} ({filteredStates.length})
             </EuiText>
           );
           return {
@@ -169,7 +170,7 @@ export function getAlertPanelsByCategory(
     for (const category of menu) {
       for (const { alert, states } of category.alerts) {
         const items = [];
-        for (const alertState of states) {
+        for (const alertState of states.filter(({ state }) => stateFilter(state))) {
           items.push({
             name: (
               <Fragment>
@@ -211,7 +212,7 @@ export function getAlertPanelsByCategory(
     }, menu.length);
     for (const category of menu) {
       for (const { alert, states } of category.alerts) {
-        for (const state of states) {
+        for (const state of states.filter(({ state: _state }) => stateFilter(_state))) {
           panels.push({
             id: ++tertiaryPanelIndex2,
             title: `${alert.name}`,

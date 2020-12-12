@@ -1,5 +1,131 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getAlertPanelsByCategory non setup mode should allow for state filtering 1`] = `
+Array [
+  Object {
+    "id": 0,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiText>
+            Resource utilization
+             (
+            1
+            )
+          </EuiText>
+        </React.Fragment>,
+        "panel": 1,
+      },
+    ],
+    "title": "Alerts",
+  },
+  Object {
+    "id": 1,
+    "items": Array [
+      Object {
+        "name": <EuiText>
+          monitoring_alert_cpu_usage_label
+           (
+          1
+          )
+        </EuiText>,
+        "panel": 2,
+      },
+    ],
+    "title": "Resource utilization",
+  },
+  Object {
+    "id": 2,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            position="top"
+          >
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
+          <EuiText
+            size="s"
+          >
+            es_name_0
+          </EuiText>
+        </React.Fragment>,
+        "panel": 3,
+      },
+      Object {
+        "isSeparator": true,
+      },
+    ],
+    "title": "monitoring_alert_cpu_usage_label",
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_cpu_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T00:00:00.000Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T00:00:00.000Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_cpu_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T00:00:00.000Z,
+          "updatedBy": null,
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "nodeId": "es0",
+            "nodeName": "es_name_0",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+    />,
+    "id": 3,
+    "title": "monitoring_alert_cpu_usage_label",
+    "width": 400,
+  },
+]
+`;
+
 exports[`getAlertPanelsByCategory non setup mode should not show any alert if none are firing 1`] = `
 Array [
   Object {
