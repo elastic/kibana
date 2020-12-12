@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useContext } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../data/common/index_patterns/fields';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -26,11 +26,7 @@ export const FilterInBtn = ({
   Component,
   rowIndex,
   columnId,
-}: {
-  Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  rowIndex: number;
-  columnId: string;
-}) => {
+}: EuiDataGridColumnCellActionProps) => {
   const context = useContext(DiscoverGridContext);
   return (
     <Component
@@ -60,11 +56,7 @@ export const FilterOutBtn = ({
   Component,
   rowIndex,
   columnId,
-}: {
-  Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  rowIndex: number;
-  columnId: string;
-}) => {
+}: EuiDataGridColumnCellActionProps) => {
   const context = useContext(DiscoverGridContext);
   return (
     <Component
