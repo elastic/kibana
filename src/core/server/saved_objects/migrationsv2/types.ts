@@ -35,6 +35,14 @@ export interface BaseState extends ControlState {
   readonly kibanaVersion: string;
   /** The mappings to apply to the target index */
   readonly targetMappings: IndexMapping;
+  /**
+   * Special mappings set when creating the reindex target. These mappings
+   * have `dynamic: false` to allow for any kind of outdated document to be
+   * written to the index, but still define mappings for the
+   * `migrationVersion` and `type` fields so that we can search for and
+   * transform outdated documents.
+   */
+  readonly reindexTargetMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: Record<string, unknown>;
@@ -109,14 +117,6 @@ export type CreateReindexTargetState = PostInitState & {
    */
   readonly controlState: 'CREATE_REINDEX_TARGET';
   readonly sourceIndex: Option.Some<string>;
-  /**
-   * Special mappings set when creating the reindex target. These mappings
-   * have `dynamic: false` to allow for any kind of outdated document to be
-   * written to the index, but still define mappings for the
-   * `migrationVersion` and `type` fields so that we can search for and
-   * transform outdated documents.
-   */
-  readonly reindexTargetMappings: IndexMapping;
 };
 
 export type ReindexSourceToTargetState = PostInitState & {

@@ -381,9 +381,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'LEGACY_DELETE',
       };
     } else {
+      const left = res.left;
       if (
-        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacyIndex) ||
-        res.left.type === 'target_index_had_write_block'
+        (left.type === 'index_not_found_exception' && left.index === stateP.legacyIndex) ||
+        left.type === 'target_index_had_write_block'
       ) {
         // index_not_found_exception for the LEGACY_REINDEX source index:
         // another instance already complete the LEGACY_DELETE step.
@@ -396,30 +397,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // step. However, by not skipping ahead we limit branches in the
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'LEGACY_DELETE' };
-      } else if (
-        res.left.type === 'index_not_found_exception' &&
-        res.left.index === stateP.sourceIndex.value
-      ) {
-        // index_not_found_exception for the LEGACY_REINDEX target index
-        // (stateP.source.value): the migration algorithm will never delete
-        // this index so it must be caused by something external
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `LEGACY_REINDEX failed because the reindex destination index [${stateP.sourceIndex.value}] does not exist.`,
-        };
+      } else {
+        // We don't handle the following errors as the algorithm will never
+        // run into these during the LEGACY_REINDEX_WAIT_FOR_TASK step:
+        //  - index_not_found_exception for the LEGACY_REINDEX target index
+        //  - strict_dynamic_mapping_exception
+        throwBadResponse(stateP, left as never);
       }
-      // @ts-expect-error TS doesn't narrow this type to never
-      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_DELETE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
     } else if (Either.isLeft(res)) {
+      const left = res.left;
       if (
-        res.left.type === 'remove_index_not_a_concrete_index' ||
-        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacyIndex)
+        left.type === 'remove_index_not_a_concrete_index' ||
+        (left.type === 'index_not_found_exception' && left.index === stateP.legacyIndex)
       ) {
         // index_not_found_exception, another Kibana instance already
         // deleted the legacy index
@@ -432,59 +426,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // step. However, by not skipping ahead we limit branches in the
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
-      } else if (
-        res.left.type === 'index_not_found_exception' &&
-        res.left.index === stateP.sourceIndex.value
-      ) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `LEGACY_DELETE failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
-        };
       } else {
-        // @ts-expect-error TS doesn't narrow this type to never
-        throwBadResponse(stateP, res);
+        // We don't handle the following errors as the migration algorithm
+        // will never cause them to occur:
+        // - alias_not_found_exception we're not using must_exist
+        // - index_not_found_exception for source index into which we reindex
+        //   the legacy index
+        throwBadResponse(stateP, left as never);
       }
     } else {
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    const reindexTargetMappings: IndexMapping = {
-      // @ts-expect-error we don't allow plugins to set `dynamic`
-      dynamic: false,
-      properties: {
-        type: { type: 'keyword' },
-        migrationVersion: {
-          // @ts-expect-error we don't allow plugins to set `dynamic`
-          dynamic: 'true',
-          type: 'object',
-        },
-      },
-    };
     if (Either.isRight(res)) {
       // If the write block is successfully in place, proceed to the next step.
       return {
         ...stateP,
         controlState: 'CREATE_REINDEX_TARGET',
-        reindexTargetMappings,
       };
-    } else if (Either.isLeft(res)) {
-      if (res.left.type === 'index_not_found_exception') {
-        // If the write block failed because the index doesn't exist, it means
-        // another instance already completed the legacy pre-migration. Proceed
-        // to the next step.
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `SET_SOURCE_WRITE_BLOCK failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
-        };
-      } else {
-        // @ts-expect-error TS doesn't correctly narrow this type to never
-        return throwBadResponse(stateP, res);
-      }
     } else {
-      return throwBadResponse(stateP, res);
+      // We don't handle the following errors as the migration algorithm
+      // will never cause them to occur:
+      // - index_not_found_exception
+      return throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -505,11 +470,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         reindexSourceToTargetTaskId: res.right.taskId,
       };
     } else {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `REINDEX_SOURCE_TO_TARGET: unexpected action response: ${JSON.stringify(res)}`,
-      };
+      // Since this is a background task, the request should always succeed,
+      // errors only show up in the returned task.
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -519,12 +482,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
       };
     } else {
-      // @ts-expect-error For LEGACY_REINDEX_WAIT_FOR_TASK we expect that
-      // another instance could cause a 'target_index_had_write_block' or
-      // 'index_not_found_exception'. However, for this step, other instances
-      // won't interefere so any left values are treated as exceptions which
-      // will cause the migration to fail.
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (left.type === 'strict_dynamic_mapping_exception') {
+        // We create the target with a permissive `dynamic: false` mapping but
+        // once another instance reaches the UPDATE_TARGET_MAPPINGS step it
+        // will set the mappings to `dynamic: strict`. The reindex operation
+        // checks whether mappings are compatible _before_ it checks if a
+        // document already exists. This could cause a slower instance to hit a
+        // strict_dynamic_mapping_exception when it tries to reindex an
+        // outdated document. Since this could only happen if another instance
+        // already successfully completed this step, we know all documents
+        // were already reindexed and can ignore this exception.
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+        };
+      } else if (
+        left.type === 'index_not_found_exception' ||
+        left.type === 'target_index_had_write_block'
+      ) {
+        // We don't handle these errors as the migration algorithm will never
+        // cause them to occur here. These left responses are only relevant to
+        // the LEGACY_REINDEX_WAIT_FOR_TASK step.
+        throwBadResponse(stateP, left as never);
+      }
+      throwBadResponse(stateP, left);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -550,15 +532,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (res.right === 'bulk_index_succeeded') {
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-        };
-      } else {
-        // @ts-expect-error TS doesn't correctly narrow this type to never
-        throwBadResponse(stateP, res);
-      }
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+      };
     } else {
       throwBadResponse(stateP, res);
     }
@@ -587,8 +564,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else {
         // If there are none versionIndexReadyActions another instance
-        // already completed this migration and we only updated the mappings
-        // and transformed outdated documents for incase a new plugin was
+        // already completed this migration and we only transformed outdated
+        // documents and updated the mappings for incase a new plugin was
         // enabled.
         return {
           ...stateP,
@@ -627,11 +604,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         left.type === 'remove_index_not_a_concrete_index' ||
         left.type === 'index_not_found_exception'
       ) {
-        // @ts-expect-error Unlike LEGACY_DELETE where these errors are
-        // expected to be caused by another instance, in the
-        // MARK_VERSION_INDEX_READY step these should never happen and will
-        // cause the migration to fail.
-        throwBadResponse(stateP, left);
+        // We don't handle these errors as the migration algorithm will never
+        // cause them to occur (these are only relevant to the LEGACY_DELETE
+        // step).
+        throwBadResponse(stateP, left as never);
       } else {
         throwBadResponse(stateP, left);
       }
@@ -704,6 +680,19 @@ export const createInitialState = ({
     },
   };
 
+  const reindexTargetMappings: IndexMapping = {
+    // @ts-expect-error we don't allow plugins to set `dynamic`
+    dynamic: false,
+    properties: {
+      type: { type: 'keyword' },
+      migrationVersion: {
+        // @ts-expect-error we don't allow plugins to set `dynamic`
+        dynamic: 'true',
+        type: 'object',
+      },
+    },
+  };
+
   const initialState: InitState = {
     controlState: 'INIT',
     indexPrefix,
@@ -714,6 +703,7 @@ export const createInitialState = ({
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetMappings,
+    reindexTargetMappings,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,

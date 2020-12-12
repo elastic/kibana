@@ -560,17 +560,6 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('LEGACY_REINDEX_WAIT_FOR_TASK -> FATAL if action fails with index_not_found_exception for reindex target', () => {
-        const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
-          type: 'index_not_found_exception',
-          index: 'source_index_name',
-        });
-        const newState = model(legacyReindexWaitForTaskState, res) as FatalState;
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"LEGACY_REINDEX failed because the reindex destination index [source_index_name] does not exist."`
-        );
-      });
     });
     describe('LEGACY_DELETE', () => {
       const legacyDeleteState: LegacyDeleteState = {
@@ -609,17 +598,6 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('LEGACY_DELETE -> FATAL if action fails with index_not_found_exception for source index', () => {
-        const res: ResponseType<'LEGACY_DELETE'> = Either.left({
-          type: 'index_not_found_exception',
-          index: 'source_index_name',
-        });
-        const newState = model(legacyDeleteState, res) as FatalState;
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"LEGACY_DELETE failed because the source index [source_index_name] does not exist."`
-        );
-      });
     });
     describe('SET_SOURCE_WRITE_BLOCK', () => {
       const setWriteBlockState: SetSourceWriteBlockState = {
@@ -638,15 +616,6 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
-      });
-      test('SET_SOURCE_WRITE_BLOCK -> FATAL if action fails with index_not_found_exception', () => {
-        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
-          type: 'index_not_found_exception',
-        });
-        const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
       });
       test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TARGET if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
@@ -980,6 +949,18 @@ describe('migrations v2 model', () => {
           },
           "preMigrationScript": Object {
             "_tag": "None",
+          },
+          "reindexTargetMappings": Object {
+            "dynamic": false,
+            "properties": Object {
+              "migrationVersion": Object {
+                "dynamic": "true",
+                "type": "object",
+              },
+              "type": Object {
+                "type": "keyword",
+              },
+            },
           },
           "retryCount": 0,
           "retryDelay": 0,
