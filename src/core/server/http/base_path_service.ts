@@ -34,10 +34,19 @@ export class BasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   public readonly serverBasePath: string;
+  /**
+   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
+   * {@link BasePath.serverBasePath}.
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  public readonly publicBaseUrl?: string;
 
   /** @internal */
-  constructor(serverBasePath: string = '') {
+  constructor(serverBasePath: string = '', publicBaseUrl?: string) {
     this.serverBasePath = serverBasePath;
+    this.publicBaseUrl = publicBaseUrl;
   }
 
   /**

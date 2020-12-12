@@ -111,7 +111,9 @@ describe('Jira service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger

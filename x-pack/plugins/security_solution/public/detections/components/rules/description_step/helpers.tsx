@@ -29,7 +29,11 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
-import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
+import {
+  subtechniquesOptions,
+  tacticsOptions,
+  techniquesOptions,
+} from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -119,11 +123,16 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
+const SubtechniqueFlexItem = styled(EuiFlexItem)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+`;
+
 const TechniqueLinkItem = styled(EuiButtonEmpty)`
   .euiIcon {
     width: 8px;
     height: 8px;
   }
+  align-self: flex-start;
 `;
 
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
@@ -145,20 +154,42 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map((technique, listIndex) => {
+                    {singleThreat.technique.map((technique, techniqueIndex) => {
                       const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                       return (
-                        <EuiFlexItem key={myTechnique?.id ?? listIndex}>
+                        <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
                           <TechniqueLinkItem
                             data-test-subj="threatTechniqueLink"
                             href={technique.reference}
                             target="_blank"
                             iconType={ListTreeIcon}
                             size="xs"
-                            flush="left"
                           >
                             {myTechnique != null ? myTechnique.label : ''}
                           </TechniqueLinkItem>
+                          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+                            {technique.subtechnique != null &&
+                              technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
+                                const mySubtechnique = subtechniquesOptions.find(
+                                  (t) => t.id === subtechnique.id
+                                );
+                                return (
+                                  <SubtechniqueFlexItem
+                                    key={mySubtechnique?.id ?? subtechniqueIndex}
+                                  >
+                                    <TechniqueLinkItem
+                                      data-test-subj="threatSubtechniqueLink"
+                                      href={subtechnique.reference}
+                                      target="_blank"
+                                      iconType={ListTreeIcon}
+                                      size="xs"
+                                    >
+                                      {mySubtechnique != null ? mySubtechnique.label : ''}
+                                    </TechniqueLinkItem>
+                                  </SubtechniqueFlexItem>
+                                );
+                              })}
+                          </EuiFlexGroup>
                         </EuiFlexItem>
                       );
                     })}
