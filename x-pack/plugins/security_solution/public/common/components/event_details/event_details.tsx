@@ -42,7 +42,7 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     display: flex;
     flex: 1;
     flex-direction: column;
-    overflow: scroll-y;
+    overflow: hidden;
   }
 `;
 
