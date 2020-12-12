@@ -53,15 +53,15 @@ const MAX_RETRY_ATTEMPTS = 10;
  */
 function throwBadControlState(p: never): never;
 function throwBadControlState(controlState: any) {
-  throw new Error('Unknown control state: ' + controlState);
+  throw new Error('Unexpected control state: ' + controlState);
 }
 
 /**
  * A helper function/type for ensuring that all response types are handled.
  */
-function throwBadResponse(p: never): never;
-function throwBadResponse(res: any): never {
-  throw new Error('Unexpected action response: ' + res);
+function throwBadResponse(state: State, p: never): never;
+function throwBadResponse(state: State, res: any): never {
+  throw new Error(`${state.controlState} received unexpected action response: ` + res);
 }
 
 /**
@@ -77,7 +77,8 @@ function throwBadResponse(res: any): never {
  * disabled plugins aren't lost.
  *
  * Right now we don't use these `migrationPropertyHashes` but it could be used
- * in the future to optimize the `UPDATE_TARGET_MAPPINGS` step.
+ * in the future to detect if mappings were changed. If mappings weren't
+ * changed we don't need to reindex but can clone the index to save disk space.
  *
  * @param targetMappings
  * @param indexMappings
@@ -155,6 +156,21 @@ const resetRetryState = <S extends State>(state: S): S => {
   return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
 };
 
+export type ExcludeRetryableEsError<Response> = Exclude<
+  | Exclude<
+      Response,
+      Either.Either<Response extends Either.Left<unknown> ? Response['left'] : never, never>
+    >
+  | Either.Either<
+      Exclude<
+        Response extends Either.Left<unknown> ? Response['left'] : never,
+        RetryableEsClientError
+      >,
+      Response extends Either.Right<unknown> ? Response['right'] : never
+    >,
+  Either.Left<never>
+>;
+
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
   // responses. Each control state only triggers one action so each control
@@ -178,7 +194,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   }
 
   if (stateP.controlState === 'INIT') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
       const indices = res.right;
@@ -192,7 +208,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         aliases[stateP.versionAlias] != null &&
         aliases[stateP.currentAlias] === aliases[stateP.versionAlias]
       ) {
-        stateP = {
+        return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH' so that if a new plugin was
           // installed / enabled we can transform any old documents and update
@@ -214,7 +230,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // pointing to `.kibana_7.12.0_001`
         indexBelongsToLaterVersion(aliases[stateP.currentAlias], stateP.kibanaVersion)
       ) {
-        stateP = {
+        return {
           ...stateP,
           controlState: 'FATAL',
           reason: `The ${
@@ -230,7 +246,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // The source index is the index the `.kibana` alias points to
         const source = aliases[stateP.currentAlias];
         const target = stateP.versionIndex;
-        stateP = {
+        return {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           sourceIndex: Option.some(source) as Option.Some<string>,
@@ -266,7 +282,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
 
         const target = stateP.versionIndex;
-        stateP = {
+        return {
           ...stateP,
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
@@ -301,7 +317,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // This cluster doesn't have an existing Saved Object index, create a
         // new version specific index.
         const target = stateP.versionIndex;
-        stateP = {
+        return {
           ...stateP,
           controlState: 'CREATE_NEW_TARGET',
           sourceIndex: Option.none as Option.None,
@@ -312,46 +328,53 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ]) as Option.Some<AliasAction[]>,
         };
       }
+    } else {
+      return throwBadResponse(stateP, res);
     }
-    return stateP;
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     // If the write block is sucessfully in place
     if (Either.isRight(res)) {
-      stateP = { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+      return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
     } else if (Either.isLeft(res)) {
       // If the write block failed because the index doesn't exist, it means
       // another instance already completed the legacy pre-migration. Proceed
       // to the next step.
       if (res.left.type === 'index_not_found_exception') {
-        stateP = { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+        return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+      } else {
+        // @ts-expect-error TS doesn't correctly narrow this type to never
+        return throwBadResponse(stateP, res);
       }
+    } else {
+      return throwBadResponse(stateP, res);
     }
-
-    return stateP;
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'LEGACY_REINDEX',
       };
     } else {
-      return stateP;
+      // If the createIndex action receives an 'resource_already_exists_exception'
+      // it will wait until the index status turns green so we don't have any
+      // left responses to handle here.
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_REINDEX') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      stateP = {
+      return {
         ...stateP,
         controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
         legacyReindexTaskId: res.right.taskId,
       };
+    } else {
+      throwBadResponse(stateP, res);
     }
-    return stateP;
   } else if (stateP.controlState === 'LEGACY_REINDEX_WAIT_FOR_TASK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
@@ -386,15 +409,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `LEGACY_REINDEX failed because the reindex destination index [${stateP.sourceIndex.value}] does not exist.`,
         };
       }
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `LEGACY_REINDEX_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(res)}`,
-      };
+      // @ts-expect-error TS doesn't narrow this type to never
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_DELETE') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isLeft(res)) {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+    } else if (Either.isLeft(res)) {
       if (
         res.left.type === 'remove_index_not_a_concrete_index' ||
         (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacyIndex)
@@ -419,13 +441,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: `LEGACY_DELETE failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
         };
+      } else {
+        // @ts-expect-error TS doesn't narrow this type to never
+        throwBadResponse(stateP, res);
       }
     } else {
-      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+      throwBadResponse(stateP, res);
     }
-    return stateP;
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     const reindexTargetMappings: IndexMapping = {
       // @ts-expect-error we don't allow plugins to set `dynamic`
       dynamic: false,
@@ -438,9 +462,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         },
       },
     };
-    // If the write block is successfully in place, proceed to the next step.
     if (Either.isRight(res)) {
-      stateP = {
+      // If the write block is successfully in place, proceed to the next step.
+      return {
         ...stateP,
         controlState: 'CREATE_REINDEX_TARGET',
         reindexTargetMappings,
@@ -450,21 +474,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // If the write block failed because the index doesn't exist, it means
         // another instance already completed the legacy pre-migration. Proceed
         // to the next step.
-        stateP = {
+        return {
           ...stateP,
           controlState: 'FATAL',
           reason: `SET_SOURCE_WRITE_BLOCK failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
         };
+      } else {
+        // @ts-expect-error TS doesn't correctly narrow this type to never
+        return throwBadResponse(stateP, res);
       }
     } else {
-      return throwBadResponse(res);
+      return throwBadResponse(stateP, res);
     }
-
-    return stateP;
   } else if (stateP.controlState === 'CREATE_REINDEX_TARGET') {
-    return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TARGET' };
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TARGET' };
+    } else {
+      // If the createIndex action receives an 'resource_already_exists_exception'
+      // it will wait until the index status turns green so we don't have any
+      // left responses to handle here.
+      throwBadResponse(stateP, res);
+    }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
@@ -479,23 +512,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
       };
     } else {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
-          res
-        )}`,
-      };
+      // @ts-expect-error For LEGACY_REINDEX_WAIT_FOR_TASK we expect that
+      // another instance could cause a 'target_index_had_write_block' or
+      // 'index_not_found_exception'. However, for this step, other instances
+      // won't interefere so any left values are treated as exceptions which
+      // will cause the migration to fail.
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       // If outdated documents were found, transform them
       if (res.right.outdatedDocuments.length > 0) {
@@ -512,35 +544,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'UPDATE_TARGET_MAPPINGS',
         };
       }
-    }
-    return stateP;
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'bulk_index_succeeded') {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-      };
     } else {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `OUTDATED_DOCUMENTS_TRANSFORM: unexpected action response: ${JSON.stringify(res)}`,
-      };
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      if (res.right === 'bulk_index_succeeded') {
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+        };
+      } else {
+        // @ts-expect-error TS doesn't correctly narrow this type to never
+        throwBadResponse(stateP, res);
+      }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      stateP = {
+      return {
         ...stateP,
         controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
         updateTargetMappingsTaskId: res.right.taskId,
       };
+    } else {
+      throwBadResponse(stateP, res);
     }
-    return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'pickup_updated_mappings_succeeded') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
       if (Option.isSome(stateP.versionIndexReadyActions)) {
         // If there are some versionIndexReadyActions we performed a full
         // migration and need to point the aliases to our newly migrated
@@ -561,43 +596,51 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: unexpected action response: ${JSON.stringify(
-          res
-        )}`,
-      };
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
-    return {
-      ...stateP,
-      controlState: 'MARK_VERSION_INDEX_READY',
-    };
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'MARK_VERSION_INDEX_READY',
+      };
+    } else {
+      // If the createIndex action receives an 'resource_already_exists_exception'
+      // it will wait until the index status turns green so we don't have any
+      // left responses to handle here.
+      throwBadResponse(stateP, res);
+    }
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'DONE' };
     } else {
-      if (res.left.type === 'alias_not_found_exception') {
+      const left = res.left;
+      if (left.type === 'alias_not_found_exception') {
         // the versionIndexReadyActions checks that the currentAlias is still
         // pointing to the source index. If this fails with an
         // alias_not_found_exception another instance has completed a
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+      } else if (
+        left.type === 'remove_index_not_a_concrete_index' ||
+        left.type === 'index_not_found_exception'
+      ) {
+        // @ts-expect-error Unlike LEGACY_DELETE where these errors are
+        // expected to be caused by another instance, in the
+        // MARK_VERSION_INDEX_READY step these should never happen and will
+        // cause the migration to fail.
+        throwBadResponse(stateP, left);
       } else {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `MARK_VERSION_INDEX_READY: unexpected action response: ${JSON.stringify(res)}`,
-        };
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY_CONFLICT') {
     // If another instance completed a migration from the same source we need
     // to check that the completed migration was performed by a Kibana that's
     // on the same version as this instance.
-    const res = resW as ResponseType<typeof stateP.controlState>;
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const indices = res.right;
       const aliases = getAliases(indices);
@@ -623,9 +666,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
         };
       }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
-    return stateP;
+    // The state-action machine will never call the model in the terminating states
+    throwBadControlState(stateP as never);
   } else {
     return throwBadControlState(stateP);
   }
