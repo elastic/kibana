@@ -68,36 +68,34 @@ const ToggleEventDetailsButton = React.memo(ToggleEventDetailsButtonComponent);
 
 interface NotePreviewsProps {
   notes?: TimelineResultNote[] | null;
-  timelineId: string;
+  timelineId?: string;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(({ notes, timelineId }) => {
   const notesList = useMemo(
     () =>
-      uniqBy('savedObjectId', notes).map((note) => {
-        console.error('noteee', note);
-        return {
-          'data-test-subj': `note-preview-${note.savedObjectId}`,
-          username: defaultToEmptyTag(note.updatedBy),
-          event: 'added a comment',
-          timestamp: note.updated ? (
-            <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
-          ) : (
-            getEmptyValue()
-          ),
-          children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
-          actions: note.eventId ? (
+      uniqBy('savedObjectId', notes).map((note) => ({
+        'data-test-subj': `note-preview-${note.savedObjectId}`,
+        username: defaultToEmptyTag(note.updatedBy),
+        event: 'added a comment',
+        timestamp: note.updated ? (
+          <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
+        ) : (
+          getEmptyValue()
+        ),
+        children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
+        actions:
+          note.eventId && timelineId ? (
             <ToggleEventDetailsButton eventId={note.eventId} timelineId={timelineId} />
           ) : null,
-          timelineIcon: (
-            <EuiAvatar
-              data-test-subj="avatar"
-              name={note.updatedBy != null ? note.updatedBy : '?'}
-              size="l"
-            />
-          ),
-        };
-      }),
+        timelineIcon: (
+          <EuiAvatar
+            data-test-subj="avatar"
+            name={note.updatedBy != null ? note.updatedBy : '?'}
+            size="l"
+          />
+        ),
+      })),
     [notes, timelineId]
   );
 

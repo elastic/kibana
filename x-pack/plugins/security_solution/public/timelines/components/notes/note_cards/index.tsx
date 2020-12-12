@@ -39,13 +39,12 @@ interface Props {
   associateNote: AssociateNote;
   noteIds: string[];
   showAddNote: boolean;
-  timelineId: string;
   toggleShowAddNote: () => void;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ associateNote, noteIds, showAddNote, timelineId, toggleShowAddNote }) => {
+  ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
     const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
     const notesById = useDeepEqualSelector(getNotesByIds);
     const [newNote, setNewNote] = useState('');
@@ -75,7 +74,7 @@ export const NoteCards = React.memo<Props>(
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
             <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-              <NotePreviews notes={notes} timelineId={timelineId} />
+              <NotePreviews notes={notes} />
             </NotesContainer>
           </NotePreviewsContainer>
         ) : null}
