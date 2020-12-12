@@ -104,5 +104,5 @@ export class UsageStatsClient {
 function getIsKibanaRequest(headers?: Headers) {
   // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.origin && headers.referer;
+  return headers && headers['kbn-version'] && headers['user-agent'] && headers.referer;
 }
