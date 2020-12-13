@@ -52,7 +52,12 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { EsAssetReference, FleetConfigType, NewPackagePolicy } from '../common';
+import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
 import {
   appContextService,
   licenseService,
@@ -119,14 +124,23 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Fleet plugin
  */
-export type ExternalCallback = [
-  'packagePolicyCreate',
-  (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
-];
+export type ExternalCallback =
+  | [
+      'packagePolicyCreate',
+      (
+        newPackagePolicy: NewPackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'packagePolicyUpdate',
+      (
+        newPackagePolicy: UpdatePackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<UpdatePackagePolicy>
+    ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
@@ -302,8 +316,8 @@ export class FleetPlugin
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
-      registerExternalCallback: (...args: ExternalCallback) => {
-        return appContextService.addExternalCallback(...args);
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
+        return appContextService.addExternalCallback(type, callback);
       },
     };
   }
