@@ -35,6 +35,30 @@ jest.mock('../../../common/formatting', () => ({
   getCalendar: (timestamp: number) => `triggered:${timestamp}`,
 }));
 
+const mockAlert = {
+  id: '',
+  enabled: true,
+  tags: [],
+  consumer: '',
+  schedule: { interval: '1m' },
+  actions: [],
+  params: {},
+  createdBy: null,
+  updatedBy: null,
+  createdAt: new Date('2020-12-08'),
+  updatedAt: new Date('2020-12-08'),
+  apiKey: null,
+  apiKeyOwner: null,
+  throttle: null,
+  muteAll: false,
+  mutedInstanceIds: [],
+  executionStatus: {
+    status: AlertExecutionStatusValues[0],
+    lastExecutionDate: new Date('2020-12-08'),
+  },
+  notifyWhen: null,
+};
+
 describe('getAlertPanelsByNode', () => {
   const ui = {
     isFiring: false,
@@ -67,26 +91,7 @@ describe('getAlertPanelsByNode', () => {
       rawAlert: {
         alertTypeId: type,
         name: `${type}_label`,
-        id: '',
-        enabled: true,
-        tags: [],
-        consumer: '',
-        schedule: { interval: '1m' },
-        actions: [],
-        params: {},
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date('2020-12-08'),
-        updatedAt: new Date('2020-12-08'),
-        apiKey: null,
-        apiKeyOwner: null,
-        throttle: null,
-        muteAll: false,
-        mutedInstanceIds: [],
-        executionStatus: {
-          status: AlertExecutionStatusValues[0],
-          lastExecutionDate: new Date('2020-12-08'),
-        },
+        ...mockAlert,
       },
       states,
     };
