@@ -17,7 +17,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiSwitch,
+  EuiNotificationBadge,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -43,13 +47,13 @@ import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_u
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
-import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
-import { DataLoader } from './data_loader';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
 import { DataVisualizerDataGrid } from '../stats_datagrid';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { DataLoader } from './data_loader';
+import type { FieldRequestConfig, FieldVisConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 
@@ -86,7 +90,7 @@ function getDefaultPageState(): DataVisualizerPageState {
     documentCountStats: undefined,
   };
 }
-export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedAppState => ({
+export const getDefaultDataVisualizerListState = (): Required<DataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
   pageSize: 10,
   sortField: 'fieldName',
@@ -99,6 +103,7 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   showDistributions: true,
   showAllFields: false,
+  showEmptyFields: false,
 });
 
 export const Page: FC = () => {
@@ -202,12 +207,24 @@ export const Page: FC = () => {
     setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldNames: values });
   };
 
+  const showEmptyFields =
+    dataVisualizerListState.showEmptyFields ?? restorableDefaults.showEmptyFields;
+  const toggleShowEmptyFields = () => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      showEmptyFields: !dataVisualizerListState.showEmptyFields,
+    });
+  };
+
   // TODO - type overallStats and stats
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
+  const [metricsStats, setMetricsStats] = useState<
+    undefined | { visibleMetricFields: number; totalMetricFields: number }
+  >();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const nonMetricsLoaded = useRef(defaults.nonMetricsLoaded);
@@ -244,6 +261,10 @@ export const Page: FC = () => {
   useEffect(() => {
     loadNonMetricFieldStats();
   }, [nonMetricConfigs]);
+
+  useEffect(() => {
+    createMetricCards();
+  }, [metricsLoaded, showEmptyFields]);
 
   /**
    * Extract query data from the saved search object.
@@ -464,7 +485,6 @@ export const Page: FC = () => {
         dataLoader.isDisplayField(f.displayName) === true
       );
     });
-
     const metricExistsFields = allMetricFields.filter((f) => {
       return aggregatableExistsFields.find((existsF) => {
         return existsF.fieldName === f.displayName;
@@ -481,7 +501,7 @@ export const Page: FC = () => {
       });
     }
 
-    if (allMetricFields.length === metricExistsFields.length && metricsLoaded === false) {
+    if (metricsLoaded === false) {
       setMetricsLoaded(true);
       return;
     }
@@ -491,7 +511,8 @@ export const Page: FC = () => {
       aggregatableFields = aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
     }
 
-    const metricFieldsToShow = metricsLoaded === true ? allMetricFields : metricExistsFields;
+    const metricFieldsToShow =
+      metricsLoaded === true && showEmptyFields === true ? allMetricFields : metricExistsFields;
 
     metricFieldsToShow.forEach((field) => {
       const fieldData = aggregatableFields.find((f) => {
@@ -511,6 +532,10 @@ export const Page: FC = () => {
       }
     });
 
+    setMetricsStats({
+      totalMetricFields: allMetricFields.length,
+      visibleMetricFields: metricFieldsToShow.length,
+    });
     setMetricConfigs(configs);
   }
 
@@ -619,6 +644,26 @@ export const Page: FC = () => {
     return combinedConfigs;
   }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
+  const fieldsCountStats = useMemo(() => {
+    let _visibleFieldsCount = 0;
+    let _totalFieldsCount = 0;
+    Object.keys(overallStats).forEach((key) => {
+      const fieldsGroup = overallStats[key as keyof OverallStats];
+      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
+        _totalFieldsCount += fieldsGroup.length;
+      }
+    });
+
+    if (showEmptyFields === true) {
+      _visibleFieldsCount = _totalFieldsCount;
+    } else {
+      _visibleFieldsCount =
+        overallStats.aggregatableExistsFields.length +
+        overallStats.nonAggregatableExistsFields.length;
+    }
+    return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
+  }, [overallStats, showEmptyFields]);
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
@@ -679,8 +724,82 @@ export const Page: FC = () => {
                     visibleFieldTypes={visibleFieldTypes}
                     visibleFieldNames={visibleFieldNames}
                     setVisibleFieldNames={setVisibleFieldNames}
+                    showEmptyFields={showEmptyFields}
                   />
-                  <EuiSpacer size={'s'} />
+                  <EuiSpacer size={'m'} />
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ marginLeft: 5 }}>
+                    {metricsStats && (
+                      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: 200 }}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText>
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.ml.dataVisualizer.searchPanel.metricsLabel"
+                                defaultMessage={'Metrics'}
+                              />
+                            </h5>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiNotificationBadge color="subdued" size="m">
+                            <strong>{metricsStats.visibleMetricFields}</strong>
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText color="subdued" size="s">
+                            <FormattedMessage
+                              id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
+                              defaultMessage={'of {totalCount} total'}
+                              values={{ totalCount: metricsStats?.totalMetricFields }}
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+                    {fieldsCountStats && (
+                      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: 200 }}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText>
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.ml.dataVisualizer.searchPanel.fieldsLabel"
+                                defaultMessage={'Fields'}
+                              />
+                            </h5>
+                          </EuiText>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiNotificationBadge color="subdued" size="m">
+                            <strong>{fieldsCountStats.visibleFieldsCount}</strong>
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText color="subdued" size="s">
+                            <FormattedMessage
+                              id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
+                              defaultMessage={'of {totalCount} total'}
+                              values={{ totalCount: fieldsCountStats.totalFieldsCount }}
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+
+                    <EuiFlexItem>
+                      <EuiSwitch
+                        label={
+                          <FormattedMessage
+                            id="xpack.ml.dataVisualizer.searchPanel.showEmptyFields"
+                            defaultMessage={'Show empty fields'}
+                          />
+                        }
+                        checked={showEmptyFields}
+                        onChange={toggleShowEmptyFields}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size={'m'} />
                   <DataVisualizerDataGrid
                     items={configs}
                     pageState={dataVisualizerListState}

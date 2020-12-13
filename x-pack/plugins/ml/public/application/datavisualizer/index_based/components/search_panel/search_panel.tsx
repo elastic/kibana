@@ -50,6 +50,7 @@ interface Props {
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
   }): void;
+  showEmptyFields: boolean;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -65,6 +66,7 @@ export const SearchPanel: FC<Props> = ({
   setVisibleFieldNames,
   visibleFieldNames,
   setSearchParams,
+  showEmptyFields,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -147,6 +149,7 @@ export const SearchPanel: FC<Props> = ({
         overallStats={overallStats}
         setVisibleFieldNames={setVisibleFieldNames}
         visibleFieldNames={visibleFieldNames}
+        showEmptyFields={showEmptyFields}
       />
       <DatavisualizerFieldTypeFilter
         indexedFieldTypes={indexedFieldTypes}

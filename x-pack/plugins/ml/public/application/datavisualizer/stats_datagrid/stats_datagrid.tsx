@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import {
   CENTER_ALIGNMENT,
   EuiButtonIcon,
+  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -236,7 +237,7 @@ export const DataVisualizerDataGrid = ({
   }, [expandAll, items, expandedRowItemIds]);
 
   return (
-    <div data-test-subj="mlDataVisualizerTableContainer">
+    <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
       <EuiInMemoryTable<FieldVisConfig>
         items={items}
         itemId={FIELD_NAME}
@@ -252,6 +253,6 @@ export const DataVisualizerDataGrid = ({
           'data-test-subj': `mlDataVisualizerRow row-${item.fieldName}`,
         })}
       />
-    </div>
+    </EuiFlexItem>
   );
 };

@@ -12,12 +12,14 @@ interface Props {
   overallStats: OverallStats;
   setVisibleFieldNames(q: any): void;
   visibleFieldNames: string[];
+  showEmptyFields: boolean;
 }
 
 export const DataVisualizerFieldNamesFilter: FC<Props> = ({
   overallStats,
   setVisibleFieldNames,
   visibleFieldNames,
+  showEmptyFields,
 }) => {
   const [items, setItems] = useState<Option[]>([]);
 
@@ -28,7 +30,10 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
         const fieldsGroup = overallStats[key as keyof OverallStats];
         if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
           fieldsGroup.forEach((field) => {
-            if (field.existsInDocs === true && field.fieldName !== undefined) {
+            if (
+              (field.existsInDocs === true || showEmptyFields === true) &&
+              field.fieldName !== undefined
+            ) {
               options.push({ value: field.fieldName });
             }
           });
