@@ -793,8 +793,13 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.setColumns = function setColumns(columns) {
-    $scope.state = { ...$scope.state, columns };
-    setAppState({ columns });
+    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
+    const actualColumns =
+      $scope.indexPattern.timeFieldName && $scope.indexPattern.timeFieldName === columns[0]
+        ? columns.slice(1)
+        : columns;
+    $scope.state = { ...$scope.state, columns: actualColumns };
+    setAppState({ columns: actualColumns });
   };
 
   async function setupVisualization() {
