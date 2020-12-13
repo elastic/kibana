@@ -17,11 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiSwitch,
-  EuiNotificationBadge,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -51,6 +47,7 @@ import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
 import { DataVisualizerDataGrid } from '../stats_datagrid';
+import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
 import type { FieldRequestConfig, FieldVisConfig } from './common';
@@ -727,78 +724,12 @@ export const Page: FC = () => {
                     showEmptyFields={showEmptyFields}
                   />
                   <EuiSpacer size={'m'} />
-                  <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ marginLeft: 5 }}>
-                    {metricsStats && (
-                      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: 200 }}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText>
-                            <h5>
-                              <FormattedMessage
-                                id="xpack.ml.dataVisualizer.searchPanel.metricsLabel"
-                                defaultMessage="Metrics"
-                              />
-                            </h5>
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiNotificationBadge color="subdued" size="m">
-                            <strong>{metricsStats.visibleMetricFields}</strong>
-                          </EuiNotificationBadge>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText color="subdued" size="s">
-                            <FormattedMessage
-                              id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                              defaultMessage="of {totalCount} total"
-                              values={{ totalCount: metricsStats?.totalMetricFields }}
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-                    {fieldsCountStats && (
-                      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: 200 }}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText>
-                            <h5>
-                              <FormattedMessage
-                                id="xpack.ml.dataVisualizer.searchPanel.fieldsLabel"
-                                defaultMessage="Fields"
-                              />
-                            </h5>
-                          </EuiText>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiNotificationBadge color="subdued" size="m">
-                            <strong>{fieldsCountStats.visibleFieldsCount}</strong>
-                          </EuiNotificationBadge>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText color="subdued" size="s">
-                            <FormattedMessage
-                              id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                              defaultMessage="of {totalCount} total"
-                              values={{ totalCount: fieldsCountStats.totalFieldsCount }}
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-
-                    <EuiFlexItem>
-                      <EuiSwitch
-                        label={
-                          <FormattedMessage
-                            id="xpack.ml.dataVisualizer.searchPanel.showEmptyFields"
-                            defaultMessage="Show empty fields"
-                          />
-                        }
-                        checked={showEmptyFields}
-                        onChange={toggleShowEmptyFields}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <FieldCountPanel
+                    showEmptyFields={showEmptyFields}
+                    toggleShowEmptyFields={toggleShowEmptyFields}
+                    fieldsCountStats={fieldsCountStats}
+                    metricsStats={metricsStats}
+                  />
                   <EuiSpacer size={'m'} />
                   <DataVisualizerDataGrid
                     items={configs}

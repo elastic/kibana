@@ -11,7 +11,7 @@ import React from 'react';
 export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => {
   return (
     <EuiFlexItem>
-      <EuiText size="s">
+      <EuiText size="s" data-test-subj="mlDataVisualizerTotalDocCount">
         <FormattedMessage
           id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
           defaultMessage="Total documents: {strongTotalCount}"
