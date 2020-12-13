@@ -4,9 +4,6 @@
 @import './embeddable/panel/index';
 @import './embeddable/viewport/index';
 
-// Temporary hacks
-@import './hacks';
-
 // Prefix all styles with "dsh" to avoid conflicts.
 // Examples
 //   dshChart
@@ -15,4 +12,3 @@
 //   dshChart__legend-isLoading
 
 @import './dashboard_app';
-
