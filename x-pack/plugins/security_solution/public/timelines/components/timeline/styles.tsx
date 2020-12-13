@@ -112,9 +112,6 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   min-width: 0;
   padding-left: ${({ isEventViewer }) =>
     !isEventViewer ? '4px;' : '0;'}; // match timeline event border
-  button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({

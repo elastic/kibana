@@ -87,7 +87,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   return (
     <StyledPanel borderRadius="none" grow={false} paddingSize="s" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <AddTimelineButton timelineId={timelineId} />
         <EuiFlexItem grow>
           <ActiveTimelines
@@ -222,7 +222,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
-  <StyledTimelineHeader alignItems="center" gutterSize="l">
+  <StyledTimelineHeader alignItems="center">
     <EuiFlexItem>
       <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
         <RowFlexItem>
