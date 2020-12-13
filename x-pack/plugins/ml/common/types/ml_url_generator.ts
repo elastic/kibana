@@ -43,10 +43,10 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
 }
 
 export interface DataVisualizerIndexBasedAppState {
-  pageIndex?: number;
-  pageSize?: number;
-  sortField?: string;
-  sortDirection?: 'asc' | 'desc';
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: string;
   searchString?: Query['query'];
   searchQuery?: Query['query'];
   searchQueryLanguage?: SearchQueryLanguage;

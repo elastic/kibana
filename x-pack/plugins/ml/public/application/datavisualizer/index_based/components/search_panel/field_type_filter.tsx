@@ -65,7 +65,7 @@ export const DatavisualizerFieldTypeFilter: FC<{
   }, [indexedFieldTypes]);
   const fieldTypeTitle = useMemo(
     () =>
-      i18n.translate('ml.dataVisualizer.indexBased.fieldTypeSelect', {
+      i18n.translate('xpack.ml.dataVisualizer.indexBased.fieldTypeSelect', {
         defaultMessage: 'Field type',
       }),
     []

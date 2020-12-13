@@ -44,7 +44,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
   }, [overallStats]);
   const fieldNameTitle = useMemo(
     () =>
-      i18n.translate('ml.dataVisualizer.indexBased.fieldNameSelect', {
+      i18n.translate('xpack.ml.dataVisualizer.indexBased.fieldNameSelect', {
         defaultMessage: 'Field name',
       }),
     []

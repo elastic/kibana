@@ -735,7 +735,7 @@ export const Page: FC = () => {
                             <h5>
                               <FormattedMessage
                                 id="xpack.ml.dataVisualizer.searchPanel.metricsLabel"
-                                defaultMessage={'Metrics'}
+                                defaultMessage="Metrics"
                               />
                             </h5>
                           </EuiText>
@@ -749,7 +749,7 @@ export const Page: FC = () => {
                           <EuiText color="subdued" size="s">
                             <FormattedMessage
                               id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                              defaultMessage={'of {totalCount} total'}
+                              defaultMessage="of {totalCount} total"
                               values={{ totalCount: metricsStats?.totalMetricFields }}
                             />
                           </EuiText>
@@ -763,7 +763,7 @@ export const Page: FC = () => {
                             <h5>
                               <FormattedMessage
                                 id="xpack.ml.dataVisualizer.searchPanel.fieldsLabel"
-                                defaultMessage={'Fields'}
+                                defaultMessage="Fields"
                               />
                             </h5>
                           </EuiText>
@@ -778,7 +778,7 @@ export const Page: FC = () => {
                           <EuiText color="subdued" size="s">
                             <FormattedMessage
                               id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                              defaultMessage={'of {totalCount} total'}
+                              defaultMessage="of {totalCount} total"
                               values={{ totalCount: fieldsCountStats.totalFieldsCount }}
                             />
                           </EuiText>
@@ -791,7 +791,7 @@ export const Page: FC = () => {
                         label={
                           <FormattedMessage
                             id="xpack.ml.dataVisualizer.searchPanel.showEmptyFields"
-                            defaultMessage={'Show empty fields'}
+                            defaultMessage="Show empty fields"
                           />
                         }
                         checked={showEmptyFields}

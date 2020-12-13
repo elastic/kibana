@@ -103,8 +103,8 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
-                  id={'xpack.ml.fieldDataCard.cardNumber.topValuesTitle'}
-                  defaultMessage={'top values'}
+                  id="xpack.ml.fieldDataCard.cardNumber.topValuesTitle"
+                  defaultMessage="top values"
                 />
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
@@ -120,8 +120,8 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
-                  id={'xpack.ml.fieldDataCard.cardNumber.distributionTitle'}
-                  defaultMessage={'distribution'}
+                  id="xpack.ml.fieldDataCard.cardNumber.distributionTitle"
+                  defaultMessage="distribution"
                 />
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
