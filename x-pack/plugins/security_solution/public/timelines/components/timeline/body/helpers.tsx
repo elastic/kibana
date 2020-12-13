@@ -146,8 +146,7 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
       ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
       content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
       dataTestSubj="investigate-in-resolver"
-      iconType="node"
-      id="investigateInResolver"
+      iconType="analyzeEvent"
       isDisabled={isDisabled}
       onClick={handleClick}
     />
