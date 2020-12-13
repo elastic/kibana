@@ -16,7 +16,7 @@ import {
   PackageAssetReference,
 } from '../../../../common';
 import { ArchiveEntry, getArchiveEntry, setArchiveEntry } from './index';
-import { preloadManifests, parseAndVerifyArchive } from './validation';
+import { parseAndVerifyEntries } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -166,20 +166,13 @@ export async function getEsPackage(opts: {
   const { references, savedObjectsClient } = opts;
   const assets = await getAssetsFromReferences({ references, savedObjectsClient });
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
+  const packageResponse = parseAndVerifyEntries(entries);
 
-  const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
     if (path && buffer) {
       setArchiveEntry(path, buffer);
-      paths.push(path);
     }
   });
 
-  preloadManifests(entries);
-  const packageInfo = parseAndVerifyArchive(paths);
-
-  return {
-    packageInfo,
-    paths,
-  };
+  return packageResponse;
 }

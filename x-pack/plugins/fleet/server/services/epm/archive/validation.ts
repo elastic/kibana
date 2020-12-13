@@ -69,6 +69,10 @@ export async function parseAndVerifyArchiveBuffer(
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
+  return parseAndVerifyEntries(entries);
+}
+
+export function parseAndVerifyEntries(entries: ArchiveEntry[]) {
   preloadManifests(entries);
 
   const paths: string[] = entries.map(({ path }) => path);
@@ -78,13 +82,13 @@ export async function parseAndVerifyArchiveBuffer(
   };
 }
 
-export function preloadManifests(entries: ArchiveEntry[]) {
+function preloadManifests(entries: ArchiveEntry[]) {
   entries.forEach(({ path, buffer }) => {
     if (path.endsWith(MANIFEST_NAME) && buffer) MANIFESTS[path] = buffer;
   });
 }
 
-export function parseAndVerifyArchive(paths: string[]): ArchivePackage {
+function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
   const toplevelDir = paths[0].split('/')[0];
   paths.forEach((path) => {
