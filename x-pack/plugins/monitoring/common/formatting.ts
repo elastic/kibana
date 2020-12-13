@@ -11,13 +11,14 @@ export const SMALL_FLOAT = '0.[00]';
 export const LARGE_BYTES = '0,0.0 b';
 export const SMALL_BYTES = '0.0 b';
 export const LARGE_ABBREVIATED = '0,0.[0]a';
+export const ROUNDED_FLOAT = '00.[00]';
 
 /**
  * Format the {@code date} in the user's expected date/time format using their <em>guessed</em> local time zone.
  * @param date Either a numeric Unix timestamp or a {@code Date} object
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date, useUTC = false, timezone = null) {
+export function formatDateTimeLocal(date: number | Date, useUTC = false, timezone = null) {
   return useUTC
     ? moment.utc(date).format('LL LTS')
     : moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
@@ -28,6 +29,18 @@ export function formatDateTimeLocal(date, useUTC = false, timezone = null) {
  * @param {string} hash The complete hash
  * @return {string} The shortened hash
  */
-export function shortenPipelineHash(hash) {
+export function shortenPipelineHash(hash: string) {
   return hash.substr(0, 6);
+}
+
+export function getDateFromNow(timestamp: string | number | Date, tz: string) {
+  return moment(timestamp)
+    .tz(tz === 'Browser' ? moment.tz.guess() : tz)
+    .fromNow();
+}
+
+export function getCalendar(timestamp: string | number | Date, tz: string) {
+  return moment(timestamp)
+    .tz(tz === 'Browser' ? moment.tz.guess() : tz)
+    .calendar();
 }
