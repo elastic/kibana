@@ -39,6 +39,7 @@ import {
   ReindexSourceToTargetWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
+  ReindexSourceToTargetVerify,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -681,12 +682,39 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when response is left incompatible_mapping_exception', () => {
+      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> REINDEX_SOURCE_TO_TARGET_VERIFY when response is left incompatible_mapping_exception', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.left({
           type: 'incompatible_mapping_exception',
         });
         const newState = model(reindexSourceToTargetWaitForState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET_VERIFY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_SOURCE_TO_TARGET_VERIFY', () => {
+      const reindexSourceToTargetVerify: ReindexSourceToTargetVerify = {
+        ...baseState,
+        controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      test('REINDEX_SOURCE_TO_TARGET_VERIFY -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_VERIFY'> = Either.right(
+          'verify_reindex_succeeded'
+        );
+        const newState = model(reindexSourceToTargetVerify, res);
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TARGET_VERIFY -> FATAL when response is left', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_VERIFY'> = Either.left({
+          type: 'verify_reindex_failed',
+        });
+        const newState = model(reindexSourceToTargetVerify, res);
+        expect(newState.controlState).toEqual('FATAL');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });

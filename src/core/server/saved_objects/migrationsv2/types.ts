@@ -135,6 +135,18 @@ export type ReindexSourceToTargetWaitForTaskState = PostInitState & {
   readonly reindexSourceToTargetTaskId: string;
 };
 
+export type ReindexSourceToTargetVerify = PostInitState & {
+  /**
+   * If we received incompatible_mappings_exception during a reindex there is
+   * a small chance that this is caused by an interfering index template and
+   * not by another instance that already completed the UPDATE_TARGET_MAPPINGS
+   * step. In this step we verify that the reindex succeeded by asserting that
+   * target_document_count >= source_document_count
+   */
+  readonly controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY';
+  readonly sourceIndex: Option.Some<string>;
+};
+
 export type UpdateTargetMappingsState = PostInitState & {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS';
@@ -248,6 +260,7 @@ export type State =
   | CreateReindexTargetState
   | ReindexSourceToTargetState
   | ReindexSourceToTargetWaitForTaskState
+  | ReindexSourceToTargetVerify
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearch

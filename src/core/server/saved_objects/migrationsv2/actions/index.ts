@@ -425,6 +425,35 @@ export const waitForReindexTask = flow(
   )
 );
 
+export const verifyReindex = (
+  client: ElasticsearchClient,
+  sourceIndex: string,
+  targetIndex: string
+): TaskEither.TaskEither<
+  RetryableEsClientError | { type: 'verify_reindex_failed' },
+  'verify_reindex_succeeded'
+> => () => {
+  return client.cat
+    .indices<[{ index: string; 'docs.count': string }]>(
+      { index: [sourceIndex, targetIndex], format: 'json' },
+      { maxRetries: 0 }
+    )
+    .then(({ body }) => {
+      const sourceIndexEntry = body.find((entry) => entry.index === sourceIndex);
+      const targetIndexEntry = body.find((entry) => entry.index === targetIndex);
+      if (
+        targetIndexEntry != null &&
+        sourceIndexEntry != null &&
+        targetIndexEntry['docs.count'] >= sourceIndexEntry['docs.count']
+      ) {
+        return Either.right('verify_reindex_succeeded' as const);
+      } else {
+        return Either.left({ type: 'verify_reindex_failed' as const });
+      }
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
 export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
   TaskEither.chain(
@@ -469,11 +498,14 @@ export const updateAliases = (
   'update_aliases_succeeded'
 > => () => {
   return client.indices
-    .updateAliases({
-      body: {
-        actions: aliasActions,
+    .updateAliases(
+      {
+        body: {
+          actions: aliasActions,
+        },
       },
-    })
+      { maxRetries: 0 }
+    )
     .then(() => {
       // Ignore `acknowledged: false`. When the coordinating node accepts
       // the new cluster state update but not all nodes have applied the

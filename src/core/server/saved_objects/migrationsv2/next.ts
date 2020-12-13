@@ -41,6 +41,7 @@ import {
   ReindexSourceToTargetWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
+  ReindexSourceToTargetVerify,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -73,6 +74,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.reindex(client, state.sourceIndex.value, state.targetIndex, Option.none),
     REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: (state: ReindexSourceToTargetWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.reindexSourceToTargetTaskId, '60s'),
+    REINDEX_SOURCE_TO_TARGET_VERIFY: (state: ReindexSourceToTargetVerify) =>
+      Actions.verifyReindex(client, state.sourceIndex.value, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>

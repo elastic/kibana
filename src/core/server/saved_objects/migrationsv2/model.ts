@@ -489,13 +489,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // will set the mappings to `dynamic: strict`. The reindex operation
         // checks whether mappings are compatible _before_ it checks if a
         // document already exists. This could cause a slower instance to hit a
-        // strict_dynamic_mapping_exception when it tries to reindex an
-        // outdated document. Since this could only happen if another instance
-        // already successfully completed this step, we know all documents
-        // were already reindexed and can ignore this exception.
+        // incompatible_mapping_exception when it tries to reindex an
+        // outdated document. This should only happen if another instance
+        // already successfully reindexed all documents.
+        // However, there is a small chance that an interefering mappings
+        // template caused the mappings exceptions in which case no instances
+        // will be able to complete a reindex, so as a precaution we verify
+        // that another instance has completed the reindex.
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+          controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY',
         };
       } else if (
         left.type === 'index_not_found_exception' ||
@@ -507,6 +510,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left as never);
       }
       throwBadResponse(stateP, left);
+    }
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_VERIFY') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: `Reindex from the source index [${stateP.sourceIndex.value}] to the target index [${stateP.targetIndex}] failed because of incompatible mappings in the target index. Remove any index templates whose index_patterns match the target index and delete the target index before trying again.`,
+      };
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

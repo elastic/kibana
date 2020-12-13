@@ -39,6 +39,7 @@ import {
   UpdateByQueryResponse,
   updateAndPickupMappings,
   UpdateAndPickupMappingsResponse,
+  verifyReindex,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -371,11 +372,11 @@ describe('migration actions', () => {
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "reindex_succeeded",
-          }
-      `);
+                        Object {
+                          "_tag": "Right",
+                          "right": "reindex_succeeded",
+                        }
+                  `);
       // Assert that existing documents weren't overrided, but that missing
       // documents were added by the reindex
       const results = ((await searchForOutdatedDocuments(
@@ -418,13 +419,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "incompatible_mapping_exception",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "type": "incompatible_mapping_exception",
+                        },
+                      }
+                  `);
     });
     it('resolves left incompatible_mapping_exception if all reindex failures are due to a mapper_parsing_exception', async () => {
       // Simulates one instance having completed the UPDATE_TARGET_MAPPINGS
@@ -450,13 +451,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "type": "incompatible_mapping_exception",
-            },
-          }
-      `);
+                        Object {
+                          "_tag": "Left",
+                          "left": Object {
+                            "type": "incompatible_mapping_exception",
+                          },
+                        }
+                  `);
     });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       const res = (await reindex(
@@ -494,6 +495,48 @@ describe('migration actions', () => {
                             },
                           }
                     `);
+    });
+  });
+
+  describe('verifyReindex', () => {
+    it('resolves right if source and target indices have the same amount of documents', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'reindex_target_7',
+        Option.none
+      )()) as Either.Right<ReindexResponse>;
+      await waitForReindexTask(client, res.right.taskId, '10s')();
+
+      const task = verifyReindex(client, 'existing_index_with_docs', 'reindex_target_7');
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Right",
+                "right": "verify_reindex_succeeded",
+              }
+            `);
+    });
+    it('resolves left if source and target indices have different amount of documents', () => {
+      const task = verifyReindex(client, 'existing_index_with_docs', 'existing_index_2');
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Left",
+                  "left": Object {
+                    "type": "verify_reindex_failed",
+                  },
+                }
+              `);
+    });
+    it('rejects if source or target index does not exist', async () => {
+      let task = verifyReindex(client, 'no_such_index', 'existing_index_2');
+      await expect(task()).rejects.toMatchInlineSnapshot(
+        `[ResponseError: index_not_found_exception]`
+      );
+
+      task = verifyReindex(client, 'existing_index_2', 'no_such_index');
+      await expect(task()).rejects.toMatchInlineSnapshot(
+        `[ResponseError: index_not_found_exception]`
+      );
     });
   });
 
