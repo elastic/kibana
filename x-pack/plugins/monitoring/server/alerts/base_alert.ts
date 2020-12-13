@@ -178,6 +178,7 @@ export class BaseAlert {
         name,
         alertTypeId,
         throttle,
+        notifyWhen: null,
         schedule: { interval },
         actions: alertActions,
       },
