@@ -5,8 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEmpty, some } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
@@ -180,6 +180,9 @@ const EventsViewerComponent: React.FC<Props> = ({
     [justTitle]
   );
 
+  const prevCombinedQueries = useRef<{
+    filterQuery: string;
+  } | null>(null);
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -232,10 +235,11 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
+      prevCombinedQueries.current = combinedQueries;
       dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
     }
-  }, [dispatch, events, expandedEvent, id]);
+  }, [combinedQueries, dispatch, id]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),

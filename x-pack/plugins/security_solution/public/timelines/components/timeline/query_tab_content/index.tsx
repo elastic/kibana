@@ -12,13 +12,15 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
-import { isEmpty, some } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { Direction } from '../../../../../common/search_strategy';
@@ -42,6 +44,7 @@ import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -127,6 +130,10 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 
 StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
 
+const EventsCountBadge = styled(EuiBadge)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
   prevProps.end === nextProps.end &&
   prevProps.start === nextProps.start &&
@@ -160,6 +167,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
+  const { timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const {
     browserFields,
     docValueFields,
@@ -174,6 +182,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
     kqlQueryExpression,
   ]);
+
+  const prevCombinedQueries = useRef<{
+    filterQuery: string;
+  } | null>(null);
   const combinedQueries = useMemo(
     () =>
       combineQueries({
@@ -255,13 +267,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
+      prevCombinedQueries.current = combinedQueries;
       handleOnEventClosed();
     }
-  }, [expandedEvent, handleOnEventClosed, events, combinedQueries]);
+  }, [combinedQueries, handleOnEventClosed]);
 
   return (
     <>
+      <InPortal node={timelineEventsCountPortalNode}>
+        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+      </InPortal>
       <TimelineRefetch
         id={timelineId}
         inputId="timeline"
