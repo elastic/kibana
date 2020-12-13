@@ -21,6 +21,22 @@ interface Props {
   hideLabel?: boolean;
 }
 
+const columnChartTheme = {
+  background: { color: 'transparent' },
+  chartMargins: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 1,
+  },
+  chartPaddings: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  scales: { barsPadding: 0.1 },
+};
 export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, hideLabel }) => {
   const { data, legendText, xScaleType } = useColumnChart(chartData, columnType);
 
@@ -29,24 +45,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, hi
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
-            <Settings
-              theme={{
-                background: { color: 'transparent' },
-                chartMargins: {
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 1,
-                },
-                chartPaddings: {
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                },
-                scales: { barsPadding: 0.1 },
-              }}
-            />
+            <Settings theme={columnChartTheme} />
             <BarSeries
               id="histogram"
               name="count"
@@ -69,7 +68,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, hi
       >
         {legendText}
       </div>
-      {hideLabel === true && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
+      {hideLabel !== true && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
     </div>
   );
 };

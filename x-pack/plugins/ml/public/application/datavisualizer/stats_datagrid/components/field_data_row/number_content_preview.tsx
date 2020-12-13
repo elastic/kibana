@@ -29,8 +29,8 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
   }, []);
 
   return (
-    <EuiFlexGroup direction={'column'}>
-      <EuiFlexItem>
+    <div data-test-subj={dataTestSubj}>
+      <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
           height={METRIC_DISTRIBUTION_CHART_HEIGHT}
@@ -38,16 +38,18 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
           fieldFormat={fieldFormat}
           hideXAxis={true}
         />
-      </EuiFlexItem>
-      {legendText && (
-        <>
-          <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
-            <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.min}</EuiFlexItem>
-            <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.max}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
-    </EuiFlexGroup>
+      </div>
+      <div className={'mlDataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
+        {legendText && (
+          <>
+            <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
+              <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.min}</EuiFlexItem>
+              <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.max}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+      </div>
+    </div>
   );
 };
