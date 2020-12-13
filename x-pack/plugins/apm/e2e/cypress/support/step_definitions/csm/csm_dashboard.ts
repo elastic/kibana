@@ -39,7 +39,7 @@ Then(`should display percentile for page load chart`, () => {
 
   waitForLoadingToFinish();
 
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   cy.get(pMarkers).eq(0).should('have.text', '50th');
 
@@ -54,18 +54,18 @@ Then(`should display chart legend`, () => {
   const chartLegend = 'div.echLegendItem__label';
 
   waitForLoadingToFinish();
-  cy.get('.euiLoadingChart').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.exist');
 
   cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
 });
 
 Then(`should display tooltip on hover`, () => {
-  cy.get('.euiLoadingChart').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.exist');
 
   const pMarkers = '[data-cy=percentile-markers] span.euiToolTipAnchor';
 
   waitForLoadingToFinish();
-  cy.get('.euiLoadingChart').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.exist');
 
   const marker = cy.get(pMarkers, DEFAULT_TIMEOUT).eq(0);
   marker.invoke('show');

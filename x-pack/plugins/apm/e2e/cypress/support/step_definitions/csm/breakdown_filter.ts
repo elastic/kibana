@@ -12,7 +12,7 @@ import { waitForLoadingToFinish } from './utils';
 
 Given(`a user clicks the page load breakdown filter`, () => {
   waitForLoadingToFinish();
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
   const breakDownBtn = cy.get(
     '[data-test-subj=pldBreakdownFilter]',
     DEFAULT_TIMEOUT
@@ -27,7 +27,7 @@ When(`the user selected the breakdown`, () => {
 });
 
 Then(`breakdown series should appear in chart`, () => {
-  cy.get('.euiLoadingChart').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.exist');
 
   cy.get('[data-cy=pageLoadDist]').within(() => {
     cy.get('div.echLegendItem__label[title=Chrome] ', DEFAULT_TIMEOUT)

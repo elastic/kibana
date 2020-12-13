@@ -10,7 +10,7 @@ import { waitForLoadingToFinish } from './utils';
 
 When(`a user clicks inside url search field`, () => {
   waitForLoadingToFinish();
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
   cy.get('span[data-cy=csmUrlFilter]', DEFAULT_TIMEOUT).within(() => {
     cy.get('input.euiFieldSearch').click();
   });

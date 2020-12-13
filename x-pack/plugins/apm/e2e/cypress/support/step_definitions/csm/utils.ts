@@ -7,7 +7,7 @@
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
 
 export function waitForLoadingToFinish() {
-  cy.get('[data-test-subj=globalLoadingIndicator]', DEFAULT_TIMEOUT);
+  cy.get('[data-test-subj=globalLoadingIndicator-hidden]', DEFAULT_TIMEOUT);
 }
 
 export function getDataTestSubj(dataTestSubj: string) {

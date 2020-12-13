@@ -11,7 +11,7 @@ import { waitForLoadingToFinish } from './utils';
 
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
   waitForLoadingToFinish();
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
   cy.get(`#local-filter-${filterName}`).click();
 
   cy.get(`#local-filter-popover-${filterName}`, DEFAULT_TIMEOUT).within(() => {
@@ -52,7 +52,7 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
 
 Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
   waitForLoadingToFinish();
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   const data =
     filterName === 'os'

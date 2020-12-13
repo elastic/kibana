@@ -22,10 +22,10 @@ export function verifyClientMetrics(
 
   if (checkTitleStatus) {
     cy.get('.euiStat__title', DEFAULT_TIMEOUT).should('be.visible');
-    cy.get('.euiSelect-isLoading').should('not.be.visible');
+    cy.get('.euiSelect-isLoading').should('not.exist');
   }
 
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   cy.get(clientMetricsSelector).eq(0).should('have.text', metrics[0]);
 
