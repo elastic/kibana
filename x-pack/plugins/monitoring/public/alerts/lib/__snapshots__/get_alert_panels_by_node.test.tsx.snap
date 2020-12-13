@@ -110,6 +110,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_jvm_memory_usage_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -169,6 +170,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_jvm_memory_usage_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -374,6 +376,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_nodes_changed_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -433,6 +436,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_disk_usage_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -492,6 +496,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_license_expiration_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -551,6 +556,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_nodes_changed_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
@@ -610,6 +616,7 @@ Array [
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_license_expiration_label",
+          "notifyWhen": null,
           "params": Object {},
           "schedule": Object {
             "interval": "1m",
