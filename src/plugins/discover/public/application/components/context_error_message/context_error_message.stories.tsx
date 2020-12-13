@@ -17,16 +17,21 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/storybook',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
-  discover: 'src/plugins/discover/.storybook',
-  dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
-  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
-  security_solution: 'x-pack/plugins/security_solution/.storybook',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
-  observability: 'x-pack/plugins/observability/.storybook',
+import * as React from 'react';
+import { ContextErrorMessage } from './context_error_message';
+
+// @ts-ignore
+import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
+
+export default {
+  component: ContextErrorMessage,
+  title: 'Discover/Components/ContextErrorMessage',
 };
+
+export function Example() {
+  return <ContextErrorMessage status={LOADING_STATUS.FAILED} />;
+}
+
+export function WithReason() {
+  return <ContextErrorMessage status={LOADING_STATUS.FAILED} reason={FAILURE_REASONS.UNKNOWN} />;
+}

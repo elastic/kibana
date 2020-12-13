@@ -17,16 +17,17 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/storybook',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
-  discover: 'src/plugins/discover/.storybook',
-  dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
-  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
-  security_solution: 'x-pack/plugins/security_solution/.storybook',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
-  observability: 'x-pack/plugins/observability/.storybook',
+import * as React from 'react';
+
+const HelloWorld = () => {
+  return <div>Hello world!</div>;
 };
+
+export default {
+  component: HelloWorld,
+  title: 'Discover/Components/HelloWorld',
+};
+
+export function Example() {
+  return <HelloWorld />;
+}
