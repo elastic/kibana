@@ -46,8 +46,8 @@ export interface DataVisualizerIndexBasedAppState {
   pageIndex: number;
   pageSize: number;
   sortField: string;
-  sortDirection: string;
-  queryText: string;
+  sortDirection: 'asc' | 'desc';
+  searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
   visibleFieldTypes: string[];

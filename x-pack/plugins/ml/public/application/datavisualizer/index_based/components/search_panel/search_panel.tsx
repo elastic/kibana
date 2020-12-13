@@ -31,11 +31,8 @@ import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_typ
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
-  setSearchString(s: Query['query']): void;
   searchQuery: Query['query'];
-  setSearchQuery(q: Query['query']): void;
   searchQueryLanguage: SearchQueryLanguage;
-  setSearchQueryLanguage(q: any): void;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
   overallStats: any;
@@ -44,15 +41,21 @@ interface Props {
   visibleFieldTypes: string[];
   setVisibleFieldNames(q: any): void;
   visibleFieldNames: string[];
+  setSearchParams({
+    searchQuery,
+    searchString,
+    queryLanguage,
+  }: {
+    searchQuery: Query['query'];
+    searchString: Query['query'];
+    queryLanguage: SearchQueryLanguage;
+  }): void;
 }
 
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
-  setSearchString,
-  setSearchQuery,
   searchQueryLanguage,
-  setSearchQueryLanguage,
   samplerShardSize,
   setSamplerShardSize,
   overallStats,
@@ -61,6 +64,7 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldTypes,
   setVisibleFieldNames,
   visibleFieldNames,
+  setSearchParams,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -82,10 +86,11 @@ export const SearchPanel: FC<Props> = ({
       } else {
         filterQuery = {};
       }
-
-      setSearchQuery(filterQuery);
-      setSearchString(query.query);
-      setSearchQueryLanguage(query.language);
+      setSearchParams({
+        searchQuery: filterQuery,
+        searchString: query.query,
+        queryLanguage: query.language as SearchQueryLanguage,
+      });
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
       setErrorMessage({ query: query.query as string, message: e.message });

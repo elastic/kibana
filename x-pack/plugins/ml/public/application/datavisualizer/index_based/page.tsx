@@ -26,6 +26,7 @@ import {
   esQuery,
   esKuery,
   UI_SETTINGS,
+  Query,
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
@@ -94,7 +95,7 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   visibleFieldTypes: [],
   visibleFieldNames: [],
   samplerShardSize: 5000,
-  queryText: '',
+  searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   showDistributions: true,
@@ -167,24 +168,26 @@ export const Page: FC = () => {
   } = extractSearchData(currentSavedSearch);
 
   const searchQueryLanguage = dataVisualizerListState.searchQueryLanguage ?? initQueryLanguage;
-  const setSearchQueryLanguage = (queryLanguage: SearchQueryLanguage) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, searchQueryLanguage: queryLanguage });
+  const searchString = dataVisualizerListState.searchString ?? initSearchString;
+  const searchQuery = dataVisualizerListState.searchQuery ?? initSearchQuery;
+
+  const setSearchParams = (searchParams: {
+    searchQuery: Query['query'];
+    searchString: Query['query'];
+    queryLanguage: SearchQueryLanguage;
+  }) => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      searchQuery: searchParams.searchQuery,
+      searchString: searchParams.searchString,
+      searchQueryLanguage: searchParams.queryLanguage,
+    });
   };
+
   const samplerShardSize =
     dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
   const setSamplerShardSize = (value: number) => {
     setDataVisualizerListState({ ...dataVisualizerListState, samplerShardSize: value });
-  };
-
-  const searchString = dataVisualizerListState.queryText ?? initSearchString;
-  const setSearchString = (value: string) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, queryText: value });
-  };
-
-  const searchQuery = dataVisualizerListState.searchQuery ?? initSearchQuery;
-
-  const setSearchQuery = (value: any) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, searchQuery: value });
   };
 
   const visibleFieldTypes =
@@ -236,7 +239,7 @@ export const Page: FC = () => {
 
   useEffect(() => {
     loadMetricFieldStats();
-  }, [metricConfigs]);
+  }, [metricConfigs, dataVisualizerListState.searchString]);
 
   useEffect(() => {
     loadNonMetricFieldStats();
@@ -253,7 +256,7 @@ export const Page: FC = () => {
     if (!savedSearch) {
       return {
         searchQuery: dataVisualizerListState.searchQuery,
-        searchString: dataVisualizerListState.queryText,
+        searchString: dataVisualizerListState.searchString,
         queryLanguage: dataVisualizerListState.searchQueryLanguage,
       };
     }
@@ -680,11 +683,9 @@ export const Page: FC = () => {
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}
-                    setSearchString={setSearchString}
                     searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
                     searchQueryLanguage={searchQueryLanguage}
-                    setSearchQueryLanguage={setSearchQueryLanguage}
+                    setSearchParams={setSearchParams}
                     samplerShardSize={samplerShardSize}
                     setSamplerShardSize={setSamplerShardSize}
                     overallStats={overallStats}
