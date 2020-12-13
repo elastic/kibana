@@ -11,6 +11,7 @@
     font-family: $euiCodeFontFamily;
   }
 
+  &--geolocation,
   &--location {
     color: $euiColorSuccessText;
     font-family: $euiCodeFontFamily;
