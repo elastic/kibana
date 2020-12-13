@@ -141,16 +141,14 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <MetricDistributionChart
-                    width={METRIC_DISTRIBUTION_CHART_WIDTH}
-                    height={METRIC_DISTRIBUTION_CHART_HEIGHT}
-                    chartData={distributionChartData}
-                    fieldFormat={fieldFormat}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiFlexItem style={{ width: '100%' }}>
+                <MetricDistributionChart
+                  width={METRIC_DISTRIBUTION_CHART_WIDTH}
+                  height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+                  chartData={distributionChartData}
+                  fieldFormat={fieldFormat}
+                />
+              </EuiFlexItem>
             </Fragment>
           </EuiFlexGroup>
         </EuiFlexItem>
