@@ -172,11 +172,14 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
-      defaultMessage:
-        'Prefer the legacy version of the documents table in Discover while available',
+      defaultMessage: 'Prefer the legacy version of the documents table in Discover.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useLegacyDataGrid',
+    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
