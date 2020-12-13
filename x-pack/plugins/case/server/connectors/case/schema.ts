@@ -80,6 +80,7 @@ const CaseBasicProps = {
   title: schema.string(),
   tags: schema.arrayOf(schema.string()),
   connector: schema.object(ConnectorProps, { validate: validateConnector }),
+  settings: schema.object({ syncAlerts: schema.boolean() }),
 };
 
 const CaseUpdateRequestProps = {
@@ -89,6 +90,7 @@ const CaseUpdateRequestProps = {
   title: schema.nullable(CaseBasicProps.title),
   tags: schema.nullable(CaseBasicProps.tags),
   connector: schema.nullable(CaseBasicProps.connector),
+  settings: schema.nullable(CaseBasicProps.settings),
   status: schema.nullable(schema.string()),
 };
 

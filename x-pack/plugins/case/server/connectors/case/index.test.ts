@@ -65,6 +65,9 @@ describe('case connector', () => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -101,6 +104,9 @@ describe('case connector', () => {
                     parent: null,
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -120,6 +126,9 @@ describe('case connector', () => {
                     incidentTypes: ['13'],
                     severityCode: '3',
                   },
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -142,6 +151,9 @@ describe('case connector', () => {
                     urgency: 'Medium',
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -158,6 +170,9 @@ describe('case connector', () => {
                   name: 'None',
                   type: '.none',
                   fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -183,6 +198,9 @@ describe('case connector', () => {
                 type: '.servicenow',
                 fields: {},
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -197,6 +215,9 @@ describe('case connector', () => {
                 name: 'Servicenow',
                 type: '.servicenow',
                 fields: { impact: null, severity: null, urgency: null },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           });
@@ -214,6 +235,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: null,
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -236,6 +260,9 @@ describe('case connector', () => {
                   priority: 'High',
                   parent: null,
                 },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -265,6 +292,9 @@ describe('case connector', () => {
                   excess: null,
                 },
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -292,6 +322,9 @@ describe('case connector', () => {
                   parent: null,
                 },
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -314,6 +347,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: {},
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -346,6 +382,7 @@ describe('case connector', () => {
             title: null,
             status: null,
             connector: null,
+            settings: null,
             ...(params.subActionParams as Record<string, unknown>),
           },
         });
@@ -378,6 +415,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -408,6 +446,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -439,6 +478,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -468,6 +508,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               connector: {
                 id: 'servicenow',
                 name: 'Servicenow',
@@ -500,6 +541,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -816,6 +858,9 @@ describe('case connector', () => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -904,6 +949,7 @@ describe('case connector', () => {
             tags: null,
             status: null,
             connector: null,
+            settings: null,
           },
         };
 
@@ -919,6 +965,7 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
         expect(mockCaseClient.update).toHaveBeenCalledWith({
+          caseClient: mockCaseClient,
           // Null values have been striped out.
           cases: {
             cases: [
@@ -1000,6 +1047,7 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
+          caseClient: mockCaseClient,
           caseId: 'case-id',
           comment: {
             comment: 'a comment',
