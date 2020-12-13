@@ -147,16 +147,21 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     [dispatch, timelineId]
   );
 
+  const handleOnEventClosed = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+  }, [dispatch, timelineId]);
+
   const EventDetailsContent = useMemo(
     () =>
       expandedEvent.eventId ? (
         <EventDetails
           browserFields={browserFields}
           docValueFields={docValueFields}
+          handleOnEventClosed={handleOnEventClosed}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedEvent.eventId, timelineId]
+    [browserFields, docValueFields, expandedEvent.eventId, handleOnEventClosed, timelineId]
   );
 
   const SidebarContent = useMemo(

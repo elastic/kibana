@@ -123,13 +123,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
 
-  const setQueryAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
-      ),
-    [dispatch, timelineId]
-  );
+  const setQueryAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
+    );
+  }, [dispatch, timelineId]);
 
   const setGraphAsActiveTab = useCallback(
     () =>
@@ -139,13 +138,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     [dispatch, timelineId]
   );
 
-  const setNotesAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
-      ),
-    [dispatch, timelineId]
-  );
+  const setNotesAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
+    );
+  }, [dispatch, timelineId]);
 
   const setPinnedAsActiveTab = useCallback(
     () =>

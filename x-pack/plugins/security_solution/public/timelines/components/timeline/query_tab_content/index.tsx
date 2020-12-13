@@ -14,8 +14,8 @@ import {
   EuiSpacer,
   EuiBadge,
 } from '@elastic/eui';
-import { isEmpty, some } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -167,19 +167,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
-  const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
   const { timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-
-  useEffect(() => {
-    // it should changed only once to true and then stay visible till the component umount
-    setShowEventDetailsColumn((current) => {
-      if (showEventDetails && !current) {
-        return true;
-      }
-      return current;
-    });
-  }, [showEventDetails]);
-
   const {
     browserFields,
     docValueFields,
@@ -194,6 +182,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
     kqlQueryExpression,
   ]);
+
+  const prevCombinedQueries = useRef<{
+    filterQuery: string;
+  } | null>(null);
   const combinedQueries = useMemo(
     () =>
       combineQueries({
@@ -275,10 +267,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    if (!events || (expandedEvent.eventId && !some(['_id', expandedEvent.eventId], events))) {
+    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
+      prevCombinedQueries.current = combinedQueries;
       handleOnEventClosed();
     }
-  }, [expandedEvent, handleOnEventClosed, events, combinedQueries]);
+  }, [combinedQueries, handleOnEventClosed]);
 
   return (
     <>

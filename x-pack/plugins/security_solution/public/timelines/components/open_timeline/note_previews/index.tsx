@@ -15,6 +15,7 @@ import { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions } from '../../../store/timeline';
+import * as i18n from './translations';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -32,34 +33,29 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const handleClick = useCallback(
-    () =>
-      dispatch(
-        timelineActions.toggleExpandedEvent({
-          timelineId,
-          event: {
-            eventId,
-            // we don't store yet info about event index name in note
-            indexName: '',
-            loading: false,
-          },
-        })
-      ),
-    [dispatch, eventId, timelineId]
-  );
+  const handleClick = useCallback(() => {
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        event: {
+          eventId,
+          // we don't store yet info about event index name in note
+          indexName: '',
+        },
+      })
+    );
+  }, [dispatch, eventId, timelineId]);
 
   return (
     <EuiButtonIcon
-      title="Expand event details"
-      aria-label="Expand event details"
+      title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
+      aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="subdued"
       iconType="arrowRight"
       onClick={handleClick}
     />
   );
 };
-
-ToggleEventDetailsButtonComponent.displayName = 'ToggleEventDetailsButtonComponent';
 
 const ToggleEventDetailsButton = React.memo(ToggleEventDetailsButtonComponent);
 /**
