@@ -6,10 +6,15 @@
 
 import React, { FC } from 'react';
 
-import { FieldDataCardProps } from '../field_data_card';
+import type { FieldDataCardProps } from '../field_data_card';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
+import { TotalCountHeader } from '../../total_count_header';
 
-export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
+export interface Props extends FieldDataCardProps {
+  totalCount: number;
+}
+
+export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
   const { stats } = config;
   if (stats === undefined) return null;
 
@@ -28,10 +33,13 @@ export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
   }
 
   return (
-    <DocumentCountChart
-      chartPoints={chartPoints}
-      timeRangeEarliest={timeRangeEarliest}
-      timeRangeLatest={timeRangeLatest}
-    />
+    <>
+      <TotalCountHeader totalCount={totalCount} />
+      <DocumentCountChart
+        chartPoints={chartPoints}
+        timeRangeEarliest={timeRangeEarliest}
+        timeRangeLatest={timeRangeLatest}
+      />
+    </>
   );
 };

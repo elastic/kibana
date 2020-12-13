@@ -16,10 +16,8 @@ import {
   EuiPageContentHeaderSection,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -54,6 +52,7 @@ import { DataVisualizerDataGrid } from '../stats_datagrid';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
+
 interface DataVisualizerPageState {
   overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
@@ -657,28 +656,12 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
-                        defaultMessage="Total documents: {strongTotalCount}"
-                        values={{
-                          strongTotalCount: (
-                            <strong data-test-subj="mlDataVisualizerTotalDocCount">
-                              <FormattedMessage
-                                id="xpack.ml.datavisualizer.searchPanel.totalDocCountNumber"
-                                defaultMessage="{totalCount, plural, one {#} other {#}}"
-                                values={{ totalCount: overallStats.totalCount }}
-                              />
-                            </strong>
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  {documentCountStats && (
+                  {documentCountStats && overallStats?.totalCount !== undefined && (
                     <EuiFlexItem grow={true}>
-                      <DocumentCountContent config={documentCountStats} />
+                      <DocumentCountContent
+                        config={documentCountStats}
+                        totalCount={overallStats.totalCount}
+                      />
                     </EuiFlexItem>
                   )}
 

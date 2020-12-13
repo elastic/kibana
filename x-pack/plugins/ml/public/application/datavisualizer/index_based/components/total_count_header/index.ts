@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldTypesSelect } from './field_types_select';
+export { TotalCountHeader } from './total_count_header';
