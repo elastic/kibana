@@ -130,6 +130,7 @@ describe('LicenseExpirationAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
+            nodeName: 'Elasticsearch cluster alert',
             ui: {
               isFiring: true,
               message: {

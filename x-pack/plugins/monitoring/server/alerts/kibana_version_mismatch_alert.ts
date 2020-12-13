@@ -26,6 +26,12 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].label,
       legacy: {
         watchName: 'kibana_version_mismatch',
+        nodeNameLabel: i18n.translate(
+          'xpack.monitoring.alerts.kibanaVersionMismatch.nodeNameLabel',
+          {
+            defaultMessage: 'Kibana instance alert',
+          }
+        ),
         changeDataValues: { severity: AlertSeverity.Warning },
       },
       interval: '1d',
