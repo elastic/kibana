@@ -21,7 +21,10 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 
-export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
+/**
+ * Button to expand a given row
+ */
+export const ExpandButton = ({ rowIndex }: { rowIndex: number }) => {
   const { expanded, setExpanded, rows } = useContext(DiscoverGridContext);
 
   const current = rows[rowIndex];

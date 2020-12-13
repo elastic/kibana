@@ -19,7 +19,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ViewButton } from './discover_grid_view_button';
+import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridContext } from './discover_grid_context';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { esHits } from '../../../__mocks__/es_hits';
@@ -36,7 +36,7 @@ describe('Discover grid view button ', function () {
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ViewButton rowIndex={0} />
+        <ExpandButton rowIndex={0} />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
@@ -54,7 +54,7 @@ describe('Discover grid view button ', function () {
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ViewButton rowIndex={0} />
+        <ExpandButton rowIndex={0} />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
@@ -72,7 +72,7 @@ describe('Discover grid view button ', function () {
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ViewButton rowIndex={1} />
+        <ExpandButton rowIndex={1} />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');

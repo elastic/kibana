@@ -42,6 +42,7 @@ describe('Discover cell actions ', function () {
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
+          isExpanded={false}
         />
       </DiscoverGridContext.Provider>
     );
@@ -64,6 +65,7 @@ describe('Discover cell actions ', function () {
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
+          isExpanded={false}
         />
       </DiscoverGridContext.Provider>
     );

@@ -19,7 +19,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
-import { ViewButton } from './discover_grid_view_button';
+import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { buildCellActions } from './discover_grid_cell_actions';
@@ -39,7 +39,7 @@ export function getLeadControlColumns() {
           </span>
         </EuiScreenReaderOnly>
       ),
-      rowCellRender: ViewButton,
+      rowCellRender: ExpandButton,
     },
   ];
 }

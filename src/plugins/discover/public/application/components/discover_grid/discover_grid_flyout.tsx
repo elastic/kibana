@@ -47,6 +47,9 @@ interface Props {
   services: DiscoverServices;
 }
 
+/**
+ * Flyout displaying an expanded Elasticsearch document
+ */
 export function DiscoverGridFlyout({
   hit,
   indexPattern,

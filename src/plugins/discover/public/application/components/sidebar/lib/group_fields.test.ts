@@ -137,7 +137,7 @@ describe('group_fields', function () {
 
     const actual2 = groupFields(
       fields as IndexPatternField[],
-      ['currency', 'customer_birth_date', 'invalid_name'],
+      ['currency', 'customer_birth_date', 'unknown'],
       5,
       fieldCounts,
       fieldFilterState
