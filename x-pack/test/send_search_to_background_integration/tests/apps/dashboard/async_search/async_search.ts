@@ -6,14 +6,14 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const inspector = getService('inspector');
+  const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
   const queryBar = getService('queryBar');
   const browser = getService('browser');
   const sendToBackground = getService('sendToBackground');
@@ -128,15 +128,4 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
-
-  // HELPERS
-  async function getSearchSessionIdByPanel(panelTitle: string) {
-    await dashboardPanelActions.openInspectorByTitle(panelTitle);
-    await inspector.openInspectorRequestsView();
-    const searchSessionId = await (
-      await testSubjects.find('inspectorRequestSearchSessionId')
-    ).getAttribute('data-search-session-id');
-    await inspector.close();
-    return searchSessionId;
-  }
 }

@@ -23,6 +23,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await esArchiver.unload('dashboard/async_search');
     });
 
+    loadTestFile(require.resolve('./sessions_in_space'));
     loadTestFile(require.resolve('./async_search'));
   });
 }
