@@ -1,8 +1,16 @@
 @include euiHeaderAffordForFixed;
 
 .euiDataGrid__restrictBody {
-  .headerGlobalNav {
+  .headerGlobalNav,
+  .kbnTopNavMenu__wrapper {
     display: none;
+  }
+}
+
+.euiDataGrid__restrictBody.euiBody--headerIsFixed {
+  .euiFlyout {
+    top: 0;
+    height: 100%;
   }
 }
 
