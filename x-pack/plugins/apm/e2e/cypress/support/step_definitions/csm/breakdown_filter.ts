@@ -6,12 +6,12 @@
 
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
+import { waitForLoadingToFinish } from './utils';
 
 /** The default time in ms to wait for a Cypress command to complete */
 
 Given(`a user clicks the page load breakdown filter`, () => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
   const breakDownBtn = cy.get(
     '[data-test-subj=pldBreakdownFilter]',
