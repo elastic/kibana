@@ -102,31 +102,13 @@ describe('migration v2', () => {
     }
   };
 
-  describe('migrating from 7.3.0-xpack version', () => {
-    beforeAll(async () => {
-      await startServers({
-        oss: false,
-        dataArchive: join(__dirname, 'archives', '7_3_0_xpack.zip'),
-      });
-    });
-
-    afterAll(async () => {
-      await stopServers();
-    });
-
-    it('works (tm)', async () => {
-      await esClient.cat.indices();
-      // console.log(response.body);
-    });
-  });
-
   describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
       await startServers({
         oss: false,
-        dataArchive: join(__dirname, 'archives', '7_7_2_xpack_100k_obj.zip'),
+        dataArchive: join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
       });
     });
 
@@ -134,21 +116,27 @@ describe('migration v2', () => {
       await stopServers();
     });
 
-    it('migrates all the objects', async () => {
-      const { body } = await esClient.count({
+    it('copies all the document of the previous index to the new one', async () => {
+      const migratedIndexResponse = await esClient.count({
         index: migratedIndex,
       });
-      expect(body.count).toEqual(106014);
+      const oldIndexResponse = await esClient.count({
+        index: '.kibana_1',
+      });
+
+      // Use a >= comparison since once Kibana has started it might create new
+      // documents like telemetry tasks
+      expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
     });
   });
 
-  describe('migrating from the same Kibana version', () => {
+  describe('migrating from 7.3.0-xpack version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
       await startServers({
-        oss: true,
-        dataArchive: join(__dirname, 'archives', 'sample_data_only_8.0.zip'),
+        oss: false,
+        dataArchive: join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
       });
     });
 
@@ -161,7 +149,7 @@ describe('migration v2', () => {
         {
           index: migratedIndex,
         },
-        { ignore: [404], maxRetries: 0 }
+        { ignore: [404] }
       );
 
       const response = body[migratedIndex];
@@ -178,7 +166,64 @@ describe('migration v2', () => {
         index: '.kibana_1',
       });
 
-      expect(migratedIndexResponse.body.count).toEqual(oldIndexResponse.body.count);
+      // Use a >= comparison since once Kibana has started it might create new
+      // documents like telemetry tasks
+      expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+    });
+
+    it('migrates the documents to the highest version', async () => {
+      const expectedVersions = getExpectedVersionPerType();
+      const res = await esClient.search({
+        index: migratedIndex,
+        sort: ['_doc'],
+        size: 10000,
+      });
+      const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
+      allDocuments.forEach((doc) => {
+        assertMigrationVersion(doc, expectedVersions);
+      });
+    });
+  });
+
+  describe('migrating from the same Kibana version', () => {
+    const migratedIndex = `.kibana_${kibanaVersion}_001`;
+
+    beforeAll(async () => {
+      await startServers({
+        oss: true,
+        dataArchive: join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
+      });
+    });
+
+    afterAll(async () => {
+      await stopServers();
+    });
+
+    it('creates the new index and the correct aliases', async () => {
+      const { body } = await esClient.indices.get(
+        {
+          index: migratedIndex,
+        },
+        { ignore: [404] }
+      );
+
+      const response = body[migratedIndex];
+
+      expect(response).toBeDefined();
+      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+    });
+
+    it('copies all the document of the previous index to the new one', async () => {
+      const migratedIndexResponse = await esClient.count({
+        index: migratedIndex,
+      });
+      const oldIndexResponse = await esClient.count({
+        index: '.kibana_1',
+      });
+
+      // Use a >= comparison since once Kibana has started it might create new
+      // documents like telemetry tasks
+      expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
     });
 
     it('migrates the documents to the highest version', async () => {

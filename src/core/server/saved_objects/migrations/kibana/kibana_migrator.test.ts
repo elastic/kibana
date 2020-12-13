@@ -263,7 +263,7 @@ describe('KibanaMigrator', () => {
         const migrator = new KibanaMigrator(options);
 
         await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
-          `[Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster]`
+          `[Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster and try again.]`
         );
         expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
           [Error: Reindex failed with the following error:
