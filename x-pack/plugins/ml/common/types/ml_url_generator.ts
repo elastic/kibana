@@ -54,6 +54,7 @@ export interface DataVisualizerIndexBasedAppState {
   visibleFieldNames: string[];
   samplerShardSize: number;
   showDistributions: boolean;
+  showAllFields: boolean;
 }
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER

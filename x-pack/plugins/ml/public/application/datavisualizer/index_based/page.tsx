@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -59,9 +59,9 @@ interface DataVisualizerPageState {
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
   populatedMetricFieldCount: number;
-  showAllMetrics: boolean;
+  metricsLoaded: boolean;
   nonMetricConfigs: FieldVisConfig[];
-  showAllNonMetrics: boolean;
+  nonMetricsLoaded: boolean;
   documentCountStats?: FieldVisConfig;
 }
 
@@ -81,9 +81,9 @@ function getDefaultPageState(): DataVisualizerPageState {
     metricConfigs: [],
     totalMetricFieldCount: 0,
     populatedMetricFieldCount: 0,
-    showAllMetrics: false,
+    metricsLoaded: false,
     nonMetricConfigs: [],
-    showAllNonMetrics: false,
+    nonMetricsLoaded: false,
     documentCountStats: undefined,
   };
 }
@@ -99,6 +99,7 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   showDistributions: true,
+  showAllFields: false,
 });
 
 export const Page: FC = () => {
@@ -207,10 +208,10 @@ export const Page: FC = () => {
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
-  const [showAllMetrics, setShowAllMetrics] = useState(defaults.showAllMetrics);
+  const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
-  const [showAllNonMetrics, setShowAllNonMetrics] = useState(defaults.showAllNonMetrics);
+  const nonMetricsLoaded = useRef(defaults.nonMetricsLoaded);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -239,15 +240,11 @@ export const Page: FC = () => {
 
   useEffect(() => {
     loadMetricFieldStats();
-  }, [metricConfigs, dataVisualizerListState.searchString]);
+  }, [metricConfigs]);
 
   useEffect(() => {
     loadNonMetricFieldStats();
   }, [nonMetricConfigs]);
-
-  useEffect(() => {
-    createMetricCards();
-  }, [showAllMetrics]);
 
   /**
    * Extract query data from the saved search object.
@@ -485,17 +482,17 @@ export const Page: FC = () => {
       });
     }
 
-    if (allMetricFields.length === metricExistsFields.length && showAllMetrics === false) {
-      setShowAllMetrics(true);
+    if (allMetricFields.length === metricExistsFields.length && metricsLoaded === false) {
+      setMetricsLoaded(true);
       return;
     }
 
     let aggregatableFields: any[] = overallStats.aggregatableExistsFields;
-    if (allMetricFields.length !== metricExistsFields.length && showAllMetrics === true) {
+    if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
       aggregatableFields = aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
     }
 
-    const metricFieldsToShow = showAllMetrics === true ? allMetricFields : metricExistsFields;
+    const metricFieldsToShow = metricsLoaded === true ? allMetricFields : metricExistsFields;
 
     metricFieldsToShow.forEach((field) => {
       const fieldData = aggregatableFields.find((f) => {
@@ -553,12 +550,17 @@ export const Page: FC = () => {
       }
     });
 
-    if (allNonMetricFields.length === nonMetricFieldData.length && showAllNonMetrics === false) {
-      setShowAllNonMetrics(true);
-      return;
+    if (
+      allNonMetricFields.length === nonMetricFieldData.length &&
+      nonMetricsLoaded.current === false
+    ) {
+      nonMetricsLoaded.current = true;
     }
 
-    if (allNonMetricFields.length !== nonMetricFieldData.length && showAllNonMetrics === true) {
+    if (
+      allNonMetricFields.length !== nonMetricFieldData.length &&
+      nonMetricsLoaded.current === true
+    ) {
       // Combine the field data obtained from Elasticsearch into a single array.
       nonMetricFieldData = nonMetricFieldData.concat(
         overallStats.aggregatableNotExistsFields,
@@ -567,7 +569,7 @@ export const Page: FC = () => {
     }
 
     const nonMetricFieldsToShow =
-      showAllNonMetrics === true ? allNonMetricFields : populatedNonMetricFields;
+      nonMetricsLoaded.current === true ? allNonMetricFields : populatedNonMetricFields;
 
     const configs: FieldVisConfig[] = [];
 
