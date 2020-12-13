@@ -6,14 +6,16 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import classNames from 'classnames';
 import { FieldDataCardProps } from '../../../index_based/components/field_data_card';
 import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
+import { formatSingleValue } from '../../../../formatters/format_value';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 200;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
 
 export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
@@ -24,8 +26,17 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
   const dataTestSubj = fieldName;
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
-    setDistributionChartData(chartData);
-    setLegendText({ min: chartData[0].x, max: chartData[chartData.length - 1].x });
+    if (
+      Array.isArray(chartData) &&
+      chartData[0].x !== undefined &&
+      chartData[chartData.length - 1].x !== undefined
+    ) {
+      setDistributionChartData(chartData);
+      setLegendText({
+        min: formatSingleValue(chartData[0].x),
+        max: formatSingleValue(chartData[chartData.length - 1].x),
+      });
+    }
   }, []);
 
   return (
@@ -44,7 +55,14 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
           <>
             <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
               <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.min}</EuiFlexItem>
-              <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.max}</EuiFlexItem>
+              <EuiFlexItem
+                className={classNames(
+                  'mlDataGridChart__legend',
+                  'mlDataGridChart__legend--numeric'
+                )}
+              >
+                {legendText.max}
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
           </>
