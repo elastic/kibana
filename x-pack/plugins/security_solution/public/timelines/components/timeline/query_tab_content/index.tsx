@@ -339,20 +339,22 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               data-test-subj="eui-flyout-footer"
               className="timeline-flyout-footer"
             >
-              <Footer
-                activePage={pageInfo?.activePage ?? 0}
-                data-test-subj="timeline-footer"
-                updatedAt={updatedAt}
-                height={footerHeight}
-                id={timelineId}
-                isLive={isLive}
-                isLoading={isQueryLoading || loadingSourcerer}
-                itemsCount={isBlankTimeline ? 0 : events.length}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                onChangePage={loadPage}
-                totalCount={isBlankTimeline ? 0 : totalCount}
-              />
+              {!isBlankTimeline && (
+                <Footer
+                  activePage={pageInfo?.activePage ?? 0}
+                  data-test-subj="timeline-footer"
+                  updatedAt={updatedAt}
+                  height={footerHeight}
+                  id={timelineId}
+                  isLive={isLive}
+                  isLoading={isQueryLoading || loadingSourcerer}
+                  itemsCount={isBlankTimeline ? 0 : events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangePage={loadPage}
+                  totalCount={isBlankTimeline ? 0 : totalCount}
+                />
+              )}
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
