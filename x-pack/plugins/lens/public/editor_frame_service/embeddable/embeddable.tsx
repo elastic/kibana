@@ -38,7 +38,11 @@ import {
 import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { isLensBrushEvent, isLensFilterEvent } from '../../types';
+import {
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensTableRowContextMenuClickEvent,
+} from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE } from '../../../common';
@@ -127,6 +131,7 @@ export class Embeddable
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
       case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick];
       case 'lnsPie':
         return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
@@ -259,6 +264,13 @@ export class Embeddable
       });
     }
     if (isLensFilterEvent(event)) {
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
+    }
+
+    if (isLensTableRowContextMenuClickEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,

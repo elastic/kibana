@@ -13,6 +13,7 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
+  ROW_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
@@ -39,9 +40,11 @@ interface UrlDrilldownDeps {
 export type ActionContext = ChartActionContext;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
-  | typeof CONTEXT_MENU_TRIGGER
   | typeof VALUE_CLICK_TRIGGER
-  | typeof SELECT_RANGE_TRIGGER;
+  | typeof SELECT_RANGE_TRIGGER
+  | typeof ROW_CLICK_TRIGGER
+  | typeof CONTEXT_MENU_TRIGGER;
+
 export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
   embeddable?: IEmbeddable;
 }
@@ -65,7 +68,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, CONTEXT_MENU_TRIGGER];
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
@@ -77,9 +80,9 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     const scope = React.useMemo(() => this.buildEditorScope(context), [context]);
     return (
       <UrlDrilldownCollectConfig
+        variables={['test']}
         config={config}
         onConfig={onConfig}
-        scope={scope}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
         variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
       />
@@ -133,7 +136,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return urlDrilldownBuildScope({
       globalScope: this.deps.getGlobalScope(),
       contextScope: getContextScope(context),
-      eventScope: getMockEventScope(context.triggers),
+      eventScope: getMockEventScope(context),
     });
   };
 

@@ -14,14 +14,17 @@ import {
   IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isRowClickTriggerContext,
   isContextMenuTriggerContext,
   RangeSelectContext,
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
-import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
+import type { ActionContext, ActionFactoryContext } from './url_drilldown';
 import {
   SELECT_RANGE_TRIGGER,
+  RowClickContext,
   VALUE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
@@ -108,7 +111,9 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
 export type UrlDrilldownEventScope =
   | ValueClickTriggerEventScope
   | RangeSelectTriggerEventScope
+  | RowClickTriggerEventScope
   | ContextMenuTriggerEventScope;
+
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -122,6 +127,12 @@ export interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
+export interface RowClickTriggerEventScope {
+  rowIndex: number;
+  values: Primitive[];
+  keys: string[];
+  columnNames: string[];
+}
 export type ContextMenuTriggerEventScope = object;
 
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
@@ -129,6 +140,8 @@ export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEve
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
+  } else if (isRowClickTriggerContext(eventScopeInput)) {
+    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
   } else if (isContextMenuTriggerContext(eventScopeInput)) {
     return {};
   } else {
@@ -168,12 +181,48 @@ function getEventScopeFromValueClickTriggerContext(
   });
 }
 
+function getEventScopeFromRowClickTriggerContext({
+  embeddable,
+  data,
+}: RowClickContext): RowClickTriggerEventScope {
+  const { rowIndex } = data;
+  const columns = data.columns || data.table.columns.map(({ id }) => id);
+  const values: Primitive[] = [];
+  const keys: string[] = [];
+  const columnNames: string[] = [];
+  const row = data.table.rows[rowIndex];
+
+  for (const columnId of columns) {
+    const column = data.table.columns.find(({ id }) => id === columnId);
+    if (!column) {
+      // This should never happe, but in case it does we log data necessary for debugging.
+      // eslint-disable-next-line no-console
+      console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
+      throw new Error('Could not find a datatable column.');
+    }
+    values.push(row[columnId]);
+    keys.push(column.meta.field || '');
+    columnNames.push(column.name || column.meta.field || '');
+  }
+
+  const scope: RowClickTriggerEventScope = {
+    rowIndex,
+    values,
+    keys,
+    columnNames,
+  };
+
+  return scope;
+}
+
 /**
  * @remarks
  * Difference between `event` and `context` variables, is that real `context` variables are available during drilldown creation (e.g. embeddable panel)
  * `event` variables are mapped from trigger context. Since there is no trigger context during drilldown creation, we have to provide some _mock_ variables for validating and previewing the URL
  */
-export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventScope {
+export function getMockEventScope(context: ActionFactoryContext): UrlDrilldownEventScope {
+  const [trigger] = context.triggers;
+
   if (trigger === SELECT_RANGE_TRIGGER) {
     return {
       key: 'event.key',
@@ -195,6 +244,15 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       value: `event.value`,
       negate: false,
       points,
+    };
+  }
+
+  if (trigger === ROW_CLICK_TRIGGER) {
+    return {
+      rowIndex: 123,
+      values: [0, 1, 2, 3],
+      keys: ['0', '1', '2', '3'],
+      columnNames: ['0', '1', '2', '3'],
     };
   }
 
