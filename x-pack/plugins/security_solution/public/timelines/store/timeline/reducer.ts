@@ -178,7 +178,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event }) => ({
+  .case(toggleExpandedEvent, (state, { timelineId, event = {} }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,

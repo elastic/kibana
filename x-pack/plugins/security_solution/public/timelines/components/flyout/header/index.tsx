@@ -222,7 +222,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
-  <StyledTimelineHeader alignItems="center" gutterSize="xl">
+  <StyledTimelineHeader alignItems="center" gutterSize="l">
     <EuiFlexItem>
       <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
         <RowFlexItem>

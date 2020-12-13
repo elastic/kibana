@@ -82,7 +82,6 @@ import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
 import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
@@ -104,7 +103,6 @@ enum RuleDetailTabs {
 }
 
 const getRuleDetailsTabs = (rule: Rule | null) => {
-  const canUseExceptions = rule && !isThresholdRule(rule.type);
   return [
     {
       id: RuleDetailTabs.alerts,
@@ -115,7 +113,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
-      disabled: !canUseExceptions,
+      disabled: false,
       dataTestSubj: 'exceptionsTab',
     },
     {

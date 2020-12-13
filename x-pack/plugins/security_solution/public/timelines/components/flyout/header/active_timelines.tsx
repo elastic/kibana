@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
 import * as i18n from './translations';
@@ -33,6 +34,12 @@ interface ActiveTimelinesProps {
   isOpen: boolean;
   updated?: number;
 }
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  > span {
+    padding: 0;
+  }
+`;
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineId,
@@ -72,9 +79,9 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   }, [timelineStatus, updated]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <ButtonWrapper grow={false}>
-        <EuiButtonEmpty
+        <StyledEuiButtonEmpty
           data-test-subj="flyoutOverlay"
           size="s"
           isSelected={isOpen}
@@ -88,9 +95,14 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
                 />
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem grow>{title}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+            {!isOpen && (
+              <EuiFlexItem grow={false}>
+                <TimelineEventsCountBadge />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        </EuiButtonEmpty>
+        </StyledEuiButtonEmpty>
       </ButtonWrapper>
     </EuiFlexGroup>
   );

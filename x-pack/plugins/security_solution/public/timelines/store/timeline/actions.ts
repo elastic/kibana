@@ -35,9 +35,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-interface ToggleExpandedEvent {
+export interface ToggleExpandedEvent {
   timelineId: string;
-  event: TimelineExpandedEvent;
+  event?: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 

@@ -464,6 +464,8 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
                 user: note.updatedBy || 'unknown',
                 saveObjectId: note.noteId,
                 version: note.version,
+                eventId: note.eventId ?? null,
+                timelineId: note.timelineId ?? null,
               }))
             : [],
       })

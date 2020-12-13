@@ -19,6 +19,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { appActions } from '../../../../common/store/app';
 
 interface Props {
   timelineId?: string;
@@ -57,6 +58,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
       dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+      dispatch(appActions.addNotes({ notes: [] }));
       if (globalTimeRange.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
