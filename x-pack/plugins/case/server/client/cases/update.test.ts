@@ -66,6 +66,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
 
@@ -146,6 +149,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -194,6 +200,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -255,6 +264,9 @@ describe('update', () => {
             username: 'awesome',
           },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });

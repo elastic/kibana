@@ -200,6 +200,9 @@ export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
       email: 'testemail@elastic.co',
       username: 'elastic',
     },
+    settings: {
+      syncAlerts: true,
+    },
   },
   references: [],
   updated_at: '2019-11-25T21:54:48.952Z',
