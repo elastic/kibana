@@ -168,7 +168,7 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
   return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
 }
 
-export function parseAndVerifyDataStreams(
+function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
   pkgVersion: string
@@ -237,7 +237,7 @@ export function parseAndVerifyDataStreams(
   return dataStreams;
 }
 
-export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
   const streams: RegistryStream[] = [];
   const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
@@ -269,7 +269,7 @@ export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): Re
   }
   return streams;
 }
-export function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
+function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
   const vars: RegistryVarsEntry[] = [];
   if (manifestVars && manifestVars.length > 0) {
     manifestVars.forEach((manifestVar) => {
@@ -304,9 +304,7 @@ export function parseAndVerifyVars(manifestVars: any[], location: string): Regis
   }
   return vars;
 }
-export function parseAndVerifyPolicyTemplates(
-  manifest: PackageSpecManifest
-): RegistryPolicyTemplate[] {
+function parseAndVerifyPolicyTemplates(manifest: PackageSpecManifest): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
   if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
@@ -337,7 +335,7 @@ export function parseAndVerifyPolicyTemplates(
   }
   return policyTemplates;
 }
-export function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
+function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
   const inputs: RegistryInput[] = [];
   if (manifestInputs && manifestInputs.length > 0) {
     manifestInputs.forEach((input: any) => {
