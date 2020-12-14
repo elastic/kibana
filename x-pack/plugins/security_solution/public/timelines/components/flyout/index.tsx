@@ -59,7 +59,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
             timelineActions.toggleModalSaveTimeline({
               id: TimelineId.active,
               showModalSaveTimeline: true,
-              nextAppId,
             })
           );
         };

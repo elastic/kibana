@@ -8,7 +8,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimelineTitleAndDescription } from './title_and_description';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 
@@ -17,7 +16,7 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
 }));
 
 jest.mock('../properties/use_create_timeline', () => ({
-  useCreateTimelineButton: jest.fn(),
+  useCreateTimeline: jest.fn(),
 }));
 
 jest.mock('react-redux', () => {
@@ -50,14 +49,10 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.default,
       });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
-      });
     });
 
     afterEach(() => {
       (useDeepEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 
@@ -130,14 +125,10 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.default,
       });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
-      });
     });
 
     afterEach(() => {
       (useDeepEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 
@@ -207,14 +198,10 @@ describe('TimelineTitleAndDescription', () => {
         timelineType: TimelineType.default,
         showWarnging: true,
       });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
-      });
     });
 
     afterEach(() => {
       (useDeepEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 

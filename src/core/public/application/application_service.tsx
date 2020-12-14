@@ -350,7 +350,7 @@ export class ApplicationService {
       });
       if (!confirmed) {
         if (action.callback) {
-          action.callback();
+          setTimeout(action.callback, 0);
         }
         return false;
       }

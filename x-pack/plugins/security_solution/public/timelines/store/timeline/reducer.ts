@@ -521,16 +521,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(toggleModalSaveTimeline, (state, { id, showModalSaveTimeline, nextAppId }) => ({
+  .case(toggleModalSaveTimeline, (state, { id, showModalSaveTimeline }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [id]: {
         ...state.timelineById[id],
-        saveModal: {
-          show: showModalSaveTimeline,
-          nextAppId,
-        },
+        showSaveModal: showModalSaveTimeline,
       },
     },
   }))

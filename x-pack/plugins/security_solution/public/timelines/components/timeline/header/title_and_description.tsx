@@ -21,13 +21,14 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
 import { Description, Name } from '../properties/helpers';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
+import { useCreateTimeline } from '../properties/use_create_timeline';
 import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
@@ -71,11 +72,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const [isFormSubmitted, setFormSubmitted] = useState(false);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
-
     const { isSaving, status, title, timelineType } = timeline;
-
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
+    const handleCreateNewTimeline = useCreateTimeline({
+      timelineId: TimelineId.active,
+      timelineType: TimelineType.default,
+    });
     const onSaveTimeline = useCallback(
       (args: TimelineInput) => dispatch(timelineActions.saveTimeline(args)),
       [dispatch]
@@ -89,6 +92,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       });
       setFormSubmitted(true);
     }, [onSaveTimeline, timeline, timelineId]);
+
+    const handleCancel = useCallback(() => {
+      if (showWarning) {
+        handleCreateNewTimeline();
+      }
+      closeSaveTimeline();
+    }, [closeSaveTimeline, handleCreateNewTimeline, showWarning]);
 
     const closeModalText = useMemo(() => {
       if (status === TimelineStatus.draft && showWarning) {
@@ -188,7 +198,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 <EuiFlexItem grow={false} component="span">
                   <EuiButton
                     fill={false}
-                    onClick={closeSaveTimeline}
+                    onClick={handleCancel}
                     isDisabled={isSaving}
                     data-test-subj="close-button"
                   >
