@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,

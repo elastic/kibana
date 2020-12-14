@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
     expected: {
-      totalDocCountFormatted: '86,274',
+      totalDocCountFormatted: '34,415',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
       documentCountCard: {
         type: ML_JOB_FIELD_TYPES.NUMBER,
