@@ -16,7 +16,6 @@ import {
   getColorPalette,
 } from '../../color_palettes';
 import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
-import { GREAT_THAN, UPTO } from '../../../../../common/i18n_getters';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -26,6 +25,9 @@ import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
 
+const UP_TO = i18n.translate('xpack.maps.legend.upto', {
+  defaultMessage: 'up to',
+});
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
@@ -337,18 +339,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
       let label = '';
       if (!hasNext) {
-        label = `${GREAT_THAN} ${valuePrefix}${formattedStopValue}`;
+        label = `> ${valuePrefix}${formattedStopValue}`;
       } else {
         const nextStopValue = colorStops[i + 2];
         const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
         const nextValuePrefix = getValuePrefix ? getValuePrefix(i, true) : '';
 
         if (i === 0) {
-          label = `${UPTO} ${nextValuePrefix}${formattedNextStopValue}`;
+          label = `< ${nextValuePrefix}${formattedNextStopValue}`;
         } else {
           const begin = `${valuePrefix}${formattedStopValue}`;
           const end = `${nextValuePrefix}${formattedNextStopValue}`;
-          label = `${begin} ${UPTO} ${end}`;
+          label = `${begin} ${UP_TO} ${end}`;
         }
       }
 
