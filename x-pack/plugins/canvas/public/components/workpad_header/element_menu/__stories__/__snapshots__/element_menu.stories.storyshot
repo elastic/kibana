@@ -16,6 +16,7 @@ exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
       aria-label="Add an element"
       className="euiButton euiButton--primary euiButton--small canvasElementMenu__popoverButton euiButton--fill"
       data-test-subj="add-element-button"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >

@@ -378,6 +378,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -427,6 +428,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -852,6 +854,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -901,6 +904,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -1331,6 +1335,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -1380,6 +1385,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a

@@ -266,13 +266,16 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
                               type="button"
                             >
@@ -312,6 +315,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
@@ -622,13 +626,16 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
                               type="button"
                             >
@@ -668,6 +675,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
@@ -978,13 +986,16 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
                               type="button"
                             >
@@ -1024,6 +1035,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >

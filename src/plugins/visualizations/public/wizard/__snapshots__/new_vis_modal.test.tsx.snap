@@ -452,6 +452,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   <button
                     aria-label="Closes this modal window"
                     className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -1032,16 +1033,19 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     size="s"
                                   >
                                     <EuiButtonDisplay
+                                      disabled={false}
                                       element="button"
                                       fill={true}
                                       iconSide="right"
                                       iconType="popout"
+                                      isDisabled={false}
                                       onClick={[Function]}
                                       size="s"
                                       type="button"
                                     >
                                       <button
                                         className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                        disabled={false}
                                         onClick={[Function]}
                                         type="button"
                                       >
@@ -1533,6 +1537,7 @@ exports[`NewVisModal should render as expected 1`] = `
                   <button
                     aria-label="Closes this modal window"
                     className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -2062,16 +2067,19 @@ exports[`NewVisModal should render as expected 1`] = `
                                     size="s"
                                   >
                                     <EuiButtonDisplay
+                                      disabled={false}
                                       element="button"
                                       fill={true}
                                       iconSide="right"
                                       iconType="popout"
+                                      isDisabled={false}
                                       onClick={[Function]}
                                       size="s"
                                       type="button"
                                     >
                                       <button
                                         className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                        disabled={false}
                                         onClick={[Function]}
                                         type="button"
                                       >

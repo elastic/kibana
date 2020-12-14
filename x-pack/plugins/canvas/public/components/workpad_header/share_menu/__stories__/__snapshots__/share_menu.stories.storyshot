@@ -16,6 +16,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
       <button
         aria-label="Share this workpad"
         className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+        disabled={false}
         onClick={[Function]}
         type="button"
       >

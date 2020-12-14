@@ -105,6 +105,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   >
                     <button
                       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                      disabled={false}
                       onClick={[Function]}
                       type="button"
                     >
@@ -529,6 +530,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <button
                       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                      disabled={false}
                       onClick={[Function]}
                       type="button"
                     >
