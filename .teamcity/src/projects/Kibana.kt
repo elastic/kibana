@@ -80,7 +80,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           buildType(JestIntegration)
         }
 
-        buildType(ApiServerIntegration)
         buildType(QuickTests)
         buildType(AllTests)
       }
@@ -99,6 +98,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           buildType(OssFirefox)
           buildType(OssAccessibility)
           buildType(OssPluginFunctional)
+          buildType(OssApiServerIntegration)
 
           subProject {
             id("CIGroups")
