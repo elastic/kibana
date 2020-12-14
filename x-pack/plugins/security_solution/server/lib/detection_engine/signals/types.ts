@@ -221,8 +221,10 @@ export interface SearchAfterAndBulkCreateParams {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   id: string;
+  inputIndexPattern: string[];
   signalsIndex: string;
   timestampsAndIndices: TimestampsAndIndices;
+  timestampsToSort: string[] | undefined;
   name: string;
   actions: RuleAlertAction[];
   createdAt: string;

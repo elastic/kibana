@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable complexity */
+
+import { isEmpty } from 'lodash/fp';
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -28,8 +31,10 @@ export const searchAfterAndBulkCreate = async ({
   logger,
   eventsTelemetry,
   id,
+  inputIndexPattern,
   signalsIndex,
   timestampsAndIndices,
+  timestampsToSort,
   filter,
   actions,
   name,
@@ -53,16 +58,18 @@ export const searchAfterAndBulkCreate = async ({
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
-  const timestampsToSort = Object.keys(timestampsAndIndices);
+  const timestamps = !isEmpty(timestampsAndIndices)
+    ? Object.keys(timestampsAndIndices)
+    : timestampsToSort;
 
-  if (timestampsToSort == null || timestampsToSort.length === 0) {
+  if (timestamps == null || timestamps.length === 0) {
     logger.error(
-      buildRuleMessage(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`)
+      buildRuleMessage(`No indices contained timestamp fields: ${JSON.stringify(timestamps)}`)
     );
-    throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
+    throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestamps)}`);
   }
 
-  for (const timestamp of timestampsToSort) {
+  for (const timestamp of timestamps) {
     const totalToFromTuples = getSignalTimeTuples({
       logger,
       ruleParamsFrom: ruleParams.from,
@@ -93,7 +100,9 @@ export const searchAfterAndBulkCreate = async ({
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
-            index: timestampsAndIndices[timestamp],
+            index: !isEmpty(timestampsAndIndices[timestamp])
+              ? timestampsAndIndices[timestamp]
+              : inputIndexPattern,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
@@ -216,7 +225,7 @@ export const searchAfterAndBulkCreate = async ({
           // we are guaranteed to have searchResult hits at this point
           // because we check before if the totalHits or
           // searchResult.hits.hits.length is 0
-          const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1].sort;
+          const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
             sortId = lastSortId[0];
           } else {

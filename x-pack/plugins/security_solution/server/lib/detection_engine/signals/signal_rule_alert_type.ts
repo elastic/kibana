@@ -164,62 +164,62 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-
-      const inputIndexPattern = await getInputIndex(services, version, index);
-      const timestampsToSort = timestampOverride
-        ? [timestampOverride, '@timestamp']
-        : ['@timestamp'];
-
-      const preCheckResult = await preExecutionRuleCheck(
-        inputIndexPattern,
-        timestampsToSort,
-        services,
-        logger,
-        buildRuleMessage
-      );
-
-      const filteredIndexPattern = preCheckResult.successIndexes;
-      let wroteStatus = false;
-
-      if (preCheckResult.result === 'error') {
-        // write the error
-        await ruleStatusService.error(preCheckResult.resultMessages.join(' | '));
-        wroteStatus = true;
-      } else if (preCheckResult.result === 'partial failure') {
-        // write the partial failure here
-        // but continue with the execution, ensuring no further statuses are written.
-        await ruleStatusService.partialFailure(
-          `There was a partial failure: ${preCheckResult.resultMessages.join(' | ')}`
-        );
-        wroteStatus = true;
-      } else {
-        await ruleStatusService.goingToRun();
-      }
-
-      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-      if (gap != null && gap.asMilliseconds() > 0) {
-        const fromUnit = from[from.length - 1];
-        const { ratio } = getGapMaxCatchupRatio({
-          logger,
-          buildRuleMessage,
-          previousStartedAt,
-          ruleParamsFrom: from,
-          interval,
-          unit: fromUnit,
-        });
-        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
-          const gapString = gap.humanize();
-          const gapMessage = buildRuleMessage(
-            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-            'Consider increasing your look behind time or adding more Kibana instances.'
-          );
-          logger.warn(gapMessage);
-
-          hasError = true;
-          await ruleStatusService.error(gapMessage, { gap: gapString });
-        }
-      }
       try {
+        const inputIndexPattern = await getInputIndex(services, version, index);
+        const timestampsToSort = timestampOverride
+          ? [timestampOverride, '@timestamp']
+          : ['@timestamp'];
+
+        const preCheckResult = await preExecutionRuleCheck(
+          inputIndexPattern,
+          timestampsToSort,
+          services,
+          logger,
+          buildRuleMessage
+        );
+
+        const filteredIndexPattern = preCheckResult.successIndexes;
+        let wroteStatus = false;
+
+        if (preCheckResult.result === 'error') {
+          // write the error
+          await ruleStatusService.error(preCheckResult.resultMessages.join(' | '));
+          wroteStatus = true;
+        } else if (preCheckResult.result === 'partial failure') {
+          // write the partial failure here
+          // but continue with the execution, ensuring no further statuses are written.
+          await ruleStatusService.partialFailure(
+            `There was a partial failure: ${preCheckResult.resultMessages.join(' | ')}`
+          );
+          wroteStatus = true;
+        } else {
+          await ruleStatusService.goingToRun();
+        }
+
+        const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
+        if (gap != null && gap.asMilliseconds() > 0) {
+          const fromUnit = from[from.length - 1];
+          const { ratio } = getGapMaxCatchupRatio({
+            logger,
+            buildRuleMessage,
+            previousStartedAt,
+            ruleParamsFrom: from,
+            interval,
+            unit: fromUnit,
+          });
+          if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
+            const gapString = gap.humanize();
+            const gapMessage = buildRuleMessage(
+              `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
+              'Consider increasing your look behind time or adding more Kibana instances.'
+            );
+            logger.warn(gapMessage);
+
+            hasError = true;
+            await ruleStatusService.error(gapMessage, { gap: gapString });
+          }
+        }
+
         const { listClient, exceptionsClient } = getListsClient({
           services,
           updatedByUser,
@@ -467,6 +467,7 @@ export const signalRulesAlertType = ({
             query,
             inputIndex: filteredIndexPattern,
             timestampsAndIndices: preCheckResult.timestampsAndIndices,
+            timestampsToSort,
             type,
             filters: filters ?? [],
             language,
@@ -525,6 +526,8 @@ export const signalRulesAlertType = ({
             eventsTelemetry,
             id: alertId,
             timestampsAndIndices: preCheckResult.timestampsAndIndices,
+            timestampsToSort,
+            inputIndexPattern,
             signalsIndex: outputIndex,
             filter: esFilter,
             actions,

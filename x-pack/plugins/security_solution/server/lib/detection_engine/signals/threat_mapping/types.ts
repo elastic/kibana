@@ -36,6 +36,7 @@ export interface CreateThreatSignalsOptions {
   query: string;
   inputIndex: string[];
   timestampsAndIndices: TimestampsAndIndices;
+  timestampsToSort: string[] | undefined;
   type: Type;
   filters: PartialFilter[];
   language: LanguageOrUndefined;
@@ -76,6 +77,7 @@ export interface CreateThreatSignalOptions {
   query: string;
   inputIndex: string[];
   timestampsAndIndices: TimestampsAndIndices;
+  timestampsToSort: string[] | undefined;
   type: Type;
   filters: PartialFilter[];
   language: LanguageOrUndefined;
