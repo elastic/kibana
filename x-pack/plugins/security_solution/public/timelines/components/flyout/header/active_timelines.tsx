@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
 
@@ -25,6 +26,17 @@ interface ActiveTimelinesProps {
   timelineType: TimelineType;
   isOpen: boolean;
 }
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  > span {
+    padding: 0;
+
+    > span {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+`;
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineId,
@@ -46,16 +58,17 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     : UNTITLED_TIMELINE;
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <ButtonWrapper grow={false}>
-        <EuiButtonEmpty
+        <StyledEuiButtonEmpty
           data-test-subj="flyoutOverlay"
           size="s"
           isSelected={isOpen}
           onClick={handleToggleOpen}
         >
           {title}
-        </EuiButtonEmpty>
+          {!isOpen && <TimelineEventsCountBadge />}
+        </StyledEuiButtonEmpty>
       </ButtonWrapper>
     </EuiFlexGroup>
   );

@@ -26,7 +26,7 @@ import {
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
@@ -41,7 +41,7 @@ import { EvaluateStat } from './evaluate_stat';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   searchQuery: SavedSearchQuery;
 }
 
