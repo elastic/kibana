@@ -17,7 +17,7 @@ export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLi
       stepIndex: schema.number(),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroup, stepIndex } = request.query;
 
     const result = await libs.requests.getNetworkEvents({
@@ -26,10 +26,8 @@ export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLi
       stepIndex,
     });
 
-    return response.ok({
-      body: {
-        events: result,
-      },
-    });
+    return {
+      events: result,
+    };
   },
 });
