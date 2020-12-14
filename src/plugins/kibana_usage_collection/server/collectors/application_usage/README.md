@@ -113,4 +113,4 @@ In order to keep the count of the events, this collector uses 3 Saved Objects:
 
 All the types use the shared fields `appId: 'keyword'`, `viewId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`, but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)). `application_usage_transactional` and `application_usage_daily` also store `timestamp: { type: 'date' }`.
 
-Rollups uses `appId` in the id for the default view. For other views `viewId` is contactinated.
+Rollups uses `appId` in the savedObject id for the default view. For other views `viewId` is concatenated. This keeps backwards compatiblity with previously stored documents on the clusters without requiring any form of migration.
