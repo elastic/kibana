@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.setRoles([
         'global_maps_all',
         'geoall_data_writer',
-        'global_Index_Pattern_Management_all',
+        'global_index_pattern_management_all',
       ]);
       await PageObjects.maps.openNewMap();
     });
