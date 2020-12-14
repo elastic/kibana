@@ -27,6 +27,7 @@ import {
   SetPriorityInputField,
   DataTierAllocationField,
   ShrinkField,
+  ReadonlyField,
 } from '../shared_fields';
 
 const i18nTexts = {
@@ -173,6 +174,9 @@ export const WarmPhase: FunctionComponent = () => {
             {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
             {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
+
+            <ReadonlyField phase={'warm'} />
+
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}
