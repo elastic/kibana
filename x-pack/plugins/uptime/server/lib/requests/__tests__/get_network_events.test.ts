@@ -197,7 +197,7 @@ describe('getNetworkEvents', () => {
               },
               "size": 1000,
             },
-            "index": "heartbeat-8*",
+            "index": "heartbeat-7*",
           },
         ],
       ]
