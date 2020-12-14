@@ -7,7 +7,7 @@
 import { pollSearch } from './poll_search';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 
-describe('EnhancedSearchInterceptor', () => {
+describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1, finishWithError = false) {
     let counter = 0;
     return jest.fn().mockImplementation(() => {
