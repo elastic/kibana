@@ -106,7 +106,7 @@ const ParamsSchema = schema.object(
     kibanaFooterLink: schema.object({
       path: schema.string({ defaultValue: '/' }),
       text: schema.string({
-        defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
+        defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
           defaultMessage: 'Go to Kibana',
         }),
       }),
