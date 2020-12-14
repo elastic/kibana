@@ -400,6 +400,17 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return values.filter((item) => item.length > 0);
     }
 
+    public async clickOnGaugeByLabel(label: string) {
+      const gauge = await testSubjects.find(`visGauge__meter--${label}`);
+      const gaugeSize = await gauge.getSize();
+      const gaugeHeight = gaugeSize.height;
+      // To click at Gauge arc instead of the center of SVG element
+      // the offset for a click is calculated as half arc height without 1 pixel
+      const yOffset = 1 - Math.floor(gaugeHeight / 2);
+
+      await gauge.clickMouseButton({ xOffset: 0, yOffset });
+    }
+
     public async getRightValueAxes() {
       const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
       return axes.length;
