@@ -23,11 +23,11 @@ import {
   PainlessCompletionResult,
   PainlessCompletionItem,
   PainlessContext,
-  Field,
+  PainlessAutocompleteField,
 } from '../../types';
 
 import {
-  painlessTestContext,
+  commonContext,
   scoreContext,
   filterContext,
   booleanScriptFieldScriptFieldContext,
@@ -53,17 +53,56 @@ export interface Suggestion extends PainlessCompletionItem {
   constructorDefinition?: PainlessCompletionItem;
 }
 
-const keywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
-  return {
-    label: keyword,
-    kind: 'keyword',
-    documentation: 'Keyword: char',
-    insertText: keyword,
-  };
-});
+export const getKeywords = (): PainlessCompletionItem[] => {
+  const lexerKeywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
+    return {
+      label: keyword,
+      kind: 'keyword',
+      documentation: `Keyword: ${keyword}`,
+      insertText: keyword,
+    };
+  });
+
+  const allKeywords: PainlessCompletionItem[] = [
+    ...lexerKeywords,
+    {
+      label: 'params',
+      kind: 'keyword',
+      documentation: i18n.translate(
+        'monaco.painlessLanguage.autocomplete.paramsKeywordDescription',
+        {
+          defaultMessage: 'Access variables passed into the script.',
+        }
+      ),
+      insertText: 'params',
+    },
+  ];
+
+  return allKeywords;
+};
+
+export const getTypeSuggestions = (): PainlessCompletionItem[] => {
+  return lexerRules.primitives.map((primitive) => {
+    return {
+      label: primitive,
+      kind: 'type',
+      documentation: `Type: ${primitive}`,
+      insertText: primitive,
+    };
+  });
+};
+
+const runtimeContexts: PainlessContext[] = [
+  'boolean_script_field_script_field',
+  'date_script_field',
+  'double_script_field_script_field',
+  'ip_script_field_script_field',
+  'long_script_field_script_field',
+  'string_script_field_script_field',
+];
 
 const mapContextToData: { [key: string]: { suggestions: any[] } } = {
-  painless_test: painlessTestContext,
+  painless_test: commonContext,
   score: scoreContext,
   filter: filterContext,
   boolean_script_field_script_field: booleanScriptFieldScriptFieldContext,
@@ -75,16 +114,24 @@ const mapContextToData: { [key: string]: { suggestions: any[] } } = {
   string_script_field_script_field: stringScriptFieldScriptFieldContext,
 };
 
-export const getStaticSuggestions = (
-  suggestions: Suggestion[],
-  hasFields: boolean
-): PainlessCompletionResult => {
+export const getStaticSuggestions = ({
+  suggestions,
+  hasFields,
+  isRuntimeContext,
+}: {
+  suggestions: Suggestion[];
+  hasFields?: boolean;
+  isRuntimeContext?: boolean;
+}): PainlessCompletionResult => {
   const classSuggestions: PainlessCompletionItem[] = suggestions.map((suggestion) => {
     const { properties, constructorDefinition, ...rootSuggestion } = suggestion;
     return rootSuggestion;
   });
 
-  const keywordSuggestions: PainlessCompletionItem[] = hasFields
+  const keywords = getKeywords();
+  const typeSuggestions = getTypeSuggestions();
+
+  let keywordSuggestions: PainlessCompletionItem[] = hasFields
     ? [
         ...keywords,
         {
@@ -102,14 +149,27 @@ export const getStaticSuggestions = (
       ]
     : keywords;
 
+  keywordSuggestions = isRuntimeContext
+    ? [
+        ...keywordSuggestions,
+        {
+          label: 'emit',
+          kind: 'keyword',
+          documentation: i18n.translate(
+            'monaco.painlessLanguage.autocomplete.emitKeywordDescription',
+            {
+              defaultMessage: 'Emit value without returning.',
+            }
+          ),
+          insertText: 'emit',
+        },
+      ]
+    : keywordSuggestions;
+
   return {
     isIncomplete: false,
-    suggestions: [...classSuggestions, ...keywordSuggestions],
+    suggestions: [...classSuggestions, ...keywordSuggestions, ...typeSuggestions],
   };
-};
-
-export const getPrimitives = (suggestions: Suggestion[]): string[] => {
-  return suggestions.filter((suggestion) => suggestion.kind === 'type').map((type) => type.label);
 };
 
 export const getClassMemberSuggestions = (
@@ -124,7 +184,9 @@ export const getClassMemberSuggestions = (
   };
 };
 
-export const getFieldSuggestions = (fields: Field[]): PainlessCompletionResult => {
+export const getFieldSuggestions = (
+  fields: PainlessAutocompleteField[]
+): PainlessCompletionResult => {
   const suggestions: PainlessCompletionItem[] = fields.map(({ name }) => {
     return {
       label: name,
@@ -168,12 +230,24 @@ export const getConstructorSuggestions = (suggestions: Suggestion[]): PainlessCo
 export const getAutocompleteSuggestions = (
   painlessContext: PainlessContext,
   words: string[],
-  fields?: Field[]
+  fields?: PainlessAutocompleteField[]
 ): PainlessCompletionResult => {
-  const suggestions = mapContextToData[painlessContext].suggestions;
+  // Unique suggestions based on context
+  const contextSuggestions = mapContextToData[painlessContext].suggestions;
+  // Enhance suggestions with common classes that exist in all contexts
+  // "painless_test" is the exception since it equals the common suggestions
+  const suggestions =
+    painlessContext === 'painless_test'
+      ? contextSuggestions
+      : contextSuggestions.concat(commonContext.suggestions);
   // What the user is currently typing
   const activeTyping = words[words.length - 1];
-  const primitives = getPrimitives(suggestions);
+  // This logic may end up needing to be more robust as we integrate autocomplete into more editors
+  // For now, we're assuming there is a list of painless contexts that are only applicable in runtime fields
+  const isRuntimeContext = runtimeContexts.includes(painlessContext);
+  // "text" field types are not available in doc values and should be removed for autocompletion
+  const filteredFields = fields?.filter((field) => field.type !== 'text');
+  const hasFields = Boolean(filteredFields?.length);
 
   let autocompleteSuggestions: PainlessCompletionResult = {
     isIncomplete: false,
@@ -182,13 +256,13 @@ export const getAutocompleteSuggestions = (
 
   if (isConstructorInstance(words)) {
     autocompleteSuggestions = getConstructorSuggestions(suggestions);
-  } else if (fields && isDeclaringField(activeTyping)) {
-    autocompleteSuggestions = getFieldSuggestions(fields);
+  } else if (filteredFields && isDeclaringField(activeTyping)) {
+    autocompleteSuggestions = getFieldSuggestions(filteredFields);
   } else if (isAccessingProperty(activeTyping)) {
     const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
     autocompleteSuggestions = getClassMemberSuggestions(suggestions, className);
-  } else if (showStaticSuggestions(activeTyping, words, primitives)) {
-    autocompleteSuggestions = getStaticSuggestions(suggestions, Boolean(fields?.length));
+  } else if (showStaticSuggestions(activeTyping, words, lexerRules.primitives)) {
+    autocompleteSuggestions = getStaticSuggestions({ suggestions, hasFields, isRuntimeContext });
   }
   return autocompleteSuggestions;
 };

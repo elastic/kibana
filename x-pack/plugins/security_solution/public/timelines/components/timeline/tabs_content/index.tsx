@@ -10,9 +10,10 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../store/timeline/model';
-import { getActiveTabSelector } from './selectors';
+import { getActiveTabSelector, getShowTimelineSelector } from './selectors';
 import * as i18n from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
@@ -61,55 +62,73 @@ const PinnedTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
 ));
 PinnedTab.displayName = 'PinnedTab';
 
-const ActiveTimelineTab: React.FC<BasicTimelineTab & { activeTimelineTab: TimelineTabs }> = memo(
-  ({ activeTimelineTab, timelineId }) => {
-    const getTab = useCallback(
-      (tab: TimelineTabs) => {
-        switch (tab) {
-          case TimelineTabs.graph:
-            return <GraphTab timelineId={timelineId} />;
-          case TimelineTabs.notes:
-            return <NotesTab timelineId={timelineId} />;
-          case TimelineTabs.pinned:
-            return <PinnedTab timelineId={timelineId} />;
-          default:
-            return null;
-        }
-      },
-      [timelineId]
-    );
+type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
-    /* Future developer -> why are we doing that
-     * It is really expansive to re-render the QueryTab because the drag/drop
-     * Therefore, we are only hiding its dom when switching to another tab
-     * to avoid mounting/un-mounting === re-render
-     */
-    return (
-      <>
-        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
-          <QueryTab timelineId={timelineId} />
-        </HideShowContainer>
-        <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
-          {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
-        </HideShowContainer>
-      </>
-    );
-  }
-);
+const ActiveTimelineTab = memo<ActiveTimelineTabProps>(({ activeTimelineTab, timelineId }) => {
+  const getTab = useCallback(
+    (tab: TimelineTabs) => {
+      switch (tab) {
+        case TimelineTabs.graph:
+          return <GraphTab timelineId={timelineId} />;
+        case TimelineTabs.notes:
+          return <NotesTab timelineId={timelineId} />;
+        case TimelineTabs.pinned:
+          return <PinnedTab timelineId={timelineId} />;
+        default:
+          return null;
+      }
+    },
+    [timelineId]
+  );
+
+  /* Future developer -> why are we doing that
+   * It is really expansive to re-render the QueryTab because the drag/drop
+   * Therefore, we are only hiding its dom when switching to another tab
+   * to avoid mounting/un-mounting === re-render
+   */
+  return (
+    <>
+      <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
+        <QueryTab timelineId={timelineId} />
+      </HideShowContainer>
+      <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
+        {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
+      </HideShowContainer>
+    </>
+  );
+});
+
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
+
+const StyledEuiTab = styled(EuiTab)`
+  > span {
+    display: flex;
+    flex-direction: row;
+    white-space: pre;
+  }
+
+  :focus {
+    text-decoration: none;
+
+    > span > span {
+      text-decoration: underline;
+    }
+  }
+`;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEventId }) => {
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
+  const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
+  const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
 
-  const setQueryAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
-      ),
-    [dispatch, timelineId]
-  );
+  const setQueryAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
+    );
+  }, [dispatch, timelineId]);
 
   const setGraphAsActiveTab = useCallback(
     () =>
@@ -119,13 +138,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     [dispatch, timelineId]
   );
 
-  const setNotesAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
-      ),
-    [dispatch, timelineId]
-  );
+  const setNotesAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
+    );
+  }, [dispatch, timelineId]);
 
   const setPinnedAsActiveTab = useCallback(
     () =>
@@ -144,15 +162,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
   return (
     <>
       <EuiTabs>
-        <EuiTab
+        <StyledEuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.query}`}
           onClick={setQueryAsActiveTab}
           isSelected={activeTab === TimelineTabs.query}
           disabled={false}
           key={TimelineTabs.query}
         >
-          {i18n.QUERY_TAB}
-        </EuiTab>
+          <span>{i18n.QUERY_TAB}</span>
+          {showTimeline && <TimelineEventsCountBadge />}
+        </StyledEuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
           onClick={setGraphAsActiveTab}
           isSelected={activeTab === TimelineTabs.graph}
           disabled={!graphEventId}
@@ -161,6 +182,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           {i18n.GRAPH_TAB}
         </EuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
           onClick={setNotesAsActiveTab}
           isSelected={activeTab === TimelineTabs.notes}
           disabled={false}
@@ -169,6 +191,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           {i18n.NOTES_TAB}
         </EuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
           onClick={setPinnedAsActiveTab}
           isSelected={activeTab === TimelineTabs.pinned}
           disabled={true}

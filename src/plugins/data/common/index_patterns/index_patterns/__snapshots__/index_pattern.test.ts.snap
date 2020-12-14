@@ -687,6 +687,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "intervalName": undefined,
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
   "title": "title",

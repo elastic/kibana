@@ -5,7 +5,6 @@
  */
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
 interface ClusterBucketESResponse {
   key: string;
@@ -126,19 +125,14 @@ export async function fetchMissingMonitoringData(
     const uuidBuckets = clusterBucket.es_uuids.buckets;
 
     for (const uuidBucket of uuidBuckets) {
-      const stackProductUuid = uuidBucket.key;
+      const nodeId = uuidBucket.key;
       const indexName = get(uuidBucket, `document.hits.hits[0]._index`);
       const differenceInMs = nowInMs - uuidBucket.most_recent.value;
-      const stackProductName = get(
-        uuidBucket,
-        `document.hits.hits[0]._source.source_node.name`,
-        stackProductUuid
-      );
+      const nodeName = get(uuidBucket, `document.hits.hits[0]._source.source_node.name`, nodeId);
 
-      uniqueList[`${clusterUuid}${stackProductUuid}`] = {
-        stackProduct: ELASTICSEARCH_SYSTEM_ID,
-        stackProductUuid,
-        stackProductName,
+      uniqueList[`${clusterUuid}${nodeId}`] = {
+        nodeId,
+        nodeName,
         clusterUuid,
         gapDuration: differenceInMs,
         ccs: indexName.includes(':') ? indexName.split(':')[0] : null,

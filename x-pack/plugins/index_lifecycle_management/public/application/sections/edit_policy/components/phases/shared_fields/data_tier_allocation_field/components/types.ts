@@ -19,4 +19,8 @@ export interface SharedProps {
    * detected.
    */
   disableDataTierOption: boolean;
+  /**
+   * A flag to indicate whether input fields should be showing a loading spinner
+   */
+  isLoading: boolean;
 }

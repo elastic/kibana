@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -21,6 +20,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -110,11 +110,7 @@ export function registerErrorCountAlertType({
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
-
+      const response = await alertingEsClient(services, searchParams);
       const errorCount = response.hits.total.value;
 
       if (errorCount > alertParams.threshold) {

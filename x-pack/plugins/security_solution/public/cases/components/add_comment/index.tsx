@@ -43,7 +43,7 @@ interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
-      const { isLoading, postComment } = usePostComment(caseId);
+      const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -79,10 +79,10 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment({ ...data, type: CommentType.user }, onCommentPosted);
+          postComment(caseId, { ...data, type: CommentType.user }, onCommentPosted);
           reset();
         }
-      }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
+      }, [onCommentPosted, onCommentSaving, postComment, reset, submit, caseId]);
 
       return (
         <span id="add-comment-permLink">

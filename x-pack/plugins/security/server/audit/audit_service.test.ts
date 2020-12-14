@@ -27,6 +27,7 @@ const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });
 const getSpaceId = jest.fn().mockReturnValue('default');
+const getSID = jest.fn().mockResolvedValue('SESSION_ID');
 
 beforeEach(() => {
   logger.info.mockClear();
@@ -45,6 +46,7 @@ describe('#setup', () => {
         http,
         getCurrentUser,
         getSpaceId,
+        getSID,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -70,6 +72,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
   });
@@ -82,6 +85,7 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
     expect(http.registerOnPostAuth).toHaveBeenCalledWith(expect.any(Function));
   });
@@ -96,15 +100,17 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
-      kibana: { space_id: 'default' },
+      kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       message: 'MESSAGE',
       trace: { id: 'REQUEST_ID' },
       user: { name: 'jdoe', roles: ['admin'] },
@@ -122,12 +128,13 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
   });
 
@@ -142,12 +149,13 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log(undefined);
+    await audit.asScoped(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
   });
 });
@@ -357,7 +365,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -367,6 +375,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -387,7 +396,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -397,6 +406,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -425,7 +435,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -435,6 +445,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -451,7 +462,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -463,6 +474,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -480,7 +492,7 @@ describe('#getLogger', () => {
     const licenseWithFeatures = licenseMock.create();
 
     const features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures);
 
     licenseWithFeatures.features$ = features$.asObservable();
@@ -492,6 +504,7 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -504,7 +517,7 @@ describe('#getLogger', () => {
 
     // perform license upgrade
     features$.next({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures);
 
     auditLogger.log(eventType, message);

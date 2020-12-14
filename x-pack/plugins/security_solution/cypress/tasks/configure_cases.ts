@@ -38,11 +38,7 @@ export const openAddNewConnectorOption = () => {
   });
 };
 
-export const selectLastConnectorCreated = () => {
+export const selectLastConnectorCreated = (id: string) => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });
-  cy.get('@createConnector')
-    .its('response')
-    .then((response) => {
-      cy.get(CONNECTOR(response.body.id)).click();
-    });
+  cy.get(CONNECTOR(id)).click();
 };
