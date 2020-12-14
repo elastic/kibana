@@ -207,13 +207,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const pillText = await pill._webElement.getText();
           // check that we have the pill text in our expected map
           expect(expectedPills.has(pillText)).to.equal(true);
-          await pill.click();
-          await pageObjects.common.sleep(100);
-
-          const lastBreadcrumbLink = await testSubjects.find('resolver:breadcrumbs:last');
-          const linkText = await lastBreadcrumbLink._webElement.getText();
-          // check that the breadcrumb has the same pill text
-          expect(pillText).to.equal(linkText);
         }
       };
 
