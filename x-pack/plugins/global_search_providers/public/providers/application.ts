@@ -10,6 +10,8 @@ import { ApplicationStart } from 'src/core/public';
 import { GlobalSearchResultProvider } from '../../../global_search/public';
 import { getAppResults } from './get_app_results';
 
+const applicationType = 'application';
+
 export const createApplicationResultProvider = (
   applicationPromise: Promise<ApplicationStart>
 ): GlobalSearchResultProvider => {
@@ -27,7 +29,7 @@ export const createApplicationResultProvider = (
   return {
     id: 'application',
     find: ({ term, types, tags }, { aborted$, maxResults }) => {
-      if (tags || (types && !types.includes('application'))) {
+      if (tags || (types && !types.includes(applicationType))) {
         return of([]);
       }
       return searchableApps$.pipe(
@@ -39,5 +41,6 @@ export const createApplicationResultProvider = (
         })
       );
     },
+    getSearchableTypes: () => [applicationType],
   };
 };

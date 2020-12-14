@@ -8,6 +8,7 @@
 export interface Note {
   /** When the note was created */
   created: Date;
+  eventId?: string | null;
   /** Uniquely identifies the note */
   id: string;
   /** When not `null`, this represents the last edit   */
@@ -18,5 +19,6 @@ export interface Note {
   user: string;
   /** SaveObjectID for note */
   saveObjectId: string | null | undefined;
+  timelineId?: string | null;
   version: string | null | undefined;
 }

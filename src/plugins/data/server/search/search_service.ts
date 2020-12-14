@@ -106,13 +106,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
+  private sessionService: ISessionService;
   private coreStart?: CoreStart;
-  private sessionService: ISessionService = new SessionService();
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
-  ) {}
+  ) {
+    this.sessionService = new SessionService();
+  }
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
@@ -254,8 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: asScoped(request).search,
-            // onResponse isn't used on the server, so we just return the original value
-            onResponse: (req, res) => res,
+            onResponse: (req, res) => shimHitsTotal(res),
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,
