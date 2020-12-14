@@ -23,7 +23,7 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
-import { removeArchiveEntries } from '../archive/save_to_es';
+import { removeArchiveEntries } from '../archive/storage';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
