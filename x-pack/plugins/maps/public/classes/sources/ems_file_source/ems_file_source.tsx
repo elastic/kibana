@@ -142,7 +142,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       // ignore error if EMS layer id could not be found
     }
 
-    return [
+    const props = [
       {
         label: getDataSourceLabel(),
         value: getSourceTitle(),
@@ -155,6 +155,17 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         link: emsLink,
       },
     ];
+
+    const emsSettings = getEMSSettings();
+    if (emsSettings.isEMSUrlSet()) {
+      props.push({
+        label: i18n.translate('xpack.maps.source.emsFile.emsOnPremLabel', {
+          defaultMessage: `Elastic Maps Server`,
+        }),
+        value: emsSettings.getEMSRoot(),
+      });
+    }
+    return props;
   }
 
   async getDisplayName(): Promise<string> {

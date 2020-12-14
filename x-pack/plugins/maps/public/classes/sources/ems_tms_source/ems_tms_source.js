@@ -53,7 +53,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       defaultMessage: 'autoselect based on Kibana theme',
     });
 
-    return [
+    const props = [
       {
         label: getDataSourceLabel(),
         value: getSourceTitle(),
@@ -65,6 +65,18 @@ export class EMSTMSSource extends AbstractTMSSource {
         value: this._descriptor.isAutoSelect ? `${displayName} - ${autoSelectMsg}` : displayName,
       },
     ];
+
+    const emsSettings = getEMSSettings();
+    if (emsSettings.isEMSUrlSet()) {
+      props.push({
+        label: i18n.translate('xpack.maps.source.emsTile.emsOnPremLabel', {
+          defaultMessage: `Elastic Maps Server`,
+        }),
+        value: emsSettings.getEMSRoot(),
+      });
+    }
+
+    return props;
   }
 
   async _getEMSTMSService() {
