@@ -32,8 +32,18 @@ export const createConnectedBackgroundSessionIndicator = ({
   return () => {
     const state = useObservable(sessionService.state$.pipe(debounceTime(500)));
     const autoRefreshEnabled = useObservable(isAutoRefreshEnabled$, isAutoRefreshEnabled());
+    let appName = useObservable(application.currentAppId$, undefined);
+    if (appName === 'dashboards') appName = 'dashboard';
+
     let disabled = false;
     let disabledReasonText: string = '';
+
+    if (!appName || application.capabilities[appName]?.storeSearchSession !== true) {
+      disabled = true;
+      disabledReasonText = i18n.translate('xpack.data.backgroundSessionIndicator.noCapability', {
+        defaultMessage: "You don't have permissions to Send to background.",
+      });
+    }
 
     if (autoRefreshEnabled) {
       disabled = true;
