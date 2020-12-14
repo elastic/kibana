@@ -75,11 +75,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const item = response.body[0];
 
           expect(isFiniteNumber(item.cpuUsage?.value)).to.be(true);
+          expect(isFiniteNumber(item.memoryUsage?.value)).to.be(true);
           expect(isFiniteNumber(item.errorRate?.value)).to.be(true);
           expect(isFiniteNumber(item.throughput?.value)).to.be(true);
           expect(isFiniteNumber(item.latency?.value)).to.be(true);
 
           expect(item.cpuUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
+          expect(item.memoryUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.errorRate?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.throughput?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.latency?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
@@ -102,6 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const values = pick(item, [
             'cpuUsage.value',
+            'memoryUsage.value',
             'errorRate.value',
             'throughput.value',
             'latency.value',
@@ -117,6 +120,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
               "latency": Object {
                 "value": 237339.813333333,
+              },
+              "memoryUsage": Object {
+                "value": 0.941324615478516,
               },
               "throughput": Object {
                 "value": 75,
@@ -148,11 +154,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const item = response.body[0];
 
           expect(isFiniteNumber(item.cpuUsage?.value)).to.be(true);
+          expect(isFiniteNumber(item.memoryUsage?.value)).to.be(true);
           expect(isFiniteNumber(item.errorRate?.value)).to.be(true);
           expect(isFiniteNumber(item.throughput?.value)).to.be(true);
           expect(isFiniteNumber(item.latency?.value)).to.be(true);
 
           expect(item.cpuUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
+          expect(item.memoryUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.errorRate?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.throughput?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
           expect(item.latency?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
