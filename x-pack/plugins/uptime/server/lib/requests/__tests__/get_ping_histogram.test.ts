@@ -68,7 +68,7 @@ describe('getPingHistogram', () => {
     expect(result).toMatchSnapshot();
   });
 
-  it('returns expected result for no status filter', async () => {
+  it.skip('returns expected result for no status filter', async () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
 
