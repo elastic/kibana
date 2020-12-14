@@ -36,5 +36,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./get_signals_migration_status'));
     loadTestFile(require.resolve('./create_signals_migrations'));
     loadTestFile(require.resolve('./finalize_signals_migrations'));
+    loadTestFile(require.resolve('./delete_signals_migrations'));
   });
 };

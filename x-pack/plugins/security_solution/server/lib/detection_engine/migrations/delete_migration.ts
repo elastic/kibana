@@ -49,7 +49,15 @@ export const deleteMigration = async ({
     });
   }
 
-  await esClient.delete({ index: '.tasks', id: taskId });
+  try {
+    // task may have already have been deleted during finalization
+    await esClient.delete({ index: '.tasks', id: taskId });
+  } catch (error) {
+    if (error.statusCode !== 404) {
+      throw error;
+    }
+  }
+
   const deletedMigration = await updateMigrationSavedObject({
     username: 'TODO',
     soClient,
