@@ -134,6 +134,13 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      settings: {
+        properties: {
+          syncAlerts: {
+            type: 'boolean',
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
