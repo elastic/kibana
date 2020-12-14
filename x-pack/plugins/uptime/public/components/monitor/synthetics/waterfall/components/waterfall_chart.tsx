@@ -112,7 +112,7 @@ export const WaterfallChart = ({
           <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" />
+                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
@@ -131,9 +131,12 @@ export const WaterfallChart = ({
                     tickFormat={tickFormat}
                     domain={domain}
                     showGridLines={true}
+                    style={{
+                      axisLine: {
+                        visible: false,
+                      },
+                    }}
                   />
-
-                  <Axis id="values" position={Position.Left} tickFormat={() => ''} />
 
                   <BarSeries
                     id="waterfallItems"
@@ -150,7 +153,7 @@ export const WaterfallChart = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </WaterfallChartFixedTopContainer>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexGroup gutterSize="none" responsive={false} style={{ paddingTop: '10px' }}>
           {shouldRenderSidebar && (
             <Sidebar items={sidebarItems!} height={generatedHeight} render={renderSidebarItem!} />
           )}
@@ -170,9 +173,12 @@ export const WaterfallChart = ({
                   tickFormat={tickFormat}
                   domain={domain}
                   showGridLines={true}
+                  style={{
+                    axisLine: {
+                      visible: false,
+                    },
+                  }}
                 />
-
-                <Axis id="values" position={Position.Left} tickFormat={() => ''} />
 
                 <BarSeries
                   id="waterfallItems"

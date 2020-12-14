@@ -22,6 +22,7 @@ export const WaterfallChartFixedTopContainer = euiStyled.div`
   position: sticky;
   top: 0;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
+  border-bottom: ${(props) => `1px solid ${props.theme.eui.euiColorLightShade}`};
 `;
 
 export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
