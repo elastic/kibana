@@ -7,6 +7,7 @@
 import React, { Component, ChangeEvent, MouseEvent } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 interface State {
   value: number | string;

@@ -7,13 +7,7 @@
 import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonEmpty,
-  EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiFormRow,
-  EuiFieldNumber,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
@@ -22,7 +16,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
-import { ValidatedNumberInput } from './validated_number_input';
+import { ValidatedNumberInput } from '../validated_number_input';
 
 function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {
