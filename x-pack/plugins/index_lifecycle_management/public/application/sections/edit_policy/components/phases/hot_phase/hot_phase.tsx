@@ -165,8 +165,8 @@ export const HotPhase: FunctionComponent = () => {
                     content={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="The new index created by rollover is added
-    to the index alias and designated as the write index."
+                        defaultMessage="Roll over to a new index when the 
+    current index meets one of the defined conditions."
                       />
                     }
                   />
