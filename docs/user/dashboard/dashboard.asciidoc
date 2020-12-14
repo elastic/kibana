@@ -19,6 +19,7 @@ image:images/Dashboard_example.png[Example dashboard]
 The quickest way to create visualization panels is to use the *Lens* visualization builder. With *Lens*, you add your data fields, then {kib} uses heuristics to apply each field 
 and create the visualizations for you.
 
+[[tsvb]]
 If you'd like to  manually create visualization panels, you can use one of the <<add-panels-with-advanced-editors,advanced editors>> or 
 <<add-aggregation-based-visualization-panels,aggregation-based options>>.
 
@@ -54,7 +55,7 @@ To open an existing dashboard, click the dashboard you want to view.
 To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
 [float]
-[[create-the-visualization]]
+[[create-panels-with-lens]]
 == Create visualizations
 
 Drag and drop the fields onto the visualization builder. The fields that appear are based on the selected 

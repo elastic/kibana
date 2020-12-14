@@ -1,4 +1,4 @@
-[[tsvb]]
+[[add-panels-with-tsvb]]
 === Add panels with TSVB
 
 With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build
