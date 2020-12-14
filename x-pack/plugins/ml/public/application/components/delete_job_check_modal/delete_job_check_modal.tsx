@@ -141,6 +141,7 @@ interface Props {
   refreshJobsCallback?: () => void;
   jobType: JobType;
   jobIds: string[];
+  setDidUntag?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const DeleteJobCheckModal: FC<Props> = ({
@@ -149,6 +150,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
   refreshJobsCallback,
   jobType,
   jobIds,
+  setDidUntag,
 }) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
@@ -170,12 +172,18 @@ export const DeleteJobCheckModal: FC<Props> = ({
       setButtonContent(buttonText);
       setModalContent(modalText);
     });
+    if (typeof setDidUntag === 'function') {
+      setDidUntag(false);
+    }
   }, []);
 
   const onUntagClick = async () => {
     setIsUntagging(true);
     const resp = await removeJobFromCurrentSpace(jobType, jobIds);
     setIsUntagging(false);
+    if (typeof setDidUntag === 'function') {
+      setDidUntag(true);
+    }
     Object.entries(resp).forEach(([id, { success, error }]) => {
       if (success === false) {
         const title = i18n.translate('xpack.ml.deleteJobCheckModal.unTagErrorTitle', {
