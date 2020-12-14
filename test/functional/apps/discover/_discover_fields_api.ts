@@ -40,6 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
+    after(async () => {
+      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
+    });
+
     it('should correctly display documents', async function () {
       log.debug('check if Document title exists in the grid');
       expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
