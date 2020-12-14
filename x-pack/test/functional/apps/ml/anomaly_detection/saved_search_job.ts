@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
           frontCardTitle: 'AAL',
         },
         row: {
-          recordCount: '34,416',
+          recordCount: '86,274',
           memoryStatus: 'ok',
           jobState: 'closed',
           datafeedState: 'stopped',
@@ -127,14 +127,14 @@ export default function ({ getService }: FtrProviderContext) {
           frontCardTitle: 'AAL',
         },
         row: {
-          recordCount: '34,415',
+          recordCount: '86,274',
           memoryStatus: 'ok',
           jobState: 'closed',
           datafeedState: 'stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
-          processed_record_count: '34,415',
+          processed_record_count: '86,274',
           processed_field_count: '68,830',
           input_bytes: '2.6 MB',
           input_field_count: '68,830',
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           bucket_count: '479',
           earliest_record_timestamp: '2016-02-07 00:00:00',
           latest_record_timestamp: '2016-02-11 23:59:54',
-          input_record_count: '34,415',
+          input_record_count: '86,274',
           latest_bucket_timestamp: '2016-02-11 23:45:00',
         },
         modelSizeStats: {
