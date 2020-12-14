@@ -98,7 +98,7 @@ export class Embeddable
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
-    lastReloadRequestTime?: number;
+    searchSessionId?: string;
   } = {};
 
   constructor(
@@ -117,9 +117,15 @@ export class Embeddable
 
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
+    this.subscription = this.getUpdated$().subscribe(() =>
+      this.onContainerStateChanged(this.input)
+    );
+
+    this.autoRefreshFetchSubscription = deps.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.reload.bind(this));
 
     const input$ = this.getInput$();
-    this.subscription = input$.subscribe((input) => this.onContainerStateChanged(input));
 
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
@@ -148,10 +154,6 @@ export class Embeddable
       .subscribe((input) => {
         this.reload();
       });
-
-    this.autoRefreshFetchSubscription = deps.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.reload.bind(this));
   }
 
   public supportedTriggers() {
@@ -200,23 +202,29 @@ export class Embeddable
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
+    if (this.handleContainerStateChanged(containerState)) this.reload();
+  }
+
+  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
+    let isDirty = false;
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
       !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !_.isEqual(containerState.query, this.externalSearchContext.query) ||
-      !_.isEqual(cleanedFilters, this.externalSearchContext.filters)
+      !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
+      this.externalSearchContext.searchSessionId !== containerState.searchSessionId
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
-        lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
         filters: cleanedFilters,
+        searchSessionId: containerState.searchSessionId,
       };
-
-      this.reload();
+      isDirty = true;
     }
+    return isDirty;
   }
 
   private updateActiveData = (
@@ -243,7 +251,7 @@ export class Embeddable
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
-        searchSessionId={this.input.searchSessionId}
+        searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
@@ -327,16 +335,9 @@ export class Embeddable
   };
 
   async reload() {
-    const currentTime = Date.now();
-    if (this.externalSearchContext.lastReloadRequestTime !== currentTime) {
-      this.externalSearchContext = {
-        ...this.externalSearchContext,
-        lastReloadRequestTime: currentTime,
-      };
-
-      if (this.domNode) {
-        this.render(this.domNode);
-      }
+    this.handleContainerStateChanged(this.input);
+    if (this.domNode) {
+      this.render(this.domNode);
     }
   }
 

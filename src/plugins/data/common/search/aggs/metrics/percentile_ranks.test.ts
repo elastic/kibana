@@ -81,54 +81,66 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
     );
     expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "customLabel": Array [
-            "my custom field label",
-          ],
-          "enabled": Array [
-            true,
-          ],
-          "field": Array [
-            "bytes",
-          ],
-          "id": Array [
-            "percentile_ranks.5000",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-          "values": Array [
-            "[5000,10000]",
-          ],
-        },
-        "function": "aggPercentileRanks",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "customLabel": Array [
+                "my custom field label",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "percentile_ranks.5000",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+              "values": Array [
+                5000,
+                10000,
+              ],
+            },
+            "function": "aggPercentileRanks",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
     expect(responseAggs[1].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "customLabel": Array [
-            "my custom field label",
-          ],
-          "enabled": Array [
-            true,
-          ],
-          "field": Array [
-            "bytes",
-          ],
-          "id": Array [
-            "percentile_ranks.10000",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-          "values": Array [
-            "[5000,10000]",
-          ],
-        },
-        "function": "aggPercentileRanks",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "customLabel": Array [
+                "my custom field label",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "percentile_ranks.10000",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+              "values": Array [
+                5000,
+                10000,
+              ],
+            },
+            "function": "aggPercentileRanks",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

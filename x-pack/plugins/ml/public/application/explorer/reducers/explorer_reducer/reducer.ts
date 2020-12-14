@@ -61,6 +61,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
           seriesToPlot: payload.seriesToPlot,
           // convert truthy/falsy value to Boolean
           tooManyBuckets: !!payload.tooManyBuckets,
+          errorMessages: payload.errorMessages,
         },
       };
       break;

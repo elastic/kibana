@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
-import { ViewMode } from '../../embeddable_plugin';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import type { SavedObjectTagDecoratorTypeGuard } from '../../services/saved_objects_tagging_oss';
+import { ViewMode } from '../../services/embeddable';
+import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardAppStateDefaults } from '../../types';
 
 export function getAppStateDefaults(
-  savedDashboard: SavedObjectDashboard,
+  savedDashboard: DashboardSavedObject,
   hideWriteControls: boolean,
   hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard
 ): DashboardAppStateDefaults {
