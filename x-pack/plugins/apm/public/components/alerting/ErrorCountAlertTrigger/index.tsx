@@ -8,17 +8,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
+import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { asInteger } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ChartPreview } from '../chart_preview';
-import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
+import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 
 export interface AlertParams {
   windowSize: number;
@@ -45,23 +40,6 @@ export function ErrorCountAlertTrigger(props: Props) {
     end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
-
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
-        params: {
-          query: {
-            ...getAbsoluteTimeRange(windowSize, windowUnit),
-            environment,
-            serviceName,
-          },
-        },
-      });
-    }
-  }, [windowSize, windowUnit, environment, serviceName]);
-
   const defaults = {
     threshold: 25,
     windowSize: 1,
@@ -86,14 +64,14 @@ export function ErrorCountAlertTrigger(props: Props) {
       unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
         defaultMessage: ' errors',
       })}
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setAlertParams('threshold', value)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+      onChangeWindowSize={(windowSize) =>
+        setAlertParams('windowSize', windowSize || '')
       }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+      onChangeWindowUnit={(windowUnit) =>
+        setAlertParams('windowUnit', windowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -104,10 +82,6 @@ export function ErrorCountAlertTrigger(props: Props) {
     />,
   ];
 
-  const chartPreview = (
-    <ChartPreview data={data} threshold={threshold} yTickFormat={asInteger} />
-  );
-
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG[AlertType.ErrorCount].name}
@@ -115,7 +89,6 @@ export function ErrorCountAlertTrigger(props: Props) {
       fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
-      chartPreview={chartPreview}
     />
   );
 }
