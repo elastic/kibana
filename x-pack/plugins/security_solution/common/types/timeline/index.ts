@@ -276,6 +276,7 @@ export enum TimelineId {
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
+  casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
 }
 
@@ -410,7 +411,6 @@ export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 export interface TimelineExpandedEventType {
   eventId: string;
   indexName: string;
-  loading: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
