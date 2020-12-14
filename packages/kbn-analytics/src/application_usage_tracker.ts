@@ -121,6 +121,12 @@ export class ApplicationUsageTracker {
     }
   }
 
+  private flushTrackedViews() {
+    const appViewMetrics = Object.values(this.trackedApplicationViews);
+    this.sendMetricsToReporter(appViewMetrics);
+    this.trackedApplicationViews = {};
+  }
+
   public start() {
     this.attachListeners();
   }
@@ -172,11 +178,5 @@ export class ApplicationUsageTracker {
     this.sendMetricsToReporter([appViewMetric]);
 
     delete this.trackedApplicationViews[serializedKey];
-  }
-
-  public flushTrackedViews() {
-    const appViewMetrics = Object.values(this.trackedApplicationViews);
-    this.sendMetricsToReporter(appViewMetrics);
-    this.trackedApplicationViews = {};
   }
 }
