@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
-  METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
@@ -33,14 +33,54 @@ export async function getServiceInstanceSystemMetricStats({
 
   const { intervalString } = getBucketSize({ start, end, numBuckets });
 
+  const systemMemoryFilter = {
+    bool: {
+      filter: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+    },
+  };
+
+  const cgroupMemoryFilter = {
+    exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES },
+  };
+
+  const cpuUsageFilter = { exists: { field: METRIC_SYSTEM_CPU_PERCENT } };
+
+  function withTimeseries<T extends AggregationOptionsByType['avg']>(agg: T) {
+    return {
+      avg: { avg: agg },
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
+          extended_bounds: {
+            min: start,
+            max: end,
+          },
+        },
+        aggs: {
+          avg: { avg: agg },
+        },
+      },
+    };
+  }
+
   const subAggs = {
     memory_usage_cgroup: {
-      avg: { script: percentCgroupMemoryUsedScript },
+      filter: cgroupMemoryFilter,
+      aggs: withTimeseries({ script: percentCgroupMemoryUsedScript }),
     },
     memory_usage_system: {
-      avg: { script: percentSystemMemoryUsedScript },
+      filter: systemMemoryFilter,
+      aggs: withTimeseries({ script: percentSystemMemoryUsedScript }),
     },
-    cpu_usage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+    cpu_usage: {
+      filter: cpuUsageFilter,
+      aggs: withTimeseries({ field: METRIC_SYSTEM_CPU_PERCENT }),
+    },
   };
 
   const response = await apmEventClient.search({
@@ -56,18 +96,7 @@ export async function getServiceInstanceSystemMetricStats({
             { term: { [SERVICE_NAME]: serviceName } },
             ...esFilter,
           ],
-          should: [
-            {
-              bool: {
-                filter: [
-                  { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-                  { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-                ],
-              },
-            },
-            { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
-            { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-          ],
+          should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
           minimum_should_match: 1,
         },
       },
@@ -78,21 +107,7 @@ export async function getServiceInstanceSystemMetricStats({
             missing: SERVICE_NODE_NAME_MISSING,
             size,
           },
-          aggs: {
-            ...subAggs,
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end,
-                },
-              },
-              aggs: subAggs,
-            },
-          },
+          aggs: subAggs,
         },
       },
     },
@@ -102,30 +117,31 @@ export async function getServiceInstanceSystemMetricStats({
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
         const hasCGroupData =
-          serviceNodeBucket.memory_usage_cgroup.value !== null;
+          serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
+
+        const memoryMetricsKey = hasCGroupData
+          ? 'memory_usage_cgroup'
+          : 'memory_usage_system';
+
         return {
           serviceNodeName: String(serviceNodeBucket.key),
           cpuUsage: {
-            value: serviceNodeBucket.cpu_usage.value,
-            timeseries: serviceNodeBucket.timeseries.buckets.map(
+            value: serviceNodeBucket.cpu_usage.avg.value,
+            timeseries: serviceNodeBucket.cpu_usage.timeseries.buckets.map(
               (dateBucket) => ({
                 x: dateBucket.key,
-                y: dateBucket.cpu_usage.value,
+                y: dateBucket.avg.value,
               })
             ),
           },
           memoryUsage: {
-            value: hasCGroupData
-              ? serviceNodeBucket.memory_usage_cgroup.value
-              : serviceNodeBucket.memory_usage_system.value,
-            timeseries: serviceNodeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: hasCGroupData
-                  ? dateBucket.memory_usage_cgroup.value
-                  : dateBucket.memory_usage_system.value,
-              })
-            ),
+            value: serviceNodeBucket[memoryMetricsKey].avg.value,
+            timeseries: serviceNodeBucket[
+              memoryMetricsKey
+            ].timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.avg.value,
+            })),
           },
         };
       }
