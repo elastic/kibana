@@ -151,13 +151,9 @@ function DefaultServicePageRouteHandler(
   const { uiSettings } = useApmPluginContext().core;
   const { serviceName } = props.match.params;
   if (uiSettings.get(enableServiceOverview)) {
-    return renderAsRedirectTo(
-      `/services/${serviceName}/overview`
-    )(props);
+    return renderAsRedirectTo(`/services/${serviceName}/overview`)(props);
   }
-  return renderAsRedirectTo(
-    `/services/${serviceName}/transactions`
-  )(props);
+  return renderAsRedirectTo(`/services/${serviceName}/transactions`)(props);
 }
 
 /**
