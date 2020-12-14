@@ -55,8 +55,11 @@ export const fileHandler = async ({
                 parsedGeojson = { ...batch.container, features };
               } else {
                 // Handle single feature geoJson
-                parsedGeojson = cleanAndValidate(batch.container);
-                featuresProcessed++;
+                const cleanedSingleFeature = cleanAndValidate(batch.container);
+                if (cleanedSingleFeature.geometry && cleanedSingleFeature.geometry.type) {
+                  features.push(cleanedSingleFeature);
+                  featuresProcessed++;
+                }
               }
             } else {
               resolve(null);
@@ -108,7 +111,6 @@ export const fileHandler = async ({
         parsedGeojson,
       });
     }
-    return;
   });
 
   return filePromise;

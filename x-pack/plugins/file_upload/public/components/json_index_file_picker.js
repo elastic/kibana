@@ -133,8 +133,6 @@ export class JsonIndexFilePicker extends Component {
     return fileNameOnly.toLowerCase();
   }
 
-  // It's necessary to throttle progress. Updates that are too frequent cause
-  // issues (update failure) in the nested progress component
   setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
     if (this.getFileParseActive()) {
