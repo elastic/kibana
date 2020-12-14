@@ -290,6 +290,6 @@ export class VectorTileLayer extends TileLayer {
 
   async getLicensedFeatures() {
     const emsSettings = getEMSSettings();
-    return emsSettings._isEMSUrlSet ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
+    return emsSettings._isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
