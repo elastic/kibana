@@ -59,7 +59,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "name": "Java",
                 "version": "11.0.9.1",
               },
-              "version": "2020-12-08 03:35:36",
+              "versions": Array [
+                "2020-12-08 03:35:36",
+              ],
             },
           }
         `);
@@ -100,7 +102,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "name": "CPython",
                 "version": "3.8.6",
               },
-              "version": "2020-12-08 03:35:35",
+              "versions": Array [
+                "2020-12-08 03:35:35",
+              ],
             },
           }
         `);

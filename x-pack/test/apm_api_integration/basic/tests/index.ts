@@ -22,6 +22,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
       loadTestFile(require.resolve('./services/service_details'));
+      loadTestFile(require.resolve('./services/service_icons'));
     });
 
     // TODO: we should not have a service overview.
