@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
