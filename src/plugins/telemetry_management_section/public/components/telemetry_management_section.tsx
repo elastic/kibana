@@ -56,37 +56,45 @@ interface State {
   processing: boolean;
   showExample: boolean;
   showSecurityExample: boolean;
-  queryMatches: boolean | null;
+  queryMatches: boolean;
   enabled: boolean;
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
-  state: State = {
-    processing: false,
-    showExample: false,
-    showSecurityExample: false,
-    queryMatches: null,
-    enabled: this.props.telemetryService.getIsOptedIn() || false,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      processing: false,
+      showExample: false,
+      showSecurityExample: false,
+      queryMatches: this.checkQueryMatch(props.query),
+      enabled: this.props.telemetryService.getIsOptedIn() || false,
+    };
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
+    const queryMatches = this.checkQueryMatch(query);
 
-    const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches =
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0);
-
-    if (searchTermMatches !== this.state.queryMatches) {
+    if (queryMatches !== this.state.queryMatches) {
       this.setState(
         {
-          queryMatches: searchTermMatches,
+          queryMatches,
         },
         () => {
-          this.props.onQueryMatchChange(searchTermMatches);
+          this.props.onQueryMatchChange(queryMatches);
         }
       );
     }
+  }
+
+  checkQueryMatch(query: any): boolean {
+    const searchTerm = (query.text || '').toLowerCase();
+    return (
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+    );
   }
 
   render() {
@@ -94,11 +102,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
     const securityExampleEnabled = isSecurityExampleEnabled();
 
-    if (!telemetryService.getCanChangeOptInStatus()) {
-      return null;
-    }
-
-    if (queryMatches !== null && !queryMatches) {
+    if (!telemetryService.getCanChangeOptInStatus() || !queryMatches) {
       return null;
     }
 
