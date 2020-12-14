@@ -52,7 +52,7 @@ interface Props {
   enableSaving: boolean;
   query?: any;
   toasts: ToastsStart;
-  applicationUsageTracker: ApplicationUsageTracker;
+  applicationUsageTracker?: ApplicationUsageTracker;
 }
 
 interface State {

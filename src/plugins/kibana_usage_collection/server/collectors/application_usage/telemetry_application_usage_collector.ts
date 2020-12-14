@@ -22,6 +22,7 @@ import { timer } from 'rxjs';
 import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { serializeKey } from './rollups';
 
 import {
   ApplicationUsageDaily,
@@ -72,8 +73,6 @@ export interface ApplicationUsageTelemetryReport {
     views?: ApplicationViewUsage[];
   };
 }
-
-const serializeKey = (appId: string, viewId: string) => `${appId}___${viewId}`;
 
 const transformByApplicationViews = (
   report: ApplicationUsageViews
