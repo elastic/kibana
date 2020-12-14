@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.networkDetails!.source!.geo!.continent_name).to.be('North America');
         expect(body.networkDetails!.source!.geo!.location!.lat!).to.be(37.751);
-        expect(body.networkDetails!.host.os!.platform!).to.be(['raspbian']);
+        expect(body.networkDetails!.host.os!.platform!).to.eql(['raspbian']);
       });
     });
 
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.networkDetails!.host.id!).to.be(['2ce8b1e7d69e4a1d9c6bcddc473da9d9']);
         expect(body.networkDetails!.host.name!).to.be(['zeek-sensor-amsterdam']);
-        expect(body.networkDetails!.host.os!.platform!).to.be(['ubuntu']);
+        expect(body.networkDetails!.host.os!.platform!).to.eql(['ubuntu']);
       });
     });
   });
