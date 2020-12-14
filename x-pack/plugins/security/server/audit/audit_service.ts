@@ -36,9 +36,6 @@ interface AuditLogMeta extends AuditEvent {
   ecs: {
     version: string;
   };
-  session?: {
-    id: string;
-  };
   trace: {
     id: string;
   };
@@ -57,6 +54,7 @@ interface AuditServiceSetupParams {
   getCurrentUser(
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
+  getSID(request: KibanaRequest): Promise<string | undefined>;
   getSpaceId(
     request: KibanaRequest
   ): ReturnType<SpacesPluginSetup['spacesService']['getSpaceId']> | undefined;
@@ -70,7 +68,7 @@ export class AuditService {
   /**
    * @deprecated
    */
-  private allowAuditLogging = false;
+  private allowLegacyAuditLogging = false;
 
   private ecsLogger: Logger;
 
@@ -84,12 +82,15 @@ export class AuditService {
     logging,
     http,
     getCurrentUser,
+    getSID,
     getSpaceId,
   }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
-        this.allowAuditLogging = allowAuditLogging;
-      });
+      this.licenseFeaturesSubscription = license.features$.subscribe(
+        ({ allowLegacyAuditLogging }) => {
+          this.allowLegacyAuditLogging = allowLegacyAuditLogging;
+        }
+      );
     }
 
     // Configure logging during setup and when license changes
@@ -132,12 +133,13 @@ export class AuditService {
        * });
        * ```
        */
-      const log: AuditLogger['log'] = (event) => {
+      const log: AuditLogger['log'] = async (event) => {
         if (!event) {
           return;
         }
-        const user = getCurrentUser(request);
         const spaceId = getSpaceId(request);
+        const user = getCurrentUser(request);
+        const sessionId = await getSID(request);
         const meta: AuditLogMeta = {
           ecs: { version: ECS_VERSION },
           ...event,
@@ -149,11 +151,10 @@ export class AuditService {
             event.user,
           kibana: {
             space_id: spaceId,
+            session_id: sessionId,
             ...event.kibana,
           },
-          trace: {
-            id: request.id,
-          },
+          trace: { id: request.id },
         };
         if (filterEvent(meta, config.ignore_filters)) {
           this.ecsLogger.info(event.message!, meta);
@@ -169,7 +170,7 @@ export class AuditService {
     const getLogger = (id?: string): LegacyAuditLogger => {
       return {
         log: (eventType: string, message: string, data?: Record<string, any>) => {
-          if (!this.allowAuditLogging) {
+          if (!this.allowLegacyAuditLogging) {
             return;
           }
 

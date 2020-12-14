@@ -22,6 +22,7 @@ import {
 } from './build_bulk_body';
 import { SignalHit, SignalSourceHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -56,6 +57,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parent: {
           id: sampleIdGuid,
           type: 'event',
@@ -161,6 +165,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parent: {
           id: sampleIdGuid,
           type: 'event',
@@ -269,6 +276,9 @@ describe('buildBulkBody', () => {
         module: 'system',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           action: 'socket_opened',
           dataset: 'socket',
@@ -378,6 +388,9 @@ describe('buildBulkBody', () => {
         module: 'system',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           action: 'socket_opened',
           dataset: 'socket',
@@ -481,6 +494,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           kind: 'event',
         },
@@ -583,6 +599,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_signal: 123,
         parent: {
           id: sampleIdGuid,
@@ -683,6 +702,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_signal: { child_1: { child_2: 'nested data' } },
         parent: {
           id: sampleIdGuid,
@@ -771,6 +793,9 @@ describe('buildSignalFromSequence', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parents: [
           {
             id: sampleIdGuid,
@@ -889,6 +914,9 @@ describe('buildSignalFromSequence', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parents: [
           {
             id: sampleIdGuid,
@@ -1008,6 +1036,9 @@ describe('buildSignalFromEvent', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_time: '2020-04-20T21:27:45+0000',
         parent: {
           id: sampleIdGuid,

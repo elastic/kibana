@@ -151,6 +151,9 @@ export interface Ancestor {
 }
 
 export interface Signal {
+  _meta?: {
+    version: number;
+  };
   rule: RulesSchema;
   // DEPRECATED: use parents instead of parent
   parent?: Ancestor;
