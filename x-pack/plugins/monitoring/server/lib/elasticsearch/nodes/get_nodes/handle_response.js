@@ -47,6 +47,7 @@ export function handleResponse(
 
   // nodesInfo is the source of truth for the nodeIds, where nodesMetrics will lack metrics for offline nodes
   const nodes = pageOfNodes.map((node) => ({
+    ...node,
     ...nodesInfo[node.uuid],
     ...nodesMetrics[node.uuid],
     resolver: node.uuid,

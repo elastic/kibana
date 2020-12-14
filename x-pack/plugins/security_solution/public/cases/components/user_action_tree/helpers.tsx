@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
 
 import {
   CaseFullExternalService,
@@ -21,7 +21,10 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
-import * as i18n from '../case_view/translations';
+import { UserActionShowAlert } from './user_action_show_alert';
+import * as i18n from './translations';
+import { Alert } from '../case_view';
+import { AlertCommentEvent } from './user_action_alert_comment_event';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -182,3 +185,52 @@ export const getUpdateAction = ({
     </EuiFlexGroup>
   ),
 });
+
+export const getAlertComment = ({
+  action,
+  alert,
+  onShowAlertDetails,
+}: {
+  action: CaseUserActions;
+  alert: Alert | undefined;
+  onShowAlertDetails: (alertId: string, index: string) => void;
+}): EuiCommentProps => {
+  return {
+    username: (
+      <UserActionUsernameWithAvatar
+        username={action.actionBy.username}
+        fullName={action.actionBy.fullName}
+      />
+    ),
+    className: 'comment-alert',
+    type: 'update',
+    event: <AlertCommentEvent alert={alert} />,
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {alert != null ? (
+            <UserActionShowAlert
+              id={action.actionId}
+              alert={alert}
+              onShowAlertDetails={onShowAlertDetails}
+            />
+          ) : (
+            <EuiIconTip
+              aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
+              size="l"
+              type="alert"
+              color="danger"
+              content={i18n.ALERT_NOT_FOUND_TOOLTIP}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};
