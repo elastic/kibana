@@ -42,57 +42,58 @@ const updateAlertsStatusMock = updateAlertsStatus as jest.Mock;
 describe('createCaseClient()', () => {
   test('it creates the client correctly', async () => {
     createCaseClient({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
-      alertsService,
-      context,
     });
 
     expect(createMock).toHaveBeenCalledWith({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
-      alertsService,
-      context,
     });
 
     expect(updateMock).toHaveBeenCalledWith({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
-      alertsService,
-      context,
     });
 
     expect(addCommentMock).toHaveBeenCalledWith({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
-      alertsService,
-      context,
     });
 
     expect(updateAlertsStatusMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
   });
 });
