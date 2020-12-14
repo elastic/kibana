@@ -5,20 +5,20 @@
  */
 
 export interface Cloud {
-  availability_zone: string;
-  instance: {
+  availability_zone?: string;
+  instance?: {
     name: string;
     id: string;
   };
-  machine: {
+  machine?: {
     type: string;
   };
-  project: {
+  project?: {
     id: string;
     name: string;
   };
-  provider: string;
-  region: string;
+  provider?: string;
+  region?: string;
   account?: {
     id: string;
     name: string;

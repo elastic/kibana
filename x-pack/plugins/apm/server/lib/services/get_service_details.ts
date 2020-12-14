@@ -16,6 +16,7 @@ import {
   SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
+  SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -30,7 +31,7 @@ type ServiceDetails = Pick<
 
 interface ServiceDetailsResponse {
   service?: {
-    version?: string;
+    versions?: string[];
     runtime?: {
       name: string;
       version: string;
@@ -81,6 +82,12 @@ export async function getServiceDetails({
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter } },
       aggs: {
+        serviceVersions: {
+          terms: {
+            field: SERVICE_VERSION,
+            size: 10,
+          },
+        },
         availabilityZones: {
           terms: {
             field: CLOUD_AVAILABILITY_ZONE,
@@ -125,7 +132,9 @@ export async function getServiceDetails({
     .hits[0]._source as ServiceDetails;
 
   const serviceDetails: ServiceDetailsResponse['service'] = {
-    version: service.version,
+    versions: response.aggregations?.serviceVersions.buckets.map(
+      (bucket) => bucket.key as string
+    ),
     runtime: service.runtime,
     framework: service.framework?.name,
     agent,
@@ -146,7 +155,7 @@ export async function getServiceDetails({
   const cloudDetails: ServiceDetailsResponse['cloud'] = cloud
     ? {
         provider: cloud.provider,
-        projectName: cloud.project.name,
+        projectName: cloud.project?.name,
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
           (bucket) => bucket.key as string
         ),

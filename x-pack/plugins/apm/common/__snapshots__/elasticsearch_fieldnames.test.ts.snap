@@ -25,6 +25,8 @@ Object {
 
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
+exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
+
 exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
 
 exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
@@ -236,6 +238,8 @@ Object {
 
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
+exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
+
 exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
 
 exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
@@ -438,6 +442,8 @@ Object {
 `;
 
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
 exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
 
