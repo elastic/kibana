@@ -42,7 +42,7 @@ export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = (props) =
         title={
           <FormattedMessage
             id="xpack.ml.dataframe.analytics.exploration.splomSectionTitle"
-            defaultMessage="Scatterplot Matrix"
+            defaultMessage="Scatterplot matrix"
           />
         }
       />
