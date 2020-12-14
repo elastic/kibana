@@ -36,20 +36,18 @@ import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.dataset';
 
 const ID = 'eventsByDatasetOverview';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
-  filters?: Filter[];
+  filters: Filter[];
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
   indexNames: string[];
   onlyField?: string;
-  query?: Query;
+  query: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showSpacer?: boolean;
   timelineId?: string;
@@ -63,13 +61,13 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
 const EventsByDatasetComponent: React.FC<Props> = ({
   combinedQueries,
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   from,
   headerChildren,
   indexPattern,
   indexNames,
   onlyField,
-  query = DEFAULT_QUERY,
+  query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showSpacer = true,
