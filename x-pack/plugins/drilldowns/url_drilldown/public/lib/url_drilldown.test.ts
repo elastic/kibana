@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
@@ -54,13 +55,27 @@ const mockEmbeddable = ({
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
+class TextExternalUrl implements IExternalUrl {
+  constructor(private readonly isCorrect: boolean = true) {}
+
+  public validateUrl(url: string): URL | null {
+    return this.isCorrect ? new URL(url) : null;
+  }
+}
+
 describe('UrlDrilldown', () => {
-  const urlDrilldown = new UrlDrilldown({
-    getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
-    getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
-    getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
-    navigateToUrl: mockNavigateToUrl,
-  });
+  const createDrilldown = (isExternalUrlValid: boolean = true) => {
+    const drilldown = new UrlDrilldown({
+      externalUrl: new TextExternalUrl(isExternalUrlValid),
+      getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
+      getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
+      getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
+      navigateToUrl: mockNavigateToUrl,
+    });
+    return drilldown;
+  };
+
+  const urlDrilldown = createDrilldown();
 
   test('license', () => {
     expect(urlDrilldown.minimalLicense).toBe('gold');
@@ -118,6 +133,30 @@ describe('UrlDrilldown', () => {
       };
 
       await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(false);
+    });
+
+    test('not compatible if external URL is denied', async () => {
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+      };
+
+      const context: ActionContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddable,
+      };
+
+      const result1 = await drilldown1.isCompatible(config, context);
+      const result2 = await drilldown2.isCompatible(config, context);
+
+      expect(result1).toBe(true);
+      expect(result2).toBe(false);
     });
   });
 
