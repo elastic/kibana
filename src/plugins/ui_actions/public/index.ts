@@ -50,6 +50,9 @@ export {
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
+  ROW_CLICK_TRIGGER,
+  rowClickTrigger,
+  RowClickContext,
 } from './triggers';
 export {
   TriggerContextMapping,
