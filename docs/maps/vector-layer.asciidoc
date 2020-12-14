@@ -37,7 +37,7 @@ Tiles exceeding `index.max_result_window` have a visual indicator when there are
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
 
 *Tracks*:: Connect points into lines.
-The index must contain at least one fields mapped as {ref}/geo-point.html[geo_point].
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 *Upload Geojson*:: Index GeoJSON data in Elasticsearch.
 
