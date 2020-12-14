@@ -202,8 +202,16 @@ export interface IMitreAttack {
   name: string;
   reference: string;
 }
+
+export interface IMitreAttackTechnique {
+  id: string;
+  name: string;
+  reference: string;
+  subtechnique?: IMitreAttack[];
+}
+
 export interface IMitreEnterpriseAttack {
   framework: string;
   tactic: IMitreAttack;
-  technique: IMitreAttack[];
+  technique: IMitreAttackTechnique[];
 }

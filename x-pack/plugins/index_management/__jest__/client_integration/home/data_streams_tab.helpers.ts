@@ -19,7 +19,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
-    clickIncludeManagedSwitch: () => void;
+    toggleViewFilterAt: (index: number) => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -82,9 +82,16 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('includeStatsSwitch').simulate('click');
   };
 
-  const clickIncludeManagedSwitch = () => {
-    const { find } = testBed;
-    find('includeManagedSwitch').simulate('click');
+  const toggleViewFilterAt = (index: number) => {
+    const { find, component } = testBed;
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+    component.update();
+    act(() => {
+      find('filterItem').at(index).simulate('click');
+    });
+    component.update();
   };
 
   const clickReloadButton = () => {
@@ -197,7 +204,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
-      clickIncludeManagedSwitch,
+      toggleViewFilterAt,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -235,6 +242,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   privileges: {
     delete_index: true,
   },
+  hidden: false,
   ...dataStream,
 });
 

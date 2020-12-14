@@ -9,7 +9,7 @@ import { randomBytes, createHash } from 'crypto';
 import nodeCrypto, { Crypto } from '@elastic/node-crypto';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { KibanaRequest, Logger } from '../../../../../src/core/server';
-import type { AuthenticationProvider } from '../../common/types';
+import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 import type { SessionIndex, SessionIndexValue } from './session_index';
 import type { SessionCookie } from './session_cookie';
@@ -97,6 +97,17 @@ export class Session {
 
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
+  }
+
+  /**
+   * Extracts session id for the specified request.
+   * @param request Request instance to get session value for.
+   */
+  async getSID(request: KibanaRequest) {
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
+    if (sessionCookieValue) {
+      return sessionCookieValue.sid;
+    }
   }
 
   /**

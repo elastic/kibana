@@ -21,7 +21,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { useLayerList } from './useLayerList';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
 import { useMapFilters } from './useMapFilters';

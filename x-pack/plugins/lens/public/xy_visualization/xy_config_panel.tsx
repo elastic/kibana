@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -22,10 +22,12 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
+  FormatFactory,
 } from '../types';
 import {
   State,
@@ -48,6 +50,8 @@ import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
+import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getSortedAccessors } from './to_expression';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -150,6 +154,28 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+function getValueLabelDisableReason({
+  isAreaPercentage,
+  isHistogramSeries,
+}: {
+  isAreaPercentage: boolean;
+  isHistogramSeries: boolean;
+}): string {
+  if (isHistogramSeries) {
+    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on histograms.',
+    });
+  }
+  if (isAreaPercentage) {
+    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on percentage area charts.',
+    });
+  }
+  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+  });
+}
+
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
@@ -242,20 +268,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
 
+  const valueLabelsDisabledReason = getValueLabelDisableReason({
+    isAreaPercentage,
+    isHistogramSeries,
+  });
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={
-              isAreaPercentage
-                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
-                  })
-                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on histograms.',
-                  })
-            }
+            tooltipContent={valueLabelsDisabledReason}
             condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
             <ToolbarPopover
@@ -445,7 +468,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 }
 const idPrefix = htmlIdGenerator()();
 
-export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
+export function DimensionEditor(
+  props: VisualizationDimensionEditorProps<State> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+  }
+) {
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -556,12 +584,43 @@ const ColorPicker = ({
   setState,
   layerId,
   accessor,
-}: VisualizationDimensionEditorProps<State>) => {
+  frame,
+  formatFactory,
+  paletteService,
+}: VisualizationDimensionEditorProps<State> & {
+  formatFactory: FormatFactory;
+  paletteService: PaletteRegistry;
+}) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const disabled = !!layer.splitAccessor;
 
-  const [color, setColor] = useState(getSeriesColor(layer, accessor));
+  const overwriteColor = getSeriesColor(layer, accessor);
+  const currentColor = useMemo(() => {
+    if (overwriteColor || !frame.activeData) return overwriteColor;
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+
+    const colorAssignments = getColorAssignments(
+      state.layers,
+      { tables: frame.activeData },
+      formatFactory
+    );
+    const mappedAccessors = getAccessorColorConfig(
+      colorAssignments,
+      frame,
+      {
+        ...layer,
+        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+      },
+      paletteService
+    );
+
+    return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
+  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
+
+  const [color, setColor] = useState(currentColor);
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
@@ -596,9 +655,9 @@ const ColorPicker = ({
     <EuiColorPicker
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
-      isClearable
+      isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : color}
+      color={disabled ? '' : color || currentColor}
       disabled={disabled}
       placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
         defaultMessage: 'Auto',

@@ -65,26 +65,23 @@ export function DiscoverIndexPattern({
   }
 
   return (
-    <div className="dscIndexPattern__container">
-      <I18nProvider>
-        <ChangeIndexPattern
-          trigger={{
-            label: selected.title,
-            title: selected.title,
-            'data-test-subj': 'indexPattern-switch-link',
-            className: 'dscIndexPattern__triggerButton',
-          }}
-          indexPatternId={selected.id}
-          indexPatternRefs={options}
-          onChangeIndexPattern={(id) => {
-            const indexPattern = options.find((pattern) => pattern.id === id);
-            if (indexPattern) {
-              setIndexPattern(id);
-              setSelected(indexPattern);
-            }
-          }}
-        />
-      </I18nProvider>
-    </div>
+    <I18nProvider>
+      <ChangeIndexPattern
+        trigger={{
+          label: selected.title,
+          title: selected.title,
+          'data-test-subj': 'indexPattern-switch-link',
+        }}
+        indexPatternId={selected.id}
+        indexPatternRefs={options}
+        onChangeIndexPattern={(id) => {
+          const indexPattern = options.find((pattern) => pattern.id === id);
+          if (indexPattern) {
+            setIndexPattern(id);
+            setSelected(indexPattern);
+          }
+        }}
+      />
+    </I18nProvider>
   );
 }

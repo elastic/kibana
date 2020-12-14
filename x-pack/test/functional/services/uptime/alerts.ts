@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const browser = getService('browser');
 
   return {
@@ -37,6 +38,8 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       return testSubjects.setValue('intervalInput', value);
     },
     async setAlertThrottleInterval(value: string) {
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
       return testSubjects.setValue('throttleInput', value);
     },
     async setAlertExpressionValue(
@@ -46,7 +49,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     ) {
       await testSubjects.click(expressionAttribute);
       await testSubjects.setValue(fieldAttribute, value);
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return await testSubjects.click(expressionAttribute);
     },
     async setAlertStatusNumTimes(value: string) {
       return this.setAlertExpressionValue(
@@ -72,7 +75,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       for (let i = 0; i < optionAttributes.length; i += 1) {
         await testSubjects.click(optionAttributes[i], 5000);
       }
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return testSubjects.click(expressionAttribute, 5000);
     },
     async setMonitorStatusSelectableToHours() {
       return this.setAlertExpressionSelectable(
@@ -99,17 +102,17 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     async clickLocationExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_location');
       await testSubjects.click(`filter-popover-item_${filter}`);
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return find.clickByCssSelector('body');
     },
     async clickPortExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_port');
       await testSubjects.click(`filter-popover-item_${filter}`);
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return find.clickByCssSelector('body');
     },
     async clickTypeExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
       await testSubjects.click(`filter-popover-item_${filter}`);
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return find.clickByCssSelector('body');
     },
     async clickSaveAlertButton() {
       return testSubjects.click('saveAlertButton');

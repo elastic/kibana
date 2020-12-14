@@ -5,7 +5,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import React, { ReactNode } from 'react';
 import { Settings } from './';
 import { createMemoryHistory } from 'history';

@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { connectorsConfiguration } from '../connectors';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 interface ConnectorCardProps {

@@ -67,7 +67,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
       break;
     case 'sourceFilters':
       title = i18n.translate('indexPatternManagement.editIndexPattern.tabs.sourceHeader', {
-        defaultMessage: 'Source filters',
+        defaultMessage: 'Field filters',
       });
       break;
   }

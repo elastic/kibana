@@ -63,7 +63,7 @@ export const timeSeriesExplorerRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver('', undefined, deps.config, {
+  const { context, results } = useResolver(undefined, undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),

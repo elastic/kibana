@@ -8,8 +8,8 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
 import { getRedirectToTracePageUrl } from './get_redirect_to_trace_page_url';
 

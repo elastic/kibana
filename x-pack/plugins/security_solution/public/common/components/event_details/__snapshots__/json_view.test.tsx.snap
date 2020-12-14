@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JSON View rendering should match snapshot 1`] = `
-<JsonEditor
-  data-test-subj="jsonView"
->
+<styled.div>
   <EuiCodeEditor
+    data-test-subj="jsonView"
+    height="100%"
     isReadOnly={true}
     mode="javascript"
     setOptions={
@@ -44,9 +44,12 @@ exports[`JSON View rendering should match snapshot 1`] = `
     \\"ip\\": \\"10.47.8.200\\",
     \\"packets\\": 4,
     \\"port\\": 902
+  },
+  \\"event\\": {
+    \\"kind\\": \\"event\\"
   }
 }"
     width="100%"
   />
-</JsonEditor>
+</styled.div>
 `;

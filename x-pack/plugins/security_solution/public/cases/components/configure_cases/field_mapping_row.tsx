@@ -15,7 +15,7 @@ import {
 
 import { capitalize } from 'lodash/fp';
 import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
-import { AllThirdPartyFields } from '../../../common/lib/connectors/types';
+import { AllThirdPartyFields } from '../connectors';
 
 export interface RowProps {
   id: string;

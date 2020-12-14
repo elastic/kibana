@@ -26,7 +26,7 @@ export declare class SavedObjectsRepository
 |  [deleteFromNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsrepository.deletefromnamespaces.md) |  | Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted entirely. This method and \[<code>addToNamespaces</code>\][SavedObjectsRepository.addToNamespaces()](./kibana-plugin-core-server.savedobjectsrepository.addtonamespaces.md) are the only ways to change which Spaces a multi-namespace saved object is shared to. |
 |  [find(options)](./kibana-plugin-core-server.savedobjectsrepository.find.md) |  |  |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.get.md) |  | Gets a single object |
-|  [incrementCounter(type, id, counterFieldNames, options)](./kibana-plugin-core-server.savedobjectsrepository.incrementcounter.md) |  | Increments all the specified counter fields by one. Creates the document if one doesn't exist for the given id. |
+|  [incrementCounter(type, id, counterFields, options)](./kibana-plugin-core-server.savedobjectsrepository.incrementcounter.md) |  | Increments all the specified counter fields (by one by default). Creates the document if one doesn't exist for the given id. |
 |  [removeReferencesTo(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.removereferencesto.md) |  | Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference. |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsrepository.update.md) |  | Updates an object |
 

@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function useUxQuery() {
   const { urlParams, uiFilters } = useUrlParams();

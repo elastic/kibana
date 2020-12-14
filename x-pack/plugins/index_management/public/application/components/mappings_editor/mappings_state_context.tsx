@@ -41,6 +41,10 @@ export const StateProvider: React.FC = ({ children }) => {
       status: 'idle',
       editor: 'default',
     },
+    runtimeFields: {},
+    runtimeFieldsList: {
+      status: 'idle',
+    },
     fieldsJsonEditor: {
       format: () => ({}),
       isValid: true,

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { ResolvedActionGroup } from '../../../../../plugins/alerts/common';
+import { RecoveredActionGroup } from '../../../../../plugins/alerts/common';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -137,7 +137,7 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
-    it('should fire actions when an alert instance is resolved', async () => {
+    it('should fire actions when an alert instance is recovered', async () => {
       const reference = alertUtils.generateReference();
 
       const { body: createdAction } = await supertestWithoutAuth
@@ -174,12 +174,12 @@ instanceStateValue: true
                 params: {},
               },
               {
-                group: ResolvedActionGroup.id,
+                group: RecoveredActionGroup.id,
                 id: indexRecordActionId,
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
-                  message: 'Resolved message',
+                  message: 'Recovered message',
                 },
               },
             ],
@@ -194,10 +194,10 @@ instanceStateValue: true
         await esTestIndexTool.waitForDocs('action:test.index-record', reference)
       )[0];
 
-      expect(actionTestRecord._source.params.message).to.eql('Resolved message');
+      expect(actionTestRecord._source.params.message).to.eql('Recovered message');
     });
 
-    it('should not fire actions when an alert instance is resolved, but alert is muted', async () => {
+    it('should not fire actions when an alert instance is recovered, but alert is muted', async () => {
       const testStart = new Date();
       const reference = alertUtils.generateReference();
 
@@ -237,12 +237,12 @@ instanceStateValue: true
                 params: {},
               },
               {
-                group: ResolvedActionGroup.id,
+                group: RecoveredActionGroup.id,
                 id: indexRecordActionId,
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
-                  message: 'Resolved message',
+                  message: 'Recovered message',
                 },
               },
             ],

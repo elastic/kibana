@@ -20,24 +20,25 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { InputControlVisParams } from './types';
 
 interface Arguments {
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+export interface InputControlRenderValue {
   visType: 'input_control_vis';
-  visConfig: VisParams;
+  visConfig: InputControlVisParams;
 }
 
-export const createInputControlVisFn = (): ExpressionFunctionDefinition<
+export type InputControlExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'input_control_vis',
   Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<InputControlRenderValue>
+>;
+
+export const createInputControlVisFn = (): InputControlExpressionFunctionDefinition => ({
   name: 'input_control_vis',
   type: 'render',
   inputTypes: [],
@@ -52,10 +53,10 @@ export const createInputControlVisFn = (): ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
-    const params = JSON.parse(args.visConfig);
+    const params: InputControlVisParams = JSON.parse(args.visConfig);
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'input_control_vis',
       value: {
         visType: 'input_control_vis',
         visConfig: params,

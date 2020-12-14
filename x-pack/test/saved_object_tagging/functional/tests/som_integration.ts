@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitUntilUrlIncludes('/app/management/kibana/objects');
         await PageObjects.savedObjects.waitTableIsLoaded();
 
-        expect(await PageObjects.savedObjects.getCurrentSearchValue()).to.eql('tag:(tag-1)');
+        expect(await PageObjects.savedObjects.getCurrentSearchValue()).to.eql('tag:("tag-1")');
         expect(await PageObjects.savedObjects.getRowTitles()).to.eql([
           'Visualization 1 (tag-1)',
           'Visualization 3 (tag-1 + tag-3)',

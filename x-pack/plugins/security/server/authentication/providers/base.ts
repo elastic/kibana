@@ -29,7 +29,7 @@ export interface AuthenticationProviderOptions {
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {
-    loggedOut: string;
+    loggedOut: (request: KibanaRequest) => string;
   };
 }
 

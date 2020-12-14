@@ -62,6 +62,7 @@ describe('ProcessMetricsCollector', () => {
       heapTotal,
       heapUsed,
       external: 0,
+      arrayBuffers: 0,
     }));
 
     jest.spyOn(v8, 'getHeapStatistics').mockImplementation(
