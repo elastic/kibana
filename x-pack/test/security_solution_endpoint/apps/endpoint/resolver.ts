@@ -200,14 +200,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
        * @param id the node ID to verify the pills for.
        * @param expectedPills a map of expected pills for all nodes
        */
-      const verifyPills = async (id: string, expectedPills: Map<string, Set<string>>) => {
+      const verifyPills = async (id: string, expectedPills: Set<string>) => {
         const relatedEventPills = await pageObjects.hosts.findNodePills(id);
-        const pillsForNode = expectedPills.get(id);
-        expect(relatedEventPills.length).to.equal(pillsForNode?.size);
+        expect(relatedEventPills.length).to.equal(expectedPills.size);
         for (const pill of relatedEventPills) {
           const pillText = await pill._webElement.getText();
           // check that we have the pill text in our expected map
-          expect(pillsForNode?.has(pillText)).to.equal(true);
+          expect(expectedPills.has(pillText)).to.equal(true);
           await pill.click();
           await pageObjects.common.sleep(100);
 
@@ -261,12 +260,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ],
           ]);
 
-          const visibleNodeIDs = await pageObjects.hosts.findVisibleNodeIDs();
-
-          for (const id of visibleNodeIDs) {
+          for (const [id, expectedPills] of expectedData.entries()) {
             // center the node in the view
             await pageObjects.hosts.clickNodeLinkInPanel(id);
-            await verifyPills(id, expectedData);
+            await verifyPills(id, expectedPills);
           }
         });
       });
