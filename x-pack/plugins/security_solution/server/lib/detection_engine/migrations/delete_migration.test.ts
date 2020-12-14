@@ -33,6 +33,7 @@ describe('deleteMigration', () => {
       migration: deletedMigration,
       signalsAlias: 'my-signals-alias',
       soClient,
+      username: 'username',
     });
 
     expect(updateMigrationSavedObject).not.toHaveBeenCalled();
@@ -45,6 +46,7 @@ describe('deleteMigration', () => {
       migration: pendingMigration,
       signalsAlias: 'my-signals-alias',
       soClient,
+      username: 'username',
     });
 
     expect(updateMigrationSavedObject).not.toHaveBeenCalled();
@@ -57,6 +59,7 @@ describe('deleteMigration', () => {
       migration: failedMigration,
       signalsAlias: 'my-signals-alias',
       soClient,
+      username: 'username',
     });
 
     expect(updateMigrationSavedObject).toHaveBeenCalledWith(
@@ -75,6 +78,7 @@ describe('deleteMigration', () => {
       migration: successMigration,
       signalsAlias: 'my-signals-alias',
       soClient,
+      username: 'username',
     });
 
     expect(updateMigrationSavedObject).toHaveBeenCalledWith(
