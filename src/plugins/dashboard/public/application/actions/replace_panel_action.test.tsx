@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable } from '../../embeddable_plugin';
+
 import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { CoreStart } from 'kibana/public';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { isErrorEmbeddable } from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -53,6 +55,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
   const input = getSampleDashboardInput({
     panels: {

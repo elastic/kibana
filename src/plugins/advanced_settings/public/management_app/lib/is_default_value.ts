@@ -22,7 +22,6 @@ export function isDefaultValue(setting: FieldSetting) {
   return (
     setting.isCustom ||
     setting.value === undefined ||
-    setting.value === '' ||
     String(setting.value) === String(setting.defVal)
   );
 }
