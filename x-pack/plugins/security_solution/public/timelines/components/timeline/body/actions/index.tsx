@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiLoadingSpinner, EuiCheckbox } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 
 import { EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import * as i18n from '../translations';
@@ -66,14 +66,16 @@ const ActionsComponent: React.FC<Props> = ({
       )}
       <EventsTd key="expand-event">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-          <EuiButtonIcon
-            aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-            data-test-subj="expand-event"
-            disabled={expanded}
-            iconType="arrowRight"
-            id={eventId}
-            onClick={onEventToggled}
-          />
+          <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.EXPAND_EVENT}>
+            <EuiButtonIcon
+              aria-label={i18n.COLLAPSE}
+              data-test-subj="expand-event"
+              disabled={expanded}
+              iconType="arrowRight"
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          </EuiToolTip>
         </EventsTdContent>
       </EventsTd>
 
