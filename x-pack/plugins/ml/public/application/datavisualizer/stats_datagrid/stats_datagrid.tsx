@@ -23,13 +23,12 @@ import { FieldTypeIcon } from '../../components/field_type_icon';
 import { FieldVisConfig } from '../index_based/common';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { DataVisualizerFieldExpandedRow } from './expanded_row';
-import { DocumentStat } from './components/field_data_column_header/document_stats';
-import { DistinctValues } from './components/field_data_column_header/distinct_values';
+import { DocumentStat } from './components/field_data_row/document_stats';
+import { DistinctValues } from './components/field_data_row/distinct_values';
 import { NumberContentPreview } from './components/field_data_row/number_content_preview';
 import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-
 const FIELD_NAME = 'fieldName';
 
 interface DataVisualizerDataGrid {
@@ -166,14 +165,9 @@ export const DataVisualizerDataGrid = ({
       },
       {
         field: 'docCount',
-        name: (
-          <div>
-            <EuiIcon type={'document'} style={{ paddingRight: 5 }} />
-            {i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
-              defaultMessage: 'Documents (%)',
-            })}
-          </div>
-        ),
+        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
+          defaultMessage: 'Documents (%)',
+        }),
         render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
         sortable: (item: FieldVisConfig) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -181,14 +175,9 @@ export const DataVisualizerDataGrid = ({
       },
       {
         field: 'stats.cardinality',
-        name: (
-          <div>
-            <EuiIcon type={'database'} style={{ paddingRight: 5 }} />
-            {i18n.translate('xpack.ml.datavisualizer.dataGrid.distinctValuesColumnName', {
-              defaultMessage: 'Distinct values',
-            })}
-          </div>
-        ),
+        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.distinctValuesColumnName', {
+          defaultMessage: 'Distinct values',
+        }),
         render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -242,6 +231,7 @@ export const DataVisualizerDataGrid = ({
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
       <EuiInMemoryTable<FieldVisConfig>
+        className={'mlDataVisualizer'}
         items={items}
         itemId={FIELD_NAME}
         columns={columns}
