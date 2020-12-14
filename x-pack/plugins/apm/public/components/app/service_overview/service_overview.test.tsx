@@ -15,12 +15,13 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
-import * as useFetcherHooks from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
 import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
+import { waitFor } from '@testing-library/dom';
+import * as callApmApi from '../../../services/rest/createCallApmApi';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -54,7 +55,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('ServiceOverview', () => {
-  it('renders', () => {
+  it('renders', async () => {
     jest
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
@@ -64,18 +65,29 @@ describe('ServiceOverview', () => {
         indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
-    jest.spyOn(useFetcherHooks, 'useFetcher').mockReturnValue({
-      data: {
-        items: [],
-        tableOptions: {
-          pageIndex: 0,
-          sort: { direction: 'desc', field: 'test field' },
-        },
-        totalItemCount: 0,
-        throughput: [],
+
+    const calls = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'GET /api/apm/services/{serviceName}/error_groups': {
+        error_groups: [],
+        total_error_groups: 0,
       },
-      refetch: () => {},
-      status: FETCH_STATUS.SUCCESS,
+      'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
+        transactionGroups: [],
+        totalTransactionGroups: 0,
+        isAggregationAccurate: true,
+      },
+      'GET /api/apm/services/{serviceName}/dependencies': [],
+    };
+
+    jest.spyOn(callApmApi, 'createCallApmApi').mockImplementation(() => {});
+
+    jest.spyOn(callApmApi, 'callApmApi').mockImplementation(({ endpoint }) => {
+      const response = calls[endpoint as keyof typeof calls];
+
+      return response
+        ? Promise.resolve(response)
+        : Promise.reject(`Response for ${endpoint} is not defined`);
     });
     jest
       .spyOn(useTransactionBreakdownHooks, 'useTransactionBreakdown')
@@ -85,10 +97,19 @@ describe('ServiceOverview', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
-    expect(() =>
-      renderWithTheme(<ServiceOverview serviceName="test service name" />, {
+    const { findAllByText } = renderWithTheme(
+      <ServiceOverview serviceName="test service name" />,
+      {
         wrapper: Wrapper,
-      })
-    ).not.toThrowError();
+      }
+    );
+
+    await waitFor(() =>
+      expect(callApmApi.callApmApi).toHaveBeenCalledTimes(
+        Object.keys(calls).length
+      )
+    );
+
+    expect((await findAllByText('Latency')).length).toBeGreaterThan(0);
   });
 });
