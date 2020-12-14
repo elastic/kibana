@@ -388,8 +388,8 @@ secret_token: '${secretToken}'
 server_url: '${apmServerUrl || 'http://localhost:8200'}',
 
 # ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setServiceEnvironment', {
-  defaultMessage: 'Set the service environment (default: production)'
-})}
+      defaultMessage: 'Set the service environment (default: production)'
+    })}
 environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.rackClient.createConfig.textPost', {
       defaultMessage:
@@ -548,8 +548,8 @@ export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 export ELASTIC_APM_SECRET_TOKEN=${secretToken}
 
 # ${i18n.translate('apmOss.tutorial.goClient.configure.commands.setServiceEnvironment', {
-  defaultMessage: 'Set the service environment (default: production)',
-})}
+      defaultMessage: 'Set the service environment (default: production)',
+    })}
 export ELASTIC_APM_ENVIRONMENT=
 `.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.goClient.configure.textPost', {
@@ -593,7 +593,7 @@ guide to instrumenting Go source code.',
   },
 ];
 
-export const createJavaAgentInstructions = (apmServerUrl = '', secretToken = '' ) => [
+export const createJavaAgentInstructions = (apmServerUrl = '', secretToken = '') => [
   {
     title: i18n.translate('apmOss.tutorial.javaClient.download.title', {
       defaultMessage: 'Download the APM agent',
