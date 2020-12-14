@@ -233,7 +233,7 @@ image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigate
 https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
 ----
 +
-The example URL navigates to {kib} issues on Github. `{{event.value}}` is substituted with a value associated with a selected pie slice. In *URL preview*, `{{event.value}}` is substituted with a <<values-in-preview, dummy>> value.
+The example URL navigates to {kib} issues on Github. `{{event.value}}` is substituted with a value associated with a selected pie slice.
 +
 [role="screenshot"]
 image:images/url_drilldown_url_template.png[URL template input]
