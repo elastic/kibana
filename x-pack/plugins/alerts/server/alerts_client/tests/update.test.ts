@@ -70,6 +70,7 @@ describe('update()', () => {
       scheduledTaskId: 'task-123',
       params: {},
       throttle: null,
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -144,6 +145,7 @@ describe('update()', () => {
             },
           },
         ],
+        notifyWhen: 'onActiveAlert',
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -185,6 +187,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyWhen: 'onActiveAlert',
         actions: [
           {
             group: 'default',
@@ -241,6 +244,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -295,6 +299,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -368,6 +373,7 @@ describe('update()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -418,6 +424,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -445,6 +452,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -479,6 +487,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -540,6 +549,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        notifyWhen: 'onThrottleInterval',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [
@@ -583,6 +593,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -611,6 +622,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -645,6 +657,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -702,6 +715,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -830,6 +844,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -937,6 +952,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -998,6 +1014,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1118,6 +1135,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1149,6 +1167,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1185,6 +1204,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1220,6 +1240,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1273,6 +1294,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [],
         },
       });
@@ -1296,6 +1318,7 @@ describe('update()', () => {
               bar: true,
             },
             throttle: null,
+            notifyWhen: null,
             actions: [],
           },
         })
@@ -1339,6 +1362,7 @@ describe('update()', () => {
           },
           throttle: null,
           actions: [],
+          notifyWhen: null,
         },
       });
 
@@ -1368,6 +1392,7 @@ describe('update()', () => {
             },
             throttle: null,
             actions: [],
+            notifyWhen: null,
           },
         })
       ).rejects.toThrow();

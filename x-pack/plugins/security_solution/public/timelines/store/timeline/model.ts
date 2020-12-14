@@ -55,6 +55,8 @@ export interface TimelineModel {
   activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
+  /** Timeline saved object owner */
+  createdBy?: string;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** Events to not be rendered **/
@@ -116,6 +118,7 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
+  showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
