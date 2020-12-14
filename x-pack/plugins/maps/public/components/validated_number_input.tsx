@@ -23,8 +23,8 @@ interface Props {
   label: string;
 }
 
-function getErrorMessage(min: number, max: number) {
-  i18n.translate('xpack.maps.validatedNumberInput.invalidClampErrorMessage', {
+function getErrorMessage(min: number, max: number): string {
+  return i18n.translate('xpack.maps.validatedNumberInput.invalidClampErrorMessage', {
     defaultMessage: 'Must be between {min} and {max}',
     values: {
       min,
