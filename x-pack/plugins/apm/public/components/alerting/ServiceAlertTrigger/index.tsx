@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 
 interface Props {
@@ -14,7 +14,6 @@ interface Props {
   setAlertProperty: (key: string, value: any) => void;
   defaults: Record<string, any>;
   fields: React.ReactNode[];
-  chartPreview?: React.ReactNode;
 }
 
 export function ServiceAlertTrigger(props: Props) {
@@ -26,7 +25,6 @@ export function ServiceAlertTrigger(props: Props) {
     setAlertProperty,
     alertTypeName,
     defaults,
-    chartPreview,
   } = props;
 
   const params: Record<string, any> = {
@@ -63,7 +61,6 @@ export function ServiceAlertTrigger(props: Props) {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      {chartPreview}
       <EuiSpacer size="m" />
     </>
   );
