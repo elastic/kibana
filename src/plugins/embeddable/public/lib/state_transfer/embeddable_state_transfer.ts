@@ -71,8 +71,10 @@ export class EmbeddableStateTransfer {
 
   public clearEditorState() {
     const currentState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
-    delete currentState[EMBEDDABLE_EDITOR_STATE_KEY];
-    this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, currentState);
+    if (currentState) {
+      delete currentState[EMBEDDABLE_EDITOR_STATE_KEY];
+      this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, currentState);
+    }
   }
 
   /**
