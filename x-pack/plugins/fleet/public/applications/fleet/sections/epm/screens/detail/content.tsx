@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { DetailParams } from '.';
@@ -45,7 +45,7 @@ export function Content(props: ContentProps) {
     <ContentFlexGroup>
       <LeftSideColumn {...(!showRightColumn ? { columnGrow: 1 } : undefined)} />
       <CenterColumn {...(!showRightColumn ? { columnGrow: 6 } : undefined)}>
-        <ContentPanel {...props} />
+        <ContentPanel panel={panel!} packageInfo={props} />
       </CenterColumn>
       {showRightColumn && (
         <RightColumn>
@@ -56,10 +56,12 @@ export function Content(props: ContentProps) {
   );
 }
 
-type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
-export function ContentPanel(props: ContentPanelProps) {
-  const { panel, ...packageInfo } = props;
-  const { name, version, assets, title, removable, latestVersion } = props;
+interface ContentPanelProps {
+  packageInfo: PackageInfo;
+  panel: DetailViewPanelName;
+}
+export const ContentPanel = memo<ContentPanelProps>(({ panel, packageInfo }) => {
+  const { name, version, assets, title, removable, latestVersion } = packageInfo;
   const pkgkey = pkgKeyFromPackageInfo(packageInfo);
 
   const CustomView = useUIExtension(name, 'package-detail-custom');
@@ -89,9 +91,9 @@ export function ContentPanel(props: ContentPanelProps) {
       );
     case 'overview':
     default:
-      return <OverviewPanel {...props} />;
+      return <OverviewPanel {...packageInfo} />;
   }
-}
+});
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
