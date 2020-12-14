@@ -56,24 +56,24 @@ export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportEr
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
-  ...getAllCommonFields(BULK_CREATE_STATS_PREFIX),
-  ...getAllCommonFields(BULK_GET_STATS_PREFIX),
-  ...getAllCommonFields(BULK_UPDATE_STATS_PREFIX),
-  ...getAllCommonFields(CREATE_STATS_PREFIX),
-  ...getAllCommonFields(DELETE_STATS_PREFIX),
-  ...getAllCommonFields(FIND_STATS_PREFIX),
-  ...getAllCommonFields(GET_STATS_PREFIX),
-  ...getAllCommonFields(UPDATE_STATS_PREFIX),
+  ...getFieldsForCounter(BULK_CREATE_STATS_PREFIX),
+  ...getFieldsForCounter(BULK_GET_STATS_PREFIX),
+  ...getFieldsForCounter(BULK_UPDATE_STATS_PREFIX),
+  ...getFieldsForCounter(CREATE_STATS_PREFIX),
+  ...getFieldsForCounter(DELETE_STATS_PREFIX),
+  ...getFieldsForCounter(FIND_STATS_PREFIX),
+  ...getFieldsForCounter(GET_STATS_PREFIX),
+  ...getFieldsForCounter(UPDATE_STATS_PREFIX),
   // Saved Objects Management APIs
-  ...getAllCommonFields(IMPORT_STATS_PREFIX),
+  ...getFieldsForCounter(IMPORT_STATS_PREFIX),
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
-  ...getAllCommonFields(RESOLVE_IMPORT_STATS_PREFIX),
+  ...getFieldsForCounter(RESOLVE_IMPORT_STATS_PREFIX),
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-  ...getAllCommonFields(EXPORT_STATS_PREFIX),
+  ...getFieldsForCounter(EXPORT_STATS_PREFIX),
   `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
   `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
 ];
@@ -169,11 +169,11 @@ export class CoreUsageStatsClient {
     const options = { refresh: false };
     try {
       const repository = await this.repositoryPromise;
-      const fields = [...this.getCommonFieldsToIncrement(request), ...counterFieldNames];
+      const fields = this.getFieldsToIncrement(counterFieldNames, prefix, request);
       await repository.incrementCounter(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
-        fields.map((x) => `${prefix}.${x}`),
+        fields,
         options
       );
     } catch (err) {
@@ -196,20 +196,24 @@ export class CoreUsageStatsClient {
     return spaceId === DEFAULT_NAMESPACE_STRING;
   }
 
-  private getCommonFieldsToIncrement(request: KibanaRequest) {
+  private getFieldsToIncrement(
+    counterFieldNames: string[],
+    prefix: string,
+    request: KibanaRequest
+  ) {
     const isKibanaRequest = getIsKibanaRequest(request);
     const isDefaultNamespace = this.getIsDefaultNamespace(request);
     const namespaceField = isDefaultNamespace ? 'default' : 'custom';
-    const counterFieldNames = [
+    return [
       'total',
       `namespace.${namespaceField}.total`,
       `namespace.${namespaceField}.kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
-    ];
-    return counterFieldNames;
+      ...counterFieldNames,
+    ].map((x) => `${prefix}.${x}`);
   }
 }
 
-function getAllCommonFields(prefix: string) {
+function getFieldsForCounter(prefix: string) {
   return [
     'total',
     'namespace.default.total',
@@ -222,7 +226,7 @@ function getAllCommonFields(prefix: string) {
 }
 
 function getIsKibanaRequest({ headers }: KibanaRequest) {
-  // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers['user-agent'] && headers.referer;
+  return headers && headers['kbn-version'] && headers.referer;
 }

@@ -53,7 +53,7 @@ describe('CoreUsageStatsClient', () => {
     );
     return { usageStatsClient, debugLoggerMock, basePathMock, repositoryMock };
   };
-  const firstPartyRequestHeaders = { 'kbn-version': 'a', 'user-agent': 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
+  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' }; // as long as these two header fields are truthy, this will be treated like a first-party request
   const incrementOptions = { refresh: false };
 
   describe('#getUsageStats', () => {
