@@ -7,11 +7,11 @@
 import { serverMock } from '../__mocks__';
 import { SetupPlugins } from '../../../../plugin';
 import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_responses';
-import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
+import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
 
-jest.mock('../../migrations/get_migration_saved_objects_by_index');
+jest.mock('../../migrations/get_migration_saved_objects_by_id');
 
 describe('finalizing signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -27,48 +27,37 @@ describe('finalizing signals migrations', () => {
     finalizeSignalsMigrationRoute(server.router, securityMock);
   });
 
-  it('returns an inline error if no migration exists', async () => {
-    (getMigrationSavedObjectsByIndex as jest.Mock).mockResolvedValue({
-      'my-signals-index': [],
-    });
+  it('returns an empty array error if no migrations exists', async () => {
+    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue([]);
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      indices: [
-        {
-          error: {
-            message: 'The specified index has no migrations',
-            status_code: 400,
-          },
-          index: 'my-signals-index',
-          migration_id: null,
-          migration_index: null,
-        },
-      ],
+      indices: [],
     });
   });
 
-  it('returns an inline error if the latest migration failed', async () => {
-    (getMigrationSavedObjectsByIndex as jest.Mock).mockResolvedValue({
-      'my-signals-index': [
-        getSignalsMigrationSavedObjectMock({ status: 'failure' }),
-        getSignalsMigrationSavedObjectMock(),
-      ],
-    });
+  it('returns an inline error if a migration failed', async () => {
+    const mockMigrations = [
+      getSignalsMigrationSavedObjectMock({ status: 'failure' }),
+      getSignalsMigrationSavedObjectMock(),
+    ];
+    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue(mockMigrations);
 
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
       indices: [
-        {
+        expect.objectContaining({
+          id: mockMigrations[0].id,
           error: {
-            message: "The specified index's latest migration was not successful.",
+            message: 'The migration was not successful.',
             status_code: 400,
           },
-          index: 'my-signals-index',
-          migration_id: null,
-          migration_index: null,
-        },
+          status: 'failure',
+        }),
+        expect.objectContaining({
+          id: mockMigrations[1].id,
+        }),
       ],
     });
   });

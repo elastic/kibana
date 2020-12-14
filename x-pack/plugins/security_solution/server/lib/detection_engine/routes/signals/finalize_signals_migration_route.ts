@@ -13,7 +13,7 @@ import { BadRequestError } from '../../errors/bad_request_error';
 import { isMigrationFailed, isMigrationPending } from '../../migrations/helpers';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
-import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
+import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
 export const finalizeSignalsMigrationRoute = (
   router: IRouter,
@@ -33,7 +33,7 @@ export const finalizeSignalsMigrationRoute = (
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const soClient = context.core.savedObjects.client;
-      const { index: indices } = request.body;
+      const { migration_ids: migrationIds } = request.body;
 
       try {
         const appClient = context.securitySolution?.getAppClient();
@@ -46,54 +46,54 @@ export const finalizeSignalsMigrationRoute = (
           soClient,
           username: user?.username ?? 'elastic',
         });
-        const migrationsByIndex = await getMigrationSavedObjectsByIndex({
+        const migrations = await getMigrationSavedObjectsById({
+          migrationIds,
           soClient,
-          index: indices,
         });
 
         const finalizeResults = await Promise.all(
-          indices.map(async (index) => {
+          migrations.map(async (migration) => {
             try {
-              const migrations = migrationsByIndex[index] ?? [];
-              if (migrations.length === 0) {
-                throw new BadRequestError('The specified index has no migrations');
-              }
-
               const finalizedMigration = await migrationService.finalize({
-                migration: migrations[0],
+                migration,
                 signalsAlias: appClient.getSignalsIndex(),
               });
 
               if (isMigrationFailed(finalizedMigration)) {
                 throw new BadRequestError(
-                  finalizedMigration.attributes.error ??
-                    "The specified index's latest migration was not successful."
+                  finalizedMigration.attributes.error ?? 'The migration was not successful.'
                 );
               }
 
               return {
-                index,
+                id: finalizedMigration.id,
                 completed: !isMigrationPending(finalizedMigration),
-                migration_id: finalizedMigration.id,
-                migration_index: finalizedMigration.attributes.destinationIndex,
+                destinationIndex: finalizedMigration.attributes.destinationIndex,
+                status: finalizedMigration.attributes.status,
+                sourceIndex: finalizedMigration.attributes.sourceIndex,
+                version: finalizedMigration.attributes.version,
+                updated: finalizedMigration.attributes.updated,
               };
             } catch (err) {
               const error = transformError(err);
               return {
-                index,
+                id: migration.id,
+                destinationIndex: migration.attributes.destinationIndex,
                 error: {
                   message: error.message,
                   status_code: error.statusCode,
                 },
-                migration_id: null,
-                migration_index: null,
+                status: migration.attributes.status,
+                sourceIndex: migration.attributes.sourceIndex,
+                version: migration.attributes.version,
+                updated: migration.attributes.updated,
               };
             }
           })
         );
 
         return response.ok({
-          body: { indices: finalizeResults },
+          body: { migrations: finalizeResults },
         });
       } catch (err) {
         const error = transformError(err);

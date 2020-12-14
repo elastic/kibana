@@ -7,5 +7,5 @@
 import { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_schema';
 
 export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeSignalsMigrationSchema => ({
-  index: ['my-signals-index'],
+  migration_ids: ['migrationSOIdentifier'],
 });

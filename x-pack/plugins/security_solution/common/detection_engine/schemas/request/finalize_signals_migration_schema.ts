@@ -6,11 +6,9 @@
 
 import * as t from 'io-ts';
 
-import { index } from '../common/schemas';
-
 export const finalizeSignalsMigrationSchema = t.exact(
   t.type({
-    index,
+    migration_ids: t.array(t.string),
   })
 );
 

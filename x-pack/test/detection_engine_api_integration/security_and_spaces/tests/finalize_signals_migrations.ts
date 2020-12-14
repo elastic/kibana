@@ -34,7 +34,8 @@ interface CreateResponse {
   migration_id: string;
 }
 
-interface FinalizeResponse extends CreateResponse {
+interface FinalizeResponse {
+  id: string;
   completed?: boolean;
   error?: unknown;
 }
@@ -100,12 +101,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitFor(async () => {
         const {
           body: {
-            indices: [{ completed }],
+            migrations: [{ completed }],
           },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [createdMigration.index] })
+          .send({ migration_ids: [createdMigration.migration_id] })
           .expect(200);
 
         return completed === true;
@@ -141,11 +142,11 @@ export default ({ getService }: FtrProviderContext): void => {
       let finalizeResponse: FinalizeResponse[];
       await waitFor(async () => {
         ({
-          body: { indices: finalizeResponse },
+          body: { migrations: finalizeResponse },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: createdMigrations.map((m) => m.index) })
+          .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
           .expect(200));
 
         return finalizeResponse.every((index) => index.completed);
@@ -168,12 +169,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitFor(async () => {
         const {
           body: {
-            indices: [{ completed }],
+            migrations: [{ completed }],
           },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [createdMigration.index] })
+          .send({ migration_ids: [createdMigration.migration_id] })
           .expect(200);
 
         return completed;
@@ -189,11 +190,13 @@ export default ({ getService }: FtrProviderContext): void => {
     it.skip('deletes the underlying migration task', async () => {
       await waitFor(async () => {
         const {
-          body: { completed },
+          body: {
+            migrations: [{ completed }],
+          },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [createdMigration.index] })
+          .send({ migration_ids: [createdMigration.migration_id] })
           .expect(200);
 
         return completed;
@@ -209,12 +212,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitFor(async () => {
         const {
           body: {
-            indices: [{ completed }],
+            migrations: [{ completed }],
           },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [createdMigration.index] })
+          .send({ migration_ids: [createdMigration.migration_id] })
           .expect(200);
 
         return completed;
@@ -223,11 +226,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: [createdMigration.index] })
+        .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
-      const finalizeResponse: FinalizeResponse = body.indices[0];
+      const finalizeResponse: FinalizeResponse = body.migrations[0];
       expect(finalizeResponse.completed).to.eql(true);
-      expect(finalizeResponse.index).to.eql(createdMigration.index);
+      expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
 
       const { body: bodyAfter } = await supertest
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -242,35 +245,14 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesAfter).not.to.contain(createdMigration.index);
     });
 
-    it('rejects inline if the index does not exist', async () => {
+    it('returns an empty array indicating a no-op for DNE migrations', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: ['dne-index'] })
+        .send({ migration_ids: ['dne-migration'] })
         .expect(200);
-      const finalizeResponse: FinalizeResponse = body.indices[0];
 
-      expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message: 'The specified index has no migrations',
-        status_code: 400,
-      });
-    });
-
-    it('rejects inline if the index has no migrations', async () => {
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-        .set('kbn-xsrf', 'true')
-        .send({ index: [outdatedSignalsIndexName] })
-        .expect(200);
-      const finalizeResponse: FinalizeResponse = body.indices[0];
-
-      expect(finalizeResponse.index).to.eql(outdatedSignalsIndexName);
-      expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message: 'The specified index has no migrations',
-        status_code: 400,
-      });
+      expect(body).to.eql({ migrations: [] });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
@@ -279,13 +261,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: [createdMigration.index] })
+        .send({ migration_ids: [createdMigration.migration_id] })
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const finalizeResponse: FinalizeResponse = body.indices[0];
+      const finalizeResponse: FinalizeResponse = body.migrations[0];
 
-      expect(finalizeResponse.index).to.eql(createdMigration.index);
+      expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
       expect(finalizeResponse.completed).not.to.eql(true);
       expect(finalizeResponse.error).to.eql({
         message:
