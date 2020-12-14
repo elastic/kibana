@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
     nonMetricFieldsFilter: 'version',
     nonMetricFieldsTypeFilter: 'keyword',
     expected: {
-      totalDocCountFormatted: '86,274',
+      totalDocCountFormatted: '34,416',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
       documentCountCard: {
         type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
