@@ -179,10 +179,10 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       ? [
           'step',
           makeMbClampedNumberExpression({
-            minValue: colorStops[0],
-            maxValue: colorStops[colorStops.length - 2],
+            minValue: colorStops[0] as number,
+            maxValue: colorStops[colorStops.length - 2] as number,
             lookupFunction: this.getMbLookupFunction(),
-            fallback: colorStops[0] - 1,
+            fallback: (colorStops[0] as number) - 1,
             fieldName: this.getFieldName(),
           }),
           RGBA_0000, // MB will assign the base value to any features that is below the first stop value
@@ -282,7 +282,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
   _getOrdinalBreaks(symbolId?: string): Break[] {
     let colorStops: Array<number | string> | null = null;
-    let getValuePrefix: (i: number, isNext: boolean) => string | null = null;
+    let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
     if (this._options.useCustomColorRamp && this._options.customColorRamp) {
       colorStops = this._getCustomRampColorStops();
     } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
@@ -303,7 +303,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       };
     } else {
       const rangeFieldMeta = this.getRangeFieldMeta();
-      if (!rangeFieldMeta) {
+      if (!rangeFieldMeta || !this._options.color) {
         return [];
       }
       if (rangeFieldMeta.delta === 0) {
