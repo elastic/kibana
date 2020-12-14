@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { useCallback, useState } from 'react';
+
+import {
+  isArrowDownOrArrowUp,
+  isArrowUp,
+  isEscape,
+  focusColumn,
+  OnColumnFocused,
+} from '../../../../../../common/components/accessibility/helpers';
+
+type FocusOwnership = 'not-owned' | 'owned';
+
+export const getSameOrNextAriaRowindex = ({
+  ariaRowindex,
+  event,
+}: {
+  ariaRowindex: number;
+  event: React.KeyboardEvent<HTMLDivElement>;
+}): number => (isArrowUp(event) ? ariaRowindex : ariaRowindex + 1);
+
+export const useStatefulEventFocus = ({
+  ariaRowindex,
+  colindexAttribute,
+  containerRef,
+  lastFocusedAriaColindex,
+  onColumnFocused,
+  rowindexAttribute,
+}: {
+  ariaRowindex: number;
+  colindexAttribute: string;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
+  lastFocusedAriaColindex: number;
+  onColumnFocused: OnColumnFocused;
+  rowindexAttribute: string;
+}) => {
+  const [focusOwnership, setFocusOwnership] = useState<FocusOwnership>('not-owned');
+
+  const onFocus = useCallback(() => {
+    if (focusOwnership !== 'owned') {
+      setFocusOwnership('owned');
+    }
+  }, [focusOwnership, setFocusOwnership]);
+
+  const onOutsideClick = useCallback(() => {
+    setFocusOwnership('not-owned');
+  }, [setFocusOwnership]);
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (isArrowDownOrArrowUp(e) || isEscape(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setFocusOwnership('not-owned');
+
+        const newAriaRowindex = isEscape(e)
+          ? ariaRowindex // return focus to the same row
+          : getSameOrNextAriaRowindex({ ariaRowindex, event: e });
+
+        setTimeout(() => {
+          onColumnFocused(
+            focusColumn({
+              ariaColindex: lastFocusedAriaColindex,
+              ariaRowindex: newAriaRowindex,
+              colindexAttribute,
+              containerElement: containerRef.current,
+              rowindexAttribute,
+            })
+          );
+        }, 0);
+      }
+    },
+    [
+      ariaRowindex,
+      colindexAttribute,
+      containerRef,
+      lastFocusedAriaColindex,
+      onColumnFocused,
+      rowindexAttribute,
+      setFocusOwnership,
+    ]
+  );
+
+  return { focusOwnership, onFocus, onOutsideClick, onKeyDown };
+};

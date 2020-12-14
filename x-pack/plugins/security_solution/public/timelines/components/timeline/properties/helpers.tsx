@@ -246,6 +246,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
+  ariaLabel?: string;
   showNotes: boolean;
   toggleShowNotes: () => void;
   toolTip?: string;
@@ -253,32 +254,46 @@ interface NotesButtonProps {
 }
 
 interface SmallNotesButtonProps {
+  ariaLabel?: string;
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, timelineType }) => {
-  const isTemplate = timelineType === TimelineType.template;
+export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
-  return (
-    <EuiButtonIcon
-      aria-label={i18n.NOTES}
-      data-test-subj="timeline-notes-button-small"
-      iconType="editorComment"
-      onClick={toggleShowNotes}
-      isDisabled={isTemplate}
-    />
-  );
-});
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(
+  ({ ariaLabel = i18n.NOTES, toggleShowNotes, timelineType }) => {
+    const isTemplate = timelineType === TimelineType.template;
+
+    return (
+      <EuiButtonIcon
+        aria-label={ariaLabel}
+        className={NOTES_BUTTON_CLASS_NAME}
+        data-test-subj="timeline-notes-button-small"
+        iconType="editorComment"
+        onClick={toggleShowNotes}
+        isDisabled={isTemplate}
+      />
+    );
+  }
+);
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ showNotes, timelineType, toggleShowNotes, toolTip }) =>
+  ({ ariaLabel, showNotes, timelineType, toggleShowNotes, toolTip }) =>
     showNotes ? (
-      <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
+      <SmallNotesButton
+        ariaLabel={ariaLabel}
+        toggleShowNotes={toggleShowNotes}
+        timelineType={timelineType}
+      />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
+        <SmallNotesButton
+          ariaLabel={ariaLabel}
+          toggleShowNotes={toggleShowNotes}
+          timelineType={timelineType}
+        />
       </EuiToolTip>
     )
 );

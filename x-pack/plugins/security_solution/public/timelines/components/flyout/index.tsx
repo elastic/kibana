@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFocusTrap } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -32,7 +33,9 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId }) => {
   return (
     <>
       <Visible show={show}>
-        <Pane timelineId={timelineId} />
+        <EuiFocusTrap disabled={!show}>
+          <Pane timelineId={timelineId} />
+        </EuiFocusTrap>
       </Visible>
       <Visible show={!show}>
         <FlyoutBottomBar timelineId={timelineId} />

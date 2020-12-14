@@ -30,7 +30,7 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { combineQueries } from '../helpers';
+import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
@@ -320,11 +320,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 className="timeline-flyout-body"
               >
                 <StatefulBody
+                  activePage={pageInfo.activePage}
                   browserFields={browserFields}
                   data={events}
                   id={timelineId}
                   refetch={refetch}
                   sort={sort}
+                  totalPages={calculateTotalPages({
+                    itemsCount: totalCount,
+                    itemsPerPage,
+                  })}
                 />
               </StyledEuiFlyoutBody>
               <StyledEuiFlyoutFooter

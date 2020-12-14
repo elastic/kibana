@@ -15,6 +15,8 @@ import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
 
+import * as i18n from './translations';
+
 const ButtonWrapper = styled(EuiFlexItem)`
   flex-direction: row;
   align-items: center;
@@ -61,6 +63,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     <EuiFlexGroup gutterSize="none">
       <ButtonWrapper grow={false}>
         <StyledEuiButtonEmpty
+          aria-label={i18n.TIMELINE_TOGGLE_BUTTON_ARIA_LABEL({ isOpen, title })}
           data-test-subj="flyoutOverlay"
           size="s"
           isSelected={isOpen}
