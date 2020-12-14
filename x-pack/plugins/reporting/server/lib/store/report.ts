@@ -9,7 +9,16 @@ import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
-import { ReportApiJSON, ReportDocumentHead, ReportSource } from '../../../common/types';
+import {
+  ReportApiJSON,
+  ReportDocument,
+  ReportDocumentHead,
+  ReportSource,
+} from '../../../common/types';
+import { ReportTaskParams } from '../tasks';
+
+export { ReportDocument };
+export { ReportApiJSON, ReportSource };
 
 const puid = new Puid();
 
@@ -35,9 +44,10 @@ export class Report implements Partial<ReportSource> {
   public readonly output?: ReportSource['output'];
   public readonly started_at?: ReportSource['started_at'];
   public readonly completed_at?: ReportSource['completed_at'];
-  public readonly process_expiration?: ReportSource['process_expiration'];
   public readonly priority?: ReportSource['priority'];
   public readonly timeout?: ReportSource['timeout'];
+
+  public process_expiration?: ReportSource['process_expiration'];
 
   /*
    * Create an unsaved report
@@ -104,7 +114,28 @@ export class Report implements Partial<ReportSource> {
         attempts: this.attempts,
         started_at: this.started_at,
         completed_at: this.completed_at,
+        process_expiration: this.process_expiration,
       },
+    };
+  }
+
+  /*
+   * Parameters to save in a task instance
+   */
+  toReportTaskJSON(): ReportTaskParams {
+    if (!this._index) {
+      throw new Error(`Task is missing the _index field!`);
+    }
+
+    return {
+      id: this._id,
+      index: this._index,
+      jobtype: this.jobtype,
+      created_at: this.created_at,
+      created_by: this.created_by,
+      payload: this.payload,
+      meta: this.meta,
+      attempts: this.attempts,
     };
   }
 
@@ -133,5 +164,3 @@ export class Report implements Partial<ReportSource> {
     };
   }
 }
-
-export { ReportApiJSON, ReportSource };

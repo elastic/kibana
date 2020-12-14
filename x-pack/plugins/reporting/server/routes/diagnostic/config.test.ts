@@ -9,7 +9,11 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
-import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockReportingCore,
+  createMockLevelLogger,
+  createMockPluginSetup,
+} from '../../test_helpers';
 import { registerDiagnoseConfig } from './config';
 import type { ReportingRequestHandlerContext } from '../../types';
 
@@ -33,7 +37,7 @@ describe('POST /diagnose/config', () => {
       () => ({})
     );
 
-    mockSetupDeps = ({
+    mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },

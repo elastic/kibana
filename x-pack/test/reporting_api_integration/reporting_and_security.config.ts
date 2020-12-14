@@ -46,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.reporting.queue.pollInterval=3000`,
         `--xpack.security.session.idleTimeout=3600000`,
         `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
+        `--xpack.reporting.encryptionKey=fluregdokpolqwohfjokkk37848tek`,
       ],
     },
     esArchiver: apiConfig.get('esArchiver'),

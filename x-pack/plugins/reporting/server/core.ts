@@ -21,12 +21,13 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
+import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
@@ -37,14 +38,15 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  esqueue: ESQueueInstance;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class ReportingCore {
@@ -53,9 +55,36 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private exportTypesRegistry = getExportTypesRegistry();
+  private executeTask: ExecuteReportTask;
+  private monitorTask: MonitorReportsTask;
   private config?: ReportingConfig;
+  private executing: Set<string>;
 
-  constructor(private logger: LevelLogger) {}
+  constructor(private logger: LevelLogger) {
+    // FIXME: need sync access to config: https://github.com/elastic/kibana/issues/74179
+    const fakeConfig = {
+      get: (...args: string[]) => {
+        const argKey = args.join('.');
+        switch (argKey) {
+          case 'queue.timeout':
+            return 121234;
+          case 'queue.concurrency':
+            return 1;
+          case 'queue.pollInterval':
+            return 3123;
+          case 'capture.browser.type':
+            return 'chromium';
+          case 'capture.maxAttempts':
+            return 3;
+          default:
+            throw new Error(`no def for ${argKey} in tasks' fake config`);
+        }
+      },
+    } as ReportingConfig;
+    this.executeTask = new ExecuteReportTask(this, fakeConfig, this.logger);
+    this.monitorTask = new MonitorReportsTask(this, fakeConfig, this.logger);
+    this.executing = new Set();
+  }
 
   /*
    * Register setupDeps
@@ -63,14 +92,30 @@ export class ReportingCore {
   public pluginSetup(setupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
+
+    const { executeTask, monitorTask } = this;
+    setupDeps.taskManager.registerTaskDefinitions({
+      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
+    });
   }
 
   /*
    * Register startDeps
    */
-  public pluginStart(startDeps: ReportingInternalStart) {
+  public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+
+    // check if Reporting is allowed to work the queue
+    if (this.getConfig().get('queue', 'pollEnabled')) {
+      // initialize our tasks for Task Manager
+      const { taskManager } = startDeps;
+      const { executeTask, monitorTask } = this;
+      // FIXME: If Polling is disabled, register the task, but set concurrency to 0
+      // User should be able to queue jobs with this Kibana, but force jobs to always run on a different Kibana
+      await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+    }
   }
 
   /*
@@ -151,8 +196,12 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async getEsqueue() {
-    return (await this.getPluginStartDeps()).esqueue;
+  public async scheduleTask(report: ReportTaskParams) {
+    return await this.executeTask.scheduleTask(report);
+  }
+
+  public async getStore() {
+    return (await this.getPluginStartDeps()).store;
   }
 
   public async getLicenseInfo() {
@@ -238,5 +287,17 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public trackReport(reportId: string) {
+    this.executing.add(reportId);
+  }
+
+  public untrackReport(reportId: string) {
+    this.executing.delete(reportId);
+  }
+
+  public countConcurrentReports(): number {
+    return this.executing.size;
   }
 }

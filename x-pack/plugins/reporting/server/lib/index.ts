@@ -6,9 +6,7 @@
  */
 
 export { checkLicense } from './check_license';
-export { createQueueFactory } from './create_queue';
 export { cryptoFactory } from './crypto';
-export { enqueueJobFactory } from './enqueue_job';
 export { ExportTypesRegistry, getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';
 export { statuses } from './statuses';

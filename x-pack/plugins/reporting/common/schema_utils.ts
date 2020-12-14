@@ -20,6 +20,13 @@ export const durationToNumber = (value: number | moment.Duration): number => {
   return value.asMilliseconds();
 };
 
+export const numberToDuration = (value: number | moment.Duration): moment.Duration => {
+  if (typeof value === 'number') {
+    return moment.duration(value, 'milliseconds');
+  }
+  return value;
+};
+
 export const byteSizeValueToNumber = (value: number | ByteSizeValue) => {
   if (typeof value === 'number') {
     return value;

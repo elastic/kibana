@@ -8,7 +8,6 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
@@ -22,7 +21,6 @@ import {
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { ReportingStartDeps } from '../types';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
@@ -31,10 +29,7 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockPluginSetup = (
-  mockReportingCore: ReportingCore,
-  setupMock?: any
-): ReportingInternalSetup => {
+export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
@@ -42,6 +37,8 @@ const createMockPluginSetup = (
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    taskManager: { registerTaskDefinitions: jest.fn() } as any,
+    ...setupMock,
   };
 };
 
@@ -54,10 +51,14 @@ const createMockPluginStart = (
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     store,
+    taskManager: {
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+    } as any,
+    ...startMock,
   };
 };
 
@@ -93,6 +94,8 @@ export const createMockConfigSchema = (
       ...overrides.capture,
     },
     queue: {
+      indexInterval: 'week',
+      pollEnabled: true,
       timeout: 120000,
       ...overrides.queue,
     },
@@ -114,10 +117,6 @@ export const createMockConfig = (
   };
 };
 
-export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
-  data: startMock.data,
-});
-
 export const createMockReportingCore = async (
   config: ReportingConfig,
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
@@ -129,7 +128,7 @@ export const createMockReportingCore = async (
   } as ReportingCore;
 
   if (!setupDepsMock) {
-    setupDepsMock = createMockPluginSetup(mockReportingCore, {});
+    setupDepsMock = createMockPluginSetup({});
   }
   if (!startDepsMock) {
     startDepsMock = createMockPluginStart(mockReportingCore, {});
@@ -142,7 +141,7 @@ export const createMockReportingCore = async (
   core.setConfig(config);
   await core.pluginSetsUp();
 
-  core.pluginStart(startDepsMock);
+  await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
 
   return core;

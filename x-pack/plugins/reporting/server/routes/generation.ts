@@ -45,10 +45,10 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
     }
 
     try {
-      const enqueueJob = enqueueJobFactory(reporting, logger);
+      const enqueueJob = enqueueJobFactory(reporting, logger.clone([exportTypeId]));
       const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-      // return the queue's job information
+      // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
       return res.ok({

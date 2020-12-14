@@ -38,6 +38,14 @@ describe('Class Report', () => {
         timeout: 30000,
       },
     });
+    expect(report.toReportTaskJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+    });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
       browser_type: 'browser_type_test_string',
@@ -93,6 +101,15 @@ describe('Class Report', () => {
         status: 'pending',
         timeout: 30000,
       },
+    });
+    expect(report.toReportTaskJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      id: '12342p9o387549o2345',
+      index: '.reporting-test-update',
+      jobtype: 'test-report',
+      meta: { objectType: 'stange' },
+      payload: { objectType: 'testOt' },
     });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
