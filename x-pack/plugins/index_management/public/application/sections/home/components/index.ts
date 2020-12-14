@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './template_type_indicator';
+export { FilterListButton, Filters } from './filter_list_button';
