@@ -119,6 +119,8 @@ export class MonitoringViewBaseController {
       showZoomOutBtn: () => zoomInLevel > 0,
     };
 
+    this.forceRenders = 0;
+
     const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
     async function fetchAlerts() {
