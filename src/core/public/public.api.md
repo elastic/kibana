@@ -92,6 +92,8 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    callback?: () => void;
+    // (undocumented)
     text: string;
     // (undocumented)
     title?: string;
@@ -110,7 +112,7 @@ export interface AppLeaveDefaultAction {
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
 export interface ApplicationSetup {

@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
               transactionType: 'request',
             },
           })
@@ -64,6 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -141,6 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -165,7 +168,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
-              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -191,6 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'desc',
               sortField: 'latency',
               transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -218,6 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -246,6 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   sortDirection: 'desc',
                   sortField: 'impact',
                   transactionType: 'request',
+                  latencyAggregationType: 'avg',
                 },
               })
             );

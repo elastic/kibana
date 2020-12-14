@@ -41,6 +41,7 @@ import {
   APP_CASES_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
+  DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -435,6 +436,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .toPromise(),
       ]);
 
+      let signal: { name: string | null } = { name: null };
+      try {
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
+      } catch {
+        signal = { name: null };
+      }
+
       const { apolloClient } = composeLibs(coreStart);
       const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -468,6 +478,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
+            signalIndexName: signal.name,
           }
         ),
         {

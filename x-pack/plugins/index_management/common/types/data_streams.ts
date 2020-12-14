@@ -38,6 +38,7 @@ export interface DataStreamFromEs {
   store_size?: string;
   maximum_timestamp?: number;
   privileges: PrivilegesFromEs;
+  hidden: boolean;
 }
 
 export interface DataStreamIndexFromEs {
@@ -59,6 +60,7 @@ export interface DataStream {
   maxTimeStamp?: number;
   _meta?: Meta;
   privileges: Privileges;
+  hidden: boolean;
 }
 
 export interface DataStreamIndex {

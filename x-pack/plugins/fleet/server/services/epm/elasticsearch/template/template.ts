@@ -45,6 +45,7 @@ export function getTemplate({
   pipelineName,
   packageName,
   composedOfTemplates,
+  hidden,
 }: {
   type: string;
   templateName: string;
@@ -52,8 +53,16 @@ export function getTemplate({
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
+  hidden?: boolean;
 }): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
+  const template = getBaseTemplate(
+    type,
+    templateName,
+    mappings,
+    packageName,
+    composedOfTemplates,
+    hidden
+  );
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -253,7 +262,8 @@ function getBaseTemplate(
   templateName: string,
   mappings: IndexTemplateMappings,
   packageName: string,
-  composedOfTemplates: string[]
+  composedOfTemplates: string[],
+  hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
@@ -324,7 +334,7 @@ function getBaseTemplate(
       // To be filled with the aliases that we need
       aliases: {},
     },
-    data_stream: {},
+    data_stream: { hidden },
     composed_of: composedOfTemplates,
     _meta,
   };

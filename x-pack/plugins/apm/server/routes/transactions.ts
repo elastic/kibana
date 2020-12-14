@@ -19,6 +19,10 @@ import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
 import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../common/latency_aggregation_types';
 
 /**
  * Returns a list of transactions grouped by name
@@ -80,6 +84,7 @@ export const transactionGroupsOverviewRoute = createRoute({
           t.literal('impact'),
         ]),
         transactionType: t.string,
+        latencyAggregationType: latencyAggregationTypeRt,
       }),
     ]),
   }),
@@ -96,6 +101,7 @@ export const transactionGroupsOverviewRoute = createRoute({
     const {
       path: { serviceName },
       query: {
+        latencyAggregationType,
         numBuckets,
         pageIndex,
         size,
@@ -115,6 +121,7 @@ export const transactionGroupsOverviewRoute = createRoute({
       sortField,
       transactionType,
       numBuckets,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     });
   },
 });
@@ -127,8 +134,11 @@ export const transactionLatencyChatsRoute = createRoute({
     }),
     query: t.intersection([
       t.partial({
-        transactionType: t.string,
         transactionName: t.string,
+      }),
+      t.type({
+        transactionType: t.string,
+        latencyAggregationType: latencyAggregationTypeRt,
       }),
       uiFiltersRt,
       rangeRt,
@@ -139,7 +149,11 @@ export const transactionLatencyChatsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const logger = context.logger;
     const { serviceName } = context.params.path;
-    const { transactionType, transactionName } = context.params.query;
+    const {
+      transactionType,
+      transactionName,
+      latencyAggregationType,
+    } = context.params.query;
 
     if (!setup.uiFilters.environment) {
       throw Boom.badRequest(
@@ -162,7 +176,10 @@ export const transactionLatencyChatsRoute = createRoute({
     const {
       latencyTimeseries,
       overallAvgDuration,
-    } = await getLatencyTimeseries(options);
+    } = await getLatencyTimeseries({
+      ...options,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    });
 
     const anomalyTimeseries = await getAnomalySeries({
       ...options,
