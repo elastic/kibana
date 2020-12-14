@@ -29,6 +29,7 @@ interface ExecuteActionTask {
   context: BaseContext;
   trigger: Trigger;
   defer: Defer<void>;
+  alwaysShowPopup?: boolean;
 }
 
 export class UiActionsExecutionService {
@@ -37,21 +38,25 @@ export class UiActionsExecutionService {
 
   constructor() {}
 
-  async execute({
-    action,
-    context,
-    trigger,
-  }: {
-    action: Action<BaseContext>;
-    context: BaseContext;
-    trigger: Trigger;
-  }): Promise<void> {
+  async execute(
+    {
+      action,
+      context,
+      trigger,
+    }: {
+      action: Action<BaseContext>;
+      context: BaseContext;
+      trigger: Trigger;
+    },
+    alwaysShowPopup?: boolean
+  ): Promise<void> {
     const shouldBatch = !(await action.shouldAutoExecute?.({ ...context, trigger })) ?? false;
     const task: ExecuteActionTask = {
       action,
       context,
       trigger,
       defer: createDefer(),
+      alwaysShowPopup: !!alwaysShowPopup,
     };
 
     if (shouldBatch) {
@@ -84,11 +89,23 @@ export class UiActionsExecutionService {
     setTimeout(() => {
       if (this.pendingTasks.size === 0) {
         const tasks = uniqBy(this.batchingQueue, (t) => t.action.id);
-        if (tasks.length === 1) {
-          this.executeSingleTask(tasks[0]);
-        }
-        if (tasks.length > 1) {
-          this.executeMultipleActions(tasks);
+        if (tasks.length > 0) {
+          let alwaysShowPopup = false;
+          for (const task of tasks) {
+            if (task.alwaysShowPopup) {
+              alwaysShowPopup = true;
+              break;
+            }
+          }
+          if (alwaysShowPopup) {
+            this.showActionPopupMenu(tasks);
+          } else {
+            if (tasks.length === 1) {
+              this.executeSingleTask(tasks[0]);
+            } else if (tasks.length > 1) {
+              this.showActionPopupMenu(tasks);
+            }
+          }
         }
 
         this.batchingQueue.splice(0, this.batchingQueue.length);
@@ -108,7 +125,7 @@ export class UiActionsExecutionService {
     }
   }
 
-  private async executeMultipleActions(tasks: ExecuteActionTask[]) {
+  private async showActionPopupMenu(tasks: ExecuteActionTask[]) {
     const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({
         action,

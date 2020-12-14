@@ -352,7 +352,6 @@ export const CaseComponent = React.memo<CaseProps>(
             event: {
               eventId: alertId,
               indexName: index,
-              loading: false,
             },
           })
         );
