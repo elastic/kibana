@@ -163,15 +163,22 @@ export const Page: FC = () => {
     mlNodesAvailable() &&
     currentIndexPattern.timeFieldName !== undefined;
 
-  const {
-    searchQuery: initSearchQuery,
-    searchString: initSearchString,
-    queryLanguage: initQueryLanguage,
-  } = extractSearchData(currentSavedSearch);
-
-  const searchQueryLanguage = dataVisualizerListState.searchQueryLanguage ?? initQueryLanguage;
-  const searchString = dataVisualizerListState.searchString ?? initSearchString;
-  const searchQuery = dataVisualizerListState.searchQuery ?? initSearchQuery;
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = extractSearchData(currentSavedSearch);
+    if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+      return {
+        searchQuery: dataVisualizerListState.searchQuery,
+        searchString: dataVisualizerListState.searchString,
+        searchQueryLanguage: dataVisualizerListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+  }, [currentSavedSearch, dataVisualizerListState]);
 
   const setSearchParams = (searchParams: {
     searchQuery: Query['query'];
@@ -271,11 +278,7 @@ export const Page: FC = () => {
    */
   function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
     if (!savedSearch) {
-      return {
-        searchQuery: dataVisualizerListState.searchQuery,
-        searchString: dataVisualizerListState.searchString,
-        queryLanguage: dataVisualizerListState.searchQueryLanguage,
-      };
+      return undefined;
     }
 
     const { query } = getQueryFromSavedSearch(savedSearch);
