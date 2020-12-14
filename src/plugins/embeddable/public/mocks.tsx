@@ -126,7 +126,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     migrate: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),
   };
