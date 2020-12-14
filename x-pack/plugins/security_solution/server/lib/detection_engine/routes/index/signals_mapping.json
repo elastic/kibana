@@ -3,6 +3,13 @@
     "properties": {
       "signal": {
         "properties": {
+          "_meta": {
+            "properties": {
+              "version": {
+                "type": "long"
+              }
+            }
+          },
           "parent": {
             "properties": {
               "rule": {

@@ -6,46 +6,15 @@
 
 import {
   getEventScope,
-  getMockEventScope,
   ValueClickTriggerEventScope,
+  getEventVariableList,
+  getPanelVariables,
 } from './url_drilldown_scope';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
-
-const createPoint = ({
-  field,
-  value,
-}: {
-  field: string;
-  value: string | null | number | boolean;
-}) => ({
-  table: {
-    columns: [
-      {
-        name: field,
-        id: '1-1',
-        meta: {
-          type: 'date' as DatatableColumnType,
-          field,
-          source: 'esaggs',
-          sourceParams: {
-            type: 'histogram',
-            indexPatternId: 'logstash-*',
-            interval: 30,
-            otherBucket: true,
-          },
-        },
-      },
-    ],
-    rows: [
-      {
-        '1-1': '2048',
-      },
-    ],
-  },
-  column: 0,
-  row: 0,
-  value,
-});
+import {
+  RowClickContext,
+  ROW_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
+import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
   describe('supports `points[]`', () => {
@@ -80,33 +49,6 @@ describe('VALUE_CLICK_TRIGGER', () => {
         ]
       `);
     });
-
-    test('getMockEventScope()', () => {
-      const mockEventScope = getMockEventScope([
-        'VALUE_CLICK_TRIGGER',
-      ]) as ValueClickTriggerEventScope;
-      expect(mockEventScope.points.length).toBeGreaterThan(3);
-      expect(mockEventScope.points).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "key": "event.points.0.key",
-                  "value": "event.points.0.value",
-                },
-                Object {
-                  "key": "event.points.1.key",
-                  "value": "event.points.1.value",
-                },
-                Object {
-                  "key": "event.points.2.key",
-                  "value": "event.points.2.value",
-                },
-                Object {
-                  "key": "event.points.3.key",
-                  "value": "event.points.3.value",
-                },
-              ]
-          `);
-    });
   });
 
   describe('handles undefined, null or missing values', () => {
@@ -131,11 +73,221 @@ describe('VALUE_CLICK_TRIGGER', () => {
   });
 });
 
-describe('CONTEXT_MENU_TRIGGER', () => {
-  test('getMockEventScope() results in empty scope', () => {
-    const mockEventScope = getMockEventScope([
-      'CONTEXT_MENU_TRIGGER',
-    ]) as ValueClickTriggerEventScope;
-    expect(mockEventScope).toEqual({});
+describe('ROW_CLICK_TRIGGER', () => {
+  test('getEventVariableList() returns correct list of runtime variables', () => {
+    const vars = getEventVariableList({
+      triggers: [ROW_CLICK_TRIGGER],
+    });
+    expect(vars).toEqual(['event.rowIndex', 'event.values', 'event.keys', 'event.columnNames']);
+  });
+
+  test('getEventScope() returns correct variables for row click trigger', () => {
+    const context = ({
+      embeddable: {},
+      data: rowClickData as any,
+    } as unknown) as RowClickContext;
+    const res = getEventScope(context);
+
+    expect(res).toEqual({
+      rowIndex: 1,
+      values: ['IT', '2.25', 3, 0, 2],
+      keys: ['DestCountry', 'FlightTimeHour', '', 'DistanceMiles', 'OriginAirportID'],
+      columnNames: [
+        'Top values of DestCountry',
+        'Top values of FlightTimeHour',
+        'Count of records',
+        'Average of DistanceMiles',
+        'Unique count of OriginAirportID',
+      ],
+    });
+  });
+});
+
+describe('getPanelVariables()', () => {
+  test('returns only ID for empty embeddable', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+    });
+  });
+
+  test('returns title as specified in input', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        title: 'title1',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title1',
+    });
+  });
+
+  test('returns output title if input and output titles are specified', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        title: 'title1',
+      },
+      {
+        title: 'title2',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title2',
+    });
+  });
+
+  test('returns title from output if title in input is missing', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        title: 'title2',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title2',
+    });
+  });
+
+  test('returns saved object ID from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        savedObjectId: '5678',
+      },
+      {
+        savedObjectId: '1234',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      savedObjectId: '1234',
+    });
+  });
+
+  test('returns saved object ID from input if it is not set on output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        savedObjectId: '5678',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      savedObjectId: '5678',
+    });
+  });
+
+  test('returns query, timeRange and filters from input', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        query: {
+          language: 'C++',
+          query: 'std::cout << 123;',
+        },
+        timeRange: {
+          from: 'FROM',
+          to: 'TO',
+        },
+        filters: [
+          {
+            meta: {
+              alias: 'asdf',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ],
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      query: {
+        language: 'C++',
+        query: 'std::cout << 123;',
+      },
+      timeRange: {
+        from: 'FROM',
+        to: 'TO',
+      },
+      filters: [
+        {
+          meta: {
+            alias: 'asdf',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ],
+    });
+  });
+
+  test('returns a single index pattern from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    });
+  });
+
+  test('returns multiple index patterns from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        indexPatterns: [
+          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+        ],
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      indexPatternIds: [
+        'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy',
+      ],
+    });
   });
 });

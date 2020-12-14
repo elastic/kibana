@@ -25,6 +25,10 @@ storiesOf('components/WorkpadHeader/ShareMenu/PDFPanel', module)
   })
   .add('default', () => (
     <div className="euiPanel">
-      <PDFPanel pdfURL="pdfUrl" onCopy={action('onCopy')} onExport={action('onExport')} />
+      <PDFPanel
+        getPdfURL={() => 'PDF URL String'}
+        onCopy={action('onCopy')}
+        onExport={action('onExport')}
+      />
     </div>
   ));
