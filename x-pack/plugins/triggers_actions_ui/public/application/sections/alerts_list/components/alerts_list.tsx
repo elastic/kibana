@@ -14,7 +14,7 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -427,10 +427,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiFieldSearch
             fullWidth
+            isClearable
             data-test-subj="alertSearchField"
-            prepend={<EuiIcon type="search" />}
             onChange={(e) => setInputText(e.target.value)}
             onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
