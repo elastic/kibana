@@ -25,4 +25,5 @@ module.exports = {
     ],
   ],
   setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
+  coverageDirectory: '<rootDir>/target/jest-coverage/jest_integration',
 };

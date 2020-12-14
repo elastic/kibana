@@ -9,7 +9,7 @@ object JestIntegration : BuildType({
   description = "Executes Jest Integration Tests"
 
   steps {
-    runbld("Jest Integration", "./.ci/teamcity/oss/jest_integration.sh")
+    runbld("Jest Integration", "./.ci/teamcity/tests/jest_integration.sh")
   }
 
   addTestSettings()

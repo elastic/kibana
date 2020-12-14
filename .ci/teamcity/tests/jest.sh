@@ -4,7 +4,7 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-export JOB=kibana-default-jest
+export JOB=kibana-jest
 
 checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest x-pack --ci --verbose --maxWorkers=5
+  node scripts/jest --ci --verbose --maxWorkers=10 --coverage --coverageReporters json

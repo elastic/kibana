@@ -8,5 +8,13 @@
 
 module.exports = {
   rootDir: '.',
-  projects: [...require('./jest.config.oss').projects, ...require('./x-pack/jest.config').projects],
+  projects: [
+    '<rootDir>/packages/*/jest.config.js',
+    '<rootDir>/src/*/jest.config.js',
+    '<rootDir>/src/legacy/*/jest.config.js',
+    '<rootDir>/src/plugins/*/jest.config.js',
+    '<rootDir>/test/*/jest.config.js',
+    ...require('./x-pack/jest.config').projects,
+  ],
+  reporters: ['default', '<rootDir>/packages/kbn-test/target/jest/junit_reporter'],
 };
