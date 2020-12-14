@@ -3,6 +3,7 @@
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
   "chartsPerRow": 1,
+  "errorMessages": Object {},
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -63,6 +64,7 @@ Object {
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
 Object {
   "chartsPerRow": 1,
+  "errorMessages": Object {},
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,

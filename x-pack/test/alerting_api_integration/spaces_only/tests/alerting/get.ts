@@ -46,6 +46,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
+        notifyWhen: 'onThrottleInterval',
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,

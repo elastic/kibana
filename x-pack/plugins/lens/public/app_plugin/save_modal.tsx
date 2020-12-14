@@ -90,7 +90,10 @@ export const SaveModal = (props: Props) => {
       savedObjectsTagging={savedObjectsTagging}
       savedObjectsClient={savedObjectsClient}
       initialTags={tagsIds}
-      onSave={(saveProps) => onSave(saveProps, { saveToLibrary: false })}
+      onSave={(saveProps) => {
+        const saveToLibrary = saveProps.dashboardId === null;
+        onSave(saveProps, { saveToLibrary });
+      }}
       onClose={onClose}
       documentInfo={{
         id: lastKnownDoc.savedObjectId,
