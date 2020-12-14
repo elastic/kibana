@@ -21,6 +21,7 @@ export const READ_ONLY_CALLOUT_MSG = i18n.translate(
   }
 );
 
+// TODO: delete
 export const DISMISS_CALLOUT = i18n.translate(
   'xpack.securitySolution.detectionEngine.dismissButton',
   {

@@ -14,13 +14,12 @@ export interface CallOutDescriptionProps {
 
 export const CallOutDescription: FC<CallOutDescriptionProps> = ({ messages }) => {
   if (!Array.isArray(messages)) {
-    return <p>{messages.description}</p>;
+    return messages.description;
   }
 
   if (messages.length < 1) {
     return null;
   }
 
-  // TODO: data-test-subj={`callout-messages-${id}`}
   return <EuiDescriptionList listItems={messages} />;
 };

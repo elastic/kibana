@@ -14,7 +14,7 @@ const readOnlyAccessToAlertsMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-alerts',
   title: i18n.NO_WRITE_ALERTS_CALLOUT_TITLE,
-  description: <>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</>,
+  description: <p>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</p>,
 };
 
 const NoWriteAlertsCallOutComponent = () => {

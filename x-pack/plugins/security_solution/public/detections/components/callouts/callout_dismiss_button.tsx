@@ -8,6 +8,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { CallOutMessage } from './callout_types';
+import * as i18n from './translations';
 
 export interface CallOutDismissButtonProps {
   message: CallOutMessage;
@@ -22,7 +23,7 @@ export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
 }) => {
   const { type } = message;
   const buttonColor = type === 'success' ? 'secondary' : type;
-  const buttonText = text ?? 'Dismiss'; // TODO: i18n
+  const buttonText = text ?? i18n.DISMISS_BUTTON;
   const handleClick = useCallback(() => onClick(message), [onClick, message]);
 
   return (

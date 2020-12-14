@@ -14,7 +14,7 @@ const readOnlyAccessToRulesMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-rules',
   title: i18n.READ_ONLY_CALLOUT_TITLE,
-  description: <>{i18n.READ_ONLY_CALLOUT_MSG}</>,
+  description: <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>,
 };
 
 const ReadOnlyCallOutComponent = () => {
