@@ -61,8 +61,8 @@ function getLayoutOptions(width: number, height: number) {
     name: 'dagre',
     rankDir: 'LR',
     fit: true,
-    padding: 30,
-    spacingFactor: 0.85,
+    padding: 20,
+    spacingFactor: 0.95,
     boundingBox: { x1: 0, y1: 0, w: width, h: height },
   };
 }
