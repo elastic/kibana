@@ -9,24 +9,22 @@ import {
   UserActionField,
   UserAction,
   CaseConnector,
-  CommentType,
+  CommentRequest,
   CaseStatuses,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
-export interface Comment {
+export type Comment = CommentRequest & {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
-  comment: string;
-  type: CommentType.user;
   pushedAt: string | null;
   pushedBy: string | null;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
-}
+};
 export interface CaseUserActions {
   actionId: string;
   actionField: UserActionField;
