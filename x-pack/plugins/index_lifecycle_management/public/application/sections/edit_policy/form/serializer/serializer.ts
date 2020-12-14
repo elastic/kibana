@@ -68,9 +68,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
           hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
+
+        if (_meta.hot.readonlyEnabled) {
+          hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
+        } else {
+          delete hotPhaseActions.readonly;
+        }
       } else {
         delete hotPhaseActions.rollover;
         delete hotPhaseActions.forcemerge;
+        delete hotPhaseActions.readonly;
       }
 
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
@@ -115,6 +122,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.actions.forcemerge;
       } else if (_meta.warm.bestCompression) {
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
+      }
+
+      if (_meta.warm.readonlyEnabled) {
+        warmPhase.actions.readonly = warmPhase.actions.readonly ?? {};
+      } else {
+        delete warmPhase.actions.readonly;
       }
 
       if (!updatedPolicy.phases.warm?.actions?.set_priority) {
