@@ -45,7 +45,7 @@ describe('getSortForSearchSource function', function () {
     expect(getSortForSearchSource(cols, indexPattern)).toEqual([{ _doc: 'desc' }]);
     expect(getSortForSearchSource(cols, indexPattern, 'asc')).toEqual([{ _doc: 'asc' }]);
     delete indexPattern.timeFieldName;
-    expect(getSortForSearchSource(cols, indexPattern)).toEqual([{ _doc: 'desc' }]);
-    expect(getSortForSearchSource(cols, indexPattern, 'asc')).toEqual([{ _doc: 'asc' }]);
+    expect(getSortForSearchSource(cols, indexPattern)).toEqual([{ _score: 'desc' }]);
+    expect(getSortForSearchSource(cols, indexPattern, 'asc')).toEqual([{ _score: 'asc' }]);
   });
 });
