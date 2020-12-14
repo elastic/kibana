@@ -23,6 +23,8 @@ import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
 
+export const CATEGORY_FIELD = 'category';
+
 interface SearchProps {
   categories: string[];
   query: Query;
@@ -78,7 +80,7 @@ export class Search extends PureComponent<SearchProps> {
     const filters = [
       {
         type: 'field_value_selection' as const,
-        field: 'category',
+        field: CATEGORY_FIELD,
         name: i18n.translate('advancedSettings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),

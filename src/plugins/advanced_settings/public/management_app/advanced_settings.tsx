@@ -73,21 +73,10 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
-
+    this.state = this.getQueryState();
     this.unregister = this.props.history.listen(({ pathname, search }) => {
-      const query = this.getQuery(pathname, search);
-      this.setState({
-        query,
-      });
+      this.setState(this.getQueryState(pathname, search));
     });
-
-    const query = this.getQuery();
-
-    this.state = {
-      query,
-      footerQueryMatched: false,
-      filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
-    };
   }
 
   init(config: IUiSettingsClient) {
@@ -158,9 +147,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.unregister?.();
   }
 
-  private getQuery(pathname?: string, search?: string): Query {
-    const queryText = this.getQueryText(pathname, search);
-    return Query.parse(queryText ? getAriaName(queryText) : '');
+  private getQuery(queryString: string): Query {
+    return Query.parse(queryString ? getAriaName(queryString) : '');
   }
 
   private getQueryText(pathname?: string, search?: string): string {
@@ -176,6 +164,19 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     if (routeQuery) return routeQuery;
 
     return new URLSearchParams(search ?? this.props.location.search).get(QUERY) ?? '';
+  }
+
+  private getQueryState(pathname?: string, search?: string): AdvancedSettingsState {
+    const queryString = this.getQueryText(pathname, search);
+    const query = this.getQuery(queryString);
+    const filteredSettings = this.mapSettings(Query.execute(query, this.settings));
+    const footerQueryMatched = Object.keys(filteredSettings).length > 0;
+
+    return {
+      query,
+      filteredSettings,
+      footerQueryMatched,
+    };
   }
 
   setUrlQuery(q: string = '') {

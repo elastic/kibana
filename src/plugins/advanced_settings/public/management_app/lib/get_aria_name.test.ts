@@ -33,6 +33,15 @@ describe('Settings', function () {
         expect(getAriaName()).to.be('');
         expect(getAriaName(undefined)).to.be('');
       });
+
+      it('should preserve category string', function () {
+        expect(getAriaName('xPack:fooBar:foo_bar_baz category:(general)')).to.be(
+          'x pack foo bar foo bar baz category:(general)'
+        );
+        expect(getAriaName('xPack:fooBar:foo_bar_baz category:(general or discover)')).to.be(
+          'x pack foo bar foo bar baz category:(general or discover)'
+        );
+      });
     });
   });
 });
