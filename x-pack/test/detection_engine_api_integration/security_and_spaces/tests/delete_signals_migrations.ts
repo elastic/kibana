@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 
 import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
-  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
@@ -21,11 +20,6 @@ import {
   waitFor,
 } from '../../utils';
 import { createUserAndRole } from '../roles_users_utils';
-
-interface StatusResponse {
-  index: string;
-  is_outdated: boolean;
-}
 
 interface CreateResponse {
   index: string;
@@ -40,7 +34,6 @@ interface FinalizeResponse extends CreateResponse {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
   const security = getService('security');
