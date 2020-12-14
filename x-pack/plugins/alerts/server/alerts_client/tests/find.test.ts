@@ -85,6 +85,7 @@ describe('find()', () => {
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
             actions: [
               {
                 group: 'default',
@@ -143,6 +144,7 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
+            "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
             },
@@ -234,6 +236,7 @@ describe('find()', () => {
             Object {
               "actions": Array [],
               "id": "1",
+              "notifyWhen": undefined,
               "schedule": undefined,
               "tags": Array [
                 "myTag",
