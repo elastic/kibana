@@ -42,9 +42,7 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
+  const node = useSelector((state: ResolverState) => selectors.graphNodeForID(state)(nodeID));
   const eventCount = useSelector((state: ResolverState) =>
     selectors.totalRelatedEventCountForNode(state)(nodeID)
   );
@@ -57,13 +55,13 @@ export const NodeEventsInCategory = memo(function ({
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
   return (
     <>
-      {isLoading || processEvent === null ? (
+      {isLoading ? (
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
-          {hasError ? (
+          {hasError || !node ? (
             <EuiCallOut
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
@@ -85,7 +83,7 @@ export const NodeEventsInCategory = memo(function ({
           ) : (
             <>
               <NodeEventsInCategoryBreadcrumbs
-                nodeName={eventModel.processNameSafeVersion(processEvent)}
+                nodeName={node.name}
                 eventCategory={eventCategory}
                 eventCount={eventCount}
                 nodeID={nodeID}
@@ -114,6 +112,8 @@ const NodeEventsListItem = memo(function ({
   eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
+  const eventID = eventModel.eventID(event);
+  const winlogRecordID = eventModel.winlogRecordID(event);
   const date =
     useFormattedDate(timestamp) ||
     i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
@@ -124,7 +124,9 @@ const NodeEventsListItem = memo(function ({
     panelParameters: {
       nodeID,
       eventCategory,
-      eventID: String(eventModel.eventID(event)),
+      eventID,
+      eventTimestamp: String(timestamp),
+      winlogRecordID: String(winlogRecordID),
     },
   });
   return (

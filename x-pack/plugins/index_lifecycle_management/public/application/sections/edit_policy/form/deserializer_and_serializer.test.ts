@@ -44,6 +44,7 @@ const originalPolicy: SerializedPolicy = {
           index_codec: 'best_compression',
           max_num_segments: 22,
         },
+        readonly: {},
         set_priority: {
           priority: 1,
         },
@@ -63,6 +64,7 @@ const originalPolicy: SerializedPolicy = {
             some: 'value',
           },
         },
+        readonly: {},
         set_priority: {
           priority: 10,
         },
@@ -168,6 +170,22 @@ describe('deserializer and serializer', () => {
 
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
     expect(result.phases.warm!.actions.forcemerge).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in hot', () => {
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in warm', () => {
+    formInternal._meta.warm.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.readonly).toBeUndefined();
   });
 
   it('removes set priority if it is disabled in the form', () => {
@@ -289,5 +307,27 @@ describe('deserializer and serializer', () => {
     expect(result.phases.warm!.actions.migrate).toEqual({
       enabled: false,
     });
+  });
+
+  it('removes shrink from hot and warm when unset', () => {
+    delete formInternal.phases.hot!.actions!.shrink;
+    delete formInternal.phases.warm!.actions!.shrink;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.shrink).toBeUndefined();
+    expect(result.phases.warm!.actions.shrink).toBeUndefined();
+  });
+
+  it('removes rollover action fields', () => {
+    formInternal.phases.hot!.actions.rollover!.max_size = '';
+    formInternal.phases.hot!.actions.rollover!.max_age = '';
+    formInternal.phases.hot!.actions.rollover!.max_docs = '' as any;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.rollover!.max_age).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_docs).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_size).toBeUndefined();
   });
 });

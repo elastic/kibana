@@ -31,6 +31,7 @@ import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
@@ -165,6 +166,7 @@ export const ExplorerChartsContainerUI = ({
   severity,
   tooManyBuckets,
   kibana,
+  errorMessages,
 }) => {
   const {
     services: {
@@ -183,27 +185,29 @@ export const ExplorerChartsContainerUI = ({
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
   const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
-
   return (
-    <EuiFlexGrid columns={chartsColumns}>
-      {seriesToPlot.length > 0 &&
-        seriesToPlot.map((series) => (
-          <EuiFlexItem
-            key={getChartId(series)}
-            className="ml-explorer-chart-container"
-            style={{ minWidth: chartsWidth }}
-          >
-            <ExplorerChartContainer
-              series={series}
-              severity={severity}
-              tooManyBuckets={tooManyBuckets}
-              wrapLabel={wrapLabel}
-              navigateToApp={navigateToApp}
-              mlUrlGenerator={mlUrlGenerator}
-            />
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGrid>
+    <>
+      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
+      <EuiFlexGrid columns={chartsColumns}>
+        {seriesToPlot.length > 0 &&
+          seriesToPlot.map((series) => (
+            <EuiFlexItem
+              key={getChartId(series)}
+              className="ml-explorer-chart-container"
+              style={{ minWidth: chartsWidth }}
+            >
+              <ExplorerChartContainer
+                series={series}
+                severity={severity}
+                tooManyBuckets={tooManyBuckets}
+                wrapLabel={wrapLabel}
+                navigateToApp={navigateToApp}
+                mlUrlGenerator={mlUrlGenerator}
+              />
+            </EuiFlexItem>
+          ))}
+      </EuiFlexGrid>
+    </>
   );
 };
 

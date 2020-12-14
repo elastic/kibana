@@ -175,7 +175,7 @@ describe('When on the Trusted Apps Page', () => {
 
           renderResult = await renderAndClickAddButton();
           fillInCreateForm(renderResult);
-          const userClickedSaveActionWatcher = waitForAction('userClickedSaveNewTrustedAppButton');
+          const userClickedSaveActionWatcher = waitForAction('trustedAppCreationDialogConfirmed');
           reactTestingLibrary.act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'), {
               button: 1,
@@ -225,7 +225,9 @@ describe('When on the Trusted Apps Page', () => {
               },
             };
             await reactTestingLibrary.act(async () => {
-              const serverResponseAction = waitForAction('serverReturnedCreateTrustedAppSuccess');
+              const serverResponseAction = waitForAction(
+                'trustedAppCreationSubmissionResourceStateChanged'
+              );
               coreStart.http.get.mockClear();
               resolveHttpPost(successCreateApiResponse);
               await serverResponseAction;
@@ -256,7 +258,9 @@ describe('When on the Trusted Apps Page', () => {
               message: 'bad call',
             };
             await reactTestingLibrary.act(async () => {
-              const serverResponseAction = waitForAction('serverReturnedCreateTrustedAppFailure');
+              const serverResponseAction = waitForAction(
+                'trustedAppCreationSubmissionResourceStateChanged'
+              );
               coreStart.http.get.mockClear();
               rejectHttpPost(failedCreateApiResponse);
               await serverResponseAction;

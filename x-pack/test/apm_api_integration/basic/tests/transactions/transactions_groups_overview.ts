@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -62,6 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -138,6 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -162,6 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -186,6 +190,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'latency',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -212,6 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -239,6 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   pageIndex,
                   sortDirection: 'desc',
                   sortField: 'impact',
+                  latencyAggregationType: 'avg',
                 },
               })
             );
