@@ -26,14 +26,14 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
 
   const { earliest, latest } = stats;
 
-  const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardNumber.summaryTableTitle', {
+  const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardDate.summaryTableTitle', {
     defaultMessage: 'summary',
   });
   const summaryTableItems = [
     {
       function: 'earliest',
       display: (
-        <FormattedMessage id="xpack.ml.fieldDataCard.cardNumber.minLabel" defaultMessage="min" />
+        <FormattedMessage id="xpack.ml.fieldDataCard.cardDate.minLabel" defaultMessage="min" />
       ),
       value: formatDate(earliest, TIME_FORMAT),
     },
@@ -41,7 +41,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
+          id="xpack.ml.fieldDataCard.cardDate.medianLabel"
           defaultMessage="median"
         />
       ),

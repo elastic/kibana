@@ -5,7 +5,7 @@
  */
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
+import { Option, MultiSelectPicker } from '../../../../components/multi_select_picker';
 import type { OverallStats } from '../../../../../../common/types/datavisualizer';
 
 interface Props {
@@ -51,7 +51,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
   );
 
   return (
-    <MultiselectPicker
+    <MultiSelectPicker
       title={fieldNameTitle}
       options={items}
       onChange={setVisibleFieldNames}

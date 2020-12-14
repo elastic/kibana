@@ -39,7 +39,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
     <div data-test-subj="mlFieldDataCardExamplesList">
       <ExpandedRowFieldHeader>
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardText.examplesTitle"
+          id="xpack.ml.fieldDataCard.examplesList.title"
           defaultMessage="{numExamples, plural, one {value} other {examples}}"
           values={{
             numExamples: examples.length,

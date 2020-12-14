@@ -213,7 +213,6 @@ export const Page: FC = () => {
     });
   };
 
-  // TODO - type overallStats and stats
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);

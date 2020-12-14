@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MultiselectPicker, Option } from './multi_select_picker';
+export { MultiSelectPicker, Option } from './multi_select_picker';

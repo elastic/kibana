@@ -7,7 +7,7 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
+import { Option, MultiSelectPicker } from '../../../../components/multi_select_picker';
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
 
 export const ML_JOB_FIELD_TYPES = {
@@ -71,7 +71,7 @@ export const DatavisualizerFieldTypeFilter: FC<{
     []
   );
   return (
-    <MultiselectPicker
+    <MultiSelectPicker
       title={fieldTypeTitle}
       options={options}
       onChange={setVisibleFieldTypes}

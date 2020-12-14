@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface Option {
   name?: string | ReactNode;
@@ -31,13 +32,18 @@ const NoFilterItems = () => {
       <div className="euiFilterSelect__noteContent">
         <EuiIcon type="minusInCircle" />
         <EuiSpacer size="xs" />
-        <p>No filters found</p>
+        <p>
+          <FormattedMessage
+            id="xpack.ml.multiSelectPicjer.NoFiltersFoundMessage"
+            defaultMessage="No filters found"
+          />
+        </p>
       </div>
     </div>
   );
 };
 
-export const MultiselectPicker: FC<{
+export const MultiSelectPicker: FC<{
   options: Option[];
   onChange: Function;
   title?: string;
