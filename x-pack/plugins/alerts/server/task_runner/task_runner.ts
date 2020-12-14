@@ -171,7 +171,16 @@ export class TaskRunner {
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
-    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
+    const {
+      throttle,
+      notifyWhen,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
@@ -257,24 +266,39 @@ export class TaskRunner {
         alertLabel,
       });
 
+      const instancesToExecute =
+        notifyWhen === 'onActionGroupChange'
+          ? Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            )
+          : Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const throttled = alertInstance.isThrottled(throttle);
+                const muted = mutedInstanceIdsSet.has(alertInstanceName);
+                const shouldExecuteAction = !throttled && !muted;
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                      muted ? 'muted' : 'throttled'
+                    }`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            );
+
       await Promise.all(
-        Object.entries(instancesWithScheduledActions)
-          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
-            const throttled = alertInstance.isThrottled(throttle);
-            const muted = mutedInstanceIdsSet.has(alertInstanceName);
-            const shouldExecuteAction = !throttled && !muted;
-            if (!shouldExecuteAction) {
-              this.logger.debug(
-                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                  muted ? 'muted' : 'throttled'
-                }`
-              );
-            }
-            return shouldExecuteAction;
-          })
-          .map(([id, alertInstance]: [string, AlertInstance]) =>
-            this.executeAlertInstance(id, alertInstance, executionHandler)
-          )
+        instancesToExecute.map(([id, alertInstance]: [string, AlertInstance]) =>
+          this.executeAlertInstance(id, alertInstance, executionHandler)
+        )
       );
     } else {
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
