@@ -33,16 +33,14 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(soClient, embeddableService);
     },
     schema: {
-      dashboard: {
-        panels: { type: 'long' },
-        panelsByValue: { type: 'long' },
-      },
-      lens: {
+      panels: { type: 'long' },
+      panelsByValue: { type: 'long' },
+      lensByValue: {
         DYNAMIC_KEY: {
           type: 'long',
         },
       },
-      visualization: {
+      visualizationByValue: {
         DYNAMIC_KEY: {
           type: 'long',
         },
