@@ -135,7 +135,9 @@ export class BackgroundSessionService implements ISessionService {
         updatedSessions.forEach((updatedSavedObject) => {
           const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
           if (updatedSavedObject.error) {
-            this.logger.warn(`monitorMappedIds | update error ${updatedSavedObject.error || ''}`);
+            this.logger.warn(
+              `monitorMappedIds | update error ${JSON.stringify(updatedSavedObject.error) || ''}`
+            );
             // Retry next time
             sessionInfo.retryCount++;
           } else if (updatedSavedObject.attributes.idMapping) {
