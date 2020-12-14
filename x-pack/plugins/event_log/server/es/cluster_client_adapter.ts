@@ -7,9 +7,10 @@
 import { Subject } from 'rxjs';
 import { bufferTime, filter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
-import { SearchResponse, Client } from 'elasticsearch';
+import { Client } from 'elasticsearch';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, LegacyClusterClient } from 'src/core/server';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
@@ -284,7 +285,7 @@ export class ClusterClientAdapter {
     try {
       const {
         hits: { hits, total },
-      }: SearchResponse<unknown> = await this.callEs('search', {
+      }: ESSearchResponse<unknown, {}> = await this.callEs('search', {
         index,
         track_total_hits: true,
         body,
@@ -292,7 +293,7 @@ export class ClusterClientAdapter {
       return {
         page,
         per_page: perPage,
-        total: ((total as unknown) as { value: number; relation: string }).value || 0,
+        total: total.value,
         data: hits.map((hit) => hit._source) as IValidatedEvent[],
       };
     } catch (err) {
