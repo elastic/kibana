@@ -10,6 +10,11 @@ import { Tag, tagSavedObjectTypeName } from '../common';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
 
+export {
+  tagIdToReference,
+  replaceTagReferences as updateTagsReferences,
+} from '../common/references';
+
 export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {
   return getTagsFromReferences(object.references, allTags);
 };
@@ -44,26 +49,14 @@ export const byNameTagSorter = (tagA: Tag, tagB: Tag): number => {
   return tagA.name.localeCompare(tagB.name);
 };
 
+export const getTag = (tagId: string, allTags: Tag[]): Tag | undefined => {
+  return allTags.find(({ id }) => id === tagId);
+};
+
 export const testSubjFriendly = (name: string) => {
   return name.replace(' ', '_');
 };
 
 export const getTagIdsFromReferences = (references: SavedObjectReferenceLike[]): string[] => {
   return references.filter((ref) => ref.type === tagSavedObjectTypeName).map(({ id }) => id);
-};
-
-export const tagIdToReference = (tagId: string): SavedObjectReference => ({
-  type: tagSavedObjectTypeName,
-  id: tagId,
-  name: `tag-ref-${tagId}`,
-});
-
-export const updateTagsReferences = (
-  references: SavedObjectReference[],
-  newTagIds: string[]
-): SavedObjectReference[] => {
-  return [
-    ...references.filter(({ type }) => type !== tagSavedObjectTypeName),
-    ...newTagIds.map(tagIdToReference),
-  ];
 };

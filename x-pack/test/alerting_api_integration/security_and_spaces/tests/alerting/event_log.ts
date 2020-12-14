@@ -37,16 +37,18 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const alertId = response.body.id;
       objectRemover.add(spaceId, alertId, 'alert', 'alerts');
 
-      // break AAD
-      await supertest
-        .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            name: 'bar',
-          },
-        })
-        .expect(200);
+      await retry.try(async () => {
+        // break AAD
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
+          .expect(200);
+      });
 
       const events = await retry.try(async () => {
         // there can be a successful execute before the error one

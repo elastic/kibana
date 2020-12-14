@@ -491,7 +491,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         <span
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
-          Down
+          Up
         </span>
         <span
           class="euiFlexItem c2"
@@ -532,7 +532,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         <span
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
-          Up
+          Down
         </span>
         <span
           class="euiFlexItem c2"
@@ -644,7 +644,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         <span
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
-          Down
+          Up
         </span>
         <span
           class="euiFlexItem c3"
@@ -685,7 +685,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         <span
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
-          Up
+          Down
         </span>
         <span
           class="euiFlexItem c3"

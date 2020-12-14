@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { formatMitreAttackDescription } from '../helpers/rules';
+import { machineLearningRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -59,29 +60,19 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = machineLearningRule.referenceUrls.join('');
-const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
-const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = machineLearningRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
-const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
-
 describe('Detection rules, machine learning', () => {
-  before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
-  });
+  const expectedUrls = machineLearningRule.referenceUrls.join('');
+  const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+  const expectedTags = machineLearningRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
+  const expectedNumberOfRules = 1;
 
   after(() => {
     deleteRule();
-    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   it('Creates and activates a new ml rule', () => {

@@ -21,7 +21,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
+import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -72,7 +72,7 @@ export class DataServerPlugin
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
-  private readonly indexPatterns = new IndexPatternsService();
+  private readonly indexPatterns = new IndexPatternsServiceProvider();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
@@ -89,11 +89,11 @@ export class DataServerPlugin
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
-    this.indexPatterns.setup(core, { expressions });
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+    this.indexPatterns.setup(core, { expressions });
 
     core.uiSettings.register(getUiSettings());
 
