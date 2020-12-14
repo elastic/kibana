@@ -6,16 +6,14 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { firstNonNullValue } from '../../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
-import {
-  NodeID,
-  Schema,
-} from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
+import { NodeID } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
 import {
   SafeResolverChildNode,
   SafeResolverLifecycleNode,
   SafeResolverEvent,
   ResolverNodeStats,
   ResolverNode,
+  ResolverSchema,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
@@ -41,7 +39,7 @@ const createLevels = ({
   descendantsByParent: Map<NodeID, Map<NodeID, ResolverNode>>;
   levels: Array<Map<NodeID, ResolverNode>>;
   currentNodes: Map<NodeID, ResolverNode> | undefined;
-  schema: Schema;
+  schema: ResolverSchema;
 }): Array<Map<NodeID, ResolverNode>> => {
   if (!currentNodes || currentNodes.size === 0) {
     return levels;
@@ -98,7 +96,7 @@ export interface APIResponse {
  * @param node a resolver node
  * @param schema the schema that was used to retrieve this resolver node
  */
-export const getID = (node: ResolverNode | undefined, schema: Schema): NodeID => {
+export const getID = (node: ResolverNode | undefined, schema: ResolverSchema): NodeID => {
   const id = firstNonNullValue(node?.data[schema.id]);
   if (!id) {
     throw new Error(`Unable to find id ${schema.id} in node: ${JSON.stringify(node)}`);
@@ -106,7 +104,10 @@ export const getID = (node: ResolverNode | undefined, schema: Schema): NodeID =>
   return id;
 };
 
-const getParentInternal = (node: ResolverNode | undefined, schema: Schema): NodeID | undefined => {
+const getParentInternal = (
+  node: ResolverNode | undefined,
+  schema: ResolverSchema
+): NodeID | undefined => {
   if (node) {
     return firstNonNullValue(node?.data[schema.parent]);
   }
@@ -119,7 +120,7 @@ const getParentInternal = (node: ResolverNode | undefined, schema: Schema): Node
  * @param node a resolver node
  * @param schema the schema that was used to retrieve this resolver node
  */
-export const getParent = (node: ResolverNode | undefined, schema: Schema): NodeID => {
+export const getParent = (node: ResolverNode | undefined, schema: ResolverSchema): NodeID => {
   const parent = getParentInternal(node, schema);
   if (!parent) {
     throw new Error(`Unable to find parent ${schema.parent} in node: ${JSON.stringify(node)}`);
@@ -138,7 +139,7 @@ export const getParent = (node: ResolverNode | undefined, schema: Schema): NodeI
 const createTreeFromResponse = (
   treeExpectations: TreeExpectation[],
   nodes: ResolverNode[],
-  schema: Schema
+  schema: ResolverSchema
 ) => {
   const nodesByID = new Map<NodeID, ResolverNode>();
   const nodesByParent = new Map<NodeID, Map<NodeID, ResolverNode>>();
@@ -206,7 +207,7 @@ const verifyAncestry = ({
   genTree,
 }: {
   responseTrees: APIResponse;
-  schema: Schema;
+  schema: ResolverSchema;
   genTree: Tree;
 }) => {
   const allGenNodes = new Map<string, TreeNode>([
@@ -277,7 +278,7 @@ const verifyChildren = ({
   genTree,
 }: {
   responseTrees: APIResponse;
-  schema: Schema;
+  schema: ResolverSchema;
   genTree: Tree;
 }) => {
   const allGenNodes = new Map<string, TreeNode>([
@@ -358,7 +359,7 @@ export const verifyTree = ({
 }: {
   expectations: TreeExpectation[];
   response: ResolverNode[];
-  schema: Schema;
+  schema: ResolverSchema;
   genTree: Tree;
   relatedEventsCategories?: RelatedEventInfo[];
 }) => {

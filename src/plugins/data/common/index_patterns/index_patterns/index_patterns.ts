@@ -135,6 +135,20 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
   /**
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
@@ -267,10 +281,10 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
+    const scriptedFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
-      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
+      return this.fieldArrayToMap([...newFields, ...scriptedFields], fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -442,14 +456,14 @@ export class IndexPatternsService {
   /**
    * Create a new index pattern and save it right away
    * @param spec
-   * @param override Overwrite if existing index pattern exists
-   * @param skipFetchFields
+   * @param override Overwrite if existing index pattern exists.
+   * @param skipFetchFields Whether to skip field refresh step.
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id as string);
+    await this.setDefault(indexPattern.id!);
     return indexPattern;
   }
 

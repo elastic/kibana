@@ -195,6 +195,10 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
         },
+        runtimeFields: action.value.runtimeFields,
+        runtimeFieldsList: {
+          status: 'idle',
+        },
         search: {
           term: '',
           result: [],
@@ -482,6 +486,80 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'runtimeFieldsList.createField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'creatingField',
+        },
+      };
+    }
+    case 'runtimeFieldsList.editField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'editingField',
+          fieldToEdit: action.value,
+        },
+      };
+    }
+    case 'runtimeField.add': {
+      const id = getUniqueId();
+      const normalizedField = {
+        id,
+        source: action.value,
+      };
+
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [id]: normalizedField,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
+    case 'runtimeField.edit': {
+      const fieldToEdit = state.runtimeFieldsList.fieldToEdit!;
+
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [fieldToEdit]: action.value,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
+    case 'runtimeField.remove': {
+      const field = state.runtimeFields[action.value];
+      const { id } = field;
+
+      const updatedFields = { ...state.runtimeFields };
+      delete updatedFields[id];
+
+      return {
+        ...state,
+        runtimeFields: updatedFields,
+      };
+    }
+    case 'runtimeFieldsList.closeRuntimeFieldEditor':
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+          fieldToEdit: undefined,
+        },
+      };
     case 'fieldsJsonEditor.update': {
       const nextState = {
         ...state,

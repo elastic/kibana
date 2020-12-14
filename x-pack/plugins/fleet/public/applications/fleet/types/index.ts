@@ -12,6 +12,7 @@ export {
   AgentPolicy,
   NewAgentPolicy,
   AgentEvent,
+  SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
   NewPackagePolicy,
@@ -22,6 +23,7 @@ export {
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
+  PackagePolicyPackage,
   Output,
   DataStream,
   // API schema - misc setup, status

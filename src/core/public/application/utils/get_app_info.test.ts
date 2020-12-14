@@ -43,6 +43,42 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
+      searchDeepLinks: [],
+    });
+  });
+
+  it('populates default values for nested searchDeepLinks', () => {
+    const app = createApp({
+      searchDeepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          searchDeepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
+        },
+      ],
+    });
+    const info = getAppInfo(app);
+
+    expect(info).toEqual({
+      id: 'some-id',
+      title: 'some-title',
+      status: AppStatus.accessible,
+      navLinkStatus: AppNavLinkStatus.visible,
+      appRoute: `/app/some-id`,
+      searchDeepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          searchDeepLinks: [
+            {
+              id: 'sub-sub-id',
+              title: 'sub-sub-title',
+              path: '/sub-sub',
+              searchDeepLinks: [], // default empty array added
+            },
+          ],
+        },
+      ],
     });
   });
 

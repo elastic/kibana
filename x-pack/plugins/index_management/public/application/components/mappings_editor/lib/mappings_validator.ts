@@ -303,4 +303,5 @@ export const VALID_MAPPINGS_PARAMETERS = [
   ...mappingsConfigurationSchemaKeys,
   'dynamic_templates',
   'properties',
+  'runtime',
 ];

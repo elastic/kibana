@@ -5,13 +5,14 @@
  */
 
 import { throwError, Subscription } from 'rxjs';
-import { tap, finalize, catchError } from 'rxjs/operators';
+import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
   IKibanaSearchRequest,
+  SessionState,
 } from '../../../../../src/plugins/data/public';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
@@ -54,7 +55,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   };
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
+    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
@@ -63,16 +64,41 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     const search = () => this.runSearch({ id, ...request }, searchOptions);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+    const isCurrentSession = () =>
+      !!options.sessionId && options.sessionId === this.deps.session.getSessionId();
+
+    const untrackSearch = isCurrentSession() && this.deps.session.trackSearch({ abort });
+
+    // track if this search's session will be send to background
+    // if yes, then we don't need to cancel this search when it is aborted
+    let isSavedToBackground = false;
+    const savedToBackgroundSub =
+      isCurrentSession() &&
+      this.deps.session.state$
+        .pipe(
+          skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
+          filter((state) => isCurrentSession() && state === SessionState.BackgroundLoading),
+          take(1)
+        )
+        .subscribe(() => {
+          isSavedToBackground = true;
+        });
 
     return pollSearch(search, { ...options, abortSignal: combinedSignal }).pipe(
       tap((response) => (id = response.id)),
       catchError((e: AbortError) => {
-        if (id) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+        if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
+        if (untrackSearch && isCurrentSession()) {
+          untrackSearch();
+        }
+        if (savedToBackgroundSub) {
+          savedToBackgroundSub.unsubscribe();
+        }
       })
     );
   }

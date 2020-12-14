@@ -23,11 +23,13 @@ export const ADD_REFERENCE_URL_BTN =
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
-export const MITRE_BTN = '[data-test-subj="addMitre"]';
-
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
+export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
+
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
@@ -57,6 +59,8 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
+export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
+
 export const INPUT = '[data-test-subj="input"]';
 
 export const INVESTIGATION_NOTES_TEXTAREA =
@@ -79,10 +83,17 @@ export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
 
-export const MITRE_TACTIC_DROPDOWN = '[data-test-subj="mitreTactic"]';
+export const MITRE_ATTACK_TACTIC_DROPDOWN = '[data-test-subj="mitreAttackTactic"]';
 
-export const MITRE_TECHNIQUES_INPUT =
-  '[data-test-subj="mitreTechniques"] [data-test-subj="comboBoxSearchInput"]';
+export const MITRE_ATTACK_TECHNIQUE_DROPDOWN = '[data-test-subj="mitreAttackTechnique"]';
+
+export const MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN = '[data-test-subj="mitreAttackSubtechnique"]';
+
+export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTactic"]';
+
+export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
+
+export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
 
 export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 

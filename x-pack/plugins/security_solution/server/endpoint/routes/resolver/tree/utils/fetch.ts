@@ -8,9 +8,14 @@ import {
   firstNonNullValue,
   values,
 } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import { ECSField, ResolverNode, FieldsObject } from '../../../../../../common/endpoint/types';
+import {
+  ECSField,
+  ResolverNode,
+  FieldsObject,
+  ResolverSchema,
+} from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
-import { Schema, NodeID } from './index';
+import { NodeID } from './index';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
 
@@ -22,11 +27,11 @@ export interface TreeOptions {
   descendantLevels: number;
   descendants: number;
   ancestors: number;
-  timerange: {
+  timeRange: {
     from: string;
     to: string;
   };
-  schema: Schema;
+  schema: ResolverSchema;
   nodes: NodeID[];
   indexPatterns: string[];
 }
@@ -71,7 +76,7 @@ export class Fetcher {
     const query = new StatsQuery({
       indexPatterns: options.indexPatterns,
       schema: options.schema,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     const eventStats = await query.search(this.client, statsIDs);
@@ -98,7 +103,7 @@ export class Fetcher {
 
   private static getNextAncestorsToFind(
     results: FieldsObject[],
-    schema: Schema,
+    schema: ResolverSchema,
     levelsLeft: number
   ): NodeID[] {
     const nodesByID = results.reduce((accMap: Map<NodeID, FieldsObject>, result: FieldsObject) => {
@@ -131,7 +136,7 @@ export class Fetcher {
     const query = new LifecycleQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     let nodes = options.nodes;
@@ -177,7 +182,7 @@ export class Fetcher {
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     let nodes: NodeID[] = options.nodes;
@@ -216,7 +221,7 @@ export class Fetcher {
 export function getLeafNodes(
   results: FieldsObject[],
   nodes: Array<string | number>,
-  schema: Schema
+  schema: ResolverSchema
 ): NodeID[] {
   let largestAncestryArray = 0;
   const nodesToQueryNext: Map<number, Set<NodeID>> = new Map();
@@ -269,7 +274,7 @@ export function getLeafNodes(
  * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getIDField(obj: FieldsObject, schema: Schema): NodeID | undefined {
+export function getIDField(obj: FieldsObject, schema: ResolverSchema): NodeID | undefined {
   const id: ECSField<NodeID> = obj[schema.id];
   return firstNonNullValue(id);
 }
@@ -281,7 +286,7 @@ export function getIDField(obj: FieldsObject, schema: Schema): NodeID | undefine
  * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getNameField(obj: FieldsObject, schema: Schema): string | undefined {
+export function getNameField(obj: FieldsObject, schema: ResolverSchema): string | undefined {
   if (!schema.name) {
     return undefined;
   }
@@ -297,12 +302,12 @@ export function getNameField(obj: FieldsObject, schema: Schema): string | undefi
  * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getParentField(obj: FieldsObject, schema: Schema): NodeID | undefined {
+export function getParentField(obj: FieldsObject, schema: ResolverSchema): NodeID | undefined {
   const parent: ECSField<NodeID> = obj[schema.parent];
   return firstNonNullValue(parent);
 }
 
-function getAncestryField(obj: FieldsObject, schema: Schema): NodeID[] | undefined {
+function getAncestryField(obj: FieldsObject, schema: ResolverSchema): NodeID[] | undefined {
   if (!schema.ancestry) {
     return undefined;
   }
@@ -324,7 +329,7 @@ function getAncestryField(obj: FieldsObject, schema: Schema): NodeID[] | undefin
  * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getAncestryAsArray(obj: FieldsObject, schema: Schema): NodeID[] {
+export function getAncestryAsArray(obj: FieldsObject, schema: ResolverSchema): NodeID[] {
   const ancestry = getAncestryField(obj, schema);
   if (!ancestry || ancestry.length <= 0) {
     const parentField = getParentField(obj, schema);

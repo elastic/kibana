@@ -30,6 +30,7 @@ import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
+import { SavedDashboardPanel } from '../common/types';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -86,6 +87,16 @@ export interface DashboardUrlGeneratorState {
    * (Background search)
    */
   searchSessionId?: string;
+
+  /**
+   * List of dashboard panels
+   */
+  panels?: SavedDashboardPanel[];
+
+  /**
+   * Saved query ID
+   */
+  savedQuery?: string;
 }
 
 export const createDashboardUrlGenerator = (
@@ -137,6 +148,8 @@ export const createDashboardUrlGenerator = (
         query: state.query,
         filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
         viewMode: state.viewMode,
+        panels: state.panels,
+        savedQuery: state.savedQuery,
       }),
       { useHash },
       `${appBasePath}#/${hash}`

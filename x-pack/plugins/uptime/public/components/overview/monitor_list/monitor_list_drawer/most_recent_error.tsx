@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
@@ -31,27 +35,25 @@ interface MostRecentErrorProps {
 
 export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentErrorProps) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  params.selectedPingStatus = 'down';
+  params.statusFilter = 'down';
   const linkParameters = stringifyUrlParams(params, true);
 
   const timestampStr = timestamp ? moment(new Date(timestamp).valueOf()).fromNow() : '';
 
   return (
-    <>
-      <EuiSpacer />
-      <EuiText size="xs">
-        <h3>
-          {i18n.translate('xpack.uptime.monitorList.mostRecentError.title', {
-            defaultMessage: 'Most recent error ({timestamp})',
-            values: { timestamp: timestampStr },
-            description: 'Most Recent Error title in Monitor List Expanded row',
-          })}
-        </h3>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
-        {error?.message}
-      </MonitorPageLink>
-    </>
+    <EuiDescriptionList>
+      <EuiDescriptionListTitle>
+        {i18n.translate('xpack.uptime.monitorList.mostRecentError.title', {
+          defaultMessage: 'Most recent error ({timestamp})',
+          values: { timestamp: timestampStr },
+          description: 'Most Recent Error title in Monitor List Expanded row',
+        })}
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
+        <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
+          {error?.message}
+        </MonitorPageLink>
+      </EuiDescriptionListDescription>
+    </EuiDescriptionList>
   );
 };

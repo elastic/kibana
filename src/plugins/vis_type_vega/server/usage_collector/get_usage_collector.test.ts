@@ -72,7 +72,8 @@ const mockedSavedObjects = [
 
 const getMockCollectorFetchContext = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+
+  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
   return fetchParamsMock;
 };
 
@@ -104,17 +105,13 @@ describe('Vega visualization usage collector', () => {
   };
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockCollectorFetchContext().callCluster, mockIndex, mockDeps);
+    const result = await getStats(getMockCollectorFetchContext().esClient, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(
-      getMockCollectorFetchContext([]).callCluster,
-      mockIndex,
-      mockDeps
-    );
+    const result = await getStats(getMockCollectorFetchContext([]).esClient, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
@@ -129,7 +126,7 @@ describe('Vega visualization usage collector', () => {
         },
       },
     ]);
-    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
@@ -153,14 +150,14 @@ describe('Vega visualization usage collector', () => {
       },
     ]);
 
-    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
-    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
 
     expect(result).toMatchObject({
       vega_lib_specs_total: 2,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Duration } from 'moment';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { Dictionary } from '../../../../../common/types/common';
 
@@ -43,7 +44,7 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: Duration | undefined;
   swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;

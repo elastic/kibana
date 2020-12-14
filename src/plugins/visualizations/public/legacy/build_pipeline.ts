@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
+import {
+  buildExpression,
+  formatExpression,
+  SerializedFieldFormat,
+} from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -219,9 +223,6 @@ export const prepareDimension = (variable: string, data: any) => {
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  input_control_vis: (params) => {
-    return `input_control_vis ${prepareJson('visConfig', params)}`;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,
@@ -284,10 +285,18 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     // request handler
     if (vis.type.requestHandler === 'courier') {
       pipeline += `esaggs
-    ${prepareString('index', indexPattern!.id)}
+    index={indexPatternLoad ${prepareString('id', indexPattern!.id)}}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || false}
-    ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
+    partialRows=${vis.params.showPartialRows || false} `;
+      if (vis.data.aggs) {
+        vis.data.aggs.aggs.forEach((agg) => {
+          const ast = agg.toExpressionAst();
+          if (ast) {
+            pipeline += `aggs={${buildExpression(ast).toString()}} `;
+          }
+        });
+      }
+      pipeline += `| `;
     }
 
     const schemas = getSchemas(vis, params);
@@ -301,8 +310,10 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     } else {
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;
+      visConfig.title = title;
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
+    ${prepareJson('uiState', uiState)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {

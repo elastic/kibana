@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ServiceNowParamsFields from './servicenow_params';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 describe('ServiceNowParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -29,7 +30,7 @@ describe('ServiceNowParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: 'alertId', description: '' }]}
+        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
       />
     );
     expect(wrapper.find('[data-test-subj="urgencySelect"]').length > 0).toBeTruthy();

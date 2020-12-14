@@ -140,6 +140,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
    * Calls specified endpoint with provided clientParams on behalf of the
    * Kibana internal user.
    * See {@link LegacyAPICaller}.
+   * @deprecated Use {@link IClusterClient.asInternalUser}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.

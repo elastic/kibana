@@ -21,8 +21,8 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { px, truncate, unit } from '../../../../style/variables';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   APIReturnType,
   callApmApi,
@@ -36,7 +36,7 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewTable } from '../service_overview_table';
 
 type ServiceTransactionGroupItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/overview_transaction_groups'>['transactionGroups']
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
 >;
 
 interface Props {
@@ -100,7 +100,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
 
     return callApmApi({
       endpoint:
-        'GET /api/apm/services/{serviceName}/overview_transaction_groups',
+        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
       params: {
         path: { serviceName },
         query: {

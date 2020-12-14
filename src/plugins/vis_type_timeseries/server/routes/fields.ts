@@ -21,11 +21,12 @@ import { isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { getFields } from '../lib/get_fields';
 import { Framework } from '../plugin';
+import { ROUTES } from '../../common/constants';
 
 export const fieldsRoutes = (framework: Framework) => {
   framework.router.get(
     {
-      path: '/api/metrics/fields',
+      path: ROUTES.FIELDS,
       validate: {
         query: schema.object({ index: schema.string() }),
       },

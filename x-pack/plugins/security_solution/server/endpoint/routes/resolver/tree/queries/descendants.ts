@@ -6,29 +6,29 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { FieldsObject } from '../../../../../../common/endpoint/types';
+import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, Schema, Timerange, docValueFields } from '../utils/index';
+import { NodeID, TimeRange, docValueFields } from '../utils/index';
 
 interface DescendantsParams {
-  schema: Schema;
+  schema: ResolverSchema;
   indexPatterns: string | string[];
-  timerange: Timerange;
+  timeRange: TimeRange;
 }
 
 /**
  * Builds a query for retrieving descendants of a node.
  */
 export class DescendantsQuery {
-  private readonly schema: Schema;
+  private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
-  private readonly timerange: Timerange;
+  private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
-  constructor({ schema, indexPatterns, timerange }: DescendantsParams) {
+  constructor({ schema, indexPatterns, timeRange }: DescendantsParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
-    this.timerange = timerange;
+    this.timeRange = timeRange;
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -46,8 +46,8 @@ export class DescendantsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.from,
-                  lte: this.timerange.to,
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
                   format: 'strict_date_optional_time',
                 },
               },
@@ -126,8 +126,8 @@ export class DescendantsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.from,
-                  lte: this.timerange.to,
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
                   format: 'strict_date_optional_time',
                 },
               },

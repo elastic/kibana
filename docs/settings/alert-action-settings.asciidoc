@@ -27,6 +27,7 @@ You can configure the following settings in the `kibana.yml` file.
   If not set, {kib} will generate a random key on startup, but all alert and action functions will be blocked. Generated keys are not allowed for alerts and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerts and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}. +
   +
   Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
+  Be sure to back up the encryption key value somewhere safe, as your alerts and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 
 |===
 

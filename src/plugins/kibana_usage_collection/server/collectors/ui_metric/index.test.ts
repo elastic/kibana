@@ -29,7 +29,7 @@ import { registerUiMetricUsageCollector } from './';
 const logger = loggingSystemMock.createLogger();
 
 describe('telemetry_ui_metric', () => {
-  let collector: Collector<unknown, unknown>;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {

@@ -162,6 +162,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         },
         isPrimary: true,
         'data-test-subj': 'deleteDataStream',
+        available: ({ privileges: { delete_index: deleteIndex } }: DataStream) => deleteIndex,
       },
     ],
   });
@@ -188,9 +189,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 ? (
+      selection.length > 0 &&
+      selection.every((dataStream: DataStream) => dataStream.privileges.delete_index) ? (
         <EuiButton
-          data-test-subj="deletDataStreamsButton"
+          data-test-subj="deleteDataStreamsButton"
           onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}
           color="danger"
         >

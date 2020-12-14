@@ -205,7 +205,12 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const [selectedCells, setSelectedCells] = useSelectedCells(explorerUrlState, setExplorerUrlState);
+  const [selectedCells, setSelectedCells] = useSelectedCells(
+    explorerUrlState,
+    setExplorerUrlState,
+    explorerState?.bounds,
+    explorerState?.swimlaneBucketInterval
+  );
 
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);

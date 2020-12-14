@@ -91,7 +91,8 @@ export class SpacesManager {
         objects,
         spaces,
         includeReferences,
-        ...(createNewCopies ? { createNewCopies } : { overwrite }),
+        createNewCopies,
+        ...(createNewCopies ? { overwrite: false } : { overwrite }), // ignore the overwrite option if createNewCopies is enabled
       }),
     });
   }

@@ -92,12 +92,12 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should not allow to create an enrollment api key for a non existing agent policy', async () => {
+      it('should return a 400 if the fleet admin user is modifed outside of Fleet', async () => {
         await supertest
           .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            policy_id: 'idonotexistspolicy',
+            raoul: 'raoul',
           })
           .expect(400);
       });
@@ -159,6 +159,33 @@ export default function (providerContext: FtrProviderContext) {
             create_index: false,
             write: false,
           },
+        });
+      });
+
+      describe('It should handle error when the Fleet user is invalid', () => {
+        before(async () => {});
+        after(async () => {
+          await getService('supertest')
+            .post(`/api/fleet/agents/setup`)
+            .set('kbn-xsrf', 'xxx')
+            .send({ forceRecreate: true });
+        });
+
+        it('should not allow to create an enrollment api key if the Fleet admin user is invalid', async () => {
+          await es.security.changePassword({
+            username: 'fleet_enroll',
+            body: {
+              password: Buffer.from((Math.random() * 10000000).toString()).toString('base64'),
+            },
+          });
+          const res = await supertest
+            .post(`/api/fleet/enrollment-api-keys`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              policy_id: 'policy1',
+            })
+            .expect(400);
+          expect(res.body.message).match(/Fleet Admin user is invalid/);
         });
       });
     });
