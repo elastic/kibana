@@ -37,6 +37,7 @@ import {
   SetPriorityInputField,
   SearchableSnapshotField,
   useRolloverPath,
+  ReadonlyField,
   ShrinkField,
 } from '../shared_fields';
 
@@ -238,6 +239,7 @@ export const HotPhase: FunctionComponent = () => {
             {<ForcemergeField phase="hot" />}
             <ShrinkField phase="hot" />
             {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+            <ReadonlyField phase={'hot'} />
           </>
         )}
         <SetPriorityInputField phase={hotProperty} />
