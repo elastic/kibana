@@ -15,7 +15,6 @@ import { PLUGIN } from '../constants/plugin';
 import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
 import { AlertType } from '../types';
 import { AlertTypeDisabledError } from './errors/alert_type_disabled';
-import { capitalize } from 'lodash';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -168,8 +167,8 @@ export class LicenseState {
         throw new AlertTypeDisabledError(
           i18n.translate('xpack.alerts.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
-              'Alert {alertTypeId} is disabled because it requires a {licenseType} license. Contact your administrator to upgrade your license.',
-            values: { alertTypeId: alertType.id, licenseType: capitalize(this.license!.type) },
+              'Alert {alertTypeId} is disabled because it requires a Gold license. Contact your administrator to upgrade your license.',
+            values: { alertTypeId: alertType.id },
           }),
           'license_invalid'
         );
