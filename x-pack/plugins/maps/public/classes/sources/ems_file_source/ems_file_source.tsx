@@ -34,6 +34,10 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
   defaultMessage: 'EMS Boundaries',
 });
 
+export function getSourceTitle() {
+  return sourceTitle;
+}
+
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
@@ -132,7 +136,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return [
       {
         label: getDataSourceLabel(),
-        value: sourceTitle,
+        value: getSourceTitle(),
       },
       {
         label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {

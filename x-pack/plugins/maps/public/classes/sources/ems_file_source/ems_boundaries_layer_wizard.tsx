@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
-import { EMSFileSource, sourceTitle } from './ems_file_source';
+import { EMSFileSource, getSourceTitle } from './ems_file_source';
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
@@ -34,5 +34,5 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
-  title: sourceTitle,
+  title: getSourceTitle(),
 };
