@@ -37,7 +37,7 @@ import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unau
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -61,7 +61,7 @@ const DetectionEnginePageComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   const [
     {
       loading: userInfoLoading,
