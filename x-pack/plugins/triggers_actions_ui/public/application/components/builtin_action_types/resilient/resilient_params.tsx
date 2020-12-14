@@ -141,8 +141,18 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
+    if (!actionParams.subActionParams) {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [actionParams]);
 
   return (
     <Fragment>

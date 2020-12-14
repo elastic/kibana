@@ -85,7 +85,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   ]);
   const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
   const issueTypesSelectOptions: EuiSelectOption[] = useMemo(() => {
-    if (!incident.issueType && issueTypes.length > 0) {
+    const doesIssueTypeExist = issueTypes.some((t) => t.id === incident.issueType);
+    if ((!incident.issueType || !doesIssueTypeExist) && issueTypes.length > 0) {
       editSubActionProperty('issueType', issueTypes[0].id ?? '');
     }
     return issueTypes.map((type) => ({
@@ -96,7 +97,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const prioritiesSelectOptions: EuiSelectOption[] = useMemo(() => {
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
-      if (!incident.priority && priorities.length > 0) {
+      const doesPriorityExist = priorities.some((p) => p.name === incident.priority);
+      if ((!incident.priority || !doesPriorityExist) && priorities.length > 0) {
         editSubActionProperty('priority', priorities[0].name ?? '');
       }
       return priorities.map((p: { id: string; name: string }) => {
@@ -132,8 +134,18 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
+    if (!actionParams.subActionParams) {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [actionParams]);
   return (
     <Fragment>
       <>
