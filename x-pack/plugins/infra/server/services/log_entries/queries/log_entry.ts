@@ -17,7 +17,7 @@ export const createGetLogEntryQuery = (
   logEntryId: string,
   timestampField: string,
   tiebreakerField: string
-): RequestParams.Search<Record<string, any>> => ({
+): RequestParams.AsyncSearchSubmit<Record<string, any>> => ({
   index: logEntryIndex,
   terminate_after: 1,
   track_scores: false,

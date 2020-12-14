@@ -17,23 +17,26 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
 import _ from 'lodash';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
-import { SavedObject } from '../../../../saved_objects/public';
+import uuid from 'uuid';
+
+import { CoreStart } from 'src/core/public';
+import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { SavedObject } from '../../services/saved_objects';
 import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
   PanelNotFoundError,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isErrorEmbeddable,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
+import { dashboardClonePanelAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
@@ -53,9 +56,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.clonePanel', {
-      defaultMessage: 'Clone panel',
-    });
+    return dashboardClonePanelAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: ClonePanelActionContext) {
@@ -99,9 +100,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   }
 
   private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
-    const clonedTag = i18n.translate('dashboard.panel.title.clonedTag', {
-      defaultMessage: 'copy',
-    });
+    const clonedTag = dashboardClonePanelAction.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
@@ -152,9 +151,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId = clonedSavedObject.id;
     }
     this.core.notifications.toasts.addSuccess({
-      title: i18n.translate('dashboard.panel.clonedToast', {
-        defaultMessage: 'Cloned panel',
-      }),
+      title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
     return panelState;

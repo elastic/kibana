@@ -50,3 +50,7 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Copy to Clipboard',
   }
 );
+
+export const CREATED_BY = i18n.translate('xpack.securitySolution.notes.createdByLabel', {
+  defaultMessage: 'Created by',
+});
