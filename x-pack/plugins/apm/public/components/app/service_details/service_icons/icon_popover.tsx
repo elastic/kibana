@@ -11,6 +11,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { px } from '../../../../style/variables';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useServiceDetailsFetcher } from './use_service_details_fetcher';
 
@@ -50,7 +51,9 @@ export function IconPopover({ icon, title, children }: IconPopoverProps) {
       closePopover={tooglePopover}
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
-      {isLoading ? <EuiLoadingContent /> : children}
+      <div style={{ minWidth: px(300) }}>
+        {isLoading ? <EuiLoadingContent /> : children}
+      </div>
     </EuiPopover>
   );
 }
