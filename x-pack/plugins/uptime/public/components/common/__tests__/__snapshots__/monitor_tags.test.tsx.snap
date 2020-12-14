@@ -9,7 +9,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <a
       class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"secure\\"]]]"
+      href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
@@ -29,7 +29,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <a
       class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"secure\\"]]]"
+      href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
@@ -49,7 +49,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <a
       class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"secure\\"]]]"
+      href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
@@ -69,7 +69,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <a
       class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"secure\\"]]]"
+      href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
@@ -89,7 +89,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <a
       class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"secure\\"]]]"
+      href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >

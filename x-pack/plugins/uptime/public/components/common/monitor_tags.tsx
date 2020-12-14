@@ -109,7 +109,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             style={{ maxWidth: 120 }}
             href={history.createHref({
               pathname: OVERVIEW_ROUTE,
-              search: `filters=[["tags",["secure"]]]`,
+              search: `filters=[["tags",["${tag}"]]]`,
             })}
           >
             {tag}
