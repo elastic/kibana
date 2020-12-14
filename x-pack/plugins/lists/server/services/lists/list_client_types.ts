@@ -160,3 +160,9 @@ export interface FindListItemOptions {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
+
+export interface SearchListItemByValuesOptions {
+  type: Type;
+  listId: string;
+  value: unknown[];
+}

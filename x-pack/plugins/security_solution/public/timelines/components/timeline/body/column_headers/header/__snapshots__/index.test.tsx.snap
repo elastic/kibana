@@ -14,10 +14,12 @@ exports[`Header renders correctly against snapshot 1`] = `
     isResizing={false}
     onClick={[Function]}
     sort={
-      Object {
-        "columnId": "@timestamp",
-        "sortDirection": "desc",
-      }
+      Array [
+        Object {
+          "columnId": "@timestamp",
+          "sortDirection": "desc",
+        },
+      ]
     }
   >
     <Actions
@@ -31,10 +33,12 @@ exports[`Header renders correctly against snapshot 1`] = `
       isLoading={false}
       onColumnRemoved={[Function]}
       sort={
-        Object {
-          "columnId": "@timestamp",
-          "sortDirection": "desc",
-        }
+        Array [
+          Object {
+            "columnId": "@timestamp",
+            "sortDirection": "desc",
+          },
+        ]
       }
     />
   </Memo(HeaderContentComponent)>

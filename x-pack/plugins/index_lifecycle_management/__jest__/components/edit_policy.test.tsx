@@ -487,7 +487,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
@@ -505,7 +505,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
@@ -556,6 +556,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'warm-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
@@ -684,6 +685,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });

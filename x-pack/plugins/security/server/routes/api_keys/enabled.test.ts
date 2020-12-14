@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
   kibanaResponseFactory,
   RequestHandler,
@@ -14,8 +15,9 @@ import {
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
+import type { AuthenticationServiceStart } from '../../authentication';
 import { defineEnabledApiKeysRoutes } from './enabled';
-import { Authentication } from '../../authentication';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('API keys enabled', () => {
   function getMockContext(
@@ -27,10 +29,11 @@ describe('API keys enabled', () => {
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;
-  let authc: jest.Mocked<Authentication>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   beforeEach(() => {
+    authc = authenticationServiceMock.createStart();
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    authc = mockRouteDefinitionParams.authc;
+    mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
     defineEnabledApiKeysRoutes(mockRouteDefinitionParams);
 
@@ -56,7 +59,7 @@ describe('API keys enabled', () => {
 
     test('returns error from cluster client', async () => {
       const error = Boom.notAcceptable('test not acceptable message');
-      authc.areAPIKeysEnabled.mockRejectedValue(error);
+      authc.apiKeys.areAPIKeysEnabled.mockRejectedValue(error);
 
       const response = await routeHandler(
         getMockContext(),
@@ -71,7 +74,7 @@ describe('API keys enabled', () => {
 
   describe('success', () => {
     test('returns true if API Keys are enabled', async () => {
-      authc.areAPIKeysEnabled.mockResolvedValue(true);
+      authc.apiKeys.areAPIKeysEnabled.mockResolvedValue(true);
 
       const response = await routeHandler(
         getMockContext(),
@@ -84,7 +87,7 @@ describe('API keys enabled', () => {
     });
 
     test('returns false if API Keys are disabled', async () => {
-      authc.areAPIKeysEnabled.mockResolvedValue(false);
+      authc.apiKeys.areAPIKeysEnabled.mockResolvedValue(false);
 
       const response = await routeHandler(
         getMockContext(),
