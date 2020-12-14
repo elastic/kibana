@@ -14,6 +14,7 @@ import {
   SavedObjectsClientContract,
   Logger,
   SavedObject,
+  SavedObjectsBulkUpdateObject,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
@@ -111,7 +112,7 @@ export class BackgroundSessionService implements ISessionService {
       filter,
       namespaces: ['*'],
     });
-    this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
+    this.logger.warn(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
     return res.saved_objects;
   }
 
@@ -178,7 +179,9 @@ export class BackgroundSessionService implements ISessionService {
     if (!activeMappingObjects.length) return [];
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
-    const updatedSessions = activeMappingObjects
+    const updatedSessions: Array<
+      SavedObjectsBulkUpdateObject<BackgroundSessionSavedObjectAttributes>
+    > = activeMappingObjects
       .filter((so) => !so.error)
       .map((sessionSavedObject) => {
         const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
@@ -187,12 +190,14 @@ export class BackgroundSessionService implements ISessionService {
           ...sessionSavedObject.attributes.idMapping,
           ...idMapping,
         };
-        return sessionSavedObject;
+        return {
+          ...sessionSavedObject,
+          namespace: sessionSavedObject.namespaces?.[0],
+        };
       });
 
     const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
-      updatedSessions,
-      {}
+      updatedSessions
     );
     return updateResults.saved_objects;
   }

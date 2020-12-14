@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
 
@@ -23,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
   const browser = getService('browser');
   const sendToBackground = getService('sendToBackground');
-  const pieChart = getService('pieChart');
 
   describe('dashboard in space', () => {
     describe('Send to background in space', () => {
@@ -85,9 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Check that session is restored
         await sendToBackground.expectState('restored');
         await testSubjects.missingOrFail('embeddableErrorLabel');
-        pieChart.expectPieSliceCount(5);
-        const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
-        expect(data.length).to.be(5);
       });
     });
   });
