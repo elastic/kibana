@@ -1,0 +1,28 @@
+.appSearchResultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $euiSizeS;
+
+  @include euiBreakpoint('xs') {
+    flex-direction: column;
+  }
+
+  &__column {
+    display: flex;
+    flex-wrap: wrap;
+
+    @include euiBreakpoint('xs') {
+      flex-direction: column;
+    }
+
+    & + &,
+    .appSearchResultHeaderItem + .appSearchResultHeaderItem {
+      margin-left: $euiSizeL;
+
+      @include euiBreakpoint('xs') {
+        margin-left: 0;
+      }
+    }
+  }
+}

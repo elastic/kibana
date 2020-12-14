@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { isErrorEmbeddable } from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+} from '../../services/embeddable_test_samples';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 
@@ -52,6 +54,8 @@ beforeEach(async () => {
     overlays: {} as any,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreMock.createStart().http,
   };
   const input = getSampleDashboardInput({
     panels: {

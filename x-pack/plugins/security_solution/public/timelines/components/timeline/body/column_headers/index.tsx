@@ -278,6 +278,7 @@ export const ColumnHeadersComponent = ({
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
+
           <EventsTh>
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
