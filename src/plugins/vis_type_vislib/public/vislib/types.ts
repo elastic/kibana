@@ -33,7 +33,7 @@ export interface TableParent {
   column: number;
   row: number;
   key: number;
-  formattedKey: string | number | boolean;
+  formattedKey: string;
   name: string;
 }
 export interface Table {

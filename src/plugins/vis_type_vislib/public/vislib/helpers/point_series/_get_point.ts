@@ -19,7 +19,7 @@
 
 import { getFormatService } from '../../../services';
 import { Aspect } from './point_series';
-import { Table, Row, TableParent } from '../../types';
+import { Table, Row } from '../../types';
 
 type RowValue = number | string | object | 'NaN';
 interface Raw {
@@ -41,7 +41,7 @@ export interface Point {
     table: Table;
     column: number;
     row: number;
-    value: TableParent['formattedKey'];
+    value: string;
     title: string;
   };
   parent: Aspect | null;

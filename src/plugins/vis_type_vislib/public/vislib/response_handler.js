@@ -34,15 +34,16 @@ function tableResponseHandler(table, dimensions) {
 
     table.rows.forEach((row, rowIndex) => {
       const splitValue = row[splitColumn.id];
+      const formattedValue = splitColumnFormatter.convert(splitValue);
 
       if (!splitMap.hasOwnProperty(splitValue)) {
         splitMap[splitValue] = splitIndex++;
         const tableGroup = {
           $parent: converted,
-          title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+          title: `${formattedValue}: ${splitColumn.name}`,
           name: splitColumn.name,
           key: splitValue,
-          formattedKey: splitColumnFormatter.convert(splitValue),
+          formattedKey: formattedValue,
           column: splitColumnIndex,
           row: rowIndex,
           table,
