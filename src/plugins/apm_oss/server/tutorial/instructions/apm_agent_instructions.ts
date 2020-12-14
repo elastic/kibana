@@ -388,7 +388,7 @@ secret_token: '${secretToken}'
 server_url: '${apmServerUrl || 'http://localhost:8200'}',
 
 # ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setServiceEnvironment', {
-      defaultMessage: 'Set the service environment (default: production)'
+      defaultMessage: 'Set the service environment (default: production)',
     })}
 environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.rackClient.createConfig.textPost', {
