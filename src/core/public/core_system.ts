@@ -145,7 +145,7 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
-      const docLinks = this.docLinks.setup({ injectedMetadata });
+      this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
@@ -155,12 +155,11 @@ export class CoreSystem {
         pluginDependencies: new Map([...pluginDependencies]),
       });
       const application = this.application.setup({ context, http });
-      this.coreApp.setup({ application, docLinks, http, injectedMetadata, notifications });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
         context,
-        docLinks,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -219,7 +218,7 @@ export class CoreSystem {
         uiSettings,
       });
 
-      this.coreApp.start({ application, http, notifications, uiSettings });
+      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
         application: pick(application, ['capabilities', 'navigateToApp']),

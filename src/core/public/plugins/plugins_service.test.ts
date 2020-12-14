@@ -89,7 +89,6 @@ describe('PluginsService', () => {
     ];
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
-      docLinks: docLinksServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),

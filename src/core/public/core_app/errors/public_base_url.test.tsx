@@ -24,15 +24,15 @@ import { notificationServiceMock } from '../../notifications/notifications_servi
 import { setupPublicBaseUrlConfigWarning } from './public_base_url';
 
 describe('publicBaseUrl warning', () => {
-  const docLinks = docLinksServiceMock.createSetupContract();
-  const notifications = notificationServiceMock.createSetupContract();
+  const docLinks = docLinksServiceMock.createStartContract();
+  const notifications = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('does not show any toast on localhost', () => {
-    const http = httpServiceMock.createSetupContract();
+    const http = httpServiceMock.createStartContract();
 
     setupPublicBaseUrlConfigWarning({
       docLinks,
@@ -47,7 +47,7 @@ describe('publicBaseUrl warning', () => {
   });
 
   it('does not show any toast on 127.0.0.1', () => {
-    const http = httpServiceMock.createSetupContract();
+    const http = httpServiceMock.createStartContract();
 
     setupPublicBaseUrlConfigWarning({
       docLinks,
@@ -62,7 +62,7 @@ describe('publicBaseUrl warning', () => {
   });
 
   it('does not show toast if configured correctly', () => {
-    const http = httpServiceMock.createSetupContract({ publicBaseUrl: 'http://myhost.com' });
+    const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com' });
 
     setupPublicBaseUrlConfigWarning({
       docLinks,
@@ -81,7 +81,7 @@ describe('publicBaseUrl warning', () => {
 
   describe('config missing toast', () => {
     it('adds toast if publicBaseUrl is missing', () => {
-      const http = httpServiceMock.createSetupContract({ publicBaseUrl: undefined });
+      const http = httpServiceMock.createStartContract({ publicBaseUrl: undefined });
 
       setupPublicBaseUrlConfigWarning({
         docLinks,
@@ -102,7 +102,7 @@ describe('publicBaseUrl warning', () => {
     });
 
     it('does not add toast if storage key set', () => {
-      const http = httpServiceMock.createSetupContract({ publicBaseUrl: undefined });
+      const http = httpServiceMock.createStartContract({ publicBaseUrl: undefined });
 
       setupPublicBaseUrlConfigWarning({
         docLinks,
@@ -125,7 +125,7 @@ describe('publicBaseUrl warning', () => {
 
   describe('config mismatch toast', () => {
     it('adds toast if location does not start with publicBaseUrl', () => {
-      const http = httpServiceMock.createSetupContract({ publicBaseUrl: 'http://myhost.com:9999' });
+      const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com:9999' });
 
       setupPublicBaseUrlConfigWarning({
         docLinks,
@@ -146,7 +146,7 @@ describe('publicBaseUrl warning', () => {
     });
 
     it('does not add toast if storage key set', () => {
-      const http = httpServiceMock.createSetupContract({ publicBaseUrl: 'http://myhost.com:9999' });
+      const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com:9999' });
 
       setupPublicBaseUrlConfigWarning({
         docLinks,

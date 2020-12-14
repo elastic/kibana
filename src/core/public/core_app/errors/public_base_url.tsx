@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
-import { HttpSetup, NotificationsSetup } from '../..';
-import { DocLinksSetup } from '../../doc_links';
+import { HttpStart, NotificationsStart } from '../..';
+import { DocLinksStart } from '../../doc_links';
 import { mountReactNode } from '../../utils';
 
 /** Only exported for tests */
@@ -31,7 +31,7 @@ export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDis
 export const MISMATCHED_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMismatchedDismissed`;
 
 /** Small helper component for the toast content */
-const WarningToastContent: React.FC<{ docLinks: DocLinksSetup; onMute: () => void }> = ({
+const WarningToastContent: React.FC<{ docLinks: DocLinksStart; onMute: () => void }> = ({
   children,
   docLinks,
   onMute,
@@ -39,7 +39,7 @@ const WarningToastContent: React.FC<{ docLinks: DocLinksSetup; onMute: () => voi
   return (
     <>
       <p>
-        {children}
+        {children}{' '}
         <a href={`${docLinks.links.settings}#server-publicBaseUrl`} target="_blank">
           <FormattedMessage
             id="core.ui.publicBaseUrlWarning.seeDocumentationLinkLabel"
@@ -63,9 +63,9 @@ const WarningToastContent: React.FC<{ docLinks: DocLinksSetup; onMute: () => voi
 };
 
 interface Deps {
-  docLinks: DocLinksSetup;
-  http: HttpSetup;
-  notifications: NotificationsSetup;
+  docLinks: DocLinksStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
   // Exposed for easier testing
   storage?: Storage;
   location?: Location;
@@ -100,7 +100,7 @@ export const setupPublicBaseUrlConfigWarning = ({
         >
           <FormattedMessage
             id="core.ui.publicBaseUrlWarning.configMissingDescription"
-            defaultMessage="{configKey} should be configured when running in a production environment. Some features may not behave correctly."
+            defaultMessage="{configKey} is missing and should be configured when running in a production environment. Some features may not behave correctly."
             values={{
               configKey: <code>server.publicBaseUrl</code>,
             }}
@@ -127,7 +127,7 @@ export const setupPublicBaseUrlConfigWarning = ({
         >
           <FormattedMessage
             id="core.ui.publicBaseUrlWarning.configMismatchDescription"
-            defaultMessage="{configKey} does match the URL that you are using to access Kibana. Some features may not behave correctly."
+            defaultMessage="{configKey} does not match the URL that you are using to access Kibana. Some features may not behave correctly."
             values={{
               configKey: <code>server.publicBaseUrl</code>,
             }}

@@ -35,11 +35,10 @@ import {
   setupUrlOverflowDetection,
 } from './errors';
 import { renderApp as renderStatusApp } from './status';
-import { DocLinksSetup } from '../doc_links';
+import { DocLinksStart } from '../doc_links';
 
 interface SetupDeps {
   application: InternalApplicationSetup;
-  docLinks: DocLinksSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   notifications: NotificationsSetup;
@@ -47,6 +46,7 @@ interface SetupDeps {
 
 interface StartDeps {
   application: InternalApplicationStart;
+  docLinks: DocLinksStart;
   http: HttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
@@ -57,7 +57,7 @@ export class CoreApp {
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public setup({ application, docLinks, http, injectedMetadata, notifications }: SetupDeps) {
+  public setup({ application, http, injectedMetadata, notifications }: SetupDeps) {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
@@ -83,11 +83,9 @@ export class CoreApp {
         return renderStatusApp(params, { http, notifications });
       },
     });
-
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
   }
 
-  public start({ application, http, notifications, uiSettings }: StartDeps) {
+  public start({ application, docLinks, http, notifications, uiSettings }: StartDeps) {
     if (!application.history) {
       return;
     }
@@ -98,6 +96,8 @@ export class CoreApp {
       toasts: notifications.toasts,
       uiSettings,
     });
+
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
   }
 
   public stop() {

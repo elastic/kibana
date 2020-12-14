@@ -18,14 +18,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { DocLinksService, DocLinksSetup, DocLinksStart } from './doc_links_service';
-
-const createSetupContractMock = (): DocLinksSetup => {
-  // This service is so simple that we actually use the real implementation
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-  injectedMetadata.getKibanaBranch.mockReturnValue('mocked-test-branch');
-  return new DocLinksService().setup({ injectedMetadata });
-};
+import { DocLinksService, DocLinksStart } from './doc_links_service';
 
 const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation
@@ -36,12 +29,12 @@ const createStartContractMock = (): DocLinksStart => {
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 const createMock = (): jest.Mocked<DocLinksServiceContract> => ({
-  setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  setup: jest.fn().mockReturnValue(undefined),
   start: jest.fn().mockReturnValue(createStartContractMock()),
 });
 
 export const docLinksServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createSetupContract: () => jest.fn(),
   createStartContract: createStartContractMock,
 };

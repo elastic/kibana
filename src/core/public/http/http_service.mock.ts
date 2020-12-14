@@ -39,7 +39,7 @@ const createServiceMock = ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  basePath: new BasePath(basePath, basePath, publicBaseUrl),
+  basePath: new BasePath(basePath, undefined, publicBaseUrl),
   anonymousPaths: {
     register: jest.fn(),
     isAnonymous: jest.fn(),
