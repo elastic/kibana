@@ -264,7 +264,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
-  const tableColumns: Array<EuiBasicTableColumn<unknown>> = props.args.columns.columnIds
+  const tableColumns: Array<
+    EuiBasicTableColumn<{ rowIndex: number; [key: string]: unknown }>
+  > = props.args.columns.columnIds
     .map((field) => {
       const col = firstTable.columns.find((c) => c.id === field);
       const filterable = bucketColumns.includes(field);
@@ -346,7 +348,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
     const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
     if (hasAtLeastOneRowClickAction) {
       const actions: EuiTableActionsColumnType<{ rowIndex: number; [key: string]: unknown }> = {
-        name: 'Actions',
+        name: i18n.translate('xpack.lens.datatable.actionsColumnName', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             name: i18n.translate('xpack.lens.tableRowMore', {
@@ -374,7 +378,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
           },
         ],
       };
-      tableColumns.push(actions as EuiTableActionsColumnType<unknown>);
+      tableColumns.push(actions);
     }
   }
 
