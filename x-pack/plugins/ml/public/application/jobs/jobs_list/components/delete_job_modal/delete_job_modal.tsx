@@ -148,6 +148,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
             setCanDelete(true);
           }}
           onCloseCallback={closeModal}
+          refreshJobsCallback={refreshJobs}
         />
       </>
     );
