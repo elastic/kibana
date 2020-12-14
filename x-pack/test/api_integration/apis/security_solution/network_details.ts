@@ -32,10 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.networkDetails!.source!.geo!.continent_name).to.be('North America');
         expect(body.networkDetails!.source!.geo!.location!.lat!).to.be(37.751);
-        expect(body.networkDetails!.host.os!.platform!).to.be('raspbian');
-        expect(body.networkDetails!.destination!.geo!.continent_name).to.be('North America');
-        expect(body.networkDetails!.destination!.geo!.location!.lat!).to.be(37.751);
-        expect(body.networkDetails!.host.os!.platform!).to.be('raspbian');
+        expect(body.networkDetails!.host.os!.platform!).to.be(['raspbian']);
       });
     });
 
