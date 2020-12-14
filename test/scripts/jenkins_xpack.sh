@@ -12,7 +12,7 @@ else
   # build runtime for canvas
   echo "NODE_ENV=$NODE_ENV"
   node ./x-pack/plugins/canvas/scripts/shareable_runtime
-  node scripts/jest x-pack --ci --verbose --maxWorkers=5 --coverage
+  node --max-old-space-size=6144 scripts/jest x-pack --ci --verbose --coverage
   # rename file in order to be unique one
   test -f ../target/kibana-coverage/jest/coverage-final.json \
     && mv ../target/kibana-coverage/jest/coverage-final.json \
