@@ -22,6 +22,8 @@ import { WaterfallData } from '../../waterfall';
 import { NetworkEvent } from '../../../../../../common/runtime_types';
 
 export const extractItems = (data: NetworkEvent[]): NetworkItems => {
+  // NOTE: This happens client side as the "payload" property is mapped
+  // in such a way it can't be queried (or sorted on) via ES.
   return data.sort((a: NetworkItem, b: NetworkItem) => {
     return a.requestSentTime - b.requestSentTime;
   });

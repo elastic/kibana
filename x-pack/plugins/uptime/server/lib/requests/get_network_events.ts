@@ -26,6 +26,9 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
         ],
       },
     },
+    // NOTE: This limit may need tweaking in the future. Users can technically perform multiple
+    // navigations within one step, and may push up against this limit, however this manner
+    // of usage isn't advised.
     size: 1000,
   };
 
