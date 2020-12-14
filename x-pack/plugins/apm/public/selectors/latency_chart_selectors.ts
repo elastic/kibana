@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '../../../observability/public';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { asDuration } from '../../common/utils/formatters';
 import {
   Coordinate,
@@ -17,7 +18,7 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 interface LatencyChart {
-  latencyTimeseries: TimeSeries[];
+  latencyTimeseries: Array<TimeSeries<Coordinate>>;
   mlJobId?: string;
   anomalyTimeseries?: {
     bounderies: TimeSeries;
@@ -28,11 +29,13 @@ interface LatencyChart {
 export function getLatencyChartSelector({
   latencyChart,
   theme,
+  latencyAggregationType,
 }: {
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
+  latencyAggregationType?: LatencyAggregationType;
 }): LatencyChart {
-  if (!latencyChart) {
+  if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
     return {
       latencyTimeseries: [],
       mlJobId: undefined,
@@ -40,7 +43,11 @@ export function getLatencyChartSelector({
     };
   }
   return {
-    latencyTimeseries: getLatencyTimeseries({ latencyChart, theme }),
+    latencyTimeseries: getLatencyTimeseries({
+      latencyChart,
+      theme,
+      latencyAggregationType,
+    }),
     mlJobId: latencyChart.anomalyTimeseries?.jobId,
     anomalyTimeseries: getAnnomalyTimeseries({
       anomalyTimeseries: latencyChart.anomalyTimeseries,
@@ -52,53 +59,60 @@ export function getLatencyChartSelector({
 function getLatencyTimeseries({
   latencyChart,
   theme,
+  latencyAggregationType,
 }: {
   latencyChart: LatencyChartsResponse;
   theme: EuiTheme;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   const { overallAvgDuration } = latencyChart;
-  const { avg, p95, p99 } = latencyChart.latencyTimeseries;
+  const { latencyTimeseries } = latencyChart;
 
-  const series = [
-    {
-      title: i18n.translate(
-        'xpack.apm.transactions.latency.chart.averageLabel',
+  switch (latencyAggregationType) {
+    case 'avg': {
+      return [
         {
-          defaultMessage: 'Avg.',
-        }
-      ),
-      data: avg,
-      legendValue: asDuration(overallAvgDuration),
-      type: 'linemark',
-      color: theme.eui.euiColorVis1,
-    },
-    {
-      title: i18n.translate(
-        'xpack.apm.transactions.latency.chart.95thPercentileLabel',
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.averageLabel',
+            { defaultMessage: 'Average' }
+          ),
+          data: latencyTimeseries,
+          legendValue: asDuration(overallAvgDuration),
+          type: 'linemark',
+          color: theme.eui.euiColorVis1,
+        },
+      ];
+    }
+    case 'p95': {
+      return [
         {
-          defaultMessage: '95th percentile',
-        }
-      ),
-      titleShort: '95th',
-      data: p95,
-      type: 'linemark',
-      color: theme.eui.euiColorVis5,
-    },
-    {
-      title: i18n.translate(
-        'xpack.apm.transactions.latency.chart.99thPercentileLabel',
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.95thPercentileLabel',
+            { defaultMessage: '95th percentile' }
+          ),
+          titleShort: '95th',
+          data: latencyTimeseries,
+          type: 'linemark',
+          color: theme.eui.euiColorVis5,
+        },
+      ];
+    }
+    case 'p99': {
+      return [
         {
-          defaultMessage: '99th percentile',
-        }
-      ),
-      titleShort: '99th',
-      data: p99,
-      type: 'linemark',
-      color: theme.eui.euiColorVis7,
-    },
-  ];
-
-  return series;
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.99thPercentileLabel',
+            { defaultMessage: '99th percentile' }
+          ),
+          titleShort: '99th',
+          data: latencyTimeseries,
+          type: 'linemark',
+          color: theme.eui.euiColorVis7,
+        },
+      ];
+    }
+  }
+  return [];
 }
 
 function getAnnomalyTimeseries({
