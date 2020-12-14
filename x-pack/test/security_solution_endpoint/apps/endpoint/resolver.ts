@@ -225,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.setWindowSize(2100, 1500);
         });
 
-        it('has the correct pill text and links for the nodes in view', async () => {
+        it('has the correct pill text', async () => {
           const expectedData: Map<string, Set<string>> = new Map([
             [
               'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTc2MzYtMTMyNDc2MTQ0NDIuOTU5MTE2NjAw',
