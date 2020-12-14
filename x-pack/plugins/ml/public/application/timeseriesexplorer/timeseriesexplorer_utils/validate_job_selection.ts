@@ -34,7 +34,30 @@ export function validateJobSelection(
   // (e.g. if switching to this view straight from the Anomaly Explorer).
   const invalidIds: string[] = difference(selectedJobIds, timeSeriesJobIds);
   const validSelectedJobIds = without(selectedJobIds, ...invalidIds);
-  if (invalidIds.length > 0) {
+
+  // show specific reason why we can't show the single metric viewer
+  if (invalidIds.length === 1) {
+    const selectedJobId = invalidIds[0];
+    const selectedJob = jobsWithTimeRange.find((j) => j.id === selectedJobId);
+    if (selectedJob !== undefined && selectedJob.isNotSingleMetricViewerJobMessage !== undefined) {
+      const warningText = i18n.translate(
+        'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningWithReasonMessage',
+        {
+          defaultMessage: `You can't view {selectedJobId} in this dashboard because {reason}.`,
+          values: {
+            selectedJobId,
+            reason: selectedJob.isNotSingleMetricViewerJobMessage,
+          },
+        }
+      );
+      toastNotifications.addWarning({
+        title: warningText,
+        'data-test-subj': 'mlTimeSeriesExplorerDisabledJobReasonWarningToast',
+      });
+    }
+  }
+
+  if (invalidIds.length > 1) {
     let warningText = i18n.translate(
       'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
       {
@@ -45,6 +68,7 @@ export function validateJobSelection(
         },
       }
     );
+
     if (validSelectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
       warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
         defaultMessage: ', auto selecting first job',

@@ -16,7 +16,7 @@ import {
 } from '../../../../common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
 import { ExpandableSectionAnalytics } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
@@ -48,7 +48,7 @@ const filters = {
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   searchQuery: ResultsSearchQuery;
 }
 

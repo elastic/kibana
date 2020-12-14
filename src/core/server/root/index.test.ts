@@ -33,6 +33,7 @@ let mockConsoleError: jest.SpyInstance;
 beforeEach(() => {
   jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
   mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
+  logger.upgrade.mockResolvedValue(undefined);
   rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
   configService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });

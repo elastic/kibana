@@ -60,6 +60,12 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
           savedTimeline.attributes.timelineType,
           savedTimeline.attributes.status
         ),
+        sort:
+          savedTimeline.attributes.sort != null
+            ? Array.isArray(savedTimeline.attributes.sort)
+              ? savedTimeline.attributes.sort
+              : [savedTimeline.attributes.sort]
+            : [],
       };
       return {
         savedObjectId: savedTimeline.id,

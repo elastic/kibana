@@ -16,6 +16,7 @@ describe('TagsFilterPopover', () => {
         tags={[]}
         selectedTags={[]}
         onSelectedTagsChanged={jest.fn()}
+        currentFilterTags={[]}
         isLoading={false}
       />
     );
