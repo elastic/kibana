@@ -15,8 +15,7 @@
       "routing": "",
       "timeout": "",
       "if_seq_no": "",
-      "if_primary_term": "",
-      "require_alias": "__flag__"
+      "if_primary_term": ""
     },
     "methods": [
       "POST"

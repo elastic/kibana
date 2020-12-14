@@ -6,8 +6,7 @@
       "decompress_definition": "__flag__",
       "from": 0,
       "size": 0,
-      "tags": [],
-      "for_export": "__flag__"
+      "tags": []
     },
     "methods": [
       "GET"

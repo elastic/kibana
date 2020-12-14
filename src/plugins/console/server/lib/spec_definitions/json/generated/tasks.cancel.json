@@ -3,8 +3,7 @@
     "url_params": {
       "nodes": [],
       "actions": [],
-      "parent_task_id": "",
-      "wait_for_completion": "__flag__"
+      "parent_task_id": ""
     },
     "methods": [
       "POST"

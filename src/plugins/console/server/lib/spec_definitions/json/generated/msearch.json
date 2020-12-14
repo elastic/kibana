@@ -20,7 +20,8 @@
     ],
     "patterns": [
       "_msearch",
-      "{indices}/_msearch"
+      "{indices}/_msearch",
+      "{indices}/{type}/_msearch"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
   }

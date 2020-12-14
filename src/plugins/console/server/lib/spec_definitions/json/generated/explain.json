@@ -22,7 +22,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_explain/{id}"
+      "{indices}/_explain/{id}",
+      "{indices}/{type}/{id}/_explain"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html"
   }
