@@ -18,7 +18,7 @@
  */
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import { ExpressionAstFunction } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 
@@ -37,7 +37,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
-  toExpressionAst?: (value: any) => ExpressionAstFunction | undefined;
+  toExpressionAst?: (value: any) => ExpressionAstExpression | undefined;
   options: any[];
   valueType?: any;
 

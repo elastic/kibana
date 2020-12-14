@@ -20,6 +20,7 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -329,6 +330,75 @@ describe('with compression', () => {
   });
 });
 
+describe('cors', () => {
+  describe('allowOrigin', () => {
+    it('list cannot be empty', () => {
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            allowOrigin: [],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0]: array size is [0], but cannot be smaller than [1]
+        - [cors.allowOrigin.1]: array size is [0], but cannot be smaller than [1]"
+      `);
+    });
+
+    it('list of valid URLs', () => {
+      const allowOrigin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      expect(
+        config.schema.validate({
+          cors: { allowOrigin },
+        }).cors.allowOrigin
+      ).toStrictEqual(allowOrigin);
+
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            allowOrigin: ['*://elastic.co/*'],
+          },
+        })
+      ).toThrow();
+    });
+
+    it('can be configured as "*" wildcard', () => {
+      expect(config.schema.validate({ cors: { allowOrigin: ['*'] } }).cors.allowOrigin).toEqual([
+        '*',
+      ]);
+    });
+
+    it('cannot mix wildcard "*" with valid URLs', () => {
+      expect(
+        () =>
+          config.schema.validate({ cors: { allowOrigin: ['*', 'https://elastic.co'] } }).cors
+            .allowOrigin
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0.0]: expected URI with scheme [http|https].
+        - [cors.allowOrigin.1.1]: expected value to equal [*]"
+      `);
+    });
+  });
+  describe('credentials', () => {
+    it('cannot use wildcard allowOrigin if "credentials: true"', () => {
+      expect(
+        () =>
+          config.schema.validate({ cors: { allowCredentials: true, allowOrigin: ['*'] } }).cors
+            .allowOrigin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+      expect(
+        () => config.schema.validate({ cors: { allowCredentials: true } }).cors.allowOrigin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
@@ -344,7 +414,7 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',

@@ -164,6 +164,35 @@ describe('LogEntry search strategy', () => {
 
     await expect(response.toPromise()).rejects.toThrowError(ResponseError);
   });
+
+  it('forwards cancellation to the underlying search strategy', async () => {
+    const esSearchStrategyMock = createEsSearchStrategyMock({
+      id: 'ASYNC_REQUEST_ID',
+      isRunning: false,
+      rawResponse: {
+        took: 1,
+        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
+        timed_out: false,
+        hits: { total: 0, max_score: 0, hits: [] },
+      },
+    });
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
+    const sourcesMock = createInfraSourcesMock();
+    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const mockDependencies = createSearchStrategyDependenciesMock();
+
+    const logEntrySearchStrategy = logEntrySearchStrategyProvider({
+      data: dataMock,
+      sources: sourcesMock,
+    });
+    const requestId = logEntrySearchRequestStateRT.encode({
+      esRequestId: 'ASYNC_REQUEST_ID',
+    });
+
+    await logEntrySearchStrategy.cancel?.(requestId, {}, mockDependencies);
+
+    expect(esSearchStrategyMock.cancel).toHaveBeenCalled();
+  });
 });
 
 const createSourceConfigurationMock = () => ({
@@ -208,6 +237,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
       return of(esSearchResponse);
     }
   }),
+  cancel: jest.fn().mockResolvedValue(undefined),
 });
 
 const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => ({
