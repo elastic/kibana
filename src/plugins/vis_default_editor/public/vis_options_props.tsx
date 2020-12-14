@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Vis, PersistedState } from 'src/plugins/visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { IAggConfigs } from 'src/plugins/data/public';
+import { PersistedState } from 'src/plugins/kibana_utils/public';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: IAggConfigs;

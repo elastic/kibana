@@ -20,7 +20,7 @@
 import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
-import { PersistedState } from '../../../../plugins/visualizations/public';
+import { PersistedState } from '../../../../plugins/kibana_utils/public';
 import { VisualizationController } from '../types';
 import { ResizeChecker } from '../../../../plugins/kibana_utils/public';
 import { ExprVis } from '../expressions/vis';

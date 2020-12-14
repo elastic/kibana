@@ -23,11 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import {
-  Vis,
-  PersistedState,
-  VisualizeEmbeddableContract,
-} from 'src/plugins/visualizations/public';
+import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import { PersistedState } from 'src/plugins/kibana_utils/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { DefaultEditorNavBar } from './navbar';

@@ -22,7 +22,7 @@ import React, { RefObject } from 'react';
 
 import { mountReactNode } from '../../../core/public/utils';
 import { ChartsPluginSetup } from '../../charts/public';
-import { PersistedState } from '../../visualizations/public';
+import { PersistedState } from '../../kibana_utils/public';
 import { IInterpreterRenderHandlers } from '../../expressions/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';

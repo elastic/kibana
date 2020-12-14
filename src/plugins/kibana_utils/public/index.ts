@@ -81,6 +81,8 @@ export { removeQueryParam, redirectWhenMissing, getQueryParams } from './history
 export { applyDiff } from './state_management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 
+export { PersistedState } from './persisted_state';
+
 /** dummy plugin, we just want kibanaUtils to have its own bundle */
 export function plugin() {
   return new (class KibanaUtilsPlugin {

@@ -31,7 +31,6 @@ interface Options {
 type CircularDepList = Set<string>;
 
 const allowedList: CircularDepList = new Set([
-  'src/plugins/charts -> src/plugins/expressions',
   'src/plugins/charts -> src/plugins/vis_default_editor',
   'src/plugins/data -> src/plugins/embeddable',
   'src/plugins/data -> src/plugins/expressions',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PersistedState } from 'src/plugins/visualizations/public';
+import { PersistedState } from 'src/plugins/kibana_utils/public';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**

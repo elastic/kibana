@@ -23,7 +23,7 @@ import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
-import { PersistedState } from '../../../../../visualizations/public';
+import { PersistedState } from '../../../../../kibana_utils/public';
 import { IInterpreterRenderHandlers } from '../../../../../expressions/public';
 
 import { getDataActions } from '../../../services';

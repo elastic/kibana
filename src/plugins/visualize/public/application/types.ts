@@ -20,13 +20,13 @@
 import { History } from 'history';
 import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
-  PersistedState,
   SavedVisState,
   VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
 } from 'src/plugins/visualizations/public';
+import { PersistedState } from 'src/plugins/kibana_utils/public';
 import {
   CoreStart,
   PluginInitializerContext,

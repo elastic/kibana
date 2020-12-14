@@ -21,7 +21,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { PersistedState } from 'src/plugins/visualizations/public';
+import { PersistedState } from 'src/plugins/kibana_utils/public';
 
 // @ts-expect-error
 import { ErrorComponent } from './error';

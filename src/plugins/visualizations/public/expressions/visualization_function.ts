@@ -19,7 +19,8 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VisResponseValue, PersistedState } from '../../../../plugins/visualizations/public';
+import { VisResponseValue } from '../../../../plugins/visualizations/public';
+import { PersistedState } from '../../../../plugins/kibana_utils/public';
 import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
 import { getTypes, getIndexPatterns, getFilterManager, getSearch } from '../services';
 

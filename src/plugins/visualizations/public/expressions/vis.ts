@@ -29,8 +29,8 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisParams, PersistedState } from '../../../../plugins/visualizations/public';
-
+import { VisParams } from '../../../../plugins/visualizations/public';
+import { PersistedState } from '../../../../plugins/kibana_utils/public';
 import { getTypes } from '../services';
 import { VisType } from '../vis_types';
 
