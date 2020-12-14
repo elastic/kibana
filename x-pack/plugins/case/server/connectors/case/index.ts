@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -73,6 +73,8 @@ async function executor(
     caseConfigureService,
     userActionService,
     alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as RequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
