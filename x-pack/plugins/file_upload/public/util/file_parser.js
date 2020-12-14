@@ -28,18 +28,12 @@ export const fileHandler = async ({
       return;
     }
 
-    let batches;
-    try {
-      batches = await loadInBatches(file, JSONLoader, {
-        json: {
-          jsonpaths: ['$.features'],
-          _rootObjectBatches: true,
-        },
-      });
-    } catch (e) {
-      reject(e);
-      return;
-    }
+    const batches = await loadInBatches(file, JSONLoader, {
+      json: {
+        jsonpaths: ['$.features'],
+        _rootObjectBatches: true,
+      },
+    });
 
     let featuresProcessed = 0;
     const features = [];

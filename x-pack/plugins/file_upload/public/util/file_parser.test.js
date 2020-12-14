@@ -84,7 +84,7 @@ describe('parse file', () => {
     await fileHandler({
       file: fileRef,
       setFileProgress,
-      cleanAndValidate: () => undefined, // Simulate clean and validate fail
+      cleanAndValidate: () => ({ not: 'the correct content' }), // Simulate clean and validate fail
       getFileParseActive,
     }).catch((e) => {
       expect(e.message).toMatch('Error, no features detected');
