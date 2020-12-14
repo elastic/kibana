@@ -55,6 +55,8 @@ export interface TimelineModel {
   activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
+  /** Timeline saved object owner */
+  createdBy?: string;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** Events to not be rendered **/
@@ -124,7 +126,7 @@ export interface TimelineModel {
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort;
+  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */

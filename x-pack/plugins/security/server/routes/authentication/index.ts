@@ -12,11 +12,11 @@ import { RouteDefinitionParams } from '..';
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineCommonRoutes(params);
 
-  if (params.authc.isProviderTypeEnabled('saml')) {
+  if (params.config.authc.sortedProviders.some(({ type }) => type === 'saml')) {
     defineSAMLRoutes(params);
   }
 
-  if (params.authc.isProviderTypeEnabled('oidc')) {
+  if (params.config.authc.sortedProviders.some(({ type }) => type === 'oidc')) {
     defineOIDCRoutes(params);
   }
 }

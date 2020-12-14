@@ -12,6 +12,7 @@ import {
   KibanaResponseFactory,
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { appContextService } from '../services';
 import {
   IngestManagerError,
@@ -50,6 +51,10 @@ interface LegacyESClientError {
 export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
   return error instanceof LegacyESErrors._Abstract;
 };
+
+export function isESClientError(error: unknown): error is ResponseError {
+  return error instanceof ResponseError;
+}
 
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
