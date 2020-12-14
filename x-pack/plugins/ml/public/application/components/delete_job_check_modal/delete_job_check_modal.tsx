@@ -72,7 +72,7 @@ function getModalContent(
       modalText: (
         <FormattedMessage
           id="xpack.ml.deleteJobCheckModal.modalTextNoAction"
-          defaultMessage="{ids} have different permissions. Jobs must have matching permissions in order to continue delete action."
+          defaultMessage="{ids} have different space permissions. When you delete multiple jobs, they must have the same permissions. De-select those jobs then re-try the deletion."
           values={{ ids: jobIds.join(', ') }}
         />
       ),
@@ -86,7 +86,7 @@ function getModalContent(
     modalText: (
       <FormattedMessage
         id="xpack.ml.deleteJobCheckModal.modalTextClose"
-        defaultMessage="{ids} cannot be deleted and cannot be removed from current space."
+        defaultMessage="{ids} cannot be deleted and cannot be removed from the current space."
         values={{ ids: jobIds.join(', ') }}
       />
     ),
@@ -239,7 +239,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
               <EuiModalHeaderTitle>
                 <FormattedMessage
                   id="xpack.ml.deleteJobCheckModal.modalTitle"
-                  defaultMessage="Checking spaces permissions"
+                  defaultMessage="Checking space permissions"
                 />
               </EuiModalHeaderTitle>
             </EuiModalHeader>
