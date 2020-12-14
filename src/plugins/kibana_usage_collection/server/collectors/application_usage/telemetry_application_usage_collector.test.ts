@@ -137,6 +137,8 @@ describe('telemetry_application_usage', () => {
 
     expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       appId: {
+        appId: 'appId',
+        viewId: 'main',
         clicks_total: total + 1 + 10,
         clicks_7_days: total + 1,
         clicks_30_days: total + 1,
@@ -145,6 +147,7 @@ describe('telemetry_application_usage', () => {
         minutes_on_screen_7_days: (total + 1) * 0.5,
         minutes_on_screen_30_days: (total + 1) * 0.5,
         minutes_on_screen_90_days: (total + 1) * 0.5,
+        views: [],
       },
     });
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledWith(
@@ -154,6 +157,7 @@ describe('telemetry_application_usage', () => {
           type: SAVED_OBJECTS_TOTAL_TYPE,
           attributes: {
             appId: 'appId',
+            viewId: 'main',
             minutesOnScreen: 10.5,
             numberOfClicks: 11,
           },
@@ -187,6 +191,26 @@ describe('telemetry_application_usage', () => {
                   numberOfClicks: 1,
                 },
               },
+              {
+                id: 'test-id-2',
+                attributes: {
+                  appId: 'appId',
+                  viewId: 'main',
+                  timestamp: new Date(0).toISOString(),
+                  minutesOnScreen: 2,
+                  numberOfClicks: 2,
+                },
+              },
+              {
+                id: 'test-id-3',
+                attributes: {
+                  appId: 'appId',
+                  viewId: 'viewId-1',
+                  timestamp: new Date(0).toISOString(),
+                  minutesOnScreen: 1,
+                  numberOfClicks: 1,
+                },
+              },
             ],
             total: 1,
           };
@@ -197,14 +221,30 @@ describe('telemetry_application_usage', () => {
 
     expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       appId: {
-        clicks_total: 1,
+        appId: 'appId',
+        viewId: 'main',
+        clicks_total: 3,
         clicks_7_days: 0,
         clicks_30_days: 0,
         clicks_90_days: 0,
-        minutes_on_screen_total: 0.5,
+        minutes_on_screen_total: 2.5,
         minutes_on_screen_7_days: 0,
         minutes_on_screen_30_days: 0,
         minutes_on_screen_90_days: 0,
+        views: [
+          {
+            appId: 'appId',
+            viewId: 'viewId-1',
+            clicks_total: 1,
+            clicks_7_days: 0,
+            clicks_30_days: 0,
+            clicks_90_days: 0,
+            minutes_on_screen_total: 1,
+            minutes_on_screen_7_days: 0,
+            minutes_on_screen_30_days: 0,
+            minutes_on_screen_90_days: 0,
+          },
+        ],
       },
     });
   });
