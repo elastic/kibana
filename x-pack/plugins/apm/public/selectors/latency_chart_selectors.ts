@@ -18,7 +18,7 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 interface LatencyChart {
-  latencyTimeseries?: TimeSeries<Coordinate>;
+  latencyTimeseries: Array<TimeSeries<Coordinate>>;
   mlJobId?: string;
   anomalyTimeseries?: {
     bounderies: TimeSeries;
@@ -37,7 +37,7 @@ export function getLatencyChartSelector({
 }): LatencyChart {
   if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
     return {
-      latencyTimeseries: undefined,
+      latencyTimeseries: [],
       mlJobId: undefined,
       anomalyTimeseries: undefined,
     };
@@ -70,42 +70,49 @@ function getLatencyTimeseries({
 
   switch (latencyAggregationType) {
     case 'avg': {
-      return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.averageLabel',
-          { defaultMessage: 'Average' }
-        ),
-        data: latencyTimeseries,
-        legendValue: asDuration(overallAvgDuration),
-        type: 'linemark',
-        color: theme.eui.euiColorVis1,
-      };
+      return [
+        {
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.averageLabel',
+            { defaultMessage: 'Average' }
+          ),
+          data: latencyTimeseries,
+          legendValue: asDuration(overallAvgDuration),
+          type: 'linemark',
+          color: theme.eui.euiColorVis1,
+        },
+      ];
     }
     case 'p95': {
-      return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.95thPercentileLabel',
-          { defaultMessage: '95th percentile' }
-        ),
-        titleShort: '95th',
-        data: latencyTimeseries,
-        type: 'linemark',
-        color: theme.eui.euiColorVis5,
-      };
+      return [
+        {
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.95thPercentileLabel',
+            { defaultMessage: '95th percentile' }
+          ),
+          titleShort: '95th',
+          data: latencyTimeseries,
+          type: 'linemark',
+          color: theme.eui.euiColorVis5,
+        },
+      ];
     }
     case 'p99': {
-      return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.99thPercentileLabel',
-          { defaultMessage: '99th percentile' }
-        ),
-        titleShort: '99th',
-        data: latencyTimeseries,
-        type: 'linemark',
-        color: theme.eui.euiColorVis7,
-      };
+      return [
+        {
+          title: i18n.translate(
+            'xpack.apm.transactions.latency.chart.99thPercentileLabel',
+            { defaultMessage: '99th percentile' }
+          ),
+          titleShort: '99th',
+          data: latencyTimeseries,
+          type: 'linemark',
+          color: theme.eui.euiColorVis7,
+        },
+      ];
     }
   }
+  return [];
 }
 
 function getAnnomalyTimeseries({

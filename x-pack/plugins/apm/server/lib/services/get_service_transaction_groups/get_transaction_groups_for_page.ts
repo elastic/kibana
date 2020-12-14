@@ -113,7 +113,10 @@ export async function getTransactionGroupsForPage({
 
       return {
         name: bucket.key as string,
-        latency: getLatencyValue(bucket.latency),
+        latency: getLatencyValue({
+          latencyAggregationType,
+          aggregation: bucket.latency,
+        }),
         throughput: bucket.transaction_count.value,
         errorRate,
       };

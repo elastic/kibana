@@ -75,6 +75,7 @@ export async function getServiceTransactionGroups({
       timeseriesData,
       start,
       end,
+      latencyAggregationType,
     }),
     totalTransactionGroups,
     isAggregationAccurate,

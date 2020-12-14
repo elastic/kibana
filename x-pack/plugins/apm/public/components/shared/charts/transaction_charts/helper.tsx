@@ -23,18 +23,10 @@ export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
   };
 }
 
-export function getMaxY(
-  timeSeries?: Array<TimeSeries<Coordinate>> | TimeSeries<Coordinate>
-) {
+export function getMaxY(timeSeries?: Array<TimeSeries<Coordinate>>) {
   if (timeSeries) {
-    const coordinates = Array.isArray(timeSeries)
-      ? timeSeries.flatMap((serie) => serie.data)
-      : timeSeries.data;
-
-    const numbers: number[] = coordinates.map((c: Coordinate) =>
-      c.y ? c.y : 0
-    );
-
+    const coordinates = timeSeries.flatMap((serie) => serie.data);
+    const numbers = coordinates.map((c) => (c.y ? c.y : 0));
     return Math.max(...numbers, 0);
   }
   return 0;

@@ -62,7 +62,7 @@ async function searchLatency({
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
+  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
 
@@ -85,9 +85,12 @@ async function searchLatency({
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
-          aggs: getLatencyAggregation(latencyAggregationType, field),
+          aggs: getLatencyAggregation(
+            latencyAggregationType,
+            transactionDurationField
+          ),
         },
-        overall_avg_duration: { avg: { field } },
+        overall_avg_duration: { avg: { field: transactionDurationField } },
       },
     },
   };
@@ -128,7 +131,13 @@ export async function getLatencyTimeseries({
       response.aggregations.overall_avg_duration.value || null,
     latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
       (bucket) => {
-        return { x: bucket.key, y: getLatencyValue(bucket.latency) };
+        return {
+          x: bucket.key,
+          y: getLatencyValue({
+            latencyAggregationType,
+            aggregation: bucket.latency,
+          }),
+        };
       }
     ),
   };

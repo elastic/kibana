@@ -8,9 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { LicenseContext } from '../../../../context/license/license_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -35,6 +35,7 @@ export function LatencyChart({ height }: Props) {
   const history = useHistory();
   const { urlParams } = useUrlParams();
   const { latencyAggregationType } = urlParams;
+  const license = useLicenseContext();
 
   const {
     latencyChartsData,
@@ -85,14 +86,10 @@ export function LatencyChart({ height }: Props) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LicenseContext.Consumer>
-              {(license) => (
-                <MLHeader
-                  hasValidMlLicense={license?.getFeature('ml').isAvailable}
-                  mlJobId={mlJobId}
-                />
-              )}
-            </LicenseContext.Consumer>
+            <MLHeader
+              hasValidMlLicense={license?.getFeature('ml').isAvailable}
+              mlJobId={mlJobId}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

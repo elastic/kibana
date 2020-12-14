@@ -44,7 +44,7 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   height?: number;
   onToggleLegend?: LegendItemListener;
-  timeseries?: TimeSeries[] | TimeSeries;
+  timeseries: TimeSeries[];
   /**
    * Formatter for y-axis tick values
    */
@@ -86,46 +86,15 @@ export function TimeseriesChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const data = Array.isArray(timeseries)
-    ? timeseries?.map((serie) => serie.data).flat()
-    : timeseries?.data;
-
-  const isEmpty = data
-    ? data.every(
-        ({ y }: { x?: number | null; y?: number | null }) =>
-          y === null || y === undefined
-      )
-    : true;
+  const isEmpty = timeseries
+    .map((serie) => serie.data)
+    .flat()
+    .every(
+      ({ y }: { x?: number | null; y?: number | null }) =>
+        y === null || y === undefined
+    );
 
   const annotationColor = theme.eui.euiColorSecondary;
-
-  function renderTimeseries() {
-    if (Array.isArray(timeseries)) {
-      return timeseries.map(renderChart);
-    }
-
-    if (timeseries) {
-      return renderChart(timeseries);
-    }
-  }
-
-  function renderChart(series: TimeSeries) {
-    const Series = series.type === 'area' ? AreaSeries : LineSeries;
-
-    return (
-      <Series
-        key={series.title}
-        id={series.title}
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        data={series.data}
-        color={series.color}
-        curve={CurveType.CURVE_MONOTONE_X}
-      />
-    );
-  }
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
@@ -187,7 +156,23 @@ export function TimeseriesChart({
           />
         )}
 
-        {renderTimeseries()}
+        {timeseries.map((serie) => {
+          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+
+          return (
+            <Series
+              key={serie.title}
+              id={serie.title}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={isEmpty ? [] : serie.data}
+              color={serie.color}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+          );
+        })}
 
         {anomalySeries?.bounderies && (
           <AreaSeries

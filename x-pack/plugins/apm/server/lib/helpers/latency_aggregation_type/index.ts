@@ -25,17 +25,26 @@ export function getLatencyAggregation(
   };
 }
 
-export function getLatencyValue(
+export function getLatencyValue({
+  latencyAggregationType,
+  aggregation,
+}: {
+  latencyAggregationType: LatencyAggregationType;
   aggregation:
     | { value: number | null }
-    | { values: Record<string, number | null> }
-) {
+    | { values: Record<string, number | null> };
+}) {
   if ('value' in aggregation) {
     return aggregation.value;
   }
   if ('values' in aggregation) {
-    const { '99.0': p99, '95.0': p95 } = aggregation.values;
-    return p99 ?? p95;
+    if (latencyAggregationType === LatencyAggregationType.p95) {
+      return aggregation.values['95.0'];
+    }
+
+    if (latencyAggregationType === LatencyAggregationType.p99) {
+      return aggregation.values['99.0'];
+    }
   }
 
   return null;
