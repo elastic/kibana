@@ -17,15 +17,23 @@ import { getEMSSettings } from '../../../kibana_services';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
 
+function getDescription() {
+  const emsSettings = getEMSSettings();
+  return i18n.translate('xpack.maps.source.emsTileDescription', {
+    defaultMessage: 'Tile map service from {host}',
+    values: {
+      host: emsSettings.isEMSUrlSet() ? emsSettings.getEMSRoot() : 'Elastic Maps Service',
+    },
+  });
+}
+
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();
     return emsSettings!.isEMSEnabled();
   },
-  description: i18n.translate('xpack.maps.source.emsTileDescription', {
-    defaultMessage: 'Tile map service from Elastic Maps Service',
-  }),
+  description: getDescription(),
   icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
