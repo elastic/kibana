@@ -34,6 +34,9 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
     return emsSettings.isIncludeElasticMapsService();
   },
   description: getDescription(),
+  disabledReason: i18n.translate('xpack.maps.source.emsTileDisabledReason', {
+    defaultMessage: 'Elastic Maps Server requires an Enterprise license',
+  }),
   icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {

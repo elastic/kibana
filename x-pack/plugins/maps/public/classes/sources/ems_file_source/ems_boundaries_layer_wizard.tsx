@@ -34,6 +34,13 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     return emsSettings.isIncludeElasticMapsService();
   },
   description: getDescription(),
+  disabledReason: i18n.translate('xpack.maps.source.emsFileDisabledReason', {
+    defaultMessage: 'Elastic Maps Server requires an Enterprise license',
+  }),
+  getIsDisabled: () => {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() && !emsSettings.hasOnPremLicense();
+  },
   icon: EMSBoundariesLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
