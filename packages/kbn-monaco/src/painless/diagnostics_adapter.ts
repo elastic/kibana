@@ -32,13 +32,16 @@ export class DiagnosticsAdapter {
   constructor(private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
-      model.onDidChangeContent(() => {
-        // Every time a new change is made, wait 500ms before validating
-        clearTimeout(handle);
-        handle = setTimeout(() => this.validate(model.uri), 500);
-      });
 
-      this.validate(model.uri);
+      if (model.getModeId() === ID) {
+        model.onDidChangeContent(() => {
+          // Every time a new change is made, wait 500ms before validating
+          clearTimeout(handle);
+          handle = setTimeout(() => this.validate(model.uri), 500);
+        });
+
+        this.validate(model.uri);
+      }
     };
     monaco.editor.onDidCreateModel(onModelAdd);
     monaco.editor.getModels().forEach(onModelAdd);
@@ -46,7 +49,7 @@ export class DiagnosticsAdapter {
 
   private async validate(resource: monaco.Uri): Promise<void> {
     const worker = await this.worker(resource);
-    const errorMarkers = await worker.getSyntaxErrors();
+    const errorMarkers = await worker.getSyntaxErrors(resource.toString());
 
     const model = monaco.editor.getModel(resource);
 

@@ -28,14 +28,16 @@ export class PainlessWorker {
     this._ctx = ctx;
   }
 
-  private getTextDocument(): string {
-    const model = this._ctx.getMirrorModels()[0];
-    return model.getValue();
+  private getTextDocument(modelUri: string): string | undefined {
+    const model = this._ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
+
+    return model?.getValue();
   }
 
-  public async getSyntaxErrors() {
-    const code = this.getTextDocument();
-    return parseAndGetSyntaxErrors(code);
+  public async getSyntaxErrors(modelUri: string) {
+    const code = this.getTextDocument(modelUri);
+
+    return code ? parseAndGetSyntaxErrors(code) : [];
   }
 
   public provideAutocompleteSuggestions(
