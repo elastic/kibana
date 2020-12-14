@@ -23,7 +23,8 @@ import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
-import { TimelineContainer } from './styles';
+import { HideShowContainer, TimelineContainer } from './styles';
+import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -58,6 +59,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -113,7 +115,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       )}
 
       <FlyoutHeaderPanel timelineId={timelineId} />
-      <FlyoutHeader timelineId={timelineId} />
+      <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeader timelineId={timelineId} />
+      </HideShowContainer>
 
       <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
     </TimelineContainer>
