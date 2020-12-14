@@ -359,6 +359,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
+      licenseService,
     });
 
     if (exceptionListsStartEnabled() && this.manifestTask) {
