@@ -18,15 +18,17 @@ export function injectActionParams({
   actionTypeId,
   actionParams,
 }: InjectActionParamsOpts) {
-  // Inject viewInKibanaPath and viewInKibanaText if action type is email.
-  // This is used by the email action type to inject a "View alert in Kibana" with a URL in the email's footer.
+  // Inject kibanaFooterLink if action type is email. This is used by the email action type
+  // to inject a "View alert in Kibana" with a URL in the email's footer.
   if (actionTypeId === '.email') {
     return {
       ...actionParams,
-      viewInKibanaPath: `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`,
-      viewInKibanaText: i18n.translate('xpack.alerts.injectActionParams.email.viewInKibanaText', {
-        defaultMessage: 'View alert in Kibana',
-      }),
+      kibanaFooterLink: {
+        path: `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`,
+        text: i18n.translate('xpack.alerts.injectActionParams.email.viewInKibanaText', {
+          defaultMessage: 'View alert in Kibana',
+        }),
+      },
     };
   }
 

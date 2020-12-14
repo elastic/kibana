@@ -103,10 +103,12 @@ const ParamsSchema = schema.object(
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
-    viewInKibanaPath: schema.string({ defaultValue: '/' }),
-    viewInKibanaText: schema.string({
-      defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
-        defaultMessage: 'Go to Kibana',
+    kibanaFooterLink: schema.object({
+      path: schema.string({ defaultValue: '/' }),
+      text: schema.string({
+        defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
+          defaultMessage: 'Go to Kibana',
+        }),
       }),
     }),
   },
@@ -187,8 +189,7 @@ async function executor(
 
   const footerMessage = getFooterMessage({
     publicBaseUrl,
-    viewInKibanaPath: params.viewInKibanaPath,
-    viewInKibanaText: params.viewInKibanaText,
+    kibanaFooterLink: params.kibanaFooterLink,
   });
 
   const sendEmailOptions: SendEmailOptions = {
@@ -250,13 +251,11 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
 }
 
 function getFooterMessage({
-  viewInKibanaPath,
-  viewInKibanaText,
   publicBaseUrl,
+  kibanaFooterLink,
 }: {
-  viewInKibanaPath: string;
-  viewInKibanaText: string;
   publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+  kibanaFooterLink: ActionParamsType['kibanaFooterLink'];
 }) {
   if (!publicBaseUrl) {
     return i18n.translate('xpack.actions.builtin.email.sentByKibanaMessage', {
@@ -265,10 +264,10 @@ function getFooterMessage({
   }
 
   return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
-    defaultMessage: 'This message was sent by Kibana. [{viewInKibanaText}]({link}).',
+    defaultMessage: 'This message was sent by Kibana. [{kibanaFooterLinkText}]({link}).',
     values: {
-      viewInKibanaText,
-      link: `${publicBaseUrl}${viewInKibanaPath === '/' ? '' : viewInKibanaPath}`,
+      kibanaFooterLinkText: kibanaFooterLink.text,
+      link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
     },
   });
 }

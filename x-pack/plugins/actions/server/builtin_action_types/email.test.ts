@@ -208,13 +208,15 @@ describe('params validation', () => {
       Object {
         "bcc": Array [],
         "cc": Array [],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Kibana",
+        },
         "message": "this is the message",
         "subject": "this is a test",
         "to": Array [
           "bob@example.com",
         ],
-        "viewInKibanaPath": "/",
-        "viewInKibanaText": "Go to Kibana",
       }
     `);
   });
@@ -248,8 +250,10 @@ describe('execute()', () => {
     bcc: ['jimmy@example.com'],
     subject: 'the subject',
     message: 'a message to you',
-    viewInKibanaPath: '/',
-    viewInKibanaText: 'Go to Kibana',
+    kibanaFooterLink: {
+      path: '/',
+      text: 'Go to Kibana',
+    },
   };
 
   const actionId = 'some-id';
@@ -413,8 +417,10 @@ describe('execute()', () => {
       ...executorOptions,
       params: {
         ...params,
-        viewInKibanaPath: '/my/app',
-        viewInKibanaText: 'View this in Kibana',
+        kibanaFooterLink: {
+          path: '/my/app',
+          text: 'View this in Kibana',
+        },
       },
     };
 

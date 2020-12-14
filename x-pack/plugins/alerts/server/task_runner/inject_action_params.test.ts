@@ -39,8 +39,10 @@ describe('injectActionParams', () => {
         "body": Object {
           "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
         },
-        "viewInKibanaPath": "/app/management/insightsAndAlerting/triggersActions/alert/1",
-        "viewInKibanaText": "View alert in Kibana",
+        "kibanaFooterLink": Object {
+          "path": "/app/management/insightsAndAlerting/triggersActions/alert/1",
+          "text": "View alert in Kibana",
+        },
       }
     `);
   });
