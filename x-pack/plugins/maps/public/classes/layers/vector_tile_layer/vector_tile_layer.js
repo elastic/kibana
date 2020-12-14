@@ -11,7 +11,9 @@ import { isRetina } from '../../../meta';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
-} from '../../../connected_components/mb_map/utils'; //todo move this implementation
+} from '../../../connected_components/mb_map/utils';
+import { getEMSSettings } from '../../../kibana_services';
+import { LICENSED_FEATURES } from '../../../licensed_features'; //todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   fill: ['fill-opacity'],
@@ -284,5 +286,10 @@ export class VectorTileLayer extends TileLayer {
 
   supportsLabelsOnTop() {
     return true;
+  }
+
+  async getLicensedFeatures() {
+    const emsSettings = getEMSSettings();
+    return emsSettings._isEMSUrlSet ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
