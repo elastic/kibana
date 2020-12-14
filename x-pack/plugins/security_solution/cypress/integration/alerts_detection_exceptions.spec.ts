@@ -16,7 +16,7 @@ import {
   goToOpenedAlerts,
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls';
+import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -34,9 +34,8 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 1;
-
 describe('Exceptions', () => {
+  const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
@@ -53,14 +52,7 @@ describe('Exceptions', () => {
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfInitialAlertsText) => {
-        cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
-          'eql',
-          NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-        );
-      });
+    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
   });
 
   afterEach(() => {
@@ -79,35 +71,20 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
       goToClosedAlerts();
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
 
       goToOpenedAlerts();
       waitForTheRuleToBeExecuted();
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
       goToExceptionsTab();
       removeException();
@@ -118,14 +95,7 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfAlertsAfterRemovingExceptionsText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
     });
   });
 
@@ -136,35 +106,20 @@ describe('Exceptions', () => {
       esArchiverLoad('auditbeat_for_exceptions2');
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
       goToClosedAlerts();
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
 
       goToOpenedAlerts();
       waitForTheRuleToBeExecuted();
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
       goToExceptionsTab();
       removeException();
@@ -174,14 +129,7 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .then((numberOfAlertsAfterRemovingExceptionsText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
     });
   });
 });

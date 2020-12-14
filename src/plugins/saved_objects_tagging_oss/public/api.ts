@@ -72,6 +72,13 @@ export type SavedObjectTagDecoratorTypeGuard = SavedObjectsTaggingApiUi['hasTagD
  */
 export interface SavedObjectsTaggingApiUi {
   /**
+   * Return a Tag from an ID
+   *
+   * @param tagId
+   */
+  getTag(tagId: string): Tag | undefined;
+
+  /**
    * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
    *
    * @param object

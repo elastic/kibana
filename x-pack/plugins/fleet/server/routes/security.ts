@@ -14,7 +14,12 @@ export function enforceSuperUser<T1, T2, T3>(
     const security = appContextService.getSecurity();
     const user = security.authc.getCurrentUser(req);
     if (!user) {
-      return res.unauthorized();
+      return res.forbidden({
+        body: {
+          message:
+            'Access to Fleet API require the superuser role, and for stack security features to be enabled.',
+        },
+      });
     }
 
     const userRoles = user.roles || [];
