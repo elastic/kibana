@@ -617,6 +617,10 @@ export class DataVisualizer {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
+      } else if (datafeedConfig?.runtime_mappings?.hasOwnProperty(field)) {
+        cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
+          cardinality: { script: datafeedConfig?.runtime_mappings[field].script },
+        };
       } else {
         cardinalityField = {
           cardinality: { field },
@@ -670,7 +674,10 @@ export class DataVisualizer {
           },
         });
       } else {
-        if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+        if (
+          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
+          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+        ) {
           const cardinality = get(
             aggregations,
             [...aggsPath, `${safeFieldName}_cardinality`, 'value'],

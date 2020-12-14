@@ -57,6 +57,12 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         aggregatableFields.push(fieldName);
       }
       if (
+        typeof datafeedConfig?.runtime_mappings === 'object' &&
+        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
         datafeedAggregations !== undefined &&
         isValidAggregationField(datafeedAggregations, fieldName)
       ) {
@@ -140,6 +146,11 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
           datafeedConfig.script_fields.hasOwnProperty(field)
         ) {
           obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else if (
+          typeof datafeedConfig?.runtime_mappings === 'object' &&
+          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.runtime_mappings[field].script } };
         } else {
           obj[field] = { cardinality: { field } };
         }
