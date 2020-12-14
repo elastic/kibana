@@ -46,9 +46,9 @@ export class DiagnosticsAdapter {
         });
 
         model.onDidChangeLanguage(({ newLanguage }) => {
-          // Reset the model markers if the language ID has changed and is no longer painless
+          // Reset the model markers if the language ID has changed and is no longer "painless"
           if (newLanguage !== ID) {
-            return monaco.editor.setModelMarkers(model!, ID, []);
+            return monaco.editor.setModelMarkers(model, ID, []);
           }
         });
 
