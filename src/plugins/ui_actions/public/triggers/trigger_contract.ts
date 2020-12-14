@@ -49,7 +49,7 @@ export class TriggerContract<T extends TriggerId> {
   /**
    * Use this method to execute action attached to this trigger.
    */
-  public readonly exec = async (context: TriggerContextMapping[T]) => {
-    await this.internal.execute(context);
+  public readonly exec = async (context: TriggerContextMapping[T], alwaysShowPopup?: boolean) => {
+    await this.internal.execute(context, alwaysShowPopup);
   };
 }
