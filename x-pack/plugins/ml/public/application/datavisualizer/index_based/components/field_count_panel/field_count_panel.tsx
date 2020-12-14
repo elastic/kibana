@@ -33,56 +33,19 @@ export const FieldCountPanel: FC<Props> = ({
       style={{ marginLeft: 5 }}
       data-test-subj="mlDataVisualizerFieldCountPanel"
     >
-      {metricsStats && (
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          style={{ maxWidth: 200 }}
-          data-test-subj="mlDataVisualizerMetricFieldsSummary"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.dataVisualizer.searchPanel.metricsLabel"
-                  defaultMessage="Metrics"
-                />
-              </h5>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge
-              color="subdued"
-              size="m"
-              data-test-subj="mlDataVisualizerVisibleMetricFieldsCount"
-            >
-              <strong>{metricsStats.visibleMetricFields}</strong>
-            </EuiNotificationBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerMetricFieldsCount">
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                defaultMessage="of {totalCount} total"
-                values={{ totalCount: metricsStats.totalMetricFields }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
       {fieldsCountStats && (
         <EuiFlexGroup
           gutterSize="s"
           alignItems="center"
-          style={{ maxWidth: 200 }}
+          style={{ maxWidth: 250 }}
           data-test-subj="mlDataVisualizerFieldsSummary"
         >
           <EuiFlexItem grow={false}>
             <EuiText>
               <h5>
                 <FormattedMessage
-                  id="xpack.ml.dataVisualizer.searchPanel.fieldsLabel"
-                  defaultMessage="Fields"
+                  id="xpack.ml.dataVisualizer.searchPanel.allFieldsLabel"
+                  defaultMessage="All fields"
                 />
               </h5>
             </EuiText>
@@ -103,6 +66,44 @@ export const FieldCountPanel: FC<Props> = ({
                 id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
                 defaultMessage="of {totalCount} total"
                 values={{ totalCount: fieldsCountStats.totalFieldsCount }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
+      {metricsStats && (
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          style={{ maxWidth: 250 }}
+          data-test-subj="mlDataVisualizerMetricFieldsSummary"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.ml.dataVisualizer.searchPanel.numberFieldsLabel"
+                  defaultMessage="Number fields"
+                />
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiNotificationBadge
+              color="subdued"
+              size="m"
+              data-test-subj="mlDataVisualizerVisibleMetricFieldsCount"
+            >
+              <strong>{metricsStats.visibleMetricFields}</strong>
+            </EuiNotificationBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerMetricFieldsCount">
+              <FormattedMessage
+                id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
+                defaultMessage="of {totalCount} total"
+                values={{ totalCount: metricsStats.totalMetricFields }}
               />
             </EuiText>
           </EuiFlexItem>
