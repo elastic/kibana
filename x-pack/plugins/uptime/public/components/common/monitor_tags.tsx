@@ -5,14 +5,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
 import { Ping } from '../../../common/runtime_types/ping';
 import { MonitorSummary } from '../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../hooks/use_filter_update';
 import { useGetUrlParams } from '../../hooks';
 import { parseCurrentFilters } from '../overview/monitor_list/columns/monitor_name_col';
 import { EXPAND_TAGS_LABEL } from '../overview/monitor_list/columns/translations';
+import { OVERVIEW_ROUTE } from '../../../common/constants';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   ping?: Ping | null;
@@ -42,7 +45,14 @@ const getFilterLabel = (tag: string) => {
 };
 
 export const MonitorTags = ({ ping, summary }: Props) => {
+  const history = useHistory();
+
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   const [toDisplay, setToDisplay] = useState(5);
+
   let tags: string[];
 
   if (summary) {
@@ -63,7 +73,14 @@ export const MonitorTags = ({ ping, summary }: Props) => {
   useFilterUpdate('tags', filterType);
 
   if (tags.length === 0) {
-    return null;
+    return summary ? null : (
+      <EuiLink
+        href={docLinks?.links.heartbeat.base + '/monitor-options.html#monitor-tags'}
+        target="_blank"
+      >
+        Set tags
+      </EuiLink>
+    );
   }
 
   return (
@@ -85,7 +102,16 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             {tag}
           </EuiBadge>
         ) : (
-          <EuiBadge key={tag} color="hollow" className="eui-textTruncate" style={{ maxWidth: 120 }}>
+          <EuiBadge
+            key={tag}
+            color="hollow"
+            className="eui-textTruncate"
+            style={{ maxWidth: 120 }}
+            href={history.createHref({
+              pathname: OVERVIEW_ROUTE,
+              search: `filters=[["tags",["secure"]]]`,
+            })}
+          >
             {tag}
           </EuiBadge>
         )

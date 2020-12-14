@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { shallowWithIntl } from '@kbn/test/jest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { MemoryRouter } from 'react-router-dom';
 import { MonitorTags } from '../monitor_tags';
 import * as hooks from '../../../hooks/use_url_params';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
 
 describe('MonitorTags component', () => {
   const summaryPing = {
@@ -142,38 +141,26 @@ describe('MonitorTags component', () => {
   });
 
   it('render against summary', () => {
-    const component = shallowWithIntl(<MonitorTags summary={summaryPing} />);
+    const component = shallowWithRouter(<MonitorTags summary={summaryPing} />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders against ping', () => {
-    const component = shallowWithIntl(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
+    const component = shallowWithRouter(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
     expect(component).toMatchSnapshot();
   });
 
   it('it shows expand tag on too many tags', () => {
     summaryPing.state.summaryPings[0].tags = ['red', 'green', 'blue', 'black', 'purple', 'yellow'];
-    const component = shallowWithIntl(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
+    const component = renderWithRouter(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
     expect(component).toMatchSnapshot();
-
-    const tags = component.find(EuiBadge);
+    const tags = component.find('.euiBadge');
     expect(tags).toHaveLength(6);
-    const expandTag = tags.get(5);
-    expect(expandTag).toMatchInlineSnapshot(`
-      <EuiBadge
-        color="hollow"
-        onClick={[Function]}
-        onClickAriaLabel="Click to view remaining tags"
-      >
-        +
-        1
-      </EuiBadge>
-    `);
   });
 
   it('expand tag show tags on click', () => {
     summaryPing.state.summaryPings[0].tags = ['red', 'green', 'blue', 'black', 'purple', 'yellow'];
-    render(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
+    render(<MonitorTags ping={summaryPing.state.summaryPings[0]} />, { wrapper: MemoryRouter });
 
     fireEvent.click(screen.getByText('+1'));
 
