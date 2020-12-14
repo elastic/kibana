@@ -40,6 +40,7 @@ export const VisualizeListing = () => {
     services: {
       application,
       chrome,
+      dashboard,
       history,
       savedVisualizations,
       toastNotifications,
@@ -179,9 +180,11 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      <div className="visListingCallout">
-        <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-      </div>
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+        <div className="visListingCallout">
+          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+        </div>
+      )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them

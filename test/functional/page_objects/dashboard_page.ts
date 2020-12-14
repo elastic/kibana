@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
-
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
@@ -136,15 +134,23 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
-      await this.expectExistsDashboardLandingPage();
+      await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
-    public async gotoDashboardLandingPage() {
+    public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
         await this.clickDashboardBreadcrumbLink();
+        await retry.try(async () => {
+          const warning = await testSubjects.exists('confirmModalTitleText');
+          if (warning) {
+            await testSubjects.click(
+              ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+            );
+          }
+        });
+        await this.expectExistsDashboardLandingPage();
       }
     }
 

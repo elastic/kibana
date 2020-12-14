@@ -38,6 +38,8 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       return testSubjects.setValue('intervalInput', value);
     },
     async setAlertThrottleInterval(value: string) {
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
       return testSubjects.setValue('throttleInput', value);
     },
     async setAlertExpressionValue(
