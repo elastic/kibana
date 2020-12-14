@@ -28,19 +28,16 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 ) => {
   const http = coreStart.http;
   const licensing = depsStart.licensing;
-  let didSubscribeLicensing = false;
+  let didGetLicense = false;
 
   return ({ getState, dispatch }) => (next) => async (action) => {
-    if (!didSubscribeLicensing) {
-      didSubscribeLicensing = true;
-      licensing.license$.subscribe((newLicense) => {
-        // populate changes in the store
-        dispatch({
-          type: 'licenseChanged',
-          payload: newLicense,
-        });
+    if (!didGetLicense) {
+      didGetLicense = true;
+      const license = await licensing.refresh();
+      dispatch({
+        type: 'licenseChanged',
+        payload: license,
       });
-      await licensing.refresh(); // trigger immediately
     }
 
     next(action);
