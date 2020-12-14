@@ -233,6 +233,8 @@ Sometimes documents have no data for the field inspected: *Lens* shows an "Other
 [role="screenshot"]
 image::images/lens_data_info_other.png[Data summary window with Other]
 
+NOTE: because the distribution is based on single values, the sum of all the entries and "Other" may be above 100%, because entries in array values are counted as distinct values.
+
 [float]
 [[change-the-visualization-type]]
 ==== Change the visualization type
