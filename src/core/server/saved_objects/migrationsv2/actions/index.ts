@@ -433,19 +433,20 @@ export const verifyReindex = (
   RetryableEsClientError | { type: 'verify_reindex_failed' },
   'verify_reindex_succeeded'
 > => () => {
-  return client.cat
-    .indices<[{ index: string; 'docs.count': string }]>(
-      { index: [sourceIndex, targetIndex], format: 'json' },
-      { maxRetries: 0 }
-    )
-    .then(({ body }) => {
-      const sourceIndexEntry = body.find((entry) => entry.index === sourceIndex);
-      const targetIndexEntry = body.find((entry) => entry.index === targetIndex);
-      if (
-        targetIndexEntry != null &&
-        sourceIndexEntry != null &&
-        targetIndexEntry['docs.count'] >= sourceIndexEntry['docs.count']
-      ) {
+  const count = (index: string) =>
+    client
+      .count<{ count: number }>({
+        index,
+        // Return an error when targeting missing or closed indices
+        allow_no_indices: false,
+      })
+      .then((res) => {
+        return res.body.count;
+      });
+
+  return Promise.all([count(sourceIndex), count(targetIndex)])
+    .then(([sourceCount, targetCount]) => {
+      if (targetCount >= sourceCount) {
         return Either.right('verify_reindex_succeeded' as const);
       } else {
         return Either.left({ type: 'verify_reindex_failed' as const });
@@ -735,6 +736,8 @@ export const searchForOutdatedDocuments = (
       body: {
         query,
       },
+      // Return an error when targeting missing or closed indices
+      allow_no_indices: false,
       // Don't return partial results if timeouts or shard failures are
       // encountered. This is important because 0 search hits is interpreted as
       // there being no more outdated documents left that require
