@@ -14,7 +14,7 @@ export interface Props {
 
 export const SwatchLabel = ({ label, color }: Props) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiColorPickerSwatch color={color} />
       </EuiFlexItem>

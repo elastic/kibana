@@ -27,7 +27,7 @@ export const PalettePreview = ({ steps, palette, reverse }: Props) => {
 };
 
 const Swatch = euiStyled.div`
-  width: 16px;
+  width: 15px;
   height: 12px;
   flex: 0 0 auto;
   &:first-child {

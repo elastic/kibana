@@ -218,7 +218,7 @@ export const LegendControls = ({
             <EuiRange
               id="steps"
               min={2}
-              max={20}
+              max={18}
               step={1}
               value={draftLegend.steps}
               onChange={handleStepsChange}
@@ -240,6 +240,10 @@ export const LegendControls = ({
               checked={draftLegend.reverseColors}
               onChange={handleReverseColors}
               compressed
+              style={{
+                position: 'relative',
+                top: '8px',
+              }}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -256,6 +260,10 @@ export const LegendControls = ({
               checked={draftAuto}
               onChange={handleAutoChange}
               compressed
+              style={{
+                position: 'relative',
+                top: '8px',
+              }}
             />
           </EuiFormRow>
           <EuiFormRow
