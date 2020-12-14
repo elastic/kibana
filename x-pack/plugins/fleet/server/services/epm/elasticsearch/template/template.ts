@@ -53,7 +53,7 @@ export function getTemplate({
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
-  hidden?: boolean | false;
+  hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
     type,
@@ -263,7 +263,7 @@ function getBaseTemplate(
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
-  hidden?: boolean | false
+  hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
