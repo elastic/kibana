@@ -19,7 +19,6 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import {
@@ -29,7 +28,7 @@ import {
 import { LicenseProvider } from '../context/license/license_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
@@ -66,38 +65,29 @@ function App() {
 
 export function ApmAppRoot({
   apmPluginContextValue,
+  startDeps,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
+  startDeps: ApmPluginStartDeps;
 }) {
-  const { appMountParameters, core, plugins } = apmPluginContextValue;
+  const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <AlertsContextProvider
-          value={{
-            http: core.http,
-            docLinks: core.docLinks,
-            capabilities: core.application.capabilities,
-            toastNotifications: core.notifications.toasts,
-            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
-          }}
-        >
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <i18nCore.Context>
-              <Router history={history}>
-                <UrlParamsProvider>
-                  <LicenseProvider>
-                    <App />
-                  </LicenseProvider>
-                </UrlParamsProvider>
-              </Router>
-            </i18nCore.Context>
-          </KibanaContextProvider>
-        </AlertsContextProvider>
+        <KibanaContextProvider services={{ ...core, ...startDeps }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LicenseProvider>
+                  <App />
+                </LicenseProvider>
+              </UrlParamsProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </RedirectAppLinks>
   );
@@ -111,7 +101,8 @@ export const renderApp = (
   core: CoreStart,
   setupDeps: ApmPluginSetupDeps,
   appMountParameters: AppMountParameters,
-  config: ConfigSchema
+  config: ConfigSchema,
+  startDeps: ApmPluginStartDeps
 ) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
@@ -133,7 +124,10 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <ApmAppRoot apmPluginContextValue={apmPluginContextValue} />,
+    <ApmAppRoot
+      apmPluginContextValue={apmPluginContextValue}
+      startDeps={startDeps}
+    />,
     element
   );
   return () => {

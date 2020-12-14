@@ -10,7 +10,6 @@ import React, { forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
-import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { SecurityPageName } from '../../../app/types';
@@ -54,7 +53,7 @@ const FlexGroup = styled(EuiFlexGroup)<{ $hasSibling: boolean }>`
     margin-bottom: 1px;
     padding-bottom: 4px;
     padding-left: ${theme.eui.paddingSizes.l};
-    padding-right: ${gutterTimeline};
+    padding-right: ${theme.eui.paddingSizes.l};
     ${$hasSibling ? `border-bottom: ${theme.eui.euiBorderThin};` : 'border-bottom-width: 0px;'}
   `}
 `;
@@ -64,11 +63,12 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
   isFixed?: boolean;
 }
+
 export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(
     ({ hideDetectionEngine = false, isFixed = true }, ref) => {
       const { globalHeaderPortalNode } = useGlobalHeaderPortal();
-      const { globalFullScreen } = useFullScreen();
+      const { globalFullScreen, timelineFullScreen } = useFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
       const { navigateToApp } = application;
@@ -82,7 +82,7 @@ export const HeaderGlobal = React.memo(
       );
       return (
         <Wrapper ref={ref} $isFixed={isFixed}>
-          <WrapperContent $globalFullScreen={globalFullScreen}>
+          <WrapperContent $globalFullScreen={globalFullScreen ?? timelineFullScreen}>
             <FlexGroup
               alignItems="center"
               $hasSibling={globalHeaderPortalNode.hasChildNodes()}
@@ -129,8 +129,8 @@ export const HeaderGlobal = React.memo(
                 </EuiFlexGroup>
               </FlexItem>
             </FlexGroup>
-            <OutPortal node={globalHeaderPortalNode} />
           </WrapperContent>
+          <OutPortal node={globalHeaderPortalNode} />
         </Wrapper>
       );
     }

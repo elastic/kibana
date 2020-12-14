@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagAttributes } from '../../../common/types';
-import { savedObjectToTag } from '../../tags';
+import { savedObjectToTag } from '../../services/tags';
 import { addConnectionCount } from '../lib';
 
 export const registerInternalFindTagsRoute = (router: IRouter) => {

@@ -133,6 +133,12 @@ export class DocLinksService {
           dashboardSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
           visualizationSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-visualization-settings`,
         },
+        ml: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
+          anomalyDetection: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/xpack-ml.html`,
+          anomalyDetectionJobs: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`,
+          dataFrameAnalytics: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`,
+        },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
@@ -242,6 +248,12 @@ export interface DocLinksStart {
       readonly dateMath: string;
     };
     readonly management: Record<string, string>;
+    readonly ml: {
+      readonly guide: string;
+      readonly anomalyDetection: string;
+      readonly anomalyDetectionJobs: string;
+      readonly dataFrameAnalytics: string;
+    };
     readonly visualize: Record<string, string>;
   };
 }

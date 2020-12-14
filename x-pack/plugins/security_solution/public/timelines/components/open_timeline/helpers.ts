@@ -38,12 +38,15 @@ import {
   setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
 } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  TimelineModel,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -105,21 +108,20 @@ const parseString = (params: string) => {
   }
 };
 
-const setTimelineColumn = (col: ColumnHeaderResult) => {
-  const timelineCols: ColumnHeaderOptions = {
-    ...col,
-    columnHeaderType: defaultColumnHeaderType,
-    id: col.id != null ? col.id : 'unknown',
-    placeholder: col.placeholder != null ? col.placeholder : undefined,
-    category: col.category != null ? col.category : undefined,
-    description: col.description != null ? col.description : undefined,
-    example: col.example != null ? col.example : undefined,
-    type: col.type != null ? col.type : undefined,
-    aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-    width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
-  };
-  return timelineCols;
-};
+const setTimelineColumn = (col: ColumnHeaderResult) =>
+  Object.entries(col).reduce<ColumnHeaderOptions>(
+    (acc, [key, value]) => {
+      if (key !== 'id' && value != null) {
+        return { ...acc, [key]: value };
+      }
+      return acc;
+    },
+    {
+      columnHeaderType: defaultColumnHeaderType,
+      id: col.id != null ? col.id : 'unknown',
+      width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+    }
+  );
 
 const setTimelineFilters = (filter: FilterTimelineResult) => ({
   $state: {
@@ -309,6 +311,7 @@ export const formatTimelineResultToModel = (
 };
 
 export interface QueryTimelineById<TCache> {
+  activeTimelineTab?: TimelineTabs;
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
@@ -327,6 +330,7 @@ export interface QueryTimelineById<TCache> {
 }
 
 export const queryTimelineById = <TCache>({
+  activeTimelineTab = TimelineTabs.query,
   apolloClient,
   duplicate = false,
   graphEventId = '',
@@ -370,6 +374,7 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              activeTab: activeTimelineTab,
               graphEventId,
               show: openTimeline,
               dateRange: { start: from, end: to },
@@ -425,15 +430,6 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
     dispatch(
-      dispatchSetKqlFilterQueryDraft({
-        id,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-        },
-      })
-    );
-    dispatch(
       dispatchApplyKqlFilterQuery({
         id,
         filterQuery: {
@@ -448,8 +444,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   }
 
   if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const getNewNoteId = (): string => uuid.v4();
-    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    const newNote = createNote({ newNote: ruleNote });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
@@ -467,6 +462,8 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
                 user: note.updatedBy || 'unknown',
                 saveObjectId: note.noteId,
                 version: note.version,
+                eventId: note.eventId ?? null,
+                timelineId: note.timelineId ?? null,
               }))
             : [],
       })

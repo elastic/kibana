@@ -19,7 +19,7 @@ import {
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
@@ -213,7 +213,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
-  const { indexNames, previousIndexNames } = useShallowEqualSelector<{
+  const { indexNames, previousIndexNames } = useDeepEqualSelector<{
     indexNames: string[];
     previousIndexNames: string;
   }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));

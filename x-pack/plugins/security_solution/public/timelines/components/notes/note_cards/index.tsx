@@ -5,14 +5,15 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { Note } from '../../../../common/lib/note';
+import { appSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { AddNote } from '../add_note';
-import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
-import { NoteCard } from '../note_card';
-import { TimelineStatusLiteral } from '../../../../../common/types/timeline';
+import { AssociateNote } from '../helpers';
+import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';
+import { TimelineResultNote } from '../../open_timeline/types';
 
 const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
@@ -22,22 +23,16 @@ const NoteContainer = styled.div`
 `;
 NoteContainer.displayName = 'NoteContainer';
 
-interface NoteCardsCompProps {
-  children: React.ReactNode;
-}
 const NoteCardsCompContainer = styled(EuiPanel)`
   border: none;
   background-color: transparent;
   box-shadow: none;
+
+  &.euiPanel--plain {
+    background-color: transparent;
+  }
 `;
 NoteCardsCompContainer.displayName = 'NoteCardsCompContainer';
-
-const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
-  <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
-    {children}
-  </NoteCardsCompContainer>
-));
-NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   margin-bottom: 5px;
@@ -46,27 +41,16 @@ NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
   associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  getNewNoteId: GetNewNoteId;
   noteIds: string[];
   showAddNote: boolean;
-  status: TimelineStatusLiteral;
   toggleShowAddNote: () => void;
-  updateNote: UpdateNote;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({
-    associateNote,
-    getNotesByIds,
-    getNewNoteId,
-    noteIds,
-    showAddNote,
-    status,
-    toggleShowAddNote,
-    updateNote,
-  }) => {
+  ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
+    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
+    const notesById = useDeepEqualSelector(getNotesByIds);
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -77,31 +61,39 @@ export const NoteCards = React.memo<Props>(
       [associateNote, toggleShowAddNote]
     );
 
+    const notes: TimelineResultNote[] = useMemo(
+      () =>
+        appSelectors.getNotes(notesById, noteIds).map((note) => ({
+          savedObjectId: note.saveObjectId,
+          note: note.note,
+          noteId: note.id,
+          updated: (note.lastEdit ?? note.created).getTime(),
+          updatedBy: note.user,
+        })),
+      [notesById, noteIds]
+    );
+
     return (
-      <NoteCardsComp>
-        {noteIds.length ? (
-          <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-            {getNotesByIds(noteIds).map((note) => (
-              <NoteContainer data-test-subj="note-container" key={note.id}>
-                <NoteCard created={note.created} rawNote={note.note} user={note.user} />
-              </NoteContainer>
-            ))}
-          </NotesContainer>
+      <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
+        {notes.length ? (
+          <NotePreviewsContainer data-test-subj="note-previews-container">
+            <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
+              <NotePreviews notes={notes} />
+            </NotesContainer>
+          </NotePreviewsContainer>
         ) : null}
 
         {showAddNote ? (
           <AddNoteContainer data-test-subj="add-note-container">
             <AddNote
               associateNote={associateNoteAndToggleShow}
-              getNewNoteId={getNewNoteId}
               newNote={newNote}
               onCancelAddNote={toggleShowAddNote}
               updateNewNote={setNewNote}
-              updateNote={updateNote}
             />
           </AddNoteContainer>
         ) : null}
-      </NoteCardsComp>
+      </NoteCardsCompContainer>
     );
   }
 );

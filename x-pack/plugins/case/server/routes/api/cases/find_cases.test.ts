@@ -38,6 +38,10 @@ describe('FIND all cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
+    // mockSavedObjectsRepository do not support filters and returns all cases every time.
+    expect(response.payload.count_open_cases).toEqual(4);
+    expect(response.payload.count_closed_cases).toEqual(4);
+    expect(response.payload.count_in_progress_cases).toEqual(4);
   });
 
   it(`has proper connector id on cases with configured connector`, async () => {

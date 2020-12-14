@@ -112,6 +112,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
   } = props;
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
+  const setStateWrapper = (layer: IndexPatternLayer) => {
+    setState(mergeLayer({ state, layerId, newLayer: layer }), Boolean(layer.columns[columnId]));
+  };
+
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
@@ -199,13 +203,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             // Clear invalid state because we are reseting to a valid column
             if (selectedColumn?.operationType === operationType) {
               if (incompleteInfo) {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: resetIncomplete(state.layers[layerId], columnId),
-                  })
-                );
+                setStateWrapper(resetIncomplete(state.layers[layerId], columnId));
               }
               return;
             }
@@ -215,38 +213,30 @@ export function DimensionEditor(props: DimensionEditorProps) {
               columnId,
               op: operationType,
             });
-            setState(mergeLayer({ state, layerId, newLayer }));
+            setStateWrapper(newLayer);
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || new Set();
 
             if (possibleFields.size === 1) {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: insertOrReplaceColumn({
-                    layer: props.state.layers[props.layerId],
-                    indexPattern: currentIndexPattern,
-                    columnId,
-                    op: operationType,
-                    field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
-                  }),
+              setStateWrapper(
+                insertOrReplaceColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: operationType,
+                  field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
                 })
               );
             } else {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: insertOrReplaceColumn({
-                    layer: props.state.layers[props.layerId],
-                    indexPattern: currentIndexPattern,
-                    columnId,
-                    op: operationType,
-                    field: undefined,
-                  }),
+              setStateWrapper(
+                insertOrReplaceColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: operationType,
+                  field: undefined,
                 })
               );
             }
@@ -256,13 +246,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           if (selectedColumn.operationType === operationType) {
             if (incompleteInfo) {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: resetIncomplete(state.layers[layerId], columnId),
-                })
-              );
+              setStateWrapper(resetIncomplete(state.layers[layerId], columnId));
             }
             return;
           }
@@ -276,7 +260,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
           });
-          setState(mergeLayer({ state, layerId, newLayer }));
+          setStateWrapper(newLayer);
         },
       };
     }
@@ -366,26 +350,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onDeleteColumn={() => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: deleteColumn({ layer: state.layers[layerId], columnId }),
-                  })
-                );
+                setStateWrapper(deleteColumn({ layer: state.layers[layerId], columnId }));
               }}
               onChoose={(choice) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: insertOrReplaceColumn({
-                      layer: state.layers[layerId],
-                      columnId,
-                      indexPattern: currentIndexPattern,
-                      op: choice.operationType,
-                      field: currentIndexPattern.getFieldByName(choice.field),
-                    }),
+                setStateWrapper(
+                  insertOrReplaceColumn({
+                    layer: state.layers[layerId],
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                    op: choice.operationType,
+                    field: currentIndexPattern.getFieldByName(choice.field),
                   })
                 );
               }}
@@ -398,9 +372,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             selectedColumn={selectedColumn}
             columnId={columnId}
             layer={state.layers[layerId]}
-            updateLayer={(newLayer: IndexPatternLayer) =>
-              setState(mergeLayer({ layerId, state, newLayer }))
-            }
+            updateLayer={setStateWrapper}
           />
         )}
 

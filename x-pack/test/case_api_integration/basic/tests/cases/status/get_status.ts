@@ -23,6 +23,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return case statuses', async () => {
       await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+
+      const { body: inProgressCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq);
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -43,6 +49,20 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: inProgressCase.id,
+              version: inProgressCase.version,
+              status: 'in-progress',
+            },
+          ],
+        })
+        .expect(200);
+
       const { body } = await supertest
         .get(CASE_STATUS_URL)
         .set('kbn-xsrf', 'true')
@@ -52,6 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body).to.eql({
         count_open_cases: 1,
         count_closed_cases: 1,
+        count_in_progress_cases: 1,
       });
     });
   });

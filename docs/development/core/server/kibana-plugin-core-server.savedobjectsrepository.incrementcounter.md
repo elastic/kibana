@@ -4,12 +4,12 @@
 
 ## SavedObjectsRepository.incrementCounter() method
 
-Increments all the specified counter fields by one. Creates the document if one doesn't exist for the given id.
+Increments all the specified counter fields (by one by default). Creates the document if one doesn't exist for the given id.
 
 <b>Signature:</b>
 
 ```typescript
-incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: strin
 |  --- | --- | --- |
 |  type | <code>string</code> | The type of saved object whose fields should be incremented |
 |  id | <code>string</code> | The id of the document whose fields should be incremented |
-|  counterFieldNames | <code>string[]</code> | An array of field names to increment |
+|  counterFields | <code>Array&lt;string &#124; SavedObjectsIncrementCounterField&gt;</code> | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
 |  options | <code>SavedObjectsIncrementCounterOptions</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>

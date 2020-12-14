@@ -207,7 +207,10 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiStats.bind(this.usageCollection, 'data_plugin'),
+      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
+        this.usageCollection,
+        'data_plugin'
+      ),
     });
 
     return {

@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:checkTsProjects
+checks-reporter-with-killswitch "Check TypeScript Projects" \
+  node scripts/check_ts_projects
