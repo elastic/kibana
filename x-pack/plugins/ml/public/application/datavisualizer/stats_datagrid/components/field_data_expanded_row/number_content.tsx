@@ -20,6 +20,7 @@ import {
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_card/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { VerticalSpacer } from '../vertical_spacer';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -29,8 +30,6 @@ interface SummaryTableItem {
   display: ReactNode;
   value: number | string | undefined | null;
 }
-
-export const VerticalSpacer = () => <div style={{ width: 16 }} />;
 
 export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
