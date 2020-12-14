@@ -47,6 +47,7 @@ describe('fetchLegacyAlerts', () => {
         message,
         metadata,
         nodes,
+        nodeName: '',
         prefix,
       },
     ]);
