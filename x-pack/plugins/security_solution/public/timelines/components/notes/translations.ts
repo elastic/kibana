@@ -60,7 +60,7 @@ export const YOU_ARE_EDITING_A_NOTE = i18n.translate(
 );
 
 export const YOU_ARE_VIEWING_NOTES = (row: number) =>
-  i18n.translate('xpack.securitySolution.notes.youAreEditingANoteScreenReaderOnly', {
+  i18n.translate('xpack.securitySolution.notes.youAreViewingNotesScreenReaderOnly', {
     values: { row },
     defaultMessage:
       'You are viewing notes for the event in row {row}. Press the up arrow key when finished to return to the event.',

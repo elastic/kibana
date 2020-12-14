@@ -139,7 +139,7 @@ export const REMOVE_DATA_PROVIDER = i18n.translate(
 );
 
 export const SHOW_OPTIONS_DATA_PROVIDER = ({ field, value }: { field: string; value: string }) =>
-  i18n.translate('xpack.securitySolution.dataProviders.showOptionsDataProvider', {
+  i18n.translate('xpack.securitySolution.dataProviders.showOptionsDataProviderAriaLabel', {
     values: { field, value },
     defaultMessage: '{field} {value} Press enter for options, or press space to begin dragging',
   });
