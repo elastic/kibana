@@ -32,7 +32,7 @@ import { useUrlGenerator } from '../../../../services/use_url_generator';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
 import { useAppContext } from '../../../../app_context';
-import { DataStreamsBadges } from '../data_stream_table/data_stream_badges';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface DetailsListProps {
   details: Array<{

@@ -65,10 +65,10 @@ const enhanceDataStreams = ({
   });
 };
 
-const getDataStreams = (client: ElasticsearchClient, name = '') => {
+const getDataStreams = (client: ElasticsearchClient, name = '*') => {
   // TODO update when elasticsearch client has update requestParams for 'indices.getDataStream'
   return client.transport.request({
-    path: `/_data_stream/${encodeURIComponent(name)}/`,
+    path: `/_data_stream/${encodeURIComponent(name)}`,
     method: 'GET',
     querystring: {
       expand_wildcards: 'all',

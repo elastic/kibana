@@ -16,7 +16,7 @@ import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
-import { DataStreamsBadges } from './data_stream_badges';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface Props {
   dataStreams?: DataStream[];
