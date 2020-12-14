@@ -73,25 +73,30 @@ describe('Significant Terms Agg', () => {
         });
         expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
           Object {
-            "arguments": Object {
-              "enabled": Array [
-                true,
-              ],
-              "field": Array [
-                "FIELD",
-              ],
-              "id": Array [
-                "test",
-              ],
-              "schema": Array [
-                "segment",
-              ],
-              "size": Array [
-                "SIZE",
-              ],
-            },
-            "function": "aggSignificantTerms",
-            "type": "function",
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "FIELD",
+                  ],
+                  "id": Array [
+                    "test",
+                  ],
+                  "schema": Array [
+                    "segment",
+                  ],
+                  "size": Array [
+                    "SIZE",
+                  ],
+                },
+                "function": "aggSignificantTerms",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
           }
         `);
       });
