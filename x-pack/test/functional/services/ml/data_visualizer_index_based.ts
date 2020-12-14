@@ -70,12 +70,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
         );
         expect(expectedCount).to.eql(
           expectedCount,
-          `Expected metric fields count count to be '${expectedCount}' (got '${actualCount}')`
+          `Expected visible metric fields count to be '${expectedCount}' (got '${actualCount}')`
         );
       });
     },
 
-    async assertMetricFieldsCount(count: number) {
+    async assertTotalMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
       await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
       await retry.tryForTime(5000, async () => {
@@ -84,7 +84,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
         );
         expect(expectedCount).to.contain(
           expectedCount,
-          `Expected metric fields count count to be '${expectedCount}' (got '${actualCount}')`
+          `Expected total metric fields count to be '${expectedCount}' (got '${actualCount}')`
         );
       });
     },

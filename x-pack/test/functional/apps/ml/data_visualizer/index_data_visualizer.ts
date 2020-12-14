@@ -363,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
         testData.expected.visibleMetricFieldsCount
       );
-      await ml.dataVisualizerIndexBased.assertMetricFieldsCount(
+      await ml.dataVisualizerIndexBased.assertTotalMetricFieldsCount(
         testData.expected.totalMetricFieldsCount
       );
       await ml.dataVisualizerIndexBased.assertVisibleFieldsCount(
