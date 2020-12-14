@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,13 +22,15 @@ import { TopValues } from '../../../index_based/components/field_data_card/top_v
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
-const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
+const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
 
 interface SummaryTableItem {
   function: string;
   display: ReactNode;
   value: number | string | undefined | null;
 }
+
+export const VerticalSpacer = () => <div style={{ width: 16 }} />;
 
 export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
@@ -80,6 +82,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '75px',
     },
     {
       field: 'value',
@@ -99,16 +102,17 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
+          className={'mlDataVisualizerSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
-          tableLayout="auto"
         />
       </EuiFlexItem>
+      <VerticalSpacer />
       {stats && (
         <EuiFlexItem>
-          <EuiFlexGroup direction={'column'} alignItems={'center'} data-test-subj={'mlTopValues'}>
+          <EuiFlexGroup direction={'column'} data-test-subj={'mlTopValues'}>
             <EuiFlexItem grow={false}>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
@@ -118,18 +122,21 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
             <EuiFlexItem>
-              <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
+              <TopValues
+                stats={stats}
+                fieldFormat={fieldFormat}
+                barColor="primary"
+                compressed={true}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
+      <VerticalSpacer />
+
       {distribution && (
         <EuiFlexItem>
-          <EuiFlexGroup
-            direction={'column'}
-            alignItems={'center'}
-            data-test-subj={'mlMetricDistribution'}
-          >
+          <EuiFlexGroup direction={'column'} data-test-subj={'mlMetricDistribution'}>
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
@@ -139,30 +146,26 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
 
-            <Fragment>
-              <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <FormattedMessage
-                      id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
-                      defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
-                      values={{
-                        minPercent: numberAsOrdinal(distribution.minPercentile),
-                        maxPercent: numberAsOrdinal(distribution.maxPercentile),
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem style={{ width: '100%' }}>
-                <MetricDistributionChart
-                  width={METRIC_DISTRIBUTION_CHART_WIDTH}
-                  height={METRIC_DISTRIBUTION_CHART_HEIGHT}
-                  chartData={distributionChartData}
-                  fieldFormat={fieldFormat}
+            <EuiFlexItem style={{ width: '100%' }}>
+              <MetricDistributionChart
+                width={METRIC_DISTRIBUTION_CHART_WIDTH}
+                height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+                chartData={distributionChartData}
+                fieldFormat={fieldFormat}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
+                  defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
+                  values={{
+                    minPercent: numberAsOrdinal(distribution.minPercentile),
+                    maxPercent: numberAsOrdinal(distribution.maxPercentile),
+                  }}
                 />
-              </EuiFlexItem>
-            </Fragment>
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       )}

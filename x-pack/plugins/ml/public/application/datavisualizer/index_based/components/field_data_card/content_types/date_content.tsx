@@ -52,6 +52,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '75px',
     },
     {
       field: 'value',
@@ -65,6 +66,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
+          className={'mlDataVisualizerSummaryTable'}
           data-test-subj={'mlDateSummaryTable'}
           compressed
           items={summaryTableItems}
