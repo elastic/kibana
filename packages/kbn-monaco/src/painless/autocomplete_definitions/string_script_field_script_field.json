@@ -1,0 +1,310 @@
+{
+  "suggestions": [
+    {
+      "label": "String",
+      "kind": "class",
+      "documentation": "Class: String",
+      "insertText": "String",
+      "properties": [
+        {
+          "label": "copyValueOf",
+          "kind": "method",
+          "documentation": "copyValueOf(char[] a, int b, int c | char[] a): String",
+          "insertText": "copyValueOf"
+        },
+        {
+          "label": "format",
+          "kind": "method",
+          "documentation": "format(Locale a, String b, def[] c | String a, def[] b): String",
+          "insertText": "format"
+        },
+        {
+          "label": "join",
+          "kind": "method",
+          "documentation": "join(CharSequence a, Iterable b): String",
+          "insertText": "join"
+        },
+        {
+          "label": "valueOf",
+          "kind": "method",
+          "documentation": "valueOf(def a): String",
+          "insertText": "valueOf"
+        },
+        {
+          "label": "charAt",
+          "kind": "method",
+          "documentation": "charAt(int a): char",
+          "insertText": "charAt"
+        },
+        {
+          "label": "chars",
+          "kind": "method",
+          "documentation": "chars(): IntStream",
+          "insertText": "chars"
+        },
+        {
+          "label": "codePointAt",
+          "kind": "method",
+          "documentation": "codePointAt(int a): int",
+          "insertText": "codePointAt"
+        },
+        {
+          "label": "codePointBefore",
+          "kind": "method",
+          "documentation": "codePointBefore(int a): int",
+          "insertText": "codePointBefore"
+        },
+        {
+          "label": "codePointCount",
+          "kind": "method",
+          "documentation": "codePointCount(int a, int b): int",
+          "insertText": "codePointCount"
+        },
+        {
+          "label": "codePoints",
+          "kind": "method",
+          "documentation": "codePoints(): IntStream",
+          "insertText": "codePoints"
+        },
+        {
+          "label": "compareTo",
+          "kind": "method",
+          "documentation": "compareTo(String a): int",
+          "insertText": "compareTo"
+        },
+        {
+          "label": "compareToIgnoreCase",
+          "kind": "method",
+          "documentation": "compareToIgnoreCase(String a): int",
+          "insertText": "compareToIgnoreCase"
+        },
+        {
+          "label": "concat",
+          "kind": "method",
+          "documentation": "concat(String a): String",
+          "insertText": "concat"
+        },
+        {
+          "label": "contains",
+          "kind": "method",
+          "documentation": "contains(CharSequence a): boolean",
+          "insertText": "contains"
+        },
+        {
+          "label": "contentEquals",
+          "kind": "method",
+          "documentation": "contentEquals(CharSequence a): boolean",
+          "insertText": "contentEquals"
+        },
+        {
+          "label": "decodeBase64",
+          "kind": "method",
+          "documentation": "decodeBase64(): String",
+          "insertText": "decodeBase64"
+        },
+        {
+          "label": "encodeBase64",
+          "kind": "method",
+          "documentation": "encodeBase64(): String",
+          "insertText": "encodeBase64"
+        },
+        {
+          "label": "endsWith",
+          "kind": "method",
+          "documentation": "endsWith(String a): boolean",
+          "insertText": "endsWith"
+        },
+        {
+          "label": "equals",
+          "kind": "method",
+          "documentation": "equals(Object a): boolean",
+          "insertText": "equals"
+        },
+        {
+          "label": "equalsIgnoreCase",
+          "kind": "method",
+          "documentation": "equalsIgnoreCase(String a): boolean",
+          "insertText": "equalsIgnoreCase"
+        },
+        {
+          "label": "getChars",
+          "kind": "method",
+          "documentation": "getChars(int a, int b, char[] c, int d): void",
+          "insertText": "getChars"
+        },
+        {
+          "label": "hashCode",
+          "kind": "method",
+          "documentation": "hashCode(): int",
+          "insertText": "hashCode"
+        },
+        {
+          "label": "indexOf",
+          "kind": "method",
+          "documentation": "indexOf(String a, int b | String a): int",
+          "insertText": "indexOf"
+        },
+        {
+          "label": "isEmpty",
+          "kind": "method",
+          "documentation": "isEmpty(): boolean",
+          "insertText": "isEmpty"
+        },
+        {
+          "label": "lastIndexOf",
+          "kind": "method",
+          "documentation": "lastIndexOf(String a, int b | String a): int",
+          "insertText": "lastIndexOf"
+        },
+        {
+          "label": "length",
+          "kind": "method",
+          "documentation": "length(): int",
+          "insertText": "length"
+        },
+        {
+          "label": "offsetByCodePoints",
+          "kind": "method",
+          "documentation": "offsetByCodePoints(int a, int b): int",
+          "insertText": "offsetByCodePoints"
+        },
+        {
+          "label": "regionMatches",
+          "kind": "method",
+          "documentation": "regionMatches(boolean a, int b, String c, int d, int e | int a, String b, int c, int d): boolean",
+          "insertText": "regionMatches"
+        },
+        {
+          "label": "replace",
+          "kind": "method",
+          "documentation": "replace(CharSequence a, CharSequence b): String",
+          "insertText": "replace"
+        },
+        {
+          "label": "replaceAll",
+          "kind": "method",
+          "documentation": "replaceAll(Pattern a, Function b): String",
+          "insertText": "replaceAll"
+        },
+        {
+          "label": "replaceFirst",
+          "kind": "method",
+          "documentation": "replaceFirst(Pattern a, Function b): String",
+          "insertText": "replaceFirst"
+        },
+        {
+          "label": "splitOnToken",
+          "kind": "method",
+          "documentation": "splitOnToken(String a, int b | String a): String[]",
+          "insertText": "splitOnToken"
+        },
+        {
+          "label": "startsWith",
+          "kind": "method",
+          "documentation": "startsWith(String a, int b | String a): boolean",
+          "insertText": "startsWith"
+        },
+        {
+          "label": "subSequence",
+          "kind": "method",
+          "documentation": "subSequence(int a, int b): CharSequence",
+          "insertText": "subSequence"
+        },
+        {
+          "label": "substring",
+          "kind": "method",
+          "documentation": "substring(int a, int b | int a): String",
+          "insertText": "substring"
+        },
+        {
+          "label": "toCharArray",
+          "kind": "method",
+          "documentation": "toCharArray(): char[]",
+          "insertText": "toCharArray"
+        },
+        {
+          "label": "toLowerCase",
+          "kind": "method",
+          "documentation": "toLowerCase(Locale a): String",
+          "insertText": "toLowerCase"
+        },
+        {
+          "label": "toString",
+          "kind": "method",
+          "documentation": "toString(): String",
+          "insertText": "toString"
+        },
+        {
+          "label": "toUpperCase",
+          "kind": "method",
+          "documentation": "toUpperCase(Locale a): String",
+          "insertText": "toUpperCase"
+        },
+        {
+          "label": "trim",
+          "kind": "method",
+          "documentation": "trim(): String",
+          "insertText": "trim"
+        }
+      ],
+      "constructorDefinition": {
+        "label": "String",
+        "kind": "constructor",
+        "documentation": "Constructor: String",
+        "insertText": "String"
+      }
+    },
+    {
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript",
+      "kind": "class",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript",
+      "properties": [
+        {
+          "label": "equals",
+          "kind": "method",
+          "documentation": "equals(Object a): boolean",
+          "insertText": "equals"
+        },
+        {
+          "label": "hashCode",
+          "kind": "method",
+          "documentation": "hashCode(): int",
+          "insertText": "hashCode"
+        },
+        {
+          "label": "toString",
+          "kind": "method",
+          "documentation": "toString(): String",
+          "insertText": "toString"
+        }
+      ]
+    },
+    {
+      "label": "org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript.Factory",
+      "kind": "class",
+      "documentation": "Class: org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript.Factory",
+      "insertText": "org.elasticsearch.xpack.runtimefields.mapper.StringFieldScript.Factory",
+      "properties": [
+        {
+          "label": "equals",
+          "kind": "method",
+          "documentation": "equals(Object a): boolean",
+          "insertText": "equals"
+        },
+        {
+          "label": "hashCode",
+          "kind": "method",
+          "documentation": "hashCode(): int",
+          "insertText": "hashCode"
+        },
+        {
+          "label": "toString",
+          "kind": "method",
+          "documentation": "toString(): String",
+          "insertText": "toString"
+        }
+      ]
+    }
+  ]
+}

@@ -166,6 +166,9 @@ kibana_vars=(
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
+    xpack.fleet.agents.elasticsearch.host
+    xpack.fleet.agents.kibana.host
+    xpack.fleet.agents.tlsCheckDisabled
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy

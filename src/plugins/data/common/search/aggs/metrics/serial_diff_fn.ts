@@ -23,16 +23,21 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggSerialDiff';
+export const aggSerialDiffFnName = 'aggSerialDiff';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SERIAL_DIFF>;
 type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggSerialDiffFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggSerialDiff = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggSerialDiffFnName,
   help: i18n.translate('data.search.aggs.function.metrics.serial_diff.help', {
     defaultMessage: 'Generates a serialized agg config for a Serial Differencing agg',
   }),
@@ -72,7 +77,6 @@ export const aggSerialDiff = (): FunctionDefinition => ({
     },
     buckets_path: {
       types: ['string'],
-      required: true,
       help: i18n.translate('data.search.aggs.metrics.serial_diff.buckets_path.help', {
         defaultMessage: 'Path to the metric of interest',
       }),

@@ -39,7 +39,7 @@ export interface AggTypeConfig<
   createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
   type?: string;
   dslName?: string;
-  expressionName?: string;
+  expressionName: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
@@ -55,7 +55,8 @@ export interface AggTypeConfig<
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
@@ -89,12 +90,11 @@ export class AggType<
   dslName: string;
   /**
    * the name of the expression function that this aggType represents.
-   * TODO: this should probably be a required field.
    *
    * @property name
    * @type {string}
    */
-  expressionName?: string;
+  expressionName: string;
   /**
    * the user friendly name that will be shown in the ui for this aggType
    *
@@ -182,6 +182,8 @@ export class AggType<
    * @param searchSourceAggs - SearchSource aggregation configuration
    * @param resp - Response to the main request
    * @param nestedSearchSource - the new SearchSource that will be used to make post flight request
+   * @param abortSignal - `AbortSignal` to abort the request
+   * @param searchSessionId - searchSessionId to be used for grouping requests into a single search session
    * @return {Promise}
    */
   postFlightRequest: (
@@ -190,7 +192,8 @@ export class AggType<
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   /**
    * Get the serialized format for the values produced by this agg type,

@@ -14,6 +14,7 @@
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
+|  [SessionService](./kibana-plugin-plugins-data-server.sessionservice.md) | The OSS session service. See data\_enhanced in X-Pack for the background session service. |
 
 ## Enumerations
 
@@ -34,6 +35,7 @@
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
+|  [searchUsageObserver(logger, usage)](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
@@ -41,11 +43,11 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [AggFunctionsMapping](./kibana-plugin-plugins-data-server.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
-|  [IEsRawSearchResponse](./kibana-plugin-plugins-data-server.iesrawsearchresponse.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
@@ -54,6 +56,7 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
+|  [ISessionService](./kibana-plugin-plugins-data-server.isessionservice.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
@@ -76,6 +79,7 @@
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
+|  [exporters](./kibana-plugin-plugins-data-server.exporters.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
@@ -102,6 +106,7 @@
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
+|  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |

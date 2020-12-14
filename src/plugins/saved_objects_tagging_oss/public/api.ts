@@ -17,20 +17,47 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { SavedObject, SavedObjectReference } from '../../../core/types';
 import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { ITagsClient } from '../common';
+import { ITagsClient, Tag } from '../common';
 
 /**
  * @public
  */
 export interface SavedObjectsTaggingApi {
+  /**
+   * The client to perform tag-related operations on the server-side
+   */
   client: ITagsClient;
+  /**
+   * A client-side auto-refreshing cache of the existing tags. Can be used
+   * to synchronously access the list of tags.
+   */
+  cache: ITagsCache;
+  /**
+   * UI API to use to add tagging capabilities to an application
+   */
   ui: SavedObjectsTaggingApiUi;
+}
+
+/**
+ * @public
+ */
+export interface ITagsCache {
+  /**
+   * Return the current state of the cache
+   */
+  getState(): Tag[];
+
+  /**
+   * Return an observable that will emit everytime the cache's state mutates.
+   */
+  getState$(): Observable<Tag[]>;
 }
 
 /**
@@ -44,6 +71,13 @@ export type SavedObjectTagDecoratorTypeGuard = SavedObjectsTaggingApiUi['hasTagD
  * @public
  */
 export interface SavedObjectsTaggingApiUi {
+  /**
+   * Return a Tag from an ID
+   *
+   * @param tagId
+   */
+  getTag(tagId: string): Tag | undefined;
+
   /**
    * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
    *
@@ -84,7 +118,7 @@ export interface SavedObjectsTaggingApiUi {
   /**
    * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
    * to be used to search using the savedObjects `_find` API. Will return `undefined`
-   * is the given name does not match any existing tag.
+   * if the given name does not match any existing tag.
    */
   convertNameToReference(tagName: string): SavedObjectsFindOptionsReference | undefined;
 
@@ -123,6 +157,12 @@ export interface SavedObjectsTaggingApiUi {
   getTagIdsFromReferences(
     references: Array<SavedObjectReference | SavedObjectsFindOptionsReference>
   ): string[];
+
+  /**
+   * Returns the id for given tag name. Will return `undefined`
+   * if the given name does not match any existing tag.
+   */
+  getTagIdFromName(tagName: string): string | undefined;
 
   /**
    * Returns a new references array that replace the old tag references with references to the

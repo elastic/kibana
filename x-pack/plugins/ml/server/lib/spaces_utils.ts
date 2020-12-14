@@ -7,6 +7,7 @@
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SpacesPluginStart } from '../../../spaces/server';
+import { PLUGIN_ID } from '../../common/constants/app';
 
 export type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -22,19 +23,34 @@ export function spacesUtilsProvider(
     const space = await (await getSpacesPlugin()).spacesService.getActiveSpace(
       request instanceof KibanaRequest ? request : KibanaRequest.from(request)
     );
-    return space.disabledFeatures.includes('ml') === false;
+    return space.disabledFeatures.includes(PLUGIN_ID) === false;
   }
 
-  async function getAllSpaces(): Promise<string[] | null> {
+  async function getAllSpaces() {
     if (getSpacesPlugin === undefined) {
       return null;
     }
     const client = (await getSpacesPlugin()).spacesService.createSpacesClient(
       request instanceof KibanaRequest ? request : KibanaRequest.from(request)
     );
-    const spaces = await client.getAll();
+    return await client.getAll();
+  }
+
+  async function getAllSpaceIds(): Promise<string[] | null> {
+    const spaces = await getAllSpaces();
+    if (spaces === null) {
+      return null;
+    }
     return spaces.map((s) => s.id);
   }
 
-  return { isMlEnabledInSpace, getAllSpaces };
+  async function getMlSpaceIds(): Promise<string[] | null> {
+    const spaces = await getAllSpaces();
+    if (spaces === null) {
+      return null;
+    }
+    return spaces.filter((s) => s.disabledFeatures.includes(PLUGIN_ID) === false).map((s) => s.id);
+  }
+
+  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds };
 }

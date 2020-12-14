@@ -12,6 +12,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
@@ -27,12 +28,13 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import { ExclusiveUnion } from '@elastic/eui';
-import { ExpressionAstFunction } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpSetup as HttpSetup_2 } from 'kibana/public';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { ISearchOptions } from 'src/plugins/data/public';
@@ -55,7 +57,9 @@ import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext as PluginInitializerContext_3 } from 'kibana/public';
 import * as PropTypes from 'prop-types';
+import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
@@ -69,6 +73,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SavedObjectsClientContract as SavedObjectsClientContract_3 } from 'src/core/public';
+import { SavedObjectsFindOptions as SavedObjectsFindOptions_3 } from 'kibana/public';
 import { SavedObjectsFindResponse as SavedObjectsFindResponse_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
@@ -76,6 +81,7 @@ import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/ex
 import { ShallowPromise } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
+import { StartServicesAccessor as StartServicesAccessor_2 } from 'kibana/public';
 import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { ToastsSetup as ToastsSetup_2 } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -83,7 +89,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
@@ -170,10 +176,11 @@ export class AttributeService<SavedObjectAttributes extends {
     wrapAttributes(newAttributes: SavedObjectAttributes, useRefType: boolean, input?: ValType | RefType): Promise<Omit<ValType | RefType, 'id'>>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "RowClickContext" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ChartActionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T>;
+export type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T> | RowClickContext;
 
 // Warning: (ae-missing-release-tag) "Container" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -305,6 +312,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
+    getUpdated$(): Readonly<Rx.Observable<void>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)
@@ -719,6 +727,11 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
 // @public (undocumented)
 export const isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext;
 
+// Warning: (ae-missing-release-tag) "isEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isEmbeddable: (x: unknown) => x is IEmbeddable<import("./i_embeddable").EmbeddableInput, import("./i_embeddable").EmbeddableOutput>;
+
 // Warning: (ae-missing-release-tag) "isErrorEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -733,6 +746,11 @@ export const isRangeSelectTriggerContext: (context: ChartActionContext) => conte
 //
 // @public (undocumented)
 export function isReferenceOrValueEmbeddable(incoming: unknown): incoming is ReferenceOrValueEmbeddable;
+
+// Warning: (ae-missing-release-tag) "isRowClickTriggerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isRowClickTriggerContext: (context: ChartActionContext) => context is RowClickContext;
 
 // Warning: (ae-missing-release-tag) "isSavedObjectEmbeddableInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

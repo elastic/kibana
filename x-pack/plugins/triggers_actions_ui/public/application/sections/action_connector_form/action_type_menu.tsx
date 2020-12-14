@@ -7,30 +7,47 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { ActionType, ActionTypeIndex } from '../../../types';
+import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   actionTypes?: ActionType[];
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
   actionTypes,
   setHasActionsUpgradeableByTrial,
+  actionTypeRegistry,
 }: Props) => {
-  const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
       try {
-        const availableActionTypes = actionTypes ?? (await loadActionTypes({ http }));
+        /**
+         * Hidden action types will be hidden only on Alerts & Actions.
+         * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
+         * can use the hidden action types. For example, Cases or Detections of Security Solution.
+         *
+         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+         *  */
+        const availableActionTypes =
+          actionTypes ??
+          (await loadActionTypes({ http })).filter(
+            (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
+          );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -47,8 +64,8 @@ export const ActionTypeMenu = ({
           setHasActionsUpgradeableByTrial(hasActionsUpgradeableByTrial);
         }
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
+        if (toasts) {
+          toasts.addDanger({
             title: i18n.translate(
               'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
               { defaultMessage: 'Unable to load action types' }
@@ -69,7 +86,6 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        typeName: id.replace('.', ''),
       };
     });
 

@@ -11,13 +11,13 @@ export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_ty
 
 export const config: PluginConfigDescriptor<Config> = {
   exposeToBrowser: {
-    enableGeoTrackingThresholdAlert: true,
+    enableGeoAlerting: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(
       'xpack.triggers_actions_ui.enableGeoTrackingThresholdAlert',
-      'xpack.stack_alerts.enableGeoTrackingThresholdAlert'
+      'xpack.stack_alerts.enableGeoAlerting'
     ),
   ],
 };

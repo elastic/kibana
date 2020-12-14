@@ -9,8 +9,8 @@
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 

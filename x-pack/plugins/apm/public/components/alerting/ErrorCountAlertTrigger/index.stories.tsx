@@ -7,11 +7,11 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ErrorCountAlertTrigger } from '.';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 export default {
   title: 'app/ErrorCountAlertTrigger',

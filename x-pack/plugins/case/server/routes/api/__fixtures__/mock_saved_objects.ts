@@ -11,6 +11,7 @@ import {
   ESCaseAttributes,
   ConnectorTypes,
   CommentType,
+  CaseStatuses,
 } from '../../../../common/api';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -35,13 +36,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       title: 'Super Bad Security Issue',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['defacement'],
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -69,13 +73,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'Oh no, a bad meanie destroying data!',
       external_service: null,
       title: 'Damaging Data Destruction Detected',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['Data Destruction'],
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -107,13 +114,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
       title: 'Another bad one',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -148,7 +158,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
-      status: 'closed',
+      status: CaseStatuses.closed,
       title: 'Another bad one',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
@@ -156,6 +166,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -179,13 +192,16 @@ export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
     description: 'This is a brand new case of a bad meanie defacing data',
     external_service: null,
     title: 'Super Bad Security Issue',
-    status: 'open',
+    status: CaseStatuses.open,
     tags: ['defacement'],
     updated_at: '2019-11-25T21:54:48.952Z',
     updated_by: {
       full_name: 'elastic',
       email: 'testemail@elastic.co',
       username: 'elastic',
+    },
+    settings: {
+      syncAlerts: true,
     },
   },
   references: [],

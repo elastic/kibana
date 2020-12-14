@@ -99,7 +99,6 @@ export class RecentlyAccessed extends Component {
     return (
       <EuiPopover
         id="popover"
-        ownFocus
         button={openPopoverComponent}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}

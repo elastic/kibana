@@ -22,7 +22,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { px, unit, units } from '../../../../style/variables';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';

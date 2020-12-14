@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MissingJobsAlert } from './anomaly_detection_setup_link';
-import * as hooks from '../../hooks/useFetcher';
+import * as hooks from '../../hooks/use_fetcher';
 
 async function renderTooltipAnchor({
   jobs,

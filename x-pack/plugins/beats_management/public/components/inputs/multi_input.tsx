@@ -73,6 +73,7 @@ class MultiFieldText extends Component<
 
   public render() {
     const {
+      name,
       id,
       required,
       label,

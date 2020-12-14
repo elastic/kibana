@@ -19,7 +19,6 @@
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { Collector } from './collector';
-import { UsageCollector } from './usage_collector';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -85,49 +84,6 @@ describe('collector', () => {
         fetch: () => fetchOutput,
       });
       expect(collector.isReady()).toBe(true);
-    });
-  });
-
-  describe('formatForBulkUpload', () => {
-    it('should use the default formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'my_test_collector',
-        payload: fetchOutput,
-      });
-    });
-
-    it('should use a custom formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-        formatForBulkUpload: (a) => ({ type: 'other_value', payload: { nested: a } }),
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'other_value',
-        payload: { nested: fetchOutput },
-      });
-    });
-
-    it("should use UsageCollector's default formatter", () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new UsageCollector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-        schema: { testPass: { type: 'long' } },
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'kibana_stats',
-        payload: { usage: { my_test_collector: fetchOutput } },
-      });
     });
   });
 

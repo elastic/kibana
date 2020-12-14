@@ -10,13 +10,19 @@ interface TimestampFieldFromEs {
 
 type TimestampField = TimestampFieldFromEs;
 
-interface MetaFieldFromEs {
+interface MetaFromEs {
   managed_by: string;
   package: any;
   managed: boolean;
 }
 
-type MetaField = MetaFieldFromEs;
+type Meta = MetaFromEs;
+
+interface PrivilegesFromEs {
+  delete_index: boolean;
+}
+
+type Privileges = PrivilegesFromEs;
 
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
@@ -25,12 +31,14 @@ export interface DataStreamFromEs {
   timestamp_field: TimestampFieldFromEs;
   indices: DataStreamIndexFromEs[];
   generation: number;
-  _meta?: MetaFieldFromEs;
+  _meta?: MetaFromEs;
   status: HealthFromEs;
   template: string;
   ilm_policy?: string;
   store_size?: string;
   maximum_timestamp?: number;
+  privileges: PrivilegesFromEs;
+  hidden: boolean;
 }
 
 export interface DataStreamIndexFromEs {
@@ -50,7 +58,9 @@ export interface DataStream {
   ilmPolicyName?: string;
   storageSize?: string;
   maxTimeStamp?: number;
-  _meta?: MetaField;
+  _meta?: Meta;
+  privileges: Privileges;
+  hidden: boolean;
 }
 
 export interface DataStreamIndex {

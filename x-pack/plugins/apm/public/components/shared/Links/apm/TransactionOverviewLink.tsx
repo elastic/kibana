@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
 
@@ -15,6 +15,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'containerId',
   'podName',
   'serviceVersion',
+  'latencyAggregationType',
 ];
 
 export function useTransactionOverviewHref(serviceName: string) {

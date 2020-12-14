@@ -48,7 +48,6 @@ module.exports = {
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '^src/core/(.*)': '<rootDir>/src/core/$1',
-    '^src/legacy/(.*)': '<rootDir>/src/legacy/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
   },
 
@@ -86,7 +85,7 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
-    '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
+    '<rootDir>/packages/kbn-ui-framework/dist/',
     '<rootDir>/packages/kbn-pm/dist/',
     `integration_tests/`,
   ],

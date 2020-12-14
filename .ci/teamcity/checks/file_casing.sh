@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:checkFileCasing
+checks-reporter-with-killswitch "Check File Casing" \
+  node scripts/check_file_casing --quiet

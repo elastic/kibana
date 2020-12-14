@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { DOCS_PREFIX } from '../../routes';
@@ -23,13 +23,7 @@ export const SetupGuide: React.FC = () => (
     standardAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-standard`}
     elasticsearchNativeAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`}
   >
-    <SetPageChrome
-      trail={[
-        i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-          defaultMessage: 'Setup Guide',
-        }),
-      ]}
-    />
+    <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />
 
     <a

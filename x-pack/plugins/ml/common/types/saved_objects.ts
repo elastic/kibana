@@ -11,7 +11,7 @@ export interface SavedObjectResult {
   [jobId: string]: { success: boolean; error?: any };
 }
 
-export interface RepairSavedObjectResponse {
+export interface SyncSavedObjectResponse {
   savedObjectsCreated: SavedObjectResult;
   savedObjectsDeleted: SavedObjectResult;
   datafeedsAdded: SavedObjectResult;
@@ -26,4 +26,13 @@ export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: string }>;
   success: boolean;
   error?: any;
+}
+
+export interface DeleteJobCheckResponse {
+  [jobId: string]: DeleteJobPermission;
+}
+
+export interface DeleteJobPermission {
+  canDelete: boolean;
+  canUntag: boolean;
 }

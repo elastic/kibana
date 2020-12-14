@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('detection engine api security and spaces enabled', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup11');
 
     loadTestFile(require.resolve('./add_actions'));
     loadTestFile(require.resolve('./add_prepackaged_rules'));
@@ -33,5 +33,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./patch_rules'));
     loadTestFile(require.resolve('./query_signals'));
     loadTestFile(require.resolve('./open_close_signals'));
+    loadTestFile(require.resolve('./migrating_signals'));
   });
 };

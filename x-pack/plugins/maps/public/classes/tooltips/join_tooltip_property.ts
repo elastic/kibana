@@ -5,14 +5,14 @@
  */
 
 import { ITooltipProperty } from './tooltip_property';
-import { IJoin } from '../joins/join';
+import { InnerJoin } from '../joins/inner_join';
 import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _leftInnerJoins: IJoin[];
+  private readonly _leftInnerJoins: InnerJoin[];
 
-  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: IJoin[]) {
+  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: InnerJoin[]) {
     this._tooltipProperty = tooltipProperty;
     this._leftInnerJoins = leftInnerJoins;
   }

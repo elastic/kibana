@@ -5,7 +5,7 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React from 'react';
+import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -22,6 +22,10 @@ import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
+import { TimeScaling } from './time_scaling';
+import { EuiSelect } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { DimensionEditor } from './dimension_editor';
 
 jest.mock('../loader');
 jest.mock('../operations');
@@ -111,7 +115,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let defaultProps: IndexPatternDimensionEditorProps;
 
   function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
-    return { ...state, layers: { first: { ...state.layers.first, columns } } };
+    return {
+      ...state,
+      layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
+    };
   }
 
   beforeEach(() => {
@@ -135,6 +142,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             col1: {
               label: 'Date histogram of timestamp',
+              customLabel: true,
               dataType: 'date',
               isBucketed: true,
 
@@ -146,11 +154,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
               sourceField: 'timestamp',
             },
           },
+          incompleteColumns: {},
         },
       },
     };
 
-    setState = jest.fn();
+    setState = jest.fn().mockImplementation((newState) => {
+      if (wrapper instanceof ReactWrapper) {
+        wrapper.setProps({ state: newState });
+      }
+    });
 
     defaultProps = {
       state,
@@ -354,23 +367,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...initialState,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              operationType: 'max',
-              sourceField: 'memory',
-              params: { format: { id: 'bytes' } },
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...initialState,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                operationType: 'max',
+                sourceField: 'memory',
+                params: { format: { id: 'bytes' } },
+                // Other parts of this don't matter for this test
+              }),
+            },
           },
         },
       },
-    });
+      true
+    );
   });
 
   it('should switch operations when selecting a field that requires another operation', () => {
@@ -385,22 +401,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              operationType: 'terms',
-              sourceField: 'source',
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                operationType: 'terms',
+                sourceField: 'source',
+                // Other parts of this don't matter for this test
+              }),
+            },
           },
         },
       },
-    });
+      true
+    );
   });
 
   it('should keep the field when switching to another operation compatible for this field', () => {
@@ -415,23 +434,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              operationType: 'min',
-              sourceField: 'bytes',
-              params: { format: { id: 'bytes' } },
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                operationType: 'min',
+                sourceField: 'bytes',
+                params: { format: { id: 'bytes' } },
+                // Other parts of this don't matter for this test
+              }),
+            },
           },
         },
       },
-    });
+      true
+    );
   });
 
   it('should not set the state if selecting the currently active operation', () => {
@@ -485,20 +507,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              label: 'Minimum of bytes',
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Minimum of bytes',
+              }),
+            },
           },
         },
       },
-    });
+      true
+    );
   });
 
   it('should keep the label on operation change if it is custom', () => {
@@ -519,25 +544,28 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              label: 'Custom label',
-              customLabel: true,
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Custom label',
+                customLabel: true,
+              }),
+            },
           },
         },
       },
-    });
+      true
+    );
   });
 
   describe('transient invalid state', () => {
-    it('should not set the state if selecting an operation incompatible with the current field', () => {
+    it('should set the state if selecting an operation incompatible with the current field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
@@ -546,7 +574,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .simulate('click');
       });
 
-      expect(setState).not.toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+              },
+              incompleteColumns: {
+                col1: { operationType: 'terms' },
+              },
+            },
+          },
+        },
+        true
+      );
     });
 
     it('should show error message in invalid state', () => {
@@ -559,8 +603,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(
         wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
       ).toBeDefined();
-
-      expect(setState).not.toHaveBeenCalled();
     });
 
     it('should leave error state if a compatible operation is selected', () => {
@@ -657,6 +699,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+      expect(setState).toHaveBeenCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              incompleteColumns: {
+                col2: { operationType: 'avg' },
+              },
+            },
+          },
+        },
+        false
+      );
 
       const comboBox = wrapper
         .find(EuiComboBox)
@@ -668,23 +724,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([options![1].options![2]]);
       });
 
-      expect(setState).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: expect.objectContaining({
-                sourceField: 'source',
-                operationType: 'terms',
-                // Other parts of this don't matter for this test
-              }),
+      expect(setState).toHaveBeenLastCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col2: expect.objectContaining({
+                  sourceField: 'source',
+                  operationType: 'terms',
+                  // Other parts of this don't matter for this test
+                }),
+              },
+              columnOrder: ['col2', 'col1'],
             },
-            columnOrder: ['col2', 'col1'],
           },
         },
-      });
+        true
+      );
     });
 
     it('should select the Records field when count is selected', () => {
@@ -752,11 +811,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should set datasource state if compatible field is selected for operation', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
-      act(() => {
-        wrapper
-          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
-          .simulate('click');
-      });
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
+        .simulate('click');
 
       const comboBox = wrapper
         .find(EuiComboBox)
@@ -767,21 +824,262 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([option]);
       });
 
-      expect(setState).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: expect.objectContaining({
-                sourceField: 'source',
-                operationType: 'terms',
-              }),
+      expect(setState).toHaveBeenLastCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: expect.objectContaining({
+                  sourceField: 'source',
+                  operationType: 'terms',
+                }),
+              },
             },
           },
         },
+        true
+      );
+    });
+  });
+
+  describe('time scaling', () => {
+    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: 'Records',
+            ...colOverrides,
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+    it('should not show custom options if time scaling is not available', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...getProps({
+            operationType: 'avg',
+            sourceField: 'bytes',
+          })}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="indexPattern-time-scaling"]')).toHaveLength(0);
+    });
+
+    it('should show custom options if time scaling is available', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      expect(
+        wrapper
+          .find(TimeScaling)
+          .find('[data-test-subj="indexPattern-time-scaling-popover"]')
+          .exists()
+      ).toBe(true);
+    });
+
+    it('should show current time scaling if set', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeScale: 'd' })} />);
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+          .find(EuiSelect)
+          .prop('value')
+      ).toEqual('d');
+    });
+
+    it('should allow to set time scaling initially', () => {
+      const props = getProps({});
+      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find(DimensionEditor)
+        .dive()
+        .find(TimeScaling)
+        .dive()
+        .find('[data-test-subj="indexPattern-time-scaling-enable"]')
+        .prop('onClick')!({} as MouseEvent);
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: 's',
+                  label: 'Count of records per second',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
+    });
+
+    it('should carry over time scaling to other operation if possible', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
       });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
+        .simulate('click');
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: 'h',
+                  label: 'Count of records per hour',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
+    });
+
+    it('should not carry over time scaling if the other operation does not support it', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: undefined,
+                  label: 'Average of bytes',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
+    });
+
+    it('should allow to change time scaling', () => {
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: 'h',
+                  label: 'Count of records per hour',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
+    });
+
+    it('should not adjust label if it is custom', () => {
+      const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: 'h',
+                  label: 'My label',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
+    });
+
+    it('should allow to remove time scaling', () => {
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-remove"]')
+        .find(EuiButtonIcon)
+        .prop('onClick')!(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
+      expect(props.setState).toHaveBeenCalledWith(
+        {
+          ...props.state,
+          layers: {
+            first: {
+              ...props.state.layers.first,
+              columns: {
+                ...props.state.layers.first.columns,
+                col2: expect.objectContaining({
+                  timeScale: undefined,
+                  label: 'Count of records',
+                }),
+              },
+            },
+          },
+        },
+        true
+      );
     });
   });
 
@@ -819,6 +1117,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {
+              col2: {
+                operationType: 'avg',
+              },
+            },
+          },
+        },
+      },
+      false
+    );
+
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]');
@@ -828,23 +1143,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([options![1].options![0]]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col2: expect.objectContaining({
-              sourceField: 'bytes',
-              operationType: 'avg',
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'bytes',
+                operationType: 'avg',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
           },
-          columnOrder: ['col1', 'col2'],
         },
       },
-    });
+      true
+    );
   });
 
   it('should select operation directly if only one field is possible', () => {
@@ -868,23 +1186,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
-    expect(setState).toHaveBeenCalledWith({
-      ...initialState,
-      layers: {
-        first: {
-          ...initialState.layers.first,
-          columns: {
-            ...initialState.layers.first.columns,
-            col2: expect.objectContaining({
-              sourceField: 'bytes',
-              operationType: 'avg',
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...initialState,
+        layers: {
+          first: {
+            ...initialState.layers.first,
+            columns: {
+              ...initialState.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'bytes',
+                operationType: 'avg',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
           },
-          columnOrder: ['col1', 'col2'],
         },
       },
-    });
+      true
+    );
   });
 
   it('should select operation directly if only document is possible', () => {
@@ -892,22 +1213,25 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col2: expect.objectContaining({
-              operationType: 'count',
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                operationType: 'count',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
           },
-          columnOrder: ['col1', 'col2'],
         },
       },
-    });
+      true
+    );
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
@@ -962,6 +1286,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should not update when selecting the current field again', () => {
+    wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]');
+
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }) => label === 'timestampLabel')!;
+
+    act(() => {
+      comboBox.prop('onChange')!([option]);
+    });
+
+    expect(setState).not.toHaveBeenCalled();
+  });
+
   it('should show all operations that are not filtered out', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
@@ -975,16 +1317,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
       'Average',
       'Count',
+      'Last value',
       'Maximum',
       'Median',
       'Minimum',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 
   it('should add a column on selection of a field', () => {
+    // Prevents field format from being loaded
+    setState.mockImplementation(() => {});
+
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
     const comboBox = wrapper
@@ -996,22 +1341,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columns: {
-            ...state.layers.first.columns,
-            col2: expect.objectContaining({
-              sourceField: 'bytes',
-              // Other parts of this don't matter for this test
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                operationType: 'range',
+                sourceField: 'bytes',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
           },
-          columnOrder: ['col1', 'col2'],
         },
       },
-    });
+      true
+    );
   });
 
   it('should use helper function when changing the function', () => {
@@ -1024,7 +1373,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
-        {} as React.MouseEvent<{}, MouseEvent>
+        {} as MouseEvent
       );
     });
 
@@ -1047,17 +1396,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!([]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columns: {},
-          columnOrder: [],
-          incompleteColumns: {},
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {},
+            columnOrder: [],
+            incompleteColumns: {},
+          },
         },
       },
-    });
+      false
+    );
   });
 
   it('allows custom format', () => {

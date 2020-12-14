@@ -24,7 +24,7 @@ export type Setup = jest.Mocked<UsageCollectionSetup>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     allowTrackUserAgent: jest.fn(),
-    reportUiStats: jest.fn(),
+    reportUiCounter: jest.fn(),
     METRIC_TYPE,
     __LEGACY: {
       appChanged: jest.fn(),

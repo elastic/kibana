@@ -5,6 +5,7 @@
  */
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
 import { Signal, Ancestor, BaseSignalHit } from './types';
 
@@ -73,6 +74,9 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param rule The rule that is generating the new signal.
  */
 export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
+  const _meta = {
+    version: SIGNALS_TEMPLATE_VERSION,
+  };
   const removedClashes = docs.map(removeClashes);
   const parents = removedClashes.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -81,6 +85,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
     []
   );
   return {
+    _meta,
     parents,
     ancestors,
     status: 'open',
@@ -96,9 +101,9 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
 export const additionalSignalFields = (doc: BaseSignalHit) => {
   return {
     parent: buildParent(removeClashes(doc)),
-    original_time: doc._source['@timestamp'],
+    original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
     original_event: doc._source.event ?? undefined,
-    threshold_count: doc._source.threshold_count ?? undefined,
+    threshold_result: doc._source.threshold_result,
     original_signal:
       doc._source.signal != null && !isEventTypeSignal(doc) ? doc._source.signal : undefined,
   };

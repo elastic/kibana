@@ -24,6 +24,7 @@ import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggFiltersFnName } from './filters_fn';
 import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
 import { BaseAggParams } from '../types';
 
@@ -53,6 +54,7 @@ export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
 export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.FILTERS,
+    expressionName: aggFiltersFnName,
     title: filtersTitle,
     createFilter: createFilterFilters,
     customLabels: false,

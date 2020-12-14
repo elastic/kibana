@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
+  ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
@@ -50,6 +51,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
+    activeData?: Record<string, Datatable>;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -166,8 +168,13 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  updateStateOnCloseDimension?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+  }) => T | undefined;
 
-  toExpression: (state: T, layerId: string) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -234,7 +241,8 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
-  setState: StateSetter<T>;
+  // Not a StateSetter because we have this unique use case of determining valid columns
+  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -539,7 +547,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
@@ -576,7 +587,7 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>,
     attributes?: Partial<{ title: string; description: string }>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
@@ -584,7 +595,7 @@ export interface Visualization<T = unknown> {
   toPreviewExpression?: (
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
@@ -593,15 +604,26 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: FramePublicAPI
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 export interface LensFilterEvent {
   name: 'filter';
   data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
 }
+
 export interface LensBrushEvent {
   name: 'brush';
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export interface LensTableRowContextMenuEvent {
+  name: 'tableRowContextMenuClick';
+  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
@@ -612,11 +634,17 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
+export function isLensTableRowContextMenuClickEvent(
+  event: ExpressionRendererEvent
+): event is LensBrushEvent {
+  return event.name === 'tableRowContextMenuClick';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent) => void;
+  event: (event: LensFilterEvent | LensBrushEvent | LensTableRowContextMenuEvent) => void;
 }

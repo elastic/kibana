@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
@@ -23,8 +22,19 @@ import {
   MedianIndexPatternColumn,
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
+import {
+  cumulativeSumOperation,
+  CumulativeSumIndexPatternColumn,
+  counterRateOperation,
+  CounterRateIndexPatternColumn,
+  derivativeOperation,
+  DerivativeIndexPatternColumn,
+  movingAverageOperation,
+  MovingAverageIndexPatternColumn,
+} from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
-import { StateSetter, OperationMetadata } from '../../../types';
+import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
+import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import {
   IndexPatternPrivateState,
@@ -33,6 +43,7 @@ import {
   IndexPatternLayer,
 } from '../../types';
 import { DateRange } from '../../../../common';
+import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
 
@@ -52,7 +63,12 @@ export type IndexPatternColumn =
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
   | MedianIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | LastValueIndexPatternColumn
+  | CumulativeSumIndexPatternColumn
+  | CounterRateIndexPatternColumn
+  | DerivativeIndexPatternColumn
+  | MovingAverageIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -71,8 +87,13 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   medianOperation,
+  lastValueOperation,
   countOperation,
   rangeOperation,
+  cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -81,6 +102,13 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
+export { lastValueOperation } from './last_value';
+export {
+  cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
+} from './calculations';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -88,7 +116,7 @@ export { countOperation } from './count';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
   layerId: string;
   uiSettings: IUiSettingsClient;
@@ -98,6 +126,8 @@ export interface ParamEditorProps<C> {
   dateRange: DateRange;
   data: DataPublicPluginStart;
 }
+
+export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
@@ -146,6 +176,31 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * present on the new index pattern.
    */
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * if there is some reason to display the operation in the operations list
+   * but disable it from usage, this function returns the string describing
+   * the status. Otherwise it returns undefined
+   */
+  getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
+  /**
+   * Validate that the operation has the right preconditions in the state. For example:
+   *
+   * - Requires a date histogram operation somewhere before it in order
+   * - Missing references
+   */
+  getErrorMessage?: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern?: IndexPattern
+  ) => string[] | undefined;
+
+  /*
+   * Flag whether this operation can be scaled by time unit if a date histogram is available.
+   * If set to mandatory or optional, a UI element is shown in the config flyout to configure the time unit
+   * to scale by. The chosen unit will be persisted as `timeScale` property of the column.
+   * If set to optional, time scaling won't be enabled by default and can be removed.
+   */
+  timeScalingMode?: TimeScalingMode;
 }
 
 interface BaseBuildColumnArgs {
@@ -172,7 +227,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsFn: (column: C, columnId: string, indexPattern: IndexPattern) => ExpressionAstFunction;
 }
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
@@ -211,7 +266,18 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsFn: (column: C, columnId: string, indexPattern: IndexPattern) => ExpressionAstFunction;
+  /**
+   * Validate that the operation has the right preconditions in the state. For example:
+   *
+   * - Requires a date histogram operation somewhere before it in order
+   * - Missing references
+   */
+  getErrorMessage: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern?: IndexPattern
+  ) => string[] | undefined;
 }
 
 export interface RequiredReference {
@@ -263,14 +329,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     layer: IndexPatternLayer,
     columnId: string,
     indexPattern: IndexPattern
-  ) => ExpressionFunctionAST[];
-  /**
-   * Validate that the operation has the right preconditions in the state. For example:
-   *
-   * - Requires a date histogram operation somewhere before it in order
-   * - Missing references
-   */
-  getErrorMessage?: (layer: IndexPatternLayer, columnId: string) => string[] | undefined;
+  ) => ExpressionAstFunction[];
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {

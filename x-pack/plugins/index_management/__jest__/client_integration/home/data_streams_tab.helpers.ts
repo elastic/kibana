@@ -19,11 +19,12 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
-    clickIncludeManagedSwitch: () => void;
+    toggleViewFilterAt: (index: number) => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
     clickDeleteActionAt: (index: number) => void;
+    selectDataStream: (name: string, selected: boolean) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
@@ -81,9 +82,16 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('includeStatsSwitch').simulate('click');
   };
 
-  const clickIncludeManagedSwitch = () => {
-    const { find } = testBed;
-    find('includeManagedSwitch').simulate('click');
+  const toggleViewFilterAt = (index: number) => {
+    const { find, component } = testBed;
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+    component.update();
+    act(() => {
+      find('filterItem').at(index).simulate('click');
+    });
+    component.update();
   };
 
   const clickReloadButton = () => {
@@ -123,6 +131,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
   const clickDeleteActionAt = (index: number) => {
     findDeleteActionAt(index).simulate('click');
+  };
+
+  const selectDataStream = (name: string, selected: boolean) => {
+    const {
+      form: { selectCheckBox },
+    } = testBed;
+    selectCheckBox(`checkboxSelectRow-${name}`, selected);
   };
 
   const findDeleteConfirmationModal = () => {
@@ -189,11 +204,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
-      clickIncludeManagedSwitch,
+      toggleViewFilterAt,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
       clickDeleteActionAt,
+      selectDataStream,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
       clickDetailPanelIndexTemplateLink,
@@ -223,6 +239,10 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
   maxTimeStamp: 420,
+  privileges: {
+    delete_index: true,
+  },
+  hidden: false,
   ...dataStream,
 });
 

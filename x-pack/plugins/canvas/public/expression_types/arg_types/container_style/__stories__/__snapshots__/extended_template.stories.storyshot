@@ -293,7 +293,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -302,68 +302,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             >
               <div
                 className="euiPopover__anchor"
-              >
-                <input
-                  id="generated-id"
-                  type="hidden"
-                  value="solid"
-                />
-                <div
-                  className="euiFormControlLayout euiFormControlLayout--compressed"
-                >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
-                  >
-                    <span
-                      className="euiScreenReaderOnly"
-                      id="generated-id"
-                    >
-                      Select an option: 
-                      <div
-                        style={
-                          Object {
-                            "border": "4px solid",
-                            "height": 16,
-                          }
-                        }
-                      />
-                      , is selected
-                    </span>
-                    <button
-                      aria-haspopup="true"
-                      aria-labelledby="generated-id generated-id"
-                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      type="button"
-                    >
-                      <div
-                        style={
-                          Object {
-                            "border": "4px solid",
-                            "height": 16,
-                          }
-                        }
-                      />
-                    </button>
-                    <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                    >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="arrowDown"
-                        />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              />
             </div>
           </div>
         </div>
@@ -436,11 +375,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
             >
               <div
                 className="euiPopover__anchor"
@@ -762,7 +696,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -771,68 +705,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           >
             <div
               className="euiPopover__anchor"
-            >
-              <input
-                id="generated-id"
-                type="hidden"
-                value="dotted"
-              />
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <span
-                    className="euiScreenReaderOnly"
-                    id="generated-id"
-                  >
-                    Select an option: 
-                    <div
-                      style={
-                        Object {
-                          "border": "4px dotted",
-                          "height": 16,
-                        }
-                      }
-                    />
-                    , is selected
-                  </span>
-                  <button
-                    aria-haspopup="true"
-                    aria-labelledby="generated-id generated-id"
-                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    type="button"
-                  >
-                    <div
-                      style={
-                        Object {
-                          "border": "4px dotted",
-                          "height": 16,
-                        }
-                      }
-                    />
-                  </button>
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -905,11 +778,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <div
             className="euiPopover euiPopover--anchorUpCenter"
             id="color-picker-popover"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
           >
             <div
               className="euiPopover__anchor"
@@ -1243,7 +1111,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -1252,68 +1120,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             >
               <div
                 className="euiPopover__anchor"
-              >
-                <input
-                  id="generated-id"
-                  type="hidden"
-                  value="solid"
-                />
-                <div
-                  className="euiFormControlLayout euiFormControlLayout--compressed"
-                >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
-                  >
-                    <span
-                      className="euiScreenReaderOnly"
-                      id="generated-id"
-                    >
-                      Select an option: 
-                      <div
-                        style={
-                          Object {
-                            "border": "4px solid",
-                            "height": 16,
-                          }
-                        }
-                      />
-                      , is selected
-                    </span>
-                    <button
-                      aria-haspopup="true"
-                      aria-labelledby="generated-id generated-id"
-                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      type="button"
-                    >
-                      <div
-                        style={
-                          Object {
-                            "border": "4px solid",
-                            "height": 16,
-                          }
-                        }
-                      />
-                    </button>
-                    <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                    >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="arrowDown"
-                        />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              />
             </div>
           </div>
         </div>
@@ -1386,11 +1193,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
             >
               <div
                 className="euiPopover__anchor"

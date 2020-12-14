@@ -13,7 +13,7 @@ getFields(): {
         type?: string | undefined;
         query?: import("../..").Query | undefined;
         filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
-        sort?: Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric> | Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric>[] | undefined;
+        sort?: Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection> | Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection>[] | undefined;
         highlight?: any;
         highlightAll?: boolean | undefined;
         aggs?: any;
@@ -21,7 +21,8 @@ getFields(): {
         size?: number | undefined;
         source?: string | boolean | string[] | undefined;
         version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
+        fields?: SearchFieldValue[] | undefined;
+        fieldsFromSource?: string | boolean | string[] | undefined;
         index?: import("../..").IndexPattern | undefined;
         searchAfter?: import("./types").EsQuerySearchAfter | undefined;
         timeout?: string | undefined;
@@ -34,7 +35,7 @@ getFields(): {
         type?: string | undefined;
         query?: import("../..").Query | undefined;
         filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
-        sort?: Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric> | Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric>[] | undefined;
+        sort?: Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection> | Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection>[] | undefined;
         highlight?: any;
         highlightAll?: boolean | undefined;
         aggs?: any;
@@ -42,7 +43,8 @@ getFields(): {
         size?: number | undefined;
         source?: string | boolean | string[] | undefined;
         version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
+        fields?: SearchFieldValue[] | undefined;
+        fieldsFromSource?: string | boolean | string[] | undefined;
         index?: import("../..").IndexPattern | undefined;
         searchAfter?: import("./types").EsQuerySearchAfter | undefined;
         timeout?: string | undefined;

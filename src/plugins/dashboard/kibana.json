@@ -9,9 +9,10 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects"
+    "savedObjects",
+    "share"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "savedObjectsTaggingOss"],
+  "optionalPlugins": ["home", "usageCollection", "savedObjectsTaggingOss"],
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]

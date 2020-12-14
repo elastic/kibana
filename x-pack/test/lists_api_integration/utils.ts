@@ -115,7 +115,7 @@ export const waitFor = async (
   maxTimeout: number = 5000,
   timeoutWait: number = 10
 ) => {
-  await new Promise(async (resolve, reject) => {
+  await new Promise<void>(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
     while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
@@ -175,12 +175,14 @@ export const deleteAllExceptions = async (es: Client): Promise<void> => {
  * @param type The type to import as
  * @param contents The contents of the import
  * @param fileName filename to import as
+ * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   type: Type,
   contents: string[],
-  fileName: string
+  fileName: string,
+  testValues?: string[]
 ): Promise<void> => {
   await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
@@ -191,7 +193,8 @@ export const importFile = async (
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
-  await waitForListItems(supertest, contents, fileName);
+  const testValuesOrContents = testValues ?? contents;
+  await waitForListItems(supertest, testValuesOrContents, fileName);
 };
 
 /**

@@ -27,7 +27,7 @@ export const usePackageIconType = ({
   icons: paramIcons,
   tryApi = false,
 }: UsePackageIconType) => {
-  const { toImage } = useLinks();
+  const { toPackageImage } = useLinks();
   const [iconList, setIconList] = useState<UsePackageIconType['icons']>();
   const [iconType, setIconType] = useState<string>(''); // FIXME: use `empty` icon during initialization - see: https://github.com/elastic/kibana/issues/60622
   const pkgKey = `${packageName}-${version}`;
@@ -42,9 +42,10 @@ export const usePackageIconType = ({
     const svgIcons = (paramIcons || iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
-    const localIconSrc = Array.isArray(svgIcons) && (svgIcons[0].path || svgIcons[0].src);
+    const localIconSrc =
+      Array.isArray(svgIcons) && toPackageImage(svgIcons[0], packageName, version);
     if (localIconSrc) {
-      CACHED_ICONS.set(pkgKey, toImage(localIconSrc));
+      CACHED_ICONS.set(pkgKey, localIconSrc);
       setIconType(CACHED_ICONS.get(pkgKey) || '');
       return;
     }
@@ -67,7 +68,6 @@ export const usePackageIconType = ({
 
     CACHED_ICONS.set(pkgKey, 'package');
     setIconType('package');
-  }, [paramIcons, pkgKey, toImage, iconList, packageName, iconType, tryApi]);
-
+  }, [paramIcons, pkgKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
   return iconType;
 };

@@ -43,6 +43,7 @@ import {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -77,7 +78,7 @@ import {
   HandlerParameters,
 } from './context';
 
-export { PackageInfo, EnvironmentMode } from '../server/types';
+export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
@@ -95,7 +96,6 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  PublicAppInfo,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -110,6 +110,9 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppSearchDeepLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';
@@ -162,6 +165,7 @@ export {
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
+  IExternalUrl,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
@@ -297,6 +301,7 @@ export {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,

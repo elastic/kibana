@@ -29,7 +29,7 @@ import {
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { Group } from '../../../types';
-import { ORG_SOURCES_PATH } from '../../../routes';
+import { SOURCES_PATH } from '../../../routes';
 
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 
@@ -96,7 +96,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
   const sourcesButton = (
-    <EuiButtonTo to={ORG_SOURCES_PATH} fill color="primary">
+    <EuiButtonTo to={SOURCES_PATH} fill color="primary">
       {ADD_SOURCE_BUTTON_TEXT}
     </EuiButtonTo>
   );

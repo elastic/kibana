@@ -77,7 +77,10 @@ export function chartExtendedLimits(data = [], functionDescription) {
       metricValue = actualValue;
     }
 
-    if (d.anomalyScore !== undefined) {
+    // Check for both an anomaly and for an actual value as anomalies in detectors with
+    // by and over fields and more than one cause will not have actual / typical values
+    // at the top level of the anomaly record.
+    if (d.anomalyScore !== undefined && actualValue !== undefined) {
       _min = Math.min(_min, metricValue, actualValue, typicalValue);
       _max = Math.max(_max, metricValue, actualValue, typicalValue);
     } else {

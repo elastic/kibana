@@ -402,6 +402,39 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"is in list" operator', () => {
+      it('will return 4 results if we have two lists with an AND contradiction keyword === "word one" AND keyword === "word two"', async () => {
+        await importFile(supertest, 'keyword', ['word one'], 'list_items_1.txt');
+        await importFile(supertest, 'keyword', ['word two'], 'list_items_2.txt');
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          [
+            {
+              field: 'keyword',
+              list: {
+                id: 'list_items_1.txt',
+                type: 'keyword',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+            {
+              field: 'keyword',
+              list: {
+                id: 'list_items_2.txt',
+                type: 'keyword',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+          ],
+        ]);
+        await waitForRuleSuccess(supertest, id);
+        await waitForSignalsToBePresent(supertest, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
+      });
+
       it('will return 3 results if we have a list that includes 1 keyword', async () => {
         await importFile(supertest, 'keyword', ['word one'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['keyword']);

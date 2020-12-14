@@ -206,6 +206,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
+    kuery?: string;
     policyId?: string;
   };
 }

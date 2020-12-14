@@ -6,13 +6,13 @@
 import { i18n } from '@kbn/i18n';
 import { ActionGroup } from './alert_type';
 
-export const ResolvedActionGroup: ActionGroup = {
-  id: 'resolved',
-  name: i18n.translate('xpack.alerts.builtinActionGroups.resolved', {
-    defaultMessage: 'Resolved',
+export const RecoveredActionGroup: Readonly<ActionGroup> = {
+  id: 'recovered',
+  name: i18n.translate('xpack.alerts.builtinActionGroups.recovered', {
+    defaultMessage: 'Recovered',
   }),
 };
 
-export function getBuiltinActionGroups(): ActionGroup[] {
-  return [ResolvedActionGroup];
+export function getBuiltinActionGroups(customRecoveryGroup?: ActionGroup): ActionGroup[] {
+  return [customRecoveryGroup ?? Object.freeze(RecoveredActionGroup)];
 }
