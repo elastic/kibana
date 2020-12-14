@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UsageCollectionSetup, MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 
 import { collectDashboardTelemetry, DashboardCollectorData } from './dashboard_telemetry';
