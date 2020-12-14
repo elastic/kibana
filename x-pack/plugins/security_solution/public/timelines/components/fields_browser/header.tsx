@@ -96,6 +96,7 @@ const TitleRow = React.memo<{
   onUpdateColumns: OnUpdateColumns;
 }>(({ id, onOutsideClick, onUpdateColumns }) => {
   const { getManageTimelineById } = useManageTimeline();
+
   const handleResetColumns = useCallback(() => {
     const timeline = getManageTimelineById(id);
     onUpdateColumns(timeline.defaultModel.columns);

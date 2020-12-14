@@ -135,7 +135,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', APP_ID);
+    this.logger = context.logger.get();
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
@@ -316,7 +316,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
 
     return {};
   }
@@ -359,6 +359,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
+      licenseService,
     });
 
     if (exceptionListsStartEnabled() && this.manifestTask) {
@@ -369,7 +370,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
-    this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
     this.licensing$ = plugins.licensing.license$;
     licenseService.start(this.licensing$);
     this.policyWatcher = new PolicyWatcher(

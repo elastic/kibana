@@ -124,7 +124,9 @@ export function WorkspacePanelWrapper({
         <EuiScreenReaderOnly>
           <h1 id="lns_ChartTitle" data-test-subj="lns_ChartTitle">
             {title ||
-              i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+              i18n.translate('xpack.lens.chartTitle.unsaved', {
+                defaultMessage: 'Unsaved visualization',
+              })}
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">

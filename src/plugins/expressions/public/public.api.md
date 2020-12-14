@@ -9,6 +9,7 @@ import { CoreStart } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
+import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { PersistedState } from 'src/plugins/visualizations/public';
@@ -136,6 +137,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
+    getKibanaRequest?: () => KibanaRequest;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
@@ -530,7 +532,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode }?: Partial<ExpressionRenderHandlerParams>);
+    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -542,7 +544,7 @@ export class ExpressionRenderHandler {
     // (undocumented)
     render$: Observable<number>;
     // (undocumented)
-    render: (data: any, uiState?: any) => Promise<void>;
+    render: (value: any, uiState?: any) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UpdateValue" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -886,6 +888,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
+    hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+    // (undocumented)
     inspectorAdapters?: Adapters;
     // Warning: (ae-forgotten-export) The symbol "RenderErrorHandlerFnType" needs to be exported by the entry point index.d.ts
     //
@@ -914,6 +918,8 @@ export interface IInterpreterRenderHandlers {
     event: (event: any) => void;
     // (undocumented)
     getRenderMode: () => RenderMode;
+    // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

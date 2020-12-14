@@ -52,6 +52,7 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [AggFunctionsMapping](./kibana-plugin-plugins-data-public.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [ApplyGlobalFilterActionContext](./kibana-plugin-plugins-data-public.applyglobalfilteractioncontext.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) | Data plugin public Setup contract |
@@ -89,7 +90,7 @@
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
 |  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
-|  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchSessionInfoprovider.md) | Provide info about current search session to be stored in backgroundSearch saved object |
+|  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in backgroundSearch saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
@@ -162,6 +163,7 @@
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
+|  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |

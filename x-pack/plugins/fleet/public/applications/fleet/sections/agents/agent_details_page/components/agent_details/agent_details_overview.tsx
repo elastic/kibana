@@ -11,10 +11,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
@@ -66,26 +66,20 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   </EuiFlexItem>
                   {isAgentUpgradeable(agent, kibanaVersion) ? (
                     <EuiFlexItem grow={false}>
-                      <EuiText color="subdued" size="s" className="eui-textNoWrap">
-                        <EuiIcon size="m" type="alert" color="warning" />
-                        &nbsp;
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.agentUpgradeLabel"
-                          defaultMessage="Upgrade available"
-                        />
-                      </EuiText>
+                      <EuiToolTip
+                        position="right"
+                        content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
+                          defaultMessage: 'Upgrade available',
+                        })}
+                      >
+                        <EuiIcon type="alert" color="warning" />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
               ) : (
                 '-'
               ),
-          },
-          {
-            title: i18n.translate('xpack.fleet.agentDetails.enrollmentTokenLabel', {
-              defaultMessage: 'Enrollment token',
-            }),
-            description: '-', // Fixme when we have the enrollment tokenhttps://github.com/elastic/kibana/issues/61269
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.integrationsLabel', {

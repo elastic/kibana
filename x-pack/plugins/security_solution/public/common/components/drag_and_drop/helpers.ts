@@ -38,7 +38,7 @@ export const droppableTimelineProvidersPrefix = `${droppableIdPrefix}.timelinePr
 
 export const droppableTimelineColumnsPrefix = `${droppableIdPrefix}.timelineColumns.`;
 
-export const droppableTimelineFlyoutButtonPrefix = `${droppableIdPrefix}.flyoutButton.`;
+export const droppableTimelineFlyoutBottomBarPrefix = `${droppableIdPrefix}.flyoutButton.`;
 
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
@@ -106,7 +106,7 @@ export const destinationIsTimelineColumns = (result: DropResult): boolean =>
 
 export const destinationIsTimelineButton = (result: DropResult): boolean =>
   result.destination != null &&
-  result.destination.droppableId.startsWith(droppableTimelineFlyoutButtonPrefix);
+  result.destination.droppableId.startsWith(droppableTimelineFlyoutBottomBarPrefix);
 
 export const getProviderIdFromDraggable = (result: DropResult): string =>
   result.draggableId.substring(result.draggableId.lastIndexOf('.') + 1);

@@ -13,9 +13,9 @@ if [[ -z "$CODE_COVERAGE" ]]; then
 
   if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
-    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-    yarn run grunt run:exampleFunctionalTestsRelease --from=source;
-    yarn run grunt run:interpreterFunctionalTestsRelease;
+    ./test/scripts/test/plugin_functional.sh
+    ./test/scripts/test/example_functional.sh
+    ./test/scripts/test/interpreter_functional.sh
   fi
 else
   echo " -> Running Functional tests with code coverage"

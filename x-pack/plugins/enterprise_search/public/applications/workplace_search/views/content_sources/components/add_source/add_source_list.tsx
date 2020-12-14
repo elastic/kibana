@@ -31,7 +31,7 @@ import { AvailableSourcesList } from './available_sources_list';
 import { ConfiguredSourcesList } from './configured_sources_list';
 
 const NEW_SOURCE_DESCRIPTION =
-  'When configuring and connecting a source, you are creating distinct entities with searchable content synchronized from the content platform itself. A source can be added using one of the available source connectors or via Custom API Sources, for additional flexibility.';
+  'When configuring and connecting a source, you are creating distinct entities with searchable content synchronized from the content platform itself. A source can be added using one of the available source connectors or via Custom API Sources, for additional flexibility. ';
 const ORG_SOURCE_DESCRIPTION =
   'Shared content sources are available to your entire organization or can be assigned to specific user groups.';
 const PRIVATE_SOURCE_DESCRIPTION =
@@ -99,7 +99,7 @@ export const AddSourceList: React.FC = () => {
       <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
       {showConfiguredSourcesList || isOrganization ? (
         <ContentSection>
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           <EuiFormRow>
             <EuiFieldSearch
               data-test-subj="FilterSourcesInput"

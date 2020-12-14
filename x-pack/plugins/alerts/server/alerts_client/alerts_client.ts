@@ -13,7 +13,8 @@ import {
   SavedObjectReference,
   SavedObject,
   PluginInitializerContext,
-} from 'src/core/server';
+  SavedObjectsUtils,
+} from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
@@ -28,8 +29,13 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
   AlertExecutionStatusValues,
+  AlertNotifyWhenType,
 } from '../types';
-import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
+import {
+  validateAlertTypeParams,
+  alertExecutionStatusFromRaw,
+  getAlertNotifyWhenType,
+} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -44,10 +50,12 @@ import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
+import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
+import { alertAuditEvent, AlertAuditAction } from './audit_events';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -75,6 +83,7 @@ export interface ConstructorOptions {
   getActionsClient: () => Promise<ActionsClient>;
   getEventLogClient: () => Promise<IEventLogClient>;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  auditLogger?: AuditLogger;
 }
 
 export interface MuteOptions extends IndexType {
@@ -153,6 +162,7 @@ interface UpdateOptions {
     actions: NormalizedAlertAction[];
     params: Record<string, unknown>;
     throttle: string | null;
+    notifyWhen: AlertNotifyWhenType | null;
   };
 }
 
@@ -176,6 +186,7 @@ export class AlertsClient {
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
+  private readonly auditLogger?: AuditLogger;
 
   constructor({
     alertTypeRegistry,
@@ -192,6 +203,7 @@ export class AlertsClient {
     actionsAuthorization,
     getEventLogClient,
     kibanaVersion,
+    auditLogger,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -207,14 +219,28 @@ export class AlertsClient {
     this.actionsAuthorization = actionsAuthorization;
     this.getEventLogClient = getEventLogClient;
     this.kibanaVersion = kibanaVersion;
+    this.auditLogger = auditLogger;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
-    await this.authorization.ensureAuthorized(
-      data.alertTypeId,
-      data.consumer,
-      WriteOperations.Create
-    );
+    const id = SavedObjectsUtils.generateId();
+
+    try {
+      await this.authorization.ensureAuthorized(
+        data.alertTypeId,
+        data.consumer,
+        WriteOperations.Create
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.CREATE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
 
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
@@ -231,6 +257,8 @@ export class AlertsClient {
     const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
 
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
@@ -242,12 +270,22 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
+      notifyWhen,
       executionStatus: {
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
       },
     };
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.CREATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
     let createdAlert: SavedObject<RawAlert>;
     try {
       createdAlert = await this.unsecuredSavedObjectsClient.create(
@@ -256,6 +294,7 @@ export class AlertsClient {
         {
           ...options,
           references,
+          id,
         }
       );
     } catch (e) {
@@ -297,10 +336,27 @@ export class AlertsClient {
 
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
-    await this.authorization.ensureAuthorized(
-      result.attributes.alertTypeId,
-      result.attributes.consumer,
-      ReadOperations.Get
+    try {
+      await this.authorization.ensureAuthorized(
+        result.attributes.alertTypeId,
+        result.attributes.consumer,
+        ReadOperations.Get
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.GET,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.GET,
+        savedObject: { type: 'alert', id },
+      })
     );
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
@@ -370,11 +426,23 @@ export class AlertsClient {
   public async find({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult> {
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter();
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.FIND,
+          error,
+        })
+      );
+      throw error;
+    }
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
       logSuccessfulAuthorization,
-    } = await this.authorization.getFindAuthorizationFilter();
+    } = authorizationTuple;
 
     const {
       page,
@@ -392,13 +460,33 @@ export class AlertsClient {
     });
 
     const authorizedData = data.map(({ id, attributes, references }) => {
-      ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
+      try {
+        ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
+      } catch (error) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: AlertAuditAction.FIND,
+            savedObject: { type: 'alert', id },
+            error,
+          })
+        );
+        throw error;
+      }
       return this.getAlertFromRaw(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
         references
       );
     });
+
+    authorizedData.forEach(({ id }) =>
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.FIND,
+          savedObject: { type: 'alert', id },
+        })
+      )
+    );
 
     logSuccessfulAuthorization();
 
@@ -473,10 +561,29 @@ export class AlertsClient {
       attributes = alert.attributes;
     }
 
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.Delete
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.Delete
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.DELETE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.DELETE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
     );
 
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
@@ -520,10 +627,30 @@ export class AlertsClient {
       // Still attempt to load the object using SOC
       alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     }
-    await this.authorization.ensureAuthorized(
-      alertSavedObject.attributes.alertTypeId,
-      alertSavedObject.attributes.consumer,
-      WriteOperations.Update
+
+    try {
+      await this.authorization.ensureAuthorized(
+        alertSavedObject.attributes.alertTypeId,
+        alertSavedObject.attributes.consumer,
+        WriteOperations.Update
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.UPDATE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.UPDATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
     );
 
     const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
@@ -576,6 +703,7 @@ export class AlertsClient {
       ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawAlert>;
     const createAttributes = this.updateMeta({
@@ -584,6 +712,7 @@ export class AlertsClient {
       ...apiKeyAttributes,
       params: validatedAlertTypeParams as RawAlert['params'],
       actions,
+      notifyWhen,
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
@@ -658,14 +787,28 @@ export class AlertsClient {
       attributes = alert.attributes;
       version = alert.version;
     }
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.UpdateApiKey
-    );
 
-    if (attributes.actions.length && !this.authorization.shouldUseLegacyAuthorization(attributes)) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.UpdateApiKey
+      );
+      if (
+        attributes.actions.length &&
+        !this.authorization.shouldUseLegacyAuthorization(attributes)
+      ) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.UPDATE_API_KEY,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
     }
 
     const username = await this.getUserName();
@@ -678,6 +821,15 @@ export class AlertsClient {
       updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.UPDATE_API_KEY,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
@@ -732,15 +884,34 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.Enable
-    );
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.Enable
+      );
 
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.ENABLE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.ENABLE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
+    );
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -816,10 +987,29 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.Disable
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.Disable
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.DISABLE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.DISABLE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
     );
 
     if (attributes.enabled === true) {
@@ -866,15 +1056,35 @@ export class AlertsClient {
       'alert',
       id
     );
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.MuteAll
-    );
 
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.MuteAll
+      );
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.MUTE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.MUTE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
+    );
 
     const updateAttributes = this.updateMeta({
       muteAll: true,
@@ -905,15 +1115,35 @@ export class AlertsClient {
       'alert',
       id
     );
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.UnmuteAll
-    );
 
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.UnmuteAll
+      );
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.UNMUTE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.UNMUTE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id },
+      })
+    );
 
     const updateAttributes = this.updateMeta({
       muteAll: false,
@@ -945,15 +1175,34 @@ export class AlertsClient {
       alertId
     );
 
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.MuteInstance
-    );
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.MuteInstance
+      );
 
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.MUTE_INSTANCE,
+          savedObject: { type: 'alert', id: alertId },
+          error,
+        })
+      );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.MUTE_INSTANCE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id: alertId },
+      })
+    );
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -991,14 +1240,33 @@ export class AlertsClient {
       alertId
     );
 
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.UnmuteInstance
-    );
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
+    try {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.UnmuteInstance
+      );
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.UNMUTE_INSTANCE,
+          savedObject: { type: 'alert', id: alertId },
+          error,
+        })
+      );
+      throw error;
     }
+
+    this.auditLogger?.log(
+      alertAuditEvent({
+        action: AlertAuditAction.UNMUTE_INSTANCE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'alert', id: alertId },
+      })
+    );
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
@@ -1069,7 +1337,7 @@ export class AlertsClient {
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, updatedAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
+    { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
     // Not the prettiest code here, but if we want to use most of the
@@ -1084,6 +1352,7 @@ export class AlertsClient {
     const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
     return {
       id,
+      notifyWhen,
       ...rawAlertWithoutExecutionStatus,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change

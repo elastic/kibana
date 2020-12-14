@@ -20,6 +20,10 @@ const alertType: AlertType = {
     { id: 'other-group', name: 'Other Group' },
   ],
   defaultActionGroupId: 'default',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };
@@ -114,6 +118,7 @@ test('enqueues execution per selected action', async () => {
           "kibana": Object {
             "alerting": Object {
               "action_group_id": "default",
+              "action_subgroup": undefined,
               "instance_id": "2",
             },
             "saved_objects": Array [

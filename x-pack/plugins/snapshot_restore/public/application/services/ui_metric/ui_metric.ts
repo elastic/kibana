@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/public';
 
@@ -21,7 +21,7 @@ export class UiMetricService {
       // Usage collection might have been disabled in Kibana config.
       return;
     }
-    this.usageCollection.reportUiStats(this.appName, 'count' as UiStatsMetricType, name);
+    this.usageCollection.reportUiCounter(this.appName, METRIC_TYPE.COUNT, name);
   }
 
   public trackUiMetric(eventName: string) {

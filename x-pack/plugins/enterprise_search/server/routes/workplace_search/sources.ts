@@ -8,6 +8,16 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
+const schemaValuesSchema = schema.recordOf(
+  schema.string(),
+  schema.oneOf([
+    schema.literal('text'),
+    schema.literal('number'),
+    schema.literal('geolocation'),
+    schema.literal('date'),
+  ])
+);
+
 const pageSchema = schema.object({
   current: schema.number(),
   size: schema.number(),
@@ -363,7 +373,7 @@ export function registerAccountSourceSchemasRoute({
     {
       path: '/api/workplace_search/account/sources/{id}/schemas',
       validate: {
-        body: schema.object({}),
+        body: schemaValuesSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -745,7 +755,7 @@ export function registerOrgSourceSchemasRoute({
     {
       path: '/api/workplace_search/org/sources/{id}/schemas',
       validate: {
-        body: schema.object({}),
+        body: schemaValuesSchema,
         params: schema.object({
           id: schema.string(),
         }),

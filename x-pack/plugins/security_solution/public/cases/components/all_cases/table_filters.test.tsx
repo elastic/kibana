@@ -7,12 +7,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { CasesTableFilters } from './table_filters';
 import { TestProviders } from '../../../common/mock';
-
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
@@ -24,10 +25,12 @@ const setFilterRefetch = jest.fn();
 const props = {
   countClosedCases: 1234,
   countOpenCases: 99,
+  countInProgressCases: 54,
   onFilterChanged,
   initial: DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
 };
+
 describe('CasesTableFilters ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -40,19 +43,17 @@ describe('CasesTableFilters ', () => {
       fetchReporters,
     });
   });
-  it('should render the initial case count', () => {
+
+  it('should render the case status filter dropdown', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="open-case-count"]`).last().text()).toEqual(
-      'Open cases (99)'
-    );
-    expect(wrapper.find(`[data-test-subj="closed-case-count"]`).last().text()).toEqual(
-      'Closed cases (1234)'
-    );
+
+    expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
   });
+
   it('should call onFilterChange when selected tags change', () => {
     const wrapper = mount(
       <TestProviders>
@@ -64,6 +65,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
+
   it('should call onFilterChange when selected reporters change', () => {
     const wrapper = mount(
       <TestProviders>
@@ -79,6 +81,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
   });
+
   it('should call onFilterChange when search changes', () => {
     const wrapper = mount(
       <TestProviders>
@@ -92,16 +95,19 @@ describe('CasesTableFilters ', () => {
       .simulate('keyup', { key: 'Enter', target: { value: 'My search' } });
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
-  it('should call onFilterChange when status toggled', () => {
+
+  it('should call onFilterChange when changing status', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="closed-case-count"]`).last().simulate('click');
 
-    expect(onFilterChanged).toBeCalledWith({ status: 'closed' });
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
+    expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
+
   it('should call on load setFilterRefetch', () => {
     mount(
       <TestProviders>
@@ -110,6 +116,7 @@ describe('CasesTableFilters ', () => {
     );
     expect(setFilterRefetch).toHaveBeenCalled();
   });
+
   it('should remove tag from selected tags when tag no longer exists', () => {
     const ourProps = {
       ...props,
@@ -125,6 +132,7 @@ describe('CasesTableFilters ', () => {
     );
     expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
   });
+
   it('should remove reporter from selected reporters when reporter no longer exists', () => {
     const ourProps = {
       ...props,

@@ -21,14 +21,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { LoadingPanel } from '../../loading';
-import { OnChangeItemsPerPage, OnChangePage } from '../events';
+import { OnChangePage } from '../events';
 
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
 import { useManageTimeline } from '../../manage_timeline';
 import { LastUpdatedAt } from '../../../../common/components/last_updated';
+import { timelineActions } from '../../../store/timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -128,6 +130,9 @@ export const EventsCountComponent = ({
   serverSideEventCount: number;
   footerText: string;
 }) => {
+  const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
+    serverSideEventCount,
+  ]);
   return (
     <h5>
       <PopoverRowItems
@@ -156,10 +161,10 @@ export const EventsCountComponent = ({
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
-      <EuiToolTip content={`${serverSideEventCount} ${footerText}`}>
+      <EuiToolTip content={`${totalCount} ${footerText}`}>
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
-            {serverSideEventCount}
+            {totalCount}
           </EuiBadge>{' '}
           {documentType}
         </ServerSideEventCount>
@@ -232,7 +237,6 @@ interface FooterProps {
   itemsCount: number;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
   totalCount: number;
 }
@@ -248,10 +252,10 @@ export const FooterComponent = ({
   itemsCount,
   itemsPerPage,
   itemsPerPageOptions,
-  onChangeItemsPerPage,
   onChangePage,
   totalCount,
 }: FooterProps) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
@@ -273,7 +277,14 @@ export const FooterComponent = ({
     isPopoverOpen,
     setIsPopoverOpen,
   ]);
+
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) =>
+      dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
+    [dispatch, id]
+  );
 
   const rowItems = useMemo(
     () =>

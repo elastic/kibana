@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
@@ -39,6 +38,7 @@ interface CreateExecutionHandlerOptions {
 
 interface ExecutionHandlerOptions {
   actionGroup: string;
+  actionSubgroup?: string;
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
@@ -58,8 +58,16 @@ export function createExecutionHandler({
   request,
   alertParams,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
-  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
+  const alertTypeActionGroups = new Map(
+    alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+  );
+  return async ({
+    actionGroup,
+    actionSubgroup,
+    context,
+    state,
+    alertInstanceId,
+  }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
@@ -76,6 +84,8 @@ export function createExecutionHandler({
             tags,
             alertInstanceId,
             alertActionGroup: actionGroup,
+            alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
+            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             state,
@@ -118,6 +128,7 @@ export function createExecutionHandler({
           alerting: {
             instance_id: alertInstanceId,
             action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
@@ -126,7 +137,11 @@ export function createExecutionHandler({
         },
       };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };

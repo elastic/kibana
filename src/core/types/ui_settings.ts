@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Type } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 /**
  * UI element type to represent the settings.
@@ -87,7 +87,7 @@ export interface UiSettingsParams<T = unknown> {
    * Temporary measure until https://github.com/elastic/kibana/issues/83084 is in place
    */
   metric?: {
-    type: UiStatsMetricType;
+    type: UiCounterMetricType;
     name: string;
   };
 }
