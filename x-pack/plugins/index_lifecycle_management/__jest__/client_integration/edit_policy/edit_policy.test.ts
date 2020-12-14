@@ -119,12 +119,15 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
 
+        await actions.hot.toggleDefaultRollover(false);
         await actions.hot.setMaxSize('123', 'mb');
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
+        await actions.hot.setShrink('2');
+        await actions.hot.setReadonly(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -140,6 +143,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "rollover": Object {
                     "max_age": "123h",
                     "max_docs": 123,
@@ -147,6 +151,9 @@ describe('<EditPolicy />', () => {
                   },
                   "set_priority": Object {
                     "priority": 123,
+                  },
+                  "shrink": Object {
+                    "number_of_shards": 2,
                   },
                 },
                 "min_age": "0ms",
@@ -171,7 +178,8 @@ describe('<EditPolicy />', () => {
 
       test('disabling rollover', async () => {
         const { actions } = testBed;
-        await actions.hot.toggleRollover(true);
+        await actions.hot.toggleDefaultRollover(false);
+        await actions.hot.toggleRollover(false);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
@@ -205,6 +213,17 @@ describe('<EditPolicy />', () => {
         // searchable snapshot in cold is still visible
         expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
         expect(actions.cold.freezeExists()).toBeFalsy();
+      });
+
+      test('disabling rollover toggle, but enabling default rollover', async () => {
+        const { actions } = testBed;
+        await actions.hot.toggleDefaultRollover(false);
+        await actions.hot.toggleRollover(false);
+        await actions.hot.toggleDefaultRollover(true);
+
+        expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
+        expect(actions.hot.shrinkExists()).toBeTruthy();
+        expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
       });
     });
   });
@@ -255,6 +274,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
+        await actions.warm.setReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -288,6 +308,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -758,7 +779,7 @@ describe('<EditPolicy />', () => {
       await act(async () => {
         testBed = await setup({
           appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'basic' } }),
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
           },
         });
       });
@@ -768,11 +789,12 @@ describe('<EditPolicy />', () => {
     });
     test('hiding and disabling searchable snapshot field', async () => {
       const { actions } = testBed;
+      await actions.hot.toggleDefaultRollover(false);
       await actions.hot.toggleRollover(false);
       await actions.cold.enable(true);
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
-      expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
+      expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
     });
   });
 });

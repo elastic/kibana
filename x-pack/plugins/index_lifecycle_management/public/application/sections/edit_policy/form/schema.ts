@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import { FormInternal } from '../types';
 
@@ -35,6 +38,12 @@ export const schema: FormSchema<FormInternal> = {
           defaultMessage: 'Enable rollover',
         }),
       },
+      isUsingDefaultRollover: {
+        defaultValue: true,
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
+          defaultMessage: 'Use recommended defaults',
+        }),
+      },
       maxStorageSizeUnit: {
         defaultValue: 'gb',
       },
@@ -44,6 +53,10 @@ export const schema: FormSchema<FormInternal> = {
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     warm: {
@@ -72,6 +85,10 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     cold: {
@@ -127,6 +144,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
@@ -141,6 +159,7 @@ export const schema: FormSchema<FormInternal> = {
               },
             ],
             serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
@@ -154,6 +173,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
         },
         forcemerge: {
@@ -170,6 +190,25 @@ export const schema: FormSchema<FormInternal> = {
               },
               {
                 validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            serializer: serializers.stringToNumber,
+          },
+        },
+        shrink: {
+          number_of_shards: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+              defaultMessage: 'Number of primary shards',
+            }),
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: numberGreaterThanField({
+                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+                  than: 0,
+                }),
               },
             ],
             serializer: serializers.stringToNumber,
@@ -210,7 +249,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         shrink: {
           number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel', {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
               defaultMessage: 'Number of primary shards',
             }),
             validations: [

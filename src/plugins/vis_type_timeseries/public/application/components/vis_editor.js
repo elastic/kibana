@@ -74,20 +74,26 @@ export class VisEditor extends Component {
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
+
+    const extractedIndexPatterns = extractIndexPatterns(this.state.model);
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        });
+      });
+    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  debouncedFetchFields = debounce(
-    (extractedIndexPatterns) => {
-      if (this.abortControllerFetchFields) {
-        this.abortControllerFetchFields.abort();
-      }
-      this.abortControllerFetchFields = new AbortController();
+  abortableFetchFields = (extractedIndexPatterns) => {
+    if (this.abortControllerFetchFields) {
+      this.abortControllerFetchFields.abort();
+    }
+    this.abortControllerFetchFields = new AbortController();
 
-      return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
-    },
-    VIS_STATE_DEBOUNCE_DELAY,
-    { leading: true }
-  );
+    return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
+  };
 
   handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
@@ -103,16 +109,6 @@ export class VisEditor extends Component {
       this.updateVisState();
 
       dirty = false;
-    }
-
-    const extractedIndexPatterns = extractIndexPatterns(nextModel);
-    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      this.debouncedFetchFields(extractedIndexPatterns).then((visFields) =>
-        this.setState({
-          visFields,
-          extractedIndexPatterns,
-        })
-      );
     }
 
     this.setState({
