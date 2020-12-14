@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import sampleJsonResponse from './es_sample_response.json';
 import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
 import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
@@ -120,7 +121,7 @@ describe('geo_containment', () => {
 
   describe('getActiveEntriesAndGenerateAlerts', () => {
     const testAlertActionArr: unknown[] = [];
-    afterEach(() => {
+    beforeEach(() => {
       jest.clearAllMocks();
       testAlertActionArr.length = 0;
     });
@@ -154,12 +155,54 @@ describe('geo_containment', () => {
         },
       ],
     ]);
+
+    const expectedContext = [
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '123',
+          entityDocumentId: 'docId1',
+          entityId: 'a',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'a-123',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '456',
+          entityDocumentId: 'docId2',
+          entityId: 'b',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'b-456',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '789',
+          entityDocumentId: 'docId3',
+          entityId: 'c',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'c-789',
+      },
+    ];
     const emptyShapesIdsNamesMap = {};
 
-    const scheduleActions = jest.fn((alertInstance: string, context: Record<string, unknown>) => {
-      testAlertActionArr.push(context.entityId);
-    });
-    const alertInstanceFactory = (x: string) => ({ scheduleActions });
+    const alertInstanceFactory = (instanceId: string) => {
+      return {
+        scheduleActions: (actionGroupId: string, context: Record<string, unknown>) => {
+          const contextKeys = Object.keys(expectedContext[0].context);
+          const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+          testAlertActionArr.push({
+            actionGroupId,
+            instanceId,
+            context: contextSubset,
+          });
+        },
+      };
+    };
     const currentDateTime = new Date();
 
     it('should use currently active entities if no older entity entries', () => {
@@ -172,8 +215,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
-      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = {
@@ -192,8 +234,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
-      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = {
@@ -204,6 +245,20 @@ describe('geo_containment', () => {
           docId: 'docId7',
         },
       };
+      const expectedContextPlusD = [
+        {
+          actionGroupId: 'Tracked entity contained',
+          context: {
+            containingBoundaryId: '999',
+            entityDocumentId: 'docId7',
+            entityId: 'd',
+            entityLocation: 'POINT (0 0)',
+          },
+          instanceId: 'd-999',
+        },
+        ...expectedContext,
+      ];
+
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
@@ -213,8 +268,7 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
-      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
-      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
+      expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
     });
     it('should remove "other" entries and schedule the expected number of actions', () => {
       const emptyPrevLocationMap = {};
@@ -233,8 +287,7 @@ describe('geo_containment', () => {
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(scheduleActions.mock.calls.length).toEqual(allActiveEntriesMap.size);
-      expect(testAlertActionArr).toEqual([...allActiveEntriesMap.keys()]);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
   });
 });
