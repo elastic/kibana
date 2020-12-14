@@ -33,7 +33,7 @@ describe('application_usage', () => {
 
     expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledWith('appId');
     expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledTimes(1);
-    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('default');
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('main');
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledTimes(1);
   });
 
@@ -48,7 +48,7 @@ describe('application_usage', () => {
 
     expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledWith('appId');
     expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledTimes(1);
-    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('default');
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('main');
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledTimes(1);
   });
 
