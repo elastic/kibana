@@ -346,19 +346,19 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the doc count`);
-      await ml.dataVisualizerIndexBased.assertDataVisualizerTotalDocCountHeaderExist();
-      await ml.dataVisualizerIndexBased.assertDataVisualizerTotalDocCountChartExist();
+      await ml.dataVisualizerIndexBased.assertTotalDocCountHeaderExist();
+      await ml.dataVisualizerIndexBased.assertTotalDocCountChartExist();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the search panel count`);
-      await ml.dataVisualizerIndexBased.assertDataVisualizerSearchPanelExist();
+      await ml.dataVisualizerIndexBased.assertSearchPanelExist();
       await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
       await ml.dataVisualizerIndexBased.assertFieldTypeInputExists();
       await ml.dataVisualizerIndexBased.assertFieldNameInputExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the field count`);
-      await ml.dataVisualizerIndexBased.assertDataVisualizerFieldCountPanelExist();
-      await ml.dataVisualizerIndexBased.assertDataVisualizerMetricFieldsSummaryExist();
-      await ml.dataVisualizerIndexBased.assertDataVisualizerFieldsSummaryExist();
+      await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
+      await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
+      await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertShowEmptyFieldsSwitchExists();
       await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
         testData.expected.visibleMetricFieldsCount

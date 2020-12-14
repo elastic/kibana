@@ -37,27 +37,27 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
     },
 
-    async assertDataVisualizerTotalDocCountHeaderExist() {
+    async assertTotalDocCountHeaderExist() {
       await testSubjects.existOrFail(`mlDataVisualizerTotalDocCountHeader`);
     },
 
-    async assertDataVisualizerTotalDocCountChartExist() {
+    async assertTotalDocCountChartExist() {
       await testSubjects.existOrFail(`mlFieldDataCardDocumentCountChart`);
     },
 
-    async assertDataVisualizerSearchPanelExist() {
+    async assertSearchPanelExist() {
       await testSubjects.existOrFail(`mlDataVisualizerSearchPanel`);
     },
 
-    async assertDataVisualizerSearchQueryInputExist() {
+    async assertSearchQueryInputExist() {
       await testSubjects.existOrFail(`mlDataVisualizerQueryInput`);
     },
 
-    async assertDataVisualizerFieldCountPanelExist() {
+    async assertFieldCountPanelExist() {
       await testSubjects.existOrFail(`mlDataVisualizerFieldCountPanel`);
     },
 
-    async assertDataVisualizerMetricFieldsSummaryExist() {
+    async assertMetricFieldsSummaryExist() {
       await testSubjects.existOrFail(`mlDataVisualizerMetricFieldsSummary`);
     },
 
@@ -113,7 +113,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       });
     },
 
-    async assertDataVisualizerFieldsSummaryExist() {
+    async assertFieldsSummaryExist() {
       await testSubjects.existOrFail(`mlDataVisualizerFieldsSummary`);
     },
 
