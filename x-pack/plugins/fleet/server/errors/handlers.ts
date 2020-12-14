@@ -20,6 +20,7 @@ import {
   PackageNotFoundError,
   AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
+  ConcurrentInstallOperationError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -69,7 +70,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
-
+  if (error instanceof ConcurrentInstallOperationError) {
+    return 409; // Conflict
+  }
   return 400; // Bad Request
 };
 
