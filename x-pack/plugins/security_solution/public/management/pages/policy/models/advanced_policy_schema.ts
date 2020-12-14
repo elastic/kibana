@@ -214,7 +214,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Delay for sending events to elasticsearch, in seconds. Default: 120.',
+        defaultMessage: 'Delay for sending events to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
