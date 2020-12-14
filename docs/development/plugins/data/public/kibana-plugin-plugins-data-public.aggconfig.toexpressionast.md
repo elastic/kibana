@@ -7,11 +7,11 @@
 <b>Signature:</b>
 
 ```typescript
-toExpressionAst(): ExpressionAstFunction | undefined;
+toExpressionAst(): ExpressionAstExpression | undefined;
 ```
 <b>Returns:</b>
 
-`ExpressionAstFunction | undefined`
+`ExpressionAstExpression | undefined`
 
-Returns an ExpressionAst representing the function for this agg type.
+Returns an ExpressionAst representing the this agg type.
 

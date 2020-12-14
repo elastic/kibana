@@ -4,7 +4,7 @@
 
 ## Embeddable.getUpdated$() method
 
-Merges input$ and output$ streams and denounces emit till next macro-task Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously In case corresponding state change triggered `reload` this stream is guarantied to emit later which allows to skip any state handling in case `reload` already handled it
+Merges input$ and output$ streams and debounces emit till next macro-task. Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously. In case corresponding state change triggered `reload` this stream is guarantied to emit later, which allows to skip any state handling in case `reload` already handled it.
 
 <b>Signature:</b>
 

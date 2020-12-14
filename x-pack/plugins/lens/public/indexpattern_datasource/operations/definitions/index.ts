@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
@@ -44,6 +43,7 @@ import {
   IndexPatternLayer,
 } from '../../types';
 import { DateRange } from '../../../../common';
+import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
 
@@ -227,7 +227,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsFn: (column: C, columnId: string, indexPattern: IndexPattern) => ExpressionAstFunction;
 }
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
@@ -266,7 +266,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsFn: (column: C, columnId: string, indexPattern: IndexPattern) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
@@ -329,7 +329,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     layer: IndexPatternLayer,
     columnId: string,
     indexPattern: IndexPattern
-  ) => ExpressionFunctionAST[];
+  ) => ExpressionAstFunction[];
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
