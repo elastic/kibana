@@ -48,7 +48,10 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       function: 'min',
       display: (
-        <FormattedMessage id="xpack.ml.fieldDataCard.cardNumber.minLabel" defaultMessage="min" />
+        <FormattedMessage
+          id="xpack.ml.fieldDataCardExpandedRow.numberContent.minLabel"
+          defaultMessage="min"
+        />
       ),
       value: kibanaFieldFormat(min, fieldFormat),
     },
@@ -56,7 +59,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       function: 'median',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
+          id="xpack.ml.fieldDataCardExpandedRow.numberContent.medianLabel"
           defaultMessage="median"
         />
       ),
@@ -65,7 +68,10 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       function: 'max',
       display: (
-        <FormattedMessage id="xpack.ml.fieldDataCard.cardNumber.maxLabel" defaultMessage="max" />
+        <FormattedMessage
+          id="xpack.ml.fieldDataCardExpandedRow.numberContent.maxLabel"
+          defaultMessage="max"
+        />
       ),
       value: kibanaFieldFormat(max, fieldFormat),
     },
@@ -82,9 +88,12 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     },
   ];
 
-  const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardNumber.summaryTableTitle', {
-    defaultMessage: 'summary',
-  });
+  const summaryTableTitle = i18n.translate(
+    'xpack.ml.fieldDataCardExpandedRow.numberContent.summaryTableTitle',
+    {
+      defaultMessage: 'summary',
+    }
+  );
   return (
     <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'}>
       <EuiFlexItem>
@@ -103,7 +112,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
-                  id="xpack.ml.fieldDataCard.cardNumber.topValuesTitle"
+                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
                   defaultMessage="top values"
                 />
               </ExpandedRowFieldHeader>
@@ -124,7 +133,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
-                  id="xpack.ml.fieldDataCard.cardNumber.distributionTitle"
+                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
                   defaultMessage="distribution"
                 />
               </ExpandedRowFieldHeader>
@@ -135,7 +144,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
                     <FormattedMessage
-                      id="xpack.ml.fieldDataCard.cardNumber.displayingPercentilesLabel"
+                      id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
                       defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
                       values={{
                         minPercent: numberAsOrdinal(distribution.minPercentile),
