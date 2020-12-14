@@ -283,7 +283,10 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getOrdinalBreaks(symbolId?: string): Break[] {
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
-    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
+    if (this._options.useCustomColorRamp) {
+      if (!this._options.customColorRamp) {
+        return [];
+      }
       colorStops = this._getCustomRampColorStops();
     } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
