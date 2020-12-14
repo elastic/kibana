@@ -7,6 +7,7 @@
 export type DocumentCreationMode = 'text' | 'file' | 'api';
 
 export enum DocumentCreationStep {
+  ShowCreationModes,
   AddDocuments,
   ShowErrorSummary,
   ShowSuccessSummary,

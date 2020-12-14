@@ -31,15 +31,72 @@ describe('DocumentCreationLogic', () => {
   });
 
   describe('actions', () => {
-    describe('openDocumentCreation', () => {
-      describe('isDocumentCreationOpen & creationMode', () => {
-        it('should open the document creation modal and sets creationMode to the provided value', () => {
-          mount();
-          DocumentCreationLogic.actions.openDocumentCreation('api');
+    describe('showCreationModes', () => {
+      beforeAll(() => {
+        mount();
+        DocumentCreationLogic.actions.showCreationModes();
+      });
 
+      const EXPECTED_VALUES = {
+        ...DEFAULT_VALUES,
+        isDocumentCreationOpen: true,
+        creationStep: DocumentCreationStep.ShowCreationModes,
+      };
+
+      describe('isDocumentCreationOpen', () => {
+        it('should be set to true', () => {
           expect(DocumentCreationLogic.values).toEqual({
-            ...DEFAULT_VALUES,
+            ...EXPECTED_VALUES,
             isDocumentCreationOpen: true,
+          });
+        });
+      });
+
+      describe('creationStep', () => {
+        it('should be set to ShowCreationModes', () => {
+          expect(DocumentCreationLogic.values).toEqual({
+            ...EXPECTED_VALUES,
+            creationStep: DocumentCreationStep.ShowCreationModes,
+          });
+        });
+      });
+    });
+
+    describe('openDocumentCreation', () => {
+      beforeAll(() => {
+        mount();
+        DocumentCreationLogic.actions.openDocumentCreation('api');
+      });
+
+      const EXPECTED_VALUES = {
+        ...DEFAULT_VALUES,
+        isDocumentCreationOpen: true,
+        creationStep: DocumentCreationStep.AddDocuments,
+        creationMode: 'api',
+      };
+
+      describe('isDocumentCreationOpen', () => {
+        it('should be set to true', () => {
+          expect(DocumentCreationLogic.values).toEqual({
+            ...EXPECTED_VALUES,
+            isDocumentCreationOpen: true,
+          });
+        });
+      });
+
+      describe('creationStep', () => {
+        it('should be set to AddDocuments', () => {
+          expect(DocumentCreationLogic.values).toEqual({
+            ...EXPECTED_VALUES,
+            creationStep: DocumentCreationStep.AddDocuments,
+          });
+        });
+      });
+
+      describe('creationMode', () => {
+        it('should be set to the provided value', () => {
+          expect(DocumentCreationLogic.values).toEqual({
+            ...EXPECTED_VALUES,
             creationMode: 'api',
           });
         });
@@ -68,7 +125,7 @@ describe('DocumentCreationLogic', () => {
 
           expect(DocumentCreationLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            creationStep: 2,
+            creationStep: 3,
           });
         });
       });

@@ -17,7 +17,7 @@ import {
   EuiModalFooter,
 } from '@elastic/eui';
 
-import { DocumentCreationLogic } from './';
+import { DocumentCreationLogic, DocumentCreationButtons } from './';
 import { DocumentCreationStep } from './types';
 
 export const DocumentCreationModal: React.FC = () => {
@@ -38,6 +38,7 @@ export const DocumentCreationModal: React.FC = () => {
         </EuiModalHeader>
         <EuiModalBody>
           {creationStep === DocumentCreationStep.ShowError && <>DocumentCreationError</>}
+          {creationStep === DocumentCreationStep.ShowCreationModes && <DocumentCreationButtons />}
           {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'api' && (
             <>ApiCodeExample</>
           )}

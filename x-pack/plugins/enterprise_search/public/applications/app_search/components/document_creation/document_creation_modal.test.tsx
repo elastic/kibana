@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { EuiModal, EuiModalBody } from '@elastic/eui';
 
 import { DocumentCreationStep } from './types';
-import { DocumentCreationModal } from './';
+import { DocumentCreationModal, DocumentCreationButtons } from './';
 
 describe('DocumentCreationModal', () => {
   const values = {
@@ -45,6 +45,13 @@ describe('DocumentCreationModal', () => {
   });
 
   describe('modal content', () => {
+    it('renders document creation mode buttons', () => {
+      setMockValues({ ...values, creationStep: DocumentCreationStep.ShowCreationModes });
+      const wrapper = shallow(<DocumentCreationModal />);
+
+      expect(wrapper.find(DocumentCreationButtons)).toHaveLength(1);
+    });
+
     describe('creation modes', () => {
       it('renders ApiCodeExample', () => {
         setMockValues({ ...values, creationMode: 'api' });

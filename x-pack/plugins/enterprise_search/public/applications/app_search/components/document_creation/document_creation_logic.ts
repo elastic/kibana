@@ -15,6 +15,7 @@ interface DocumentCreationValues {
 }
 
 interface DocumentCreationActions {
+  showCreationModes(): void;
   openDocumentCreation(creationMode: DocumentCreationMode): { creationMode: DocumentCreationMode };
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
@@ -25,6 +26,7 @@ export const DocumentCreationLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'document_creation_modal_logic'],
   actions: () => ({
+    showCreationModes: () => null,
     openDocumentCreation: (creationMode) => ({ creationMode }),
     closeDocumentCreation: () => null,
     setCreationStep: (creationStep) => ({ creationStep }),
@@ -33,6 +35,7 @@ export const DocumentCreationLogic = kea<
     isDocumentCreationOpen: [
       false,
       {
+        showCreationModes: () => true,
         openDocumentCreation: () => true,
         closeDocumentCreation: () => false,
       },
@@ -46,6 +49,8 @@ export const DocumentCreationLogic = kea<
     creationStep: [
       DocumentCreationStep.AddDocuments,
       {
+        showCreationModes: () => DocumentCreationStep.ShowCreationModes,
+        openDocumentCreation: () => DocumentCreationStep.AddDocuments,
         setCreationStep: (_, { creationStep }) => creationStep,
       },
     ],
