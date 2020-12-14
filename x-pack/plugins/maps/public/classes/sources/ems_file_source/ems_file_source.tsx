@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
+import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import {
@@ -27,6 +28,16 @@ import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+
+function getErrorInfo(fileId: string) {
+  return i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {
+    defaultMessage: `Unable to find EMS vector shapes for id: {id}. {info}`,
+    values: {
+      id: fileId,
+      info: getEmsUnavailableMessage(),
+    },
+  });
+}
 
 export interface IEmsFileSource extends IVectorSource {
   getEmsFieldLabel(emsFieldName: string): Promise<string>;
@@ -85,20 +96,18 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   }
 
   async getEMSFileLayer(): Promise<FileLayer> {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
-    if (!emsFileLayer) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {
-          defaultMessage: `Unable to find EMS vector shapes for id: {id}. {info}`,
-          values: {
-            id: this._descriptor.id,
-            info: getEmsUnavailableMessage(),
-          },
-        })
-      );
+    let emsFileLayers: FileLayer[];
+    try {
+      emsFileLayers = await getEmsFileLayers();
+    } catch (e) {
+      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${e.message}`);
     }
-    return emsFileLayer;
+    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
+    if (emsFileLayer) {
+      return emsFileLayer;
+    }
+
+    throw new Error(getErrorInfo(this._descriptor.id));
   }
 
   // Map EMS field name to language specific label

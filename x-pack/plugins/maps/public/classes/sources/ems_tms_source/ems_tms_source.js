@@ -15,6 +15,13 @@ import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kiban
 import { registerSource } from '../source_registry';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
+function getErrorInfo(emsTileLayerId) {
+  return i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
+    defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
+    values: { id: emsTileLayerId, info: getEmsUnavailableMessage() },
+  });
+}
+
 export function getSourceTitle() {
   const emsSettings = getEMSSettings();
   if (emsSettings.isEMSUrlSet()) {
@@ -80,18 +87,19 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async _getEMSTMSService() {
-    const emsTMSServices = await getEmsTmsServices();
+    let emsTMSServices;
     const emsTileLayerId = this.getTileLayerId();
-    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
-    if (!tmsService) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
-          defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
-          values: { id: emsTileLayerId, info: getEmsUnavailableMessage() },
-        })
-      );
+    try {
+      emsTMSServices = await getEmsTmsServices();
+    } catch (e) {
+      throw new Error(`${getErrorInfo(emsTileLayerId)} - ${e.message}`);
     }
-    return tmsService;
+    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
+    if (tmsService) {
+      return tmsService;
+    }
+
+    throw new Error(getErrorInfo());
   }
 
   async getDisplayName() {
