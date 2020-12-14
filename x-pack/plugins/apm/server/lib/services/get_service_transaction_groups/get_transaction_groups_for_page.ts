@@ -5,6 +5,7 @@
  */
 import { orderBy } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
@@ -19,6 +20,10 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../helpers/latency_aggregation_type';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'latency'
@@ -41,6 +46,7 @@ export async function getTransactionGroupsForPage({
   sortDirection,
   pageIndex,
   size,
+  latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
@@ -52,7 +58,12 @@ export async function getTransactionGroupsForPage({
   sortDirection: 'asc' | 'desc';
   pageIndex: number;
   size: number;
+  latencyAggregationType: LatencyAggregationType;
 }) {
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
+
   const response = await apmEventClient.search({
     apm: {
       events: [
@@ -77,40 +88,14 @@ export async function getTransactionGroupsForPage({
           terms: {
             field: TRANSACTION_NAME,
             size: 500,
-            order: {
-              _count: 'desc',
-            },
+            order: { _count: 'desc' },
           },
           aggs: {
-            avg_latency: {
-              avg: {
-                field: getTransactionDurationFieldForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
-              },
-            },
-            transaction_count: {
-              value_count: {
-                field: getTransactionDurationFieldForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
-              },
-            },
+            ...getLatencyAggregation(latencyAggregationType, field),
+            transaction_count: { value_count: { field } },
             [EVENT_OUTCOME]: {
-              filter: {
-                term: {
-                  [EVENT_OUTCOME]: EventOutcome.failure,
-                },
-              },
-              aggs: {
-                transaction_count: {
-                  value_count: {
-                    field: getTransactionDurationFieldForAggregatedTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
-              },
+              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+              aggs: { transaction_count: { value_count: { field } } },
             },
           },
         },
@@ -128,7 +113,10 @@ export async function getTransactionGroupsForPage({
 
       return {
         name: bucket.key as string,
-        latency: bucket.avg_latency.value,
+        latency: getLatencyValue({
+          latencyAggregationType,
+          aggregation: bucket.latency,
+        }),
         throughput: bucket.transaction_count.value,
         errorRate,
       };

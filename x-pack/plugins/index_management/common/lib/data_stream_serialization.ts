@@ -19,6 +19,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     maximum_timestamp: maxTimeStamp,
     _meta,
     privileges,
+    hidden,
   } = dataStreamFromEs;
 
   return {
@@ -39,6 +40,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     maxTimeStamp,
     _meta,
     privileges,
+    hidden,
   };
 }
 
