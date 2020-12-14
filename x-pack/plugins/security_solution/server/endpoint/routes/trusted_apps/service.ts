@@ -92,10 +92,9 @@ export const getTrustedAppsSummary = async (
     macos: 0,
     total: 0,
   };
-
+  const perPage = 100;
   let paging = true;
   let page = 1;
-  const perPage = 100;
 
   while (paging) {
     const { data, total } = (await exceptionsListClient.findExceptionListItem({
