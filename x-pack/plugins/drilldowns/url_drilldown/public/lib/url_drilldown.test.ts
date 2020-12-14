@@ -8,6 +8,7 @@ import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
+import { of } from '../../../../../../src/plugins/kibana_utils';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 import {
   VALUE_CLICK_TRIGGER,
