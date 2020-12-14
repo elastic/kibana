@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
+import { MlJobFieldType } from '../../../../../common/types/field_types';
 
 export interface Percentile {
   percent: number;
@@ -56,9 +56,8 @@ export interface FieldVisStats {
 
 // The internal representation of the configuration used to build the visuals
 // which display the field information.
-// TODO - type stats
 export interface FieldVisConfig {
-  type: ML_JOB_FIELD_TYPES;
+  type: MlJobFieldType;
   fieldName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;

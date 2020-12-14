@@ -9,19 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, MultiSelectPicker } from '../../../../components/multi_select_picker';
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
-
-export const ML_JOB_FIELD_TYPES = {
-  BOOLEAN: 'boolean',
-  DATE: 'date',
-  GEO_POINT: 'geo_point',
-  IP: 'ip',
-  KEYWORD: 'keyword',
-  NUMBER: 'number',
-  TEXT: 'text',
-  UNKNOWN: 'unknown',
-} as const;
-
-export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import type { MlJobFieldType } from '../../../../../../common/types/field_types';
 
 export const ML_JOB_FIELD_TYPES_OPTIONS = {
   [ML_JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },

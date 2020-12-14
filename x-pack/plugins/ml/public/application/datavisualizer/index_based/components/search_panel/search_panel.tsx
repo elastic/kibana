@@ -27,7 +27,8 @@ import {
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { MlJobFieldType } from '../../../../../../common/types/field_types';
+
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -36,7 +37,7 @@ interface Props {
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
   overallStats: any;
-  indexedFieldTypes: ML_JOB_FIELD_TYPES[];
+  indexedFieldTypes: MlJobFieldType[];
   setVisibleFieldTypes(q: any): void;
   visibleFieldTypes: string[];
   setVisibleFieldNames(q: any): void;

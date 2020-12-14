@@ -53,6 +53,7 @@ import { DataLoader } from './data_loader';
 import type { FieldRequestConfig, FieldVisConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
+import { MlJobFieldType } from '../../../../common/types/field_types';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -143,11 +144,11 @@ export const Page: FC = () => {
   }, []);
 
   // Obtain the list of non metric field types which appear in the index pattern.
-  let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
+  let indexedFieldTypes: MlJobFieldType[] = [];
   const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach((field) => {
     if (field.scripted !== true) {
-      const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
+      const dataVisualizerType: MlJobFieldType | undefined = kbnTypeToMLJobType(field);
       if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
         indexedFieldTypes.push(dataVisualizerType);
       }
