@@ -8,8 +8,9 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 
-export const JobMapLegend: FC = () => (
+export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => (
   <EuiFlexGroup className="mlJobMapLegend__container" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -56,7 +57,16 @@ export const JobMapLegend: FC = () => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <span className="mlJobMapLegend__trainedModel" />
+          <span
+            style={{
+              display: 'inline-block',
+              width: '0px',
+              height: '0px',
+              borderLeft: `${theme.euiSizeS} solid ${theme.euiPageBackgroundColor}`,
+              borderRight: `${theme.euiSizeS} solid ${theme.euiPageBackgroundColor}`,
+              borderBottom: `${theme.euiSizeM} solid ${theme.euiColorVis3}`,
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
