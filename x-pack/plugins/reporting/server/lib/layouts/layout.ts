@@ -17,6 +17,10 @@ export abstract class Layout {
   public id: string = '';
   public groupCount: number = 0;
 
+  public hasHeader: boolean = true;
+  public hasFooter: boolean = true;
+  public useReportingBranding: boolean = true;
+
   constructor(id: string) {
     this.id = id;
   }
@@ -35,5 +39,5 @@ export abstract class Layout {
 
   public abstract getBrowserViewport(): Size;
 
-  public abstract getCssOverridesPath(): string;
+  public abstract getCssOverridesPath(): string | undefined;
 }
