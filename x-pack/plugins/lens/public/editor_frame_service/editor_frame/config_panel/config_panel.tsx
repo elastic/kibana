@@ -24,7 +24,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
-const getFirstFocusable = (el: HTMLElement | null) => {
+export const getFirstFocusable = (el: HTMLElement | null) => {
   if (!el) {
     return null;
   }
@@ -37,13 +37,12 @@ const getFirstFocusable = (el: HTMLElement | null) => {
   return (firstFocusable as unknown) as { focus: () => void };
 };
 
-function useFocusUpdate(layerIds: string[]) {
+export function useFocusUpdate(layerIds: string[]) {
   const [lastUpdated, setLastUpdated] = useState<{
     type: 'ADD_LAYER' | 'REMOVE_OR_CLEAR_LAYER';
     id: string;
   } | null>(null);
   const [layerRefs, setLayersRefs] = useState<Record<string, HTMLElement | null>>({});
-
   useEffect(() => {
     if (!lastUpdated) {
       return;
@@ -65,7 +64,7 @@ function useFocusUpdate(layerIds: string[]) {
     }
   }, [layerIds, layerRefs, lastUpdated]);
 
-  const setLayerRef = useCallback((el, layerId) => {
+  const setLayerRef = useCallback((layerId, el) => {
     if (el) {
       setLayersRefs((refs) => ({
         ...refs,
@@ -94,7 +93,7 @@ function useFocusUpdate(layerIds: string[]) {
   return { setLastUpdated, removeLayerRef, setLayerRef };
 }
 
-function LayerPanels(
+export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeDatasourceId: string;
     activeVisualization: Visualization;
