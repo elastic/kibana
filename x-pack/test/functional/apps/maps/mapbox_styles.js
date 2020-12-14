@@ -23,8 +23,7 @@ export const MAPBOX_STYLES = {
     layout: { visibility: 'visible' },
     paint: {
       'circle-color': [
-        'interpolate',
-        ['linear'],
+        'step',
         [
           'coalesce',
           [
@@ -53,7 +52,6 @@ export const MAPBOX_STYLES = {
           ],
           2,
         ],
-        2,
         'rgba(0,0,0,0)',
         3,
         '#ecf1f7',
@@ -97,8 +95,7 @@ export const MAPBOX_STYLES = {
     layout: { visibility: 'visible' },
     paint: {
       'fill-color': [
-        'interpolate',
-        ['linear'],
+        'step',
         [
           'coalesce',
           [
@@ -127,7 +124,6 @@ export const MAPBOX_STYLES = {
           ],
           2,
         ],
-        2,
         'rgba(0,0,0,0)',
         3,
         '#ecf1f7',
