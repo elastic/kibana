@@ -4,7 +4,7 @@
 
 Application Usage is tracked automatically for each plugin by using the platform `currentAppId$` observer.
 
-### Tracking sub views for inside your application
+### Tracking sub views inside your application
 
 To track a sub view inside your application (ie a flyout, a tab, form step, etc) Application Usage provides you with the tools to do so:
 
