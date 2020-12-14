@@ -7,10 +7,15 @@ import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
 const metaSchema = t.partial({
-  lastScheduledActions: t.type({
-    group: t.string,
-    date: DateFromString,
-  }),
+  lastScheduledActions: t.intersection([
+    t.partial({
+      subgroup: t.string,
+    }),
+    t.type({
+      group: t.string,
+      date: DateFromString,
+    }),
+  ]),
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 

@@ -54,6 +54,9 @@ describe('JSON View', () => {
           packets: 4,
           port: 902,
         },
+        event: {
+          kind: 'event',
+        },
       };
       expect(buildJsonView(mockDetailItemData)).toEqual(expectedData);
     });
