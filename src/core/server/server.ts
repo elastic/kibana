@@ -7,8 +7,12 @@
  */
 
 import apm from 'elastic-apm-node';
-import { config as pathConfig } from '@kbn/utils';
+import { config as pathConfig, REPO_ROOT } from '@kbn/utils';
 import { mapToObject } from '@kbn/std';
+import {
+  cliNotice as apmCliNotice,
+  loadConfiguration as loadApmConfiguration,
+} from '@kbn/apm-config-loader';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
@@ -260,6 +264,11 @@ export class Server {
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
+
+    const apmConfig = loadApmConfiguration([], REPO_ROOT, this.env.packageInfo.dist);
+    if (apmConfig.getConfig('kibana').active) {
+      this.log.info(apmCliNotice);
+    }
 
     await this.legacy.start({
       core: {

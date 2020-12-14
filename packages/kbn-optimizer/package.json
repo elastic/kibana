@@ -10,6 +10,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
+    "@kbn/apm-config-loader": "link:../kbn-apm-config-loader",
     "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/config": "link:../kbn-config",
     "@kbn/dev-utils": "link:../kbn-dev-utils",

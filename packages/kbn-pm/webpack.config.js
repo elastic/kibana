@@ -21,8 +21,12 @@ module.exports = {
     libraryTarget: 'commonjs2',
   },
 
+  optimization: {
+    nodeEnv: false,
+  },
+
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.js', '.json'],
   },
 
   module: {

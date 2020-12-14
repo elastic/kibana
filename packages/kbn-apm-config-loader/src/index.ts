@@ -9,3 +9,4 @@
 export { loadConfiguration } from './config_loader';
 export type { ApmConfiguration } from './config';
 export type { ApmAgentConfig } from './types';
+export { cliNotice } from './cli_notice';

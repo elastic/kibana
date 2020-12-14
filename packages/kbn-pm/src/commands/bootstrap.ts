@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import Agent from 'elastic-apm-node';
 import { sep } from 'path';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
@@ -76,11 +77,13 @@ export const BootstrapCommand: ICommand = {
     const checksums = await getAllChecksums(kbn, log, yarnLock);
     const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
     let cachedProjectCount = 0;
+    let totalProjectCount = 0;
 
     for (const project of projects.values()) {
       if (project.hasScript('kbn:bootstrap')) {
         const file = new BootstrapCacheFile(kbn, project, checksums);
         const valid = options.cache && file.isValid();
+        totalProjectCount += 1;
 
         if (valid) {
           log.debug(`[${project.name}] cache up to date`);
@@ -95,15 +98,27 @@ export const BootstrapCommand: ICommand = {
       log.success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
+    Agent.addLabels({
+      projects_count: totalProjectCount,
+      projects_cache_count: cachedProjectCount,
+      projects_cache_pct: Math.round((cachedProjectCount / totalProjectCount) * 100),
+    });
+
+    const span = Agent.startSpan('build packages');
+
     await parallelizeBatches(batchedProjects, async (project) => {
       const cache = caches.get(project);
       if (cache && !cache.valid) {
         log.info(`[${project.name}] running [kbn:bootstrap] script`);
         cache.file.delete();
+
         await project.runScriptStreaming('kbn:bootstrap');
+
         cache.file.write();
         log.success(`[${project.name}] bootstrap complete`);
       }
     });
+
+    if (span) span.end();
   },
 };

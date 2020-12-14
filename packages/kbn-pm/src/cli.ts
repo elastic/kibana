@@ -6,14 +6,32 @@
  * Public License, v 1.
  */
 
+import path from 'path';
+import { loadConfiguration, cliNotice } from '@kbn/apm-config-loader';
+import Agent from 'elastic-apm-node';
+
+const rootPath = path.resolve(__dirname, '../../../');
+const apmConfig = loadConfiguration(process.argv, rootPath, false).getConfig('kibana-proxy');
+
+// start APM before any other imports
+Agent.start({
+  ...apmConfig,
+  ...{ metricsInterval: '1', metricsLimit: '1' },
+});
+
 import dedent from 'dedent';
 import getopts from 'getopts';
-import { resolve } from 'path';
 import { pickLevelFromFlags } from '@kbn/dev-utils/tooling_log';
 
 import { commands } from './commands';
 import { runCommand } from './run';
 import { log } from './utils/log';
+
+if (apmConfig.active) {
+  log.info(cliNotice);
+}
+
+const flushAPM = () => new Promise((resolve) => Agent.flush(resolve));
 
 function help() {
   log.info(
@@ -85,10 +103,6 @@ export async function run(argv: string[]) {
     return;
   }
 
-  // This `rootPath` is relative to `./dist/` as that's the location of the
-  // built version of this tool.
-  const rootPath = resolve(__dirname, '../../../');
-
   const commandName = args[0];
   const extraArgs = args.slice(1);
 
@@ -100,5 +114,13 @@ export async function run(argv: string[]) {
     process.exit(1);
   }
 
+  const trans = Agent.startTransaction(
+    `@kbn/pm ${[commandName, ...extraArgs].join(' ')}`,
+    'kibana_platform'
+  );
+
   await runCommand(command, commandOptions);
+
+  if (trans) trans.end();
+  await flushAPM();
 }

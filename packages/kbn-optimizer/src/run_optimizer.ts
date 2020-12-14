@@ -10,6 +10,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, share, observeOn } from 'rxjs/operators';
 
 import { summarizeEventStream, Update } from './common';
+import { apmOptimizerStats } from './apm_optimizer_stats';
 
 import {
   OptimizerConfig,
@@ -47,43 +48,45 @@ export function runOptimizer(config: OptimizerConfig) {
       startTime: Date.now(),
       cacheKey: await getOptimizerCacheKey(config),
     };
-  }).pipe(
-    mergeMap(({ startTime, cacheKey }) => {
-      const bundleCacheEvent$ = getBundleCacheEvent$(config, cacheKey).pipe(
-        observeOn(Rx.asyncScheduler),
-        share()
-      );
+  })
+    .pipe(
+      mergeMap(({ startTime, cacheKey }) => {
+        const bundleCacheEvent$ = getBundleCacheEvent$(config, cacheKey).pipe(
+          observeOn(Rx.asyncScheduler),
+          share()
+        );
 
-      // initialization completes once all bundle caches have been resolved
-      const init$ = Rx.concat(
-        bundleCacheEvent$,
-        Rx.of<OptimizerInitializedEvent>({
-          type: 'optimizer initialized',
-        })
-      );
+        // initialization completes once all bundle caches have been resolved
+        const init$ = Rx.concat(
+          bundleCacheEvent$,
+          Rx.of<OptimizerInitializedEvent>({
+            type: 'optimizer initialized',
+          })
+        );
 
-      // watch the offline bundles for changes, turning them online...
-      const changeEvent$ = config.watch
-        ? watchBundlesForChanges$(bundleCacheEvent$, startTime).pipe(share())
-        : Rx.EMPTY;
+        // watch the offline bundles for changes, turning them online...
+        const changeEvent$ = config.watch
+          ? watchBundlesForChanges$(bundleCacheEvent$, startTime).pipe(share())
+          : Rx.EMPTY;
 
-      // run workers to build all the online bundles, including the bundles turned online by changeEvent$
-      const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
+        // run workers to build all the online bundles, including the bundles turned online by changeEvent$
+        const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
 
-      // create the stream that summarized all the events into specific states
-      return summarizeEventStream<OptimizerEvent, OptimizerState>(
-        Rx.merge(init$, changeEvent$, workerEvent$),
-        {
-          phase: 'initializing',
-          compilerStates: [],
-          offlineBundles: [],
-          onlineBundles: [],
-          startTime,
-          durSec: 0,
-        },
-        createOptimizerStateSummarizer(config)
-      );
-    }),
-    handleOptimizerCompletion(config)
-  );
+        // create the stream that summarized all the events into specific states
+        return summarizeEventStream<OptimizerEvent, OptimizerState>(
+          Rx.merge(init$, changeEvent$, workerEvent$),
+          {
+            phase: 'initializing',
+            compilerStates: [],
+            offlineBundles: [],
+            onlineBundles: [],
+            startTime,
+            durSec: 0,
+          },
+          createOptimizerStateSummarizer(config)
+        );
+      }),
+      handleOptimizerCompletion(config)
+    )
+    .pipe(apmOptimizerStats(config));
 }

@@ -8,6 +8,20 @@
 
 import 'source-map-support/register';
 
+import path from 'path';
+import { loadConfiguration } from '@kbn/apm-config-loader';
+import Agent from 'elastic-apm-node';
+
+const rootPath = path.resolve(__dirname, '../../../');
+const apmConfig = loadConfiguration(process.argv, rootPath, false);
+const conf = apmConfig.getConfig('kibana-proxy');
+
+// start APM before any other imports
+Agent.start({
+  ...conf,
+  ...{ metricsInterval: '1', metricsLimit: '1' },
+});
+
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
@@ -17,8 +31,11 @@ import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
 import { reportOptimizerStats } from './report_optimizer_stats';
+import { apmOptimizerStats } from './apm_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
 import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
+
+const flushAPM = () => new Promise((resolve) => Agent.flush(resolve));
 
 run(
   async ({ log, flags }) => {
@@ -132,7 +149,10 @@ run(
       update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
+    update$ = update$.pipe(apmOptimizerStats(config));
     await lastValueFrom(update$.pipe(logOptimizerState(log, config)));
+
+    await flushAPM();
 
     if (updateLimits) {
       updateBundleLimits({

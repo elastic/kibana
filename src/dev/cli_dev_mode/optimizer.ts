@@ -18,7 +18,12 @@ import {
 } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs/operators';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  apmOptimizerStats,
+} from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;
@@ -104,6 +109,7 @@ export class Optimizer {
 
     this.run$ = runOptimizer(config).pipe(
       logOptimizerState(log, config),
+      apmOptimizerStats(config),
       tap(({ state }) => {
         this.ready$.next(state.phase === 'success' || state.phase === 'issue');
       }),

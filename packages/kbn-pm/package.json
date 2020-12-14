@@ -13,9 +13,8 @@
     "prettier": "../../node_modules/.bin/prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  },
-  "dependencies": {
+    "@kbn/apm-config-loader": "link:../kbn-apm-config-loader",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/utils": "link:../kbn-utils"
   }
 }

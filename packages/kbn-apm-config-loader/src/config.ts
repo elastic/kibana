@@ -6,9 +6,10 @@
  * Public License, v 1.
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { merge, get } from 'lodash';
 import { execSync } from 'child_process';
+import os from 'os';
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils/target/path';
 import { readFileSync } from 'fs';
@@ -16,9 +17,16 @@ import { ApmAgentConfig } from './types';
 
 const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
   // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
+  let active = false;
+
+  if (process.env.hasOwnProperty('ELASTIC_APM_ACTIVE')) {
+    active = process.env.ELASTIC_APM_ACTIVE === 'true';
+  } else if (isDistributable === false) {
+    active = true;
+  }
 
   return {
-    active: process.env.ELASTIC_APM_ACTIVE === 'true' || false,
+    active,
     environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
 
     serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
@@ -53,8 +61,9 @@ export class ApmConfiguration {
     private readonly rawKibanaConfig: Record<string, any>,
     private readonly isDistributable: boolean
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { version, build } = require(join(this.rootDir, 'package.json'));
+    const { version, build } = JSON.parse(
+      readFileSync(resolve(rootDir, 'package.json')).toString()
+    );
     this.kibanaVersion = version;
     this.pkgBuild = build;
   }
@@ -73,7 +82,8 @@ export class ApmConfiguration {
         this.getConfigFromKibanaConfig(),
         this.getDevConfig(),
         this.getDistConfig(),
-        this.getCIConfig()
+        this.getCIConfig(),
+        this.getOSConfig()
       );
 
       const rev = this.getGitRev();
@@ -132,6 +142,17 @@ export class ApmConfiguration {
       // Headers & body may contain sensitive info
       captureHeaders: false,
       captureBody: 'off',
+    };
+  }
+
+  private getOSConfig(): ApmAgentConfig {
+    return {
+      globalLabels: {
+        os_kernel: os.release(),
+        system_cpu_cores: os.cpus().length,
+        system_cpu_name: os.cpus()[0].model,
+        system_cpu_speed: os.cpus()[0].speed,
+      },
     };
   }
 

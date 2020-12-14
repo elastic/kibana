@@ -7,9 +7,9 @@
  */
 
 import {
-  packageMock,
   mockedRootDir,
   gitRevExecMock,
+  readPackageJSONMock,
   devConfigMock,
   readUuidFileMock,
   resetAllMocks,
@@ -21,12 +21,14 @@ const initialEnv = { ...process.env };
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
-    packageMock.raw = {
-      version: '8.0.0',
-      build: {
-        sha: 'sha',
-      },
-    };
+    readPackageJSONMock.mockReturnValue(
+      JSON.stringify({
+        version: '8.0.0',
+        build: {
+          sha: 'sha',
+        },
+      })
+    );
   });
 
   afterEach(() => {
@@ -35,9 +37,11 @@ describe('ApmConfiguration', () => {
   });
 
   it('sets the correct service name and version', () => {
-    packageMock.raw = {
-      version: '9.2.1',
-    };
+    readPackageJSONMock.mockReturnValue(
+      JSON.stringify({
+        version: '9.2.1',
+      })
+    );
     const config = new ApmConfiguration(mockedRootDir, {}, false);
     expect(config.getConfig('myservice').serviceName).toBe('myservice');
     expect(config.getConfig('myservice').serviceVersion).toBe('9.2.1');
@@ -51,12 +55,14 @@ describe('ApmConfiguration', () => {
 
   it('sets the git revision from `pkg.build.sha` in distribution mode', () => {
     gitRevExecMock.mockReturnValue('dev-sha');
-    packageMock.raw = {
-      version: '9.2.1',
-      build: {
-        sha: 'distribution-sha',
-      },
-    };
+    readPackageJSONMock.mockReturnValue(
+      JSON.stringify({
+        version: '9.2.1',
+        build: {
+          sha: 'distribution-sha',
+        },
+      })
+    );
     const config = new ApmConfiguration(mockedRootDir, {}, true);
     expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('distribution-sha');
   });
@@ -176,6 +182,56 @@ describe('ApmConfiguration', () => {
     expect(config.getConfig('serviceName')).toEqual(
       expect.objectContaining({
         environment: 'ci',
+      })
+    );
+  });
+
+  it('defaults to active when not a distributable', () => {
+    delete process.env.ELASTIC_APM_ACTIVE;
+
+    const kibanaConfig = {};
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        active: true,
+      })
+    );
+  });
+
+  it('defaults to inactive when a distributable', () => {
+    delete process.env.ELASTIC_APM_ACTIVE;
+
+    const kibanaConfig = {};
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        active: false,
+      })
+    );
+  });
+
+  it('can be activated with ELASTIC_APM_ACTIVE=true env', () => {
+    delete process.env.ELASTIC_APM_ACTIVE;
+    process.env.ELASTIC_APM_ACTIVE = 'true';
+
+    const kibanaConfig = {};
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        active: true,
+      })
+    );
+  });
+
+  it('can be deactivated with ELASTIC_APM_ACTIVE=false env', () => {
+    delete process.env.ELASTIC_APM_ACTIVE;
+    process.env.ELASTIC_APM_ACTIVE = 'false';
+
+    const kibanaConfig = {};
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        active: false,
       })
     );
   });
