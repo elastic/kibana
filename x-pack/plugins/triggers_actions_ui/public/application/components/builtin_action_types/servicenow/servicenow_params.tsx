@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -46,6 +46,7 @@ const selectOptions = [
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+  const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
@@ -71,8 +72,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
   );
 
   useEffect(() => {
-    return () => {
-      // clear subActionParams when connector is changed
+    if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
+      actionConnectorRef.current = actionConnector.id;
       editAction(
         'subActionParams',
         {
@@ -81,7 +82,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         },
         index
       );
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
   useEffect(() => {

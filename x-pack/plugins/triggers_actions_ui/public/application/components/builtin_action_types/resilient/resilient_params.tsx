@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -37,6 +37,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
@@ -124,8 +125,8 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   }, [editSubActionProperty, incident.incidentTypes]);
 
   useEffect(() => {
-    return () => {
-      // clear subActionParams when connector is changed
+    if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
+      actionConnectorRef.current = actionConnector.id;
       editAction(
         'subActionParams',
         {
@@ -134,7 +135,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         },
         index
       );
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
   useEffect(() => {

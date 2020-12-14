@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -48,6 +48,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       } as unknown) as JiraActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
+  const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
@@ -85,7 +86,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   ]);
   const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
   const issueTypesSelectOptions: EuiSelectOption[] = useMemo(() => {
-    const doesIssueTypeExist = issueTypes.some((t) => t.id === incident.issueType);
+    const doesIssueTypeExist =
+      incident.issueType != null && issueTypes.length
+        ? issueTypes.some((t) => t.id === incident.issueType)
+        : true;
     if ((!incident.issueType || !doesIssueTypeExist) && issueTypes.length > 0) {
       editSubActionProperty('issueType', issueTypes[0].id ?? '');
     }
@@ -93,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       value: type.id ?? '',
       text: type.name ?? '',
     }));
-  }, [editSubActionProperty, incident.issueType, issueTypes]);
+  }, [editSubActionProperty, incident, issueTypes]);
   const prioritiesSelectOptions: EuiSelectOption[] = useMemo(() => {
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
@@ -117,8 +121,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   );
 
   useEffect(() => {
-    return () => {
-      // clear subActionParams when connector is changed
+    if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
+      actionConnectorRef.current = actionConnector.id;
       editAction(
         'subActionParams',
         {
@@ -127,7 +131,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         },
         index
       );
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
   useEffect(() => {
