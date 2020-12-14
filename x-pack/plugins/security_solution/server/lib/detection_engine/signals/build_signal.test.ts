@@ -18,6 +18,7 @@ import {
   ANCHOR_DATE,
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -33,6 +34,9 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      _meta: {
+        version: SIGNALS_TEMPLATE_VERSION,
+      },
       parent: {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
@@ -111,6 +115,9 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      _meta: {
+        version: SIGNALS_TEMPLATE_VERSION,
+      },
       parent: {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
