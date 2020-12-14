@@ -5,18 +5,39 @@
  */
 
 import moment from 'moment';
-import { upperFirst, get } from 'lodash';
+import { upperFirst } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createBeatsQuery } from './create_beats_query';
+// @ts-ignore
 import { calculateRate } from '../calculate_rate';
+// @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
+import { ElasticsearchResponse, LegacyRequest } from '../../types';
 
-export function handleResponse(response, start, end) {
-  const hits = get(response, 'hits.hits', []);
-  const initial = { ids: new Set(), beats: [] };
+interface Beat {
+  uuid: string | undefined;
+  name: string | undefined;
+  type: string | undefined;
+  output: string | undefined;
+  total_events_rate: number;
+  bytes_sent_rate: number;
+  memory: number | undefined;
+  version: string | undefined;
+  errors: any;
+}
+
+export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
+  const hits = response.hits?.hits ?? [];
+  const initial: { ids: Set<string>; beats: Beat[] } = { ids: new Set(), beats: [] };
   const { beats } = hits.reduce((accum, hit) => {
-    const stats = get(hit, '_source.beats_stats');
-    const uuid = get(stats, 'beat.uuid');
+    const stats = hit._source.beats_stats;
+    const uuid = stats?.beat?.uuid;
+
+    if (!uuid) {
+      return accum;
+    }
 
     // skip this duplicated beat, newer one was already added
     if (accum.ids.has(uuid)) {
@@ -25,47 +46,55 @@ export function handleResponse(response, start, end) {
 
     // add another beat summary
     accum.ids.add(uuid);
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.beats_stats');
+
+    let earliestStats = null;
+    if (
+      hit.inner_hits?.earliest?.hits?.hits &&
+      hit.inner_hits?.earliest?.hits?.hits.length > 0 &&
+      hit.inner_hits.earliest.hits.hits[0]._source.beats_stats
+    ) {
+      earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
+    }
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: get(stats, 'timestamp'),
-      earliestHitTimestamp: get(earliestStats, 'timestamp'),
+      hitTimestamp: stats?.timestamp,
+      earliestHitTimestamp: earliestStats?.timestamp,
       timeWindowMin: start,
       timeWindowMax: end,
     };
 
     const { rate: bytesSentRate } = calculateRate({
-      latestTotal: get(stats, 'metrics.libbeat.output.write.bytes'),
-      earliestTotal: get(earliestStats, 'metrics.libbeat.output.write.bytes'),
+      latestTotal: stats?.metrics?.libbeat?.output?.write?.bytes,
+      earliestTotal: earliestStats?.metrics?.libbeat?.output?.write?.bytes,
       ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
-      latestTotal: get(stats, 'metrics.libbeat.pipeline.events.total'),
-      earliestTotal: get(earliestStats, 'metrics.libbeat.pipeline.events.total'),
+      latestTotal: stats?.metrics?.libbeat?.pipeline?.events?.total,
+      earliestTotal: earliestStats?.metrics?.libbeat?.pipeline?.events?.total,
       ...rateOptions,
     });
 
-    const errorsWrittenLatest = get(stats, 'metrics.libbeat.output.write.errors');
-    const errorsWrittenEarliest = get(earliestStats, 'metrics.libbeat.output.write.errors');
-    const errorsReadLatest = get(stats, 'metrics.libbeat.output.read.errors');
-    const errorsReadEarliest = get(earliestStats, 'metrics.libbeat.output.read.errors');
+    const errorsWrittenLatest = stats?.metrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsWrittenEarliest = earliestStats?.metrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsReadLatest = stats?.metrics?.libbeat?.output?.read?.errors ?? 0;
+    const errorsReadEarliest = earliestStats?.metrics?.libbeat?.output?.read?.errors ?? 0;
     const errors = getDiffCalculation(
       errorsWrittenLatest + errorsReadLatest,
       errorsWrittenEarliest + errorsReadEarliest
     );
 
     accum.beats.push({
-      uuid: get(stats, 'beat.uuid'),
-      name: get(stats, 'beat.name'),
-      type: upperFirst(get(stats, 'beat.type')),
-      output: upperFirst(get(stats, 'metrics.libbeat.output.type')),
+      uuid: stats?.beat?.uuid,
+      name: stats?.beat?.name,
+      type: upperFirst(stats?.beat?.type),
+      output: upperFirst(stats?.metrics?.libbeat?.output?.type),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,
-      memory: get(stats, 'metrics.beat.memstats.memory_alloc'),
-      version: get(stats, 'beat.version'),
+      memory: stats?.metrics?.beat?.memstats?.memory_alloc,
+      version: stats?.beat?.version,
     });
 
     return accum;
@@ -74,7 +103,7 @@ export function handleResponse(response, start, end) {
   return beats;
 }
 
-export async function getBeats(req, beatsIndexPattern, clusterUuid) {
+export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
   const config = req.server.config();
