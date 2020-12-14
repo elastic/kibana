@@ -37,7 +37,7 @@ const i18nTexts = {
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes }) => {
+export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, isLoading }) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({
@@ -98,6 +98,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes })
               nodeOptions
             ),
             hasNoInitialSelection: false,
+            isLoading,
           },
         }}
       />

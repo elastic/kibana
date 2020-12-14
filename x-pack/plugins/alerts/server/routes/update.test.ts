@@ -10,6 +10,7 @@ import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { AlertNotifyWhenType } from '../../common';
 
 const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -41,6 +42,7 @@ describe('updateAlertRoute', () => {
         },
       },
     ],
+    notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
   };
 
   it('updates an alert with proper parameters', async () => {
@@ -78,6 +80,7 @@ describe('updateAlertRoute', () => {
               },
             },
           ],
+          notifyWhen: 'onActionGroupChange',
         },
       },
       ['ok']
@@ -100,6 +103,7 @@ describe('updateAlertRoute', () => {
               },
             ],
             "name": "abc",
+            "notifyWhen": "onActionGroupChange",
             "params": Object {
               "otherField": false,
             },

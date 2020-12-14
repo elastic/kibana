@@ -19,25 +19,25 @@
 
 import React from 'react';
 import { DashboardContainer } from '..';
-import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { mountWithIntl } from '@kbn/test/jest';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
 import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
 import { CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
+import { isErrorEmbeddable } from '../../services/embeddable';
+import {
+  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  ContactCardEmbeddable,
+} from '../../services/embeddable_test_samples';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -64,6 +64,8 @@ describe('LibraryNotificationPopover', () => {
       overlays: coreStart.overlays,
       savedObjectMetaData: {} as any,
       uiActions: {} as any,
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      http: coreStart.http,
     };
 
     container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
