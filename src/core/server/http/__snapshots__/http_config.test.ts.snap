@@ -40,7 +40,9 @@ Object {
   },
   "cors": Object {
     "allowCredentials": false,
-    "allowOrigin": "*",
+    "allowOrigin": Array [
+      "*",
+    ],
     "enabled": false,
   },
   "customResponseHeaders": Object {},

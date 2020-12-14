@@ -50,15 +50,18 @@ export const config = {
           enabled: schema.boolean({ defaultValue: false }),
           allowCredentials: schema.boolean({ defaultValue: false }),
           allowOrigin: schema.oneOf(
-            [schema.literal('*'), schema.arrayOf(hostURISchema, { minSize: 1 })],
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
             {
-              defaultValue: '*',
+              defaultValue: ['*'],
             }
           ),
         },
         {
           validate(value) {
-            if (value.allowCredentials === true && value.allowOrigin === '*') {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
               return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
             }
           },
@@ -169,7 +172,7 @@ export class HttpConfig {
   public cors: {
     enabled: boolean;
     allowCredentials: boolean;
-    allowOrigin: '*' | string[];
+    allowOrigin: string[];
   };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
