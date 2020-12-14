@@ -29,7 +29,7 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
     license: 'gold',
   },
   [LICENSED_FEATURES.ON_PREM_EMS]: {
-    name: 'layer with local Elastic Maps Server',
+    name: 'layer from local Elastic Maps Server',
     license: 'enterprise',
   },
 };
