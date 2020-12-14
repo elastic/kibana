@@ -71,7 +71,14 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
             index,
             version,
             signal_versions: signalVersions,
-            migration_ids: migrations.filter((m) => !isMigrationDeleted(m)).map((m) => m.id),
+            migrations: migrations
+              .filter((m) => !isMigrationDeleted(m))
+              .map((m) => ({
+                id: m.id,
+                status: m.attributes.status,
+                version: m.attributes.version,
+                updated: m.attributes.updated,
+              })),
             is_outdated:
               isOutdated({ current: version, target: currentVersion }) ||
               signalsAreOutdated({ signalVersions, target: currentVersion }),

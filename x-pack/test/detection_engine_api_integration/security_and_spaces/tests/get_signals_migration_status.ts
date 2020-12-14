@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           index: legacySignalsIndexName,
           is_outdated: true,
-          migration_ids: [],
+          migrations: [],
           signal_versions: [
             {
               count: 1,
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           is_outdated: true,
           index: outdatedIndexName,
-          migration_ids: [],
+          migrations: [],
           signal_versions: [
             {
               count: 1,

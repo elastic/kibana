@@ -42,7 +42,7 @@ describe('get signals migration status', () => {
         {
           index: 'my-signals-index',
           is_outdated: false,
-          migration_ids: [],
+          migrations: [],
           signal_versions: [],
           version: 0,
         },
