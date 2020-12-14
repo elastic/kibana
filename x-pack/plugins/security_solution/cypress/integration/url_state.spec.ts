@@ -48,7 +48,7 @@ const ABSOLUTE_DATE = {
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
 };
 
-// SKIP: https://github.com/elastic/kibana/issues/85289
+// FLAKY: https://github.com/elastic/kibana/issues/61612
 describe.skip('url state', () => {
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);

@@ -43,12 +43,20 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
       if (hotPhaseActions.rollover && _meta.hot.useRollover) {
-        if (hotPhaseActions.rollover.max_age) {
+        if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
           hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+        } else {
+          delete hotPhaseActions.rollover.max_age;
         }
 
-        if (hotPhaseActions.rollover.max_size) {
+        if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+          delete hotPhaseActions.rollover.max_docs;
+        }
+
+        if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
           hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+        } else {
+          delete hotPhaseActions.rollover.max_size;
         }
 
         if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
@@ -60,13 +68,24 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
           hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
+
+        if (_meta.hot.readonlyEnabled) {
+          hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
+        } else {
+          delete hotPhaseActions.readonly;
+        }
       } else {
         delete hotPhaseActions.rollover;
         delete hotPhaseActions.forcemerge;
+        delete hotPhaseActions.readonly;
       }
 
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
+      }
+
+      if (!updatedPolicy.phases.hot?.actions?.shrink) {
+        delete hotPhaseActions.shrink;
       }
 
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
@@ -103,6 +122,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.actions.forcemerge;
       } else if (_meta.warm.bestCompression) {
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
+      }
+
+      if (_meta.warm.readonlyEnabled) {
+        warmPhase.actions.readonly = warmPhase.actions.readonly ?? {};
+      } else {
+        delete warmPhase.actions.readonly;
       }
 
       if (!updatedPolicy.phases.warm?.actions?.set_priority) {
