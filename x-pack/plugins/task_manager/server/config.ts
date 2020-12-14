@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const MAX_MAX_WORKERS = 100;
+export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
