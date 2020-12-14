@@ -14,7 +14,7 @@ import { NamespaceType } from '../types';
 export const findExceptionListSchema = t.exact(
   t.partial({
     filter, // defaults to undefined if not set during decode
-    namespace_type, // defaults to 'single' if not set during decode
+    namespace_type: t.array(namespace_type), // defaults to 'single' if not set during decode
     page: StringToPositiveNumber, // defaults to undefined if not set during decode
     per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
     sort_field, // defaults to undefined if not set during decode
@@ -29,5 +29,5 @@ export type FindExceptionListSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof findExceptionListSchema>>,
   'namespace_type'
 > & {
-  namespace_type: NamespaceType;
+  namespace_type: NamespaceType[];
 };

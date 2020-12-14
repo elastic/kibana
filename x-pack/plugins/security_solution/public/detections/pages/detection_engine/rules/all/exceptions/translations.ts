@@ -40,3 +40,10 @@ export const LIST_DATE_UPDATED_TITLE = i18n.translate(
     defaultMessage: 'Last edited',
   }
 );
+
+export const ERROR_EXCEPTION_LISTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.errorFetching',
+  {
+    defaultMessage: 'Error fetching exception lists',
+  }
+);

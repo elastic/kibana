@@ -1,11 +1,11 @@
 {
-  "name": "Rule 2",
+  "name": "Rule w exceptions",
   "description": "Sample rule with exception list",
-  "rule_id": "query-blah",
+  "rule_id": "query-with-exceptions",
   "risk_score": 1,
   "severity": "high",
   "type": "query",
   "query": "host.name: *",
   "interval": "30s",
-  "exceptions_list": [{ "id": "db212e70-365f-11eb-986e-09a3676f2ffc", "list_id": "871c606c-fc26-49f7-a3bf-4a9a7cfe64c1", "namespace_type": "single", "type": "detection" }]
+  "exceptions_list": [{ "id": "ID_HERE", "namespace_type": "single", "type": "endpoint" }]
 }

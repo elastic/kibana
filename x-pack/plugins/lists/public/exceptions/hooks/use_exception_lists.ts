@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchExceptionLists } from '../api';
 import { Pagination, UseExceptionListsProps } from '../types';
 import { ExceptionListSchema } from '../../../common/schemas';
+import { getFilters } from '../utils';
 
-export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, () => void | null];
+type Func = () => void;
+export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, Func | null];
 
 /**
  * Hook for fetching ExceptionLists
@@ -27,35 +29,42 @@ export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, 
  *
  */
 export const useExceptionLists = ({
+  errorMessage,
   http,
   pagination = {
     page: 1,
     perPage: 20,
     total: 0,
   },
-  filterOptions = [],
-  onError,
-  onSuccess,
+  filterOptions,
+  namespaceTypes,
+  notifications,
+  showTrustedApps = false,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
-  const fetchExceptionListsRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-
-  const filterAsString: string = filterOptions.map(({ filter }) => filter).join(',');
-  const filterTagsAsString: string = filterOptions.map(({ tags }) => tags.join(',')).join(',');
+  const [loading, setLoading] = useState(false);
+  const filters = useMemo((): string => {
+    return getFilters((filterOptions = {}), namespaceTypes, showTrustedApps);
+  }, [namespaceTypes, filterOptions, showTrustedApps]);
+  const fetchExceptionListsRef = useRef<Func | null>(null);
+  const namespaceTypesAsString = useMemo(() => {
+    return namespaceTypes.join(',');
+  }, [namespaceTypes]);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const fetchData = async (): Promise<void> => {
+      console.log('WTF');
       try {
         setLoading(true);
 
         const { page, per_page: perPage, total, data } = await fetchExceptionLists({
+          filters,
           http,
-          namespaceType: 'single',
+          namespaceTypes: namespaceTypesAsString,
           pagination: {
             page: pagination.page,
             perPage: pagination.perPage,
@@ -70,34 +79,21 @@ export const useExceptionLists = ({
             total,
           });
           setExceptionLists(data);
-
-          if (onSuccess != null) {
-            onSuccess({
-              exceptions: data,
-              pagination: {
-                page,
-                perPage,
-                total,
-              },
-            });
-          }
+          setLoading(false);
         }
       } catch (error) {
         if (isSubscribed) {
+          notifications.toasts.addError(error, {
+            title: errorMessage,
+          });
           setExceptionLists([]);
           setPagination({
             page: 1,
             perPage: 20,
             total: 0,
           });
-          if (onError != null) {
-            onError(error);
-          }
+          setLoading(false);
         }
-      }
-
-      if (isSubscribed) {
-        setLoading(false);
       }
     };
 
@@ -109,14 +105,13 @@ export const useExceptionLists = ({
       abortCtrl.abort();
     };
   }, [
-    http,
-    setExceptionLists,
+    errorMessage,
+    notifications,
     pagination.page,
     pagination.perPage,
-    filterAsString,
-    filterTagsAsString,
-    onError,
-    onSuccess,
+    filters,
+    namespaceTypesAsString,
+    http,
   ]);
 
   return [loading, exceptionLists, paginationInfo, fetchExceptionListsRef.current];

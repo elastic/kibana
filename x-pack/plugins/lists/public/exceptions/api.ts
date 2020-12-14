@@ -24,6 +24,7 @@ import {
   exceptionListItemSchema,
   exceptionListSchema,
   findExceptionListItemSchema,
+  findExceptionListSchema,
   foundExceptionListItemSchema,
   foundExceptionListSchema,
   readExceptionListItemSchema,
@@ -43,6 +44,7 @@ import {
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
+import { getFilters } from './utils';
 
 /**
  * Add new ExceptionList
@@ -216,23 +218,22 @@ export const updateExceptionListItem = async ({
  */
 export const fetchExceptionLists = async ({
   http,
-  namespaceType,
+  filters,
+  namespaceTypes,
   pagination,
   signal,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { namespace_type: namespaceType },
-    readExceptionListSchema
-  );
-
   const query = {
-    // namespace_type: 'single',
+    filter: filters,
+    namespace_type: namespaceTypes.split(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
     // sort_field: 'exception-list.created_at',
     // sort_order: 'desc',
   };
 
+  const [validatedRequest, errorsRequest] = validate(query, findExceptionListSchema);
+  console.log(query, validatedRequest, errorsRequest);
   if (validatedRequest != null) {
     try {
       const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {

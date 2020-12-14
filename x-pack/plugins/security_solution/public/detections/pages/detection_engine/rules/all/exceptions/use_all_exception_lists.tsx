@@ -29,7 +29,7 @@ export const useAllExceptionLists = ({
 }: {
   exceptionLists: ExceptionListSchema[];
 }): UseAllExceptionListsReturn => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [exceptionsListInfo, setExceptionsListInfo] = useState<ExceptionListInfo[]>([]);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export const useAllExceptionLists = ({
           },
           {}
         );
-
+        console.log('YOOO', listsSkeleton);
         const { data: rules } = await fetchRules({
           filterOptions: {
             filter: '',

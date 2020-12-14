@@ -17,7 +17,7 @@ import {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;
@@ -100,10 +100,17 @@ export interface ApiCallFindListsItemsMemoProps {
   onSuccess: (arg: UseExceptionListItemsSuccess) => void;
 }
 
+export interface ExceptionListFilter {
+  name?: string;
+  created_by?: string;
+  list_id?: string;
+}
+
 export interface ApiCallFetchExceptionListsProps {
   http: HttpStart;
-  namespaceType: NamespaceType;
+  namespaceTypes: NamespaceType[];
   pagination: Partial<Pagination>;
+  filters: string;
   signal: AbortSignal;
 }
 
@@ -113,12 +120,13 @@ export interface UseExceptionListsSuccess {
 }
 
 export interface UseExceptionListsProps {
+  errorMessage: string;
+  filterOptions?: ExceptionListFilter;
   http: HttpStart;
-  filterOptions?: FilterExceptionsOptions[];
-  matchFilters?: boolean;
-  onError?: (arg: string[]) => void;
-  onSuccess?: (arg: UseExceptionListsSuccess) => void;
+  namespaceTypes: NamespaceType[];
+  notifications: NotificationsStart;
   pagination?: Pagination;
+  showTrustedApps: boolean;
 }
 
 export interface AddExceptionListProps {

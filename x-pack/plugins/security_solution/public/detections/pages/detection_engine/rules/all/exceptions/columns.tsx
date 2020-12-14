@@ -6,7 +6,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { EuiButtonIcon, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 import { History } from 'history';
 
 import { FormatUrl } from '../../../../../../common/components/link_to';
@@ -30,7 +30,12 @@ export const getAllExceptionListsColumns = (
     name: i18n.EXCEPTION_LIST_ID_TITLE,
     truncateText: true,
     dataType: 'string',
-    width: '100px',
+    width: '15%',
+    render: (value: ExceptionListInfo['list_id']) => (
+      <EuiToolTip position="left" content={value}>
+        <>{value}</>
+      </EuiToolTip>
+    ),
   },
   {
     align: 'center',
@@ -38,7 +43,7 @@ export const getAllExceptionListsColumns = (
     name: i18n.NUMBER_RULES_ASSIGNED_TO_TITLE,
     truncateText: true,
     dataType: 'number',
-    width: '14%',
+    width: '10%',
     render: (value: ExceptionListInfo['rules']) => {
       return <p>{value.length}</p>;
     },
@@ -49,7 +54,7 @@ export const getAllExceptionListsColumns = (
     name: i18n.RULES_ASSIGNED_TO_TITLE,
     truncateText: true,
     dataType: 'string',
-    width: '14%',
+    width: '20%',
     render: (value: ExceptionListInfo['rules']) => {
       return (
         <>
@@ -90,7 +95,7 @@ export const getAllExceptionListsColumns = (
   {
     align: 'center',
     isExpander: false,
-    width: '20px',
+    width: '25px',
     render: (list: ExceptionListInfo) => (
       <EuiButtonIcon
         onClick={onExport(list.id)}
@@ -101,7 +106,7 @@ export const getAllExceptionListsColumns = (
   },
   {
     align: 'center',
-    width: '20px',
+    width: '25px',
     isExpander: false,
     render: (list: ExceptionListInfo) => (
       <EuiButtonIcon

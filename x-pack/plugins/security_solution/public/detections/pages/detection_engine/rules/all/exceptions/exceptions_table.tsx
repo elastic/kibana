@@ -54,7 +54,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     pagination,
     onRefresh,
   }) => {
-    const [initLoading, setInitLoading] = useState(false);
+    const [initLoading, setInitLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(Date.now());
 
     const handleDelete = useCallback((id: string) => () => {}, []);
@@ -87,6 +87,30 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         />
       );
     }, []);
+    console.log(data);
+    const handleSearch = useCallback((search: string) => {
+      const a = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
+      console.log('a', a);
+      const b = a
+        .filter((c) => c != null)
+        .reduce(
+          (filter, term) => {
+            const [qualifier, value] = term.split(':');
+            console.log('b', qualifier, value);
+
+            if (qualifier == null) {
+              filter.name = search;
+            } else if (qualifier != null && value != null) {
+              filter[qualifier] = value;
+            }
+
+            return filter;
+          },
+          { name: null, list_id: null, created_by: null }
+        );
+
+      console.log(b);
+    }, []);
 
     return (
       <>
@@ -109,7 +133,8 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 data-test-subj="exceptionsHeaderSearch"
                 aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
                 placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                onSearch={() => {}}
+                onSearch={handleSearch}
+                onChange={handleSearch}
                 disabled={initLoading}
                 incremental={false}
                 fullWidth

@@ -197,7 +197,7 @@ export interface FindExceptionListsItemOptions {
 }
 
 export interface FindExceptionListOptions {
-  namespaceType: NamespaceType;
+  namespaceType: NamespaceType[];
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;

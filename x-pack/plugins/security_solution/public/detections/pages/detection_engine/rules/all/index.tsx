@@ -15,6 +15,7 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
+import * as exceptionsI18n from './exceptions/translations';
 import { ExceptionListsTable } from './exceptions/exceptions_table';
 import { useAllExceptionLists } from './exceptions/use_all_exception_lists';
 
@@ -80,10 +81,14 @@ export const AllRules = React.memo<AllRulesProps>(
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const {
-      services: { http },
+      services: { http, notifications },
     } = useKibana();
     const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
+      errorMessage: exceptionsI18n.ERROR_EXCEPTION_LISTS,
       http,
+      namespaceTypes: ['single', 'agnostic'],
+      notifications,
+      showTrustedApps: false,
     });
     const [loadingTableInfo, data] = useAllExceptionLists({
       exceptionLists: exceptions ?? [],
