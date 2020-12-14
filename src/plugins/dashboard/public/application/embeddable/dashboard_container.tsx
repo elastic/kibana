@@ -253,7 +253,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <DashboardViewport container={this} />
+          <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom
