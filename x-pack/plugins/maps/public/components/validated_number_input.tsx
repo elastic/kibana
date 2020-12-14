@@ -11,13 +11,12 @@ import _ from 'lodash';
 
 interface State {
   value: number | string;
-  prevValue: number;
   errorMessage: string;
   isValid: boolean;
 }
 
 interface Props {
-  value: number;
+  initialValue: number;
   min: number;
   max: number;
   onChange: (value: number) => void;
@@ -56,22 +55,17 @@ export class ValidatedNumberInput extends Component<Props, State> {
   // @ts-expect-error state populated by getDerivedStateFromProps
   state: State = {};
 
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    if (nextProps.value !== prevState.prevValue) {
-      const { isValid, errorMessage } = isNumberValid(
-        nextProps.value,
-        nextProps.min,
-        nextProps.max
-      );
-      return {
-        value: nextProps.value,
-        prevValue: nextProps.value,
-        isValid,
-        errorMessage,
-      };
-    }
+  constructor(props: Props) {
+    super(props);
 
-    return null;
+    const { isValid, errorMessage, parsedValue } = isNumberValid(
+      props.initialValue,
+      this.props.min,
+      this.props.max
+    );
+    this.state.value = isValid ? (parsedValue as number) : props.initialValue;
+    this.state.errorMessage = errorMessage;
+    this.state.isValid = isValid;
   }
 
   _submit = _.debounce((value) => {

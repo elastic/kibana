@@ -151,7 +151,9 @@ export function MetricEditor({
         max={100}
         onChange={onPercentileChange}
         label={label}
-        value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}
+        initialValue={
+          typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE
+        }
       />
     );
   }
