@@ -94,6 +94,32 @@ describe('core deprecations', () => {
     });
   });
 
+  describe('server.cors', () => {
+    it('renames server.cors to server.cors.enabled', () => {
+      const { migrated } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+    });
+    it('logs a warning message about server.cors renaming', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
+        ]
+      `);
+    });
+    it('does not log deprecation message when server.cors.enabled set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { cors: { enabled: true } },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+      expect(messages.length).toBe(0);
+    });
+  });
+
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
       const { messages } = applyCoreDeprecations({
