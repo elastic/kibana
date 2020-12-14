@@ -399,13 +399,15 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   to,
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
-  dispatch(
-    sourcererActions.initTimelineIndexPatterns({
-      id: SourcererScopeName.timeline,
-      selectedPatterns: timeline.indexNames,
-      eventType: timeline.eventType,
-    })
-  );
+  if (!isEmpty(timeline.indexNames)) {
+    dispatch(
+      sourcererActions.initTimelineIndexPatterns({
+        id: SourcererScopeName.timeline,
+        selectedPatterns: timeline.indexNames,
+        eventType: timeline.eventType,
+      })
+    );
+  }
   if (
     timeline.status === TimelineStatus.immutable &&
     timeline.timelineType === TimelineType.template
@@ -462,6 +464,8 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
                 user: note.updatedBy || 'unknown',
                 saveObjectId: note.noteId,
                 version: note.version,
+                eventId: note.eventId ?? null,
+                timelineId: note.timelineId ?? null,
               }))
             : [],
       })

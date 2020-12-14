@@ -110,7 +110,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'critical', value: 'critical' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs'],
+    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go'],
   },
 
   // Recording
@@ -235,7 +235,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
       }
     ),
-    includeAgents: ['java', 'python', 'go'],
+    includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs'],
   },
 
   // Ignore transactions based on URLs
@@ -254,6 +254,6 @@ export const generalSettings: RawSettingDefinition[] = [
           'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby'],
   },
 ];

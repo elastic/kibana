@@ -111,6 +111,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
+
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
   const setMaxSize = async (value: string, units?: string) => {
@@ -187,15 +189,19 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
-  const setShrink = async (value: string) => {
-    await createFormToggleAction('shrinkSwitch')(true);
-    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
+  const setShrink = (phase: Phases) => async (value: string) => {
+    await createFormToggleAction(`${phase}-shrinkSwitch`)(true);
+    await createFormSetValueAction(`${phase}-selectedPrimaryShardCount`)(value);
   };
 
-  const shrinkExists = () => exists('shrinkSwitch');
+  const shrinkExists = (phase: Phases) => () => exists(`${phase}-shrinkSwitch`);
 
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
+
+  const setReadonly = (phase: Phases) => async (value: boolean) => {
+    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  };
 
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
@@ -235,8 +241,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxDocs,
         setMaxAge,
         toggleRollover,
+        toggleDefaultRollover,
         ...createForceMergeActions('hot'),
         setIndexPriority: setIndexPriority('hot'),
+        setShrink: setShrink('hot'),
+        shrinkExists: shrinkExists('hot'),
+        setReadonly: setReadonly('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
@@ -247,9 +257,10 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
-        setShrink,
-        shrinkExists,
+        setShrink: setShrink('warm'),
+        shrinkExists: shrinkExists('warm'),
         ...createForceMergeActions('warm'),
+        setReadonly: setReadonly('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
