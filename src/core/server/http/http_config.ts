@@ -22,11 +22,12 @@ import { hostname } from 'os';
 import url from 'url';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
+const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
@@ -44,7 +45,28 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.boolean({ defaultValue: false }),
+      cors: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          allowCredentials: schema.boolean({ defaultValue: false }),
+          allowOrigin: schema.oneOf(
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
+            {
+              defaultValue: ['*'],
+            }
+          ),
+        },
+        {
+          validate(value) {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
+              return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
+            }
+          },
+        }
+      ),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
@@ -147,7 +169,11 @@ export class HttpConfig {
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
-  public cors: boolean | { origin: string[] };
+  public cors: {
+    enabled: boolean;
+    allowCredentials: boolean;
+    allowOrigin: string[];
+  };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
@@ -156,13 +182,18 @@ export class HttpConfig {
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
+  public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(
+    rawHttpConfig: HttpConfigType,
+    rawCspConfig: CspConfigType,
+    rawExternalUrlConfig: ExternalUrlConfig
+  ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -186,6 +217,7 @@ export class HttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

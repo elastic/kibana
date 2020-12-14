@@ -314,6 +314,7 @@ export async function installTemplate({
     pipelineName,
     packageName,
     composedOfTemplates,
+    hidden: dataStream.hidden,
   });
 
   // TODO: Check return values for errors

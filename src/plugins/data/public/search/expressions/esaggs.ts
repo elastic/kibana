@@ -56,9 +56,11 @@ export function getFunctionDefinition({
         searchSource,
       } = await getStartDependencies();
 
-      const aggConfigsState = JSON.parse(args.aggConfigs);
-      const indexPattern = await indexPatterns.get(args.index);
-      const aggConfigs = aggs.createAggConfigs(indexPattern, aggConfigsState);
+      const indexPattern = await indexPatterns.create(args.index.value, true);
+      const aggConfigs = aggs.createAggConfigs(
+        indexPattern,
+        args.aggs!.map((agg) => agg.value)
+      );
 
       return await handleEsaggsRequest(input, args, {
         abortSignal: (abortSignal as unknown) as AbortSignal,
