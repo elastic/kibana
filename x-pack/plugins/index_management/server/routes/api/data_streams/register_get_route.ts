@@ -65,12 +65,24 @@ const enhanceDataStreams = ({
   });
 };
 
+const getDataStreams = (client: ElasticsearchClient, name = '*') => {
+  // TODO update when elasticsearch client has update requestParams for 'indices.getDataStream'
+  return client.transport.request({
+    path: `/_data_stream/${encodeURIComponent(name)}`,
+    method: 'GET',
+    querystring: {
+      expand_wildcards: 'all',
+    },
+  });
+};
+
 const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
   return client.transport.request({
     path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
     method: 'GET',
     querystring: {
       human: true,
+      expand_wildcards: 'all',
     },
   });
 };
@@ -107,7 +119,7 @@ export function registerGetAllRoute({
       try {
         let {
           body: { data_streams: dataStreams },
-        } = await asCurrentUser.indices.getDataStream();
+        } = await getDataStreams(asCurrentUser);
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
@@ -165,7 +177,7 @@ export function registerGetOneRoute({
             body: { data_streams: dataStreamsStats },
           },
         ] = await Promise.all([
-          asCurrentUser.indices.getDataStream({ name }),
+          getDataStreams(asCurrentUser, name),
           getDataStreamsStats(asCurrentUser, name),
         ]);
 

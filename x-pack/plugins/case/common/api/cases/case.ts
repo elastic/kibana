@@ -29,12 +29,17 @@ const CaseStatusRt = rt.union([
 
 export const caseStatuses = Object.values(CaseStatuses);
 
+const SettingsRt = rt.type({
+  syncAlerts: rt.boolean,
+});
+
 const CaseBasicRt = rt.type({
-  connector: CaseConnectorRt,
   description: rt.string,
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
+  connector: CaseConnectorRt,
+  settings: SettingsRt,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -74,6 +79,7 @@ export const CasePostRequestRt = rt.type({
   tags: rt.array(rt.string),
   title: rt.string,
   connector: CaseConnectorRt,
+  settings: SettingsRt,
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
