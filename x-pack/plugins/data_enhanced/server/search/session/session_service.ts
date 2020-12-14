@@ -89,8 +89,8 @@ export class BackgroundSessionService implements ISessionService {
    */
   private sessionIdsAsFilters(sessionIds: string[]): KueryNode {
     return nodeBuilder.or(
-      sessionIds.map(id => {
-        nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id)
+      sessionIds.map((id) => {
+        return nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id);
       })
     );
   }
