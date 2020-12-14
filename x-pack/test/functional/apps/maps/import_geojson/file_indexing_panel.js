@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
         'global_maps_all',
         'geoall_data_writer',
         'global_index_pattern_management_all',
+        'global_dashboard_all',
       ]);
       await PageObjects.maps.openNewMap();
     });
