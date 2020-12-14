@@ -28,5 +28,9 @@ export function useChartTheme() {
       ...baseChartTheme.lineSeriesStyle,
       point: { visible: false },
     },
+    areaSeriesStyle: {
+      ...baseChartTheme.areaSeriesStyle,
+      point: { visible: false },
+    },
   };
 }

@@ -35,6 +35,7 @@ export const updateNotifications = async ({
           ruleAlertId,
         },
         throttle: null,
+        notifyWhen: null,
       },
     });
   } else if (interval && !notification) {
