@@ -330,7 +330,7 @@ In high-availability deployments, make sure you use the same encryption and decr
 
 [float]
 [[audit-logging-settings]]
-===== Audit logging settings
+==== Audit logging settings
 
 You can enable audit logging to support compliance, accountability, and security. When enabled, {kib} will capture:
 
@@ -348,7 +348,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 
 [float]
 [[ecs-audit-logging-settings]]
-===== ECS audit logging settings
+==== ECS audit logging settings
 
 To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify where you want to write the audit events using `xpack.security.audit.appender`.
 
