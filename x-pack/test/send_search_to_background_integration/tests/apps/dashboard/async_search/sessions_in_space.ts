@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload('dashboard/session_in_space');
+        await PageObjects.security.forceLogout();
       });
 
       it('Saves and restores a session', async () => {
