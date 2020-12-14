@@ -22,7 +22,7 @@ import { getServiceDependencies } from '../lib/services/get_service_dependencies
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceDetails } from '../lib/services/get_service_details';
-import { getServiceDetailsIcons } from '../lib/services/get_service_details_icons.';
+import { getServiceDetailsIcons } from '../lib/services/get_service_details_icons';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
