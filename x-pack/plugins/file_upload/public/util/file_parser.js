@@ -44,7 +44,6 @@ export const fileHandler = async ({
     let featuresProcessed = 0;
     const features = [];
     const errors = [];
-    let boolCleaningErrs = false;
     let boolGeometryErrs = false;
     let parsedGeojson;
     for await (const batch of batches) {
@@ -56,17 +55,8 @@ export const fileHandler = async ({
                 parsedGeojson = { ...batch.container, features };
               } else {
                 // Handle single feature geoJson
-                try {
-                  parsedGeojson = cleanAndValidate(batch.container);
-                  if (parsedGeojson) {
-                    featuresProcessed++;
-                  }
-                } catch (e) {
-                  boolCleaningErrs = true;
-                  errors.push(e);
-                  resolve(null);
-                  return;
-                }
+                parsedGeojson = cleanAndValidate(batch.container);
+                featuresProcessed++;
               }
             } else {
               resolve(null);
@@ -75,25 +65,6 @@ export const fileHandler = async ({
             break;
           default:
             for (const feature of batch.data) {
-              let cleanFeature;
-              try {
-                cleanFeature = cleanAndValidate(feature);
-                if (cleanFeature) {
-                  features.push(cleanFeature);
-                }
-              } catch (e) {
-                // TODO: Give feedback on which features failed
-                if (!boolCleaningErrs) {
-                  boolCleaningErrs = true;
-                  errors.push(
-                    new Error(
-                      i18n.translate('xpack.fileUpload.fileParser.cleaningErrors', {
-                        defaultMessage: 'Some features with cleaning errors omitted',
-                      })
-                    )
-                  );
-                }
-              }
               // TODO: Give feedback on which features failed
               if ((!feature.geometry || !feature.geometry.type) && !boolGeometryErrs) {
                 boolGeometryErrs = true;
@@ -104,8 +75,11 @@ export const fileHandler = async ({
                     })
                   )
                 );
+              } else {
+                const cleanFeature = cleanAndValidate(feature);
+                features.push(cleanFeature);
+                featuresProcessed++;
               }
-              featuresProcessed++;
             }
         }
         setFileProgress({
