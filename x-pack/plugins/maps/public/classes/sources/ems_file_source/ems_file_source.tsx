@@ -36,7 +36,7 @@ export function getSourceTitle() {
   const emsSettings = getEMSSettings();
   if (emsSettings.isEMSUrlSet()) {
     return i18n.translate('xpack.maps.source.emsOnPremFileTitle', {
-      defaultMessage: 'Elastic Map Server boundaries',
+      defaultMessage: 'Elastic Maps Server Boundaries',
     });
   } else {
     return i18n.translate('xpack.maps.source.emsFileTitle', {

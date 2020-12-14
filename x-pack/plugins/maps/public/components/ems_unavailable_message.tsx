@@ -21,11 +21,11 @@ export function getEmsUnavailableMessage(): string {
     if (!emsSettings.hasOnPremLicense()) {
       return i18n.translate('xpack.maps.source.ems.noOnPremLicenseDescription', {
         defaultMessage:
-          'An enterprise license is required to connect to local Elastic Map Server installations',
+          'An enterprise license is required to connect to local Elastic Maps Server installations.',
       });
     } else {
       return i18n.translate('xpack.maps.source.ems.noOnPremConnectionDescription', {
-        defaultMessage: 'Cannot connect to {host}',
+        defaultMessage: 'Cannot connect to {host}.',
         values: {
           host: emsSettings.getEMSRoot(),
         },

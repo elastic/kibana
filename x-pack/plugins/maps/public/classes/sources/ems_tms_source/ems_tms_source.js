@@ -19,11 +19,11 @@ export function getSourceTitle() {
   const emsSettings = getEMSSettings();
   if (emsSettings.isEMSUrlSet()) {
     return i18n.translate('xpack.maps.source.emsOnPremTileTitle', {
-      defaultMessage: 'Elastic Map Server basemaps',
+      defaultMessage: 'Elastic Maps Server Basemaps',
     });
   } else {
     return i18n.translate('xpack.maps.source.emsTileTitle', {
-      defaultMessage: 'EMS Boundaries',
+      defaultMessage: 'EMS Basemaps',
     });
   }
 }
