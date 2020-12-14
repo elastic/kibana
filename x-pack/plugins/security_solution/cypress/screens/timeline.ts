@@ -53,6 +53,8 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
+export const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
@@ -103,7 +105,7 @@ export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
 export const TIMELINE_FILTER = (filter: TimelineFilter) => {
-  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
+  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned "]`;
 };
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
