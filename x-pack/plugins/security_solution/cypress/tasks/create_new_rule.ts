@@ -71,7 +71,7 @@ import {
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
 } from '../screens/create_new_rule';
-import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
+import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
@@ -262,11 +262,20 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  cy.get(EQL_QUERY_INPUT).should('exist');
+  cy.get(EQL_QUERY_INPUT).should('be.visible');
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
   cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
-  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+    .invoke('text')
+    .then((text) => {
+      if (text !== 'Hits') {
+        cy.get(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+      }
+    });
+  cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
