@@ -13,19 +13,34 @@ import type { IAsyncSearchOptions } from './types';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
+  cancel?: () => void,
   { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   const aborted = options?.abortSignal
     ? abortSignalToPromise(options?.abortSignal)
     : { promise: NEVER, cleanup: () => {} };
 
-  return from(search()).pipe(
-    expand(() => timer(pollInterval).pipe(switchMap(search))),
-    tap((response) => {
-      if (isErrorResponse(response)) throw new AbortError();
-    }),
-    takeWhile<Response>(isPartialResponse, true),
-    takeUntil<Response>(from(aborted.promise)),
-    finalize(aborted.cleanup)
-  );
+  return new Observable((subscriber) => {
+    const obs = from(search()).pipe(
+      expand(() => timer(pollInterval).pipe(switchMap(search))),
+      tap((response) => {
+        if (isErrorResponse(response)) throw new AbortError();
+      }),
+      takeWhile<Response>(isPartialResponse, true),
+      takeUntil<Response>(from(aborted.promise)),
+      finalize(aborted.cleanup)
+    );
+
+    const subscription = obs.subscribe({
+      next: (value) => subscriber.next(value),
+      error: (error) => subscriber.error(error),
+      complete: () => subscriber.complete(),
+    });
+
+    return () => {
+      if (cancel) cancel();
+      aborted.cleanup();
+      subscription.unsubscribe();
+    };
+  });
 };

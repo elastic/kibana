@@ -84,10 +84,14 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    return pollSearch(search, { ...options, abortSignal: combinedSignal }).pipe(
+    const cancel = () => {
+      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+    };
+
+    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
       tap((response) => (id = response.id)),
       catchError((e: AbortError) => {
-        if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+        cancel();
         return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {

@@ -54,7 +54,13 @@ export const eqlSearchStrategyProvider = (
         return toEqlKibanaSearchResponse(response);
       };
 
-      return pollSearch(search, options).pipe(tap((response) => (id = response.id)));
+      const cancel = async () => {
+        if (id) {
+          await esClient.asCurrentUser.eql.delete({ id });
+        }
+      };
+
+      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
     },
   };
 };

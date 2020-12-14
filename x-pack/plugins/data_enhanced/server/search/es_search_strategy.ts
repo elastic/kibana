@@ -57,7 +57,13 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse(body);
     };
 
-    return pollSearch(search, options).pipe(
+    const cancel = async () => {
+      if (id) {
+        await esClient.asCurrentUser.asyncSearch.delete({ id });
+      }
+    };
+
+    return pollSearch(search, cancel, options).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage))
     );
