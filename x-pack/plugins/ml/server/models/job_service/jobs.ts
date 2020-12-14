@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
+import {
+  getSingleMetricViewerJobErrorMessage,
+  parseTimeIntervalForJob,
+} from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -27,7 +30,6 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getEarliestDatafeedStartTime,
   getLatestDataOrBucketTimestamp,
-  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
@@ -175,6 +177,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       const hasDatafeed =
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
       const dataCounts = job.data_counts;
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob: MlSummaryJob = {
         id: job.job_id,
@@ -200,7 +203,8 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           dataCounts?.latest_record_timestamp,
           dataCounts?.latest_bucket_timestamp
         ),
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
       };
@@ -242,13 +246,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
       }
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob = {
         id: job.job_id,
         job_id: job.job_id,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         isRunning: hasDatafeed && job.datafeed_config.state === 'started',
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         timeRange,
       };
 

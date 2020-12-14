@@ -26,10 +26,11 @@ import {
 } from 'src/plugins/expressions/common';
 
 import { FormatFactory } from '../../../field_formats/utils';
+import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
 import { calculateBounds } from '../../../query';
 
-import { AggsStart } from '../../aggs';
+import { AggsStart, AggExpressionType } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
@@ -42,11 +43,10 @@ type Input = KibanaContext | null;
 type Output = Promise<Datatable>;
 
 interface Arguments {
-  index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
+  index: IndexPatternExpressionType;
+  aggs?: AggExpressionType[];
+  metricsAtAllLevels?: boolean;
+  partialRows?: boolean;
   timeFields?: string[];
 }
 
@@ -76,33 +76,40 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   }),
   args: {
     index: {
-      types: ['string'],
-      help: '',
+      types: ['index_pattern'],
+      required: true,
+      help: i18n.translate('data.search.functions.esaggs.index.help', {
+        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+      }),
+    },
+    aggs: {
+      types: ['agg_type'],
+      multi: true,
+      default: [],
+      help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
+        defaultMessage: 'List of aggs configured with agg_type functions',
+      }),
     },
     metricsAtAllLevels: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.metricsAtAllLevels.help', {
+        defaultMessage: 'Whether to include columns with metrics for each bucket level',
+      }),
     },
     partialRows: {
       types: ['boolean'],
       default: false,
-      help: '',
-    },
-    includeFormatHints: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    aggConfigs: {
-      types: ['string'],
-      default: '""',
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.partialRows.help', {
+        defaultMessage: 'Whether to return rows that only contain partial data',
+      }),
     },
     timeFields: {
       types: ['string'],
-      help: '',
       multi: true,
+      help: i18n.translate('data.search.functions.esaggs.timeFields.help', {
+        defaultMessage: 'Provide time fields to get the resolved time ranges for the query',
+      }),
     },
   },
 });
