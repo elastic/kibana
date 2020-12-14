@@ -63,7 +63,7 @@ describe('getSharingData', () => {
             "script_fields": Object {},
             "sort": Array [
               Object {
-                "_doc": Object {
+                "_score": Object {
                   "order": "desc",
                 },
               },
