@@ -40,6 +40,8 @@ import { SourceConfigurationFields } from '../../graphql/types';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomoly_detection_flyout';
+import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -47,6 +49,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 
   const kibana = useKibana();
 
@@ -71,6 +74,32 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         defaultMessage: 'Metrics',
                       })}
                     />
+
+                    {setHeaderActionMenu && (
+                      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+                        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              href={kibana.services?.application?.getUrlForApp(
+                                '/home#/tutorial_directory/metrics'
+                              )}
+                              size="s"
+                              color="primary"
+                              iconType="plusInCircle"
+                            >
+                              {ADD_DATA_LABEL}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </HeaderMenuPortal>
+                    )}
 
                     <Header
                       breadcrumbs={[
@@ -120,30 +149,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                               },
                             ]}
                           />
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          grow={false}
-                          style={{ flexDirection: 'row', alignItems: 'center' }}
-                        >
-                          <EuiFlexItem grow={false}>
-                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
-                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              href={kibana.services?.application?.getUrlForApp(
-                                '/home#/tutorial_directory/metrics'
-                              )}
-                              size="s"
-                              color="primary"
-                              iconType="plusInCircle"
-                            >
-                              {ADD_DATA_LABEL}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </AppNavigation>

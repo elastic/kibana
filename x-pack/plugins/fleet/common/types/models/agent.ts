@@ -22,6 +22,8 @@ export type AgentStatus =
   | 'updating'
   | 'degraded';
 
+export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+
 export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'UNENROLL'

@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiToolTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -28,9 +29,9 @@ import { isFullScreen } from '../timeline/body/column_headers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 
-import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import * as i18n from './translations';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -167,15 +168,17 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiHorizontalRule margin="none" />
-
-      {graphEventId !== undefined && indices !== null && (
+      {graphEventId !== undefined && indices !== null ? (
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
           indices={indices}
         />
+      ) : (
+        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
       )}
     </OverlayContainer>
   );

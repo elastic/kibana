@@ -28,6 +28,7 @@ jest.mock('../../../shared/flash_messages', () => ({
 import { setQueuedSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
 import { DocumentDetailLogic } from './document_detail_logic';
+import { InternalSchemaTypes } from '../../../shared/types';
 
 describe('DocumentDetailLogic', () => {
   const DEFAULT_VALUES = {
@@ -61,7 +62,7 @@ describe('DocumentDetailLogic', () => {
   describe('actions', () => {
     describe('setFields', () => {
       it('should set fields to the provided value and dataLoading to false', () => {
-        const fields = [{ name: 'foo', value: ['foo'], type: 'string' }];
+        const fields = [{ name: 'foo', value: ['foo'], type: 'string' as InternalSchemaTypes }];
 
         mount({
           dataLoading: true,
