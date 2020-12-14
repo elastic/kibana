@@ -5,22 +5,17 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  values: string[];
-  tooltipLabel?: string;
-  numberOfVisibleItems?: number;
+  environments: string[];
 }
-export function GroupBadges({
-  values = [],
-  tooltipLabel,
-  numberOfVisibleItems = 2,
-}: Props) {
-  if (values.length < numberOfVisibleItems) {
+export function EnvironmentBadge({ environments = [] }: Props) {
+  if (environments.length < 2) {
     return (
       <>
-        {values.map((env) => (
+        {environments.map((env) => (
           <EuiBadge color="hollow" key={env}>
             {env}
           </EuiBadge>
@@ -31,14 +26,20 @@ export function GroupBadges({
   return (
     <EuiToolTip
       position="right"
-      content={values.map((env) => (
+      content={environments.map((env) => (
         <React.Fragment key={env}>
           {env}
           <br />
         </React.Fragment>
       ))}
     >
-      <EuiBadge>{tooltipLabel}</EuiBadge>
+      <EuiBadge>
+        {i18n.translate('xpack.apm.servicesTable.environmentCount', {
+          values: { environmentCount: environments.length },
+          defaultMessage:
+            '{environmentCount, plural, one {1 environment} other {# environments}}',
+        })}
+      </EuiBadge>
     </EuiToolTip>
   );
 }

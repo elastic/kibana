@@ -20,11 +20,11 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
+import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
-import { GroupBadges } from '../../../shared/group_badges';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -109,18 +109,8 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     }),
     width: px(unit * 10),
     sortable: true,
-    render: (_, { environments = [] }) => (
-      <GroupBadges
-        values={environments}
-        tooltipLabel={i18n.translate(
-          'xpack.apm.servicesTable.environmentCount',
-          {
-            values: { valuesCount: environments.length },
-            defaultMessage:
-              '{valuesCount, plural, one {1 environment} other {# environments}}',
-          }
-        )}
-      />
+    render: (_, { environments }) => (
+      <EnvironmentBadge environments={environments ?? []} />
     ),
   },
   {
