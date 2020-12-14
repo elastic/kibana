@@ -77,7 +77,7 @@ The final payload matches the following contract:
       "minutes_on_screen_30_days": 20.0,
       "minutes_on_screen_90_days": 110.1,
       "minutes_on_screen_total": 112.5,
-      "views: [
+      "views": [
         {
           "appId": "application_ID",
           "viewId": "view_ID",
