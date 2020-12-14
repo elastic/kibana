@@ -188,16 +188,6 @@ export class Plugin {
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 
-    const audit = this.auditService.setup({
-      license,
-      config: config.audit,
-      logging: core.logging,
-      http: core.http,
-      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
-      getCurrentUser: (request) => authenticationSetup.getCurrentUser(request),
-    });
-    const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
-
     const { session } = this.sessionManagementService.setup({
       config,
       clusterClient,
@@ -205,6 +195,17 @@ export class Plugin {
       kibanaIndexName: legacyConfig.kibana.index,
       taskManager,
     });
+
+    const audit = this.auditService.setup({
+      license,
+      config: config.audit,
+      logging: core.logging,
+      http: core.http,
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
+      getSID: (request) => session.getSID(request),
+      getCurrentUser: (request) => authenticationSetup.getCurrentUser(request),
+    });
+    const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const authenticationSetup = this.authenticationService.setup({
       legacyAuditLogger,
