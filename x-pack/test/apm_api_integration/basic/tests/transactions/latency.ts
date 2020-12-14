@@ -22,17 +22,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('Latency', () => {
     describe('when data is not loaded ', () => {
+      it('returns 400 when latencyAggregationType is not informed', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request`
+        );
+
+        expect(response.status).to.be(400);
+      });
+
+      it('returns 400 when transactionType is not informed', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+        );
+
+        expect(response.status).to.be(400);
+      });
+
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&latencyAggregationType=avg&transactionType=request`
         );
 
         expect(response.status).to.be(200);
 
         expect(response.body.overallAvgDuration).to.be(null);
-        expect(response.body.latencyTimeseries.avg.length).to.be(0);
-        expect(response.body.latencyTimeseries.p95.length).to.be(0);
-        expect(response.body.latencyTimeseries.p99.length).to.be(0);
+        expect(response.body.latencyTimeseries.length).to.be(0);
       });
     });
 
@@ -42,19 +56,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       let response: PromiseReturnType<typeof supertest.get>;
 
-      before(async () => {
-        response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+      describe('average latency type', () => {
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=avg`
+          );
+        });
+
+        it('returns average duration and timeseries', async () => {
+          expect(response.status).to.be(200);
+          expect(response.body.overallAvgDuration).not.to.be(null);
+          expect(response.body.latencyTimeseries.length).to.be.eql(61);
+        });
       });
 
-      it('returns average duration and timeseries', async () => {
-        expect(response.status).to.be(200);
+      describe('95th percentile latency type', () => {
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=p95`
+          );
+        });
 
-        expect(response.body.overallAvgDuration).not.to.be(null);
-        expect(response.body.latencyTimeseries.avg.length).to.be.greaterThan(0);
-        expect(response.body.latencyTimeseries.p95.length).to.be.greaterThan(0);
-        expect(response.body.latencyTimeseries.p99.length).to.be.greaterThan(0);
+        it('returns average duration and timeseries', async () => {
+          expect(response.status).to.be(200);
+          expect(response.body.overallAvgDuration).not.to.be(null);
+          expect(response.body.latencyTimeseries.length).to.be.eql(61);
+        });
+      });
+
+      describe('99th percentile latency type', () => {
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/services/opbeans-node/transactions/charts/latency?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=p99`
+          );
+        });
+
+        it('returns average duration and timeseries', async () => {
+          expect(response.status).to.be(200);
+          expect(response.body.overallAvgDuration).not.to.be(null);
+          expect(response.body.latencyTimeseries.length).to.be.eql(61);
+        });
       });
     });
   });
