@@ -14,12 +14,19 @@ export const renderApp = ({
   apolloClient,
   element,
   history,
+  onAppLeave,
   services,
   store,
   SubPluginRoutes,
 }: RenderAppProps): (() => void) => {
   render(
-    <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
+    <SecurityApp
+      apolloClient={apolloClient}
+      history={history}
+      onAppLeave={onAppLeave}
+      services={services}
+      store={store}
+    >
       <SubPluginRoutes />
     </SecurityApp>,
     element

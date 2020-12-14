@@ -20,7 +20,7 @@
 import * as stringScriptFieldScriptFieldContext from './string_script_field_script_field.json';
 import * as scoreContext from './score.json';
 import * as processorConditionalContext from './processor_conditional.json';
-import * as painlessTestContext from './painless_test.json';
+import * as commonContext from './common.json';
 import * as longScriptFieldScriptFieldContext from './long_script_field_script_field.json';
 import * as ipScriptFieldScriptFieldContext from './ip_script_field_script_field.json';
 import * as filterContext from './filter.json';
@@ -30,7 +30,7 @@ import * as booleanScriptFieldScriptFieldContext from './boolean_script_field_sc
 export { stringScriptFieldScriptFieldContext };
 export { scoreContext };
 export { processorConditionalContext };
-export { painlessTestContext };
+export { commonContext };
 export { longScriptFieldScriptFieldContext };
 export { ipScriptFieldScriptFieldContext };
 export { filterContext };

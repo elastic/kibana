@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { pick, uniqBy } from 'lodash';
+import { pick, uniqBy, sortBy } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -62,6 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -74,10 +76,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Array [
             "DispatcherServlet#doGet",
-            "APIRestController#stats",
-            "APIRestController#topProducts",
+            "APIRestController#customers",
             "APIRestController#order",
-            "APIRestController#customer",
+            "APIRestController#stats",
+            "APIRestController#customerWhoBought",
           ]
         `);
 
@@ -85,10 +87,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Array [
             100,
-            0.794579770440557,
-            0.298214689777379,
-            0.290932594821871,
-            0.270655974123907,
+            1.43059146953109,
+            0.953769516915408,
+            0.905498741191481,
+            0.894989230293471,
           ]
         `);
 
@@ -99,30 +101,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Object {
             "errorRate": Object {
-              "value": 0.107142857142857,
+              "value": 0.0625,
             },
             "impact": 100,
             "latency": Object {
-              "value": 996636.214285714,
+              "value": 1044995.1875,
             },
             "name": "DispatcherServlet#doGet",
             "throughput": Object {
-              "value": 28,
+              "value": 16,
             },
           }
         `);
 
         expectSnapshot(
           firstItem.latency.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`15`);
+        ).toMatchInline(`9`);
 
         expectSnapshot(
           firstItem.throughput.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`15`);
+        ).toMatchInline(`9`);
 
         expectSnapshot(
           firstItem.errorRate.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`3`);
+        ).toMatchInline(`1`);
       });
 
       it('sorts items in the correct order', async () => {
@@ -138,6 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -148,7 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (item: any) => item.impact
         );
 
-        expect(descendingOccurrences).to.eql(descendingOccurrences.concat().sort().reverse());
+        expect(descendingOccurrences).to.eql(sortBy(descendingOccurrences.concat()).reverse());
 
         const ascendingResponse = await supertest.get(
           url.format({
@@ -162,6 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -170,7 +174,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (item: any) => item.impact
         );
 
-        expect(ascendingOccurrences).to.eql(ascendingOccurrences.concat().sort().reverse());
+        expect(ascendingOccurrences).to.eql(sortBy(ascendingOccurrences.concat()).reverse());
       });
 
       it('sorts items by the correct field', async () => {
@@ -186,6 +190,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'latency',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -194,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const latencies = response.body.transactionGroups.map((group: any) => group.latency.value);
 
-        expect(latencies).to.eql(latencies.concat().sort().reverse());
+        expect(latencies).to.eql(sortBy(latencies.concat()).reverse());
       });
 
       it('paginates through the items', async () => {
@@ -212,6 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -239,6 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   pageIndex,
                   sortDirection: 'desc',
                   sortField: 'impact',
+                  latencyAggregationType: 'avg',
                 },
               })
             );
