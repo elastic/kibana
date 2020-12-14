@@ -30,13 +30,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
       loadTestFile(require.resolve('./delete_rules'));
       loadTestFile(require.resolve('./delete_rules_bulk'));
-      loadTestFile(require.resolve('./exception_operators_data_types/index'));
+      loadTestFile(require.resolve('./export_rules'));
     });
 
     describe('', function () {
       this.tags('ciGroup11');
 
-      loadTestFile(require.resolve('./export_rules'));
+      loadTestFile(require.resolve('./exception_operators_data_types/index'));
       loadTestFile(require.resolve('./find_rules'));
       loadTestFile(require.resolve('./find_statuses'));
       loadTestFile(require.resolve('./generating_signals'));
