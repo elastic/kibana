@@ -45,10 +45,11 @@ export const ShareMenu = compose<ComponentProps, {}>(
   withServices,
   withProps(
     ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
-      getExportUrl: (type) => {
+      getExportUrl: (type, layout) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(
             workpad,
+            layout,
             { pageCount },
             services.platform.getBasePathInterface()
           );
@@ -69,10 +70,15 @@ export const ShareMenu = compose<ComponentProps, {}>(
             throw new Error(strings.getUnknownExportErrorMessage(type));
         }
       },
-      onExport: (type) => {
+      onExport: (type, layout) => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount }, services.platform.getBasePathInterface())
+            return createPdf(
+              workpad,
+              layout || 'preserve_layout',
+              { pageCount },
+              services.platform.getBasePathInterface()
+            )
               .then(({ data }: { data: { job: { id: string } } }) => {
                 services.notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),

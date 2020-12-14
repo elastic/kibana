@@ -33,7 +33,7 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
-  sort: Sort;
+  sort: Sort[];
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
 }
@@ -144,7 +144,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" data-timeline-id={id}>
+        <TimelineBody data-test-subj="timeline-body">
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}

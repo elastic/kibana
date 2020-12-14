@@ -41,8 +41,6 @@ export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 
-export const getEventsByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
-
 export const getKqlFilterQuerySelector = () =>
   createSelector(selectTimeline, (timeline) =>
     timeline &&
