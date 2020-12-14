@@ -224,7 +224,7 @@ export const Page: FC = () => {
   >();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
-  const nonMetricsLoaded = useRef(defaults.nonMetricsLoaded);
+  const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -249,7 +249,7 @@ export const Page: FC = () => {
   useEffect(() => {
     createMetricCards();
     createNonMetricCards();
-  }, [overallStats]);
+  }, [overallStats, showEmptyFields]);
 
   useEffect(() => {
     loadMetricFieldStats();
@@ -261,7 +261,11 @@ export const Page: FC = () => {
 
   useEffect(() => {
     createMetricCards();
-  }, [metricsLoaded, showEmptyFields]);
+  }, [metricsLoaded]);
+
+  useEffect(() => {
+    createNonMetricCards();
+  }, [nonMetricsLoaded]);
 
   /**
    * Extract query data from the saved search object.
@@ -516,17 +520,15 @@ export const Page: FC = () => {
         return f.fieldName === field.displayName;
       });
 
-      if (fieldData !== undefined) {
-        const metricConfig: FieldVisConfig = {
-          ...fieldData,
-          fieldFormat: currentIndexPattern.getFormatterForField(field),
-          type: ML_JOB_FIELD_TYPES.NUMBER,
-          loading: true,
-          aggregatable: true,
-        };
+      const metricConfig: FieldVisConfig = {
+        ...(fieldData ? fieldData : {}),
+        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        type: ML_JOB_FIELD_TYPES.NUMBER,
+        loading: true,
+        aggregatable: true,
+      };
 
-        configs.push(metricConfig);
-      }
+      configs.push(metricConfig);
     });
 
     setMetricsStats({
@@ -571,17 +573,12 @@ export const Page: FC = () => {
       }
     });
 
-    if (
-      allNonMetricFields.length === nonMetricFieldData.length &&
-      nonMetricsLoaded.current === false
-    ) {
-      nonMetricsLoaded.current = true;
+    if (nonMetricsLoaded === false) {
+      setNonMetricsLoaded(true);
+      return;
     }
 
-    if (
-      allNonMetricFields.length !== nonMetricFieldData.length &&
-      nonMetricsLoaded.current === true
-    ) {
+    if (allNonMetricFields.length !== nonMetricFieldData.length && showEmptyFields === true) {
       // Combine the field data obtained from Elasticsearch into a single array.
       nonMetricFieldData = nonMetricFieldData.concat(
         overallStats.aggregatableNotExistsFields,
@@ -589,8 +586,7 @@ export const Page: FC = () => {
       );
     }
 
-    const nonMetricFieldsToShow =
-      nonMetricsLoaded.current === true ? allNonMetricFields : populatedNonMetricFields;
+    const nonMetricFieldsToShow = showEmptyFields ? allNonMetricFields : populatedNonMetricFields;
 
     const configs: FieldVisConfig[] = [];
 
