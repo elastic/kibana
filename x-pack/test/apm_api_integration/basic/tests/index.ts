@@ -11,10 +11,6 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     loadTestFile(require.resolve('./feature_controls'));
 
-    describe('Alerts', function () {
-      loadTestFile(require.resolve('./alerts/chart_preview'));
-    });
-
     describe('Service Maps', function () {
       loadTestFile(require.resolve('./service_maps/service_maps'));
     });
