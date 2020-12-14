@@ -40,19 +40,21 @@ import {
   ROLL_INDICES_START,
 } from './constants';
 
+export interface ApplicationViewUsage {
+  appId: string;
+  viewId: string;
+  clicks_total: number;
+  clicks_7_days: number;
+  clicks_30_days: number;
+  clicks_90_days: number;
+  minutes_on_screen_total: number;
+  minutes_on_screen_7_days: number;
+  minutes_on_screen_30_days: number;
+  minutes_on_screen_90_days: number;
+}
+
 export interface ApplicationUsageViews {
-  [serializedKey: string]: {
-    appId: string;
-    viewId: string;
-    clicks_total: number;
-    clicks_7_days: number;
-    clicks_30_days: number;
-    clicks_90_days: number;
-    minutes_on_screen_total: number;
-    minutes_on_screen_7_days: number;
-    minutes_on_screen_30_days: number;
-    minutes_on_screen_90_days: number;
-  };
+  [serializedKey: string]: ApplicationViewUsage;
 }
 
 export interface ApplicationUsageTelemetryReport {
@@ -67,18 +69,7 @@ export interface ApplicationUsageTelemetryReport {
     minutes_on_screen_7_days: number;
     minutes_on_screen_30_days: number;
     minutes_on_screen_90_days: number;
-    views?: Array<{
-      appId: string;
-      viewId: string;
-      clicks_total: number;
-      clicks_7_days: number;
-      clicks_30_days: number;
-      clicks_90_days: number;
-      minutes_on_screen_total: number;
-      minutes_on_screen_7_days: number;
-      minutes_on_screen_30_days: number;
-      minutes_on_screen_90_days: number;
-    }>;
+    views?: ApplicationViewUsage[];
   };
 }
 

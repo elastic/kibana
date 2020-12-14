@@ -58,6 +58,12 @@
       "properties": {
         "dashboards": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -81,11 +87,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "dev_tools": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -109,11 +158,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "discover": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -137,11 +229,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "home": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -165,11 +300,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "kibana": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -193,11 +371,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "management": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -221,11 +442,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "short_url_redirect": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -249,11 +513,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "timelion": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -277,11 +584,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "visualize": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -305,11 +655,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "apm": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -333,11 +726,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "csm": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -361,11 +797,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "canvas": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -389,11 +868,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "dashboard_mode": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -417,11 +939,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "enterpriseSearch": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -445,11 +1010,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "appSearch": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -473,11 +1081,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "workplaceSearch": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -501,11 +1152,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "graph": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -529,11 +1223,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "logs": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -557,11 +1294,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "metrics": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -585,11 +1365,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "infra": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -613,11 +1436,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "fleet": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -641,11 +1507,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "lens": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -669,11 +1578,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "maps": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -697,11 +1649,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "ml": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -725,11 +1720,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "monitoring": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -753,11 +1791,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "observability-overview": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -781,11 +1862,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_account": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -809,11 +1933,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_access_agreement": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -837,11 +2004,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_capture_url": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -865,11 +2075,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_logged_out": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -893,11 +2146,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_login": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -921,11 +2217,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_logout": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -949,11 +2288,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "security_overwritten_session": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -977,11 +2359,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1005,11 +2430,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:overview": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1033,11 +2501,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:detections": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1061,11 +2572,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:hosts": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1089,11 +2643,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:network": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1117,11 +2714,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:timelines": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1145,11 +2785,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:case": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1173,11 +2856,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "securitySolution:administration": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1201,11 +2927,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "siem": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1229,11 +2998,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "space_selector": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1257,11 +3069,54 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         },
         "uptime": {
           "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "viewId": {
+              "type": "keyword"
+            },
             "clicks_total": {
               "type": "long"
             },
@@ -1285,6 +3140,43 @@
             },
             "minutes_on_screen_90_days": {
               "type": "float"
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword"
+                  },
+                  "viewId": {
+                    "type": "keyword"
+                  },
+                  "clicks_total": {
+                    "type": "long"
+                  },
+                  "clicks_7_days": {
+                    "type": "long"
+                  },
+                  "clicks_30_days": {
+                    "type": "long"
+                  },
+                  "clicks_90_days": {
+                    "type": "long"
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float"
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float"
+                  }
+                }
+              }
             }
           }
         }
