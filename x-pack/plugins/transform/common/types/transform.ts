@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import type { LatestFunctionConfig, PutTransformsRequestSchema } from '../api_schemas/transforms';
 import { PivotGroupByDict } from './pivot_group_by';
 import { PivotAggDict } from './pivot_aggs';
@@ -21,14 +22,16 @@ export type TransformBaseConfig = PutTransformsRequestSchema & {
   version?: string;
 };
 
+export interface PivotConfigDefinition {
+  group_by: PivotGroupByDict;
+  aggregations: PivotAggDict;
+}
+
 /**
  * Transform with pivot configuration
  */
 export type TransformPivotConfig = Omit<TransformBaseConfig, 'latest'> & {
-  pivot: {
-    group_by: PivotGroupByDict;
-    aggregations: PivotAggDict;
-  };
+  pivot: PivotConfigDefinition;
 };
 
 /**
@@ -48,4 +51,9 @@ export function isLatestTransform(
   transform: TransformBaseConfig
 ): transform is TransformLatestConfig {
   return transform.hasOwnProperty('latest');
+}
+
+export interface LatestFunctionConfigUI {
+  unique_key: Array<EuiComboBoxOptionOption<string>>;
+  sort: EuiComboBoxOptionOption<string>;
 }

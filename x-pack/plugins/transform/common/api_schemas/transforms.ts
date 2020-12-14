@@ -46,6 +46,8 @@ export const latestFunctionSchema = schema.object({
   sort: schema.string(),
 });
 
+export type PivotConfig = TypeOf<typeof pivotSchema>;
+
 export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
 
 export const settingsSchema = schema.object({
@@ -66,6 +68,17 @@ export const syncSchema = schema.object({
   }),
 });
 
+function transformConfigPayloadValidator<
+  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig }
+>(value: T) {
+  if (!value.pivot && !value.latest) {
+    return 'pivot or latest is required for transform configuration';
+  }
+  if (value.pivot && value.latest) {
+    return 'pivot and latest are not allowed together';
+  }
+}
+
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object(
   {
@@ -85,19 +98,14 @@ export const putTransformsRequestSchema = schema.object(
     sync: schema.maybe(syncSchema),
   },
   {
-    validate: (value) => {
-      if (!value.pivot || !value.latest) {
-        return 'pivot or latest is required for transform configuration';
-      }
-      if (value.pivot && value.latest) {
-        return 'pivot and latest are not allowed together';
-      }
-    },
+    validate: transformConfigPayloadValidator,
   }
 );
 
-export interface PutTransformsRequestSchema extends TypeOf<typeof putTransformsRequestSchema> {
-  pivot?: {
+export type PutTransformsRequestSchema = TypeOf<typeof putTransformsRequestSchema>;
+
+export interface PutTransformsPivotRequestSchema extends PutTransformsRequestSchema {
+  pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
@@ -116,18 +124,30 @@ export interface PutTransformsResponseSchema {
 }
 
 // POST transforms/_preview
-export const postTransformsPreviewRequestSchema = schema.object({
-  pivot: pivotSchema,
-  source: sourceSchema,
-});
+export const postTransformsPreviewRequestSchema = schema.object(
+  {
+    pivot: schema.maybe(pivotSchema),
+    latest: schema.maybe(latestFunctionSchema),
+    source: sourceSchema,
+  },
+  {
+    validate: transformConfigPayloadValidator,
+  }
+);
 
-export interface PostTransformsPreviewRequestSchema
-  extends TypeOf<typeof postTransformsPreviewRequestSchema> {
+export type PostTransformsPreviewRequestSchema = TypeOf<typeof postTransformsPreviewRequestSchema>;
+
+export type PivotTransformPreviewRequestSchema = Omit<
+  PostTransformsPreviewRequestSchema,
+  'latest'
+> & {
   pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
-}
+};
+
+export type LatestTransformPreviewRequestSchema = Omit<PostTransformsPreviewRequestSchema, 'pivot'>;
 
 interface EsMappingType {
   type: ES_FIELD_TYPES;

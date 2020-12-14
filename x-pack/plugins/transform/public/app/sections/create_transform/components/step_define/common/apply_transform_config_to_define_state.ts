@@ -8,7 +8,11 @@ import { isEqual } from 'lodash';
 
 import { Dictionary } from '../../../../../../../common/types/common';
 import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
-import { isPivotTransform, TransformBaseConfig } from '../../../../../../../common/types/transform';
+import {
+  isLatestTransform,
+  isPivotTransform,
+  TransformBaseConfig,
+} from '../../../../../../../common/types/transform';
 
 import {
   matchAllQuery,
@@ -21,16 +25,23 @@ import {
 
 import { StepDefineExposedState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
+import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
+import { StepDefineFormProps } from '../step_define_form';
+import { validateLatestConfig } from '../hooks/use_latest_function_config';
+import { validatePivotConfig } from '../hooks/use_pivot_config';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
-  transformConfig?: TransformBaseConfig
+  transformConfig?: TransformBaseConfig,
+  indexPattern?: StepDefineFormProps['searchItems']['indexPattern']
 ): StepDefineExposedState {
   if (transformConfig === undefined) {
     return state;
   }
 
   if (isPivotTransform(transformConfig)) {
+    state.transformFunction = TRANSFORM_FUNCTION.PIVOT;
+
     // apply the transform configuration to wizard DEFINE state
     // transform aggregations config to wizard state
     state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce((aggList, aggName) => {
@@ -56,6 +67,33 @@ export function applyTransformConfigToDefineState(
       },
       {} as PivotGroupByConfigDict
     );
+
+    state.previewRequest = {
+      pivot: transformConfig.pivot,
+    };
+
+    state.validationStatus = validatePivotConfig(transformConfig.pivot);
+  }
+
+  if (isLatestTransform(transformConfig)) {
+    state.transformFunction = TRANSFORM_FUNCTION.LATEST;
+    state.latestConfig = {
+      unique_key: transformConfig.latest.unique_key.map((v) => ({
+        value: v,
+        label: indexPattern ? indexPattern.fields.find((f) => f.name === v)?.displayName ?? v : v,
+      })),
+      sort: {
+        value: transformConfig.latest.sort,
+        label: indexPattern
+          ? indexPattern.fields.find((f) => f.name === transformConfig.latest.sort)?.displayName ??
+            transformConfig.latest.sort
+          : transformConfig.latest.sort,
+      },
+    };
+    state.previewRequest = {
+      latest: transformConfig.latest,
+    };
+    state.validationStatus = validateLatestConfig(transformConfig.latest);
   }
 
   // only apply the query from the transform config to wizard state if it's not the default query

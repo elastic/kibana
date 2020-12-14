@@ -100,7 +100,11 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   // The DEFINE state
   const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig)
+    applyTransformConfigToDefineState(
+      getDefaultStepDefineState(searchItems),
+      cloneConfig,
+      indexPattern
+    )
   );
 
   // The DETAILS state

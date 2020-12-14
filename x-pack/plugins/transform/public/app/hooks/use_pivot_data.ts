@@ -15,37 +15,19 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
-import { dictionaryToArray } from '../../../common/types/common';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
-import {
-  getPreviewTransformRequestBody,
-  PivotAggsConfigDict,
-  PivotGroupByConfigDict,
-  PivotGroupByConfig,
-  PivotQuery,
-  PivotAggsConfig,
-} from '../common';
-import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
+import { getPreviewTransformRequestBody, PivotGroupByConfig, PivotQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
-
-/**
- * Checks if the aggregations collection is invalid.
- */
-function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
-  return aggsArray.some((agg) => {
-    return (
-      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
-      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
-    );
-  });
-}
+import { TRANSFORM_FUNCTION, TransformFunction } from '../../../common/constants';
+import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import { dictionaryToArray } from '../../../common/types/common';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -63,11 +45,28 @@ function sortColumns(groupByArr: PivotGroupByConfig[]) {
   };
 }
 
+function sortColumnsForLatest(sortField: string) {
+  return (a: string, b: string) => {
+    // make sure sort field is always the most left column
+    if (sortField === a && sortField === b) {
+      return a.localeCompare(b);
+    }
+    if (sortField === a) {
+      return -1;
+    }
+    if (sortField === b) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
+
 export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
-  aggs: PivotAggsConfigDict,
-  groupBy: PivotGroupByConfigDict
+  transformFunction: TransformFunction,
+  validationStatus: StepDefineExposedState['validationStatus'],
+  requestPayload: StepDefineExposedState['previewRequest']
 ): UseIndexDataReturnType => {
   const [
     previewMappingsProperties,
@@ -78,14 +77,17 @@ export const usePivotData = (
     ml: { formatHumanReadableDateTimeSeconds, multiColumnSortFactory, useDataGrid, INDEX_STATUS },
   } = useAppDependencies();
 
-  const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
-  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
-
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappingsProperties).filter(
     (key) => previewMappingsProperties[key].type !== 'object'
   );
-  columnKeys.sort(sortColumns(groupByArr));
+
+  if (transformFunction === TRANSFORM_FUNCTION.PIVOT) {
+    const groupByArr = dictionaryToArray(requestPayload.pivot!.group_by);
+    columnKeys.sort(sortColumns(groupByArr));
+  } else {
+    columnKeys.sort(sortColumnsForLatest(requestPayload.latest?.sort));
+  }
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
@@ -141,18 +143,10 @@ export const usePivotData = (
   } = dataGrid;
 
   const getPreviewData = async () => {
-    if (aggsArr.length === 0 || groupByArr.length === 0) {
+    if (!validationStatus.isValid) {
       setTableItems([]);
       setRowCount(0);
-      setNoDataMessage(
-        i18n.translate('xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody', {
-          defaultMessage: 'Please choose at least one group-by field and aggregation.',
-        })
-      );
-      return;
-    }
-
-    if (isConfigInvalid(aggsArr)) {
+      setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
 
@@ -160,12 +154,7 @@ export const usePivotData = (
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
-    const previewRequest = getPreviewTransformRequestBody(
-      indexPatternTitle,
-      query,
-      groupByArr,
-      aggsArr
-    );
+    const previewRequest = getPreviewTransformRequestBody(indexPatternTitle, query, requestPayload);
     const resp = await api.getTransformsPreview(previewRequest);
 
     if (!isPostTransformsPreviewResponseSchema(resp)) {
@@ -204,8 +193,7 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    aggsArr,
-    JSON.stringify([groupByArr, query]),
+    JSON.stringify([requestPayload, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
