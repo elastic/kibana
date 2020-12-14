@@ -37,16 +37,88 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
     },
 
-    async assertDataVisualizerTableExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerTable`);
+    async assertDataVisualizerTotalDocCountHeaderExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerTotalDocCountHeader`);
     },
 
-    async assertFieldsPanelsExist(expectedPanelCount: number) {
-      const allPanels = await testSubjects.findAll('~mlDataVisualizerFieldsPanel');
-      expect(allPanels).to.have.length(
-        expectedPanelCount,
-        `Expected field panels count to be '${expectedPanelCount}' (got '${allPanels.length}')`
-      );
+    async assertDataVisualizerTotalDocCountChartExist() {
+      await testSubjects.existOrFail(`mlFieldDataCardDocumentCountChart`);
+    },
+
+    async assertDataVisualizerSearchPanelExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerSearchPanel`);
+    },
+
+    async assertDataVisualizerSearchQueryInputExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerQueryInput`);
+    },
+
+    async assertDataVisualizerFieldCountPanelExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerFieldCountPanel`);
+    },
+
+    async assertDataVisualizerMetricFieldsSummaryExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerMetricFieldsSummary`);
+    },
+
+    async assertVisibleMetricFieldsCount(count: number) {
+      const expectedCount = count.toString();
+      await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
+      await retry.tryForTime(5000, async () => {
+        const actualCount = await testSubjects.getVisibleText(
+          'mlDataVisualizerVisibleMetricFieldsCount'
+        );
+        expect(expectedCount).to.eql(
+          expectedCount,
+          `Expected metric fields count count to be '${expectedCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
+    async assertMetricFieldsCount(count: number) {
+      const expectedCount = count.toString();
+      await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
+      await retry.tryForTime(5000, async () => {
+        const actualCount = await testSubjects.getVisibleText(
+          'mlDataVisualizerVisibleMetricFieldsCount'
+        );
+        expect(expectedCount).to.contain(
+          expectedCount,
+          `Expected metric fields count count to be '${expectedCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
+    async assertVisibleFieldsCount(count: number) {
+      const expectedCount = count.toString();
+      await testSubjects.existOrFail('mlDataVisualizerVisibleFieldsCount');
+      await retry.tryForTime(5000, async () => {
+        const actualCount = await testSubjects.getVisibleText('mlDataVisualizerVisibleFieldsCount');
+        expect(expectedCount).to.eql(
+          expectedCount,
+          `Expected fields count to be '${expectedCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
+    async assertTotalFieldsCount(count: number) {
+      const expectedCount = count.toString();
+      await testSubjects.existOrFail('mlDataVisualizerTotalFieldsCount');
+      await retry.tryForTime(5000, async () => {
+        const actualCount = await testSubjects.getVisibleText('mlDataVisualizerTotalFieldsCount');
+        expect(expectedCount).to.contain(
+          expectedCount,
+          `Expected total fields count to be '${expectedCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
+    async assertDataVisualizerFieldsSummaryExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerFieldsSummary`);
+    },
+
+    async assertDataVisualizerTableExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerTable`);
     },
 
     async assertFieldsPanelForTypesExist(fieldTypes: ML_JOB_FIELD_TYPES[]) {
@@ -292,6 +364,18 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType);
       await this.assertFieldsPanelTypeInputValue(filterFieldType);
       await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
+    },
+
+    async assertShowEmptyFieldsSwitchExists() {
+      await testSubjects.existOrFail('mlDataVisualizerShowEmptyFieldsSwitch');
+    },
+
+    async assertFieldNameInputExists() {
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect');
+    },
+
+    async assertFieldTypeInputExists() {
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect');
     },
 
     async assertSampleSizeInputExists() {
