@@ -25,12 +25,14 @@ tc_set_env FORCE_COLOR 1
 tc_set_env TEST_BROWSER_HEADLESS 1
 
 tc_set_env ELASTIC_APM_ENVIRONMENT ci
+tc_set_env ELASTIC_APM_TRANSACTION_SAMPLE_RATE 0.1
 
 if [[ "${KIBANA_CI_REPORTER_KEY_BASE64-}" ]]; then
   tc_set_env KIBANA_CI_REPORTER_KEY "$(echo "$KIBANA_CI_REPORTER_KEY_BASE64" | base64 -d)"
 fi
 
 if is_pr; then
+  tc_set_env ELASTIC_APM_ACTIVE false
   tc_set_env CHECKS_REPORTER_ACTIVE true
 
   # These can be removed once we're not supporting Jenkins and TeamCity at the same time
@@ -39,6 +41,7 @@ if is_pr; then
   tc_set_env ghprbActualCommit "$GITHUB_PR_TRIGGERED_SHA"
   tc_set_env BUILD_URL "$TEAMCITY_BUILD_URL"
 else
+  tc_set_env ELASTIC_APM_ACTIVE true
   tc_set_env CHECKS_REPORTER_ACTIVE false
 fi
 
