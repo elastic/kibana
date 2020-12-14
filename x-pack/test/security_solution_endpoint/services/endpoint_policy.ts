@@ -18,7 +18,9 @@ import {
 } from '../../../plugins/fleet/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
-import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public';
+
+// NOTE: import path below should be the deep path to the actual module - else we get CI errors
+import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
