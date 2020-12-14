@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
+import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -22,6 +22,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
+import { ValidatedNumberInput } from './validated_number_input';
 
 function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -100,12 +101,8 @@ export function MetricEditor({
     });
   };
 
-  const onPercentileChange = (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
+  const onPercentileChange = (percentile: number) => {
     if (metric.type !== AGG_TYPE.PERCENTILE) {
-      return;
-    }
-    const percentile = parseInt((e.target as HTMLInputElement).value, 10);
-    if (typeof percentile !== 'number' || percentile < 0 || percentile > 100) {
       return;
     }
     onChange({
@@ -151,31 +148,17 @@ export function MetricEditor({
 
   let percentileSelect;
   if (metric.type === AGG_TYPE.PERCENTILE) {
+    const label = i18n.translate('xpack.maps.metricsEditor.selectPercentileLabel', {
+      defaultMessage: 'Percentile',
+    });
     percentileSelect = (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.metricsEditor.selectPercentileLabel', {
-          defaultMessage: 'Percentile',
-        })}
-        display="columnCompressed"
-      >
-        {/* <EuiRange*/}
-        {/*  min={0}*/}
-        {/*  max={100}*/}
-        {/*  step={1}*/}
-        {/*  value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}*/}
-        {/*  onChange={onPercentileChange}*/}
-        {/*  showLabels*/}
-        {/*  showValue*/}
-        {/*  aria-label="percentile select"*/}
-
-        <EuiFieldNumber
-          min={0}
-          max={100}
-          value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}
-          onChange={onPercentileChange}
-          aria-label="percentile select"
-        />
-      </EuiFormRow>
+      <ValidatedNumberInput
+        min={0}
+        max={100}
+        onChange={onPercentileChange}
+        label={label}
+        value={typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE}
+      />
     );
   }
 
