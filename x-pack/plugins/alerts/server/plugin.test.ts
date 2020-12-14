@@ -36,7 +36,7 @@ describe('Alerting Plugin', () => {
         },
         invalidateApiKeysTask: {
           interval: '5m',
-          removalDelay: '5m',
+          removalDelay: '1h',
         },
       });
       plugin = new AlertingPlugin(context);
@@ -135,7 +135,7 @@ describe('Alerting Plugin', () => {
           },
           invalidateApiKeysTask: {
             interval: '5m',
-            removalDelay: '5m',
+            removalDelay: '1h',
           },
         });
         const plugin = new AlertingPlugin(context);
@@ -187,7 +187,7 @@ describe('Alerting Plugin', () => {
           },
           invalidateApiKeysTask: {
             interval: '5m',
-            removalDelay: '5m',
+            removalDelay: '1h',
           },
         });
         const plugin = new AlertingPlugin(context);

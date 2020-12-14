@@ -25,11 +25,13 @@ interface HotPhaseMetaFields extends ForcemergeFields {
   useRollover: boolean;
   maxStorageSizeUnit?: string;
   maxAgeUnit?: string;
+  readonlyEnabled: boolean;
 }
 
 interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
+  readonlyEnabled: boolean;
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {

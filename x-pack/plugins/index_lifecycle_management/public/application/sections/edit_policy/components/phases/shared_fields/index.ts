@@ -19,3 +19,5 @@ export { SnapshotPoliciesField } from './snapshot_policies_field';
 export { ShrinkField } from './shrink_field';
 
 export { SearchableSnapshotField } from './searchable_snapshot_field';
+
+export { ReadonlyField } from './readonly_field';
