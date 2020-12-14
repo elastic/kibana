@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBadge } from '@elastic/eui';
 import { EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +38,9 @@ export function CloudDetails() {
       description: (
         <ul>
           {details.cloud.availabilityZones.map((zone, index) => (
-            <li key={index}>{zone}</li>
+            <li key={index}>
+              <EuiBadge color="hollow">{zone}</EuiBadge>
+            </li>
           ))}
         </ul>
       ),
@@ -54,7 +57,9 @@ export function CloudDetails() {
       description: (
         <ul>
           {details.cloud.machineTypes.map((type, index) => (
-            <li key={index}>{type}</li>
+            <li key={index}>
+              <EuiBadge color="hollow">{type}</EuiBadge>
+            </li>
           ))}
         </ul>
       ),

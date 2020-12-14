@@ -18,8 +18,6 @@ export type IconsReponseType = APIReturnType<'GET /api/apm/services/{serviceName
 export type ServiceDetailsReponseType = APIReturnType<'GET /api/apm/services/{serviceName}'>;
 
 interface ServiceDetailsContext {
-  icons?: IconsReponseType;
-  iconsFetchStatus: FETCH_STATUS;
   details?: ServiceDetailsReponseType;
   detailsFetchStatus: FETCH_STATUS;
   fetchServiceDetails: Dispatch<SetStateAction<boolean>>;
@@ -37,21 +35,6 @@ export function ServiceDetailsContextProvider({
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
   const [fetchServiceDetails, setFetchServiceDetails] = useState(false);
-
-  const { data: icons, status: iconsFetchStatus } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/icons',
-          params: {
-            path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
-          },
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
@@ -71,8 +54,6 @@ export function ServiceDetailsContextProvider({
   return (
     <ServiceDetailsContext.Provider
       value={{
-        icons,
-        iconsFetchStatus,
         details,
         fetchServiceDetails: setFetchServiceDetails,
         detailsFetchStatus,

@@ -73,6 +73,14 @@ export async function getServiceDetails({
     ...setup.esFilter,
   ];
 
+  const should = [
+    CONTAINER,
+    KUBERNETES,
+    CLOUD,
+    HOST,
+    AGENT,
+  ].map((fieldName) => ({ exists: { field: fieldName } }));
+
   const params = {
     apm: {
       events: [ProcessorEvent.transaction],
@@ -80,7 +88,7 @@ export async function getServiceDetails({
     body: {
       size: 1,
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
-      query: { bool: { filter } },
+      query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
           terms: {

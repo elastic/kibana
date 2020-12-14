@@ -12,13 +12,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
-import { useServiceDetailsFetcher } from './use_service_details_fetcher';
+import { ServiceDetailsContextProvider } from './service_details_context';
 
 interface Props {
   serviceName: string;
@@ -37,67 +38,88 @@ function getCloudIcon(provider?: string) {
 }
 
 export function ServiceIcons({ serviceName }: Props) {
-  const { icons, iconsFetchStatus } = useServiceDetailsFetcher();
+  const {
+    urlParams: { start, end },
+    uiFilters,
+  } = useUrlParams();
+
+  const { data: icons, status: iconsFetchStatus } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/icons',
+          params: {
+            path: { serviceName },
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+          },
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters]
+  );
 
   const isLoading =
-    iconsFetchStatus === FETCH_STATUS.LOADING ||
-    iconsFetchStatus === FETCH_STATUS.PENDING;
+    !icons &&
+    (iconsFetchStatus === FETCH_STATUS.LOADING ||
+      iconsFetchStatus === FETCH_STATUS.PENDING);
 
   const cloudIcon = getCloudIcon(icons?.cloud);
   const containerIcon =
     icons?.container === 'Kubernetes' ? 'logoKubernetes' : 'logoDocker';
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle>
-          <h1>{serviceName}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {isLoading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          <EuiFlexGroup gutterSize="s">
-            {icons?.agentName && (
-              <EuiFlexItem grow={false}>
-                <IconPopover
-                  icon={getAgentIcon(icons.agentName) || 'node'}
-                  title={i18n.translate('xpack.apm.serviceIcons.service', {
-                    defaultMessage: 'Service',
-                  })}
-                >
-                  <ServiceDetails />
-                </IconPopover>
-              </EuiFlexItem>
-            )}
-            {containerIcon && (
-              <EuiFlexItem grow={false}>
-                <IconPopover
-                  icon={containerIcon}
-                  title={i18n.translate('xpack.apm.serviceIcons.container', {
-                    defaultMessage: 'Container',
-                  })}
-                >
-                  <ContainerDetails />
-                </IconPopover>
-              </EuiFlexItem>
-            )}
-            {cloudIcon && (
-              <EuiFlexItem grow={false}>
-                <IconPopover
-                  icon={cloudIcon}
-                  title={i18n.translate('xpack.apm.serviceIcons.cloud', {
-                    defaultMessage: 'Cloud',
-                  })}
-                >
-                  <CloudDetails />
-                </IconPopover>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ServiceDetailsContextProvider serviceName={serviceName}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h1>{serviceName}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {isLoading ? (
+            <EuiLoadingSpinner />
+          ) : (
+            <EuiFlexGroup gutterSize="s">
+              {icons?.agentName && (
+                <EuiFlexItem grow={false}>
+                  <IconPopover
+                    icon={getAgentIcon(icons.agentName) || 'node'}
+                    title={i18n.translate('xpack.apm.serviceIcons.service', {
+                      defaultMessage: 'Service',
+                    })}
+                  >
+                    <ServiceDetails />
+                  </IconPopover>
+                </EuiFlexItem>
+              )}
+              {containerIcon && (
+                <EuiFlexItem grow={false}>
+                  <IconPopover
+                    icon={containerIcon}
+                    title={i18n.translate('xpack.apm.serviceIcons.container', {
+                      defaultMessage: 'Container',
+                    })}
+                  >
+                    <ContainerDetails />
+                  </IconPopover>
+                </EuiFlexItem>
+              )}
+              {cloudIcon && (
+                <EuiFlexItem grow={false}>
+                  <IconPopover
+                    icon={cloudIcon}
+                    title={i18n.translate('xpack.apm.serviceIcons.cloud', {
+                      defaultMessage: 'Cloud',
+                    })}
+                  >
+                    <CloudDetails />
+                  </IconPopover>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ServiceDetailsContextProvider>
   );
 }

@@ -8,7 +8,6 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceIcons } from './service_icons';
-import { ServiceDetailsContextProvider } from './service_icons/service_details_context';
 import { ServiceDetailTabs } from './service_detail_tabs';
 
 interface Props extends RouteComponentProps<{ serviceName: string }> {
@@ -21,9 +20,7 @@ export function ServiceDetails({ match, tab }: Props) {
   return (
     <div>
       <ApmHeader>
-        <ServiceDetailsContextProvider serviceName={serviceName}>
-          <ServiceIcons serviceName={serviceName} />
-        </ServiceDetailsContextProvider>
+        <ServiceIcons serviceName={serviceName} />
       </ApmHeader>
       <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
