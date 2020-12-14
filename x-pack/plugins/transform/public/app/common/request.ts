@@ -30,6 +30,7 @@ import {
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
+  GroupByConfigWithUiSupport,
   PivotGroupByConfig,
 } from '../common';
 
@@ -71,7 +72,9 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
-export const getMissingBucketConfig = (g: PivotGroupByConfig): { missing_bucket?: boolean } => {
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
   return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
 };
 

@@ -41,8 +41,6 @@ interface GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS;
   aggName: AggName;
   dropDownName: string;
-  field: EsFieldName;
-  missing_bucket?: boolean;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.
@@ -52,16 +50,22 @@ export const dateHistogramIntervalFormatRegex = /^[1-9][0-9]*(ms|s|m|h|d|w|M|q|y
 
 interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
+  field: EsFieldName;
   calendar_interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM;
+  field: EsFieldName;
   interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
+  field: EsFieldName;
+  missing_bucket?: boolean;
 }
 
 export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
