@@ -30,7 +30,7 @@ export function TransactionOverviewLink({ serviceName, ...rest }: Props) {
 
   return (
     <APMLink
-      path={`/services/${serviceName}/transactions`}
+      path={`/services/${serviceName}`}
       query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
       {...rest}
     />
