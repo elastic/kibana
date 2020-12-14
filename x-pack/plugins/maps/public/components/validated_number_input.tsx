@@ -23,15 +23,23 @@ interface Props {
   label: string;
 }
 
+function getErrorMessage(min: number, max: number) {
+  i18n.translate('xpack.maps.validatedNumberInput.invalidClampErrorMessage', {
+    defaultMessage: 'Must be between {min} and {max}',
+    values: {
+      min,
+      max,
+    },
+  });
+}
+
 function isNumberValid(value: number | string, min: number, max: number) {
-  const parsedValue = parseInt(value.toString(), 10);
+  const parsedValue = parseFloat(value.toString());
 
   if (isNaN(parsedValue)) {
     return {
       isValid: false,
-      errorMessage: i18n.translate('xpack.maps.validatedNumberInput.invalidNumberErrorMessage', {
-        defaultMessage: 'Invalid number',
-      }),
+      errorMessage: getErrorMessage(min, max),
     };
   }
 
@@ -39,15 +47,7 @@ function isNumberValid(value: number | string, min: number, max: number) {
   return {
     parsedValue,
     isValid,
-    errorMessage: isValid
-      ? ''
-      : i18n.translate('xpack.maps.validatedNumberInput.invalidClampErrorMessage', {
-          defaultMessage: 'Value must be between {min} and {max}',
-          values: {
-            min,
-            max,
-          },
-        }),
+    errorMessage: isValid ? '' : getErrorMessage(min, max),
   };
 }
 
@@ -104,7 +104,7 @@ export class ValidatedNumberInput extends Component<Props, State> {
           max={this.props.max}
           value={this.state.value}
           onChange={this._onChange}
-          aria-label="number select"
+          aria-label={`${this.props.label} number input`}
         />
       </EuiFormRow>
     );
