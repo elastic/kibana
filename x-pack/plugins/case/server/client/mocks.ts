@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { actionsClientMock } from '../../../actions/server/mocks';
 import {
-  CaseService,
+  AlertService,
   CaseConfigureService,
+  CaseService,
   CaseUserActionServiceSetup,
   ConnectorMappingsService,
 } from '../services';
 import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
+import { getActions } from '../routes/api/__mocks__/request_responses';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
@@ -23,6 +26,7 @@ export const createCaseClientMock = (): CaseClientMock => ({
   getFields: jest.fn(),
   getMappings: jest.fn(),
   update: jest.fn(),
+  updateAlertsStatus: jest.fn(),
 });
 
 export const createCaseClientWithMockSavedObjectsClient = async (
@@ -32,7 +36,10 @@ export const createCaseClientWithMockSavedObjectsClient = async (
   client: CaseClient;
   services: { userActionService: jest.Mocked<CaseUserActionServiceSetup> };
 }> => {
+  const actionsMock = actionsClientMock.create();
+  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
+  const esClientMock = elasticsearchServiceMock.createClusterClient();
   const request = {} as KibanaRequest;
 
   const caseServicePlugin = new CaseService(log);
@@ -49,16 +56,38 @@ export const createCaseClientWithMockSavedObjectsClient = async (
     postUserActions: jest.fn(),
     getUserActions: jest.fn(),
   };
+  const alertsService = new AlertService();
+  alertsService.initialize(esClientMock);
 
+  const context = ({
+    core: {
+      savedObjects: {
+        client: savedObjectsClient,
+      },
+    },
+    actions: { getActionsClient: () => actionsMock },
+    case: {
+      getCaseClient: () => caseClient,
+    },
+    securitySolution: {
+      getAppClient: () => ({
+        getSignalsIndex: () => '.siem-signals',
+      }),
+    },
+  } as unknown) as RequestHandlerContext;
+
+  const caseClient = createCaseClient({
+    savedObjectsClient,
+    request,
+    caseService,
+    caseConfigureService,
+    connectorMappingsService,
+    userActionService,
+    alertsService,
+    context,
+  });
   return {
-    client: createCaseClient({
-      savedObjectsClient,
-      request,
-      caseService,
-      caseConfigureService,
-      connectorMappingsService,
-      userActionService,
-    }),
+    client: caseClient,
     services: { userActionService },
   };
 };

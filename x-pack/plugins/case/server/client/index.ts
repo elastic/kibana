@@ -10,6 +10,7 @@ import { update } from './cases/update';
 import { addComment } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
+import { updateAlertsStatus } from './alerts/update_status';
 
 export { CaseClient } from './types';
 
@@ -20,37 +21,57 @@ export const createCaseClient = ({
   request,
   savedObjectsClient,
   userActionService,
+  alertsService,
+  context,
 }: CaseClientFactoryArguments): CaseClient => {
   return {
     create: create({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
     }),
     update: update({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
     }),
     addComment: addComment({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,
     }),
     getFields: getFields(),
     getMappings: getMappings({
+      alertsService,
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      context,
+      request,
+      savedObjectsClient,
+      userActionService,
+    }),
+    updateAlertsStatus: updateAlertsStatus({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,

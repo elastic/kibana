@@ -15,6 +15,7 @@ import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
+  createAlertServiceMock,
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
@@ -37,12 +38,14 @@ describe('case connector', () => {
     const caseConfigureService = createConfigureServiceMock();
     const connectorMappingsService = connectorMappingsServiceMock();
     const userActionService = createUserActionServiceMock();
+    const alertsService = createAlertServiceMock();
     caseActionType = getActionType({
       logger,
       caseService,
       caseConfigureService,
       connectorMappingsService,
       userActionService,
+      alertsService,
     });
   });
 
@@ -64,6 +67,9 @@ describe('case connector', () => {
                 priority: 'High',
                 parent: null,
               },
+            },
+            settings: {
+              syncAlerts: true,
             },
           },
         };
@@ -101,6 +107,9 @@ describe('case connector', () => {
                     parent: null,
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -120,6 +129,9 @@ describe('case connector', () => {
                     incidentTypes: ['13'],
                     severityCode: '3',
                   },
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -142,6 +154,9 @@ describe('case connector', () => {
                     urgency: 'Medium',
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -158,6 +173,9 @@ describe('case connector', () => {
                   name: 'None',
                   type: '.none',
                   fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -183,6 +201,9 @@ describe('case connector', () => {
                 type: '.servicenow',
                 fields: {},
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -197,6 +218,9 @@ describe('case connector', () => {
                 name: 'Servicenow',
                 type: '.servicenow',
                 fields: { impact: null, severity: null, urgency: null },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           });
@@ -214,6 +238,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: null,
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -236,6 +263,9 @@ describe('case connector', () => {
                   priority: 'High',
                   parent: null,
                 },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -265,6 +295,9 @@ describe('case connector', () => {
                   excess: null,
                 },
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -292,6 +325,9 @@ describe('case connector', () => {
                   parent: null,
                 },
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -314,6 +350,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: {},
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -346,6 +385,7 @@ describe('case connector', () => {
             title: null,
             status: null,
             connector: null,
+            settings: null,
             ...(params.subActionParams as Record<string, unknown>),
           },
         });
@@ -378,6 +418,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -408,6 +449,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -439,6 +481,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -468,6 +511,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               connector: {
                 id: 'servicenow',
                 name: 'Servicenow',
@@ -500,6 +544,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -633,7 +678,9 @@ describe('case connector', () => {
         expect(validateParams(caseActionType, params)).toEqual(params);
       });
 
-      it('succeeds when type is an alert', () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('succeeds when type is an alert', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
           subActionParams: {
@@ -652,6 +699,26 @@ describe('case connector', () => {
       it('fails when params is not valid', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
+        };
+
+        expect(() => {
+          validateParams(caseActionType, params);
+        }).toThrow();
+      });
+
+      // TODO: Remove it when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it('fails when type is an alert', () => {
+        const params: Record<string, unknown> = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: 'case-id',
+            comment: {
+              type: CommentType.alert,
+              alertId: 'test-id',
+              index: 'test-index',
+            },
+          },
         };
 
         expect(() => {
@@ -681,7 +748,9 @@ describe('case connector', () => {
         });
       });
 
-      it('fails when missing attributes: type alert', () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('fails when missing attributes: type alert', () => {
         const allParams = {
           type: CommentType.alert,
           comment: 'a comment',
@@ -723,7 +792,9 @@ describe('case connector', () => {
         });
       });
 
-      it('fails when excess attributes are provided: type alert', () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('fails when excess attributes are provided: type alert', () => {
         ['comment'].forEach((attribute) => {
           const params: Record<string, unknown> = {
             subAction: 'addComment',
@@ -792,6 +863,9 @@ describe('case connector', () => {
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.create.mockReturnValue(Promise.resolve(createReturn));
@@ -812,6 +886,9 @@ describe('case connector', () => {
                 priority: 'High',
                 parent: null,
               },
+            },
+            settings: {
+              syncAlerts: true,
             },
           },
         };
@@ -882,6 +959,9 @@ describe('case connector', () => {
               username: 'awesome',
             },
             version: 'WzE3LDFd',
+            settings: {
+              syncAlerts: true,
+            },
           },
         ];
 
@@ -898,6 +978,7 @@ describe('case connector', () => {
             tags: null,
             status: null,
             connector: null,
+            settings: null,
           },
         };
 
@@ -913,6 +994,7 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
         expect(mockCaseClient.update).toHaveBeenCalledWith({
+          caseClient: mockCaseClient,
           // Null values have been striped out.
           cases: {
             cases: [
@@ -963,6 +1045,9 @@ describe('case connector', () => {
               version: 'WzksMV0=',
             },
           ],
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.addComment.mockReturnValue(Promise.resolve(commentReturn));
@@ -991,6 +1076,7 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
+          caseClient: mockCaseClient,
           caseId: 'case-id',
           comment: {
             comment: 'a comment',

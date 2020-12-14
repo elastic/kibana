@@ -5,6 +5,7 @@
  */
 
 import {
+  AlertServiceContract,
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
@@ -15,6 +16,7 @@ export type CaseServiceMock = jest.Mocked<CaseServiceSetup>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureServiceSetup>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsServiceSetup>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
+export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 
 export const createCaseServiceMock = (): CaseServiceMock => ({
   deleteCase: jest.fn(),
@@ -51,4 +53,9 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => ({
   getUserActions: jest.fn(),
   postUserActions: jest.fn(),
+});
+
+export const createAlertServiceMock = (): AlertServiceMock => ({
+  initialize: jest.fn(),
+  updateAlertsStatus: jest.fn(),
 });

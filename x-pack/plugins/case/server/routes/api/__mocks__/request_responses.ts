@@ -17,6 +17,9 @@ export const newCase: CasePostRequest = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const getActions = (): FindActionResult[] => [

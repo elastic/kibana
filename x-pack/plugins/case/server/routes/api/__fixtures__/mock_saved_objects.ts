@@ -47,6 +47,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      settings: {
+        syncAlerts: true,
+      },
     },
     references: [],
     updated_at: '2019-11-25T21:54:48.952Z',
@@ -80,6 +83,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -118,6 +124,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -161,6 +170,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      settings: {
+        syncAlerts: true,
+      },
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -190,6 +202,9 @@ export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
       full_name: 'elastic',
       email: 'testemail@elastic.co',
       username: 'elastic',
+    },
+    settings: {
+      syncAlerts: true,
     },
   },
   references: [],

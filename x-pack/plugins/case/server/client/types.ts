@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsClientContract, RequestHandlerContext } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
   CaseResponse,
   CasesPatchRequest,
   CasesResponse,
+  CaseStatuses,
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
@@ -19,6 +20,7 @@ import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
+  AlertServiceContract,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 export interface CaseClientCreate {
@@ -26,13 +28,22 @@ export interface CaseClientCreate {
 }
 
 export interface CaseClientUpdate {
+  caseClient: CaseClient;
   cases: CasesPatchRequest;
 }
 
 export interface CaseClientAddComment {
+  caseClient: CaseClient;
   caseId: string;
   comment: CommentRequest;
 }
+
+export interface CaseClientUpdateAlertsStatus {
+  ids: string[];
+  status: CaseStatuses;
+}
+
+type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -41,6 +52,8 @@ export interface CaseClientFactoryArguments {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
+  alertsService: AlertServiceContract;
+  context?: PartialExceptFor<RequestHandlerContext, 'core'>;
 }
 
 export interface ConfigureFields {
@@ -54,6 +67,7 @@ export interface CaseClient {
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
+  updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
 }
 
 export interface MappingsClient {

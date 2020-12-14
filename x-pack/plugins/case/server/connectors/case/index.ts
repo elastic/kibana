@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -31,6 +31,7 @@ export function getActionType({
   caseConfigureService,
   connectorMappingsService,
   userActionService,
+  alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
     id: CASE_ACTION_TYPE_ID,
@@ -41,10 +42,11 @@ export function getActionType({
       params: CaseExecutorParamsSchema,
     },
     executor: curry(executor)({
-      logger,
-      caseService,
+      alertsService,
       caseConfigureService,
+      caseService,
       connectorMappingsService,
+      logger,
       userActionService,
     }),
   };
@@ -53,10 +55,11 @@ export function getActionType({
 // action executor
 async function executor(
   {
-    logger,
-    caseService,
+    alertsService,
     caseConfigureService,
+    caseService,
     connectorMappingsService,
+    logger,
     userActionService,
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
@@ -73,6 +76,9 @@ async function executor(
     caseConfigureService,
     connectorMappingsService,
     userActionService,
+    alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as RequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -94,12 +100,15 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: { cases: [updateParamsWithoutNullValues] } });
+    data = await caseClient.update({
+      caseClient,
+      cases: { cases: [updateParamsWithoutNullValues] },
+    });
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseId, comment });
+    data = await caseClient.addComment({ caseClient, caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

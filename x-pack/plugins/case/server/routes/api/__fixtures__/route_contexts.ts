@@ -5,10 +5,15 @@
  */
 
 import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createCaseClient } from '../../../client';
-import { CaseService, CaseConfigureService, ConnectorMappingsService } from '../../../services';
+import {
+  AlertService,
+  CaseService,
+  CaseConfigureService,
+  ConnectorMappingsService,
+} from '../../../services';
 import { getActions } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 
@@ -16,6 +21,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
+  const esClientMock = elasticsearchServiceMock.createClusterClient();
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
@@ -25,6 +31,26 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const alertsService = new AlertService();
+  alertsService.initialize(esClientMock);
+
+  const context = ({
+    core: {
+      savedObjects: {
+        client,
+      },
+    },
+    actions: { getActionsClient: () => actionsMock },
+    case: {
+      getCaseClient: () => caseClient,
+    },
+    securitySolution: {
+      getAppClient: () => ({
+        getSignalsIndex: () => '.siem-signals',
+      }),
+    },
+  } as unknown) as RequestHandlerContext;
+
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const caseClient = createCaseClient({
     savedObjectsClient: client,
@@ -36,17 +62,9 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       postUserActions: jest.fn(),
       getUserActions: jest.fn(),
     },
+    alertsService,
+    context,
   });
 
-  return ({
-    core: {
-      savedObjects: {
-        client,
-      },
-    },
-    actions: { getActionsClient: () => actionsMock },
-    case: {
-      getCaseClient: () => caseClient,
-    },
-  } as unknown) as RequestHandlerContext;
+  return context;
 };
