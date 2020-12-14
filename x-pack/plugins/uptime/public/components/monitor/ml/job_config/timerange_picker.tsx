@@ -51,7 +51,7 @@ function selectedDateToParam(selectedDate: Moment | null) {
 
 export const TimerangePicker: React.FunctionComponent<{
   disabled?: boolean;
-  setTimeRange: (tr?: TimeRange) => void;
+  setTimeRange: (tr: TimeRange) => void;
   timeRange: { start: number | undefined; end: number | undefined };
   validationErrors?: TimeRangeValidationError[];
 }> = ({
@@ -105,7 +105,7 @@ export const TimerangePicker: React.FunctionComponent<{
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
-            clear={startTime && !disabled ? { onClick: () => setTimeRange(undefined) } : undefined}
+            clear={startTime && !disabled ? { onClick: () => setTimeRange({}) } : undefined}
             isDisabled={disabled}
             compressed={true}
           >
@@ -135,7 +135,7 @@ export const TimerangePicker: React.FunctionComponent<{
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
-            clear={endTime && !disabled ? { onClick: () => setTimeRange(undefined) } : undefined}
+            clear={endTime && !disabled ? { onClick: () => setTimeRange({}) } : undefined}
             isDisabled={disabled}
           >
             <EuiDatePicker

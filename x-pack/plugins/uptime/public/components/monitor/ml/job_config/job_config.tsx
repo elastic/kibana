@@ -61,6 +61,9 @@ export const JobConfig = ({ bucketSpan, timeRange, setTimeRange, setBucketSpan }
             checked={useFullData}
             onChange={(evt) => {
               setUseFullData(evt.target.checked);
+              if (data) {
+                setTimeRange({ start: data.start.epoch });
+              }
             }}
           />
           <EuiSpacer />

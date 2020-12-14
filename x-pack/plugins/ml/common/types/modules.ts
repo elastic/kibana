@@ -93,6 +93,7 @@ export interface DataRecognizerConfigRequest {
   end?: number;
   jobOverrides?: Array<Partial<Job>>;
   estimateModelMemory?: boolean;
+  applyToAllSpaces?: boolean;
 }
 
 export interface DataRecognizerConfigResponse {
