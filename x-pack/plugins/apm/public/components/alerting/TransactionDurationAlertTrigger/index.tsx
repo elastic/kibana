@@ -3,48 +3,64 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiSelect } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 import React from 'react';
-import { ANOMALY_SEVERITY } from '../../../../../ml/common';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { PopoverExpression } from '../service_alert_trigger/popover_expression';
-import {
-  AnomalySeverity,
-  SelectAnomalySeverity,
-} from './select_anomaly_severity';
+import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
+import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
+  IsAboveField,
 } from '../fields';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
-interface Params {
+interface AlertParams {
   windowSize: number;
   windowUnit: string;
-  serviceName?: string;
-  transactionType?: string;
+  threshold: number;
+  aggregationType: 'avg' | '95th' | '99th';
+  serviceName: string;
+  transactionType: string;
   environment: string;
-  anomalySeverityType:
-    | ANOMALY_SEVERITY.CRITICAL
-    | ANOMALY_SEVERITY.MAJOR
-    | ANOMALY_SEVERITY.MINOR
-    | ANOMALY_SEVERITY.WARNING;
 }
 
+const TRANSACTION_ALERT_AGGREGATION_TYPES = {
+  avg: i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.avg',
+    {
+      defaultMessage: 'Average',
+    }
+  ),
+  '95th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.95th',
+    {
+      defaultMessage: '95th percentile',
+    }
+  ),
+  '99th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.99th',
+    {
+      defaultMessage: '99th percentile',
+    }
+  ),
+};
+
 interface Props {
-  alertParams: Params;
+  alertParams: AlertParams;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAnomalyAlertTrigger(props: Props) {
+export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
   const { transactionTypes } = useApmServiceContext();
@@ -56,17 +72,19 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     end,
   });
 
-  if (serviceName && !transactionTypes.length) {
+  if (!transactionTypes.length || !serviceName) {
     return null;
   }
 
-  const defaults: Params = {
-    windowSize: 15,
+  const defaults = {
+    threshold: 1500,
+    aggregationType: 'avg',
+    windowSize: 5,
     windowUnit: 'm',
+
+    // use the current transaction type or default to the first in the list
     transactionType: transactionType || transactionTypes[0],
-    serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
-    anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
   };
 
   const params = {
@@ -87,28 +105,49 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
     <PopoverExpression
-      value={<AnomalySeverity type={params.anomalySeverityType} />}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity',
-        {
-          defaultMessage: 'Has anomaly with severity',
-        }
-      )}
+      value={params.aggregationType}
+      title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
+        defaultMessage: 'When',
+      })}
     >
-      <SelectAnomalySeverity
-        value={params.anomalySeverityType}
-        onChange={(value) => {
-          setAlertParams('anomalySeverityType', value);
-        }}
+      <EuiSelect
+        value={params.aggregationType}
+        options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
+          return {
+            text: label,
+            value: key,
+          };
+        })}
+        onChange={(e) => setAlertParams('aggregationType', e.target.value)}
+        compressed
       />
     </PopoverExpression>,
+    <IsAboveField
+      value={params.threshold}
+      unit={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
+        defaultMessage: 'ms',
+      })}
+      onChange={(value) => setAlertParams('threshold', value)}
+    />,
+    <ForLastExpression
+      onChangeWindowSize={(timeWindowSize) =>
+        setAlertParams('windowSize', timeWindowSize || '')
+      }
+      onChangeWindowUnit={(timeWindowUnit) =>
+        setAlertParams('windowUnit', timeWindowUnit)
+      }
+      timeWindowSize={params.windowSize}
+      timeWindowUnit={params.windowUnit}
+      errors={{
+        timeWindowSize: [],
+        timeWindowUnit: [],
+      }}
+    />,
   ];
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={
-        ALERT_TYPES_CONFIG['apm.transaction_duration_anomaly'].name
-      }
+      alertTypeName={ALERT_TYPES_CONFIG['apm.transaction_duration'].name}
       fields={fields}
       defaults={defaults}
       setAlertParams={setAlertParams}
@@ -120,4 +159,4 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionDurationAnomalyAlertTrigger;
+export default TransactionDurationAlertTrigger;

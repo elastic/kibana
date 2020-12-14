@@ -101,11 +101,6 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
 } from './rum_client';
-import {
-  transactionErrorRateChartPreview,
-  transactionErrorCountChartPreview,
-  transactionDurationChartPreview,
-} from './alerts/chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -209,12 +204,7 @@ const createApmApi = () => {
     .add(rumJSErrors)
     .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
-    .add(rumHasDataRoute)
-
-    // Alerting
-    .add(transactionErrorCountChartPreview)
-    .add(transactionDurationChartPreview)
-    .add(transactionErrorRateChartPreview);
+    .add(rumHasDataRoute);
 
   return api;
 };
