@@ -37,7 +37,9 @@ export class PainlessWorker {
   public async getSyntaxErrors(modelUri: string) {
     const code = this.getTextDocument(modelUri);
 
-    return code ? parseAndGetSyntaxErrors(code) : [];
+    if (code) {
+      return parseAndGetSyntaxErrors(code);
+    }
   }
 
   public provideAutocompleteSuggestions(
