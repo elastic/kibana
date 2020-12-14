@@ -385,6 +385,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        global_Index_Pattern_Management_all: {
+          kibana: [
+            {
+              feature: {
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_devtools_read: {
           kibana: [
             {
