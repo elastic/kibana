@@ -7,6 +7,12 @@ To access these settings, click *Map settings* in the application toolbar.
 
 [float]
 [[maps-settings-navigation]]
+=== Display
+*Background color*::
+Set the map background color.
+
+[float]
+[[maps-settings-navigation]]
 === Navigation
 
 *Auto fit map to bounds*::
