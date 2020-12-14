@@ -12,8 +12,11 @@ import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { createMigration } from '../../migrations/create_migration';
 import { getIndexAliases } from '../../index/get_index_aliases';
+import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
+jest.mock('../index/check_template_version');
 jest.mock('../../index/get_index_aliases');
 jest.mock('../../migrations/create_migration');
 jest.mock('../../migrations/get_index_versions_by_index');
@@ -28,6 +31,7 @@ describe('creating signals migrations route', () => {
     (getIndexAliases as jest.Mock).mockResolvedValue([
       { index: 'my-signals-index', isWriteIndex: false },
     ]);
+    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION);
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
@@ -51,6 +55,23 @@ describe('creating signals migrations route', () => {
         index: 'my-signals-index',
       })
     );
+  });
+
+  it('rejects the request if template is not up to date', async () => {
+    (getTemplateVersion as jest.Mock).mockResolvedValue(SIGNALS_TEMPLATE_VERSION - 1);
+    const request = requestMock.create({
+      method: 'post',
+      path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
+      body: getCreateSignalsMigrationSchemaMock('my-signals-index'),
+    });
+    const response = await server.inject(request);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message:
+        'Cannot migrate due to the signals template being out of date. Please visit Detections to automatically update your template, then try again.',
+      status_code: 400,
+    });
   });
 
   it('returns an inline error if write index is out of date but specified', async () => {
