@@ -8,6 +8,7 @@ import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
+import { of } from '../../../../../../src/plugins/kibana_utils';
 
 const mockDataPoints = [
   {
@@ -63,18 +64,18 @@ class TextExternalUrl implements IExternalUrl {
   }
 }
 
-describe('UrlDrilldown', () => {
-  const createDrilldown = (isExternalUrlValid: boolean = true) => {
-    const drilldown = new UrlDrilldown({
-      externalUrl: new TextExternalUrl(isExternalUrlValid),
-      getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
-      getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
-      getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
-      navigateToUrl: mockNavigateToUrl,
-    });
-    return drilldown;
-  };
+const createDrilldown = (isExternalUrlValid: boolean = true) => {
+  const drilldown = new UrlDrilldown({
+    externalUrl: new TextExternalUrl(isExternalUrlValid),
+    getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
+    getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
+    getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
+    navigateToUrl: mockNavigateToUrl,
+  });
+  return drilldown;
+};
 
+describe('UrlDrilldown', () => {
   const urlDrilldown = createDrilldown();
 
   test('license', () => {
@@ -205,6 +206,42 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.getHref(config, context)).rejects.toThrowError();
       await expect(urlDrilldown.execute(config, context)).rejects.toThrowError();
       expect(mockNavigateToUrl).not.toBeCalled();
+    });
+
+    test('should throw on denied external URL', async () => {
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+      };
+
+      const context: ActionContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddable,
+      };
+
+      const url = await drilldown1.getHref(config, context);
+      await drilldown1.execute(config, context);
+
+      expect(url).toMatchInlineSnapshot(`"https://elasti.co/?test&(language:kuery,query:test)"`);
+      expect(mockNavigateToUrl).toBeCalledWith(url);
+
+      const [, error1] = await of(drilldown2.getHref(config, context));
+      const [, error2] = await of(drilldown2.execute(config, context));
+
+      expect(error1).toBeInstanceOf(Error);
+      expect(error1.message).toMatchInlineSnapshot(
+        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
+      );
+      expect(error2).toBeInstanceOf(Error);
+      expect(error2.message).toMatchInlineSnapshot(
+        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
+      );
     });
   });
 });

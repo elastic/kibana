@@ -115,7 +115,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
       return false;
     }
 
-    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    const url = this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       return false;
@@ -124,11 +124,25 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return true;
   };
 
-  public readonly getHref = async (config: Config, context: ActionContext) =>
-    urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+  private buildUrl(config: Config, context: ActionContext): string {
+    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    return url;
+  }
+
+  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
+    const url = this.buildUrl(config, context);
+    const validUrl = this.deps.externalUrl.validateUrl(url);
+    if (!validUrl) {
+      throw new Error(
+        `External URL [${url}] was denied by ExternalUrl service. ` +
+          `You can configure external URL policies using "externalUrl.policy" setting in kibana.yml.`
+      );
+    }
+    return url;
+  };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    const url = await this.getHref(config, context);
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {
