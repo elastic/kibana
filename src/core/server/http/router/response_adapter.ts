@@ -137,7 +137,7 @@ export class HapiResponseAdapter {
 
     const attributes = getErrorAttributes(payload);
     if (attributes) {
-      // @ts-expect-error `attributes` does not exist on the `Payload` type, however it does exist in real life (https://github.com/hapijs/boom/issues/277)
+      // @ts-expect-error Custom properties on `output.payload` aren't allowed by TS, however, it's the only way to send custom data to the client (https://github.com/hapijs/boom/issues/277).
       error.output.payload.attributes = attributes;
     }
 

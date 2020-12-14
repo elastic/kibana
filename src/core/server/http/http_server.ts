@@ -190,11 +190,11 @@ export class HttpServer {
                   output,
                   parse,
                   timeout: timeout?.payload,
-                  multipart: true, // TODO: Figure out what the default value should be
+                  multipart: true,
                 }
               : undefined,
             timeout: {
-              socket: timeout?.idleSocket ?? this.config!.socketTimeout ?? false, // TODO: Do we really want to fall back to NO timeout? Shouldn't we default to the default Node.js timeout of 2 minutes?
+              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
             },
           },
         };

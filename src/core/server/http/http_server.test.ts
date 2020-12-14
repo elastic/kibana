@@ -1166,7 +1166,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: false, // TODO: Figure out if we can/should use `{ body: schema.any() }` instead
+          validate: { body: schema.maybe(schema.any()) },
         },
         (context, req, res) => {
           return res.ok({
@@ -1199,7 +1199,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: false, // TODO: Figure out if we can/should use `{ body: schema.any() }` instead
+          validate: { body: schema.maybe(schema.any()) },
           options: { timeout: { idleSocket: 12000 } },
         },
         (context, req, res) => {
