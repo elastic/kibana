@@ -19,10 +19,8 @@
 
 import { resolve } from 'path';
 
-process.argv.push('--no-exit'); // don't exit after encountering a rule error
-process.argv.push('--verbose'); // print results
 process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-process.argv.push('--config', resolve(__dirname, '..', '..', '.sass-lint.yml')); // configuration file
+process.argv.push('--config', resolve(__dirname, '..', '..', '.stylelintrc')); // configuration file
 
 // common-js is required so that logic before this executes before loading sass-lint
-require('sass-lint/bin/sass-lint');
+require('stylelint/bin/stylelint');

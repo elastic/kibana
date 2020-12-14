@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import sassLint from 'sass-lint';
+import stylelint from 'stylelint';
 import path from 'path';
+import { safeLoad } from 'js-yaml';
+import fs from 'fs';
 import { createFailError } from '@kbn/dev-utils';
+
+// load the include globs from .stylelintrc and convert them to regular expressions for filtering files
+const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');
+const styleLintConfig = safeLoad(fs.readFileSync(stylelintPath));
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -29,28 +35,20 @@ import { createFailError } from '@kbn/dev-utils';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log, files) {
+export async function lintFiles(log, files) {
   const paths = files.map((file) => file.getRelativePath());
 
-  const report = sassLint.lintFiles(
-    paths.join(', '),
-    {},
-    path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml')
-  );
+  const options = {
+    files: paths.join(', '),
+    config: styleLintConfig,
+    formatter: 'string',
+  };
 
-  const failTypes = Object.keys(
-    report.reduce((failTypes, reportEntry) => {
-      if (reportEntry.warningCount > 0) failTypes.warning = true;
-      if (reportEntry.errorCount > 0) failTypes.errors = true;
-      return failTypes;
-    }, {})
-  );
-
-  if (!failTypes.length) {
-    log.success('[sasslint] %d files linted successfully', files.length);
-    return;
+  const report = await stylelint.lint(options);
+  if (report.errored) {
+    log.error(report.output);
+    throw createFailError('[stylelint] errors');
+  } else {
+    log.success('[stylelint] %d files linted successfully', files.length);
   }
-
-  log.error(sassLint.format(report));
-  throw createFailError(`[sasslint] ${failTypes.join(' & ')}`);
 }
