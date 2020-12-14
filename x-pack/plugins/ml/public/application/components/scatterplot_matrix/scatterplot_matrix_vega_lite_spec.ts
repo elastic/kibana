@@ -140,8 +140,26 @@ export const getScatterplotMatrixVegaLiteSpec = (
             }
           : {}),
         tooltip: { type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD },
-        x: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'column' } },
-        y: { type: LEGEND_TYPES.QUANTITATIVE, field: { repeat: 'row' } },
+        x: {
+          type: LEGEND_TYPES.QUANTITATIVE,
+          field: { repeat: 'column' },
+          axis: {
+            titleColor: {
+              condition: { test: `datum.column === '${columns[0]}'`, value: 'red' },
+              value: '#CCC',
+            },
+          },
+          scale: { zero: false },
+        },
+        y: {
+          type: LEGEND_TYPES.QUANTITATIVE,
+          field: { repeat: 'row' },
+          axis: {
+            condition: { test: { value: 'row', equal: columns[0] }, value: undefined },
+            value: null,
+          },
+          scale: { zero: false },
+        },
         ...(outliers
           ? {
               order: { field: OUTLIER_SCORE_FIELD },
