@@ -54,6 +54,10 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
+      },
     },
     warm: {
       enabled: {
@@ -81,6 +85,10 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     cold: {

@@ -127,6 +127,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
         await actions.hot.setShrink('2');
+        await actions.hot.setReadonly(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -142,6 +143,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "rollover": Object {
                     "max_age": "123h",
                     "max_docs": 123,
@@ -272,6 +274,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
+        await actions.warm.setReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -305,6 +308,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "set_priority": Object {
                     "priority": 123,
                   },

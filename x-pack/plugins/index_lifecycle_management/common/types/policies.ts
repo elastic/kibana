@@ -67,7 +67,9 @@ export interface SerializedHotPhase extends SerializedPhase {
   actions: {
     rollover?: RolloverAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     shrink?: ShrinkAction;
+
     set_priority?: {
       priority: number | null;
     };
@@ -83,6 +85,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     allocate?: AllocateAction;
     shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };

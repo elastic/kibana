@@ -24,12 +24,14 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       useRollover: Boolean(hot?.actions?.rollover),
       isUsingDefaultRollover: isUsingDefaultRollover(policy),
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
+      readonlyEnabled: Boolean(hot?.actions?.readonly),
     },
     warm: {
       enabled: Boolean(warm),
       warmPhaseOnRollover: warm === undefined ? true : Boolean(warm.min_age === '0ms'),
       bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
+      readonlyEnabled: Boolean(warm?.actions?.readonly),
     },
     cold: {
       enabled: Boolean(cold),

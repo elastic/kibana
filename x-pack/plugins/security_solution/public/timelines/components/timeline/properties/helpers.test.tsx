@@ -105,19 +105,6 @@ describe('Description', () => {
     ).toEqual(i18n.DESCRIPTION_TOOL_TIP);
   });
 
-  test('should not render textarea if isTextArea is false', () => {
-    const component = mount(
-      <TestProviders>
-        <Description {...props} />
-      </TestProviders>
-    );
-    expect(component.find('[data-test-subj="timeline-description-textarea"]').exists()).toEqual(
-      false
-    );
-
-    expect(component.find('[data-test-subj="timeline-description-input"]').exists()).toEqual(true);
-  });
-
   test('should render textarea if isTextArea is true', () => {
     const testProps = {
       ...props,
