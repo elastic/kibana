@@ -66,7 +66,7 @@ import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
-import { filterEventsAgainstList } from './filter_events_with_list';
+import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { isOutdated } from '../migrations/helpers';
 
 export const signalRulesAlertType = ({
@@ -338,7 +338,7 @@ export const signalRulesAlertType = ({
                     must: [
                       {
                         term: {
-                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
+                          [threshold.field || 'signal.rule.rule_id']: bucket.key,
                         },
                       },
                       {
