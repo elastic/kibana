@@ -12250,7 +12250,6 @@
     "xpack.ml.fieldDataCard.cardOther.cardTypeLabel": "{cardType} タイプ",
     "xpack.ml.fieldDataCard.cardOther.distinctCountDescription": "{cardinality} 個の特徴的な {cardinality, plural, zero {value} one {value} other {values}}",
     "xpack.ml.fieldDataCard.cardOther.documentsCountDescription": "{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)",
-    "xpack.ml.fieldDataCard.cardText.examplesTitle": "{numExamples, plural, one {値} other {例}}",
     "xpack.ml.fieldDataCard.cardText.fieldMayBePopulatedDescription": "たとえば、ドキュメントマッピングで {copyToParam} パラメーターを使ったり、{includesParam} と {excludesParam} パラメーターを使用してインデックスした後に {sourceParam} フィールドから切り取ったりして入力される場合があります。",
     "xpack.ml.fieldDataCard.cardText.fieldNotPresentDescription": "このフィールドはクエリが実行されたドキュメントの {sourceParam} フィールドにありませんでした。",
     "xpack.ml.fieldDataCard.cardText.noExamplesForFieldsTitle": "このフィールドの例が取得されませんでした",

@@ -12264,7 +12264,6 @@
     "xpack.ml.fieldDataCard.cardOther.cardTypeLabel": "{cardType} 类型",
     "xpack.ml.fieldDataCard.cardOther.distinctCountDescription": "{cardinality} 不同的 {cardinality, plural, zero {值} one {value} 其他 {values}}",
     "xpack.ml.fieldDataCard.cardOther.documentsCountDescription": "{count, plural, zero {# 个文档} one {# 个文档} other {# 个文档}} ({docsPercent}%)",
-    "xpack.ml.fieldDataCard.cardText.examplesTitle": "{numExamples, plural, one { 个值} other { 个示例}}",
     "xpack.ml.fieldDataCard.cardText.fieldMayBePopulatedDescription": "例如，可以使用文档映射中的 {copyToParam} 参数进行填充，也可以在索引后通过使用 {includesParam} 和 {excludesParam} 参数从 {sourceParam} 字段中进行剪裁。",
     "xpack.ml.fieldDataCard.cardText.fieldNotPresentDescription": "查询的文档的 {sourceParam} 字段中不存在此字段。",
     "xpack.ml.fieldDataCard.cardText.noExamplesForFieldsTitle": "没有获取此字段的示例",
