@@ -25,7 +25,12 @@ import {
 
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
-import { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
+import {
+  registerApplicationUsageCollector,
+  transformByApplicationViews,
+  ApplicationUsageViews,
+} from './telemetry_application_usage_collector';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
@@ -235,6 +240,103 @@ describe('telemetry_application_usage', () => {
           {
             appId: 'appId',
             viewId: 'viewId-1',
+            clicks_total: 1,
+            clicks_7_days: 0,
+            clicks_30_days: 0,
+            clicks_90_days: 0,
+            minutes_on_screen_total: 1,
+            minutes_on_screen_7_days: 0,
+            minutes_on_screen_30_days: 0,
+            minutes_on_screen_90_days: 0,
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('transformByApplicationViews', () => {
+  it(`uses '${MAIN_APP_DEFAULT_VIEW_ID}' as the top level metric`, () => {
+    const report: ApplicationUsageViews = {
+      randomId1: {
+        appId: 'appId1',
+        viewId: MAIN_APP_DEFAULT_VIEW_ID,
+        clicks_total: 1,
+        clicks_7_days: 0,
+        clicks_30_days: 0,
+        clicks_90_days: 0,
+        minutes_on_screen_total: 1,
+        minutes_on_screen_7_days: 0,
+        minutes_on_screen_30_days: 0,
+        minutes_on_screen_90_days: 0,
+      },
+    };
+
+    const result = transformByApplicationViews(report);
+
+    expect(result).toEqual({
+      appId1: {
+        appId: 'appId1',
+        viewId: MAIN_APP_DEFAULT_VIEW_ID,
+        clicks_total: 1,
+        clicks_7_days: 0,
+        clicks_30_days: 0,
+        clicks_90_days: 0,
+        minutes_on_screen_total: 1,
+        minutes_on_screen_7_days: 0,
+        minutes_on_screen_30_days: 0,
+        minutes_on_screen_90_days: 0,
+        views: [],
+      },
+    });
+  });
+
+  it('nests views under each application', () => {
+    const report: ApplicationUsageViews = {
+      randomId1: {
+        appId: 'appId1',
+        viewId: MAIN_APP_DEFAULT_VIEW_ID,
+        clicks_total: 1,
+        clicks_7_days: 0,
+        clicks_30_days: 0,
+        clicks_90_days: 0,
+        minutes_on_screen_total: 1,
+        minutes_on_screen_7_days: 0,
+        minutes_on_screen_30_days: 0,
+        minutes_on_screen_90_days: 0,
+      },
+      randomId2: {
+        appId: 'appId1',
+        viewId: 'appView1',
+        clicks_total: 1,
+        clicks_7_days: 0,
+        clicks_30_days: 0,
+        clicks_90_days: 0,
+        minutes_on_screen_total: 1,
+        minutes_on_screen_7_days: 0,
+        minutes_on_screen_30_days: 0,
+        minutes_on_screen_90_days: 0,
+      },
+    };
+
+    const result = transformByApplicationViews(report);
+
+    expect(result).toEqual({
+      appId1: {
+        appId: 'appId1',
+        viewId: MAIN_APP_DEFAULT_VIEW_ID,
+        clicks_total: 1,
+        clicks_7_days: 0,
+        clicks_30_days: 0,
+        clicks_90_days: 0,
+        minutes_on_screen_total: 1,
+        minutes_on_screen_7_days: 0,
+        minutes_on_screen_30_days: 0,
+        minutes_on_screen_90_days: 0,
+        views: [
+          {
+            appId: 'appId1',
+            viewId: 'appView1',
             clicks_total: 1,
             clicks_7_days: 0,
             clicks_30_days: 0,

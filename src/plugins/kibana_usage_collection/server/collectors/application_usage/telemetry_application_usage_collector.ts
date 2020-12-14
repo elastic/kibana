@@ -74,7 +74,7 @@ export interface ApplicationUsageTelemetryReport {
   };
 }
 
-const transformByApplicationViews = (
+export const transformByApplicationViews = (
   report: ApplicationUsageViews
 ): ApplicationUsageTelemetryReport => {
   const reportMetrics = Object.values(report);
