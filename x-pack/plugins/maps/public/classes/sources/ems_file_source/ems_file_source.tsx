@@ -25,17 +25,23 @@ import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getEMSSettings } from '../../../kibana_services';
 
 export interface IEmsFileSource extends IVectorSource {
   getEmsFieldLabel(emsFieldName: string): Promise<string>;
 }
 
-export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
-  defaultMessage: 'EMS Boundaries',
-});
-
 export function getSourceTitle() {
-  return sourceTitle;
+  const emsSettings = getEMSSettings();
+  if (emsSettings.isEMSUrlSet()) {
+    return i18n.translate('xpack.maps.source.emsOnPremFileTitle', {
+      defaultMessage: 'Elastic Map Server boundaries',
+    });
+  } else {
+    return i18n.translate('xpack.maps.source.emsFileTitle', {
+      defaultMessage: 'EMS Boundaries',
+    });
+  }
 }
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {

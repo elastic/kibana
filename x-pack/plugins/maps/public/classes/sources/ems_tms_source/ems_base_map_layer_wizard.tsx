@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
-import { EMSTMSSource, sourceTitle } from './ems_tms_source';
+import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
 // @ts-ignore
 import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_layer';
 // @ts-ignore
@@ -41,5 +41,5 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
       </EuiPanel>
     );
   },
-  title: sourceTitle,
+  title: getSourceTitle(),
 };

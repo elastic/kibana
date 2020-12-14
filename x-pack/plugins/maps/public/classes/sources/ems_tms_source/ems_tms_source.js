@@ -11,12 +11,21 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { getEmsTileLayerId, getIsDarkMode } from '../../../kibana_services';
+import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 
-export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
-  defaultMessage: 'EMS Basemaps',
-});
+export function getSourceTitle() {
+  const emsSettings = getEMSSettings();
+  if (emsSettings.isEMSUrlSet()) {
+    return i18n.translate('xpack.maps.source.emsOnPremTileTitle', {
+      defaultMessage: 'Elastic Map Server basemaps',
+    });
+  } else {
+    return i18n.translate('xpack.maps.source.emsTileTitle', {
+      defaultMessage: 'EMS Boundaries',
+    });
+  }
+}
 
 export class EMSTMSSource extends AbstractTMSSource {
   static createDescriptor(descriptor) {
@@ -46,7 +55,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: sourceTitle,
+        value: getSourceTitle(),
       },
       {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
