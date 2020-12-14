@@ -9,6 +9,7 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/publ
 import { APP_ID } from '../common/constants';
 
 export enum LICENSED_FEATURES {
+  GEO_LINE_AGG = 'GEO_LINE_AGG',
   GEO_SHAPE_AGGS_GEO_TILE = 'GEO_SHAPE_AGGS_GEO_TILE',
   ON_PREM_EMS = 'ON_PREM_EMS',
 }
@@ -19,6 +20,10 @@ export interface LicensedFeatureDetail {
 }
 
 export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatureDetail> = {
+  [LICENSED_FEATURES.GEO_LINE_AGG]: {
+    name: 'geo_line aggregation',
+    license: 'gold',
+  },
   [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]: {
     name: 'geo_tile aggregation on geo_shape field-type',
     license: 'gold',
