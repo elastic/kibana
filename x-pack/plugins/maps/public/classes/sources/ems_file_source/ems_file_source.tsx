@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
-import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import {
@@ -102,6 +101,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     } catch (e) {
       throw new Error(`${getErrorInfo(this._descriptor.id)} - ${e.message}`);
     }
+
     const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
     if (emsFileLayer) {
       return emsFileLayer;
