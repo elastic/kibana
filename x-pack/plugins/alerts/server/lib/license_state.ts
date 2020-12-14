@@ -167,7 +167,7 @@ export class LicenseState {
         throw new AlertTypeDisabledError(
           i18n.translate('xpack.alerts.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
-              'Alert type {alertTypeId} is disabled because your {licenseType} license does not support it. Please upgrade your license.',
+              'Alert {alertTypeId} is disabled because it requires a Gold license. Contact your administrator to upgrade your license.',
             values: { alertTypeId: alertType.id, licenseType: this.license!.type },
           }),
           'license_invalid'
