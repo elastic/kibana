@@ -290,4 +290,26 @@ describe('deserializer and serializer', () => {
       enabled: false,
     });
   });
+
+  it('removes shrink from hot and warm when unset', () => {
+    delete formInternal.phases.hot!.actions!.shrink;
+    delete formInternal.phases.warm!.actions!.shrink;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.shrink).toBeUndefined();
+    expect(result.phases.warm!.actions.shrink).toBeUndefined();
+  });
+
+  it('removes rollover action fields', () => {
+    formInternal.phases.hot!.actions.rollover!.max_size = '';
+    formInternal.phases.hot!.actions.rollover!.max_age = '';
+    formInternal.phases.hot!.actions.rollover!.max_docs = '' as any;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.rollover!.max_age).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_docs).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_size).toBeUndefined();
+  });
 });

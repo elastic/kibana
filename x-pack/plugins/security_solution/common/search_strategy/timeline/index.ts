@@ -31,7 +31,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
 export interface TimelineRequestOptionsPaginated<Field = string>
   extends TimelineRequestBasicOptions {
   pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: SortField<Field>;
+  sort: Array<SortField<Field>>;
 }
 
 export type TimelineStrategyResponseType<

@@ -22,6 +22,10 @@ export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullS
   defaultMessage: 'Full screen',
 });
 
+export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
+  defaultMessage: 'Sort fields',
+});
+
 export const TYPE = i18n.translate('xpack.securitySolution.timeline.typeTooltip', {
   defaultMessage: 'Type',
 });

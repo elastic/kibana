@@ -62,13 +62,10 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
   });
 }
 
-export function sendGetAgentStatus(
-  query: GetAgentStatusRequest['query'],
-  options?: RequestOptions
-) {
-  return sendRequest<GetAgentStatusResponse>({
+export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequest<GetAgentsResponse>({
     method: 'get',
-    path: agentRouteService.getStatusPath(),
+    path: agentRouteService.getListPath(),
     query,
     ...options,
   });
@@ -76,6 +73,18 @@ export function sendGetAgentStatus(
 
 export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options?: RequestOptions) {
   return useRequest<GetAgentStatusResponse>({
+    method: 'get',
+    path: agentRouteService.getStatusPath(),
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentStatus(
+  query: GetAgentStatusRequest['query'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetAgentStatusResponse>({
     method: 'get',
     path: agentRouteService.getStatusPath(),
     query,

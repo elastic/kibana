@@ -28,13 +28,20 @@ export const resetScroll = () => {
   }, 0);
 };
 
-export const useFullScreen = () => {
+interface GlobalFullScreen {
+  globalFullScreen: boolean;
+  setGlobalFullScreen: (fullScreen: boolean) => void;
+}
+
+interface TimelineFullScreen {
+  timelineFullScreen: boolean;
+  setTimelineFullScreen: (fullScreen: boolean) => void;
+}
+
+export const useGlobalFullScreen = (): GlobalFullScreen => {
   const dispatch = useDispatch();
   const globalFullScreen =
     useShallowEqualSelector(inputsSelectors.globalFullScreenSelector) ?? false;
-  const timelineFullScreen =
-    useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
-
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {
       if (fullScreen) {
@@ -49,21 +56,31 @@ export const useFullScreen = () => {
     },
     [dispatch]
   );
+  const memoizedReturn = useMemo(
+    () => ({
+      globalFullScreen,
+      setGlobalFullScreen,
+    }),
+    [globalFullScreen, setGlobalFullScreen]
+  );
+  return memoizedReturn;
+};
+
+export const useTimelineFullScreen = (): TimelineFullScreen => {
+  const dispatch = useDispatch();
+  const timelineFullScreen =
+    useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const setTimelineFullScreen = useCallback(
     (fullScreen: boolean) => dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen })),
     [dispatch]
   );
-
   const memoizedReturn = useMemo(
     () => ({
-      globalFullScreen,
-      setGlobalFullScreen,
-      setTimelineFullScreen,
       timelineFullScreen,
+      setTimelineFullScreen,
     }),
-    [globalFullScreen, setGlobalFullScreen, setTimelineFullScreen, timelineFullScreen]
+    [timelineFullScreen, setTimelineFullScreen]
   );
-
   return memoizedReturn;
 };
