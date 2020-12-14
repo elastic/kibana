@@ -197,6 +197,10 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
 
+  const setReadonly = (phase: Phases) => async (value: boolean) => {
+    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  };
+
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
@@ -239,6 +243,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setIndexPriority: setIndexPriority('hot'),
         setShrink: setShrink('hot'),
         shrinkExists: shrinkExists('hot'),
+        setReadonly: setReadonly('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
@@ -252,6 +257,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setShrink: setShrink('warm'),
         shrinkExists: shrinkExists('warm'),
         ...createForceMergeActions('warm'),
+        setReadonly: setReadonly('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
