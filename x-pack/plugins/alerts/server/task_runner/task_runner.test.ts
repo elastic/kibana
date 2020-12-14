@@ -92,6 +92,7 @@ describe('Task Runner', () => {
     updatedAt: new Date('2019-02-12T21:01:22.479Z'),
     throttle: null,
     muteAll: false,
+    notifyWhen: 'onActiveAlert',
     enabled: true,
     alertTypeId: alertType.id,
     apiKey: '',
@@ -531,6 +532,188 @@ describe('Task Runner', () => {
       4,
       'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
+  });
+
+  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: { date: '1970-01-01T00:00:00.000Z', group: 'default' },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: { lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() } },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subgroup1');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: {
+                  group: 'default',
+                  subgroup: 'newSubgroup',
+                  date: new Date().toISOString(),
+                },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   });
 
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {

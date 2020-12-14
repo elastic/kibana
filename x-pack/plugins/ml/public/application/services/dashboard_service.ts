@@ -11,7 +11,7 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGenerator,
   SavedDashboardPanel,
-  SavedObjectDashboard,
+  DashboardSavedObject,
 } from '../../../../../../src/plugins/dashboard/public';
 import { useMlKibana } from '../contexts/kibana';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
@@ -32,7 +32,7 @@ export function dashboardServiceProvider(
      * Fetches dashboards
      */
     async fetchDashboards(query?: string) {
-      return await savedObjectClient.find<SavedObjectDashboard>({
+      return await savedObjectClient.find<DashboardSavedObject>({
         type: 'dashboard',
         perPage: 1000,
         search: query ? `${query}*` : '',
@@ -60,7 +60,7 @@ export function dashboardServiceProvider(
      */
     async attachPanels(
       dashboardId: string,
-      dashboardAttributes: SavedObjectDashboard,
+      dashboardAttributes: DashboardSavedObject,
       panelsData: Array<Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>>
     ) {
       const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
