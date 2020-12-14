@@ -11,6 +11,7 @@ import {
   Logger,
   PluginInitializerContext,
   RequestHandler,
+  RequestHandlerContext,
 } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
@@ -117,7 +118,10 @@ export class CasePlugin {
     this.log.debug(`Starting Case Workflow`);
     this.alertsService!.initialize(core.elasticsearch.client);
 
-    const getCaseClientWithRequest = async (request: KibanaRequest) => {
+    const getCaseClientWithRequestAndContext = async (
+      context: RequestHandlerContext,
+      request: KibanaRequest
+    ) => {
       return createCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
@@ -125,11 +129,12 @@ export class CasePlugin {
         caseConfigureService: this.caseConfigureService!,
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
+        context,
       });
     };
 
     return {
-      getCaseClientWithRequest,
+      getCaseClientWithRequestAndContext,
     };
   }
 
