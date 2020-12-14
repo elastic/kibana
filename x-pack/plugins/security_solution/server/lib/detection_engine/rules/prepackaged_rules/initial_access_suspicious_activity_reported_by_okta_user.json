@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects when a user reports suspicious activity for their Okta account. These events should be investigated, as they can help security teams identify when an adversary is attempting to gain access to their network.",
+  "description": "Detects when a user reports suspicious activity for their Okta account. These events should be investigated, as they can help security teams identify when an adversary is attempting to gain access to their network.",
   "false_positives": [
     "A user may report suspicious activity on their Okta account in error."
   ],
@@ -13,7 +13,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Suspicious Activity Reported by Okta User",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:user.account.report_suspicious_activity_by_enduser",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
@@ -93,5 +93,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

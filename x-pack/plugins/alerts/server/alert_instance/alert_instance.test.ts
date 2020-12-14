@@ -72,6 +72,114 @@ describe('isThrottled', () => {
   });
 });
 
+describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
+  test('should be false if no last scheduled and nothing scheduled', () => {
+    const alertInstance = new AlertInstance();
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group does not change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group and subgroup does not change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group does not change and subgroup goes from undefined to defined', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group does not change and subgroup goes from defined to undefined', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+  });
+
+  test('should be true if no last scheduled and has scheduled action', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance.scheduleActions('penguin');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does change and subgroup does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('penguin', 'fish');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does not change and subgroup does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance.scheduleActionsWithSubGroup('default', 'fish');
+    expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+  });
+});
+
 describe('getScheduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
