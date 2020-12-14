@@ -37,7 +37,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('On GeoJSON index name & pattern operation complete', () => {
     before(async () => {
-      //await security.testUser.setRoles(['global_maps_all', 'geoall_data_writer', 'global_Index_Pattern_Management_all']);
+      await security.testUser.setRoles([
+        'global_maps_all',
+        'geoall_data_writer',
+        'global_Index_Pattern_Management_all',
+      ]);
       await PageObjects.maps.openNewMap();
     });
 
