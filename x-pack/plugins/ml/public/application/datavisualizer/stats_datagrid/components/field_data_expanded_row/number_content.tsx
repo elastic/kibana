@@ -91,7 +91,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const summaryTableTitle = i18n.translate(
     'xpack.ml.fieldDataCardExpandedRow.numberContent.summaryTableTitle',
     {
-      defaultMessage: 'summary',
+      defaultMessage: 'Summary',
     }
   );
   return (
@@ -113,7 +113,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
               <ExpandedRowFieldHeader>
                 <FormattedMessage
                   id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
-                  defaultMessage="top values"
+                  defaultMessage="Top values"
                 />
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
@@ -134,7 +134,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
               <ExpandedRowFieldHeader>
                 <FormattedMessage
                   id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
-                  defaultMessage="distribution"
+                  defaultMessage="Distribution"
                 />
               </ExpandedRowFieldHeader>
             </EuiFlexItem>

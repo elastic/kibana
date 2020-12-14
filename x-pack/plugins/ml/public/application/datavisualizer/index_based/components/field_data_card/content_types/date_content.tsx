@@ -27,7 +27,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   const { earliest, latest } = stats;
 
   const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardDate.summaryTableTitle', {
-    defaultMessage: 'summary',
+    defaultMessage: 'Summary',
   });
   const summaryTableItems = [
     {

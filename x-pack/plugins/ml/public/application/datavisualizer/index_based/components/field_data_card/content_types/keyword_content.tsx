@@ -21,7 +21,7 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
           id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
           defaultMessage="Top values"
         />
-      </ExpandedRowFieldHeader>{' '}
+      </ExpandedRowFieldHeader>
       <EuiSpacer size="xs" />
       <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
     </div>

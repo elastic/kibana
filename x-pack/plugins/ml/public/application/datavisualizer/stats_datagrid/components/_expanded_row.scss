@@ -1,5 +1,5 @@
 .mlDataVisualizerFieldExpandedRow {
-  padding-left: 50px;
+  padding-left: $euiSizeL * 2;
   width: 100%;
 
   .mlFieldDataCard__valuesTitle {
@@ -9,8 +9,7 @@
     font-weight: bold;
   }
   .mlFieldDataCard__codeContent {
+    @include euiCodeFont;
     font-family: $euiCodeFontFamily;
   }
-
-
 }

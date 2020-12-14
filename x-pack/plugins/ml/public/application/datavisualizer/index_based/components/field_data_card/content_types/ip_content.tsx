@@ -24,7 +24,7 @@ export const IpContent: FC<FieldDataCardProps> = ({ config }) => {
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardIp.topValuesLabel"
-          defaultMessage="top values"
+          defaultMessage="Top values"
         />
       </ExpandedRowFieldHeader>
       <EuiSpacer size="xs" />

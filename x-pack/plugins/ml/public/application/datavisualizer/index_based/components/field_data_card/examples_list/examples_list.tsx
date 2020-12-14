@@ -40,7 +40,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.ml.fieldDataCard.examplesList.title"
-          defaultMessage="{numExamples, plural, one {value} other {examples}}"
+          defaultMessage="{numExamples, plural, one {Value} other {Examples}}"
           values={{
             numExamples: examples.length,
           }}
