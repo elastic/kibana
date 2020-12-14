@@ -134,7 +134,7 @@ export const HotPhase: FunctionComponent = () => {
                       content={
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                          defaultMessage="Rollover once an index is 30 days old or 50 gigabytes in size."
+                          defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
                         />
                       }
                     />
