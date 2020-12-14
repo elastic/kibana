@@ -77,7 +77,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
 
     async assertTotalMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
-      await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
+      await testSubjects.existOrFail('mlDataVisualizerMetricFieldsCount');
       await retry.tryForTime(5000, async () => {
         const actualCount = await testSubjects.getVisibleText(
           'mlDataVisualizerVisibleMetricFieldsCount'
