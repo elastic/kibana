@@ -13,6 +13,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
 export function getSourceTitle() {
   const emsSettings = getEMSSettings();
@@ -71,10 +72,11 @@ export class EMSTMSSource extends AbstractTMSSource {
     const emsTileLayerId = this.getTileLayerId();
     const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
+      const info = getEmsUnavailableMessage();
       throw new Error(
         i18n.translate('xpack.maps.source.emsTile.errorMessage', {
-          defaultMessage: `Unable to find EMS tile configuration for id: {id}`,
-          values: { id: emsTileLayerId },
+          defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
+          values: { id: emsTileLayerId, info },
         })
       );
     }

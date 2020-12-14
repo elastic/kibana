@@ -26,6 +26,7 @@ import { IField } from '../../fields/field';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getEMSSettings } from '../../../kibana_services';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
 export interface IEmsFileSource extends IVectorSource {
   getEmsFieldLabel(emsFieldName: string): Promise<string>;
@@ -87,11 +88,13 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsFileLayers = await getEmsFileLayers();
     const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
     if (!emsFileLayer) {
+      const info = getEmsUnavailableMessage();
       throw new Error(
         i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
-          defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
+          defaultMessage: `Unable to find EMS vector shapes for id: {id}. {info}`,
           values: {
             id: this._descriptor.id,
+            info,
           },
         })
       );
