@@ -13,7 +13,7 @@ import {
   WaterfallChart,
   MiddleTruncatedText,
   RenderItem,
-} from '../../../waterfall';
+} from '../../waterfall';
 
 const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
@@ -27,7 +27,7 @@ const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
 
   return (
     <>
-      {!isErrorStatusCode(status) ? (
+      {!status || !isErrorStatusCode(status) ? (
         <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -47,9 +47,12 @@ const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
 };
 
-export const WaterfallChartWrapper = () => {
-  // TODO: Will be sourced via an API
-  const [networkData] = useState<NetworkItems>([]);
+interface Props {
+  data: NetworkItems;
+}
+
+export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
+  const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
     return getSeriesAndDomain(networkData);
