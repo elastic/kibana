@@ -10,13 +10,22 @@ import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
 import {
   FormatFactory,
   ILensInterpreterRenderHandlers,
   LensFilterEvent,
   LensMultiTable,
+  LensTableRowContextMenuEvent,
 } from '../types';
 import {
   ExpressionFunctionDefinition,
@@ -45,7 +54,14 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   onClickValue: (data: LensFilterEvent['data']) => void;
+  onRowContextMenuClick?: (data: LensTableRowContextMenuEvent['data']) => void;
   getType: (name: string) => IAggType;
+
+  /**
+   * A boolean for each table row, which is true if the row active
+   * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
+   */
+  rowHasRowClickTriggerActions?: boolean[];
 };
 
 export interface DatatableRender {
@@ -143,13 +159,47 @@ export const getDatatableRenderer = (dependencies: {
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
+    const onRowContextMenuClick = (data: LensTableRowContextMenuEvent['data']) => {
+      handlers.event({ name: 'tableRowContextMenuClick', data });
+    };
+    const { hasCompatibleActions } = handlers;
+
+    // An entry for each table row, whether it has any actions attached to
+    // ROW_CLICK_TRIGGER trigger.
+    let rowHasRowClickTriggerActions: boolean[] = [];
+    if (hasCompatibleActions) {
+      const table = Object.values(config.data.tables)[0];
+      if (!!table) {
+        rowHasRowClickTriggerActions = await Promise.all(
+          table.rows.map(async (row, rowIndex) => {
+            try {
+              const hasActions = await hasCompatibleActions({
+                name: 'tableRowContextMenuClick',
+                data: {
+                  rowIndex,
+                  table,
+                  columns: config.args.columns.columnIds,
+                },
+              });
+
+              return hasActions;
+            } catch {
+              return false;
+            }
+          })
+        );
+      }
+    }
+
     ReactDOM.render(
       <I18nProvider>
         <DatatableComponent
           {...config}
           formatFactory={resolvedFormatFactory}
           onClickValue={onClickValue}
+          onRowContextMenuClick={onRowContextMenuClick}
           getType={resolvedGetType}
+          rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
         />
       </I18nProvider>,
       domNode,
@@ -169,7 +219,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     formatters[column.id] = props.formatFactory(column.meta?.params);
   });
 
-  const { onClickValue } = props;
+  const { onClickValue, onRowContextMenuClick } = props;
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
@@ -214,6 +264,124 @@ export function DatatableComponent(props: DatatableRenderProps) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
+  const tableColumns: Array<
+    EuiBasicTableColumn<{ rowIndex: number; [key: string]: unknown }>
+  > = props.args.columns.columnIds
+    .map((field) => {
+      const col = firstTable.columns.find((c) => c.id === field);
+      const filterable = bucketColumns.includes(field);
+      const colIndex = firstTable.columns.findIndex((c) => c.id === field);
+      return {
+        field,
+        name: (col && col.name) || '',
+        render: (value: unknown) => {
+          const formattedValue = formatters[field]?.convert(value);
+          const fieldName = col?.meta?.field;
+
+          if (filterable) {
+            return (
+              <EuiFlexGroup
+                className="lnsDataTable__cell"
+                data-test-subj="lnsDataTableCellValueFilterable"
+                gutterSize="xs"
+              >
+                <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup
+                    responsive={false}
+                    gutterSize="none"
+                    alignItems="center"
+                    className="lnsDataTable__filter"
+                  >
+                    <EuiToolTip
+                      position="bottom"
+                      content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
+                        defaultMessage: 'Include value',
+                      })}
+                    >
+                      <EuiButtonIcon
+                        iconType="plusInCircle"
+                        color="text"
+                        aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
+                          defaultMessage: `Include {value}`,
+                          values: {
+                            value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
+                          },
+                        })}
+                        data-test-subj="lensDatatableFilterFor"
+                        onClick={() => handleFilterClick(field, value, colIndex)}
+                      />
+                    </EuiToolTip>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="bottom"
+                        content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
+                          defaultMessage: 'Exclude value',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          iconType="minusInCircle"
+                          color="text"
+                          aria-label={i18n.translate('xpack.lens.excludeValueButtonAriaLabel', {
+                            defaultMessage: `Exclude {value}`,
+                            values: {
+                              value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
+                            },
+                          })}
+                          data-test-subj="lensDatatableFilterOut"
+                          onClick={() => handleFilterClick(field, value, colIndex, true)}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+          return <span data-test-subj="lnsDataTableCellValue">{formattedValue}</span>;
+        },
+      };
+    })
+    .filter(({ field }) => !!field);
+
+  if (!!props.rowHasRowClickTriggerActions && !!onRowContextMenuClick) {
+    const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
+    if (hasAtLeastOneRowClickAction) {
+      const actions: EuiTableActionsColumnType<{ rowIndex: number; [key: string]: unknown }> = {
+        name: i18n.translate('xpack.lens.datatable.actionsColumnName', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            name: i18n.translate('xpack.lens.tableRowMore', {
+              defaultMessage: 'More',
+            }),
+            description: i18n.translate('xpack.lens.tableRowMoreDescription', {
+              defaultMessage: 'Table row context menu',
+            }),
+            type: 'icon',
+            icon: ({ rowIndex }: { rowIndex: number }) => {
+              if (
+                !!props.rowHasRowClickTriggerActions &&
+                !props.rowHasRowClickTriggerActions[rowIndex]
+              )
+                return 'empty';
+              return 'boxesVertical';
+            },
+            onClick: ({ rowIndex }) => {
+              onRowContextMenuClick({
+                rowIndex,
+                table: firstTable,
+                columns: props.args.columns.columnIds,
+              });
+            },
+          },
+        ],
+      };
+      tableColumns.push(actions);
+    }
+  }
+
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -223,89 +391,8 @@ export function DatatableComponent(props: DatatableRenderProps) {
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
         tableLayout="auto"
-        columns={props.args.columns.columnIds
-          .map((field) => {
-            const col = firstTable.columns.find((c) => c.id === field);
-            const filterable = bucketColumns.includes(field);
-            const colIndex = firstTable.columns.findIndex((c) => c.id === field);
-            return {
-              field,
-              name: (col && col.name) || '',
-              render: (value: unknown) => {
-                const formattedValue = formatters[field]?.convert(value);
-                const fieldName = col?.meta?.field;
-
-                if (filterable) {
-                  return (
-                    <EuiFlexGroup
-                      className="lnsDataTable__cell"
-                      data-test-subj="lnsDataTableCellValueFilterable"
-                      gutterSize="xs"
-                    >
-                      <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup
-                          responsive={false}
-                          gutterSize="none"
-                          alignItems="center"
-                          className="lnsDataTable__filter"
-                        >
-                          <EuiToolTip
-                            position="bottom"
-                            content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
-                              defaultMessage: 'Include value',
-                            })}
-                          >
-                            <EuiButtonIcon
-                              iconType="plusInCircle"
-                              color="text"
-                              aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
-                                defaultMessage: `Include {value}`,
-                                values: {
-                                  value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
-                                },
-                              })}
-                              data-test-subj="lensDatatableFilterFor"
-                              onClick={() => handleFilterClick(field, value, colIndex)}
-                            />
-                          </EuiToolTip>
-                          <EuiFlexItem grow={false}>
-                            <EuiToolTip
-                              position="bottom"
-                              content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
-                                defaultMessage: 'Exclude value',
-                              })}
-                            >
-                              <EuiButtonIcon
-                                iconType="minusInCircle"
-                                color="text"
-                                aria-label={i18n.translate(
-                                  'xpack.lens.excludeValueButtonAriaLabel',
-                                  {
-                                    defaultMessage: `Exclude {value}`,
-                                    values: {
-                                      value: `${
-                                        fieldName ? `${fieldName}: ` : ''
-                                      }${formattedValue}`,
-                                    },
-                                  }
-                                )}
-                                data-test-subj="lensDatatableFilterOut"
-                                onClick={() => handleFilterClick(field, value, colIndex, true)}
-                              />
-                            </EuiToolTip>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  );
-                }
-                return <span data-test-subj="lnsDataTableCellValue">{formattedValue}</span>;
-              },
-            };
-          })
-          .filter(({ field }) => !!field)}
-        items={firstTable ? firstTable.rows : []}
+        columns={tableColumns}
+        items={firstTable ? firstTable.rows.map((row, rowIndex) => ({ ...row, rowIndex })) : []}
       />
     </VisualizationContainer>
   );

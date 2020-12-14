@@ -566,6 +566,13 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                   "902",
                 ],
               },
+              Object {
+                "field": "event.kind",
+                "originalValue": "event",
+                "values": Array [
+                  "event",
+                ],
+              },
             ]
           }
           eventId="Y-6TfmcB0WOhS6qyMv3s"
@@ -1139,6 +1146,13 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                     "902",
                   ],
                 },
+                Object {
+                  "field": "event.kind",
+                  "originalValue": "event",
+                  "values": Array [
+                    "event",
+                  ],
+                },
               ]
             }
             eventId="Y-6TfmcB0WOhS6qyMv3s"
@@ -1294,6 +1308,13 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                   "originalValue": 902,
                   "values": Array [
                     "902",
+                  ],
+                },
+                Object {
+                  "field": "event.kind",
+                  "originalValue": "event",
+                  "values": Array [
+                    "event",
                   ],
                 },
               ]
