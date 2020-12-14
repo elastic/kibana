@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiToolTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -72,7 +73,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineFullScreen,
   toggleFullScreen,
 }) => (
-  <EuiFlexGroup alignItems="flexStart" gutterSize="none">
+  <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
         {i18n.CLOSE_ANALYZER}
@@ -167,15 +168,17 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiHorizontalRule margin="none" />
-
-      {graphEventId !== undefined && indices !== null && (
+      {graphEventId !== undefined && indices !== null ? (
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
           indices={indices}
         />
+      ) : (
+        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
       )}
     </OverlayContainer>
   );

@@ -134,7 +134,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
 
   return (
     <>
-      <ActionIconItem id="attachAlertToCase">
+      <ActionIconItem>
         <EuiPopover
           id="attachAlertToCasePanel"
           button={button}
