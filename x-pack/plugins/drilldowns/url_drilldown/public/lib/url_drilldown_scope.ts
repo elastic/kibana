@@ -18,6 +18,7 @@ import {
   isContextMenuTriggerContext,
   RangeSelectContext,
   ValueClickContext,
+  EmbeddableOutput,
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext } from './url_drilldown';
 import {
@@ -27,38 +28,40 @@ import {
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
-type ContextScopeInput = ActionContext | ActionFactoryContext;
-
 /**
  * Part of context scope extracted from an embeddable
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
 interface EmbeddableUrlDrilldownContextScope {
+  /**
+   * ID of the embeddable panel.
+   */
   id: string;
+
+  /**
+   * Title of the embeddable panel.
+   */
   title?: string;
+
+  /**
+   * In case panel supports only 1 index pattern.
+   */
+  indexPatternId?: string;
+
+  /**
+   * In case panel supports more then 1 index pattern.
+   */
+  indexPatternIds?: string[];
+
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
   savedObjectId?: string;
-  /**
-   * In case panel supports only 1 index patterns
-   */
-  indexPatternId?: string;
-  /**
-   * In case panel supports more then 1 index patterns
-   */
-  indexPatternIds?: string[];
 }
 
-/**
- * Url drilldown context scope
- * `{{context.$}}`
- */
-interface UrlDrilldownContextScope {
-  panel?: EmbeddableUrlDrilldownContextScope;
-}
-
-export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilldownContextScope {
+export function getPanelVariables(contextScopeInput: {
+  embeddable?: IEmbeddable;
+}): EmbeddableUrlDrilldownContextScope {
   function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
     if (val && typeof val === 'object' && 'embeddable' in val) return true;
     return false;
@@ -67,41 +70,52 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-
   const embeddable = contextScopeInput.embeddable;
+
+  return getEmbeddableVariables(embeddable);
+}
+
+function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
+  return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
+}
+
+/**
+ * @todo Same functionality is implemented in x-pack/plugins/discover_enhanced/public/actions/explore_data/shared.ts,
+ *       combine both implementations into a common approach.
+ */
+function getIndexPatternIds(output: EmbeddableOutput): string[] {
+  function hasIndexPatterns(
+    _output: Record<string, any>
+  ): _output is { indexPatterns: Array<{ id?: string }> } {
+    return (
+      'indexPatterns' in _output &&
+      Array.isArray(_output.indexPatterns) &&
+      _output.indexPatterns.length > 0
+    );
+  }
+  return hasIndexPatterns(output)
+    ? (output.indexPatterns.map((ip) => ip.id).filter(Boolean) as string[])
+    : [];
+}
+
+export function getEmbeddableVariables(
+  embeddable: IEmbeddable
+): EmbeddableUrlDrilldownContextScope {
   const input = embeddable.getInput();
   const output = embeddable.getOutput();
-  function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
-    return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
-  }
-  function getIndexPatternIds(): string[] {
-    function hasIndexPatterns(
-      _output: Record<string, any>
-    ): _output is { indexPatterns: Array<{ id?: string }> } {
-      return (
-        'indexPatterns' in _output &&
-        Array.isArray(_output.indexPatterns) &&
-        _output.indexPatterns.length > 0
-      );
-    }
-    return hasIndexPatterns(output)
-      ? (output.indexPatterns.map((ip) => ip.id).filter(Boolean) as string[])
-      : [];
-  }
-  const indexPatternsIds = getIndexPatternIds();
-  return {
-    panel: cleanEmptyKeys({
-      id: input.id,
-      title: output.title ?? input.title,
-      savedObjectId:
-        output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
-      query: input.query,
-      timeRange: input.timeRange,
-      filters: input.filters,
-      indexPatternIds: indexPatternsIds.length > 1 ? indexPatternsIds : undefined,
-      indexPatternId: indexPatternsIds.length === 1 ? indexPatternsIds[0] : undefined,
-    }),
-  };
+  const indexPatternsIds = getIndexPatternIds(output);
+
+  return deleteUndefinedKeys({
+    id: input.id,
+    title: output.title ?? input.title,
+    savedObjectId:
+      output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
+    query: input.query,
+    timeRange: input.timeRange,
+    filters: input.filters,
+    indexPatternIds: indexPatternsIds.length > 1 ? indexPatternsIds : undefined,
+    indexPatternId: indexPatternsIds.length === 1 ? indexPatternsIds[0] : undefined,
+  });
 }
 
 /**
@@ -154,7 +168,7 @@ function getEventScopeFromRangeSelectTriggerContext(
 ): RangeSelectTriggerEventScope {
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
-  return cleanEmptyKeys({
+  return deleteUndefinedKeys({
     key: toPrimitiveOrUndefined(column?.meta.field) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
@@ -173,7 +187,7 @@ function getEventScopeFromValueClickTriggerContext(
     };
   });
 
-  return cleanEmptyKeys({
+  return deleteUndefinedKeys({
     key: points[0]?.key,
     value: points[0]?.value,
     negate,
@@ -239,7 +253,7 @@ function toPrimitiveOrUndefined(v: unknown): Primitive | undefined {
   return String(v);
 }
 
-function cleanEmptyKeys<T extends Record<string, any>>(obj: T): T {
+function deleteUndefinedKeys<T extends Record<string, any>>(obj: T): T {
   Object.keys(obj).forEach((key) => {
     if (obj[key] === undefined) {
       delete obj[key];

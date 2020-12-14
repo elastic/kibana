@@ -28,7 +28,7 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getContextScope, getEventScope, getEventVariableList } from './url_drilldown_scope';
+import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
@@ -103,10 +103,9 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
-    const { isValid, error } = urlDrilldownValidateUrlTemplate(
-      config.url,
-      await this.buildRuntimeScope(context)
-    );
+    const scope = this.getRuntimeVariables(context);
+    const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
+
     if (!isValid) {
       // eslint-disable-next-line no-console
       console.warn(
@@ -125,7 +124,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private buildUrl(config: Config, context: ActionContext): string {
-    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
     return url;
   }
 
@@ -150,19 +149,23 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     }
   };
 
-  private buildRuntimeScope = (context: ActionContext) => {
+  public readonly getRuntimeVariables = (context: ActionContext) => {
     return {
       ...this.deps.getGlobalScope(),
-      context: getContextScope(context),
+      context: {
+        panel: getPanelVariables(context),
+      },
       event: getEventScope(context),
     };
   };
 
-  private getVariableList = (context: ActionFactoryContext): string[] => {
-    return [
-      ...getEventVariableList(context).sort(),
-      ...Object.keys(getFlattenedObject(getContextScope(context))).sort(),
-      ...Object.keys(getFlattenedObject(this.deps.getGlobalScope())).sort(),
-    ];
+  public readonly getVariableList = (context: ActionFactoryContext): string[] => {
+    const eventVariables = getEventVariableList(context);
+    const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
+      (key) => 'context.panel.' + key
+    );
+    const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
+
+    return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
   };
 }

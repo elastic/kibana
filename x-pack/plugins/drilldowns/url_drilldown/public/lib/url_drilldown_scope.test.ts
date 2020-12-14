@@ -8,48 +8,13 @@ import {
   getEventScope,
   ValueClickTriggerEventScope,
   getEventVariableList,
+  getPanelVariables,
 } from './url_drilldown_scope';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 import {
   RowClickContext,
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
-
-const createPoint = ({
-  field,
-  value,
-}: {
-  field: string;
-  value: string | null | number | boolean;
-}) => ({
-  table: {
-    columns: [
-      {
-        name: field,
-        id: '1-1',
-        meta: {
-          type: 'date' as DatatableColumnType,
-          field,
-          source: 'esaggs',
-          sourceParams: {
-            type: 'histogram',
-            indexPatternId: 'logstash-*',
-            interval: 30,
-            otherBucket: true,
-          },
-        },
-      },
-    ],
-    rows: [
-      {
-        '1-1': '2048',
-      },
-    ],
-  },
-  column: 0,
-  row: 0,
-  value,
-});
+import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
   describe('supports `points[]`', () => {
@@ -109,116 +74,6 @@ describe('VALUE_CLICK_TRIGGER', () => {
 });
 
 describe('ROW_CLICK_TRIGGER', () => {
-  const data = {
-    rowIndex: 1,
-    table: {
-      type: 'datatable',
-      rows: [
-        {
-          '6ced5344-2596-4545-b626-8b449924e2d4': 'IT',
-          '6890e417-c5f1-4565-a45c-92f55380e14c': '0',
-          '93b8ef16-2483-45b8-ad27-6cc1f790578b': 13,
-          'b0c5dcc2-4012-4d7e-b983-0e089badc43c': 0,
-          'e0719f1a-04fb-4036-a63c-c25deac3f011': 7,
-        },
-        {
-          '6ced5344-2596-4545-b626-8b449924e2d4': 'IT',
-          '6890e417-c5f1-4565-a45c-92f55380e14c': '2.25',
-          '93b8ef16-2483-45b8-ad27-6cc1f790578b': 3,
-          'b0c5dcc2-4012-4d7e-b983-0e089badc43c': 0,
-          'e0719f1a-04fb-4036-a63c-c25deac3f011': 2,
-        },
-        {
-          '6ced5344-2596-4545-b626-8b449924e2d4': 'IT',
-          '6890e417-c5f1-4565-a45c-92f55380e14c': '0.020939215995129826',
-          '93b8ef16-2483-45b8-ad27-6cc1f790578b': 2,
-          'b0c5dcc2-4012-4d7e-b983-0e089badc43c': 12.490584373474121,
-          'e0719f1a-04fb-4036-a63c-c25deac3f011': 1,
-        },
-      ],
-      columns: [
-        {
-          id: '6ced5344-2596-4545-b626-8b449924e2d4',
-          name: 'Top values of DestCountry',
-          meta: {
-            type: 'string',
-            field: 'DestCountry',
-            index: 'kibana_sample_data_flights',
-            params: {
-              id: 'terms',
-              params: {
-                id: 'string',
-                otherBucketLabel: 'Other',
-                missingBucketLabel: '(missing value)',
-              },
-            },
-            source: 'esaggs',
-          },
-        },
-        {
-          id: '6890e417-c5f1-4565-a45c-92f55380e14c',
-          name: 'Top values of FlightTimeHour',
-          meta: {
-            type: 'string',
-            field: 'FlightTimeHour',
-            index: 'kibana_sample_data_flights',
-            params: {
-              id: 'terms',
-              params: {
-                id: 'string',
-                otherBucketLabel: 'Other',
-                missingBucketLabel: '(missing value)',
-              },
-            },
-            source: 'esaggs',
-          },
-        },
-        {
-          id: '93b8ef16-2483-45b8-ad27-6cc1f790578b',
-          name: 'Count of records',
-          meta: {
-            type: 'number',
-            index: 'kibana_sample_data_flights',
-            params: {
-              id: 'number',
-            },
-          },
-        },
-        {
-          id: 'b0c5dcc2-4012-4d7e-b983-0e089badc43c',
-          name: 'Average of DistanceMiles',
-          meta: {
-            type: 'number',
-            field: 'DistanceMiles',
-            index: 'kibana_sample_data_flights',
-            params: {
-              id: 'number',
-            },
-          },
-        },
-        {
-          id: 'e0719f1a-04fb-4036-a63c-c25deac3f011',
-          name: 'Unique count of OriginAirportID',
-          meta: {
-            type: 'string',
-            field: 'OriginAirportID',
-            index: 'kibana_sample_data_flights',
-            params: {
-              id: 'number',
-            },
-          },
-        },
-      ],
-    },
-    columns: [
-      '6ced5344-2596-4545-b626-8b449924e2d4',
-      '6890e417-c5f1-4565-a45c-92f55380e14c',
-      '93b8ef16-2483-45b8-ad27-6cc1f790578b',
-      'b0c5dcc2-4012-4d7e-b983-0e089badc43c',
-      'e0719f1a-04fb-4036-a63c-c25deac3f011',
-    ],
-  };
-
   test('getEventVariableList() returns correct list of runtime variables', () => {
     const vars = getEventVariableList({
       triggers: [ROW_CLICK_TRIGGER],
@@ -229,7 +84,7 @@ describe('ROW_CLICK_TRIGGER', () => {
   test('getEventScope() returns correct variables for row click trigger', () => {
     const context = ({
       embeddable: {},
-      data: data as any,
+      data: rowClickData as any,
     } as unknown) as RowClickContext;
     const res = getEventScope(context);
 
@@ -243,6 +98,195 @@ describe('ROW_CLICK_TRIGGER', () => {
         'Count of records',
         'Average of DistanceMiles',
         'Unique count of OriginAirportID',
+      ],
+    });
+  });
+});
+
+describe('getPanelVariables()', () => {
+  test('returns only ID for empty embeddable', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+    });
+  });
+
+  test('returns title as specified in input', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        title: 'title1',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title1',
+    });
+  });
+
+  test('returns output title if input and output titles are specified', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        title: 'title1',
+      },
+      {
+        title: 'title2',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title2',
+    });
+  });
+
+  test('returns title from output if title in input is missing', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        title: 'title2',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      title: 'title2',
+    });
+  });
+
+  test('returns saved object ID from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        savedObjectId: '5678',
+      },
+      {
+        savedObjectId: '1234',
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      savedObjectId: '1234',
+    });
+  });
+
+  test('returns saved object ID from input if it is not set on output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        savedObjectId: '5678',
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      savedObjectId: '5678',
+    });
+  });
+
+  test('returns query, timeRange and filters from input', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+        query: {
+          language: 'C++',
+          query: 'std::cout << 123;',
+        },
+        timeRange: {
+          from: 'FROM',
+          to: 'TO',
+        },
+        filters: [
+          {
+            meta: {
+              alias: 'asdf',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ],
+      },
+      {}
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      query: {
+        language: 'C++',
+        query: 'std::cout << 123;',
+      },
+      timeRange: {
+        from: 'FROM',
+        to: 'TO',
+      },
+      filters: [
+        {
+          meta: {
+            alias: 'asdf',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ],
+    });
+  });
+
+  test('returns a single index pattern from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    });
+  });
+
+  test('returns multiple index patterns from output', () => {
+    const embeddable = new TestEmbeddable(
+      {
+        id: 'test',
+      },
+      {
+        indexPatterns: [
+          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+        ],
+      }
+    );
+    const vars = getPanelVariables({ embeddable });
+
+    expect(vars).toEqual({
+      id: 'test',
+      indexPatternIds: [
+        'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy',
       ],
     });
   });

@@ -8,7 +8,11 @@ import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
-import { of } from '../../../../../../src/plugins/kibana_utils';
+import { createPoint, rowClickData, TestEmbeddable } from './test/data';
+import {
+  VALUE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 const mockDataPoints = [
   {
@@ -115,7 +119,8 @@ describe('UrlDrilldown', () => {
         embeddable: mockEmbeddable,
       };
 
-      await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(true);
+      const result = urlDrilldown.isCompatible(config, context);
+      await expect(result).resolves.toBe(true);
     });
 
     test('not compatible if url is invalid', async () => {
@@ -242,6 +247,201 @@ describe('UrlDrilldown', () => {
       expect(error2.message).toMatchInlineSnapshot(
         `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
       );
+    });
+  });
+
+  describe('variables', () => {
+    const embeddable1 = new TestEmbeddable(
+      {
+        id: 'test',
+        title: 'The Title',
+        savedObjectId: 'SAVED_OBJECT_IDxx',
+      },
+      {
+        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
+      }
+    );
+    const data: any = {
+      data: [
+        createPoint({ field: 'field0', value: 'value0' }),
+        createPoint({ field: 'field1', value: 'value1' }),
+        createPoint({ field: 'field2', value: 'value2' }),
+      ],
+    };
+
+    const embeddable2 = new TestEmbeddable(
+      {
+        id: 'the-id',
+        query: {
+          language: 'C++',
+          query: 'std::cout << 123;',
+        },
+        timeRange: {
+          from: 'FROM',
+          to: 'TO',
+        },
+        filters: [
+          {
+            meta: {
+              alias: 'asdf',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ],
+        savedObjectId: 'SAVED_OBJECT_ID',
+      },
+      {
+        title: 'The Title',
+        indexPatterns: [
+          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+        ],
+      }
+    );
+
+    describe('getRuntimeVariables()', () => {
+      test('builds runtime variables for VALUE_CLICK_TRIGGER trigger', () => {
+        const variables = urlDrilldown.getRuntimeVariables({
+          embeddable: embeddable1,
+          data,
+        });
+
+        expect(variables).toMatchObject({
+          kibanaUrl: 'http://localhost:5601/',
+          context: {
+            panel: {
+              id: 'test',
+              title: 'The Title',
+              savedObjectId: 'SAVED_OBJECT_IDxx',
+              indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+            },
+          },
+          event: {
+            key: 'field0',
+            value: 'value0',
+            negate: false,
+            points: [
+              {
+                value: 'value0',
+                key: 'field0',
+              },
+              {
+                value: 'value1',
+                key: 'field1',
+              },
+              {
+                value: 'value2',
+                key: 'field2',
+              },
+            ],
+          },
+        });
+      });
+
+      test('builds runtime variables for ROW_CLICK_TRIGGER trigger', () => {
+        const variables = urlDrilldown.getRuntimeVariables({
+          embeddable: embeddable2,
+          data: rowClickData as any,
+        });
+
+        expect(variables).toMatchObject({
+          kibanaUrl: 'http://localhost:5601/',
+          context: {
+            panel: {
+              id: 'the-id',
+              title: 'The Title',
+              savedObjectId: 'SAVED_OBJECT_ID',
+              query: {
+                language: 'C++',
+                query: 'std::cout << 123;',
+              },
+              timeRange: {
+                from: 'FROM',
+                to: 'TO',
+              },
+              filters: [
+                {
+                  meta: {
+                    alias: 'asdf',
+                    disabled: false,
+                    negate: false,
+                  },
+                },
+              ],
+            },
+          },
+          event: {
+            rowIndex: 1,
+            values: ['IT', '2.25', 3, 0, 2],
+            keys: ['DestCountry', 'FlightTimeHour', '', 'DistanceMiles', 'OriginAirportID'],
+            columnNames: [
+              'Top values of DestCountry',
+              'Top values of FlightTimeHour',
+              'Count of records',
+              'Average of DistanceMiles',
+              'Unique count of OriginAirportID',
+            ],
+          },
+        });
+      });
+    });
+
+    describe('getVariableList()', () => {
+      test('builds variable list for VALUE_CLICK_TRIGGER trigger', () => {
+        const list = urlDrilldown.getVariableList({
+          triggers: [VALUE_CLICK_TRIGGER],
+          embeddable: embeddable1,
+        });
+
+        const expectedList = [
+          'event.key',
+          'event.value',
+          'event.negate',
+          'event.points',
+
+          'context.panel.id',
+          'context.panel.title',
+          'context.panel.indexPatternId',
+          'context.panel.savedObjectId',
+
+          'kibanaUrl',
+        ];
+
+        for (const expectedItem of expectedList) {
+          expect(list.includes(expectedItem)).toBe(true);
+        }
+      });
+
+      test('builds variable list for ROW_CLICK_TRIGGER trigger', () => {
+        const list = urlDrilldown.getVariableList({
+          triggers: [ROW_CLICK_TRIGGER],
+          embeddable: embeddable2,
+        });
+
+        const expectedList = [
+          'event.columnNames',
+          'event.keys',
+          'event.rowIndex',
+          'event.values',
+
+          'context.panel.id',
+          'context.panel.title',
+          'context.panel.filters',
+          'context.panel.query.language',
+          'context.panel.query.query',
+          'context.panel.indexPatternIds',
+          'context.panel.savedObjectId',
+          'context.panel.timeRange.from',
+          'context.panel.timeRange.to',
+
+          'kibanaUrl',
+        ];
+
+        for (const expectedItem of expectedList) {
+          expect(list.includes(expectedItem)).toBe(true);
+        }
+      });
     });
   });
 });
