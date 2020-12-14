@@ -31,12 +31,14 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ApplicationUsageTracker } from '@kbn/analytics';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
+import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -50,6 +52,7 @@ interface Props {
   enableSaving: boolean;
   query?: any;
   toasts: ToastsStart;
+  applicationUsageTracker: ApplicationUsageTracker;
 }
 
 interface State {
@@ -90,7 +93,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
   }
 
   render() {
-    const { telemetryService, isSecurityExampleEnabled } = this.props;
+    const { telemetryService, isSecurityExampleEnabled, applicationUsageTracker } = this.props;
     const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
     const securityExampleEnabled = isSecurityExampleEnabled();
 
@@ -105,13 +108,23 @@ export class TelemetryManagementSection extends Component<Props, State> {
     return (
       <Fragment>
         {showExample && (
-          <OptInExampleFlyout
-            fetchExample={telemetryService.fetchExample}
-            onClose={this.toggleExample}
-          />
+          <TrackApplicationView
+            viewId="optInExampleFlyout"
+            applicationUsageTracker={applicationUsageTracker}
+          >
+            <OptInExampleFlyout
+              fetchExample={telemetryService.fetchExample}
+              onClose={this.toggleExample}
+            />
+          </TrackApplicationView>
         )}
         {showSecurityExample && securityExampleEnabled && (
-          <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          <TrackApplicationView
+            viewId="optInSecurityExampleFlyout"
+            applicationUsageTracker={applicationUsageTracker}
+          >
+            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          </TrackApplicationView>
         )}
         <EuiPanel paddingSize="l">
           <EuiForm>

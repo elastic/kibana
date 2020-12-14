@@ -19,7 +19,7 @@
 
 import { Subject } from 'rxjs';
 
-import { trackApplicationUsage } from './application_usage';
+import { trackApplicationUsageChange } from './application_usage';
 import { createApplicationUsageTrackerMock } from '../mocks';
 
 describe('application_usage', () => {
@@ -27,7 +27,7 @@ describe('application_usage', () => {
     const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
+    trackApplicationUsageChange(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('appId');
 
@@ -41,7 +41,7 @@ describe('application_usage', () => {
     const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
+    trackApplicationUsageChange(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('appId');
     currentAppId$.next('appId');
@@ -56,7 +56,7 @@ describe('application_usage', () => {
     const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
+    trackApplicationUsageChange(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('');
     currentAppId$.next('kibana');

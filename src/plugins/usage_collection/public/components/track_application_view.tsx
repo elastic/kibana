@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { createReporter } from './create_reporter';
-export { trackApplicationUsageChange } from './application_usage';
+import { Component, ReactNode } from 'react';
+import { ApplicationUsageTracker } from '@kbn/analytics';
+
+interface Props {
+  viewId: string;
+  applicationUsageTracker?: ApplicationUsageTracker;
+  children: ReactNode;
+}
+
+export class TrackApplicationView extends Component<Props> {
+  componentDidMount() {
+    const { applicationUsageTracker, viewId } = this.props;
+
+    applicationUsageTracker?.trackApplicationViewUsage(viewId);
+  }
+  componentWillUnmount() {
+    const { applicationUsageTracker, viewId } = this.props;
+
+    applicationUsageTracker?.flushTrackedView(viewId);
+  }
+
+  render() {
+    return this.props.children;
+  }
+}

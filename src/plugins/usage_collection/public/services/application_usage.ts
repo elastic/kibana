@@ -20,14 +20,14 @@
 import { Observable } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { ApplicationUsageTracker } from '@kbn/analytics';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../common/constants';
 
-const DEFAULT_VIEW = 'default';
 /**
  * List of appIds not to report usage from (due to legacy hacks)
  */
 const DO_NOT_REPORT = ['kibana'];
 
-export function trackApplicationUsage(
+export function trackApplicationUsageChange(
   currentAppId$: Observable<string | undefined>,
   applicationUsageTracker: ApplicationUsageTracker
 ) {
@@ -42,6 +42,6 @@ export function trackApplicationUsage(
       }
 
       applicationUsageTracker.setCurrentAppId(appId);
-      applicationUsageTracker.trackApplicationViewUsage(DEFAULT_VIEW);
+      applicationUsageTracker.trackApplicationViewUsage(MAIN_APP_DEFAULT_VIEW_ID);
     });
 }

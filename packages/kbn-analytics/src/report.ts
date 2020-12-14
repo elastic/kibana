@@ -20,7 +20,7 @@
 import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
 import { Metric, UiCounterMetricType, METRIC_TYPE } from './metrics';
-const REPORT_VERSION = 2;
+const REPORT_VERSION = 3;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
@@ -46,6 +46,8 @@ export interface Report {
   application_usage?: Record<
     string,
     {
+      appId: string;
+      viewId: string;
       minutesOnScreen: number;
       numberOfClicks: number;
     }
@@ -132,20 +134,25 @@ export class ReportManager {
         };
         return;
       }
-      case METRIC_TYPE.APPLICATION_USAGE:
-        const { numberOfClicks, startTime } = metric;
+      case METRIC_TYPE.APPLICATION_USAGE: {
+        const { numberOfClicks, startTime, appId, viewId } = metric;
         const minutesOnScreen = moment().diff(startTime, 'minutes', true);
 
         report.application_usage = report.application_usage || {};
         const appExistingData = report.application_usage[key] || {
           minutesOnScreen: 0,
           numberOfClicks: 0,
+          appId,
+          viewId,
         };
         report.application_usage[key] = {
+          ...appExistingData,
           minutesOnScreen: appExistingData.minutesOnScreen + minutesOnScreen,
           numberOfClicks: appExistingData.numberOfClicks + numberOfClicks,
         };
-        break;
+
+        return;
+      }
       default:
         throw new UnreachableCaseError(metric);
     }

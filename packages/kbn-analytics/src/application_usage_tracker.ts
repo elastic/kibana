@@ -32,7 +32,6 @@ export class ApplicationUsageTracker {
 
   private currentAppId?: string;
   private currentApplicationKeys: ApplicationKey[] = [];
-  private lastApplicationKey?: ApplicationKey;
 
   private beforeUnloadListener?: EventListener;
   private onVisiblityChangeListener?: EventListener;
@@ -59,8 +58,6 @@ export class ApplicationUsageTracker {
       const metric = createApplicationUsageMetric(appId, viewId);
       this.trackedApplicationViews[serializedKey] = metric;
     }
-
-    this.lastApplicationKey = appKeys[appKeys.length];
   }
 
   private attachListeners() {
@@ -81,11 +78,7 @@ export class ApplicationUsageTracker {
     };
 
     this.onClickListener = () => {
-      if (!this.lastApplicationKey) {
-        return;
-      }
-
-      this.updateApplicationClickCounter(this.lastApplicationKey);
+      this.updateActiveViewsClickCounters();
     };
 
     // Before leaving the page, make sure we store the current usage
@@ -121,14 +114,11 @@ export class ApplicationUsageTracker {
     });
   }
 
-  private updateApplicationClickCounter(appKey: ApplicationKey) {
-    const serializedKey = this.serializeKey(appKey);
-    const appMetric = this.trackedApplicationViews[serializedKey];
-    if (!appMetric) {
-      return;
+  private updateActiveViewsClickCounters() {
+    const keys = Object.keys(this.trackedApplicationViews);
+    for (const key of keys) {
+      this.trackedApplicationViews[key].numberOfClicks++;
     }
-
-    appMetric.numberOfClicks = appMetric.numberOfClicks + 1;
   }
 
   public start() {

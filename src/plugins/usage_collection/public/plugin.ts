@@ -20,7 +20,7 @@
 import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
 import { Subject, merge } from 'rxjs';
 import { Storage } from '../../kibana_utils/public';
-import { createReporter, trackApplicationUsage } from './services';
+import { createReporter, trackApplicationUsageChange } from './services';
 import {
   PluginInitializerContext,
   Plugin,
@@ -73,7 +73,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     this.config = initializerContext.config.get<PublicConfigType>();
   }
 
-  public setup({ http, application }: CoreSetup): UsageCollectionSetup {
+  public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
     const debug = this.config.uiCounters.debug;
 
@@ -106,16 +106,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
       this.applicationUsageTracker.start();
+      trackApplicationUsageChange(
+        merge(application.currentAppId$, this.legacyAppId$),
+        this.applicationUsageTracker
+      );
     }
 
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
-
-    trackApplicationUsage(
-      merge(application.currentAppId$, this.legacyAppId$),
-      this.applicationUsageTracker
-    );
 
     return {
       applicationUsageTracker: this.applicationUsageTracker,
