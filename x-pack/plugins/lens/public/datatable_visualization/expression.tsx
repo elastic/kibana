@@ -130,11 +130,7 @@ export const getDatatable = ({
         columnsReverseLookup[sortBy]?.meta?.type || ''
       )
         ? sortBy
-        : (row: Record<string, unknown>) =>
-            possiblyWrapFormat(
-              formatters[sortBy]?.convert(row[sortBy]),
-              columnsReverseLookup[sortBy]?.meta?.type
-            );
+        : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
       // replace the table here
       context.inspectorAdapters.tables[layerId].rows = orderBy(
         firstTable.rows || [],
@@ -230,19 +226,6 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
-
-function possiblyWrapFormat(rowFormatted: string, type: string | undefined) {
-  if (type !== 'ip') {
-    return rowFormatted;
-  }
-  // Note this supports only IPv4: maybe there already a solution to support IPv6 and more?
-  return Number(
-    rowFormatted
-      .split('.')
-      .map((n) => `000${n}`.slice(-3))
-      .join('')
-  );
-}
 
 function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
   const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
