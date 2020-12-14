@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { deleteSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/delete_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -13,7 +14,10 @@ import { BadRequestError } from '../../errors/bad_request_error';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 
-export const deleteSignalsMigrationRoute = (router: IRouter) => {
+export const deleteSignalsMigrationRoute = (
+  router: IRouter,
+  security: SetupPlugins['security']
+) => {
   router.delete(
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -31,11 +35,17 @@ export const deleteSignalsMigrationRoute = (router: IRouter) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;
-        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        const user = await security?.authc.getCurrentUser(request);
+        const migrationService = signalsMigrationService({
+          esClient,
+          soClient,
+          username: user?.username ?? 'elastic',
+        });
 
         const signalsAlias = appClient.getSignalsIndex();
         const migrationsByIndex = await getMigrationSavedObjectsByIndex({

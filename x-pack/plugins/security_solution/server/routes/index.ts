@@ -87,9 +87,9 @@ export const initRoutes = (
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
   getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router);
-  finalizeSignalsMigrationRoute(router);
-  deleteSignalsMigrationRoute(router);
+  createSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, security);
+  deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

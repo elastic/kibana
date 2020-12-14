@@ -23,6 +23,7 @@ import { updateMigrationSavedObject } from './update_migration_saved_object';
  * @param soClient An {@link SavedObjectsClientContract}
  * @param migration the migration to be finalized {@link SignalsMigrationSO}
  * @param signalsAlias the alias for signals indices
+ * @param username name of the user initiating the finalization
  *
  * @returns the migration SavedObject {@link SignalsMigrationSO}
  * @throws if the migration is invalid or a client throws
@@ -32,11 +33,13 @@ export const finalizeMigration = async ({
   migration,
   signalsAlias,
   soClient,
+  username,
 }: {
   esClient: ElasticsearchClient;
   migration: SignalsMigrationSO;
   signalsAlias: string;
   soClient: SavedObjectsClientContract;
+  username: string;
 }): Promise<SignalsMigrationSO> => {
   if (isMigrationDeleted(migration) || !isMigrationPending(migration)) {
     return migration;
@@ -53,7 +56,7 @@ export const finalizeMigration = async ({
   const destinationCount = await getIndexCount({ esClient, index: destinationIndex });
   if (sourceCount !== destinationCount) {
     const updatedMigration = await updateMigrationSavedObject({
-      username: 'TODO',
+      username,
       soClient,
       id: migration.id,
       attributes: {
@@ -85,7 +88,7 @@ export const finalizeMigration = async ({
   await esClient.delete({ index: '.tasks', id: taskId });
 
   const updatedMigration = await updateMigrationSavedObject({
-    username: 'TODO',
+    username,
     soClient,
     id: migration.id,
     attributes: {

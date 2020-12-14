@@ -37,7 +37,7 @@ export interface SignalsMigrationService {
 export const signalsMigrationService = ({
   esClient,
   soClient,
-  username = 'system',
+  username,
 }: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -64,6 +64,7 @@ export const signalsMigrationService = ({
         migration,
         signalsAlias,
         soClient,
+        username,
       }),
     delete: ({ migration, signalsAlias }) =>
       deleteMigration({
@@ -71,6 +72,7 @@ export const signalsMigrationService = ({
         migration,
         signalsAlias,
         soClient,
+        username,
       }),
   };
 };

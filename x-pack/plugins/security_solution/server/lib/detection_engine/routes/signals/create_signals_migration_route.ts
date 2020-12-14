@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -18,7 +19,10 @@ import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
-export const createSignalsMigrationRoute = (router: IRouter) => {
+export const createSignalsMigrationRoute = (
+  router: IRouter,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -36,11 +40,16 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;
-        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+        const user = await security?.authc.getCurrentUser(request);
+        const migrationService = signalsMigrationService({
+          esClient,
+          soClient,
+          username: user?.username ?? 'elastic',
+        });
 
         const signalsAlias = appClient.getSignalsIndex();
         const currentVersion = await getTemplateVersion({
@@ -50,7 +59,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
 
         if (isOutdated({ current: currentVersion, target: SIGNALS_TEMPLATE_VERSION })) {
           throw new BadRequestError(
-            'Cannot migrate due to the signals template being out of date. Please visit Detections to automatically update your template, then try again.'
+            `Cannot migrate due to the signals template being out of date. Latest version: [${SIGNALS_TEMPLATE_VERSION}], template version: [${currentVersion}]. Please visit Detections to automatically update your template, then try again.`
           );
         }
         const signalsIndexAliases = await getIndexAliases({ esClient, alias: signalsAlias });

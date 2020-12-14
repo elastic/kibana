@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .auth(ROLES.t1_analyst, 'changeme')
         .send({ index: [legacySignalsIndexName] })
-        .expect(403);
+        .expect(400);
     });
   });
 };

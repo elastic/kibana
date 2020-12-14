@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -14,7 +15,10 @@ import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse, transformError } from '../utils';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 
-export const finalizeSignalsMigrationRoute = (router: IRouter) => {
+export const finalizeSignalsMigrationRoute = (
+  router: IRouter,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
@@ -36,7 +40,12 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const migrationService = signalsMigrationService({ esClient, soClient, username: 'TODO' });
+        const user = await security?.authc.getCurrentUser(request);
+        const migrationService = signalsMigrationService({
+          esClient,
+          soClient,
+          username: user?.username ?? 'elastic',
+        });
         const migrationsByIndex = await getMigrationSavedObjectsByIndex({
           soClient,
           index: indices,

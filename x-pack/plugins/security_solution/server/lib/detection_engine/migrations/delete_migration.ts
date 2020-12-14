@@ -20,6 +20,7 @@ import { updateMigrationSavedObject } from './update_migration_saved_object';
  * @param soClient An {@link SavedObjectsClientContract}
  * @param migration the migration to be finalized {@link SignalsMigrationSO}
  * @param signalsAlias the alias for signals indices
+ * @param username name of the user initiating the deletion
  *
  * @returns the migration SavedObject {@link SignalsMigrationSO}
  * @throws if the migration is invalid or a client throws
@@ -29,11 +30,13 @@ export const deleteMigration = async ({
   migration,
   signalsAlias,
   soClient,
+  username,
 }: {
   esClient: ElasticsearchClient;
   migration: SignalsMigrationSO;
   signalsAlias: string;
   soClient: SavedObjectsClientContract;
+  username: string;
 }): Promise<SignalsMigrationSO> => {
   if (isMigrationPending(migration) || isMigrationDeleted(migration)) {
     return migration;
@@ -59,7 +62,7 @@ export const deleteMigration = async ({
   }
 
   const deletedMigration = await updateMigrationSavedObject({
-    username: 'TODO',
+    username,
     soClient,
     id: migration.id,
     attributes: {
