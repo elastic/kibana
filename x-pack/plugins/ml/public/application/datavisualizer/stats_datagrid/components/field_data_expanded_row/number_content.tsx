@@ -109,7 +109,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       {stats && (
         <EuiFlexItem>
           <EuiFlexGroup direction={'column'} alignItems={'center'} data-test-subj={'mlTopValues'}>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
                   id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
