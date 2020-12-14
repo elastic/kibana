@@ -24,11 +24,17 @@ const CallOutComponent: FC<CallOutProps> = ({
   dismissButtonText,
   onDismiss,
 }) => {
-  const { type, title } = message;
+  const { type, id, title } = message;
   const finalIconType = iconType ?? getDefaultIconType(type);
 
   return (
-    <EuiCallOut color={type} title={title} iconType={finalIconType}>
+    <EuiCallOut
+      color={type}
+      title={title}
+      iconType={finalIconType}
+      data-test-subj={`callout-${id}`}
+      data-test-messages={`[${id}]`}
+    >
       <CallOutDescription messages={message} />
       <CallOutDismissButton message={message} text={dismissButtonText} onClick={onDismiss} />
     </EuiCallOut>

@@ -20,13 +20,13 @@ export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
   text,
   onClick = noop,
 }) => {
-  const { type, id } = message;
+  const { type } = message;
   const buttonColor = type === 'success' ? 'secondary' : type;
   const buttonText = text ?? 'Dismiss'; // TODO: i18n
   const handleClick = useCallback(() => onClick(message), [onClick, message]);
 
   return (
-    <EuiButton data-test-subj={`callout-dismiss-[${id}]`} color={buttonColor} onClick={handleClick}>
+    <EuiButton color={buttonColor} data-test-subj="callout-dismiss-btn" onClick={handleClick}>
       {buttonText}
     </EuiButton>
   );
