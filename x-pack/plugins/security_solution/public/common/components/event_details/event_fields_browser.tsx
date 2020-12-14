@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import { getOr, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -76,7 +76,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
-        sortBy(data, ['field']).map((item) => ({
+        sortBy(['field'], data).map((item) => ({
           ...item,
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',
@@ -89,6 +89,19 @@ export const EventFieldsBrowser = React.memo<Props>(
 
       return getColumnHeaders(columns, browserFields);
     });
+
+    const getLinkValue = useCallback(
+      (field: string) => {
+        const linkField = (columnHeaders.find((col) => col.id === field) ?? {}).linkField;
+        if (!linkField) {
+          return null;
+        }
+        const linkFieldData = (data ?? []).find((d) => d.field === linkField);
+        const linkFieldValue = getOr(null, 'originalValue', linkFieldData);
+        return Array.isArray(linkFieldValue) ? linkFieldValue[0] : linkFieldValue;
+      },
+      [data, columnHeaders]
+    );
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
@@ -126,8 +139,17 @@ export const EventFieldsBrowser = React.memo<Props>(
           onUpdateColumns,
           contextId: timelineId,
           toggleColumn,
+          getLinkValue,
         }),
-      [browserFields, columnHeaders, eventId, onUpdateColumns, timelineId, toggleColumn]
+      [
+        browserFields,
+        columnHeaders,
+        eventId,
+        onUpdateColumns,
+        timelineId,
+        toggleColumn,
+        getLinkValue,
+      ]
     );
 
     return (

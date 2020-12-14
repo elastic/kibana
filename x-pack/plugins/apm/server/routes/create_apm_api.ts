@@ -23,6 +23,7 @@ import {
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
   serviceThroughputRoute,
+  serviceDependenciesRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -122,6 +123,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
     .add(serviceThroughputRoute)
+    .add(serviceDependenciesRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)

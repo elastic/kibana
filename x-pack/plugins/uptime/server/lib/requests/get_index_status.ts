@@ -15,7 +15,7 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
       _shards: { total },
       count,
     },
-  } = await uptimeEsClient.count({});
+  } = await uptimeEsClient.count({ terminateAfter: 1 });
   return {
     indexExists: total > 0,
     docCount: count,

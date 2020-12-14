@@ -1,0 +1,220 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { join } from 'path';
+import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import moment from 'moment-timezone';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
+
+const flushDelay = 250;
+const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
+const flush = async () => delay(flushDelay);
+
+function createRoot(appenderConfig: any) {
+  return kbnTestServer.createRoot({
+    logging: {
+      silent: true, // set "true" in kbnTestServer
+      appenders: {
+        'rolling-file': appenderConfig,
+      },
+      loggers: [
+        {
+          context: 'test.rolling.file',
+          appenders: ['rolling-file'],
+          level: 'debug',
+        },
+      ],
+    },
+  });
+}
+
+describe('RollingFileAppender', () => {
+  let root: ReturnType<typeof createRoot>;
+  let testDir: string;
+  let logFile: string;
+
+  const getFileContent = async (basename: string) =>
+    (await readFile(join(testDir, basename))).toString('utf-8');
+
+  beforeEach(async () => {
+    testDir = await mkdtemp('rolling-test');
+    logFile = join(testDir, 'kibana.log');
+  });
+
+  afterEach(async () => {
+    try {
+      await rmdir(testDir);
+    } catch (e) {
+      /* trap */
+    }
+    if (root) {
+      await root.shutdown();
+    }
+  });
+
+  const message = (index: number) => `some message of around 40 bytes number ${index}`;
+  const expectedFileContent = (indices: number[]) => indices.map(message).join('\n') + '\n';
+
+  describe('`size-limit` policy with `numeric` strategy', () => {
+    it('rolls the log file in the correct order', async () => {
+      root = createRoot({
+        kind: 'rolling-file',
+        path: logFile,
+        layout: {
+          kind: 'pattern',
+          pattern: '%message',
+        },
+        policy: {
+          kind: 'size-limit',
+          size: '100b',
+        },
+        strategy: {
+          kind: 'numeric',
+          max: 5,
+          pattern: '.%i',
+        },
+      });
+      await root.setup();
+
+      const logger = root.logger.get('test.rolling.file');
+
+      // size = 100b, message.length ~= 40b, should roll every 3 message
+
+      // last file - 'kibana.2.log'
+      logger.info(message(1));
+      logger.info(message(2));
+      logger.info(message(3));
+      // roll - 'kibana.1.log'
+      logger.info(message(4));
+      logger.info(message(5));
+      logger.info(message(6));
+      // roll - 'kibana.log'
+      logger.info(message(7));
+
+      await flush();
+
+      const files = await readdir(testDir);
+
+      expect(files.sort()).toEqual(['kibana.1.log', 'kibana.2.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7]));
+      expect(await getFileContent('kibana.1.log')).toEqual(expectedFileContent([4, 5, 6]));
+      expect(await getFileContent('kibana.2.log')).toEqual(expectedFileContent([1, 2, 3]));
+    });
+
+    it('only keep the correct number of files', async () => {
+      root = createRoot({
+        kind: 'rolling-file',
+        path: logFile,
+        layout: {
+          kind: 'pattern',
+          pattern: '%message',
+        },
+        policy: {
+          kind: 'size-limit',
+          size: '60b',
+        },
+        strategy: {
+          kind: 'numeric',
+          max: 2,
+          pattern: '-%i',
+        },
+      });
+      await root.setup();
+
+      const logger = root.logger.get('test.rolling.file');
+
+      // size = 60b, message.length ~= 40b, should roll every 2 message
+
+      // last file - 'kibana-3.log' (which will be removed during the last rolling)
+      logger.info(message(1));
+      logger.info(message(2));
+      // roll - 'kibana-2.log'
+      logger.info(message(3));
+      logger.info(message(4));
+      // roll - 'kibana-1.log'
+      logger.info(message(5));
+      logger.info(message(6));
+      // roll - 'kibana.log'
+      logger.info(message(7));
+      logger.info(message(8));
+
+      await flush();
+
+      const files = await readdir(testDir);
+
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7, 8]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
+      expect(await getFileContent('kibana-2.log')).toEqual(expectedFileContent([3, 4]));
+    });
+  });
+
+  describe('`time-interval` policy with `numeric` strategy', () => {
+    it('rolls the log file at the given interval', async () => {
+      root = createRoot({
+        kind: 'rolling-file',
+        path: logFile,
+        layout: {
+          kind: 'pattern',
+          pattern: '%message',
+        },
+        policy: {
+          kind: 'time-interval',
+          interval: '1s',
+          modulate: true,
+        },
+        strategy: {
+          kind: 'numeric',
+          max: 2,
+          pattern: '-%i',
+        },
+      });
+      await root.setup();
+
+      const logger = root.logger.get('test.rolling.file');
+
+      const waitForNextRollingTime = () => {
+        const now = Date.now();
+        const nextRolling = getNextRollingTime(now, moment.duration(1, 'second'), true);
+        return delay(nextRolling - now + 1);
+      };
+
+      // wait for a rolling time boundary to minimize the risk to have logs emitted in different intervals
+      // the `1s` interval should be way more than enough to log 2 messages
+      await waitForNextRollingTime();
+
+      logger.info(message(1));
+      logger.info(message(2));
+
+      await waitForNextRollingTime();
+
+      logger.info(message(3));
+      logger.info(message(4));
+
+      await flush();
+
+      const files = await readdir(testDir);
+
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([3, 4]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([1, 2]));
+    });
+  });
+});
