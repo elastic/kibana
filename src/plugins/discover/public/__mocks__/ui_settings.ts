@@ -24,6 +24,5 @@ export const uiSettingsMock = ({
     if (key === SAMPLE_SIZE_SETTING) {
       return 10;
     }
-    return false;
   },
 } as unknown) as IUiSettingsClient;
