@@ -23,7 +23,7 @@ export type JobsSpacesResponse = {
 };
 
 export interface InitializeSavedObjectResponse {
-  jobs: Array<{ id: string; type: string }>;
+  jobs: Array<{ id: string; type: JobType }>;
   success: boolean;
   error?: any;
 }

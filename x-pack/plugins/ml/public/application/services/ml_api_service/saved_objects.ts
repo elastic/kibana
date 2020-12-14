@@ -12,6 +12,7 @@ import { basePath } from './index';
 import {
   JobType,
   SyncSavedObjectResponse,
+  InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
 } from '../../../../common/types/saved_objects';
@@ -43,6 +44,14 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   syncSavedObjects(simulate: boolean = false) {
     return httpService.http<SyncSavedObjectResponse>({
       path: `${basePath()}/saved_objects/sync`,
+      method: 'GET',
+      query: { simulate },
+    });
+  },
+
+  initSavedObjects(simulate: boolean = false) {
+    return httpService.http<InitializeSavedObjectResponse>({
+      path: `${basePath()}/saved_objects/initialize`,
       method: 'GET',
       query: { simulate },
     });
