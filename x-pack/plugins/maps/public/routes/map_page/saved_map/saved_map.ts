@@ -94,9 +94,8 @@ export class SavedMap {
       };
     } else {
       const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const references = doc.references;
-      delete doc.references;
-      this._attributes = doc;
+      const { references, ...savedObjectAttributes } = doc;
+      this._attributes = savedObjectAttributes;
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
