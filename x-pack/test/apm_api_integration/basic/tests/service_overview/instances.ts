@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": Object {
-                "value": 0.033,
+                "value": 0.0120166666666667,
               },
               "errorRate": Object {
                 "value": 0.16,
@@ -192,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": Object {
-                "value": 0.235616666666667,
+                "value": 0.00111666666666667,
               },
               "errorRate": Object {
                 "value": 0.0373134328358209,
