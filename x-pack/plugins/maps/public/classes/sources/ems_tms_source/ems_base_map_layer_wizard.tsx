@@ -31,7 +31,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();
-    return emsSettings!.isEMSEnabled();
+    return emsSettings.isIncludeElasticMapsService();
   },
   description: getDescription(),
   icon: WorldMapLayerIcon,

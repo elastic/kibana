@@ -47,6 +47,10 @@ export class EMSSettings {
     return !!this._config.includeElasticMapsService;
   }
 
+  hasOnPremLicense() {
+    return this._getIsEnterprisePlus();
+  }
+
   isEMSEnabled(): boolean {
     if (this.isEMSUrlSet()) {
       return this._getIsEnterprisePlus();
