@@ -65,6 +65,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
+          data-test-subj={'mlDateSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}

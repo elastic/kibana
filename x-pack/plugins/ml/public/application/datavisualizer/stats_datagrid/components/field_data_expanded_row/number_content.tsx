@@ -86,7 +86,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     defaultMessage: 'summary',
   });
   return (
-    <EuiFlexGroup direction={'row'}>
+    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'}>
       <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
@@ -99,7 +99,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       </EuiFlexItem>
       {stats && (
         <EuiFlexItem>
-          <EuiFlexGroup direction={'column'} alignItems={'center'}>
+          <EuiFlexGroup direction={'column'} alignItems={'center'} data-test-subj={'mlTopValues'}>
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage
@@ -116,7 +116,11 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       )}
       {distribution && (
         <EuiFlexItem>
-          <EuiFlexGroup direction={'column'} alignItems={'center'}>
+          <EuiFlexGroup
+            direction={'column'}
+            alignItems={'center'}
+            data-test-subj={'mlMetricDistribution'}
+          >
             <EuiFlexItem>
               <ExpandedRowFieldHeader>
                 <FormattedMessage

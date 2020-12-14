@@ -42,7 +42,8 @@ export const MultiselectPicker: FC<{
   onChange: Function;
   title?: string;
   checkedOptions: string[];
-}> = ({ options, onChange, title, checkedOptions }) => {
+  dataTestSubj: string;
+}> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -92,7 +93,7 @@ export const MultiselectPicker: FC<{
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         id="popoverExampleMultiSelect"
         button={button}

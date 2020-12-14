@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import { FieldVisConfig } from '../index_based/common';
 import {
   BooleanContent,
@@ -22,7 +23,7 @@ import { LoadingIndicator } from '../index_based/components/field_data_card/load
 
 export const DataVisualizerFieldExpandedRow = ({ item }: { item: FieldVisConfig }) => {
   const config = item;
-  const { loading, type, existsInDocs } = config;
+  const { loading, type, existsInDocs, fieldName } = config;
 
   function getCardContent() {
     if (existsInDocs === false) {
@@ -59,7 +60,7 @@ export const DataVisualizerFieldExpandedRow = ({ item }: { item: FieldVisConfig 
   return (
     <div
       className="mlDataVisualizerFieldExpandedRow"
-      data-test-subj="mlDataVisualizerFieldExpandedRowContent"
+      data-test-subj={`mlDataVisualizerFieldExpandedRow ${fieldName} ${type}`}
     >
       {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>

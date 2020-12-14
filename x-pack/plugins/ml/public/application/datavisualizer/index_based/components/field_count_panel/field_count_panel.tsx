@@ -54,13 +54,13 @@ export const FieldCountPanel: FC<Props> = ({
             <EuiNotificationBadge
               color="subdued"
               size="m"
-              data-test-subj="mlDataVisualizerVisibleMetricFieldsCountBadge"
+              data-test-subj="mlDataVisualizerVisibleMetricFieldsCount"
             >
               <strong>{metricsStats.visibleMetricFields}</strong>
             </EuiNotificationBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
+            <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerMetricFieldsCount">
               <FormattedMessage
                 id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
                 defaultMessage="of {totalCount} total"
@@ -92,13 +92,13 @@ export const FieldCountPanel: FC<Props> = ({
             <EuiNotificationBadge
               color="subdued"
               size="m"
-              data-test-subj="mlDataVisualizerVisibleFieldsCountBadge"
+              data-test-subj="mlDataVisualizerVisibleFieldsCount"
             >
               <strong>{fieldsCountStats.visibleFieldsCount}</strong>
             </EuiNotificationBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
+            <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerTotalFieldsCount">
               <FormattedMessage
                 id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
                 defaultMessage="of {totalCount} total"

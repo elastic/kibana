@@ -120,7 +120,7 @@ export const SearchPanel: FC<Props> = ({
                 }
               )}
               disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
+              dataTestSubj="mlDataVisualizerQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
             />
           }

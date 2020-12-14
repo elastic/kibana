@@ -92,6 +92,7 @@ export const DataVisualizerDataGrid = ({
     const expanderColumn: EuiTableComputedColumnType<FieldVisConfig> = {
       name: (
         <EuiButtonIcon
+          data-test-subj={`mlToggleDetailsForAllRowsButton ${expandAll ? 'expanded' : 'collapsed'}`}
           onClick={() => toggleExpandAll(!expandAll)}
           aria-label={
             !expandAll
@@ -110,8 +111,10 @@ export const DataVisualizerDataGrid = ({
       isExpander: true,
       render: (item: FieldVisConfig) => {
         if (item.fieldName === undefined) return null;
+        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
           <EuiButtonIcon
+            data-test-subj={`mlDataVisualizerToggleDetails ${item.fieldName} ${direction}`}
             onClick={() => toggleDetails(item)}
             aria-label={
               expandedRowItemIds.includes(item.fieldName)
@@ -124,7 +127,7 @@ export const DataVisualizerDataGrid = ({
                     values: { fieldName: item.fieldName },
                   })
             }
-            iconType={expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown'}
+            iconType={direction}
           />
         );
       },
