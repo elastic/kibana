@@ -84,11 +84,10 @@ export class EMSTMSSource extends AbstractTMSSource {
     const emsTileLayerId = this.getTileLayerId();
     const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
-      const info = getEmsUnavailableMessage();
       throw new Error(
-        i18n.translate('xpack.maps.source.emsTile.errorMessage', {
+        i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
           defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
-          values: { id: emsTileLayerId, info },
+          values: { id: emsTileLayerId, info: getEmsUnavailableMessage() },
         })
       );
     }

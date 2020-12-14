@@ -19,7 +19,7 @@ import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_
 
 function getDescription() {
   const emsSettings = getEMSSettings();
-  return i18n.translate('xpack.maps.source.emsFileDescription', {
+  return i18n.translate('xpack.maps.source.emsFileSourceDescription', {
     defaultMessage: 'Administrative boundaries from {host}',
     values: {
       host: emsSettings.isEMSUrlSet() ? emsSettings.getEMSRoot() : 'Elastic Maps Service',

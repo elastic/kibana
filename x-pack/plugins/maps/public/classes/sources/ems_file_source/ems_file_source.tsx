@@ -88,13 +88,12 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsFileLayers = await getEmsFileLayers();
     const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
     if (!emsFileLayer) {
-      const info = getEmsUnavailableMessage();
       throw new Error(
-        i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
+        i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {
           defaultMessage: `Unable to find EMS vector shapes for id: {id}. {info}`,
           values: {
             id: this._descriptor.id,
-            info,
+            info: getEmsUnavailableMessage(),
           },
         })
       );

@@ -19,8 +19,8 @@ import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();
-  return i18n.translate('xpack.maps.source.emsTileDescription', {
-    defaultMessage: 'Tile map service from {host}',
+  return i18n.translate('xpack.maps.source.emsTileSourceDescription', {
+    defaultMessage: 'Basemap service from {host}',
     values: {
       host: emsSettings.isEMSUrlSet() ? emsSettings.getEMSRoot() : 'Elastic Maps Service',
     },
