@@ -51,6 +51,7 @@ import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getSortedAccessors } from './to_expression';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -153,6 +154,28 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+function getValueLabelDisableReason({
+  isAreaPercentage,
+  isHistogramSeries,
+}: {
+  isAreaPercentage: boolean;
+  isHistogramSeries: boolean;
+}): string {
+  if (isHistogramSeries) {
+    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on histograms.',
+    });
+  }
+  if (isAreaPercentage) {
+    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on percentage area charts.',
+    });
+  }
+  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+  });
+}
+
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
@@ -245,20 +268,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
 
+  const valueLabelsDisabledReason = getValueLabelDisableReason({
+    isAreaPercentage,
+    isHistogramSeries,
+  });
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={
-              isAreaPercentage
-                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
-                  })
-                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on histograms.',
-                  })
-            }
+            tooltipContent={valueLabelsDisabledReason}
             condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
             <ToolbarPopover
@@ -579,6 +599,9 @@ const ColorPicker = ({
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
 
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+
     const colorAssignments = getColorAssignments(
       state.layers,
       { tables: frame.activeData },
@@ -587,11 +610,14 @@ const ColorPicker = ({
     const mappedAccessors = getAccessorColorConfig(
       colorAssignments,
       frame,
-      layer,
-      [accessor],
+      {
+        ...layer,
+        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+      },
       paletteService
     );
-    return mappedAccessors[0].color;
+
+    return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
   }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
 
   const [color, setColor] = useState(currentColor);

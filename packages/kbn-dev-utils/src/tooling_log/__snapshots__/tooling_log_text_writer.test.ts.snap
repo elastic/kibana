@@ -170,7 +170,7 @@ exports[`level:warning/type:warning snapshots: output 1`] = `
 "
 `;
 
-exports[`throws error if created with invalid level 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+exports[`throws error if created with invalid level 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,success,info,debug,verbose)"`;
 
 exports[`throws error if writeTo config is not defined or doesn't have a write method 1`] = `"ToolingLogTextWriter requires the \`writeTo\` option be set to a stream (like process.stdout)"`;
 

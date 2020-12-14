@@ -66,6 +66,8 @@ import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
+import { filterEventsAgainstList } from './filters/filter_events_against_list';
+import { isOutdated } from '../migrations/helpers';
 
 export const signalRulesAlertType = ({
   logger,
@@ -242,9 +244,18 @@ export const signalRulesAlertType = ({
             anomalyThreshold,
             from,
             to,
+            exceptionItems: exceptionItems ?? [],
           });
 
-          const anomalyCount = anomalyResults.hits.hits.length;
+          const filteredAnomalyResults = await filterEventsAgainstList({
+            listClient,
+            exceptionsList: exceptionItems ?? [],
+            logger,
+            eventSearchResult: anomalyResults,
+            buildRuleMessage,
+          });
+
+          const anomalyCount = filteredAnomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
@@ -257,7 +268,7 @@ export const signalRulesAlertType = ({
           } = await bulkCreateMlSignals({
             actions,
             throttle,
-            someResult: anomalyResults,
+            someResult: filteredAnomalyResults,
             ruleParams: params,
             services,
             logger,
@@ -276,15 +287,16 @@ export const signalRulesAlertType = ({
           });
           // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
           const shardFailures =
-            (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
-            [];
+            (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+              failures: [];
+            }).failures ?? [];
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
           result = mergeReturns([
             result,
             createSearchAfterReturnType({
-              success: success && anomalyResults._shards.failed === 0,
+              success: success && filteredAnomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
@@ -326,7 +338,7 @@ export const signalRulesAlertType = ({
                     must: [
                       {
                         term: {
-                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
+                          [threshold.field || 'signal.rule.rule_id']: bucket.key,
                         },
                       },
                       {
@@ -498,10 +510,7 @@ export const signalRulesAlertType = ({
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
-            if (
-              signalIndexVersion === undefined ||
-              signalIndexVersion < MIN_EQL_RULE_INDEX_VERSION
-            ) {
+            if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
               throw new Error(
                 `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
               );

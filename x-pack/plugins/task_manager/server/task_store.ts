@@ -260,6 +260,7 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
+    const registeredTaskTypes = this.definitions.getAllTypes();
     const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
       return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
     }, {});
@@ -297,6 +298,7 @@ export class TaskStore {
             retryAt: claimOwnershipUntil,
           },
           claimTasksById || [],
+          registeredTaskTypes,
           taskMaxAttempts
         ),
         sort,

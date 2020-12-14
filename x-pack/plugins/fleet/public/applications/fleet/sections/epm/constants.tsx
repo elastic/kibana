@@ -29,8 +29,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   map: 'Map',
 };
 
-export const ServiceTitleMap: Record<ServiceName, string> = {
-  elasticsearch: 'Elasticsearch',
+export const ServiceTitleMap: Record<Extract<ServiceName, 'kibana'>, string> = {
   kibana: 'Kibana',
 };
 

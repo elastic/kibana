@@ -17,11 +17,9 @@ export interface TabProps {
 
 export const OVERLAY_Y_START = 266;
 export const OVERLAY_BOTTOM_MARGIN = 16;
-export const OVERLAY_HEADER_SIZE = 96;
-const contentHeightOffset = OVERLAY_Y_START + OVERLAY_BOTTOM_MARGIN + OVERLAY_HEADER_SIZE;
 export const TabContent = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
-  height: calc(100vh - ${contentHeightOffset}px);
+  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 `;

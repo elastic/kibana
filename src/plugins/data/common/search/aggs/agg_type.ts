@@ -39,7 +39,7 @@ export interface AggTypeConfig<
   createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
   type?: string;
   dslName?: string;
-  expressionName?: string;
+  expressionName: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
@@ -90,12 +90,11 @@ export class AggType<
   dslName: string;
   /**
    * the name of the expression function that this aggType represents.
-   * TODO: this should probably be a required field.
    *
    * @property name
    * @type {string}
    */
-  expressionName?: string;
+  expressionName: string;
   /**
    * the user friendly name that will be shown in the ui for this aggType
    *

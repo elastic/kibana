@@ -48,6 +48,7 @@ export {
 export {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsDeleteByNamespaceOptions,
 } from './service/lib/repository';
 

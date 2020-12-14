@@ -58,6 +58,7 @@ export const getColumns = ({
   onUpdateColumns,
   contextId,
   toggleColumn,
+  getLinkValue,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -65,6 +66,7 @@ export const getColumns = ({
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  getLinkValue: (field: string) => string | null;
 }) => [
   {
     field: 'field',
@@ -88,21 +90,6 @@ export const getColumns = ({
         />
       </EuiToolTip>
     ),
-  },
-  {
-    field: 'description',
-    name: '',
-    render: (description: string | null | undefined, data: EventFieldsData) => (
-      <EuiIconTip
-        aria-label={i18n.DESCRIPTION}
-        type="iInCircle"
-        color="subdued"
-        content={`${description || ''} ${getExampleText(data.example)}`}
-      />
-    ),
-    sortable: true,
-    truncateText: true,
-    width: '30px',
   },
   {
     field: 'field',
@@ -167,6 +154,14 @@ export const getColumns = ({
             </Draggable>
           </DroppableWrapper>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            aria-label={i18n.DESCRIPTION}
+            type="iInCircle"
+            color="subdued"
+            content={`${data.description || ''} ${getExampleText(data.example)}`}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
   },
@@ -194,6 +189,7 @@ export const getColumns = ({
                   fieldName={data.field}
                   fieldType={data.type}
                   value={value}
+                  linkValue={getLinkValue(data.field)}
                 />
               )}
             </EuiFlexItem>

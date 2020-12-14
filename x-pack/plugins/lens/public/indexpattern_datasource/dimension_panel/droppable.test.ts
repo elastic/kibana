@@ -17,8 +17,6 @@ import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
 import { getFieldByNameFactory } from '../pure_helpers';
 
-jest.mock('../operations');
-
 const fields = [
   {
     name: 'timestamp',

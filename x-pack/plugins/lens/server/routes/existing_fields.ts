@@ -5,8 +5,9 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient, RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
 import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
@@ -68,7 +69,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
         logger.info(
           `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
         );
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
         }
         if (isBoomError(e)) {
@@ -111,7 +112,7 @@ async function fetchFieldExistence({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.legacy.client,
+    client: context.core.elasticsearch.client.asCurrentUser,
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
@@ -149,7 +150,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: ILegacyScopedClusterClient;
+  client: ElasticsearchClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -179,7 +180,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const result = await client.callAsCurrentUser('search', {
+  const { body: result } = await client.search({
     index,
     body: {
       size: SAMPLE_SIZE,

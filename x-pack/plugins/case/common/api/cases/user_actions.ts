@@ -20,6 +20,7 @@ const UserActionFieldRt = rt.array(
     rt.literal('tags'),
     rt.literal('title'),
     rt.literal('status'),
+    rt.literal('settings'),
   ])
 );
 const UserActionRt = rt.union([

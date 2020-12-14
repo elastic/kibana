@@ -16,12 +16,15 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
+import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
+import { getInvalidFieldMessage } from '../helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -31,7 +34,7 @@ function ofName(name: string) {
 }
 
 function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed;
+  return !column.isBucketed && column.operationType !== 'last_value';
 }
 
 const DEFAULT_SIZE = 3;
@@ -71,6 +74,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -111,28 +116,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => {
-    return {
+  toEsAggsFn: (column, columnId, _indexPattern) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
-      type: 'terms',
       schema: 'segment',
-      params: {
-        field: column.sourceField,
-        orderBy:
-          column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-        order: column.params.orderDirection,
-        size: column.params.size,
-        otherBucket: Boolean(column.params.otherBucket),
-        otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
-          defaultMessage: 'Other',
-        }),
-        missingBucket: column.params.otherBucket && column.params.missingBucket,
-        missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-          defaultMessage: '(missing value)',
-        }),
-      },
-    };
+      field: column.sourceField,
+      orderBy:
+        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+      order: column.params.orderDirection,
+      size: column.params.size,
+      otherBucket: Boolean(column.params.otherBucket),
+      otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
+        defaultMessage: 'Other',
+      }),
+      missingBucket: column.params.otherBucket && column.params.missingBucket,
+      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
+        defaultMessage: '(missing value)',
+      }),
+    }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
     ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { AlertAdd } from '../../../../../../plugins/triggers_actions_ui/public';
+import React, { useMemo } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../../../plugins/triggers_actions_ui/public';
 
 interface Props {
   alertFlyoutVisible: boolean;
@@ -13,18 +14,29 @@ interface Props {
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface KibanaDeps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
 export const UptimeAlertsFlyoutWrapperComponent = ({
   alertFlyoutVisible,
   alertTypeId,
   setAlertFlyoutVisibility,
-}: Props) => (
-  <AlertAdd
-    addFlyoutVisible={alertFlyoutVisible}
-    consumer="uptime"
-    setAddFlyoutVisibility={setAlertFlyoutVisibility}
-    alertTypeId={alertTypeId}
-    // if we don't have an alert type pre-specified, we need to
-    // let the user choose
-    canChangeTrigger={!alertTypeId}
-  />
-);
+}: Props) => {
+  const { triggersActionsUi } = useKibana<KibanaDeps>().services;
+
+  const AddAlertFlyout = useMemo(
+    () =>
+      triggersActionsUi.getAddAlertFlyout({
+        consumer: 'uptime',
+        addFlyoutVisible: alertFlyoutVisible,
+        setAddFlyoutVisibility: setAlertFlyoutVisibility,
+        alertTypeId,
+        canChangeTrigger: !alertTypeId,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [alertFlyoutVisible, alertTypeId]
+  );
+
+  return <>{AddAlertFlyout}</>;
+};

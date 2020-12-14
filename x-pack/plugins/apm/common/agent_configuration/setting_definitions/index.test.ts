@@ -45,7 +45,9 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('go')).toEqual([
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
@@ -61,12 +63,14 @@ describe('filterByAgent', () => {
         'capture_headers',
         'circuit_breaker_enabled',
         'enable_log_correlation',
+        'log_level',
         'profiling_inferred_spans_enabled',
         'profiling_inferred_spans_excluded_classes',
         'profiling_inferred_spans_included_classes',
         'profiling_inferred_spans_min_duration',
         'profiling_inferred_spans_sampling_interval',
         'recording',
+        'sanitize_field_names',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
@@ -75,6 +79,7 @@ describe('filterByAgent', () => {
         'stress_monitor_gc_stress_threshold',
         'stress_monitor_system_cpu_relief_threshold',
         'stress_monitor_system_cpu_stress_threshold',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -97,6 +102,9 @@ describe('filterByAgent', () => {
     it('nodejs', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
         'capture_body',
+        'log_level',
+        'sanitize_field_names',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -108,8 +116,11 @@ describe('filterByAgent', () => {
         'api_request_time',
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -121,8 +132,10 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -137,6 +150,7 @@ describe('filterByAgent', () => {
         'log_level',
         'recording',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);

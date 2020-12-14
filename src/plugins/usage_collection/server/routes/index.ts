@@ -25,7 +25,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
-import { registerUiMetricRoute } from './report_metrics';
+import { registerUiCountersRoute } from './ui_counters';
 import { registerStatsRoute } from './stats';
 
 export function setupRoutes({
@@ -50,6 +50,6 @@ export function setupRoutes({
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  registerUiMetricRoute(router, getSavedObjects);
+  registerUiCountersRoute(router, getSavedObjects);
   registerStatsRoute({ router, ...rest });
 }
