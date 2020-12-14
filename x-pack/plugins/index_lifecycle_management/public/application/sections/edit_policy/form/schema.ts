@@ -50,7 +50,7 @@ export const schema: FormSchema<FormInternal> = {
       },
       readonlyEnabled: {
         defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.readonly.label', {
+        label: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
           defaultMessage: 'Make index read only',
         }),
       },
