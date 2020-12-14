@@ -28,7 +28,7 @@ export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.readonly.explanationText"
+            id="xpack.indexLifecycleMgmt.editPolicy.readonlyDescription"
             defaultMessage="Enable to make the index and index metadata read only, disable to allow writes and metadata changes."
           />{' '}
           <LearnMoreLink docPath="ilm-readonly.html" />
