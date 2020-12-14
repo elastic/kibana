@@ -18,3 +18,4 @@
  */
 
 export { createReporter } from './create_reporter';
+export { trackApplicationUsage } from './application_usage';

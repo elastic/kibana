@@ -17,53 +17,52 @@
  * under the License.
  */
 
-import { Reporter } from '@kbn/analytics';
 import { Subject } from 'rxjs';
 
-import { reportApplicationUsage } from './application_usage';
+import { trackApplicationUsage } from './application_usage';
+import { createApplicationUsageTrackerMock } from '../mocks';
 
 describe('application_usage', () => {
   test('report an appId change', () => {
-    const reporterMock: jest.Mocked<Reporter> = {
-      reportApplicationUsage: jest.fn(),
-    } as any;
+    const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    reportApplicationUsage(currentAppId$, reporterMock);
+    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('appId');
 
-    expect(reporterMock.reportApplicationUsage).toHaveBeenCalledWith('appId');
-    expect(reporterMock.reportApplicationUsage).toHaveBeenCalledTimes(1);
+    expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledWith('appId');
+    expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledTimes(1);
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('default');
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledTimes(1);
   });
 
   test('skip duplicates', () => {
-    const reporterMock: jest.Mocked<Reporter> = {
-      reportApplicationUsage: jest.fn(),
-    } as any;
+    const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    reportApplicationUsage(currentAppId$, reporterMock);
+    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('appId');
     currentAppId$.next('appId');
 
-    expect(reporterMock.reportApplicationUsage).toHaveBeenCalledWith('appId');
-    expect(reporterMock.reportApplicationUsage).toHaveBeenCalledTimes(1);
+    expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledWith('appId');
+    expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledTimes(1);
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith('default');
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledTimes(1);
   });
 
   test('skip if not a valid value', () => {
-    const reporterMock: jest.Mocked<Reporter> = {
-      reportApplicationUsage: jest.fn(),
-    } as any;
+    const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
 
     const currentAppId$ = new Subject<string | undefined>();
-    reportApplicationUsage(currentAppId$, reporterMock);
+    trackApplicationUsage(currentAppId$, applicationUsageTrackerMock);
 
     currentAppId$.next('');
     currentAppId$.next('kibana');
     currentAppId$.next(undefined);
 
-    expect(reporterMock.reportApplicationUsage).toHaveBeenCalledTimes(0);
+    expect(applicationUsageTrackerMock.setCurrentAppId).toHaveBeenCalledTimes(0);
+    expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledTimes(0);
   });
 });

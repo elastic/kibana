@@ -19,21 +19,29 @@
 
 import { Observable } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
-import { Reporter } from '@kbn/analytics';
+import { ApplicationUsageTracker } from '@kbn/analytics';
 
+const DEFAULT_VIEW = 'default';
 /**
  * List of appIds not to report usage from (due to legacy hacks)
  */
 const DO_NOT_REPORT = ['kibana'];
 
-export function reportApplicationUsage(
+export function trackApplicationUsage(
   currentAppId$: Observable<string | undefined>,
-  reporter: Reporter
+  applicationUsageTracker: ApplicationUsageTracker
 ) {
-  currentAppId$
+  return currentAppId$
     .pipe(
       filter((appId) => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
       distinctUntilChanged()
     )
-    .subscribe((appId) => appId && reporter.reportApplicationUsage(appId));
+    .subscribe((appId) => {
+      if (!appId) {
+        return;
+      }
+
+      applicationUsageTracker.setCurrentAppId(appId);
+      applicationUsageTracker.trackApplicationViewUsage(DEFAULT_VIEW);
+    });
 }

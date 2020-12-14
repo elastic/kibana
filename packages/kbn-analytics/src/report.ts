@@ -91,8 +91,10 @@ export class ReportManager {
         const { appName, eventName, type } = metric;
         return `${appName}-${type}-${eventName}`;
       }
-      case METRIC_TYPE.APPLICATION_USAGE:
-        return metric.appId;
+      case METRIC_TYPE.APPLICATION_USAGE: {
+        const { appId, viewId } = metric;
+        return `${appId}-${viewId}`;
+      }
       default:
         throw new UnreachableCaseError(metric);
     }
