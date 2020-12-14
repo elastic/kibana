@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
@@ -80,6 +81,11 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
     [fieldProps, exists, hideDetails]
   );
 
+  const titleClassname = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    lnsInnerIndexPatternDataPanel__titleTooltip: !!helpTooltip,
+  });
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -89,7 +95,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       buttonContent={
         <EuiText size="xs">
           <p>
-            <strong>{label}</strong>
+            <strong className={titleClassname}>{label}</strong>
             {!!helpTooltip && (
               <EuiIconTip
                 aria-label={helpTooltip}
