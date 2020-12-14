@@ -948,6 +948,10 @@ export const timestampFieldCheck = async (
                       ),
                     ])
                   : JSON.stringify(tempFailedIdxs)
+              }${
+                timestamp !== '@timestamp'
+                  ? ', defaulting to sorting events using @timestamp field'
+                  : ''
               }`,
             ]
           : [...acc.resultMessages];
