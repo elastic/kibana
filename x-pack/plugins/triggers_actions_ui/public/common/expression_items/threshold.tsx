@@ -58,6 +58,7 @@ export const ThresholdExpression = ({
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
+  const [comparator, setComparator] = useState<string>(thresholdComparator);
 
   const andThresholdText = i18n.translate(
     'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
@@ -66,14 +67,25 @@ export const ThresholdExpression = ({
     }
   );
 
+  const updateThresholdComparator = (newComparator: string) => {
+    const updateThresholdValue =
+      comparators[comparator].requiredValues !== comparators[newComparator].requiredValues;
+    onChangeSelectedThresholdComparator(newComparator);
+    if (updateThresholdValue) {
+      const thresholdValues = threshold.slice(0, comparators[newComparator].requiredValues);
+      onChangeSelectedThreshold(thresholdValues);
+    }
+    setComparator(newComparator);
+  };
+
   return (
     <EuiPopover
       button={
         <EuiExpression
           data-test-subj="thresholdPopover"
-          description={comparators[thresholdComparator].text}
+          description={comparators[comparator].text}
           value={(threshold || [])
-            .slice(0, comparators[thresholdComparator].requiredValues)
+            .slice(0, comparators[comparator].requiredValues)
             .join(` ${andThresholdText} `)}
           isActive={Boolean(
             alertThresholdPopoverOpen ||
@@ -102,32 +114,22 @@ export const ThresholdExpression = ({
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
-          <>{comparators[thresholdComparator].text}</>
+          <>{comparators[comparator].text}</>
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="comparatorOptionsComboBox"
-              value={thresholdComparator}
+              value={comparator}
               onChange={(e) => {
-                const updateThresholdValue =
-                  comparators[thresholdComparator].requiredValues !==
-                  comparators[e.target.value].requiredValues;
-                onChangeSelectedThresholdComparator(e.target.value);
-                if (updateThresholdValue) {
-                  const thresholdValues = threshold.slice(
-                    0,
-                    comparators[e.target.value].requiredValues
-                  );
-                  onChangeSelectedThreshold(thresholdValues);
-                }
+                updateThresholdComparator(e.target.value);
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
               })}
             />
           </EuiFlexItem>
-          {Array.from(Array(comparators[thresholdComparator].requiredValues)).map((_notUsed, i) => {
+          {Array.from(Array(comparators[comparator].requiredValues)).map((_notUsed, i) => {
             return (
               <Fragment key={`threshold${i}`}>
                 {i > 0 ? (
