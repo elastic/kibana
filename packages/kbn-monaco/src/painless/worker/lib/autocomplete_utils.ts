@@ -37,8 +37,8 @@ export const isAccessingProperty = (activeTyping: string): boolean => {
  * If the preceding word is a primitive type, e.g., "boolean",
  * we assume the user is declaring a variable and will skip autocomplete
  *
- * Note: this isn't entirely exhaustive. For example, "def myVar =" is not included in context
- * It's also acceptable to use a class as a type, e.g., "String myVar ="
+ * Note: this isn't entirely exhaustive.
+ * For example, you may use a class as a type, e.g., "String myVar ="
  */
 export const hasDeclaredType = (activeLineWords: string[], primitives: string[]): boolean => {
   return activeLineWords.length === 2 && primitives.includes(activeLineWords[0]);

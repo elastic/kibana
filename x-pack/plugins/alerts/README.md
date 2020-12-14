@@ -623,8 +623,23 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
-|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` isn't called during an execution.|
+|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. `scheduleActions` or `scheduleActionsWithSubGroup` should only be called once per alert instance.|
+|scheduleActionsWithSubGroup(actionGroup, subgroup, context)|Called to schedule the execution of actions within a subgroup. The actionGroup is a string `id` that relates to the group of alert `actions` to execute, the `subgroup` is a dynamic string that denotes a subgroup within the actionGroup and the context will be used for templating purposes. `scheduleActions` or `scheduleActionsWithSubGroup` should only be called once per alert instance.|
+|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` or `scheduleActionsWithSubGroup` aren't called during an execution.|
+
+### when should I use `scheduleActions` and `scheduleActionsWithSubGroup`?
+The `scheduleActions` or `scheduleActionsWithSubGroup` methods are both used to achieve the same thing: schedule actions to be run under a specific action group.
+It's important to note though, that when an actions are scheduled for an instance, we check whether the instance was already active in this action group after the previous execution. If it was, then we might throttle the actions (adhering to the user's configuration), as we don't consider this a change in the instance.
+
+What happens though, if the instance _has_ changed, but they just happen to be in the same action group after this change? This is where subgroups come in. By specifying a subgroup (using the `scheduleActionsWithSubGroup` method), the instance becomes active within the action group, but it will also keep track of the subgroup.
+If the subgroup changes, then the framework will treat the instance as if it had been placed in a new action group. It is important to note though, we only use the subgroup to denote a change if both the current execution and the previous one specified a subgroup.
+
+You might wonder, why bother using a subgroup if you can just add a new action group?
+Action Groups are static, and have to be define when the Alert Type is defined.
+Action Subgroups are dynamic, and can be defined on the fly.
+
+This approach enables users to specify actions under specific action groups, but they can't specify actions that are specific to subgroups.
+As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the AlertType implementer to reuse the same action group for multiple different active subgroups.
 
 ## Templating actions
 
@@ -632,7 +647,7 @@ There needs to be a way to map alert context into action parameters. For this, w
 
 When an alert instance executes, the first argument is the `group` of actions to execute and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the following "variables":
 
-- `context` - provided by second argument of `.scheduleActions(...)` on an alert instance
+- `context` - provided by context argument of `.scheduleActions(...)` and `.scheduleActionsWithSubGroup(...)` on an alert instance
 - `state` - the alert instance's `state` provided by the most recent `replaceState` call on an alert instance
 - `alertId` - the id of the alert
 - `alertInstanceId` - the alert instance id

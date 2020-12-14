@@ -41,6 +41,9 @@ configService.atPath.mockImplementation((path) => {
       ssl: {
         enabled: false,
       },
+      cors: {
+        enabled: false,
+      },
       compression: { enabled: true },
       xsrf: {
         disableProtection: true,
