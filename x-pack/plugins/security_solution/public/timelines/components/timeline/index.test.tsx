@@ -51,6 +51,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
       docValueFields: mockDocValueFields,
       loading: false,
       indexPattern: mockIndexPattern,
+      pageInfo: { activePage: 0, querySize: 0 },
       selectedPatterns: mockIndexNames,
     }),
   };
