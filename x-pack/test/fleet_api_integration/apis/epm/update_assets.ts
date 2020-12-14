@@ -294,6 +294,10 @@ export default function (providerContext: FtrProviderContext) {
         ],
         installed_es: [
           {
+            id: 'logs-all_assets.test_logs-all_assets',
+            type: 'data_stream_ilm_policy',
+          },
+          {
             id: 'logs-all_assets.test_logs-0.2.0',
             type: 'ingest_pipeline',
           },
