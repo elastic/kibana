@@ -243,7 +243,7 @@ export function Discover({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && rows.length !== 0 && (
+                          {opts.chartAggConfigs && histogramData && rows.length !== 0 && (
                             <div className="dscHistogramGrid" data-test-subj="discoverChart">
                               <DiscoverHistogram
                                 chartData={histogramData}
