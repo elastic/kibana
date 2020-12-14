@@ -48,6 +48,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     server: true,
     extraPublicDirs: true,
     requiredBundles: true,
+    serviceFolders: true,
   };
 
   return new Set(Object.keys(manifestFields));

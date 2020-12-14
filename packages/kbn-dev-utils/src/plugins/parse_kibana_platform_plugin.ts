@@ -8,11 +8,13 @@
 
 import Path from 'path';
 import loadJsonFile from 'load-json-file';
+import { REPO_ROOT } from '@kbn/utils';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly manifestPath: string;
   readonly manifest: Manifest;
+  readonly relativeDirectory: string;
 }
 
 function isValidDepsDeclaration(input: unknown, type: string): string[] {
@@ -29,6 +31,7 @@ interface Manifest {
   server: boolean;
   kibanaVersion: string;
   version: string;
+  serviceFolders: readonly string[];
   requiredPlugins: readonly string[];
   optionalPlugins: readonly string[];
   requiredBundles: readonly string[];
@@ -54,6 +57,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
   }
 
   return {
+    relativeDirectory: Path.dirname(manifestPath).slice(REPO_ROOT.length),
     directory: Path.dirname(manifestPath),
     manifestPath,
     manifest: {
@@ -64,6 +68,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       id: manifest.id,
       version: manifest.version,
       kibanaVersion: manifest.kibanaVersion || manifest.version,
+      serviceFolders: manifest.serviceFolders || [],
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),
