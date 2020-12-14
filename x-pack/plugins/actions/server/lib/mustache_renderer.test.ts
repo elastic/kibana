@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderMustacheString, renderMustacheObject } from './mustache_renderer';
+import { renderMustacheString, renderMustacheObject, Escape } from './mustache_renderer';
 
 const variables = {
   a: 1,
@@ -14,7 +14,9 @@ const variables = {
   e: undefined,
   f: {
     g: 3,
+    h: null,
   },
+  i: [42, 43, 44],
   lt: '<',
   gt: '>',
   amp: '&',
@@ -29,15 +31,26 @@ const variables = {
 
 describe('mustache_renderer', () => {
   describe('renderMustacheString()', () => {
-    it('handles basic templating that does not need escaping', () => {
-      expect(renderMustacheString('', variables, 'none')).toBe('');
-      expect(renderMustacheString('{{a}}', variables, 'none')).toBe('1');
-      expect(renderMustacheString('{{b}}', variables, 'none')).toBe('2');
-      expect(renderMustacheString('{{c}}', variables, 'none')).toBe('false');
-      expect(renderMustacheString('{{d}}', variables, 'none')).toBe('');
-      expect(renderMustacheString('{{e}}', variables, 'none')).toBe('');
-      expect(renderMustacheString('{{f.g}}', variables, 'none')).toBe('3');
-    });
+    for (const escapeVal of ['none', 'slack', 'markdown', 'json']) {
+      const escape = escapeVal as Escape;
+
+      it(`handles basic templating that does not need escaping for ${escape}`, () => {
+        expect(renderMustacheString('', variables, escape)).toBe('');
+        expect(renderMustacheString('{{a}}', variables, escape)).toBe('1');
+        expect(renderMustacheString('{{b}}', variables, escape)).toBe('2');
+        expect(renderMustacheString('{{c}}', variables, escape)).toBe('false');
+        expect(renderMustacheString('{{d}}', variables, escape)).toBe('');
+        expect(renderMustacheString('{{e}}', variables, escape)).toBe('');
+        if (escape === 'markdown') {
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('\\[object Object\\]');
+        } else {
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('[object Object]');
+        }
+        expect(renderMustacheString('{{f.g}}', variables, escape)).toBe('3');
+        expect(renderMustacheString('{{f.h}}', variables, escape)).toBe('');
+        expect(renderMustacheString('{{i}}', variables, escape)).toBe('42,43,44');
+      });
+    }
 
     it('handles escape:none with commonly escaped strings', () => {
       expect(renderMustacheString('{{lt}}', variables, 'none')).toBe(variables.lt);

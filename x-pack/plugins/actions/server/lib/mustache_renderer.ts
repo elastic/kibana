@@ -7,7 +7,7 @@
 import Mustache from 'mustache';
 import { isString, cloneDeepWith } from 'lodash';
 
-type Escape = 'markdown' | 'slack' | 'json' | 'none';
+export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
 
 // return a rendered mustache template given the specified variables and escape
@@ -40,19 +40,20 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
   return (result as unknown) as Params;
 }
 
-function getEscape(escape: Escape): (string: string) => string {
+function getEscape(escape: Escape): (value: unknown) => string {
   if (escape === 'markdown') return escapeMarkdown;
   if (escape === 'slack') return escapeSlack;
   if (escape === 'json') return escapeJSON;
   return escapeNone;
 }
 
-function escapeNone(value: string): string {
-  return value;
+function escapeNone(value: unknown): string {
+  if (value == null) return '';
+  return `${value}`;
 }
 
 // replace with JSON stringified version, removing leading and trailing double quote
-function escapeJSON(value: string): string {
+function escapeJSON(value: unknown): string {
   if (value == null) return '';
 
   const quoted = JSON.stringify(`${value}`);
@@ -62,28 +63,32 @@ function escapeJSON(value: string): string {
 
 // see: https://api.slack.com/reference/surfaces/formatting
 // but in practice, a bit more needs to be escaped, in drastic ways
-function escapeSlack(value: string): string {
+function escapeSlack(value: unknown): string {
+  if (value == null) return '';
+
+  const valueString = `${value}`;
   // if the value contains * or _, escape the whole thing with back tics
-  if (value.includes('_') || value.includes('*')) {
+  if (valueString.includes('_') || valueString.includes('*')) {
     // replace unescapable back tics with single quote
-    value = value.replace(/`/g, `'`);
-    return '`' + value + '`';
+    return '`' + valueString.replace(/`/g, `'`) + '`';
   }
 
   // otherwise, do "standard" escaping
-  value = value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    // this isn't really standard escaping, but escaping back tics is problematic
-    .replace(/`/g, `'`);
-
-  return value;
+  return (
+    valueString
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      // this isn't really standard escaping, but escaping back tics is problematic
+      .replace(/`/g, `'`)
+  );
 }
 
 // see: https://www.markdownguide.org/basic-syntax/#characters-you-can-escape
-function escapeMarkdown(value: string): string {
-  return value
+function escapeMarkdown(value: unknown): string {
+  if (value == null) return '';
+
+  return `${value}`
     .replace(/\\/g, '\\\\')
     .replace(/`/g, '\\`')
     .replace(/\*/g, '\\*')
