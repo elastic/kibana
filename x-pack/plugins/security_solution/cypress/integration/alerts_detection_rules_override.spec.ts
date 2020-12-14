@@ -83,7 +83,9 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, override', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/85671
+// FLAKY: https://github.com/elastic/kibana/issues/84020
+describe.skip('Detection rules, override', () => {
   const expectedUrls = newOverrideRule.referenceUrls.join('');
   const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
   const expectedTags = newOverrideRule.tags.join('');

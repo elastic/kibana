@@ -31,7 +31,6 @@ import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
