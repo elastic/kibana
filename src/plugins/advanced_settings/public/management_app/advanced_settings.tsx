@@ -18,9 +18,10 @@
  */
 
 import React, { Component } from 'react';
-import { RouteChildrenProps } from 'react-router-dom';
+import { matchPath, RouteChildrenProps } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { UnregisterCallback } from 'history';
 
 import { UiCounterMetricType } from '@kbn/analytics';
 import { CallOuts } from './components/call_outs';
@@ -63,6 +64,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
   private uiSettingsSubscription?: Subscription;
+  private unregister: UnregisterCallback;
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
@@ -72,11 +74,19 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
 
-    const parsedQuery = Query.parse(this.queryText ? getAriaName(this.queryText) : '');
+    this.unregister = this.props.history.listen(({ pathname, search }) => {
+      const query = this.getQuery(pathname, search);
+      this.setState({
+        query,
+      });
+    });
+
+    const query = this.getQuery();
+
     this.state = {
-      query: parsedQuery,
+      query,
       footerQueryMatched: false,
-      filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
+      filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
     };
   }
 
@@ -144,17 +154,28 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   componentWillUnmount() {
-    if (this.uiSettingsSubscription) {
-      this.uiSettingsSubscription.unsubscribe();
-    }
+    this.uiSettingsSubscription?.unsubscribe?.();
+    this.unregister?.();
   }
 
-  private get queryText(): string {
-    const routeQuery = this.props.match?.params[QUERY] ?? '';
+  private getQuery(pathname?: string, search?: string): Query {
+    const queryText = this.getQueryText(pathname, search);
+    return Query.parse(queryText ? getAriaName(queryText) : '');
+  }
+
+  private getQueryText(pathname?: string, search?: string): string {
+    const match = pathname
+      ? matchPath<RouteParams>(pathname, {
+          path: this.props.match?.path,
+          exact: this.props.match?.isExact,
+        })
+      : this.props.match;
+
+    const routeQuery = match?.params[QUERY] ?? '';
 
     if (routeQuery) return routeQuery;
 
-    return new URLSearchParams(this.props.location.search).get(QUERY) ?? '';
+    return new URLSearchParams(search ?? this.props.location.search).get(QUERY) ?? '';
   }
 
   setUrlQuery(q: string = '') {
