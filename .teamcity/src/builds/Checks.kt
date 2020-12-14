@@ -17,7 +17,6 @@ object Checks : BuildType({
     "Check File Casing" to ".ci/teamcity/checks/file_casing.sh",
     "Check Licenses" to ".ci/teamcity/checks/licenses.sh",
     "Verify NOTICE" to ".ci/teamcity/checks/verify_notice.sh",
-    "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
     "Check Types" to ".ci/teamcity/checks/type_check.sh",
     "Check Jest Configs" to ".ci/teamcity/checks/jest_configs.sh",
     "Check Doc API Changes" to ".ci/teamcity/checks/doc_api_changes.sh",
