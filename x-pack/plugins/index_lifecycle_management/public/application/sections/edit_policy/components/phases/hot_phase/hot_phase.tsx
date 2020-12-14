@@ -105,7 +105,7 @@ export const HotPhase: FunctionComponent = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                    defaultMessage="Index time series data for efficient storage and fast search performance."
+                    defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
                   />{' '}
                   <LearnMoreLink
                     text={
