@@ -43,6 +43,8 @@ const buildRuleMessage = buildRuleMessageFactory({
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
+  let inputIndexPattern: string[] = [];
+  let timestampsToSort: string[] = [];
   let listClient = listMock.getListClient();
   (timestampFieldCheck as jest.Mock).mockImplementation((indexPattern: string[], t, s, l, b) => ({
     '@timestamp': [...indexPattern],
@@ -52,6 +54,8 @@ describe('searchAfterAndBulkCreate', () => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
+    inputIndexPattern = ['auditbeat-*'];
+    timestampsToSort = ['@timestamp'];
     mockService = alertsMock.createAlertServices();
   });
 
@@ -132,6 +136,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -243,6 +249,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -320,6 +328,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -384,6 +394,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -448,6 +460,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -529,6 +543,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -607,6 +623,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -657,6 +675,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -713,6 +733,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -782,6 +804,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],
@@ -882,6 +906,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       timestampsAndIndices: { '@timestamp': ['auditbeat-*'] },
+      inputIndexPattern,
+      timestampsToSort,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       actions: [],

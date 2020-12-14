@@ -6,6 +6,8 @@
 
 /* eslint-disable complexity */
 
+import { isEmpty } from 'lodash/fp';
+
 import { Logger, KibanaRequest } from 'src/core/server';
 
 import { Filter } from 'src/plugins/data/common';
@@ -178,7 +180,9 @@ export const signalRulesAlertType = ({
           buildRuleMessage
         );
 
-        const filteredIndexPattern = preCheckResult.successIndexes;
+        const filteredIndexPattern = !isEmpty(preCheckResult.successIndexes)
+          ? preCheckResult.successIndexes
+          : inputIndexPattern;
         let wroteStatus = false;
 
         if (preCheckResult.result === 'error') {
@@ -337,7 +341,6 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
-          // const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
             filters,
@@ -461,7 +464,6 @@ export const signalRulesAlertType = ({
               ].join(' ')
             );
           }
-          // const inputIndex = await getInputIndex(services, version, index);
           result = await createThreatSignals({
             threatMapping,
             query,
@@ -503,7 +505,6 @@ export const signalRulesAlertType = ({
             itemsPerSearch: itemsPerSearch ?? 9000,
           });
         } else if (type === 'query' || type === 'saved_query') {
-          // const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
             filters,
@@ -564,7 +565,6 @@ export const signalRulesAlertType = ({
               throw err;
             }
           }
-          // const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(
             query,
             filteredIndexPattern,
