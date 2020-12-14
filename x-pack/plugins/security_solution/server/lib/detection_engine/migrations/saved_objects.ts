@@ -15,33 +15,42 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
     },
     destinationIndex: {
       type: 'keyword',
+      index: false,
     },
     version: {
       type: 'long',
     },
     error: {
       type: 'text',
+      index: false,
     },
     taskId: {
       type: 'keyword',
+      index: false,
     },
     status: {
       type: 'keyword',
+      index: false,
     },
     deleted: {
       type: 'boolean',
+      index: false,
     },
     created: {
       type: 'date',
+      index: false,
     },
     createdBy: {
       type: 'text',
+      index: false,
     },
     updated: {
       type: 'date',
+      index: false,
     },
     updatedBy: {
       type: 'text',
+      index: false,
     },
   },
 };
