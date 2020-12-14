@@ -25,6 +25,7 @@ const initialCaseValue: FormProps = {
   title: '',
   connectorId: 'none',
   fields: null,
+  syncAlerts: true,
 };
 
 describe('CreateCaseForm', () => {
