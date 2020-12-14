@@ -72,6 +72,33 @@ Array [
       class="euiDescriptionList__description c1"
       data-test-subj="monitor-page-title"
     />
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Tags
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      <a
+        class="euiLink euiLink--primary"
+        href="undefined/monitor-options.html#monitor-tags"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Set tags
+        <span
+          aria-label="External link"
+          class="euiLink__externalIcon"
+          data-euiicon-type="popout"
+        />
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+    </dd>
   </dl>,
 ]
 `;
