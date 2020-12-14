@@ -8,6 +8,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -623,6 +624,7 @@ export interface LensFilterEvent {
   name: 'filter';
   data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
 }
+
 export interface LensBrushEvent {
   name: 'brush';
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
@@ -644,6 +646,10 @@ export interface LensEditEvent<T> {
   name: 'edit';
   data: EditPayloadContext<T>;
 }
+export interface LensTableRowContextMenuEvent {
+  name: 'tableRowContextMenuClick';
+  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
+}
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
   return event.name === 'filter';
@@ -659,6 +665,12 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
   return event.name === 'edit';
 }
 
+export function isLensTableRowContextMenuClickEvent(
+  event: ExpressionRendererEvent
+): event is LensBrushEvent {
+  return event.name === 'tableRowContextMenuClick';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
@@ -666,6 +678,10 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
   event: (
-    event: LensFilterEvent | LensBrushEvent | LensEditEvent<LensEditSupportedActions>
+    event:
+      | LensFilterEvent
+      | LensBrushEvent
+      | LensEditEvent<LensEditSupportedActions>
+      | LensTableRowContextMenuEvent
   ) => void;
 }

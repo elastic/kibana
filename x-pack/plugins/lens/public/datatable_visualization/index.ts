@@ -7,11 +7,9 @@
 import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 interface DatatableVisualizationPluginStartPlugins {
-  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
 }
 export interface DatatableVisualizationPluginSetupPlugins {
@@ -35,6 +33,7 @@ export class DatatableVisualization {
         datatableVisualization,
       } = await import('../async_services');
       const resolvedFormatFactory = await formatFactory;
+
       expressions.registerFunction(() => datatableColumns);
       expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
