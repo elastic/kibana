@@ -17,23 +17,13 @@
  * under the License.
  */
 
-import {
-  APPLY_FILTER_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-} from '../../../ui_actions/public';
+import { IEmbeddable } from './i_embeddable';
 
-export interface VisEventToTrigger {
-  ['applyFilter']: typeof APPLY_FILTER_TRIGGER;
-  ['brush']: typeof SELECT_RANGE_TRIGGER;
-  ['filter']: typeof VALUE_CLICK_TRIGGER;
-  ['tableRowContextMenuClick']: typeof ROW_CLICK_TRIGGER;
-}
-
-export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
-  applyFilter: APPLY_FILTER_TRIGGER,
-  brush: SELECT_RANGE_TRIGGER,
-  filter: VALUE_CLICK_TRIGGER,
-  tableRowContextMenuClick: ROW_CLICK_TRIGGER,
+export const isEmbeddable = (x: unknown): x is IEmbeddable => {
+  if (!x) return false;
+  if (typeof x !== 'object') return false;
+  if (typeof (x as IEmbeddable).id !== 'string') return false;
+  if (typeof (x as IEmbeddable).getInput !== 'function') return false;
+  if (typeof (x as IEmbeddable).supportedTriggers !== 'function') return false;
+  return true;
 };
