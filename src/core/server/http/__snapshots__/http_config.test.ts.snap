@@ -39,9 +39,9 @@ Object {
     "enabled": true,
   },
   "cors": Object {
-    "credentials": false,
+    "allowCredentials": false,
+    "allowOrigin": "*",
     "enabled": false,
-    "origin": "*",
   },
   "customResponseHeaders": Object {},
   "host": "localhost",

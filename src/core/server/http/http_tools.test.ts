@@ -196,8 +196,8 @@ describe('getServerOptions', () => {
       config.schema.validate({
         cors: {
           enabled: true,
-          credentials: false,
-          origin: '*',
+          allowCredentials: false,
+          allowOrigin: '*',
         },
       }),
       {} as any,
