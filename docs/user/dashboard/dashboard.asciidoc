@@ -228,7 +228,7 @@ To view the data field summary information, navigate to the field, then click *i
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window]
 
-Sometimes documents have no data for the field inspected: *Lens* shows an "Other" entry to represent these documents in the distribution chart.
+*Lens* inspects the top 10 values to build the value distribution: every other value, together with documents with no data for the inspected field, are shown with the "Other" entry in the distribution chart.
 
 [role="screenshot"]
 image::images/lens_data_info_other.png[Data summary window with Other]
