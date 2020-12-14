@@ -32,7 +32,7 @@ import { px, unit } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
-import { ServiceOverviewTableContainer } from '../service_overview_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 interface Props {
   serviceName: string;

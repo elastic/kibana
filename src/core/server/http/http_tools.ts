@@ -39,8 +39,8 @@ const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-
 export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
   const cors: RouteOptionsCors | false = config.cors.enabled
     ? {
-        credentials: config.cors.credentials,
-        origin: config.cors.origin,
+        credentials: config.cors.allowCredentials,
+        origin: config.cors.allowOrigin,
         headers: corsAllowedHeaders,
       }
     : false;

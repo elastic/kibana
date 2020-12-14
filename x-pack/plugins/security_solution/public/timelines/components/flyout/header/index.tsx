@@ -32,6 +32,8 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
+import { getTimelineStatusByIdSelector } from './selectors';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -49,9 +51,27 @@ interface FlyoutHeaderPanelProps {
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { dataProviders, kqlQuery, title, timelineType, show } = useDeepEqualSelector((state) =>
+  const {
+    activeTab,
+    dataProviders,
+    kqlQuery,
+    title,
+    timelineType,
+    status: timelineStatus,
+    updated,
+    show,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['dataProviders', 'kqlQuery', 'title', 'timelineType', 'show'],
+      [
+        'activeTab',
+        'dataProviders',
+        'kqlQuery',
+        'status',
+        'title',
+        'timelineType',
+        'updated',
+        'show',
+      ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -67,29 +87,33 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   return (
     <StyledPanel borderRadius="none" grow={false} paddingSize="s" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <AddTimelineButton timelineId={timelineId} />
         <EuiFlexItem grow>
           <ActiveTimelines
             timelineId={timelineId}
             timelineType={timelineType}
             timelineTitle={title}
+            timelineStatus={timelineStatus}
             isOpen={show}
+            updated={updated}
           />
         </EuiFlexItem>
         {show && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <InspectButton
-                  compact
-                  queryId={timelineId}
-                  inputId="timeline"
-                  inspectIndex={0}
-                  isDisabled={!isDataInTimeline}
-                  title={i18n.INSPECT_TIMELINE_TITLE}
-                />
-              </EuiFlexItem>
+              {activeTab === TimelineTabs.query && (
+                <EuiFlexItem grow={false}>
+                  <InspectButton
+                    compact
+                    queryId={timelineId}
+                    inputId="timeline"
+                    inspectIndex={0}
+                    isDisabled={!isDataInTimeline}
+                    title={i18n.INSPECT_TIMELINE_TITLE}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.CLOSE_TIMELINE}>
                   <EuiButtonIcon
@@ -164,9 +188,9 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    pick(['status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
+    getTimelineStatus(state, timelineId)
   );
 
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
@@ -198,16 +222,16 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
-  <StyledTimelineHeader alignItems="center" gutterSize="l">
+  <StyledTimelineHeader alignItems="center">
     <EuiFlexItem>
       <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
         <RowFlexItem>
           <TimelineName timelineId={timelineId} />
-          <SaveTimelineButton timelineId={timelineId} />
+          <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
         </RowFlexItem>
         <RowFlexItem>
           <TimelineDescription timelineId={timelineId} />
-          <SaveTimelineButton timelineId={timelineId} />
+          <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
         </RowFlexItem>
         <EuiFlexItem>
           <TimelineStatusInfo timelineId={timelineId} />

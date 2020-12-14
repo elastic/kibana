@@ -9,7 +9,7 @@ import { rangeFilter } from '../../../../common/utils/range_filter';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
-  METRIC_SYSTEM_CPU_PERCENT,
+  METRIC_PROCESS_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
@@ -46,7 +46,7 @@ export async function getServiceInstanceSystemMetricStats({
     exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES },
   };
 
-  const cpuUsageFilter = { exists: { field: METRIC_SYSTEM_CPU_PERCENT } };
+  const cpuUsageFilter = { exists: { field: METRIC_PROCESS_CPU_PERCENT } };
 
   function withTimeseries<T extends AggregationOptionsByType['avg']>(agg: T) {
     return {
@@ -79,7 +79,7 @@ export async function getServiceInstanceSystemMetricStats({
     },
     cpu_usage: {
       filter: cpuUsageFilter,
-      aggs: withTimeseries({ field: METRIC_SYSTEM_CPU_PERCENT }),
+      aggs: withTimeseries({ field: METRIC_PROCESS_CPU_PERCENT }),
     },
   };
 

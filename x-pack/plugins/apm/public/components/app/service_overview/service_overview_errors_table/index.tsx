@@ -13,6 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { EuiBasicTable } from '@elastic/eui';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -23,7 +24,7 @@ import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { ServiceOverviewTable } from '../service_overview_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { TableLinkFlexItem } from '../table_link_flex_item';
 
 interface Props {
@@ -224,41 +225,47 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTable
-            columns={columns}
-            items={items}
-            pagination={{
-              pageIndex,
-              pageSize: PAGE_SIZE,
-              totalItemCount,
-              pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
-            }}
-            loading={status === FETCH_STATUS.LOADING}
-            onChange={(newTableOptions: {
-              page?: {
-                index: number;
-              };
-              sort?: { field: string; direction: SortDirection };
-            }) => {
-              setTableOptions({
-                pageIndex: newTableOptions.page?.index ?? 0,
-                sort: newTableOptions.sort
-                  ? {
-                      field: newTableOptions.sort.field as SortField,
-                      direction: newTableOptions.sort.direction,
-                    }
-                  : DEFAULT_SORT,
-              });
-            }}
-            sorting={{
-              enableAllColumns: true,
-              sort: {
-                direction: sort.direction,
-                field: sort.field,
-              },
-            }}
-          />
+          <ServiceOverviewTableContainer
+            isEmptyAndLoading={
+              items.length === 0 && status === FETCH_STATUS.LOADING
+            }
+          >
+            <EuiBasicTable
+              columns={columns}
+              items={items}
+              pagination={{
+                pageIndex,
+                pageSize: PAGE_SIZE,
+                totalItemCount,
+                pageSizeOptions: [PAGE_SIZE],
+                hidePerPageOptions: true,
+              }}
+              loading={status === FETCH_STATUS.LOADING}
+              onChange={(newTableOptions: {
+                page?: {
+                  index: number;
+                };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  pageIndex: newTableOptions.page?.index ?? 0,
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+              }}
+              sorting={{
+                enableAllColumns: true,
+                sort: {
+                  direction: sort.direction,
+                  field: sort.field,
+                },
+              }}
+            />
+          </ServiceOverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -30,7 +30,7 @@ import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { px, unit } from '../../../../style/variables';
-import { ServiceOverviewTableContainer } from '../service_overview_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 
