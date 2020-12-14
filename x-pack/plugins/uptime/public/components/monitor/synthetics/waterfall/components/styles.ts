@@ -6,9 +6,7 @@
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../observability/public';
-
-// NOTE: This isn't a perfect solution - changes in font size etc within charts could change the ideal height here.
-const FIXED_AXIS_HEIGHT = 33;
+import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
   height?: number;

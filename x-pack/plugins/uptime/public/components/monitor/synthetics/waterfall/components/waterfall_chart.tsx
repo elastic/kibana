@@ -33,7 +33,7 @@ import {
   WaterfallChartTooltip,
 } from './styles';
 import { WaterfallData } from '../types';
-import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
+import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE, FIXED_AXIS_HEIGHT } from './constants';
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 
@@ -77,7 +77,8 @@ const getUniqueBars = (data: WaterfallData) => {
   }, new Set());
 };
 
-const getChartHeight = (data: WaterfallData): number => getUniqueBars(data).size * BAR_HEIGHT;
+const getChartHeight = (data: WaterfallData): number =>
+  getUniqueBars(data).size * BAR_HEIGHT + FIXED_AXIS_HEIGHT;
 
 export const WaterfallChart = ({
   tickFormat,
