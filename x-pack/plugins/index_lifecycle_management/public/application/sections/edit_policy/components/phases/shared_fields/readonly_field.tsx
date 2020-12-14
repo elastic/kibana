@@ -20,7 +20,7 @@ export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
       title={
         <h3>
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.readonly.text"
+            id="xpack.indexLifecycleMgmt.editPolicy.readonlyTitle"
             defaultMessage="Read only"
           />
         </h3>
