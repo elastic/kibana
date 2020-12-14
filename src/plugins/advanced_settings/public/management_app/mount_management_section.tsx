@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
-import { AdvancedSettings } from './advanced_settings';
+import { AdvancedSettings, QUERY } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 
@@ -67,15 +67,18 @@ export async function mountManagementSection(
     <I18nProvider>
       <Router history={params.history}>
         <Switch>
-          <Route path={['/:query', '/']}>
-            <AdvancedSettings
-              enableSaving={canSave}
-              toasts={notifications.toasts}
-              dockLinks={docLinks.links}
-              uiSettings={uiSettings}
-              componentRegistry={componentRegistry}
-              trackUiMetric={trackUiMetric}
-            />
+          <Route path={[`/:${QUERY}`, '/']}>
+            {(routeProps) => (
+              <AdvancedSettings
+                {...routeProps}
+                enableSaving={canSave}
+                toasts={notifications.toasts}
+                dockLinks={docLinks.links}
+                uiSettings={uiSettings}
+                componentRegistry={componentRegistry}
+                trackUiMetric={trackUiMetric}
+              />
+            )}
           </Route>
         </Switch>
       </Router>

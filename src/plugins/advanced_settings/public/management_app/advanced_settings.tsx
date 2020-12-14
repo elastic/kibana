@@ -18,10 +18,10 @@
  */
 
 import React, { Component } from 'react';
+import { RouteChildrenProps } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
@@ -34,19 +34,20 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 
-interface AdvancedSettingsProps {
+export const QUERY = 'query';
+
+interface RouteParams {
+  [QUERY]: string;
+}
+
+type AdvancedSettingsProps = RouteChildrenProps<RouteParams> & {
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
-
-interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
-  queryText: string;
-  setUrlQuery: (query?: string) => void;
-}
+};
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
@@ -56,17 +57,14 @@ interface AdvancedSettingsState {
 
 type GroupedSettings = Record<string, FieldSetting[]>;
 
-export class AdvancedSettingsComponent extends Component<
-  AdvancedSettingsComponentProps,
-  AdvancedSettingsState
-> {
+export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
   private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
   private uiSettingsSubscription?: Subscription;
 
-  constructor(props: AdvancedSettingsComponentProps) {
+  constructor(props: AdvancedSettingsProps) {
     super(props);
 
     this.settings = this.initSettings(this.props.uiSettings);
@@ -74,7 +72,7 @@ export class AdvancedSettingsComponent extends Component<
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
 
-    const parsedQuery = Query.parse(this.props.queryText ? getAriaName(this.props.queryText) : '');
+    const parsedQuery = Query.parse(this.queryText ? getAriaName(this.queryText) : '');
     this.state = {
       query: parsedQuery,
       footerQueryMatched: false,
@@ -151,6 +149,28 @@ export class AdvancedSettingsComponent extends Component<
     }
   }
 
+  private get queryText(): string {
+    const routeQuery = this.props.match?.params[QUERY] ?? '';
+
+    if (routeQuery) return routeQuery;
+
+    return new URLSearchParams(this.props.location.search).get(QUERY) ?? '';
+  }
+
+  setUrlQuery(q: string = '') {
+    const searchParams = new URLSearchParams(this.props.location.search);
+    if (q) {
+      searchParams.set(QUERY, q);
+    } else {
+      searchParams.delete(QUERY);
+    }
+    this.props.history.push({
+      // remove any route query param
+      pathname: '',
+      search: searchParams.toString(),
+    });
+  }
+
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
@@ -179,8 +199,7 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   onQueryChange = ({ query }: { query: Query }) => {
-    this.props.setUrlQuery(query.text);
-
+    this.setUrlQuery(query.text);
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
@@ -188,8 +207,7 @@ export class AdvancedSettingsComponent extends Component<
   };
 
   clearQuery = () => {
-    this.props.setUrlQuery('');
-
+    this.setUrlQuery('');
     this.setState({
       query: Query.parse(''),
       footerQueryMatched: false,
@@ -260,23 +278,3 @@ export class AdvancedSettingsComponent extends Component<
     );
   }
 }
-
-export const AdvancedSettings = (props: AdvancedSettingsProps) => {
-  const query = useParams<{ query: string }>().query ?? '';
-  const { push } = useHistory();
-  const location = useLocation();
-  const setUrlQuery = (q: string = '') => push({ ...location, pathname: q.toLowerCase() });
-
-  return (
-    <AdvancedSettingsComponent
-      queryText={query}
-      setUrlQuery={setUrlQuery}
-      enableSaving={props.enableSaving}
-      uiSettings={props.uiSettings}
-      dockLinks={props.dockLinks}
-      toasts={props.toasts}
-      componentRegistry={props.componentRegistry}
-      trackUiMetric={props.trackUiMetric}
-    />
-  );
-};
