@@ -204,6 +204,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         target="_blank"
         color="text"
         className="visNewVisDialog__groupsCardLink"
+        external={false}
       >
         <EuiBetaBadge
           data-test-subj="visTypeBadge"

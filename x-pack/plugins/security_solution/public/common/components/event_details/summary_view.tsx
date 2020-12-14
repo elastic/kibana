@@ -167,15 +167,12 @@ export const SummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ data, eventId, timelineId, browserFields }) => {
-  const ruleId = useMemo(
-    () =>
-      getOr(
-        null,
-        'originalValue',
-        data.find((d) => d.field === 'signal.rule.id')
-      ),
-    [data]
-  );
+  const ruleId = useMemo(() => {
+    const item = data.find((d) => d.field === 'signal.rule.id');
+    return Array.isArray(item?.originalValue)
+      ? item?.originalValue[0]
+      : item?.originalValue ?? null;
+  }, [data]);
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const summaryList = useMemo(() => getSummary({ browserFields, data, eventId, timelineId }), [
     browserFields,
