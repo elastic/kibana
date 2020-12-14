@@ -12,13 +12,16 @@ import { useFetcher } from '../../../../../observability/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { getResponseTimeTickFormatter } from '../../shared/charts/transaction_charts/helper';
-import { useFormatter } from '../../shared/charts/transaction_charts/use_formatter';
+import {
+  getMaxY,
+  getResponseTimeTickFormatter,
+} from '../../shared/charts/transaction_charts/helper';
 import { ChartPreview } from '../chart_preview';
 import {
   EnvironmentField,
@@ -110,8 +113,12 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowUnit,
   ]);
 
-  const { formatter } = useFormatter([{ data: data ?? [] } as TimeSeries]);
+  const maxY = getMaxY([
+    { data: data ?? [] } as TimeSeries<{ x: number; y: number | null }>,
+  ]);
+  const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
+
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = threshold * 1000;
 
