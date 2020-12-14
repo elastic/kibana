@@ -26,28 +26,38 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     });
 
     describe('', function () {
+      this.tags('ciGroup7');
+
+      loadTestFile(require.resolve('./find_rules'));
+      loadTestFile(require.resolve('./find_statuses'));
+      loadTestFile(require.resolve('./generating_signals'));
+    });
+
+    describe('', function () {
       this.tags('ciGroup8');
 
       loadTestFile(require.resolve('./delete_rules'));
       loadTestFile(require.resolve('./delete_rules_bulk'));
       loadTestFile(require.resolve('./export_rules'));
+      loadTestFile(require.resolve('./import_rules'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup9');
+
+      loadTestFile(require.resolve('./read_rules'));
+      loadTestFile(require.resolve('./query_signals'));
     });
 
     describe('', function () {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./exception_operators_data_types/index'));
-      loadTestFile(require.resolve('./find_rules'));
-      loadTestFile(require.resolve('./find_statuses'));
-      loadTestFile(require.resolve('./generating_signals'));
       loadTestFile(require.resolve('./get_prepackaged_rules_status'));
-      loadTestFile(require.resolve('./import_rules'));
-      loadTestFile(require.resolve('./read_rules'));
       loadTestFile(require.resolve('./update_rules'));
       loadTestFile(require.resolve('./update_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules'));
-      loadTestFile(require.resolve('./query_signals'));
       loadTestFile(require.resolve('./open_close_signals'));
       loadTestFile(require.resolve('./migrating_signals'));
     });
