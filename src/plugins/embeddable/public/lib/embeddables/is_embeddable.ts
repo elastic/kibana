@@ -17,8 +17,13 @@
  * under the License.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/src/test_utils'],
+import { IEmbeddable } from './i_embeddable';
+
+export const isEmbeddable = (x: unknown): x is IEmbeddable => {
+  if (!x) return false;
+  if (typeof x !== 'object') return false;
+  if (typeof (x as IEmbeddable).id !== 'string') return false;
+  if (typeof (x as IEmbeddable).getInput !== 'function') return false;
+  if (typeof (x as IEmbeddable).supportedTriggers !== 'function') return false;
+  return true;
 };

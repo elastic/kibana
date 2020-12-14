@@ -20,7 +20,10 @@ import styled from 'styled-components';
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
 import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
@@ -114,12 +117,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
 
-  const {
-    timelineFullScreen,
-    setTimelineFullScreen,
-    globalFullScreen,
-    setGlobalFullScreen,
-  } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
