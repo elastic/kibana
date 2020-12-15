@@ -363,13 +363,15 @@ xpack.security.audit.appender:
   path: ./audit.log
   policy:
     kind: time-interval
-    interval: 24h
+    interval: 24h <1>
   strategy:
     kind: numeric
-    max: 28
+    max: 10 <2>
   layout:
     kind: json
 ----------------------------------------
+<1> Rotate log files every 24 hours
+<2> Keep maximum of 10 log files before deleting older ones
 
 | `xpack.security.audit.appender.kind`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file` or `rolling-file`. 
