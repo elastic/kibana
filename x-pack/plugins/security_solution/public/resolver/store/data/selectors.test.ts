@@ -154,7 +154,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[]}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
         requires a pending request to be aborted: null"
       `);
     });
@@ -184,7 +184,7 @@ describe('data state', () => {
         has more children: false
         has more ancestors: false
         parameters to fetch: null
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[]}"
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
   });
@@ -215,17 +215,14 @@ describe('data state', () => {
     it('should be loading', () => {
       expect(selectors.isTreeLoading(state())).toBe(true);
     });
-    it('should not have a request to abort', () => {
-      expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
-    });
     it('should not have an error, more children, more ancestors, a request to make, or a pending request that should be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: null
-        requires a pending request to be aborted: null"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
     describe('when the pending request fails', () => {
@@ -247,7 +244,7 @@ describe('data state', () => {
           has an error: true
           has more children: false
           has more ancestors: false
-          parameters to fetch: null
+          parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
           requires a pending request to be aborted: null"
         `);
       });
@@ -315,8 +312,8 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[]}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[]}"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
     describe('when after initial load resolver is told to refresh', () => {
@@ -400,10 +397,10 @@ describe('data state', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
           "is loading: true
           has an error: false
-          has more children: true
-          has more ancestors: true
-          parameters to fetch: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":1}
-          requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":2}"
+          has more children: false
+          has more ancestors: false
+          parameters to fetch: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":1}
+          requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":2,\\"filters\\":{}}"
         `);
       });
     });
@@ -431,7 +428,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[]}
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
           requires a pending request to be aborted: null"
         `);
       });
@@ -442,9 +439,6 @@ describe('data state', () => {
             payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
           });
         });
-        it('should not have a document ID to fetch', () => {
-          expect(selectors.treeParametersToFetch(state())).toBe(null);
-        });
         it('should be loading', () => {
           expect(selectors.isTreeLoading(state())).toBe(true);
         });
@@ -454,8 +448,8 @@ describe('data state', () => {
             has an error: false
             has more children: false
             has more ancestors: false
-            parameters to fetch: null
-            requires a pending request to be aborted: null"
+            parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+            requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
           `);
         });
       });

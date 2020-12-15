@@ -106,20 +106,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       },
     };
     return nextState;
-  } else if (action.type === 'appRequestedNodeEventsInCategory') {
-    if (state.nodeEventsInCategory) {
-      const next: DataState = {
-        ...state,
-        nodeEventsInCategory: {
-          ...state.nodeEventsInCategory,
-          events: [],
-          pendingRequest: action.payload,
-        },
-      };
-      return next;
-    } else {
-      return state;
-    }
   } else if (action.type === 'serverFailedToReturnResolverData') {
     /** Only handle this if we are expecting a response */
     if (state.tree?.pendingRequestParameters !== undefined) {

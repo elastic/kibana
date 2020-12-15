@@ -758,13 +758,9 @@ export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function (nodeEventsInCategory, panelViewAndParameters) {
+  function (nodeEventsInCategory, panelViewAndParameters): boolean {
     const { panelView } = panelViewAndParameters;
-    if (panelView === 'nodeEventsInCategory' && nodeEventsInCategory) {
-      return nodeEventsInCategory.pendingRequest !== undefined;
-    } else {
-      return false;
-    }
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
   }
 );
 

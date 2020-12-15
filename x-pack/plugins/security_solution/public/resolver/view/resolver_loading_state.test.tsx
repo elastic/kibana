@@ -179,33 +179,4 @@ describe('Resolver: data loading and resolution states', () => {
       });
     });
   });
-
-  describe('When should update is set to true', () => {
-    beforeEach(async () => {
-      const {
-        metadata: { databaseDocumentID },
-        dataAccessLayer,
-      } = noAncestorsTwoChildren();
-
-      simulator = new Simulator({
-        dataAccessLayer,
-        databaseDocumentID,
-        resolverComponentInstanceID,
-        indices: [],
-        shouldUpdate: false,
-        filters: {},
-      });
-    });
-
-    it('should display the loading indicator', async () => {
-      simulator.debugActions();
-      await expect(
-        simulator.map(() => ({
-          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
-        }))
-      ).toYieldEqualTo({
-        resolverGraphLoading: 1,
-      });
-    });
-  });
 });
