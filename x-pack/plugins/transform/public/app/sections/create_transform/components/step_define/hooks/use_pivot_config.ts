@@ -15,6 +15,7 @@ import {
   DropDownLabel,
   getEsAggFromAggConfig,
   getEsAggFromGroupByConfig,
+  GroupByConfigWithUiSupport,
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
@@ -99,6 +100,12 @@ function getRootAggregation(item: PivotAggsConfig) {
   }
   return rootItem;
 }
+
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
+  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
+};
 
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
@@ -321,6 +328,7 @@ export const usePivotConfig = (
           terms: {
             field: g.field,
           },
+          ...getMissingBucketConfig(g),
         };
         request.pivot.group_by[g.aggName] = termsAgg;
       } else if (isGroupByHistogram(g)) {
@@ -329,6 +337,7 @@ export const usePivotConfig = (
             field: g.field,
             interval: g.interval,
           },
+          ...getMissingBucketConfig(g),
         };
         request.pivot.group_by[g.aggName] = histogramAgg;
       } else if (isGroupByDateHistogram(g)) {
@@ -337,6 +346,7 @@ export const usePivotConfig = (
             field: g.field,
             calendar_interval: g.calendar_interval,
           },
+          ...getMissingBucketConfig(g),
         };
         request.pivot.group_by[g.aggName] = dateHistogramAgg;
       } else {

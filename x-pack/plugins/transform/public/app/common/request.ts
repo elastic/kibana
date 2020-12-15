@@ -57,19 +57,17 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
-  partialRequest: Record<string, any>
+  partialRequest: StepDefineExposedState['previewRequest']
 ): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
-  const request: PostTransformsPreviewRequestSchema = {
+  return {
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
     },
     ...partialRequest,
   };
-
-  return request;
 }
 
 export const getCreateTransformSettingsRequestBody = (
