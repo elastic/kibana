@@ -6,7 +6,9 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+
+import { foldLeftRight, getPaths } from '../../test_utils';
+
 import { DefaultStringBooleanFalse } from './default_string_boolean_false';
 
 describe('default_string_boolean_false', () => {

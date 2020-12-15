@@ -16,12 +16,16 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../saved_objects';
 
 import { getSavedObjectType, transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
-  namespaceType: NamespaceType;
+  namespaceType?: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
@@ -39,7 +43,9 @@ export const findExceptionList = async ({
   sortField,
   sortOrder,
 }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
-  const savedObjectType = getSavedObjectType({ namespaceType });
+  const savedObjectType: SavedObjectType[] = namespaceType
+    ? [getSavedObjectType({ namespaceType })]
+    : [exceptionListSavedObjectType, exceptionListAgnosticSavedObjectType];
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
     filter: getExceptionListFilter({ filter, savedObjectType }),
     page,
@@ -56,11 +62,18 @@ export const getExceptionListFilter = ({
   savedObjectType,
 }: {
   filter: FilterOrUndefined;
-  savedObjectType: SavedObjectType;
+  savedObjectType: SavedObjectType[];
 }): string => {
+  const savedObjectTypeFilter = `(${savedObjectType
+    .map((sot) => `${sot}.attributes.list_type: list`)
+    .join(' OR ')})`;
   if (filter == null) {
-    return `${savedObjectType}.attributes.list_type: list`;
+    return savedObjectTypeFilter;
   } else {
-    return `${savedObjectType}.attributes.list_type: list AND ${filter}`;
+    if (Array.isArray(savedObjectType)) {
+      return `${savedObjectTypeFilter} AND ${filter}`;
+    } else {
+      return `${savedObjectType}.attributes.list_type: list AND ${filter}`;
+    }
   }
 };

@@ -26,6 +26,6 @@ NAMESPACE_TYPE=${2-single}
 #
 # Finding multiple list id's across multiple spaces
 # Example: ./find_exception_list_items.sh simple_list,endpoint_list single,agnostic
-curl -s -k \
+curl --verbose -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET "${KIBANA_URL}${SPACE_URL}/api/exception_lists/items/_find?list_id=${LIST_ID}&namespace_type=${NAMESPACE_TYPE}" | jq .
