@@ -25,5 +25,9 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
+    validationStatus: {
+      isValid: false,
+    },
+    previewRequest: undefined,
   };
 }

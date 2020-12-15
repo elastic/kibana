@@ -104,12 +104,15 @@ export const putTransformsRequestSchema = schema.object(
 
 export type PutTransformsRequestSchema = TypeOf<typeof putTransformsRequestSchema>;
 
-export interface PutTransformsPivotRequestSchema extends PutTransformsRequestSchema {
+export interface PutTransformsPivotRequestSchema
+  extends Omit<PutTransformsRequestSchema, 'latest'> {
   pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
 }
+
+export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
 interface TransformCreated {
   transform: TransformId;

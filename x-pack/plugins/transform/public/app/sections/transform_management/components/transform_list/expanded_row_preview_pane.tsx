@@ -6,7 +6,7 @@
 
 import React, { useMemo, FC } from 'react';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { getPivotQuery } from '../../../../common';
@@ -19,7 +19,7 @@ import {
 } from '../../../create_transform/components/step_define/';
 
 interface ExpandedRowPreviewPaneProps {
-  transformConfig: TransformPivotConfig;
+  transformConfig: TransformConfigUnion;
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {

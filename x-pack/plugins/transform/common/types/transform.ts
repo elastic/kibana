@@ -41,6 +41,8 @@ export type TransformLatestConfig = Omit<TransformBaseConfig, 'pivot'> & {
   latest: LatestFunctionConfig;
 };
 
+export type TransformConfigUnion = TransformPivotConfig | TransformLatestConfig;
+
 export function isPivotTransform(
   transform: TransformBaseConfig
 ): transform is TransformPivotConfig {

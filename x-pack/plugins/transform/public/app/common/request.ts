@@ -11,6 +11,8 @@ import type { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 import type {
   PostTransformsPreviewRequestSchema,
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
 
@@ -88,7 +90,7 @@ export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
-): PutTransformsRequestSchema => ({
+): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     indexPatternTitle,
     getPivotQuery(pivotState.searchQuery),
