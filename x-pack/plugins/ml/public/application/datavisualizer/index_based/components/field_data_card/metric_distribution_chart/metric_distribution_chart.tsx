@@ -100,7 +100,7 @@ export const MetricDistributionChart: FC<Props> = ({
             chartPaddings: {
               left: 0,
               right: 0,
-              top: 0,
+              top: 4,
               bottom: 0,
             },
             scales: { barsPadding: 0.1 },
