@@ -55,7 +55,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
               className={classNames(
                 'eui-textTruncate',
                 'mlTopValuesLabelContainer',
-                compressed === true ? 'small' : 'large'
+                `mlTopValuesLabelContainer--${compressed === true ? 'small' : 'large'}`
               )}
             >
               <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">

@@ -5,7 +5,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,19 +62,17 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   ];
 
   return (
-    <EuiFlexGroup direction={'row'}>
-      <EuiFlexItem>
-        <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
-        <EuiBasicTable<SummaryTableItem>
-          className={'mlDataVisualizerSummaryTable'}
-          data-test-subj={'mlDateSummaryTable'}
-          compressed
-          items={summaryTableItems}
-          columns={summaryTableColumns}
-          tableCaption={summaryTableTitle}
-          tableLayout="auto"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexItem>
+      <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
+      <EuiBasicTable<SummaryTableItem>
+        className={'mlDataVisualizerSummaryTable'}
+        data-test-subj={'mlDateSummaryTable'}
+        compressed
+        items={summaryTableItems}
+        columns={summaryTableColumns}
+        tableCaption={summaryTableTitle}
+        tableLayout="auto"
+      />
+    </EuiFlexItem>
   );
 };
