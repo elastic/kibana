@@ -5,7 +5,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,7 +62,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   ];
 
   return (
-    <EuiFlexItem>
+    <>
       <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable<SummaryTableItem>
         className={'mlDataVisualizerSummaryTable'}
@@ -73,6 +73,6 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
         tableCaption={summaryTableTitle}
         tableLayout="auto"
       />
-    </EuiFlexItem>
+    </>
   );
 };
