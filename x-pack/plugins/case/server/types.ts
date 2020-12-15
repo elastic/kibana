@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AppRequestContext } from '../../security_solution/server/types';
 import { CaseClient } from './client';
 
 export interface CaseRequestContext {
@@ -13,5 +15,8 @@ export interface CaseRequestContext {
 declare module 'src/core/server' {
   interface RequestHandlerContext {
     case?: CaseRequestContext;
+    // TODO: Remove when triggers_ui do not import case's types.
+    // PR https://github.com/elastic/kibana/pull/84587.
+    securitySolution?: AppRequestContext;
   }
 }
