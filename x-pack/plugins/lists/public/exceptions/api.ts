@@ -44,7 +44,6 @@ import {
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
-import { getFilters } from './utils';
 
 /**
  * Add new ExceptionList
@@ -210,11 +209,12 @@ export const updateExceptionListItem = async ({
  * Fetch all ExceptionLists (optionally by namespaceType)
  *
  * @param http Kibana http service
- * @param namespaceType ExceptionList namespace_type
+ * @param namespaceTypes ExceptionList namespace_types of lists to find
+ * @param filters search bar filters
  * @param pagination optional
  * @param signal to cancel request
  *
- * @throws An error if response is not OK
+ * @throws An error if request params or response is not OK
  */
 export const fetchExceptionLists = async ({
   http,
@@ -228,12 +228,12 @@ export const fetchExceptionLists = async ({
     namespace_type: namespaceTypes.split(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    // sort_field: 'exception-list.created_at',
-    // sort_order: 'desc',
+    sort_field: 'exception-list.created_at',
+    sort_order: 'desc',
   };
 
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListSchema);
-  console.log(query, validatedRequest, errorsRequest);
+
   if (validatedRequest != null) {
     try {
       const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {

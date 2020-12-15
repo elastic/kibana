@@ -6,26 +6,27 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../../common/types';
+import { getSavedObjectTypes } from '../../../common/utils';
 import {
   ExceptionListSoSchema,
   FilterOrUndefined,
   FoundExceptionListSchema,
-  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../saved_objects';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
+import { transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
-  namespaceType: NamespaceType[];
+  namespaceType: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;

@@ -99,16 +99,9 @@ export interface ApiCallFindListsItemsMemoProps {
   onError: (arg: string[]) => void;
   onSuccess: (arg: UseExceptionListItemsSuccess) => void;
 }
-
-export interface ExceptionListFilter {
-  name?: string;
-  created_by?: string;
-  list_id?: string;
-}
-
 export interface ApiCallFetchExceptionListsProps {
   http: HttpStart;
-  namespaceTypes: NamespaceType[];
+  namespaceTypes: string;
   pagination: Partial<Pagination>;
   filters: string;
   signal: AbortSignal;
@@ -121,7 +114,7 @@ export interface UseExceptionListsSuccess {
 
 export interface UseExceptionListsProps {
   errorMessage: string;
-  filterOptions?: ExceptionListFilter;
+  filterOptions?: Record<string, string>;
   http: HttpStart;
   namespaceTypes: NamespaceType[];
   notifications: NotificationsStart;

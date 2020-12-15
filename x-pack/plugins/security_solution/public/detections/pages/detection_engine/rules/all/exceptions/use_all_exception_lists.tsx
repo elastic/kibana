@@ -29,7 +29,7 @@ export const useAllExceptionLists = ({
 }: {
   exceptionLists: ExceptionListSchema[];
 }): UseAllExceptionListsReturn => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [exceptionsListInfo, setExceptionsListInfo] = useState<ExceptionListInfo[]>([]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const useAllExceptionLists = ({
           },
           pagination: {
             page: 1,
-            perPage: 10000,
+            perPage: 9999,
             total: 0,
           },
           signal: abortCtrl.signal,

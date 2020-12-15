@@ -5,6 +5,8 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { getSavedObjectTypes } from '../../../common/utils';
+import { SavedObjectType } from '../../../common/types';
 import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
@@ -16,9 +18,8 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemsOptions {

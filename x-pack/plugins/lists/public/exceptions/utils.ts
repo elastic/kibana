@@ -6,10 +6,10 @@
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import { NamespaceType } from '../../common/schemas';
-import { SavedObjectType } from '../../server/saved_objects';
-import { getSavedObjectTypes } from '../../server/services/exception_lists/utils';
+import { SavedObjectType } from '../../common/types';
+import { getSavedObjectTypes } from '../../common/utils';
 
-import { ExceptionListFilter, ExceptionListIdentifiers } from './types';
+import { ExceptionListIdentifiers } from './types';
 
 export const getIdsAndNamespaces = ({
   lists,
@@ -39,7 +39,7 @@ export const getIdsAndNamespaces = ({
     );
 
 export const getGeneralFilters = (
-  filters: ExceptionListFilter,
+  filters: Record<string, string>,
   namespaceTypes: SavedObjectType[]
 ): string => {
   return Object.keys(filters)
@@ -76,7 +76,7 @@ export const getTrustedAppsFilter = (
 };
 
 export const getFilters = (
-  filters: ExceptionListFilter,
+  filters: Record<string, string>,
   namespaceTypes: NamespaceType[],
   showTrustedApps: boolean
 ): string => {

@@ -118,7 +118,7 @@ export const fetchRules = async ({
   ].join(' OR ');
   const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ruleTypeFilter,
+    `(${ruleTypeFilter})`,
   ].join(' AND ');
 
   const tags = [
@@ -133,7 +133,7 @@ export const fetchRules = async ({
   const getFieldNameForSortField = (field: string) => {
     return field === 'name' ? `${field}.keyword` : field;
   };
-
+  console.log(filterString);
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,

@@ -18,14 +18,12 @@ export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, 
  * Hook for fetching ExceptionLists
  *
  * @param http Kibana http service
- * @param onError error callback
- * @param onSuccess callback when all lists fetched successfully
- * @param filterOptions optional - filter by fields or tags
- * @param showDetectionsListsOnly boolean, if true, only detection lists are searched
- * @param showEndpointListsOnly boolean, if true, only endpoint lists are searched
- * @param matchFilters boolean, if true, applies first filter in filterOptions to
- * all lists
- * @param pagination optional
+ * @param errorMessage message shown to user if error occurs
+ * @param filterOptions filter by certain fields
+ * @param namespaceTypes spaces to be searched
+ * @param notifications kibana service for displaying toasters
+ * @param showTrustedApps boolean - include/exclude trusted app lists
+ * @param pagination
  *
  */
 export const useExceptionLists = ({
@@ -36,28 +34,27 @@ export const useExceptionLists = ({
     perPage: 20,
     total: 0,
   },
-  filterOptions,
+  filterOptions = {},
   namespaceTypes,
   notifications,
   showTrustedApps = false,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
-  const [loading, setLoading] = useState(false);
-  const filters = useMemo((): string => {
-    return getFilters((filterOptions = {}), namespaceTypes, showTrustedApps);
-  }, [namespaceTypes, filterOptions, showTrustedApps]);
+  const [loading, setLoading] = useState(true);
   const fetchExceptionListsRef = useRef<Func | null>(null);
-  const namespaceTypesAsString = useMemo(() => {
-    return namespaceTypes.join(',');
-  }, [namespaceTypes]);
+
+  const namespaceTypesAsString = useMemo(() => namespaceTypes.join(','), [namespaceTypes]);
+  const filters = useMemo(
+    (): string => getFilters(filterOptions, namespaceTypes, showTrustedApps),
+    [namespaceTypes, filterOptions, showTrustedApps]
+  );
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const fetchData = async (): Promise<void> => {
-      console.log('WTF');
       try {
         setLoading(true);
 
