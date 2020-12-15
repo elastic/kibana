@@ -195,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('node related event pills', function () {
       /**
-       * Verifies that the pills of a node have the correct text and link.
+       * Verifies that the pills of a node have the correct text.
        *
        * @param id the node ID to verify the pills for.
        * @param expectedPills a map of expected pills for all nodes
