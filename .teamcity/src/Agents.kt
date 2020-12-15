@@ -1,4 +1,5 @@
 import co.elastic.teamcity.common.GoogleCloudAgent
+import co.elastic.teamcity.common.GoogleCloudAgentDiskType
 import co.elastic.teamcity.common.GoogleCloudProfile
 
 private val sizes = listOf("2", "4", "8", "16")
@@ -8,6 +9,7 @@ val StandardAgents = sizes.map { size -> size to GoogleCloudAgent {
   agentPrefix = "kibana-standard-$size-"
   machineType = "n2-standard-$size"
   diskSizeGb = 75
+  diskType = GoogleCloudAgentDiskType.SSD
 } }.toMap()
 
 val BuildAgent = GoogleCloudAgent {
@@ -15,6 +17,7 @@ val BuildAgent = GoogleCloudAgent {
     agentPrefix = "kibana-c2-16-"
     machineType = "c2-standard-16"
     diskSizeGb = 75
+    diskType = GoogleCloudAgentDiskType.SSD
 }
 
 val CloudProfile = GoogleCloudProfile {
