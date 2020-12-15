@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { monitorStatusSelector } from '../state/selectors';
@@ -16,7 +16,6 @@ import { MonitorStatusDetails, PingList } from '../components/monitor';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { Ping } from '../../common/runtime_types/ping';
 import { setSelectedMonitorId } from '../state/actions';
-import { EnableMonitorAlert } from '../components/overview/monitor_list/columns/enable_alert';
 import { getMonitorAlertsAction } from '../state/alerts/alerts';
 import { useInitApp } from '../hooks/use_init_app';
 
@@ -63,20 +62,6 @@ export const MonitorPage: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup wrap={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{nameOrId}</h1>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EnableMonitorAlert
-            monitorId={monitorId}
-            monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
@@ -19,6 +19,7 @@ import {
 } from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
+import { MonitorPageTitle } from '../../monitor/monitor_title';
 
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
@@ -52,19 +53,20 @@ export const PageHeader = () => {
 
   const isMonRoute = useRouteMatch(MONITOR_ROUTE);
 
+  if (isStepDetailRoute) {
+    return null;
+  }
+
   return (
     <>
       <SyntheticsCallout />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap responsive={false}>
-        <EuiFlexItem>
-          <PageTabs />
-        </EuiFlexItem>
+        <EuiFlexItem>{isMonRoute ? <MonitorPageTitle /> : <PageTabs />}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         {!isSettingsRoute && <DatePickerComponent />}
       </EuiFlexGroup>
-      {isMonRoute && <EuiHorizontalRule margin="m" />}
       {!isMonRoute && <EuiSpacer size="m" />}
     </>
   );
