@@ -46,6 +46,7 @@ export function SparkPlot(props: Props) {
     <Chart size={{ height: px(24), width }}>
       <Settings
         theme={merge({}, chartTheme, {
+          chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
           lineSeriesStyle: {
             point: { opacity: 0 },
           },
