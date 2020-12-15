@@ -76,6 +76,9 @@ export const basicCase: Case = {
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const basicCasePost: Case = {

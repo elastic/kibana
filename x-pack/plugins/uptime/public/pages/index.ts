@@ -5,5 +5,6 @@
  */
 
 export { MonitorPage } from './monitor';
+export { StepDetailPage } from './step_detail_page';
 export { SettingsPage } from './settings';
 export { NotFoundPage } from './not_found';

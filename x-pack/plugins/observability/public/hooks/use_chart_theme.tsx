@@ -14,6 +14,12 @@ export function useChartTheme() {
 
   return {
     ...baseChartTheme,
+    chartMargins: {
+      left: 10,
+      right: 10,
+      top: 10,
+      bottom: 10,
+    },
     background: {
       ...baseChartTheme.background,
       color: 'transparent',

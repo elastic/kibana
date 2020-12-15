@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const security = getService('security');
 
-  describe('async search with scripted fields', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/78553
+  describe.skip('async search with scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {

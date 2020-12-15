@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -30,6 +30,7 @@ export function getActionType({
   caseService,
   caseConfigureService,
   userActionService,
+  alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
     id: CASE_ACTION_TYPE_ID,
@@ -39,13 +40,25 @@ export function getActionType({
       config: CaseConfigurationSchema,
       params: CaseExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger, caseService, caseConfigureService, userActionService }),
+    executor: curry(executor)({
+      logger,
+      caseService,
+      caseConfigureService,
+      userActionService,
+      alertsService,
+    }),
   };
 }
 
 // action executor
 async function executor(
-  { logger, caseService, caseConfigureService, userActionService }: GetActionTypeParams,
+  {
+    logger,
+    caseService,
+    caseConfigureService,
+    userActionService,
+    alertsService,
+  }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
@@ -59,6 +72,9 @@ async function executor(
     caseService,
     caseConfigureService,
     userActionService,
+    alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as RequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -80,12 +96,15 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: { cases: [updateParamsWithoutNullValues] } });
+    data = await caseClient.update({
+      caseClient,
+      cases: { cases: [updateParamsWithoutNullValues] },
+    });
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseId, comment });
+    data = await caseClient.addComment({ caseClient, caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

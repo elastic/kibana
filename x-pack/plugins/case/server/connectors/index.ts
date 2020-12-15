@@ -16,6 +16,7 @@ import {
   CaseServiceSetup,
   CaseConfigureServiceSetup,
   CaseUserActionServiceSetup,
+  AlertServiceContract,
 } from '../services';
 
 import { getActionType as getCaseConnector } from './case';
@@ -26,6 +27,7 @@ export interface GetActionTypeParams {
   caseService: CaseServiceSetup;
   caseConfigureService: CaseConfigureServiceSetup;
   userActionService: CaseUserActionServiceSetup;
+  alertsService: AlertServiceContract;
 }
 
 export interface RegisterConnectorsArgs extends GetActionTypeParams {
@@ -45,6 +47,7 @@ export const registerConnectors = ({
   caseService,
   caseConfigureService,
   userActionService,
+  alertsService,
 }: RegisterConnectorsArgs) => {
   actionsRegisterType(
     getCaseConnector({
@@ -52,6 +55,7 @@ export const registerConnectors = ({
       caseService,
       caseConfigureService,
       userActionService,
+      alertsService,
     })
   );
 };

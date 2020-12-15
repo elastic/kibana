@@ -23,6 +23,7 @@ const initialCaseValue: FormProps = {
   title: '',
   connectorId: 'none',
   fields: null,
+  syncAlerts: true,
 };
 
 interface Props {
@@ -34,14 +35,21 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { caseData, postCase } = usePostCase();
 
   const submitCase = useCallback(
-    async ({ connectorId: dataConnectorId, fields, ...dataWithoutConnectorId }, isValid) => {
+    async (
+      { connectorId: dataConnectorId, fields, syncAlerts, ...dataWithoutConnectorId },
+      isValid
+    ) => {
       if (isValid) {
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        await postCase({ ...dataWithoutConnectorId, connector: connectorToUpdate });
+        await postCase({
+          ...dataWithoutConnectorId,
+          connector: connectorToUpdate,
+          settings: { syncAlerts },
+        });
       }
     },
     [postCase, connectors]

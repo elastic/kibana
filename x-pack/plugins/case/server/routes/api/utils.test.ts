@@ -302,6 +302,9 @@ describe('Utils', () => {
           comments: [],
           totalComment: 2,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -341,6 +344,9 @@ describe('Utils', () => {
           comments: [],
           totalComment: 0,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -387,6 +393,9 @@ describe('Utils', () => {
           comments: [],
           totalComment: 0,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -497,6 +506,9 @@ describe('Utils', () => {
         comments: [],
         totalComment: 2,
         version: 'WzAsMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
   });
