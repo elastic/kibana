@@ -133,21 +133,24 @@ export const createExternalService = (
     [key: string]: {
       allowedValues?: Array<{}>;
       defaultValue?: {};
+      name: string;
       required: boolean;
       schema: FieldSchema;
     };
   }) =>
-    Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
-      return {
+    Object.keys(fields ?? {}).reduce(
+      (fieldsAcc, fieldKey) => ({
         ...fieldsAcc,
         [fieldKey]: {
           required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
           schema: fields[fieldKey]?.schema,
+          name: fields[fieldKey]?.name,
         },
-      };
-    }, {});
+      }),
+      {}
+    );
 
   const normalizeSearchResults = (
     issues: Array<{ id: string; key: string; fields: { summary: string } }>
@@ -386,7 +389,6 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-
         return normalizeFields(fields);
       } else {
         const res = await request({

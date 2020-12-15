@@ -76,7 +76,7 @@ describe(`POST ${URL}`, () => {
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
-    coreUsageStatsClient.incrementSavedObjectsImport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the import does not fail
+    coreUsageStatsClient.incrementSavedObjectsImport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerImportRoute(router, { config, coreUsageData });
 
@@ -106,7 +106,7 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
     expect(coreUsageStatsClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
-      headers: expect.anything(),
+      request: expect.anything(),
       createNewCopies: false,
       overwrite: false,
     });
