@@ -5,6 +5,7 @@
  */
 
 import { Unionize, UnionToIntersection } from 'utility-types';
+import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
 type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
@@ -20,8 +21,6 @@ type Script =
     };
 
 type BucketsPath = string | Record<string, string>;
-
-type SourceOptions = string | string[];
 
 type AggregationSourceOptions =
   | {
@@ -104,7 +103,9 @@ export interface AggregationOptionsByType {
     from?: number;
     size?: number;
     sort?: SortOptions;
-    _source?: SourceOptions;
+    _source?: ESSourceOptions;
+    fields?: MaybeReadonlyArray<string>;
+    docvalue_fields?: MaybeReadonlyArray<string>;
   };
   filter: Record<string, any>;
   filters: {
@@ -177,6 +178,10 @@ export interface AggregationOptionsByType {
       [x: string]: string;
     };
     script: string;
+  };
+  top_metrics: {
+    metrics: { field: string } | MaybeReadonlyArray<{ field: string }>;
+    sort: SortOptions;
   };
 }
 
@@ -271,9 +276,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
         relation: 'eq' | 'gte';
       };
       max_score: number | null;
-      hits: Array<{
-        _source: TDocument;
-      }>;
+      hits: TAggregationOptionsMap extends { top_hits: AggregationOptionsByType['top_hits'] }
+        ? ESHitsOf<TAggregationOptionsMap['top_hits'], TDocument>
+        : ESSearchHit[];
     };
   };
   filter: {
@@ -369,7 +374,27 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   };
   bucket_sort: undefined;
   bucket_selector: undefined;
+  top_metrics: [
+    {
+      sort: [string | number];
+      metrics: UnionToIntersection<
+        TAggregationOptionsMap extends {
+          top_metrics: { metrics: { field: infer TFieldName } };
+        }
+          ? TopMetricsMap<TFieldName>
+          : TAggregationOptionsMap extends {
+              top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
+            }
+          ? TopMetricsMap<TFieldName>
+          : TopMetricsMap<string>
+      >;
+    }
+  ];
 }
+
+type TopMetricsMap<TFieldName> = TFieldName extends string
+  ? Record<TFieldName, string | number | null>
+  : Record<string, string | number>;
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap
 // similar to "cannot be used to index type", uncomment the type below and hover

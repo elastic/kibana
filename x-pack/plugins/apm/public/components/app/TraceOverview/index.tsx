@@ -14,6 +14,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './TraceList';
+import { Correlations } from '../Correlations';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -61,6 +62,7 @@ export function TraceOverview() {
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>

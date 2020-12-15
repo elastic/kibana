@@ -19,7 +19,8 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
@@ -104,8 +105,30 @@ export abstract class Embeddable<
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
    * input data did not change.
+   *
+   * In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
+   *
+   * The order would be as follows:
+   * input$
+   * output$
+   * reload()
+   * ----
+   * updated$
    */
   public abstract reload(): void;
+
+  /**
+   * Merges input$ and output$ streams and debounces emit till next macro-task.
+   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
+   * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
+   * which allows to skip any state handling in case `reload` already handled it.
+   */
+  public getUpdated$(): Readonly<Rx.Observable<void>> {
+    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
+      debounceTime(0),
+      mapTo(undefined)
+    );
+  }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
     return this.input$.asObservable();

@@ -21,6 +21,9 @@ import supertest from 'supertest';
 import { registerGetRoute } from '../get';
 import { ContextService } from '../../../context';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
 import { coreMock } from '../../../mocks';
@@ -32,6 +35,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   let httpSetup: InternalHttpServiceSetup;
   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
@@ -50,7 +54,10 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     });
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerGetRoute(router);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsGet.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerGetRoute(router, { coreUsageData });
 
     await server.start();
   });
@@ -59,7 +66,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const clientResponse = {
       id: 'logstash-*',
       title: 'logstash-*',
@@ -77,6 +84,9 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       .expect(200);
 
     expect(result.body).toEqual(clientResponse);
+    expect(coreUsageStatsClient.incrementSavedObjectsGet).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
   });
 
   it('calls upon savedObjectClient.get', async () => {

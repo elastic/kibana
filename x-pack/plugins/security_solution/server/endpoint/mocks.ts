@@ -25,6 +25,8 @@ import { ManifestManager } from './services/artifacts/manifest_manager/manifest_
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
+// import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { LicenseService } from '../../common/license/license';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -72,6 +74,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     security: securityMock.createSetup(),
     alerts: alertsMock.createStart(),
     config,
+    licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<
       ReturnType<FleetStartContract['registerExternalCallback']>,
       Parameters<FleetStartContract['registerExternalCallback']>

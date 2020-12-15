@@ -29,8 +29,13 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
   AlertExecutionStatusValues,
+  AlertNotifyWhenType,
 } from '../types';
-import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
+import {
+  validateAlertTypeParams,
+  alertExecutionStatusFromRaw,
+  getAlertNotifyWhenType,
+} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -157,6 +162,7 @@ interface UpdateOptions {
     actions: NormalizedAlertAction[];
     params: Record<string, unknown>;
     throttle: string | null;
+    notifyWhen: AlertNotifyWhenType | null;
   };
 }
 
@@ -236,6 +242,8 @@ export class AlertsClient {
       throw error;
     }
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
+
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
 
@@ -251,6 +259,8 @@ export class AlertsClient {
     const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
 
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
@@ -262,6 +272,7 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
+      notifyWhen,
       executionStatus: {
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
@@ -644,6 +655,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
+
     const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
 
     await Promise.all([
@@ -694,6 +707,7 @@ export class AlertsClient {
       ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawAlert>;
     const createAttributes = this.updateMeta({
@@ -702,6 +716,7 @@ export class AlertsClient {
       ...apiKeyAttributes,
       params: validatedAlertTypeParams as RawAlert['params'],
       actions,
+      notifyWhen,
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
@@ -819,6 +834,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
@@ -901,6 +918,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -1001,6 +1020,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -1075,6 +1096,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
@@ -1134,6 +1157,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
@@ -1192,6 +1217,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1256,6 +1283,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
@@ -1326,7 +1355,7 @@ export class AlertsClient {
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, updatedAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
+    { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
     // Not the prettiest code here, but if we want to use most of the
@@ -1341,6 +1370,7 @@ export class AlertsClient {
     const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
     return {
       id,
+      notifyWhen,
       ...rawAlertWithoutExecutionStatus,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change

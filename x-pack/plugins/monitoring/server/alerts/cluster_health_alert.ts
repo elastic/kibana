@@ -38,6 +38,9 @@ export class ClusterHealthAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label,
       legacy: {
         watchName: 'elasticsearch_cluster_status',
+        nodeNameLabel: i18n.translate('xpack.monitoring.alerts.clusterHealth.nodeNameLabel', {
+          defaultMessage: 'Elasticsearch cluster alert',
+        }),
       },
       actionVariables: [
         {

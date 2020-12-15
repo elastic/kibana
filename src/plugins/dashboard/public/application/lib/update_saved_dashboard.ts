@@ -18,15 +18,14 @@
  */
 
 import _ from 'lodash';
-import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
-import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
+import type { SavedObjectTagDecoratorTypeGuard } from '../../services/saved_objects_tagging_oss';
+import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
 import { FilterUtils } from './filter_utils';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
-import { esFilters } from '../../../../data/public';
 
 export function updateSavedDashboard(
-  savedDashboard: SavedObjectDashboard,
+  savedDashboard: DashboardSavedObject,
   appState: DashboardAppState,
   timeFilter: TimefilterContract,
   hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard,

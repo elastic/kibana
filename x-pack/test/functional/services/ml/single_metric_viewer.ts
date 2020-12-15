@@ -187,5 +187,13 @@ export function MachineLearningSingleMetricViewerProvider(
       );
       await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
     },
+
+    async assertToastMessageExists(dataTestSubj: string) {
+      const toast = await testSubjects.find(dataTestSubj);
+      expect(toast).not.to.be(undefined);
+    },
+    async assertDisabledJobReasonWarningToastExist() {
+      await this.assertToastMessageExists('mlTimeSeriesExplorerDisabledJobReasonWarningToast');
+    },
   };
 }

@@ -21,11 +21,16 @@ describe('EventCounts', () => {
   const to = '2020-01-21T20:49:57.080Z';
 
   const testProps = {
+    filters: [],
     from,
     indexNames: [],
     indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
+    query: {
+      query: '',
+      language: 'kuery',
+    },
   };
 
   test('it filters the `Host events` widget with a `host.name` `exists` filter', () => {

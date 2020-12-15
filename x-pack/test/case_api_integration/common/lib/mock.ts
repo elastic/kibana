@@ -26,6 +26,9 @@ export const postCaseReq: CasePostRequest = {
     type: '.none' as ConnectorTypes,
     fields: null,
   },
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const postCommentUserReq: CommentRequestUserType = {

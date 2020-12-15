@@ -130,7 +130,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    // width: '175px',
     sortable: true,
     render: (_field, node) => {
       return (

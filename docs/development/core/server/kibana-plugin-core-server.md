@@ -94,6 +94,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [ICspConfig](./kibana-plugin-core-server.icspconfig.md) | CSP configuration for use in Kibana. |
 |  [ICustomClusterClient](./kibana-plugin-core-server.icustomclusterclient.md) | See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md) |
+|  [IExternalUrlConfig](./kibana-plugin-core-server.iexternalurlconfig.md) | External Url configuration for use in Kibana. |
+|  [IExternalUrlPolicy](./kibana-plugin-core-server.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IKibanaResponse](./kibana-plugin-core-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [ImageValidation](./kibana-plugin-core-server.imagevalidation.md) |  |

@@ -17,7 +17,6 @@ import React, { useMemo } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router-dom';
-import { useTransactionChartsFetcher } from '../../../hooks/use_transaction_charts_fetcher';
 import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -53,11 +52,6 @@ export function TransactionDetails({
     distributionData,
     distributionStatus,
   } = useTransactionDistributionFetcher();
-
-  const {
-    transactionChartsData,
-    transactionChartsStatus,
-  } = useTransactionChartsFetcher();
 
   const {
     waterfall,
@@ -128,11 +122,7 @@ export function TransactionDetails({
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
             <ChartPointerEventContextProvider>
-              <TransactionCharts
-                fetchStatus={transactionChartsStatus}
-                charts={transactionChartsData}
-                urlParams={urlParams}
-              />
+              <TransactionCharts />
             </ChartPointerEventContextProvider>
 
             <EuiHorizontalRule size="full" margin="l" />

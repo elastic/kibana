@@ -91,16 +91,23 @@ export const getSourcererScopeSelector = () => {
       : selectedPatterns;
   });
 
+  const getIndexPattern = memoizeOne(
+    (indexPattern, title) => ({
+      ...indexPattern,
+      title,
+    }),
+    (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  );
+
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
     const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
+    const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
+
     return {
       ...scope,
       selectedPatterns,
-      indexPattern: {
-        ...scope.indexPattern,
-        title: selectedPatterns.join(),
-      },
+      indexPattern,
     };
   };
   return mapStateToProps;

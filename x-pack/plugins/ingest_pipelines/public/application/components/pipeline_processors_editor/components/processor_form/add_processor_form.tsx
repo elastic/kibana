@@ -81,7 +81,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
-                <EuiTitle size="m">
+                <EuiTitle size="m" data-test-subj="configurePipelineHeader">
                   <h2>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>

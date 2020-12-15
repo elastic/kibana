@@ -21,16 +21,19 @@ import {
   APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../plugins/ui_actions/public';
+  ROW_CLICK_TRIGGER,
+} from '../../../ui_actions/public';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;
   ['brush']: typeof SELECT_RANGE_TRIGGER;
   ['filter']: typeof VALUE_CLICK_TRIGGER;
+  ['tableRowContextMenuClick']: typeof ROW_CLICK_TRIGGER;
 }
 
 export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
   applyFilter: APPLY_FILTER_TRIGGER,
   brush: SELECT_RANGE_TRIGGER,
   filter: VALUE_CLICK_TRIGGER,
+  tableRowContextMenuClick: ROW_CLICK_TRIGGER,
 };

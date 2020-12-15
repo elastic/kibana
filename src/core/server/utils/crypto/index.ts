@@ -18,3 +18,4 @@
  */
 
 export { Pkcs12ReadResult, readPkcs12Keystore, readPkcs12Truststore } from './pkcs12';
+export { createSHA256Hash } from './sha256';

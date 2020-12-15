@@ -532,7 +532,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode }?: Partial<ExpressionRenderHandlerParams>);
+    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -544,7 +544,7 @@ export class ExpressionRenderHandler {
     // (undocumented)
     render$: Observable<number>;
     // (undocumented)
-    render: (data: any, uiState?: any) => Promise<void>;
+    render: (value: any, uiState?: any) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UpdateValue" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -888,6 +888,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
+    hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+    // (undocumented)
     inspectorAdapters?: Adapters;
     // Warning: (ae-forgotten-export) The symbol "RenderErrorHandlerFnType" needs to be exported by the entry point index.d.ts
     //
@@ -916,6 +918,8 @@ export interface IInterpreterRenderHandlers {
     event: (event: any) => void;
     // (undocumented)
     getRenderMode: () => RenderMode;
+    // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+      defaultMessage: 'Shrink index',
+    }),
     searchableSnapshotInHotPhase: {
       searchableSnapshotDisallowed: {
         calloutTitle: i18n.translate(
@@ -27,6 +30,9 @@ export const i18nTexts = {
     },
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
+    }),
+    readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
+      defaultMessage: 'Make index read only',
     }),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',

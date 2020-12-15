@@ -14,7 +14,7 @@ import { EuiPageContent, EuiBasicTable } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { DocumentDetail } from '.';
-import { ResultFieldValue } from '../result_field_value';
+import { ResultFieldValue } from '../result';
 
 describe('DocumentDetail', () => {
   const values = {

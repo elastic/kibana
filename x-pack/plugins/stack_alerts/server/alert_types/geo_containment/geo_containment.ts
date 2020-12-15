@@ -11,7 +11,7 @@ import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_qu
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
 
-interface LatestEntityLocation {
+export interface LatestEntityLocation {
   location: number[];
   shapeLocationId: string;
   dateInShape: string | null;
@@ -94,6 +94,40 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
+export function getActiveEntriesAndGenerateAlerts(
+  prevLocationMap: Record<string, LatestEntityLocation>,
+  currLocationMap: Map<string, LatestEntityLocation>,
+  alertInstanceFactory: (
+    x: string
+  ) => { scheduleActions: (x: string, y: Record<string, unknown>) => void },
+  shapesIdsNamesMap: Record<string, unknown>,
+  currIntervalEndTime: Date
+) {
+  const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
+    ...Object.entries(prevLocationMap || {}),
+    ...currLocationMap,
+  ]);
+  allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
+    const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
+    const context = {
+      entityId: entityName,
+      entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+      entityDocumentId: docId,
+      detectionDateTime: new Date(currIntervalEndTime).toISOString(),
+      entityLocation: `POINT (${location[0]} ${location[1]})`,
+      containingBoundaryId: shapeLocationId,
+      containingBoundaryName,
+    };
+    const alertInstanceId = `${entityName}-${containingBoundaryName}`;
+    if (shapeLocationId === OTHER_CATEGORY) {
+      allActiveEntriesMap.delete(entityName);
+    } else {
+      alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+    }
+  });
+  return allActiveEntriesMap;
+}
+
 export const getGeoContainmentExecutor = (log: Logger) =>
   async function ({
     previousStartedAt,
@@ -153,26 +187,17 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    // Cycle through new alert statuses and set active
-    currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
-      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
-      const context = {
-        entityId: entityName,
-        entityDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityLocation: `POINT (${location[0]} ${location[1]})`,
-        containingBoundaryId: shapeLocationId,
-        containingBoundaryName,
-      };
-      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-      if (shapeLocationId !== OTHER_CATEGORY) {
-        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
-      }
-    });
+    const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      state.prevLocationMap as Record<string, LatestEntityLocation>,
+      currLocationMap,
+      services.alertInstanceFactory,
+      shapesIdsNamesMap,
+      currIntervalEndTime
+    );
 
     return {
       shapesFilters,
       shapesIdsNamesMap,
+      prevLocationMap: Object.fromEntries(allActiveEntriesMap),
     };
   };

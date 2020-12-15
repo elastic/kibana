@@ -220,74 +220,72 @@ export const EditConnector = React.memo(
           )}
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="none">
-          <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
-            <DisappearingFlexItem $isHidden={!editConnector}>
-              <Form form={form}>
-                <EuiFlexGroup gutterSize="none" direction="row">
-                  <EuiFlexItem>
-                    <UseField
-                      path="connectorId"
-                      component={ConnectorSelector}
-                      componentProps={{
-                        connectors,
-                        dataTestSubj: 'caseConnectors',
-                        defaultValue: selectedConnector,
-                        disabled,
-                        idAria: 'caseConnectors',
-                        isEdit: editConnector,
-                        isLoading,
-                      }}
-                      onChange={onChangeConnector}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </Form>
-            </DisappearingFlexItem>
-            <EuiFlexItem data-test-subj="edit-connector-settings-fields-form-flex-item">
-              {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
-                !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
-                !editConnector && (
-                  <EuiText size="s">
-                    <span>{i18n.NO_CONNECTOR}</span>
-                  </EuiText>
-                )}
-              <SettingFieldsForm
-                connector={currentConnector}
-                fields={fields}
-                isEdit={editConnector}
-                onChange={onFieldsChange}
-              />
+        <MyFlexGroup data-test-subj="edit-connectors" direction="column">
+          <DisappearingFlexItem $isHidden={!editConnector}>
+            <Form form={form}>
+              <EuiFlexGroup gutterSize="none" direction="row">
+                <EuiFlexItem>
+                  <UseField
+                    path="connectorId"
+                    component={ConnectorSelector}
+                    componentProps={{
+                      connectors,
+                      dataTestSubj: 'caseConnectors',
+                      defaultValue: selectedConnector,
+                      disabled,
+                      idAria: 'caseConnectors',
+                      isEdit: editConnector,
+                      isLoading,
+                    }}
+                    onChange={onChangeConnector}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Form>
+          </DisappearingFlexItem>
+          <EuiFlexItem data-test-subj="edit-connector-settings-fields-form-flex-item">
+            {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
+              !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
+              !editConnector && (
+                <EuiText size="s">
+                  <span>{i18n.NO_CONNECTOR}</span>
+                </EuiText>
+              )}
+            <SettingFieldsForm
+              connector={currentConnector}
+              fields={fields}
+              isEdit={editConnector}
+              onChange={onFieldsChange}
+            />
+          </EuiFlexItem>
+          {editConnector && (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="secondary"
+                    data-test-subj="edit-connectors-submit"
+                    fill
+                    iconType="save"
+                    onClick={onSubmitConnector}
+                    size="s"
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="edit-connectors-cancel"
+                    iconType="cross"
+                    onClick={onCancelConnector}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {editConnector && (
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="secondary"
-                      data-test-subj="edit-connectors-submit"
-                      fill
-                      iconType="save"
-                      onClick={onSubmitConnector}
-                      size="s"
-                    >
-                      {i18n.SAVE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="edit-connectors-cancel"
-                      iconType="cross"
-                      onClick={onCancelConnector}
-                      size="s"
-                    >
-                      {i18n.CANCEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          )}
         </MyFlexGroup>
       </EuiText>
     );

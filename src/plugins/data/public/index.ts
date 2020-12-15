@@ -273,6 +273,7 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
+  IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
 } from '../common';
 
@@ -331,6 +332,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,

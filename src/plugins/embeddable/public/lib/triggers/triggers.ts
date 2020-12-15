@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '../../../../expressions';
-import { Trigger } from '../../../../ui_actions/public';
+import { Trigger, RowClickContext } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {
@@ -52,7 +52,8 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
-  | RangeSelectContext<T>;
+  | RangeSelectContext<T>
+  | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
@@ -94,6 +95,11 @@ export const isValueClickTriggerContext = (
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext
 ): context is RangeSelectContext => context.data && 'range' in context.data;
+
+export const isRowClickTriggerContext = (context: ChartActionContext): context is RowClickContext =>
+  !!context.data &&
+  typeof context.data === 'object' &&
+  typeof (context as RowClickContext).data.rowIndex === 'number';
 
 export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
   !!context &&

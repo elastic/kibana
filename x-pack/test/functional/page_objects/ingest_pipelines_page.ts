@@ -17,6 +17,10 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await testSubjects.getVisibleText('appTitle');
     },
 
+    async emptyStateHeaderText() {
+      return await testSubjects.getVisibleText('title');
+    },
+
     async createNewPipeline({
       name,
       description,

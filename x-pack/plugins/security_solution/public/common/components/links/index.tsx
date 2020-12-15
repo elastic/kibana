@@ -327,6 +327,20 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
+  const renderCallback = useCallback(
+    (rowItem) =>
+      isReputationLink(rowItem) && (
+        <ExternalLink
+          url={rowItem.url_template}
+          overflowIndexStart={overflowIndexStart}
+          allItemsLimit={allItemsLimit}
+        >
+          <>{rowItem.name ?? domain}</>
+        </ExternalLink>
+      ),
+    [allItemsLimit, domain, overflowIndexStart]
+  );
+
   return ipReputationLinks?.length > 0 ? (
     <section>
       <EuiFlexGroup
@@ -357,19 +371,7 @@ const ReputationLinkComponent: React.FC<{
           <DefaultFieldRendererOverflow
             rowItems={ipReputationLinks}
             idPrefix="moreReputationLink"
-            render={(rowItem) => {
-              return (
-                isReputationLink(rowItem) && (
-                  <ExternalLink
-                    url={rowItem.url_template}
-                    overflowIndexStart={overflowIndexStart}
-                    allItemsLimit={allItemsLimit}
-                  >
-                    <>{rowItem.name ?? domain}</>
-                  </ExternalLink>
-                )
-              );
-            }}
+            render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}
           />

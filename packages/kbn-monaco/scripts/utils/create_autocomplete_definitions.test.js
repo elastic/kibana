@@ -17,32 +17,13 @@
  * under the License.
  */
 const {
-  getPrimitives,
   getMethodDescription,
   getPainlessClassToAutocomplete,
   createAutocompleteDefinitions,
 } = require('./create_autocomplete_definitions');
 
-// Snippet of sample data returned from GET _scripts/painless/_context?context=<context>
+// Snippet of sample data returned from https://github.com/elastic/elasticsearch/tree/master/modules/lang-painless/src/main/generated/whitelist-json
 const testContext = [
-  {
-    name: 'boolean',
-    imported: true,
-    constructors: [],
-    static_methods: [],
-    methods: [],
-    static_fields: [],
-    fields: [],
-  },
-  {
-    name: 'int',
-    imported: true,
-    constructors: [],
-    static_methods: [],
-    methods: [],
-    static_fields: [],
-    fields: [],
-  },
   {
     name: 'java.lang.Long',
     imported: true,
@@ -103,12 +84,6 @@ const testContext = [
 ];
 
 describe('Autocomplete utils', () => {
-  describe('getPrimitives()', () => {
-    test('returns an array of primitives', () => {
-      expect(getPrimitives(testContext)).toEqual(['boolean', 'int']);
-    });
-  });
-
   describe('getMethodDescription()', () => {
     test('returns a string describing the method', () => {
       expect(getMethodDescription('pow', [['double', 'double']], ['double'])).toEqual(
@@ -128,7 +103,7 @@ describe('Autocomplete utils', () => {
 
   describe('getPainlessClassToAutocomplete()', () => {
     test('returns the fields and methods associated with a class', () => {
-      const mathClass = testContext[3];
+      const mathClass = testContext[1];
 
       const {
         static_fields: staticFields,
@@ -173,7 +148,7 @@ describe('Autocomplete utils', () => {
     });
 
     test('removes duplicate methods', () => {
-      const longClass = testContext[2];
+      const longClass = testContext[0];
 
       const {
         static_fields: staticFields,
@@ -251,22 +226,6 @@ describe('Autocomplete utils', () => {
   describe('createAutocompleteDefinitions()', () => {
     test('returns formatted autocomplete definitions', () => {
       expect(createAutocompleteDefinitions(testContext)).toEqual([
-        {
-          properties: undefined,
-          constructorDefinition: undefined,
-          documentation: 'Primitive: boolean',
-          insertText: 'boolean',
-          kind: 'type',
-          label: 'boolean',
-        },
-        {
-          properties: undefined,
-          constructorDefinition: undefined,
-          documentation: 'Primitive: int',
-          insertText: 'int',
-          kind: 'type',
-          label: 'int',
-        },
         {
           constructorDefinition: undefined,
           documentation: 'Class: Long',

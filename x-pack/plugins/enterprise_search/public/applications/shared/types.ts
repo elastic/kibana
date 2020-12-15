@@ -7,7 +7,8 @@
 import { ADD, UPDATE } from './constants/operations';
 
 export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
-
+// Certain API endpoints will use these internal type names, which map to the external names above
+export type InternalSchemaTypes = 'string' | 'float' | 'location' | 'date';
 export interface Schema {
   [key: string]: SchemaTypes;
 }

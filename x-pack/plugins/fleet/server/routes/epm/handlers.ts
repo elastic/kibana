@@ -41,12 +41,13 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
+  getInstallation,
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { bufferToStream } from '../../services/epm/streams';
+import { getAsset } from '../../services/epm/archive/storage';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -107,35 +108,54 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const savedObject = await getInstallationObject({ savedObjectsClient, pkgName });
-    const pkgInstallSource = savedObject?.attributes.install_source;
-    // TODO: when package storage is available, remove installSource check and check cache and storage, remove registry call
-    if (pkgInstallSource === 'upload' && pkgVersion === savedObject?.attributes.version) {
-      const headerContentType = mime.contentType(path.extname(filePath));
-      if (!headerContentType) {
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const useLocalFile = pkgVersion === installation?.version;
+
+    if (useLocalFile) {
+      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
+      const fileBuffer = getArchiveEntry(assetPath);
+      // only pull local installation if we don't have it cached
+      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+
+      // error, if neither is available
+      if (!fileBuffer && !storedAsset) {
+        return response.custom({
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
+        });
+      }
+
+      // if storedAsset is not available, fileBuffer *must* be
+      // b/c we error if we don't have at least one, and storedAsset is the least likely
+      const { buffer, contentType } = storedAsset
+        ? {
+            contentType: storedAsset.media_type,
+            buffer: storedAsset.data_utf8
+              ? Buffer.from(storedAsset.data_utf8, 'utf8')
+              : Buffer.from(storedAsset.data_base64, 'base64'),
+          }
+        : {
+            contentType: mime.contentType(path.extname(assetPath)),
+            buffer: fileBuffer,
+          };
+
+      if (!contentType) {
         return response.custom({
           body: `unknown content type for file: ${filePath}`,
           statusCode: 400,
         });
       }
-      const archiveFile = getArchiveEntry(`${pkgName}-${pkgVersion}/${filePath}`);
-      if (!archiveFile) {
-        return response.custom({
-          body: `uploaded package file not found: ${filePath}`,
-          statusCode: 404,
-        });
-      }
-      const headers: ResponseHeaders = {
-        'cache-control': 'max-age=10, public',
-        'content-type': headerContentType,
-      };
+
       return response.custom({
-        body: bufferToStream(archiveFile),
+        body: buffer,
         statusCode: 200,
-        headers,
+        headers: {
+          'cache-control': 'max-age=10, public',
+          'content-type': contentType,
+        },
       });
     } else {
-      const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
       const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
       const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
         const value = registryResponse.headers.get(knownHeader);

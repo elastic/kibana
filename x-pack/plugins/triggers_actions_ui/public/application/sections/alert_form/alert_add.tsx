@@ -57,6 +57,7 @@ const AlertAdd = ({
       },
       actions: [],
       tags: [],
+      notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
     }),
     [alertTypeId, consumer, initialValues]

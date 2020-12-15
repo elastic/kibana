@@ -21,6 +21,7 @@ export const buildTimelineDetailsQuery = (
         _id: [id],
       },
     },
+    fields: ['*'],
   },
   size: 1,
 });

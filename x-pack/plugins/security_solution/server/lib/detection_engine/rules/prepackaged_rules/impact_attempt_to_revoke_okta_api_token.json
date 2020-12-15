@@ -13,7 +13,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Attempt to Revoke Okta API Token",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:system.api_token.revoke",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
@@ -48,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

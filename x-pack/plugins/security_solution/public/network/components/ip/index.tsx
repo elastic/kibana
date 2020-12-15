@@ -11,7 +11,7 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 export const SOURCE_IP_FIELD_NAME = 'source.ip';
 export const DESTINATION_IP_FIELD_NAME = 'destination.ip';
 
-const IP_FIELD_TYPE = 'ip';
+export const IP_FIELD_TYPE = 'ip';
 
 /**
  * Renders text containing a draggable IP address (e.g. `source.ip`,

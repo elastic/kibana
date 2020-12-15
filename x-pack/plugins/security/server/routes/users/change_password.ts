@@ -14,7 +14,11 @@ import {
 } from '../../authentication';
 import { RouteDefinitionParams } from '..';
 
-export function defineChangeUserPasswordRoutes({ authc, session, router }: RouteDefinitionParams) {
+export function defineChangeUserPasswordRoutes({
+  getAuthenticationService,
+  session,
+  router,
+}: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/users/{username}/password',
@@ -30,7 +34,7 @@ export function defineChangeUserPasswordRoutes({ authc, session, router }: Route
       const { username } = request.params;
       const { password: currentPassword, newPassword } = request.body;
 
-      const currentUser = authc.getCurrentUser(request);
+      const currentUser = getAuthenticationService().getCurrentUser(request);
       const isUserChangingOwnPassword =
         currentUser && currentUser.username === username && canUserChangePassword(currentUser);
       const currentSession = isUserChangingOwnPassword ? await session.get(request) : null;
@@ -74,7 +78,7 @@ export function defineChangeUserPasswordRoutes({ authc, session, router }: Route
       // session and in such cases we shouldn't create a new one.
       if (isUserChangingOwnPassword && currentSession) {
         try {
-          const authenticationResult = await authc.login(request, {
+          const authenticationResult = await getAuthenticationService().login(request, {
             provider: { name: currentSession.provider.name },
             value: { username, password: newPassword },
           });

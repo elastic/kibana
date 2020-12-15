@@ -65,6 +65,7 @@ export function registerTransactionErrorRateAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params: alertParams }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const indices = await getApmIndices({

@@ -592,10 +592,37 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // TODO: Unskip these once this is fixed
-      describe.skip('working against text values with spaces', () => {
+      describe('working against text values with spaces', () => {
         it('will return 3 results if we have a list that includes 1 text', async () => {
-          await importFile(supertest, 'text', ['one'], 'list_items.txt');
+          await importTextFile(supertest, 'text', ['word one'], 'list_items.txt');
+          const rule = getRuleForSignalTesting(['text']);
+          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'text',
+                list: {
+                  id: 'list_items.txt',
+                  type: 'text',
+                },
+                operator: 'included',
+                type: 'list',
+              },
+            ],
+          ]);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, id);
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source.text).sort();
+          expect(hits).to.eql(['word four', 'word three', 'word two']);
+        });
+
+        it('will return 3 results if we have a list that includes 1 text with additional wording', async () => {
+          await importTextFile(
+            supertest,
+            'text',
+            ['word one additional wording'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['text']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
@@ -618,7 +645,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('will return 2 results if we have a list that includes 2 text', async () => {
-          await importFile(supertest, 'text', ['one', 'three'], 'list_items.txt');
+          await importFile(supertest, 'text', ['word one', 'word three'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['text']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
@@ -644,7 +671,7 @@ export default ({ getService }: FtrProviderContext) => {
           await importTextFile(
             supertest,
             'text',
-            ['one', 'two', 'three', 'four'],
+            ['word one', 'word two', 'word three', 'word four'],
             'list_items.txt'
           );
           const rule = getRuleForSignalTesting(['text']);
@@ -746,10 +773,37 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // TODO: Unskip these once this is fixed
-      describe.skip('working against text values with spaces', () => {
+      describe('working against text values with spaces', () => {
         it('will return 1 result if we have a list that excludes 1 text', async () => {
-          await importTextFile(supertest, 'text', ['one'], 'list_items.txt');
+          await importTextFile(supertest, 'text', ['word one'], 'list_items.txt');
+          const rule = getRuleForSignalTesting(['text']);
+          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'text',
+                list: {
+                  id: 'list_items.txt',
+                  type: 'text',
+                },
+                operator: 'excluded',
+                type: 'list',
+              },
+            ],
+          ]);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, id);
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source.text).sort();
+          expect(hits).to.eql(['word one']);
+        });
+
+        it('will return 1 result if we have a list that excludes 1 text with additional wording', async () => {
+          await importTextFile(
+            supertest,
+            'text',
+            ['word one additional wording'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['text']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
@@ -772,7 +826,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('will return 2 results if we have a list that excludes 2 text', async () => {
-          await importTextFile(supertest, 'text', ['one', 'three'], 'list_items.txt');
+          await importTextFile(supertest, 'text', ['word one', 'word three'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['text']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
@@ -798,7 +852,7 @@ export default ({ getService }: FtrProviderContext) => {
           await importTextFile(
             supertest,
             'text',
-            ['one', 'two', 'three', 'four'],
+            ['word one', 'word two', 'word three', 'word four'],
             'list_items.txt'
           );
           const rule = getRuleForSignalTesting(['text']);

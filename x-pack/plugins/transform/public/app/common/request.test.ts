@@ -18,6 +18,7 @@ import {
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
+  getMissingBucketConfig,
   getPivotQuery,
   isDefaultQuery,
   isMatchAllQuery,
@@ -27,6 +28,20 @@ import {
 } from './request';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
+
+const groupByTerms: PivotGroupByConfig = {
+  agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+  field: 'the-group-by-field',
+  aggName: 'the-group-by-agg-name',
+  dropDownName: 'the-group-by-drop-down-name',
+};
+
+const aggsAvg: PivotAggsConfig = {
+  agg: PIVOT_SUPPORTED_AGGS.AVG,
+  field: 'the-agg-field',
+  aggName: 'the-agg-agg-name',
+  dropDownName: 'the-agg-drop-down-name',
+};
 
 describe('Transform: Common', () => {
   test('isMatchAllQuery()', () => {
@@ -47,6 +62,16 @@ describe('Transform: Common', () => {
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 
+  test('getMissingBucketConfig()', () => {
+    expect(getMissingBucketConfig(groupByTerms)).toEqual({});
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
+      missing_bucket: true,
+    });
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: false } })).toEqual({
+      missing_bucket: false,
+    });
+  });
+
   test('getPivotQuery()', () => {
     const query = getPivotQuery('the-query');
 
@@ -60,22 +85,8 @@ describe('Transform: Common', () => {
 
   test('getPreviewTransformRequestBody()', () => {
     const query = getPivotQuery('the-query');
-    const groupBy: PivotGroupByConfig[] = [
-      {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-        field: 'the-group-by-field',
-        aggName: 'the-group-by-agg-name',
-        dropDownName: 'the-group-by-drop-down-name',
-      },
-    ];
-    const aggs: PivotAggsConfig[] = [
-      {
-        agg: PIVOT_SUPPORTED_AGGS.AVG,
-        field: 'the-agg-field',
-        aggName: 'the-agg-agg-name',
-        dropDownName: 'the-agg-drop-down-name',
-      },
-    ];
+    const groupBy: PivotGroupByConfig[] = [groupByTerms];
+    const aggs: PivotAggsConfig[] = [aggsAvg];
     const request = getPreviewTransformRequestBody('the-index-pattern-title', query, groupBy, aggs);
 
     expect(request).toEqual({
@@ -92,22 +103,8 @@ describe('Transform: Common', () => {
 
   test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
     const query = getPivotQuery('the-query');
-    const groupBy: PivotGroupByConfig[] = [
-      {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-        field: 'the-group-by-field',
-        aggName: 'the-group-by-agg-name',
-        dropDownName: 'the-group-by-drop-down-name',
-      },
-    ];
-    const aggs: PivotAggsConfig[] = [
-      {
-        agg: PIVOT_SUPPORTED_AGGS.AVG,
-        field: 'the-agg-field',
-        aggName: 'the-agg-agg-name',
-        dropDownName: 'the-agg-drop-down-name',
-      },
-    ];
+    const groupBy: PivotGroupByConfig[] = [groupByTerms];
+    const aggs: PivotAggsConfig[] = [aggsAvg];
     const request = getPreviewTransformRequestBody(
       'the-index-pattern-title,the-other-title',
       query,
@@ -127,22 +124,30 @@ describe('Transform: Common', () => {
     });
   });
 
+  test('getPreviewTransformRequestBody() with missing_buckets config', () => {
+    const query = getPivotQuery('the-query');
+    const groupBy: PivotGroupByConfig[] = [{ ...groupByTerms, ...{ missing_bucket: true } }];
+    const aggs: PivotAggsConfig[] = [aggsAvg];
+    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, groupBy, aggs);
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: {
+          'the-group-by-agg-name': { terms: { field: 'the-group-by-field', missing_bucket: true } },
+        },
+      },
+      source: {
+        index: ['the-index-pattern-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+      },
+    });
+  });
+
   test('getCreateTransformRequestBody()', () => {
-    const groupBy: PivotGroupByConfig = {
-      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-      field: 'the-group-by-field',
-      aggName: 'the-group-by-agg-name',
-      dropDownName: 'the-group-by-drop-down-name',
-    };
-    const agg: PivotAggsConfig = {
-      agg: PIVOT_SUPPORTED_AGGS.AVG,
-      field: 'the-agg-field',
-      aggName: 'the-agg-agg-name',
-      dropDownName: 'the-agg-drop-down-name',
-    };
     const pivotState: StepDefineExposedState = {
-      aggList: { 'the-agg-name': agg },
-      groupByList: { 'the-group-by-name': groupBy },
+      aggList: { 'the-agg-name': aggsAvg },
+      groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       sourceConfigUpdated: false,

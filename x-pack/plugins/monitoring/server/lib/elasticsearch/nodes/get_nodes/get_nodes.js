@@ -25,8 +25,9 @@ import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_me
  *
  * @param {Object} req: server request object
  * @param {String} esIndexPattern: index pattern for elasticsearch data in monitoring indices
+ * @param {Object} pageOfNodes: server-side paginated current page of ES nodes
  * @param {Object} clusterStats: cluster stats from cluster state document
- * @param {Object} shardStats: per-node information about shards
+ * @param {Object} nodesShardCount: per-node information about shards
  * @return {Array} node info combined with metrics for each node from handle_response
  */
 export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, nodesShardCount) {

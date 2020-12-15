@@ -261,6 +261,7 @@ In other use cases the message field can be used to concatenate different values
   }
   end="2018-03-24T03:33:52.253Z"
   eventType="all"
+  expandedEvent={Object {}}
   filters={Array []}
   isLive={false}
   itemsPerPage={5}
@@ -273,13 +274,16 @@ In other use cases the message field can be used to concatenate different values
   }
   kqlMode="search"
   kqlQueryExpression=""
+  onEventClosed={[MockFunction]}
   showCallOutUnauthorizedMsg={false}
   showEventDetails={false}
   sort={
-    Object {
-      "columnId": "@timestamp",
-      "sortDirection": "desc",
-    }
+    Array [
+      Object {
+        "columnId": "@timestamp",
+        "sortDirection": "desc",
+      },
+    ]
   }
   start="2018-03-23T18:49:23.132Z"
   status="active"

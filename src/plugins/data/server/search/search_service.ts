@@ -256,8 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: asScoped(request).search,
-            // onResponse isn't used on the server, so we just return the original value
-            onResponse: (req, res) => res,
+            onResponse: (req, res) => shimHitsTotal(res),
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,

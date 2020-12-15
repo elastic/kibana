@@ -15,5 +15,6 @@ export default function alertingApiIntegrationTests({
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./actions'));
+    loadTestFile(require.resolve('./alerts'));
   });
 }

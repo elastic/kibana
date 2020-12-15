@@ -24,7 +24,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { IUrlParams } from '../../../context/url_params_context/types';
-import { useTransactionChartsFetcher } from '../../../hooks/use_transaction_charts_fetcher';
 import { useTransactionListFetcher } from './use_transaction_list';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
@@ -72,11 +71,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
-
-  const {
-    transactionChartsData,
-    transactionChartsStatus,
-  } = useTransactionChartsFetcher();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
@@ -132,11 +126,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
                 <EuiSpacer size="s" />
               </>
             )}
-            <TransactionCharts
-              fetchStatus={transactionChartsStatus}
-              charts={transactionChartsData}
-              urlParams={urlParams}
-            />
+            <TransactionCharts />
             <EuiSpacer size="s" />
             <EuiPanel>
               <EuiTitle size="xs">

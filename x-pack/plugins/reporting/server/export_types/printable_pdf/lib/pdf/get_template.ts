@@ -6,8 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import path from 'path';
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import {
+  ContentText,
+  DynamicContent,
+  StyleDictionary,
+  TDocumentDefinitions,
+} from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
+import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 
 export function getTemplate(
@@ -29,6 +35,79 @@ export function getTemplate(
   const subheadingMarginBottom = 5;
   const subheadingHeight = subheadingFontSize * 1.5 + subheadingMarginTop + subheadingMarginBottom;
 
+  const getStyle = (): StyleDictionary => ({
+    heading: {
+      alignment: 'left',
+      fontSize: headingFontSize,
+      bold: true,
+      margin: [headingMarginTop, 0, headingMarginBottom, 0],
+    },
+    subheading: {
+      alignment: 'left',
+      fontSize: subheadingFontSize,
+      italics: true,
+      margin: [0, 0, subheadingMarginBottom, 20],
+    },
+    warning: {
+      color: '#f39c12', // same as @brand-warning in Kibana colors.less
+    },
+  });
+  const getHeader = (): ContentText => ({
+    margin: [pageMarginWidth, pageMarginTop / 4, pageMarginWidth, 0],
+    text: title,
+    font: getFont(title),
+    style: {
+      color: '#aaa',
+    },
+    fontSize: 10,
+    alignment: 'center',
+  });
+  const getFooter = (): DynamicContent => (currentPage: number, pageCount: number) => {
+    const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png'); // Default Elastic Logo
+    return {
+      margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],
+      layout: REPORTING_TABLE_LAYOUT,
+      table: {
+        widths: [100, '*', 100],
+        body: [
+          [
+            {
+              fit: [100, 35],
+              image: logo || logoPath,
+            },
+            {
+              alignment: 'center',
+              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
+                defaultMessage: 'Page {currentPage} of {pageCount}',
+                values: { currentPage: currentPage.toString(), pageCount },
+              }),
+              style: {
+                color: '#aaa',
+              },
+            },
+            '',
+          ],
+          [
+            logo
+              ? {
+                  text: i18n.translate('xpack.reporting.exportTypes.printablePdf.logoDescription', {
+                    defaultMessage: 'Powered by Elastic',
+                  }),
+                  fontSize: 10,
+                  style: {
+                    color: '#aaa',
+                  },
+                  margin: [0, 2, 0, 0],
+                }
+              : '',
+            '',
+            '',
+          ],
+        ],
+      },
+    };
+  };
+
   return {
     // define page size
     pageOrientation: layout.getPdfPageOrientation(),
@@ -40,87 +119,14 @@ export function getTemplate(
       headingHeight,
       subheadingHeight,
     }),
-    pageMargins: [pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom],
+    pageMargins: layout.useReportingBranding
+      ? [pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom]
+      : [0, 0, 0, 0],
 
-    header() {
-      return {
-        margin: [pageMarginWidth, pageMarginTop / 4, pageMarginWidth, 0],
-        text: title,
-        font: getFont(title),
-        style: {
-          color: '#aaa',
-        },
-        fontSize: 10,
-        alignment: 'center',
-      };
-    },
+    header: layout.hasHeader ? getHeader() : undefined,
+    footer: layout.hasFooter ? getFooter() : undefined,
 
-    footer(currentPage: number, pageCount: number) {
-      const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png'); // Default Elastic Logo
-      return {
-        margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],
-        layout: 'noBorder',
-        table: {
-          widths: [100, '*', 100],
-          body: [
-            [
-              {
-                fit: [100, 35],
-                image: logo || logoPath,
-              },
-              {
-                alignment: 'center',
-                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
-                  defaultMessage: 'Page {currentPage} of {pageCount}',
-                  values: { currentPage: currentPage.toString(), pageCount },
-                }),
-                style: {
-                  color: '#aaa',
-                },
-              },
-              '',
-            ],
-            [
-              logo
-                ? {
-                    text: i18n.translate(
-                      'xpack.reporting.exportTypes.printablePdf.logoDescription',
-                      {
-                        defaultMessage: 'Powered by Elastic',
-                      }
-                    ),
-                    fontSize: 10,
-                    style: {
-                      color: '#aaa',
-                    },
-                    margin: [0, 2, 0, 0],
-                  }
-                : '',
-              '',
-              '',
-            ],
-          ],
-        },
-      };
-    },
-
-    styles: {
-      heading: {
-        alignment: 'left',
-        fontSize: headingFontSize,
-        bold: true,
-        margin: [headingMarginTop, 0, headingMarginBottom, 0],
-      },
-      subheading: {
-        alignment: 'left',
-        fontSize: subheadingFontSize,
-        italics: true,
-        margin: [0, 0, subheadingMarginBottom, 20],
-      },
-      warning: {
-        color: '#f39c12', // same as @brand-warning in Kibana colors.less
-      },
-    },
+    styles: layout.useReportingBranding ? getStyle() : undefined,
 
     defaultStyle: {
       fontSize: 12,

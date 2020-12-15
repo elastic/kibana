@@ -49,6 +49,10 @@ export const byNameTagSorter = (tagA: Tag, tagB: Tag): number => {
   return tagA.name.localeCompare(tagB.name);
 };
 
+export const getTag = (tagId: string, allTags: Tag[]): Tag | undefined => {
+  return allTags.find(({ id }) => id === tagId);
+};
+
 export const testSubjFriendly = (name: string) => {
   return name.replace(' ', '_');
 };

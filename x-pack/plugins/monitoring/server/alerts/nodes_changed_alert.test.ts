@@ -137,6 +137,7 @@ describe('NodesChangedAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
+            nodeName: 'Elasticsearch nodes alert',
             ui: {
               isFiring: true,
               message: {

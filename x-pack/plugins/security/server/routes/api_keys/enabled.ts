@@ -8,7 +8,10 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineEnabledApiKeysRoutes({ router, authc }: RouteDefinitionParams) {
+export function defineEnabledApiKeysRoutes({
+  router,
+  getAuthenticationService,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key/_enabled',
@@ -16,7 +19,7 @@ export function defineEnabledApiKeysRoutes({ router, authc }: RouteDefinitionPar
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const apiKeysEnabled = await authc.areAPIKeysEnabled();
+        const apiKeysEnabled = await getAuthenticationService().apiKeys.areAPIKeysEnabled();
 
         return response.ok({ body: { apiKeysEnabled } });
       } catch (error) {

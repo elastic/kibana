@@ -5,9 +5,9 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
+import { CompleteTimeline, timeline } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -40,7 +40,7 @@ export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index: string[];
+  index?: string[];
   interval?: string;
   severity: string;
   riskScore: string;
@@ -50,9 +50,9 @@ export interface CustomRule {
   falsePositivesExamples: string[];
   mitre: Mitre[];
   note: string;
-  timelineId?: string;
   runsEvery: Interval;
   lookBack: Interval;
+  timeline: CompleteTimeline;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -159,7 +159,7 @@ const lookBack: Interval = {
 };
 
 export const newRule: CustomRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
@@ -170,9 +170,9 @@ export const newRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const existingRule: CustomRule = {
@@ -195,13 +195,13 @@ export const existingRule: CustomRule = {
   falsePositivesExamples: [],
   mitre: [],
   note: 'This is my note',
-  timelineId: '',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const newOverrideRule: OverrideRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
@@ -212,17 +212,17 @@ export const newOverrideRule: OverrideRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   severityOverride: [severityOverride1, severityOverride2, severityOverride3, severityOverride4],
   riskOverride: 'destination.port',
   nameOverride: 'agent.type',
   timestampOverride: '@timestamp',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const newThresholdRule: ThresholdRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
@@ -233,11 +233,11 @@ export const newThresholdRule: ThresholdRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   thresholdField: 'host.name',
   threshold: '10',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const machineLearningRule: MachineLearningRule = {
@@ -268,9 +268,9 @@ export const eqlRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const eqlSequenceRule: CustomRule = {
@@ -288,9 +288,9 @@ export const eqlSequenceRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   runsEvery,
   lookBack,
+  timeline,
 };
 
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
@@ -309,6 +309,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   indicatorIndexPattern: ['threat-indicator-*'],
   indicatorMapping: 'agent.id',
   indicatorIndexField: 'agent.threat',
+  timeline,
 };
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
@@ -318,4 +319,10 @@ export const editedRule = {
   severity: 'Medium',
   description: 'Edited Rule description',
   tags: [...existingRule.tags, 'edited'],
+};
+
+export const expectedExportedRule = (ruleResponse: Cypress.Response) => {
+  const jsonrule = ruleResponse.body;
+
+  return `{"author":[],"actions":[],"created_at":"${jsonrule.created_at}","updated_at":"${jsonrule.updated_at}","created_by":"elastic","description":"${jsonrule.description}","enabled":false,"false_positives":[],"from":"now-17520h","id":"${jsonrule.id}","immutable":false,"index":["exceptions-*"],"interval":"10s","rule_id":"rule_testing","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":${jsonrule.risk_score},"risk_score_mapping":[],"name":"${jsonrule.name}","query":"${jsonrule.query}","references":[],"severity":"${jsonrule.severity}","severity_mapping":[],"updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[],"throttle":"no_actions","version":1,"exceptions_list":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
 };

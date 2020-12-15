@@ -474,6 +474,9 @@ describe('AllCases', () => {
           username: 'lknope',
         },
         version: 'WzQ3LDFd',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
   });

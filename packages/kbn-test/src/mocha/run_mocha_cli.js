@@ -64,14 +64,14 @@ export function runMochaCli() {
     globby
       .sync(
         [
-          'src/**/__tests__/**/*.js',
-          'packages/**/__tests__/**/*.js',
-          'tasks/**/__tests__/**/*.js',
-          'x-pack/common/**/__tests__/**/*.js',
-          'x-pack/server/**/__tests__/**/*.js',
-          `x-pack/legacy/plugins/*/__tests__/**/*.js`,
-          `x-pack/legacy/plugins/*/common/**/__tests__/**/*.js`,
-          `x-pack/legacy/plugins/*/**/server/**/__tests__/**/*.js`,
+          'src/**/__tests__/**/*.{js,ts,tsx}',
+          'packages/**/__tests__/**/*.{js,ts,tsx}',
+          'tasks/**/__tests__/**/*.{js,ts,tsx}',
+          'x-pack/common/**/__tests__/**/*.{js,ts,tsx}',
+          'x-pack/server/**/__tests__/**/*.{js,ts,tsx}',
+          `x-pack/legacy/plugins/*/__tests__/**/*.{js,ts,tsx}`,
+          `x-pack/legacy/plugins/*/common/**/__tests__/**/*.{js,ts,tsx}`,
+          `x-pack/legacy/plugins/*/**/server/**/__tests__/**/*.{js,ts,tsx}`,
         ],
         {
           cwd: REPO_ROOT,
@@ -80,7 +80,8 @@ export function runMochaCli() {
           ignore: [
             '**/__tests__/fixtures/**',
             'src/**/public/**',
-            '**/_*.js',
+            '**/_*.{js,ts,tsx}',
+            '**/*.test.*',
             'packages/**/target/**',
           ],
         }

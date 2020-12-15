@@ -22,6 +22,10 @@ exports.EcsKibanaExtensionsMappings = {
           type: 'keyword',
           ignore_above: 1024,
         },
+        action_subgroup: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         status: {
           type: 'keyword',
           ignore_above: 1024,
@@ -73,6 +77,7 @@ exports.EcsEventLogProperties = [
   'kibana.server_uuid',
   'kibana.alerting.instance_id',
   'kibana.alerting.action_group_id',
+  'kibana.alerting.action_subgroup',
   'kibana.alerting.status',
   'kibana.saved_objects.rel',
   'kibana.saved_objects.namespace',

@@ -37,15 +37,18 @@ export function getMigrations(
     )
   );
 
-  const migrationAlertUpdatedAtDate = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    // migrate all documents in 7.11 in order to add the "updatedAt" field
+  const migrationAlertUpdatedAtAndNotifyWhen = encryptedSavedObjects.createMigration<
+    RawAlert,
+    RawAlert
+  >(
+    // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setAlertUpdatedAtDate)
+    pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtDate, '7.11.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
   };
 }
 
@@ -75,6 +78,19 @@ const setAlertUpdatedAtDate = (
     attributes: {
       ...doc.attributes,
       updatedAt,
+    },
+  };
+};
+
+const setNotifyWhen = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> => {
+  const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      notifyWhen,
     },
   };
 };

@@ -33,14 +33,10 @@ export default function ({
     describe('correctly renders metric', () => {
       let dataContext: ExpressionResult;
       before(async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
-          {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
-          {"id":"1","enabled":true,"type":"max","schema":"metric","params":
-            {"field":"bytes"}
-          },
-          {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
-            {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
-          }]'`;
+        const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggCount id="1" enabled=true schema="metric"}
+          aggs={aggMax id="1" enabled=true schema="metric" field="bytes"}
+          aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}`;
         // we execute the part of expression that fetches the data and store its response
         dataContext = await expectExpression('partial_metric_test', expression).getResponse();
       });

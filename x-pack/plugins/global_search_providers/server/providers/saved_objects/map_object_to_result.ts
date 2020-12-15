@@ -53,5 +53,8 @@ export const mapToResult = (
     icon: type.management?.icon ?? undefined,
     url: getInAppUrl(object).path,
     score: object.score,
+    meta: {
+      tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+    },
   };
 };

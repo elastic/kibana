@@ -43,6 +43,7 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [AggFunctionsMapping](./kibana-plugin-plugins-data-server.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
@@ -105,6 +106,7 @@
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
+|  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |

@@ -26,6 +26,9 @@ export class NodesChangedAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label,
       legacy: {
         watchName: 'elasticsearch_nodes',
+        nodeNameLabel: i18n.translate('xpack.monitoring.alerts.nodesChanged.nodeNameLabel', {
+          defaultMessage: 'Elasticsearch nodes alert',
+        }),
         changeDataValues: { shouldFire: true },
       },
       actionVariables: [

@@ -14,9 +14,11 @@ import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
 import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
+import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
+import { isOutdated } from '../../migrations/helpers';
 
 export const createIndexRoute = (router: IRouter) => {
   router.post(
@@ -61,6 +63,7 @@ export const createDetectionIndex = async (
   siemClient: AppClient
 ): Promise<void> => {
   const clusterClient = context.core.elasticsearch.legacy.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = clusterClient.callAsCurrentUser;
 
   if (!siemClient) {
@@ -68,17 +71,18 @@ export const createDetectionIndex = async (
   }
 
   const index = siemClient.getSignalsIndex();
+  await ensureMigrationCleanupPolicy({ alias: index, esClient });
   const policyExists = await getPolicyExists(callCluster, index);
   if (!policyExists) {
     await setPolicy(callCluster, index, signalsPolicy);
   }
-  if (await templateNeedsUpdate(callCluster, index)) {
+  if (await templateNeedsUpdate({ alias: index, esClient })) {
     await setTemplate(callCluster, index, getSignalsTemplate(index));
   }
   const indexExists = await getIndexExists(callCluster, index);
   if (indexExists) {
     const indexVersion = await getIndexVersion(callCluster, index);
-    if ((indexVersion ?? 0) < SIGNALS_TEMPLATE_VERSION) {
+    if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await callCluster('indices.rollover', { alias: index });
     }
   } else {

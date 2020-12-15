@@ -60,7 +60,7 @@ describe('usersManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Users' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Users Page: {"notifications":{"toasts":{}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
+        Users Page: {"notifications":{"toasts":{}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
       </div>
     `);
 
@@ -76,7 +76,7 @@ describe('usersManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Users' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -97,7 +97,7 @@ describe('usersManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"foo@bar.com","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/foo@bar.com","search":"","hash":""}}}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"username":"foo@bar.com","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/foo@bar.com","search":"","hash":""}}}
       </div>
     `);
 

@@ -21,13 +21,8 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { activeTimeline } from '../../containers/active_timeline_context';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
-
-const TimelineContainer = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-`;
+import { HideShowContainer, TimelineContainer } from './styles';
+import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -61,6 +56,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -78,14 +74,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   }, []);
 
   return (
-    <TimelineContainer data-test-subj="timeline">
+    <TimelineContainer data-test-subj="timeline" data-timeline-id={timelineId}>
       <TimelineSavingProgress timelineId={timelineId} />
       {timelineType === TimelineType.template && (
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
       <FlyoutHeaderPanel timelineId={timelineId} />
-      <FlyoutHeader timelineId={timelineId} />
+      <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeader timelineId={timelineId} />
+      </HideShowContainer>
 
       <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
     </TimelineContainer>

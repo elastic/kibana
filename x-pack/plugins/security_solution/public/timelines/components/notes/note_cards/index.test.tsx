@@ -77,14 +77,9 @@ describe('NoteCards', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="note-card"]')
-        .find('[data-test-subj="note-card-body"]')
-        .find('.euiMarkdownFormat')
-        .first()
-        .text()
-    ).toEqual(getNotesByIds().abc.note);
+    expect(wrapper.find('.euiCommentEvent__body .euiMarkdownFormat').first().text()).toEqual(
+      getNotesByIds().abc.note
+    );
   });
 
   test('it shows controls for adding notes when showAddNote is true', () => {

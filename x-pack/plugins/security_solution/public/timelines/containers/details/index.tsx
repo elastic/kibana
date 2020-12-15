@@ -85,6 +85,9 @@ export const useTimelineEventsDetails = ({
               }
             },
             error: () => {
+              if (!didCancel) {
+                setLoading(false);
+              }
               notifications.toasts.addDanger('Failed to run search');
             },
           });

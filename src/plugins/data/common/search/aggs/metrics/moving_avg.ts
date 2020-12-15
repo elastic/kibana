@@ -26,7 +26,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 export interface AggParamsMovingAvg extends BaseAggParams {
-  buckets_path: string;
+  buckets_path?: string;
   window?: number;
   script?: string;
   customMetric?: AggConfigSerialized;

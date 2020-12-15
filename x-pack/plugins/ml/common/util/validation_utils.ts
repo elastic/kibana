@@ -32,15 +32,20 @@ export function isValidJson(json: string) {
   }
 }
 
-export function findAggField(aggs: Record<string, any>, fieldName: string): any {
+export function findAggField(
+  aggs: Record<string, any> | { [key: string]: any },
+  fieldName: string | undefined,
+  returnParent: boolean = false
+): any {
+  if (fieldName === undefined) return;
   let value;
   Object.keys(aggs).some(function (k) {
     if (k === fieldName) {
-      value = aggs[k];
+      value = returnParent === true ? aggs : aggs[k];
       return true;
     }
     if (aggs.hasOwnProperty(k) && typeof aggs[k] === 'object') {
-      value = findAggField(aggs[k], fieldName);
+      value = findAggField(aggs[k], fieldName, returnParent);
       return value !== undefined;
     }
   });

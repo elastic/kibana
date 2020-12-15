@@ -21,7 +21,7 @@ import { useManageTimeline } from '../../../../manage_timeline';
 interface Props {
   header: ColumnHeaderOptions;
   onFilterChange?: OnFilterChange;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
@@ -33,22 +33,39 @@ export const HeaderComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const onClick = useCallback(
-    () =>
-      dispatch(
-        timelineActions.updateSort({
-          id: timelineId,
-          sort: {
-            columnId: header.id,
-            sortDirection: getNewSortDirectionOnClick({
-              clickedHeader: header,
-              currentSort: sort,
-            }),
-          },
-        })
-      ),
-    [dispatch, header, timelineId, sort]
-  );
+  const onColumnSort = useCallback(() => {
+    const columnId = header.id;
+    const sortDirection = getNewSortDirectionOnClick({
+      clickedHeader: header,
+      currentSort: sort,
+    });
+    const headerIndex = sort.findIndex((col) => col.columnId === columnId);
+    let newSort = [];
+    if (headerIndex === -1) {
+      newSort = [
+        ...sort,
+        {
+          columnId,
+          sortDirection,
+        },
+      ];
+    } else {
+      newSort = [
+        ...sort.slice(0, headerIndex),
+        {
+          columnId,
+          sortDirection,
+        },
+        ...sort.slice(headerIndex + 1),
+      ];
+    }
+    dispatch(
+      timelineActions.updateSort({
+        id: timelineId,
+        sort: newSort,
+      })
+    );
+  }, [dispatch, header, sort, timelineId]);
 
   const onColumnRemoved = useCallback(
     (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
@@ -68,7 +85,7 @@ export const HeaderComponent: React.FC<Props> = ({
         header={header}
         isLoading={isLoading}
         isResizing={false}
-        onClick={onClick}
+        onClick={onColumnSort}
         sort={sort}
       >
         <Actions

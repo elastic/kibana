@@ -32,10 +32,12 @@ const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 
 describe('Header', () => {
   const columnHeader = defaultHeaders[0];
-  const sort: Sort = {
-    columnId: columnHeader.id,
-    sortDirection: Direction.desc,
-  };
+  const sort: Sort[] = [
+    {
+      columnId: columnHeader.id,
+      sortDirection: Direction.desc,
+    },
+  ];
   const timelineId = 'fakeId';
 
   test('renders correctly against snapshot', () => {
@@ -119,10 +121,12 @@ describe('Header', () => {
       expect(mockDispatch).toBeCalledWith(
         timelineActions.updateSort({
           id: timelineId,
-          sort: {
-            columnId: columnHeader.id,
-            sortDirection: Direction.asc, // (because the previous state was Direction.desc)
-          },
+          sort: [
+            {
+              columnId: columnHeader.id,
+              sortDirection: Direction.asc, // (because the previous state was Direction.desc)
+            },
+          ],
         })
       );
     });
@@ -158,7 +162,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="header"]').first().simulate('click');
+      wrapper.find(`[data-test-subj="header-${columnHeader.id}"]`).first().simulate('click');
 
       expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });
@@ -180,14 +184,16 @@ describe('Header', () => {
 
   describe('getSortDirection', () => {
     test('it returns the sort direction when the header id matches the sort column id', () => {
-      expect(getSortDirection({ header: columnHeader, sort })).toEqual(sort.sortDirection);
+      expect(getSortDirection({ header: columnHeader, sort })).toEqual(sort[0].sortDirection);
     });
 
     test('it returns "none" when sort direction when the header id does NOT match the sort column id', () => {
-      const nonMatching: Sort = {
-        columnId: 'differentSocks',
-        sortDirection: Direction.desc,
-      };
+      const nonMatching: Sort[] = [
+        {
+          columnId: 'differentSocks',
+          sortDirection: Direction.desc,
+        },
+      ];
 
       expect(getSortDirection({ header: columnHeader, sort: nonMatching })).toEqual('none');
     });
@@ -221,10 +227,12 @@ describe('Header', () => {
 
   describe('getNewSortDirectionOnClick', () => {
     test('it returns the expected new sort direction when the header id matches the sort column id', () => {
-      const sortMatches: Sort = {
-        columnId: columnHeader.id,
-        sortDirection: Direction.desc,
-      };
+      const sortMatches: Sort[] = [
+        {
+          columnId: columnHeader.id,
+          sortDirection: Direction.desc,
+        },
+      ];
 
       expect(
         getNewSortDirectionOnClick({
@@ -235,10 +243,12 @@ describe('Header', () => {
     });
 
     test('it returns the expected new sort direction when the header id does NOT match the sort column id', () => {
-      const sortDoesNotMatch: Sort = {
-        columnId: 'someOtherColumn',
-        sortDirection: 'none',
-      };
+      const sortDoesNotMatch: Sort[] = [
+        {
+          columnId: 'someOtherColumn',
+          sortDirection: 'none',
+        },
+      ];
 
       expect(
         getNewSortDirectionOnClick({

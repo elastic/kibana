@@ -13,13 +13,14 @@ import { LogEntryColumnContent } from './log_entry_column';
 interface LogEntryTimestampColumnProps {
   format?: TimeFormat;
   time: number;
+  render?: (timestamp: number) => React.ReactNode;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
-  ({ format = 'time', time }) => {
+  ({ format = 'time', time, render }) => {
     const formattedTime = useFormattedTime(time, { format });
 
-    return <TimestampColumnContent>{formattedTime}</TimestampColumnContent>;
+    return <TimestampColumnContent>{render ? render(time) : formattedTime}</TimestampColumnContent>;
   }
 );
 

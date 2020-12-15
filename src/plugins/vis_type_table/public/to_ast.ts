@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
@@ -27,14 +30,15 @@ const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
   visParams: TableVisParams
 ) => {
-  const visConfig = {} as any;
   const metrics = schemas.metric;
   const buckets = schemas.bucket || [];
-  visConfig.dimensions = {
-    metrics,
-    buckets,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
+  const visConfig = {
+    dimensions: {
+      metrics,
+      buckets,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
+    },
   };
 
   if (visParams.showPartialRows && !visParams.showMetricsAtAllLevels) {
@@ -49,11 +53,14 @@ const buildTableVisConfig = (
 
 export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineParams) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);

@@ -25,6 +25,7 @@ import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { CoreService } from '../../types';
+import { ExternalUrlService } from './external_url_service';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
@@ -51,6 +52,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     this.service = {
       basePath,
       anonymousPaths: this.anonymousPaths.setup({ basePath }),
+      externalUrl: new ExternalUrlService().setup({ injectedMetadata, location: window.location }),
       intercept: fetchService.intercept.bind(fetchService),
       fetch: fetchService.fetch.bind(fetchService),
       delete: fetchService.delete.bind(fetchService),

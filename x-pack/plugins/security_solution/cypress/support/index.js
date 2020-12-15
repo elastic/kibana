@@ -21,6 +21,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+import 'cypress-promise/register';
 
 Cypress.Cookies.defaults({
   preserve: 'sid',

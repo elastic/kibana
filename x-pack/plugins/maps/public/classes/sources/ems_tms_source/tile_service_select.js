@@ -60,10 +60,7 @@ export class TileServiceSelect extends React.Component {
   };
 
   render() {
-    const helpText =
-      this.state.hasLoaded && this.state.emsTmsOptions.length === 0
-        ? getEmsUnavailableMessage()
-        : null;
+    const helpText = this.state.emsTmsOptions.length === 0 ? getEmsUnavailableMessage() : null;
 
     let selectedId;
     if (this.props.config) {

@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -15,8 +16,9 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  CommonAlertFilter,
   CommonAlertParams,
+  AlertMemoryUsageNodeStats,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -24,6 +26,8 @@ import {
   ALERT_MEMORY_USAGE,
   ALERT_DETAILS,
 } from '../../common/constants';
+// @ts-ignore
+import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -108,13 +112,13 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertMemoryUsageState;
+    const stat = item.meta as AlertMemoryUsageNodeStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting JVM memory usage of {memoryUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          memoryUsage: stat.memoryUsage,
+          memoryUsage: numeral(stat.memoryUsage).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [

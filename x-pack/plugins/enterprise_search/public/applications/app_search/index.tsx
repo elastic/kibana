@@ -8,6 +8,8 @@ import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
+
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
@@ -26,6 +28,7 @@ import {
   ROLE_MAPPINGS_PATH,
   ENGINES_PATH,
   ENGINE_PATH,
+  LIBRARY_PATH,
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
@@ -35,6 +38,7 @@ import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
+import { Library } from './components/library';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -66,35 +70,42 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      {process.env.NODE_ENV === 'development' && (
+        <Route path={LIBRARY_PATH}>
+          <Library />
+        </Route>
+      )}
       <Route path={ENGINE_PATH}>
         <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
           <EngineRouter />
         </Layout>
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-          {errorConnecting ? (
-            <ErrorConnecting />
-          ) : (
-            <Switch>
-              <Route exact path={ROOT_PATH}>
-                <Redirect to={ENGINES_PATH} />
-              </Route>
-              <Route exact path={ENGINES_PATH}>
-                <EnginesOverview />
-              </Route>
-              <Route exact path={SETTINGS_PATH}>
-                <Settings />
-              </Route>
-              <Route exact path={CREDENTIALS_PATH}>
-                <Credentials />
-              </Route>
-              <Route>
-                <NotFound product={APP_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
-          )}
-        </Layout>
+        <EuiPage>
+          <EuiPageBody restrictWidth>
+            {errorConnecting ? (
+              <ErrorConnecting />
+            ) : (
+              <Switch>
+                <Route exact path={ROOT_PATH}>
+                  <Redirect to={ENGINES_PATH} />
+                </Route>
+                <Route exact path={ENGINES_PATH}>
+                  <EnginesOverview />
+                </Route>
+                <Route exact path={SETTINGS_PATH}>
+                  <Settings />
+                </Route>
+                <Route exact path={CREDENTIALS_PATH}>
+                  <Credentials />
+                </Route>
+                <Route>
+                  <NotFound product={APP_SEARCH_PLUGIN} />
+                </Route>
+              </Switch>
+            )}
+          </EuiPageBody>
+        </EuiPage>
       </Route>
     </Switch>
   );

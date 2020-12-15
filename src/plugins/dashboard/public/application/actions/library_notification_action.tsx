@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+
+import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { reactToUiComponent } from '../../services/kibana_react';
 import {
   IEmbeddable,
   ViewMode,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
-} from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { reactToUiComponent } from '../../../../kibana_react/public';
+} from '../../services/embeddable';
+
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';
+import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -43,9 +45,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
 
   constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
-  private displayName = i18n.translate('dashboard.panel.LibraryNotification', {
-    defaultMessage: 'Visualize Library',
-  });
+  private displayName = dashboardLibraryNotification.getDisplayName();
 
   private icon = 'folderCheck';
 

@@ -87,22 +87,27 @@ describe('AggTypeMetricMedianProvider class', () => {
     const agg = aggConfigs.getResponseAggs()[0];
     expect(agg.toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "enabled": Array [
-            true,
-          ],
-          "field": Array [
-            "bytes",
-          ],
-          "id": Array [
-            "median",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-        },
-        "function": "aggMedian",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "median",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+            },
+            "function": "aggMedian",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

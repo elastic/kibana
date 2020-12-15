@@ -22,3 +22,4 @@ export * from './types';
 export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
 export type { IndexPattern } from './index_patterns';
 export * from './errors';
+export * from './expressions';

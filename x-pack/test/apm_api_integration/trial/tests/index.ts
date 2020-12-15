@@ -16,7 +16,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     });
 
     describe('Transactions', function () {
-      loadTestFile(require.resolve('./transactions/transactions_charts.ts'));
+      loadTestFile(require.resolve('./transactions/latency'));
     });
 
     describe('Settings', function () {

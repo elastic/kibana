@@ -33,7 +33,8 @@ const esPainlessContextFolder = join(
   'lang-painless',
   'src',
   'main',
-  'generated'
+  'generated',
+  'whitelist-json'
 );
 
 /**

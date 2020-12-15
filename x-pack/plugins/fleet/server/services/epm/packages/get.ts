@@ -18,7 +18,7 @@ import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getArchivePackage } from '../archive';
 
-export { fetchFile as getFile, SearchParams } from '../registry';
+export { getFile, SearchParams } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();

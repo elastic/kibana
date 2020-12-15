@@ -404,9 +404,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"is in list" operator', () => {
-      // TODO: Enable this test once the bugs are fixed, we cannot use a list of strings that represent
-      // a float against an index that has the floats stored as real floats.
-      describe.skip('working against float values in the data set', () => {
+      describe('working against float values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 float', async () => {
           await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
@@ -545,17 +543,16 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql([]);
         });
 
-        // TODO: Fix this bug and then unskip this test
-        it.skip('will return 1 result if we have a list which contains the float range of 1.0-1.2', async () => {
-          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt');
+        it('will return 1 result if we have a list which contains the float range of 1.0-1.2', async () => {
+          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt', ['1.0', '1.2']);
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
               {
-                field: 'ip',
+                field: 'float',
                 list: {
                   id: 'list_items.txt',
-                  type: 'ip',
+                  type: 'float_range',
                 },
                 operator: 'included',
                 type: 'list',
@@ -565,16 +562,14 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source.float).sort();
           expect(hits).to.eql(['1.3']);
         });
       });
     });
 
     describe('"is not in list" operator', () => {
-      // TODO: Enable this test once the bugs are fixed, we cannot use a list of strings that represent
-      // a float against an index that has the floats stored as real floats.
-      describe.skip('working against float values in the data set', () => {
+      describe('working against float values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 float', async () => {
           await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
@@ -715,17 +710,16 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
         });
 
-        // TODO: Fix this bug and then unskip this test
-        it.skip('will return 3 results if we have a list which contains the float range of 1.0-1.2', async () => {
-          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt');
+        it('will return 3 results if we have a list which contains the float range of 1.0-1.2', async () => {
+          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt', ['1.0', '1.2']);
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, rule, [
             [
               {
-                field: 'ip',
+                field: 'float',
                 list: {
                   id: 'list_items.txt',
-                  type: 'ip',
+                  type: 'float_range',
                 },
                 operator: 'excluded',
                 type: 'list',
@@ -733,9 +727,9 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           await waitForRuleSuccess(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source.float).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2']);
         });
       });

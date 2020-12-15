@@ -157,9 +157,9 @@ describe('Events Viewer', () => {
 
     it('re-orders columns via drag and drop', () => {
       const originalColumnOrder =
-        '@timestampmessagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        '@timestamp1messagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
       const expectedOrderAfterDragAndDrop =
-        'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        'message@timestamp1host.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 0 });
