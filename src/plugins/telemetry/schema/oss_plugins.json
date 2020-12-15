@@ -1,5 +1,29 @@
 {
   "properties": {
+    "dashboard": {
+      "properties": {
+        "panels": {
+          "type": "long"
+        },
+        "panelsByValue": {
+          "type": "long"
+        },
+        "lensByValue": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        },
+        "visualizationByValue": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "kql": {
       "properties": {
         "optInCount": {

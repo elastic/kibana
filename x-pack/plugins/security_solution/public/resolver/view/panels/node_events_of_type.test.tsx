@@ -41,6 +41,8 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
@@ -53,6 +55,7 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
 
   describe(`when the URL query string is showing a resolver with nodeID origin, panel view nodeEventsInCategory, and eventCategory registry`, () => {
     beforeEach(() => {
+      simulator(); // Initialize simulator in beforeEach to use instance in tests
       memoryHistory.push({
         search: urlSearch(resolverComponentInstanceID, {
           panelParameters: { nodeID: 'origin', eventCategory: 'registry' },
@@ -75,6 +78,7 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
     });
     describe('when the user clicks the load more button', () => {
       beforeEach(async () => {
+        simulator(); // Initialize simulator in beforeEach to use instance in tests
         const loadMore = await simulator().resolve('resolver:nodeEventsInCategory:loadMore');
         if (loadMore) {
           loadMore.simulate('click', { button: 0 });
