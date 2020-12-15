@@ -74,6 +74,7 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   // make private once manual field refresh is removed
   public fieldAttrs: FieldAttrs;
+  public readonly allowNoIndex: boolean = false;
 
   constructor({
     spec = {},
@@ -110,6 +111,7 @@ export class IndexPattern implements IIndexPattern {
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
     this.intervalName = spec.intervalName;
+    this.allowNoIndex = spec.allowNoIndex || false;
   }
 
   /**
@@ -204,6 +206,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormats: this.fieldFormatMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
+      allowNoIndex: this.allowNoIndex,
     };
   }
 
@@ -309,6 +312,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
     };
   }
 

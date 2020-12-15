@@ -49,6 +49,7 @@ export interface IndexPatternAttributes {
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
+  allowNoIndex?: boolean;
 }
 
 export interface FieldAttrs {
@@ -101,6 +102,7 @@ export interface GetFieldsOptions {
   lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
+  allowNoIndex?: boolean;
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -193,6 +195,7 @@ export interface IndexPatternSpec {
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
   fieldAttrs?: FieldAttrs;
+  allowNoIndex?: boolean;
 }
 
 export interface SourceFilter {

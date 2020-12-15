@@ -1249,6 +1249,8 @@ export class IndexPattern implements IIndexPattern {
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
+    readonly allowNoIndex: boolean;
+    // (undocumented)
     readonly deleteFieldFormat: (fieldName: string) => void;
     // Warning: (ae-forgotten-export) The symbol "FieldAttrs" needs to be exported by the entry point index.d.ts
     //
@@ -1288,6 +1290,7 @@ export class IndexPattern implements IIndexPattern {
         fieldFormatMap: string | undefined;
         type: string | undefined;
         typeMeta: string | undefined;
+        allowNoIndex: true | undefined;
     };
     // (undocumented)
     getComputedFields(): {
@@ -1380,6 +1383,8 @@ export type IndexPatternAggRestrictions = Record<string, {
 //
 // @public (undocumented)
 export interface IndexPatternAttributes {
+    // (undocumented)
+    allowNoIndex?: boolean;
     // (undocumented)
     fieldAttrs?: string;
     // (undocumented)
@@ -1510,6 +1515,8 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
 //
 // @public (undocumented)
 export interface IndexPatternSpec {
+    // (undocumented)
+    allowNoIndex?: boolean;
     // (undocumented)
     fieldAttrs?: FieldAttrs;
     // (undocumented)
@@ -2556,7 +2563,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:128:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:130:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:145:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/search_source/search_source.ts:197:7 - (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
