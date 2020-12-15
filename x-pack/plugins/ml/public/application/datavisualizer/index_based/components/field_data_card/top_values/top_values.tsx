@@ -16,6 +16,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import classNames from 'classnames';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
@@ -51,11 +52,14 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
           <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
             <EuiFlexItem
               grow={false}
-              style={{ width: compressed === true ? 100 : 300 }}
-              className="eui-textTruncate"
+              className={classNames(
+                'eui-textTruncate',
+                'mlTopValuesLabelContainer',
+                compressed === true ? 'small' : 'large'
+              )}
             >
               <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-                <EuiText size="xs" textAlign="left" color="subdued">
+                <EuiText size="xs" textAlign={'right'} color="subdued">
                   {kibanaFieldFormat(value.key, fieldFormat)}
                 </EuiText>
               </EuiToolTip>

@@ -1,0 +1,11 @@
+.mlTopValuesLabelContainer {
+  padding-right: $euiSizeM;
+
+  &.small {
+    width: 50px !important;
+  }
+
+  &.large {
+    width: 200px !important;
+  }
+}
