@@ -420,7 +420,7 @@ export default function ({ getService }) {
           }));
     });
 
-    describe('without kibana index', () => {
+    describe.skip('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
@@ -430,7 +430,7 @@ export default function ({ getService }) {
           })
       );
 
-      it.skip('should return 200 with empty response', async () =>
+      it('should return 200 with empty response', async () =>
         await supertest
           .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
