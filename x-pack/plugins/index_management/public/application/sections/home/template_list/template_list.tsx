@@ -36,7 +36,7 @@ import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
-import { FilterListButton, Filters } from './components';
+import { FilterListButton, Filters } from '../components';
 import { attemptToURIDecode } from '../../../../shared_imports';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';

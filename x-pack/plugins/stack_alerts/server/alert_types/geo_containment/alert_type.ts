@@ -9,12 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
-import {
-  ActionGroup,
-  AlertServices,
-  ActionVariable,
-  AlertTypeState,
-} from '../../../../alerts/server';
+import { AlertType } from '../../../../alerts/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
@@ -117,40 +112,7 @@ export interface GeoContainmentParams {
   boundaryIndexQuery?: Query;
 }
 
-export function getAlertType(
-  logger: Logger
-): {
-  defaultActionGroupId: string;
-  actionGroups: ActionGroup[];
-  executor: ({
-    previousStartedAt: currIntervalStartTime,
-    startedAt: currIntervalEndTime,
-    services,
-    params,
-    alertId,
-    state,
-  }: {
-    previousStartedAt: Date | null;
-    startedAt: Date;
-    services: AlertServices;
-    params: GeoContainmentParams;
-    alertId: string;
-    state: AlertTypeState;
-  }) => Promise<AlertTypeState>;
-  validate?: {
-    params?: {
-      validate: (object: unknown) => GeoContainmentParams;
-    };
-  };
-  name: string;
-  producer: string;
-  id: string;
-  actionVariables?: {
-    context?: ActionVariable[];
-    state?: ActionVariable[];
-    params?: ActionVariable[];
-  };
-} {
+export function getAlertType(logger: Logger): AlertType<GeoContainmentParams> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Geo tracking containment',
   });
@@ -173,5 +135,6 @@ export function getAlertType(
       params: ParamsSchema,
     },
     actionVariables,
+    minimumLicenseRequired: 'gold',
   };
 }

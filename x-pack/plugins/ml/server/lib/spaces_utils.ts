@@ -52,5 +52,16 @@ export function spacesUtilsProvider(
     return spaces.filter((s) => s.disabledFeatures.includes(PLUGIN_ID) === false).map((s) => s.id);
   }
 
-  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds };
+  async function getCurrentSpaceId(): Promise<string | null> {
+    if (getSpacesPlugin === undefined) {
+      // if spaces is disabled force isMlEnabledInSpace to be true
+      return null;
+    }
+    const space = await (await getSpacesPlugin()).spacesService.getActiveSpace(
+      request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+    );
+    return space.id;
+  }
+
+  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds, getCurrentSpaceId };
 }
