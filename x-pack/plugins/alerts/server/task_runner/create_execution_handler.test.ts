@@ -7,7 +7,11 @@
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+import {
+  actionsMock,
+  actionsClientMock,
+  renderActionParameterTemplatesDefault,
+} from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
@@ -20,6 +24,7 @@ const alertType: AlertType = {
     { id: 'other-group', name: 'Other Group' },
   ],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -68,6 +73,9 @@ beforeEach(() => {
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
   createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
     actionsClient
+  );
+  createExecutionHandlerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
+    renderActionParameterTemplatesDefault
   );
 });
 
