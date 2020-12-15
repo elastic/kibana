@@ -8,12 +8,9 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
-import {
-  euiPaletteColorBlind,
-  euiPaletteGray,
-  euiPaletteNegative,
-  euiPalettePositive,
-} from '@elastic/eui';
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+
+import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,18 +26,22 @@ const SCATTERPLOT_SIZE = 125;
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 const COLOR_OUTLIER = euiPaletteNegative(2)[1];
-const COLOR_GRAY = euiPaletteGray(5)[0];
 const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
-const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) => {
+const getColorSpec = (
+  euiTheme: typeof euiThemeLight,
+  outliers = true,
+  color?: string,
+  legendType?: LegendType
+) => {
   if (outliers) {
     return {
       condition: {
         value: COLOR_OUTLIER,
         test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
       },
-      value: COLOR_GRAY,
+      value: euiTheme.euiColorMediumShade,
     };
   }
 
@@ -60,6 +61,7 @@ const getColorSpec = (outliers = true, color?: string, legendType?: LegendType) 
 export const getScatterplotMatrixVegaLiteSpec = (
   values: any[],
   columns: string[],
+  euiTheme: typeof euiThemeLight,
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
@@ -76,14 +78,21 @@ export const getScatterplotMatrixVegaLiteSpec = (
   });
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
+    $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
+    background: 'transparent',
+    // There seems to be a bug in Vega which doesn't propagate these settings
+    // for repeated charts, it seems to be fixed for facets but not repeat.
+    // This causes #ddd lines to stand out in dark mode.
+    // See: https://github.com/vega/vega-lite/issues/5908
+    view: { fill: 'transparent', stroke: euiTheme.euiColorLightestShade },
     padding: 10,
     config: {
       axis: {
-        domainColor: '#ccc',
-        tickColor: '#ccc',
-        labelColor: '#aaa',
-        titleColor: '#999',
+        domainColor: euiTheme.euiColorLightShade,
+        gridColor: euiTheme.euiColorLightestShade,
+        tickColor: euiTheme.euiColorLightestShade,
+        labelColor: euiTheme.euiTextSubduedColor,
+        titleColor: euiTheme.euiTextSubduedColor,
       },
     },
     repeat: {
@@ -103,10 +112,10 @@ export const getScatterplotMatrixVegaLiteSpec = (
           : { type: 'circle', opacity: 0.75, size: 8 }),
       },
       encoding: {
-        color: getColorSpec(outliers, color, legendType),
+        color: getColorSpec(euiTheme, outliers, color, legendType),
         ...(dynamicSize
           ? {
-              stroke: getColorSpec(outliers, color, legendType),
+              stroke: getColorSpec(euiTheme, outliers, color, legendType),
               opacity: {
                 condition: {
                   value: 1,
@@ -143,21 +152,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
         x: {
           type: LEGEND_TYPES.QUANTITATIVE,
           field: { repeat: 'column' },
-          axis: {
-            titleColor: {
-              condition: { test: `datum.column === '${columns[0]}'`, value: 'red' },
-              value: '#CCC',
-            },
-          },
           scale: { zero: false },
         },
         y: {
           type: LEGEND_TYPES.QUANTITATIVE,
           field: { repeat: 'row' },
-          axis: {
-            condition: { test: { value: 'row', equal: columns[0] }, value: undefined },
-            value: null,
-          },
           scale: { zero: false },
         },
         ...(outliers

@@ -33,6 +33,7 @@ import type { SearchResponse7 } from '../../../../common/types/es_client';
 import { ml } from '../../services/ml_api_service';
 
 import { getProcessedFields } from '../data_grid';
+import { useCurrentEuiTheme } from '../color_range_legend';
 
 import {
   getScatterplotMatrixVegaLiteSpec,
@@ -123,6 +124,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     setDynamicSize(!dynamicSize);
   };
 
+  const { euiTheme } = useCurrentEuiTheme();
+
   useEffect(() => {
     async function fetchSplom(options: { didCancel: boolean }) {
       setIsLoading(true);
@@ -198,6 +201,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     const vegaSpec = getScatterplotMatrixVegaLiteSpec(
       values,
       columns,
+      euiTheme,
       resultsField,
       color,
       legendType,
