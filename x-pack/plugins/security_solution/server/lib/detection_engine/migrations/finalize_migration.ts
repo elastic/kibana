@@ -6,7 +6,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { getIndexCount } from '../index/get_index_count';
-import { isMigrationDeleted, isMigrationPending } from './helpers';
+import { isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { replaceSignalsIndexAlias } from './replace_signals_index_alias';
 import { SignalsMigrationSO } from './saved_objects_schema';
@@ -41,7 +41,7 @@ export const finalizeMigration = async ({
   soClient: SavedObjectsClientContract;
   username: string;
 }): Promise<SignalsMigrationSO> => {
-  if (isMigrationDeleted(migration) || !isMigrationPending(migration)) {
+  if (!isMigrationPending(migration)) {
     return migration;
   }
 
@@ -65,6 +65,12 @@ export const finalizeMigration = async ({
       },
     });
 
+    await applyMigrationCleanupPolicy({
+      alias: signalsAlias,
+      esClient,
+      index: destinationIndex,
+    });
+
     return {
       ...migration,
       attributes: {
@@ -80,12 +86,6 @@ export const finalizeMigration = async ({
     newIndex: destinationIndex,
     oldIndex: sourceIndex,
   });
-  await applyMigrationCleanupPolicy({
-    alias: signalsAlias,
-    esClient,
-    index: sourceIndex,
-  });
-  await esClient.delete({ index: '.tasks', id: taskId });
 
   const updatedMigration = await updateMigrationSavedObject({
     username,

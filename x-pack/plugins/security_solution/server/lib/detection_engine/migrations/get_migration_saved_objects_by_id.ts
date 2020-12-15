@@ -13,23 +13,23 @@ import { SignalsMigrationSO } from './saved_objects_schema';
  * Retrieves a list of migrations SOs by their ID
  *
  * @param soClient An {@link SavedObjectsClientContract}
- * @param migrationIds IDs of the migration SOs
+ * @param ids IDs of the migration SOs
  *
  * @returns a list of {@link SignalsMigrationSO[]}
  *
  * @throws if client returns an error
  */
 export const getMigrationSavedObjectsById = async ({
-  migrationIds,
+  ids,
   soClient,
 }: {
-  migrationIds: string[];
+  ids: string[];
   soClient: SavedObjectsClientContract;
 }): Promise<SignalsMigrationSO[]> =>
   findMigrationSavedObjects({
     soClient,
     options: {
-      search: migrationIds.map((id) => `${signalsMigrationType}:${id}`).join(' OR '),
+      search: ids.map((id) => `${signalsMigrationType}:${id}`).join(' OR '),
       rootSearchFields: ['_id'],
       sortField: 'updated',
       sortOrder: 'desc',

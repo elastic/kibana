@@ -13,7 +13,7 @@ import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
-import { isMigrationDeleted, isOutdated, signalsAreOutdated } from '../../migrations/helpers';
+import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse, transformError } from '../utils';
 
@@ -71,14 +71,12 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
             index,
             version,
             signal_versions: signalVersions,
-            migrations: migrations
-              .filter((m) => !isMigrationDeleted(m))
-              .map((m) => ({
-                id: m.id,
-                status: m.attributes.status,
-                version: m.attributes.version,
-                updated: m.attributes.updated,
-              })),
+            migrations: migrations.map((m) => ({
+              id: m.id,
+              status: m.attributes.status,
+              version: m.attributes.version,
+              updated: m.attributes.updated,
+            })),
             is_outdated:
               isOutdated({ current: version, target: currentVersion }) ||
               signalsAreOutdated({ signalVersions, target: currentVersion }),

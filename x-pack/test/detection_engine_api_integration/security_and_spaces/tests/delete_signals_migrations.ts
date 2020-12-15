@@ -64,12 +64,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitFor(async () => {
         ({
           body: {
-            indices: [finalizedMigration],
+            migrations: [finalizedMigration],
           },
         } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send({ index: [outdatedSignalsIndexName] })
+          .send({ migration_ids: [createdMigration.migration_id] })
           .expect(200));
 
         return finalizedMigration.completed ?? false;
@@ -78,24 +78,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('signals/outdated_signals_index');
-      await deleteMigrations({
-        kbnClient,
-        ids: [createdMigration.migration_id],
-      });
       await deleteSignalsIndex(supertest);
     });
 
-    it('soft-deletes the migration SavedObject', async () => {
+    it('returns the deleted migration SavedObjects', async () => {
       const { body } = await supertest
         .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: [outdatedSignalsIndexName] })
+        .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
 
-      const deletedIndex = body.indices[0];
-      const deletedMigration = deletedIndex.migrations[0];
-      expect(deletedMigration.attributes.sourceIndex).to.eql(outdatedSignalsIndexName);
-      expect(deletedMigration.attributes.deleted).to.eql(true);
+      const deletedMigration = body.migrations[0];
+      expect(deletedMigration.id).to.eql(createdMigration.migration_id);
+      expect(deletedMigration.sourceIndex).to.eql(outdatedSignalsIndexName);
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
@@ -104,17 +99,16 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertestWithoutAuth
         .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: [outdatedSignalsIndexName] })
+        .send({ migration_ids: [createdMigration.migration_id] })
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const deletedMigration = body.indices[0];
+      const deletedMigration = body.migrations[0];
 
-      expect(deletedMigration.index).to.eql(createdMigration.index);
-      expect(deletedMigration.completed).not.to.eql(true);
+      expect(deletedMigration.id).to.eql(createdMigration.migration_id);
       expect(deletedMigration.error).to.eql({
         message:
-          'security_exception: action [indices:data/write/bulk[s]] is unauthorized for user [t1_analyst] on indices [.tasks], this action is granted by the privileges [create_doc,create,delete,index,write,all]',
+          'security_exception: action [indices:admin/settings/update] is unauthorized for user [t1_analyst] on indices [], this action is granted by the privileges [manage,all]',
         status_code: 403,
       });
     });

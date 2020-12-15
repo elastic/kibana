@@ -29,10 +29,10 @@ describe('get signals migration status', () => {
     });
   });
 
-  it('excludes soft-deleted migrations', async () => {
-    const deletedMigration = getSignalsMigrationSavedObjectMock({ deleted: true });
+  it('returns statuses by index', async () => {
+    const migration = getSignalsMigrationSavedObjectMock();
     (getMigrationSavedObjectsByIndex as jest.Mock).mockResolvedValueOnce({
-      'my-signals-index': [deletedMigration],
+      'my-signals-index': [migration],
     });
 
     const response = await server.inject(getSignalsMigrationStatusRequest());
@@ -42,7 +42,14 @@ describe('get signals migration status', () => {
         {
           index: 'my-signals-index',
           is_outdated: false,
-          migrations: [],
+          migrations: [
+            expect.objectContaining({
+              id: migration.id,
+              status: migration.attributes.status,
+              updated: migration.attributes.updated,
+              version: migration.attributes.version,
+            }),
+          ],
           signal_versions: [],
           version: 0,
         },

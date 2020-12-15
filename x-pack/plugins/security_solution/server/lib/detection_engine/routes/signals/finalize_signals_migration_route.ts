@@ -47,7 +47,7 @@ export const finalizeSignalsMigrationRoute = (
           username: user?.username ?? 'elastic',
         });
         const migrations = await getMigrationSavedObjectsById({
-          migrationIds,
+          ids: migrationIds,
           soClient,
         });
 

@@ -53,7 +53,7 @@ export const signalsMigrationService = ({
       });
 
       return createMigrationSavedObject({
-        attributes: { ...migrationInfo, status: 'pending', error: null, deleted: false },
+        attributes: { ...migrationInfo, status: 'pending', error: null },
         soClient,
         username,
       });
@@ -72,7 +72,6 @@ export const signalsMigrationService = ({
         migration,
         signalsAlias,
         soClient,
-        username,
       }),
   };
 };

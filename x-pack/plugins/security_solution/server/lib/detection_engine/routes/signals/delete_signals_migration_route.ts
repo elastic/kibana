@@ -10,9 +10,8 @@ import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/co
 import { deleteSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/delete_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse, transformError } from '../utils';
-import { BadRequestError } from '../../errors/bad_request_error';
 import { signalsMigrationService } from '../../migrations/migration_service';
-import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
+import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
 export const deleteSignalsMigrationRoute = (
   router: IRouter,
@@ -30,7 +29,7 @@ export const deleteSignalsMigrationRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const { index: indices } = request.body;
+      const { migration_ids: migrationIds } = request.body;
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -48,47 +47,46 @@ export const deleteSignalsMigrationRoute = (
         });
 
         const signalsAlias = appClient.getSignalsIndex();
-        const migrationsByIndex = await getMigrationSavedObjectsByIndex({
-          index: indices,
+        const migrations = await getMigrationSavedObjectsById({
+          ids: migrationIds,
           soClient,
         });
 
         const deletionResults = await Promise.all(
-          indices.map(async (index) => {
+          migrations.map(async (migration) => {
             try {
-              const migrations = migrationsByIndex[index] ?? [];
-              if (migrations.length === 0) {
-                throw new BadRequestError('The specified index has no migrations');
-              }
-
-              const deletedMigrations = await Promise.all(
-                migrations.map((migration) =>
-                  migrationService.delete({
-                    migration,
-                    signalsAlias,
-                  })
-                )
-              );
+              const deletedMigration = await migrationService.delete({
+                migration,
+                signalsAlias,
+              });
 
               return {
-                index,
-                migrations: deletedMigrations,
+                id: deletedMigration.id,
+                destinationIndex: deletedMigration.attributes.destinationIndex,
+                status: deletedMigration.attributes.status,
+                sourceIndex: deletedMigration.attributes.sourceIndex,
+                version: deletedMigration.attributes.version,
+                updated: deletedMigration.attributes.updated,
               };
             } catch (err) {
               const error = transformError(err);
               return {
-                index,
-                migrations: null,
+                id: migration.id,
+                destinationIndex: migration.attributes.destinationIndex,
                 error: {
                   message: error.message,
                   status_code: error.statusCode,
                 },
+                status: migration.attributes.status,
+                sourceIndex: migration.attributes.sourceIndex,
+                version: migration.attributes.version,
+                updated: migration.attributes.updated,
               };
             }
           })
         );
 
-        return response.ok({ body: { indices: deletionResults } });
+        return response.ok({ body: { migrations: deletionResults } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

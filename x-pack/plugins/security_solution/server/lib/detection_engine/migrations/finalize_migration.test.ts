@@ -31,22 +31,6 @@ describe('finalizeMigration', () => {
     }));
   });
 
-  it('does not finalize a soft-deleted migration', async () => {
-    const deletedMigration = getSignalsMigrationSavedObjectMock({
-      deleted: true,
-    });
-    const finalizedMigration = await finalizeMigration({
-      esClient,
-      migration: deletedMigration,
-      signalsAlias: 'my-signals-alias',
-      soClient,
-      username: 'username',
-    });
-
-    expect(updateMigrationSavedObject).not.toHaveBeenCalled();
-    expect(finalizedMigration).toEqual(deletedMigration);
-  });
-
   it('does not finalize a failed migration', async () => {
     const failedMigration = getSignalsMigrationSavedObjectMock({ status: 'failure' });
     const finalizedMigration = await finalizeMigration({
