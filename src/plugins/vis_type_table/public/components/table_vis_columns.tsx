@@ -76,7 +76,7 @@ export const createGridColumns = (
     (col, colIndex): EuiDataGridColumn => {
       const cellActions = col.filterable
         ? [
-            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
               const rowValue = rows[rowIndex][columnId];
               const contentsIsDefined = rowValue !== null && rowValue !== undefined;
               const cellContent = col.formatter.convert(rowValue);
@@ -102,9 +102,10 @@ export const createGridColumns = (
                   <Component
                     aria-label={filterForAriaLabel}
                     data-test-subj="tbvChartCell__filterForCellValue"
-                    onClick={() =>
-                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false)
-                    }
+                    onClick={() => {
+                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
+                      closePopover();
+                    }}
                     iconType="plusInCircle"
                   >
                     {filterForText}
@@ -112,7 +113,7 @@ export const createGridColumns = (
                 )
               );
             },
-            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
               const rowValue = rows[rowIndex][columnId];
               const contentsIsDefined = rowValue !== null && rowValue !== undefined;
               const cellContent = col.formatter.convert(rowValue);
@@ -137,9 +138,10 @@ export const createGridColumns = (
                 contentsIsDefined && (
                   <Component
                     aria-label={filterOutAriaLabel}
-                    onClick={() =>
-                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true)
-                    }
+                    onClick={() => {
+                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
+                      closePopover();
+                    }}
                     iconType="minusInCircle"
                   >
                     {filterOutText}
