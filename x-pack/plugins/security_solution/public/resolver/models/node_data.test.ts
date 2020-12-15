@@ -44,7 +44,7 @@ describe('node data model', () => {
   });
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
-    const state: Map<string, NodeData> = new Map<string, NodeData>([
+    const state = new Map<string, NodeData>([
       [
         '1',
         {
@@ -56,15 +56,15 @@ describe('node data model', () => {
     ]);
 
     expect(setRequestedNodes(state, new Set(['1', '2']), 0)).toEqual(
-      new Map([
-        ['1', { events: [], status: 'loading' }],
-        ['2', { events: [], status: 'loading' }],
+      new Map<string, NodeData>([
+        ['1', { events: [], status: 'loading', dataRequestID: 0 }],
+        ['2', { events: [], status: 'loading', dataRequestID: 0 }],
       ])
     );
   });
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
-    const state: Map<string, NodeData> = new Map<string, NodeData>([
+    const state = new Map<string, NodeData>([
       [
         '1',
         {
@@ -76,16 +76,16 @@ describe('node data model', () => {
     ]);
 
     expect(setErrorNodes(state, new Set(['1', '2']), 0)).toEqual(
-      new Map([
-        ['1', { events: [], status: 'error' }],
-        ['2', { events: [], status: 'error' }],
+      new Map<string, NodeData>([
+        ['1', { events: [], status: 'error', dataRequestID: 0 }],
+        ['2', { events: [], status: 'error', dataRequestID: 0 }],
       ])
     );
   });
 
   describe('setReloadedNodes', () => {
     it('removes the id from the map', () => {
-      const state: Map<string, NodeData> = new Map<string, NodeData>([
+      const state = new Map<string, NodeData>([
         ['1', { events: [], status: 'error', dataRequestID: 0 }],
       ]);
       expect(setReloadedNodes(state, '1')).toEqual(new Map());
@@ -95,7 +95,7 @@ describe('node data model', () => {
   describe('updateWithReceivedNodes', () => {
     const node1Events = [generator.generateEvent({ entityID: '1', eventType: ['start'] })];
     const node2Events = [generator.generateEvent({ entityID: '2', eventType: ['start'] })];
-    const state: Map<string, NodeData> = new Map<string, NodeData>([
+    const state = new Map<string, NodeData>([
       ['1', { events: node1Events, status: 'error', dataRequestID: 0 }],
       ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
     ]);
@@ -113,9 +113,9 @@ describe('node data model', () => {
             dataRequestID: 0,
           })
         ).toEqual(
-          new Map([
-            ['1', { events: [genNodeEvent], status: 'running' }],
-            ['2', { events: node2Events, status: 'error' }],
+          new Map<string, NodeData>([
+            ['1', { events: [genNodeEvent], status: 'running', dataRequestID: 0 }],
+            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
           ])
         );
       });
@@ -130,9 +130,9 @@ describe('node data model', () => {
             dataRequestID: 0,
           })
         ).toEqual(
-          new Map([
-            ['1', { events: [], status: 'running' }],
-            ['2', { events: [], status: 'running' }],
+          new Map<string, NodeData>([
+            ['1', { events: [], status: 'running', dataRequestID: 0 }],
+            ['2', { events: [], status: 'running', dataRequestID: 0 }],
           ])
         );
       });
@@ -148,7 +148,11 @@ describe('node data model', () => {
             numberOfRequestedEvents: 0,
             dataRequestID: 0,
           })
-        ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
+        ).toEqual(
+          new Map<string, NodeData>([
+            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
+          ])
+        );
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {
@@ -161,9 +165,9 @@ describe('node data model', () => {
             dataRequestID: 0,
           })
         ).toEqual(
-          new Map([
-            ['1', { events: node1Events, status: 'error' }],
-            ['2', { events: node2Events, status: 'error' }],
+          new Map<string, NodeData>([
+            ['1', { events: node1Events, status: 'error', dataRequestID: 0 }],
+            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
           ])
         );
       });
@@ -180,9 +184,9 @@ describe('node data model', () => {
             dataRequestID: 0,
           })
         ).toEqual(
-          new Map([
-            ['1', { events: [genNodeEvent], status: 'running' }],
-            ['2', { events: node2Events, status: 'error' }],
+          new Map<string, NodeData>([
+            ['1', { events: [genNodeEvent], status: 'running', dataRequestID: 0 }],
+            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
           ])
         );
       });
