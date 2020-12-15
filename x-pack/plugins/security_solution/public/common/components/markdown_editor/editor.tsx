@@ -31,13 +31,10 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
     setMarkdownErrorMessages(err ? [err] : messages);
   }, []);
 
-  useEffect(() => {
-    const textArea = document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea');
-
-    if (textArea) {
-      textArea.focus();
-    }
-  }, []);
+  useEffect(
+    () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
+    []
+  );
 
   return (
     <EuiMarkdownEditor

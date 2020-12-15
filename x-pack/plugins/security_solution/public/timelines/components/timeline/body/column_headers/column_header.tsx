@@ -113,7 +113,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
 
   const onFocus = useCallback(() => {
     keyboardHandlerRef.current?.focus();
-  }, [keyboardHandlerRef]);
+  }, []);
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -121,7 +121,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
 
   const openPopover = useCallback(() => {
     setHoverActionsOwnFocus(true);
-  }, [setHoverActionsOwnFocus]);
+  }, []);
 
   const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
     closePopover: handleClosePopOverTrigger,

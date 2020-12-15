@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 
 import {
   isArrowDownOrArrowUp,
@@ -42,14 +42,17 @@ export const useStatefulEventFocus = ({
   const [focusOwnership, setFocusOwnership] = useState<FocusOwnership>('not-owned');
 
   const onFocus = useCallback(() => {
-    if (focusOwnership !== 'owned') {
-      setFocusOwnership('owned');
-    }
-  }, [focusOwnership, setFocusOwnership]);
+    setFocusOwnership((prevFocusOwnership) => {
+      if (prevFocusOwnership !== 'owned') {
+        return 'owned';
+      }
+      return prevFocusOwnership;
+    });
+  }, []);
 
   const onOutsideClick = useCallback(() => {
     setFocusOwnership('not-owned');
-  }, [setFocusOwnership]);
+  }, []);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -87,5 +90,12 @@ export const useStatefulEventFocus = ({
     ]
   );
 
-  return { focusOwnership, onFocus, onOutsideClick, onKeyDown };
+  const memoizedReturn = useMemo(() => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }), [
+    focusOwnership,
+    onFocus,
+    onKeyDown,
+    onOutsideClick,
+  ]);
+
+  return memoizedReturn;
 };

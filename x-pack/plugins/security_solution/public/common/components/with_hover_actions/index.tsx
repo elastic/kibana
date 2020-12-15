@@ -80,16 +80,20 @@ export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, closePopOverTrigger, hoverContent, onCloseRequested, render }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);
-    const [hoverTimeout, setHoverTimeout] = useState<number | undefined>(undefined);
+    const [, setHoverTimeout] = useState<number | undefined>(undefined);
 
     const tryClosePopover = useCallback(() => {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(undefined);
+      setHoverTimeout((prevHoverTimeout) => {
+        clearTimeout(prevHoverTimeout);
+        return undefined;
+      });
+
       setShowHoverContent(false);
+
       if (onCloseRequested != null) {
         onCloseRequested();
       }
-    }, [hoverTimeout, onCloseRequested, setHoverTimeout, setShowHoverContent]);
+    }, [onCloseRequested]);
 
     const onMouseEnter = useCallback(() => {
       setHoverTimeout(

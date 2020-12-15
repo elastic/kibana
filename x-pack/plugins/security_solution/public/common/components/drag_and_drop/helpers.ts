@@ -431,7 +431,6 @@ export const draggableKeyDownHandler = ({
       temporarilyDisableInteractiveChildTabIndexes(draggableElement);
       break;
     case 'ArrowUp':
-      stopPropagationAndPreventDefault(keyboardEvent);
       currentPosition = draggableElement.getBoundingClientRect();
       dragToLocation({
         dragActions,

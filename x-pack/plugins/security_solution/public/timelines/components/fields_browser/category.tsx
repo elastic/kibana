@@ -65,7 +65,7 @@ export const Category = React.memo<Props>(
           rowindexAttribute: DATA_ROWINDEX_ATTRIBUTE,
         });
       },
-      [containerElement, fieldItems.length]
+      [fieldItems.length]
     );
 
     const fieldItemsWithRowindex = useMemo(

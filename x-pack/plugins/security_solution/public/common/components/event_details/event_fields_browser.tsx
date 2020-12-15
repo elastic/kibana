@@ -175,7 +175,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     const focusSearchInput = useCallback(() => {
       // the selector below is used to focus the input because EuiInMemoryTable does not expose a ref to its built-in search input
       containerElement.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
-    }, [containerElement]);
+    }, []);
 
     const focusAddTimelineButton = useCallback(() => {
       // the document selector below is required because we may be in a flyout or full screen timeline context
@@ -203,7 +203,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           });
         }
       },
-      [containerElement, data, focusAddTimelineButton, focusSearchInput]
+      [data, focusAddTimelineButton, focusSearchInput]
     );
 
     useEffect(() => {

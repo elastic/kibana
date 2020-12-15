@@ -237,11 +237,11 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
 
     const onFocus = useCallback(() => {
       keyboardHandlerRef.current?.focus();
-    }, [keyboardHandlerRef]);
+    }, []);
 
     const openPopover = useCallback(() => {
       setHoverActionsOwnFocus(true);
-    }, [setHoverActionsOwnFocus]);
+    }, []);
 
     const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
       closePopover: handleClosePopOverTrigger,

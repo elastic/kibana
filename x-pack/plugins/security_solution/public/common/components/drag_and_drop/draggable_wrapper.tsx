@@ -156,7 +156,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     setTimeout(() => {
       setHoverActionsOwnFocus(false);
     }, 0); // invoked on the next tick, because we want to restore focus first
-  }, [keyboardHandlerRef, setClosePopOverTrigger, setHoverActionsOwnFocus]);
+  }, [keyboardHandlerRef]);
 
   const toggleTopN = useCallback(() => {
     setShowTopN((prevShowTopN) => {
@@ -294,7 +294,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   const openPopover = useCallback(() => {
     setHoverActionsOwnFocus(true);
-  }, [setHoverActionsOwnFocus]);
+  }, []);
 
   const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
     closePopover: handleClosePopOverTrigger,
@@ -320,7 +320,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         onFocus(); // return focus to this draggable on the next tick, because we owned focus
       }, 0);
     }
-  }, [onFocus, hoverActionsOwnFocus, setShowTopN, setHoverActionsOwnFocus]);
+  }, [onFocus, hoverActionsOwnFocus]);
 
   const DroppableContent = useCallback(
     (droppableProvided) => (

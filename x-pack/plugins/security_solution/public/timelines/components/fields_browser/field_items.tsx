@@ -108,7 +108,7 @@ const DraggableFieldsBrowserFieldComponent = ({
     setTimeout(() => {
       setHoverActionsOwnFocus(false);
     }, 0); // invoked on the next tick, because we want to restore focus first
-  }, [keyboardHandlerRef, setClosePopOverTrigger, setHoverActionsOwnFocus]);
+  }, []);
 
   const openPopover = useCallback(() => {
     setHoverActionsOwnFocus(true);
@@ -127,17 +127,17 @@ const DraggableFieldsBrowserFieldComponent = ({
 
   const onFocus = useCallback(() => {
     keyboardHandlerRef.current?.focus();
-  }, [keyboardHandlerRef]);
+  }, []);
 
   const onCloseRequested = useCallback(() => {
-    if (hoverActionsOwnFocus) {
-      setHoverActionsOwnFocus(false);
+    setHoverActionsOwnFocus((prevHoverActionOwnFocus) =>
+      prevHoverActionOwnFocus ? false : prevHoverActionOwnFocus
+    );
 
-      setTimeout(() => {
-        onFocus(); // return focus to this draggable on the next tick, because we owned focus
-      }, 0);
-    }
-  }, [onFocus, hoverActionsOwnFocus, setHoverActionsOwnFocus]);
+    setTimeout(() => {
+      onFocus(); // return focus to this draggable on the next tick, because we owned focus
+    }, 0);
+  }, [onFocus]);
 
   return (
     <div

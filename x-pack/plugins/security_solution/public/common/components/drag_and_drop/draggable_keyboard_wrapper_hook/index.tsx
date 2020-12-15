@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FluidDragActions } from 'react-beautiful-dnd';
 
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
@@ -38,18 +38,14 @@ export const useDraggableKeyboardWrapper = ({
   const [dragActions, setDragActions] = useState<FluidDragActions | null>(null);
 
   const cancelDragActions = useCallback(() => {
-    if (dragActions) {
-      cancelDrag(dragActions);
-      setDragActions(null);
-    }
-  }, [cancelDrag, dragActions, setDragActions]);
-
-  const onBlur = useCallback(() => {
-    if (dragActions) {
-      cancelDrag(dragActions);
-      setDragActions(null);
-    }
-  }, [cancelDrag, dragActions, setDragActions]);
+    setDragActions((prevDragAction) => {
+      if (prevDragAction) {
+        cancelDrag(dragActions);
+        return null;
+      }
+      return prevDragAction;
+    });
+  }, [cancelDrag, dragActions]);
 
   const onKeyDown = useCallback(
     (keyboardEvent: React.KeyboardEvent) => {
@@ -94,8 +90,13 @@ export const useDraggableKeyboardWrapper = ({
     ]
   );
 
-  return {
-    onBlur,
-    onKeyDown,
-  };
+  const memoizedReturn = useMemo(
+    () => ({
+      onBlur: cancelDragActions,
+      onKeyDown,
+    }),
+    [cancelDragActions, onKeyDown]
+  );
+
+  return memoizedReturn;
 };

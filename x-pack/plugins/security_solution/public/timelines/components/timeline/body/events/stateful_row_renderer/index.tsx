@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash/fp';
 import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
 import {
@@ -59,34 +59,28 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
+  const content = useMemo(
+    () => (
+      <EuiFocusTrap clickOutsideDisables={true} disabled={focusOwnership !== 'owned'}>
+        <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
+          <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
+        </EuiScreenReaderOnly>
+        <div onKeyDown={onKeyDown}>
+          {getRowRenderer(event.ecs, rowRenderers).renderRow({
+            browserFields,
+            data: event.ecs,
+            timelineId,
+          })}
+        </div>
+      </EuiFocusTrap>
+    ),
+    [ariaRowindex, browserFields, event.ecs, focusOwnership, onKeyDown, rowRenderers, timelineId]
+  );
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div role="dialog" onFocus={onFocus}>
-      <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
-        <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
-      </EuiScreenReaderOnly>
-
-      {focusOwnership !== 'owned' ? (
-        getRowRenderer(event.ecs, rowRenderers).renderRow({
-          browserFields,
-          data: event.ecs,
-          timelineId,
-        })
-      ) : (
-        <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-          <div>
-            <EuiFocusTrap>
-              <div onKeyDown={onKeyDown}>
-                {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                  browserFields,
-                  data: event.ecs,
-                  timelineId,
-                })}
-              </div>
-            </EuiFocusTrap>
-          </div>
-        </EuiOutsideClickDetector>
-      )}
+      <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>{content}</EuiOutsideClickDetector>
     </div>
   );
 };
