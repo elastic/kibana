@@ -31,6 +31,11 @@ interface SearchProps {
   onQueryChange: ({ query }: { query: Query }) => void;
 }
 
+export const parseErrorMsg = i18n.translate(
+  'advancedSettings.searchBar.unableToParseQueryErrorMessage',
+  { defaultMessage: 'Unable to parse query' }
+);
+
 export class Search extends PureComponent<SearchProps> {
   private categories: Array<{ value: string; name: string }> = [];
 
@@ -91,10 +96,6 @@ export class Search extends PureComponent<SearchProps> {
 
     let queryParseError;
     if (!this.state.isSearchTextValid) {
-      const parseErrorMsg = i18n.translate(
-        'advancedSettings.searchBar.unableToParseQueryErrorMessage',
-        { defaultMessage: 'Unable to parse query' }
-      );
       queryParseError = (
         <EuiFormErrorText>{`${parseErrorMsg}. ${this.state.parseErrorMessage}`}</EuiFormErrorText>
       );

@@ -38,6 +38,7 @@ import { ComponentRegistry } from '../';
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
+import { parseErrorMsg } from './components/search/search';
 
 export const QUERY = 'query';
 
@@ -152,7 +153,15 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   private getQuery(queryString: string): Query {
-    return Query.parse(queryString ? getAriaName(queryString) : '');
+    try {
+      return Query.parse(queryString ? getAriaName(queryString) : '');
+    } catch ({ message }) {
+      this.props.toasts.addWarning({
+        title: parseErrorMsg,
+        text: message,
+      });
+      return Query.parse('');
+    }
   }
 
   private getQueryText(pathname?: string, search?: string): string {

@@ -20,7 +20,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,
@@ -32,6 +32,7 @@ import { AdvancedSettings } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { RouteChildrenProps } from 'react-router-dom';
+import { Search } from './components/search';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -234,8 +235,10 @@ function mockConfig() {
 }
 
 describe('AdvancedSettings', () => {
-  const query = 'test:string:setting';
-  const getMockRouteParams = (): RouteChildrenProps<{ query: string }> =>
+  const defaultQuery = 'test:string:setting';
+  const getMockRouteParams = (
+    query: string = defaultQuery
+  ): RouteChildrenProps<{ query: string }> =>
     ({
       match: {
         params: {
@@ -267,7 +270,7 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === query
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
     ).toHaveLength(1);
   });
@@ -288,9 +291,30 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === query
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
         .prop('enableSaving')
     ).toBe(false);
+  });
+
+  it('should render unfiltered with query parsing error', async () => {
+    const badQuery = 'category:(accessibility))';
+    const { toasts } = notificationServiceMock.createStartContract();
+    const getComponent = () =>
+      shallowWithI18nProvider(
+        <AdvancedSettings
+          {...getMockRouteParams(badQuery)}
+          enableSaving={false}
+          toasts={toasts}
+          dockLinks={docLinksServiceMock.createStartContract().links}
+          uiSettings={mockConfig().core.uiSettings}
+          componentRegistry={new ComponentRegistry().start}
+        />
+      );
+
+    expect(getComponent).not.toThrow();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    const component = getComponent();
+    expect(component.find(Search).prop('query').text).toEqual('');
   });
 });
