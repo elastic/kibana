@@ -6,12 +6,16 @@
 
 import dedent from 'dedent';
 import React from 'react';
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiTitle,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
   EuiText,
   EuiLink,
   EuiSpacer,
@@ -26,23 +30,39 @@ import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
 
 import { DOCS_PREFIX } from '../../../routes';
-import { DOCUMENTS_API_JSON_EXAMPLE } from '../constants';
+import { DOCUMENTS_API_JSON_EXAMPLE, MODAL_CANCEL_BUTTON } from '../constants';
+import { DocumentCreationLogic } from '../';
 
-export const ApiCodeExample: React.FC = () => {
+export const ApiCodeExample: React.FC = () => (
+  <>
+    <ModalHeader />
+    <ModalBody />
+    <ModalFooter />
+  </>
+);
+
+export const ModalHeader: React.FC = () => {
+  return (
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.title', {
+            defaultMessage: 'Indexing by API',
+          })}
+        </h2>
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+  );
+};
+
+export const ModalBody: React.FC = () => {
   const { engineName, engine } = useValues(EngineLogic);
   const { apiKey } = engine as EngineDetails;
 
   const documentsApiUrl = getEnterpriseSearchUrl(`/api/as/v1/engines/${engineName}/documents`);
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.title', {
-            defaultMessage: 'Indexing by API',
-          })}
-        </h3>
-      </EuiTitle>
+    <EuiModalBody>
       <EuiText color="subdued">
         <p>
           <FormattedMessage
@@ -76,23 +96,33 @@ export const ApiCodeExample: React.FC = () => {
       </EuiPanel>
       <EuiCodeBlock language="bash" fontSize="m" isCopyable>
         {dedent(`
-          curl -X POST '${documentsApiUrl}'
-            -H 'Content-Type: application/json'
-            -H 'Authorization: Bearer ${apiKey}'
-            -d '${DOCUMENTS_API_JSON_EXAMPLE}'
-          # Returns
-          # [
-          #   {
-          #     "id": "park_rocky-mountain",
-          #     "errors": []
-          #   },
-          #   {
-          #     "id": "park_saguaro",
-          #     "errors": []
-          #   }
-          # ]
-        `)}
+        curl -X POST '${documentsApiUrl}'
+          -H 'Content-Type: application/json'
+          -H 'Authorization: Bearer ${apiKey}'
+          -d '${DOCUMENTS_API_JSON_EXAMPLE}'
+        # Returns
+        # [
+        #   {
+        #     "id": "park_rocky-mountain",
+        #     "errors": []
+        #   },
+        #   {
+        #     "id": "park_saguaro",
+        #     "errors": []
+        #   }
+        # ]
+      `)}
       </EuiCodeBlock>
-    </>
+    </EuiModalBody>
+  );
+};
+
+export const ModalFooter: React.FC = () => {
+  const { closeDocumentCreation } = useActions(DocumentCreationLogic);
+
+  return (
+    <EuiModalFooter>
+      <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
+    </EuiModalFooter>
   );
 };

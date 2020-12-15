@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ShowCreationModes } from './show_creation_modes';
 export { ApiCodeExample } from './api_code_example';
 export { PasteJsonText } from './paste_json_text';
 export { UploadJsonFile } from './upload_json_file';

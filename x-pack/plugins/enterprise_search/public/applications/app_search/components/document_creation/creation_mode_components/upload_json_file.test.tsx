@@ -13,9 +13,9 @@ import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiFilePicker } from '@elastic/eui';
+import { EuiFilePicker, EuiButtonEmpty } from '@elastic/eui';
 
-import { UploadJsonFile } from './';
+import { UploadJsonFile, ModalHeader, ModalBody, ModalFooter } from './upload_json_file';
 
 describe('UploadJsonFile', () => {
   const values = {
@@ -28,6 +28,7 @@ describe('UploadJsonFile', () => {
   };
   const actions = {
     setFileInput: jest.fn(),
+    closeDocumentCreation: jest.fn(),
   };
 
   beforeEach(() => {
@@ -38,15 +39,33 @@ describe('UploadJsonFile', () => {
 
   it('renders', () => {
     const wrapper = shallow(<UploadJsonFile />);
-
-    expect(wrapper.find('h3').text()).toEqual('Drag and drop .json');
-    expect(wrapper.find(EuiFilePicker)).toHaveLength(1);
+    expect(wrapper.find(ModalHeader)).toHaveLength(1);
+    expect(wrapper.find(ModalBody)).toHaveLength(1);
+    expect(wrapper.find(ModalFooter)).toHaveLength(1);
   });
 
-  it('updates state when files are dropped in', () => {
-    const wrapper = shallow(<UploadJsonFile />);
+  describe('ModalHeader', () => {
+    it('renders', () => {
+      const wrapper = shallow(<ModalHeader />);
+      expect(wrapper.find('h2').text()).toEqual('Drag and drop .json');
+    });
+  });
 
-    wrapper.find(EuiFilePicker).simulate('change', ['mock file']);
-    expect(actions.setFileInput).toHaveBeenCalledWith(['mock file']);
+  describe('ModalBody', () => {
+    it('updates state when files are dropped in', () => {
+      const wrapper = shallow(<ModalBody />);
+
+      wrapper.find(EuiFilePicker).simulate('change', ['mock file']);
+      expect(actions.setFileInput).toHaveBeenCalledWith(['mock file']);
+    });
+  });
+
+  describe('ModalFooter', () => {
+    it('closes the modal', () => {
+      const wrapper = shallow(<ModalFooter />);
+
+      wrapper.find(EuiButtonEmpty).simulate('click');
+      expect(actions.closeDocumentCreation).toHaveBeenCalled();
+    });
   });
 });

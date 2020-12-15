@@ -8,15 +8,49 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
-import { EuiTextArea, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTextArea,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { AppLogic } from '../../../app_logic';
 import { ConfiguredLimits } from '../../../types';
+
+import { MODAL_CANCEL_BUTTON, MODAL_CONTINUE_BUTTON } from '../constants';
 import { DocumentCreationLogic } from '../';
 
 import './paste_json_text.scss';
 
-export const PasteJsonText: React.FC = () => {
+export const PasteJsonText: React.FC = () => (
+  <>
+    <ModalHeader />
+    <ModalBody />
+    <ModalFooter />
+  </>
+);
+
+export const ModalHeader: React.FC = () => {
+  return (
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.pasteJsonText.title', {
+            defaultMessage: 'Create documents',
+          })}
+        </h2>
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+  );
+};
+
+export const ModalBody: React.FC = () => {
   const { configuredLimits } = useValues(AppLogic);
   const {
     engine: { maxDocumentByteSize },
@@ -26,14 +60,7 @@ export const PasteJsonText: React.FC = () => {
   const { setTextInput } = useActions(DocumentCreationLogic);
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.pasteJsonText.title', {
-            defaultMessage: 'Create documents',
-          })}
-        </h3>
-      </EuiTitle>
+    <EuiModalBody>
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -58,6 +85,17 @@ export const PasteJsonText: React.FC = () => {
         fullWidth
         rows={12}
       />
-    </>
+    </EuiModalBody>
+  );
+};
+
+export const ModalFooter: React.FC = () => {
+  const { closeDocumentCreation } = useActions(DocumentCreationLogic);
+
+  return (
+    <EuiModalFooter>
+      <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
+      <EuiButton fill>{MODAL_CONTINUE_BUTTON}</EuiButton>
+    </EuiModalFooter>
   );
 };
