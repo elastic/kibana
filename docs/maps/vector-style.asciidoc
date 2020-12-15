@@ -55,7 +55,7 @@ For color styles, values are fit from the domain range to the color ramp with on
 
 * *Interpolate (default)*. Color ramp is divided into 8 bands. Values are interpolated between min and max to a color band on a linear scale.
 * *Percentiles*. Use percentiles to divide the color ramp into bands that map to values.
-* *Custom*. Define custom color ramp bands and ranges
+* *Custom*. Define custom color ramp bands and ranges.
 
 When the property value is undefined for a feature:
 
