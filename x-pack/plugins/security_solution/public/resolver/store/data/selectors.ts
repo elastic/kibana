@@ -180,10 +180,11 @@ export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = cr
  */
 export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
-  (nodeInfo) => {
+  nodeDataIsStale,
+  (nodeInfo, isStale) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info) {
+      if (!info || isStale(id)) {
         return 'loading';
       }
 

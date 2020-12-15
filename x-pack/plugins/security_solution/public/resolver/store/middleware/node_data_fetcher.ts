@@ -60,7 +60,6 @@ export function NodeDataFetcher(
     });
 
     let results: SafeResolverEvent[] | undefined;
-    const newID = selectors.refreshCount(state);
     try {
       const timeRangeFilters = selectors.timeRangeFilters(state);
       results = await dataAccessLayer.nodeData({
