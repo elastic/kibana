@@ -330,7 +330,7 @@ image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
 [[histogram]]
 === View the traffic for your website by the hour 
 
-To find the best time to shut down your website for maintenance, create a histogram that diplays the traffic for your website by the hour.
+To find the best time to shut down your website for maintenance, create a histogram that displays the traffic for your website by the hour.
 
 . From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
 
