@@ -23,8 +23,6 @@ import {
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_DETAILS,
 } from '../../common/constants';
-// @ts-ignore
-import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
