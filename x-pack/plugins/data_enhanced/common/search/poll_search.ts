@@ -18,29 +18,22 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
 ): Observable<Response> => {
   const aborted = options?.abortSignal
     ? abortSignalToPromise(options?.abortSignal)
-    : { promise: NEVER, cleanup: () => {} };
+    : { promise: new Promise(() => {}), cleanup: () => {} };
 
-  return new Observable((subscriber) => {
-    const obs = from(search()).pipe(
-      expand(() => timer(pollInterval).pipe(switchMap(search))),
-      tap((response) => {
-        if (isErrorResponse(response)) throw new AbortError();
-      }),
-      takeWhile<Response>(isPartialResponse, true),
-      takeUntil<Response>(from(aborted.promise)),
-      finalize(aborted.cleanup)
-    );
-
-    const subscription = obs.subscribe({
-      next: (value) => subscriber.next(value),
-      error: (error) => subscriber.error(error),
-      complete: () => subscriber.complete(),
-    });
-
-    return () => {
-      if (cancel) cancel();
-      aborted.cleanup();
-      subscription.unsubscribe();
-    };
+  aborted.promise.catch(() => {
+    if (cancel) cancel();
   });
+
+  return from(search()).pipe(
+    expand(() => timer(pollInterval).pipe(switchMap(search))),
+    tap((response) => {
+      if (isErrorResponse(response)) {
+        if (cancel) cancel();
+        throw new AbortError();
+      }
+    }),
+    takeWhile<Response>(isPartialResponse, true),
+    takeUntil<Response>(from(aborted.promise)),
+    finalize(aborted.cleanup)
+  );
 };
