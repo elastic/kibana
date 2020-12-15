@@ -394,6 +394,10 @@ describe('execute()', () => {
       bcc: ['jim', '{{rogue}}', 'bob'],
       subject: '{{rogue}}',
       message: '{{rogue}}',
+      kibanaFooterLink: {
+        path: '/',
+        text: 'Go to Kibana',
+      },
     };
     const variables = {
       rogue: '*bold*',
