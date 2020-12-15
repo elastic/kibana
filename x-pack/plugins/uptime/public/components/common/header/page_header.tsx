@@ -45,7 +45,7 @@ export const PageHeader = () => {
   const DatePickerComponent = () =>
     isCertRoute ? (
       <CertRefreshBtn />
-    ) : isStepDetailRoute ? null : (
+    ) : (
       <StyledPicker grow={false} style={{ flexBasis: 485 }}>
         <UptimeDatePicker />
       </StyledPicker>
