@@ -206,6 +206,7 @@ describe('ExecutedJourney component', () => {
         direction="column"
       >
         <ExecutedStep
+          checkGroup="check_group"
           index={0}
           key="0"
           step={
@@ -230,6 +231,7 @@ describe('ExecutedJourney component', () => {
           }
         />
         <ExecutedStep
+          checkGroup="check_group"
           index={1}
           key="1"
           step={
