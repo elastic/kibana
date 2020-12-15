@@ -94,7 +94,7 @@ export async function getServiceDetails({
           terms: {
             field: SERVICE_VERSION,
             size: 10,
-            order: { _key: 'asc' },
+            order: { _key: 'desc' },
           },
         },
         availabilityZones: {
