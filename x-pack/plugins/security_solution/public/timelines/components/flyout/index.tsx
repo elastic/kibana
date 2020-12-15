@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { AppLeaveHandler } from '../../../../../../../src/core/public';
+import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { timelineActions } from '../../store/timeline';
+import { TimelineTabs } from '../../store/timeline/model';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
-import { timelineSelectors } from '../../store/timeline';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { getTimelineShowStatusByIdSelector } from './selectors';
 
 const Visible = styled.div<{ show?: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
@@ -21,13 +26,57 @@ Visible.displayName = 'Visible';
 
 interface OwnProps {
   timelineId: string;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const FlyoutComponent: React.FC<OwnProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const show = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).show
+const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
+  const dispatch = useDispatch();
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+    getTimelineShowStatus(state, timelineId)
   );
+
+  useEffect(() => {
+    onAppLeave((actions, nextAppId) => {
+      if (show) {
+        dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+      }
+      // Confirm when the user has made any changes to a timeline
+      if (
+        !(nextAppId ?? '').includes('securitySolution') &&
+        timelineStatus === TimelineStatus.draft &&
+        updated != null
+      ) {
+        const showSaveTimelineModal = () => {
+          dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
+          dispatch(
+            timelineActions.setActiveTabTimeline({
+              id: TimelineId.active,
+              activeTab: TimelineTabs.query,
+            })
+          );
+          dispatch(
+            timelineActions.toggleModalSaveTimeline({
+              id: TimelineId.active,
+              showModalSaveTimeline: true,
+            })
+          );
+        };
+
+        return actions.confirm(
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkMessage', {
+            defaultMessage: 'Leave Timeline with unsaved work?',
+          }),
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
+          }),
+          showSaveTimelineModal
+        );
+      } else {
+        return actions.default();
+      }
+    });
+  }, [dispatch, onAppLeave, show, timelineStatus, updated]);
 
   return (
     <>
