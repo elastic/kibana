@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
+import { IExternalUrl } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import {
   ChartActionContext,
@@ -31,6 +32,7 @@ import { getPanelVariables, getEventScope, getEventVariableList } from './url_dr
 import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
+  externalUrl: IExternalUrl;
   getGlobalScope: () => UrlDrilldownGlobalScope;
   navigateToUrl: (url: string) => Promise<void>;
   getSyntaxHelpDocsLink: () => string;
@@ -55,7 +57,7 @@ const URL_DRILLDOWN = 'URL_DRILLDOWN';
 export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
-  constructor(private deps: UrlDrilldownDeps) {}
+  constructor(private readonly deps: UrlDrilldownDeps) {}
 
   public readonly order = 8;
 
@@ -109,18 +111,37 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
       console.warn(
         `UrlDrilldown [${config.url.template}] is not valid. Error [${error}]. Skipping execution.`
       );
+      return false;
     }
 
-    return Promise.resolve(isValid);
+    const url = this.buildUrl(config, context);
+    const validUrl = this.deps.externalUrl.validateUrl(url);
+    if (!validUrl) {
+      return false;
+    }
+
+    return true;
   };
 
-  public readonly getHref = async (config: Config, context: ActionContext) => {
-    const scope = this.getRuntimeVariables(context);
-    return urlDrilldownCompileUrl(config.url.template, scope);
+  private buildUrl(config: Config, context: ActionContext): string {
+    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    return url;
+  }
+
+  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
+    const url = this.buildUrl(config, context);
+    const validUrl = this.deps.externalUrl.validateUrl(url);
+    if (!validUrl) {
+      throw new Error(
+        `External URL [${url}] was denied by ExternalUrl service. ` +
+          `You can configure external URL policies using "externalUrl.policy" setting in kibana.yml.`
+      );
+    }
+    return url;
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    const url = await this.getHref(config, context);
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {

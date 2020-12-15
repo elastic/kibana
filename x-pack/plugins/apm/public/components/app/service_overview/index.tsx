@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
@@ -23,6 +16,7 @@ import { TransactionErrorRateChart } from '../../shared/charts/transaction_error
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
+import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 
@@ -101,36 +95,9 @@ export function ServiceOverview({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={4}>
-                  <EuiPanel>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.instancesLatencyDistributionChartTitle',
-                          {
-                            defaultMessage: 'Instances latency distribution',
-                          }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiPanel>
-                </EuiFlexItem>
-                <EuiFlexItem grow={6}>
-                  <EuiPanel>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.instancesTableTitle',
-                          {
-                            defaultMessage: 'Instances',
-                          }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiPanel>
+                <ServiceOverviewInstancesTable serviceName={serviceName} />
+              </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPage>

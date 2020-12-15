@@ -83,6 +83,7 @@ export abstract class FieldFormat {
    * @private
    */
   public type: any = this.constructor;
+  public allowsNumericalAggregations?: boolean;
 
   protected readonly _params: any;
   protected getConfig: FieldFormatsGetConfigFn | undefined;
