@@ -11,6 +11,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
+import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
   SanitizedAlert as Alert,
   AlertAction,
@@ -140,15 +141,20 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType {
-  id: string;
-  name: string;
-  actionGroups: ActionGroup[];
-  recoveryActionGroup: ActionGroup;
+export interface AlertType
+  extends Pick<
+    CommonAlertType,
+    | 'id'
+    | 'name'
+    | 'actionGroups'
+    | 'producer'
+    | 'minimumLicenseRequired'
+    | 'recoveryActionGroup'
+    | 'defaultActionGroupId'
+  > {
   actionVariables: ActionVariables;
-  defaultActionGroupId: ActionGroup['id'];
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
-  producer: string;
+  enabledInLicense: boolean;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -159,6 +165,7 @@ export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
   isEditable: boolean;
+  enabledInLicense: boolean;
 }
 
 export interface AlertTypeParamsExpressionProps<
