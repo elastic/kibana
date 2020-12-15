@@ -1,6 +1,6 @@
 [float]
 [[lens-end-to-end]]
-== Try it: Analyze website data on a dashboard
+== Tutorial: Analyze website data on a dashboard
 
 Most dashboards use similar types of analysis to answer key questions. In this tutorial you will base your analysis off of {kib} sample data which resembles logs from the Apache web server.
 
