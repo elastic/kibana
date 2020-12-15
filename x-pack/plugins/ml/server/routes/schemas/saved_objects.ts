@@ -12,6 +12,11 @@ export const jobsAndSpaces = schema.object({
   spaces: schema.arrayOf(schema.string()),
 });
 
+export const jobsAndCurrentSpace = schema.object({
+  jobType: schema.string(),
+  jobIds: schema.arrayOf(schema.string()),
+});
+
 export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
 
 export const jobTypeSchema = schema.object({

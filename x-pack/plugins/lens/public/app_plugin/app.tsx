@@ -59,6 +59,7 @@ export function App({
     navigation,
     uiSettings,
     application,
+    stateTransfer,
     notifications,
     attributeService,
     savedObjectsClient,
@@ -463,6 +464,9 @@ export function App({
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+        // remove editor state so the connection is still broken after reload
+        stateTransfer.clearEditorState();
+
         redirectTo(newInput.savedObjectId);
         return;
       }

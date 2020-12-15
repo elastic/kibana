@@ -1439,10 +1439,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@30.5.1":
-  version "30.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-30.5.1.tgz#c9782c2f4763d563de6afcc2fc56d81c1e5b183c"
-  integrity sha512-W8rW49prYG0XHNdMWGTxNW50Kef3/fh+IL5mzMOKLao1W4h0F45efIDbnIHyjGl//akknIIEa6bwdTU4dmLBgA==
+"@elastic/eui@30.6.0":
+  version "30.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-30.6.0.tgz#6653223223f52407ac05303825d9bd08382df1d5"
+  integrity sha512-40Jiy54MpJAx3lD3NSZZLkMkVySwKpX6RxIKnvT3somE95pwIjXrWB688m2nL2g05y7kNhjrhwfdctVzNXZENA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1476,6 +1476,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^9.2.0"
+    url-parse "^1.4.7"
     uuid "^8.3.0"
     vfile "^4.2.0"
 
@@ -28095,7 +28096,7 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.4.3:
+url-parse@^1.4.3, url-parse@^1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
   integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==
