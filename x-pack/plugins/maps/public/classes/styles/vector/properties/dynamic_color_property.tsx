@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Map as MbMap } from 'mapbox-gl';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';

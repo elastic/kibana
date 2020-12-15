@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiTabbedContent,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
@@ -72,22 +66,6 @@ const VerticalRule = styled.div`
 `;
 
 VerticalRule.displayName = 'VerticalRule';
-
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
-`;
-
-StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
 
 interface OwnProps {
   timelineId: string;

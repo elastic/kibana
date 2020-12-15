@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
@@ -115,22 +114,6 @@ const VerticalRule = styled.div`
 `;
 
 VerticalRule.displayName = 'VerticalRule';
-
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
-`;
-
-StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
 
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
