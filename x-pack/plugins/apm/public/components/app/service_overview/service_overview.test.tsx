@@ -86,6 +86,8 @@ describe('ServiceOverview', () => {
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'GET /api/apm/services/{serviceName}/service_overview_instances': [],
     };
 
     jest
