@@ -8,13 +8,18 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { TimelineTabs } from '../../../store/timeline/model';
 import { FlyoutBottomBar } from '.';
 
 describe('FlyoutBottomBar', () => {
   test('it renders the expected bottom bar', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar timelineId="test" />
+        <FlyoutBottomBar
+          timelineId="test"
+          showDataproviders={false}
+          activeTab={TimelineTabs.query}
+        />
       </TestProviders>
     );
 
@@ -24,7 +29,11 @@ describe('FlyoutBottomBar', () => {
   test('it renders the data providers drop target area', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar timelineId="test" />
+        <FlyoutBottomBar
+          timelineId="test"
+          showDataproviders={false}
+          activeTab={TimelineTabs.query}
+        />
       </TestProviders>
     );
 

@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
@@ -18,7 +17,6 @@ import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { Direction } from '../../../../../common/search_strategy';
@@ -34,7 +32,6 @@ import { EventDetailsWidthProvider } from '../../../../common/components/events_
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { useTimelinePinnedEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../store/timeline/model';
 import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
@@ -110,10 +107,6 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 `;
 
 StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
-
-const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
 
 interface OwnProps {
   timelineId: string;
