@@ -29,6 +29,7 @@ export function getActionType({
   logger,
   caseService,
   caseConfigureService,
+  connectorMappingsService,
   userActionService,
   alertsService,
 }: GetActionTypeParams): CaseActionType {
@@ -41,11 +42,12 @@ export function getActionType({
       params: CaseExecutorParamsSchema,
     },
     executor: curry(executor)({
-      logger,
-      caseService,
-      caseConfigureService,
-      userActionService,
       alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      logger,
+      userActionService,
     }),
   };
 }
@@ -53,11 +55,12 @@ export function getActionType({
 // action executor
 async function executor(
   {
-    logger,
-    caseService,
-    caseConfigureService,
-    userActionService,
     alertsService,
+    caseConfigureService,
+    caseService,
+    connectorMappingsService,
+    logger,
+    userActionService,
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
@@ -71,6 +74,7 @@ async function executor(
     request: {} as KibanaRequest,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
     alertsService,
     // TODO: When case connector is enabled we should figure out how to pass the context.
