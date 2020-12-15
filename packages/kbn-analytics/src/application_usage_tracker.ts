@@ -45,13 +45,13 @@ export class ApplicationUsageTracker {
     return { appId, viewId };
   }
 
-  private serializeKey({ appId, viewId }: ApplicationKey): string {
+  static serializeKey({ appId, viewId }: ApplicationKey): string {
     return `${appId}-${viewId}`;
   }
 
   private trackApplications(appKeys: ApplicationKey[]) {
     for (const { appId, viewId } of appKeys.filter(Boolean)) {
-      const serializedKey = this.serializeKey({ appId, viewId });
+      const serializedKey = ApplicationUsageTracker.serializeKey({ appId, viewId });
       if (typeof this.trackedApplicationViews[serializedKey] !== 'undefined') {
         continue;
       }
@@ -173,7 +173,7 @@ export class ApplicationUsageTracker {
     }
 
     const appKey = this.createKey(this.currentAppId, viewId);
-    const serializedKey = this.serializeKey(appKey);
+    const serializedKey = ApplicationUsageTracker.serializeKey(appKey);
     const appViewMetric = this.trackedApplicationViews[serializedKey];
     this.sendMetricsToReporter([appViewMetric]);
 
