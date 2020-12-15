@@ -430,7 +430,7 @@ export default function ({ getService }) {
           })
       );
 
-      it('should return 200 with empty response', async () =>
+      it.skip('should return 200 with empty response', async () =>
         await supertest
           .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
