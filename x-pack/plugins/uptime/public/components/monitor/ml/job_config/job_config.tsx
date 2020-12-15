@@ -40,7 +40,7 @@ export const JobConfig = ({ bucketSpan, timeRange, setTimeRange, setBucketSpan }
   }, [useFullData]);
 
   useEffect(() => {
-    if (data?.success && useFullData) {
+    if (data?.success && useFullData && data?.start.epoch > 0) {
       // only set start, end undefined means job will use data in a continues manner
       setTimeRange({ start: data.start.epoch });
     }
