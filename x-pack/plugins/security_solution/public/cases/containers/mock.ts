@@ -76,6 +76,9 @@ export const basicCase: Case = {
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const basicCasePost: Case = {
@@ -141,7 +144,6 @@ const basicAction = {
 };
 
 export const casePushParams = {
-  actionBy: elasticUser,
   savedObjectId: basicCaseId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -153,6 +155,7 @@ export const casePushParams = {
   description: 'nice',
   comments: null,
 };
+
 export const actionTypeExecutorResult = {
   actionId: 'string',
   status: 'ok',

@@ -5,45 +5,74 @@
  */
 
 import { find } from 'lodash/fp';
-import { EuiTextColor, EuiLoadingContent, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiTextColor,
+  EuiLoadingContent,
+  EuiTitle,
+  EuiSpacer,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
-import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import { BrowserFields } from '../../../../common/containers/source';
 import {
   EventDetails,
   EventsViewType,
   View,
 } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { useTimelineEventsDetails } from '../../../containers/details';
+import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
 
+export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
+  detailsData: TimelineEventsDetailsItem[] | null;
   event: TimelineExpandedEvent;
+  isAlert: boolean;
+  loading: boolean;
   timelineId: string;
 }
 
-export const ExpandableEventTitle = React.memo(() => (
-  <EuiTitle size="s">
-    <h4>{i18n.EVENT_DETAILS}</h4>
-  </EuiTitle>
-));
+interface ExpandableEventTitleProps {
+  isAlert: boolean;
+  loading: boolean;
+  handleOnEventClosed?: HandleOnEventClosed;
+}
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  flex: 0;
+`;
+
+export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
+  ({ isAlert, loading, handleOnEventClosed }) => (
+    <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
+        </EuiTitle>
+      </EuiFlexItem>
+      {handleOnEventClosed && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
+        </EuiFlexItem>
+      )}
+    </StyledEuiFlexGroup>
+  )
+);
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, docValueFields, event, timelineId }) => {
-    const [view, setView] = useState<View>(EventsViewType.tableView);
-
-    const [loading, detailsData] = useTimelineEventsDetails({
-      docValueFields,
-      indexName: event.indexName!,
-      eventId: event.eventId!,
-      skip: !event.eventId,
-    });
+  ({ browserFields, event, timelineId, isAlert, loading, detailsData }) => {
+    const [view, setView] = useState<View>(EventsViewType.summaryView);
 
     const message = useMemo(() => {
       if (detailsData) {
@@ -52,7 +81,9 @@ export const ExpandableEvent = React.memo<Props>(
           | undefined;
 
         if (messageField?.originalValue) {
-          return messageField?.originalValue;
+          return Array.isArray(messageField?.originalValue)
+            ? messageField?.originalValue.join()
+            : messageField?.originalValue;
         }
       }
       return null;
@@ -68,12 +99,22 @@ export const ExpandableEvent = React.memo<Props>(
 
     return (
       <>
-        <EuiText>{message}</EuiText>
-        <EuiSpacer size="m" />
+        {message && (
+          <>
+            <EuiDescriptionList data-test-subj="event-message" compressed>
+              <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <LineClamp content={message} />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EventDetails
           browserFields={browserFields}
           data={detailsData!}
           id={event.eventId!}
+          isAlert={isAlert}
           onViewSelected={setView}
           timelineId={timelineId}
           view={view}
