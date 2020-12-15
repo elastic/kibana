@@ -9,8 +9,9 @@ import {
   ResilientGetFieldsResponse,
   ServiceNowGetFieldsResponse,
 } from '../../../../actions/server/types';
-import { formatFields } from './utils';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { createDefaultMapping, formatFields } from './utils';
+import { ConnectorField, ConnectorTypes } from '../../../common/api/connectors';
+import { mappings } from './mock';
 
 const jiraFields: JiraGetFieldsResponse = {
   summary: {
@@ -435,8 +436,12 @@ const serviceNowFields: ServiceNowGetFieldsResponse = [
     element: 'upon_reject',
   },
 ];
-
-const formatFieldsTestData = [
+interface FormatFieldsTestData {
+  expected: ConnectorField[];
+  fields: JiraGetFieldsResponse | ResilientGetFieldsResponse | ServiceNowGetFieldsResponse;
+  type: ConnectorTypes;
+}
+const formatFieldsTestData: FormatFieldsTestData[] = [
   {
     expected: [
       { id: 'summary', name: 'Summary', required: true, type: 'text' },
@@ -539,6 +544,14 @@ describe('client/configure/utils', () => {
       it(`normalizes ${type} fields to common type ConnectorField`, () => {
         const result = formatFields(fields, type);
         expect(result).toEqual(expected);
+      });
+    });
+  });
+  describe('createDefaultMapping', () => {
+    formatFieldsTestData.forEach(({ expected, fields, type }) => {
+      it(`normalizes ${type} fields to common type ConnectorField`, () => {
+        const result = createDefaultMapping(expected, type);
+        expect(result).toEqual(mappings[type]);
       });
     });
   });
