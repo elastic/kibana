@@ -46,6 +46,7 @@ export function SparkPlot({
   const defaultChartTheme = useChartTheme();
 
   const sparkplotChartTheme = merge({}, defaultChartTheme, {
+    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
