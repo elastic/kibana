@@ -199,7 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index threshold',
+          alertType: 'Always Firing',
           interval: '1m',
         },
       ]);
