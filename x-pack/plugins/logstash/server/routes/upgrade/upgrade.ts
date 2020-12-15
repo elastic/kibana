@@ -6,7 +6,7 @@
 import { IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
-import { INDEX_NAMES } from '../../../common/constants';
+// import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
 
 export function registerUpgradeRoute(router: IRouter) {
@@ -18,26 +18,31 @@ export function registerUpgradeRoute(router: IRouter) {
     wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = context.logstash!.esClient;
+        // https://github.com/elastic/kibana/issues/86038
+        // This is not supported in 8.0 due to it being a system index.
+        // Commenting it out for now to unblock the snapshots for the Ingest
+        // team to address
 
-        const doesIndexExist = await client.callAsCurrentUser('indices.exists', {
-          index: INDEX_NAMES.PIPELINES,
-        });
+        // const client = context.logstash!.esClient;
 
-        // If index doesn't exist yet, there is no mapping to upgrade
-        if (doesIndexExist) {
-          await client.callAsCurrentUser('indices.putMapping', {
-            index: INDEX_NAMES.PIPELINES,
-            body: {
-              properties: {
-                pipeline_settings: {
-                  dynamic: false,
-                  type: 'object',
-                },
-              },
-            },
-          });
-        }
+        // const doesIndexExist = await client.callAsCurrentUser('indices.exists', {
+        //   index: INDEX_NAMES.PIPELINES,
+        // });
+
+        // // If index doesn't exist yet, there is no mapping to upgrade
+        // if (doesIndexExist) {
+        //   await client.callAsCurrentUser('indices.putMapping', {
+        //     index: INDEX_NAMES.PIPELINES,
+        //     body: {
+        //       properties: {
+        //         pipeline_settings: {
+        //           dynamic: false,
+        //           type: 'object',
+        //         },
+        //       },
+        //     },
+        //   });
+        // }
 
         return response.ok({ body: { is_upgraded: true } });
       })
