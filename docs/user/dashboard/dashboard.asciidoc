@@ -4,7 +4,7 @@
 [partintro]
 --
 
-Dashboards are collections of panels that you configure and arrange to visualize and analyze your data. Each panel contains data from one or more index patterns, which allows 
+A dashboard is a collection of panels that you use to analyze your data. Each panel contains data from one or more <<index-patterns, index patterns>>, which allows
 you to create a complete overview of your data on a single dashboard. {kib} supports many types of panels that enable you to see your data from multiple perspectives. 
 
 [role="screenshot"]
