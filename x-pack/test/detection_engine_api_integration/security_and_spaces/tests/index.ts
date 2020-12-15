@@ -40,8 +40,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     });
 
     describe('', function () {
-      this.tags('ciGroup12');
-
       loadTestFile(require.resolve('./exception_operators_data_types/index'));
     });
   });
