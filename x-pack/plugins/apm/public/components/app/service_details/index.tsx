@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -20,7 +21,16 @@ export function ServiceDetails({ match, tab }: Props) {
   return (
     <div>
       <ApmHeader>
-        <ServiceIcons serviceName={serviceName} />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>{serviceName}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ServiceIcons serviceName={serviceName} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </ApmHeader>
       <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>

@@ -43,7 +43,10 @@ export function IconPopover({ icon, title, children }: IconPopoverProps) {
     <EuiPopover
       ownFocus={false}
       button={
-        <EuiButtonEmpty onClick={tooglePopover}>
+        <EuiButtonEmpty
+          onClick={tooglePopover}
+          data-test-subj={`popover_${title}`}
+        >
           <EuiIcon type={icon} size="l" color="black" />
         </EuiButtonEmpty>
       }
@@ -52,7 +55,11 @@ export function IconPopover({ icon, title, children }: IconPopoverProps) {
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: px(300) }}>
-        {isLoading ? <EuiLoadingContent /> : children}
+        {isLoading ? (
+          <EuiLoadingContent data-test-subj="loading-content" />
+        ) : (
+          children
+        )}
       </div>
     </EuiPopover>
   );
