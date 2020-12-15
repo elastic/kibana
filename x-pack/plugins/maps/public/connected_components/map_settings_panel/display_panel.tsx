@@ -16,7 +16,7 @@ interface Props {
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
 }
 
-export function MapChromePanel({ settings, updateMapSetting }: Props) {
+export function DisplayPanel({ settings, updateMapSetting }: Props) {
   const onBackgroundColorChange = (color: string) => {
     updateMapSetting('backgroundColor', color);
   };
@@ -25,7 +25,10 @@ export function MapChromePanel({ settings, updateMapSetting }: Props) {
     <EuiPanel>
       <EuiTitle size="xs">
         <h5>
-          <FormattedMessage id="xpack.maps.mapSettingsPanel.mapTitle" defaultMessage="Map" />
+          <FormattedMessage
+            id="xpack.maps.mapSettingsPanel.displayTitle"
+            defaultMessage="Display"
+          />
         </h5>
       </EuiTitle>
 

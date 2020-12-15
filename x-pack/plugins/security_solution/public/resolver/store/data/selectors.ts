@@ -117,7 +117,7 @@ export const eventsInCategoryResultIsStale = createSelector(
   currentNodeEventsInCategoryRequestID,
   refreshCount,
   function eventsInCategoryResultIsStale(oldID, newID) {
-    return oldID !== undefined && newID !== undefined && oldID !== newID;
+    return oldID !== undefined && oldID !== newID;
   }
 );
 
@@ -125,7 +125,7 @@ export const currentRelatedEventIsStale = createSelector(
   currentRelatedEventRequestID,
   refreshCount,
   function currentRelatedEventIsStale(oldID, newID) {
-    return oldID !== undefined && newID !== undefined && oldID !== newID;
+    return oldID !== undefined && oldID !== newID;
   }
 );
 

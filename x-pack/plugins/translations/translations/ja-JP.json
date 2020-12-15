@@ -16668,7 +16668,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionHighDescription": "高",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionLowDescription": "低",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionMediumDescription": "中",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError": "Tacticには1つ以上のTechniqueが必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError": "KQLが無効です",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError": "カスタムクエリが必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError": "すべての一致には、フィールドと脅威インデックスフィールドの両方が必要です。",

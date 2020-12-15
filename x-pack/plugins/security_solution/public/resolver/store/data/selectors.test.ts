@@ -317,7 +317,6 @@ describe('data state', () => {
         requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
-
     describe('and when the old request was aborted', () => {
       beforeEach(() => {
         actions.push({

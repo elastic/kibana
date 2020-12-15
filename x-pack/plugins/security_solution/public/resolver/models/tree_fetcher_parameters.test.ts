@@ -116,6 +116,12 @@ describe('TreeFetcherParameters#equal:', () => {
       },
       true,
     ],
+    // all parameters the same, except for the request id
+    [
+      { databaseDocumentID: 'b', indices: [], dataRequestID: 0, filters: {} },
+      { databaseDocumentID: 'b', indices: [], dataRequestID: 1, filters: {} },
+      false,
+    ],
   ];
   describe.each(cases)('%p when compared to %p', (first, second, expected) => {
     it(`should ${expected ? '' : 'not'}be equal`, () => {
