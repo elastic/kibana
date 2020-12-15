@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const HelpMenu = React.memo(() => {
   const { chrome, docLinks } = useKibana().services;
