@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }) {
       expect(split[5]).to.equal('7.5 up to 8.63');
       expect(split[6]).to.equal('8.63 up to 9.75');
       expect(split[7]).to.equal('9.75 up to 11');
-      expect(split[8]).to.equal('> 11');
+      expect(split[8]).to.equal('>= 11');
     });
 
     it('should decorate feature properties with join property', async () => {

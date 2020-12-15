@@ -384,7 +384,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
       let label = '';
       if (!hasNext) {
-        label = `> ${valuePrefix}${formattedStopValue}`;
+        label = `>= ${valuePrefix}${formattedStopValue}`;
       } else {
         const nextStopValue = colorStops[i + 2];
         const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
