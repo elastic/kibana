@@ -10,7 +10,7 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
 
-import { determineDataTierAllocationType } from '../../../lib';
+import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 
 import { FormInternal } from '../types';
 
@@ -22,6 +22,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const _meta: FormInternal['_meta'] = {
     hot: {
       useRollover: Boolean(hot?.actions?.rollover),
+      isUsingDefaultRollover: isUsingDefaultRollover(policy),
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
     },

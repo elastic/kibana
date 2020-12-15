@@ -57,13 +57,15 @@ export interface SearchableSnapshotAction {
   force_merge_index?: boolean;
 }
 
+export interface RolloverAction {
+  max_size?: string;
+  max_age?: string;
+  max_docs?: number;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
-    rollover?: {
-      max_size?: string;
-      max_age?: string;
-      max_docs?: number;
-    };
+    rollover?: RolloverAction;
     forcemerge?: ForcemergeAction;
     readonly?: {};
     shrink?: ShrinkAction;

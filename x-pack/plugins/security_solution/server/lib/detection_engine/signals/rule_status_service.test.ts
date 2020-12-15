@@ -13,7 +13,7 @@ import {
 } from './rule_status_service';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from './__mocks__/es_results';
 
-const expectIsoDateString = expect.stringMatching(/Z$/);
+const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 const buildStatuses = (n: number) =>
   Array(n)
     .fill(exampleRuleStatus())

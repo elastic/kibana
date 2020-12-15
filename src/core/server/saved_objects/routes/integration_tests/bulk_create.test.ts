@@ -21,6 +21,9 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerBulkCreateRoute } from '../bulk_create';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -30,6 +33,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -37,7 +41,10 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerBulkCreateRoute(router);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsBulkCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerBulkCreateRoute(router, { coreUsageData });
 
     await server.start();
   });
@@ -46,7 +53,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const clientResponse = {
       saved_objects: [
         {
@@ -75,6 +82,9 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       .expect(200);
 
     expect(result.body).toEqual(clientResponse);
+    expect(coreUsageStatsClient.incrementSavedObjectsBulkCreate).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
   });
 
   it('calls upon savedObjectClient.bulkCreate', async () => {

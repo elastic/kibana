@@ -21,7 +21,6 @@ import { useConfigurationIssues } from '../../../form';
 import { ActiveBadge, DescribedFormRow } from '../../';
 
 import {
-  useRolloverPath,
   MinAgeInputField,
   ForcemergeField,
   SetPriorityInputField,
@@ -47,13 +46,12 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
   const [formData] = useFormData({
-    watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
+    watch: [formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
-  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
   const warmPhaseOnRollover = get(formData, formFieldPaths.warmPhaseOnRollover);
 
   return (
@@ -99,7 +97,7 @@ export const WarmPhase: FunctionComponent = () => {
           <>
             {enabled && (
               <>
-                {hotPhaseRolloverEnabled && (
+                {isUsingRollover && (
                   <UseField
                     path={formFieldPaths.warmPhaseOnRollover}
                     component={ToggleField}
@@ -111,7 +109,7 @@ export const WarmPhase: FunctionComponent = () => {
                     }}
                   />
                 )}
-                {(!warmPhaseOnRollover || !hotPhaseRolloverEnabled) && (
+                {(!warmPhaseOnRollover || !isUsingRollover) && (
                   <>
                     <EuiSpacer size="m" />
                     <MinAgeInputField phase="warm" />

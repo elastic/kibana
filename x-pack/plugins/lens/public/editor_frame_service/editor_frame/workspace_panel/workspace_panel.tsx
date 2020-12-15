@@ -37,6 +37,7 @@ import {
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensEditEvent,
 } from '../../../types';
 import { DragDrop, DragContext } from '../../../drag_drop';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
@@ -217,8 +218,15 @@ export function WorkspacePanel({
           data: event.data,
         });
       }
+      if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+        });
+      }
     },
-    [plugins.uiActions]
+    [plugins.uiActions, dispatch, activeVisualization]
   );
 
   useEffect(() => {
@@ -472,6 +480,7 @@ export const InnerVisualizationWrapper = ({
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
         onData$={onData$}
+        renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 

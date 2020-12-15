@@ -386,6 +386,39 @@ describe('execute()', () => {
     `);
   });
 
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    // Yes, this is tested in the snapshot below, but it's double-escaped there,
+    // so easier to see here that the escaping is correct.
+    expect(renderedParams.message).toBe('\\*bold\\*');
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "message": "\\\\*bold\\\\*",
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
+
   test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
     const actionTypeWithPublicUrl = getActionType({
       logger: mockedLogger,

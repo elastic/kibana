@@ -6,10 +6,17 @@
 
 import { get } from 'lodash';
 import React, { FunctionComponent, createContext, useContext } from 'react';
+
 import { useFormData } from '../../../../shared_imports';
 
+import { isUsingDefaultRolloverPath, useRolloverPath } from '../constants';
+
 export interface ConfigurationIssues {
-  isUsingForceMergeInHotPhase: boolean;
+  /**
+   * Whether the serialized policy will use rollover. This blocks certain actions in
+   * the form such as hot phase (forcemerge, shrink) and cold phase (searchable snapshot).
+   */
+  isUsingRollover: boolean;
   /**
    * If this value is true, phases after hot cannot set shrink, forcemerge, freeze, or
    * searchable_snapshot actions.
@@ -24,18 +31,18 @@ const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as an
 const pathToHotPhaseSearchableSnapshot =
   'phases.hot.actions.searchable_snapshot.snapshot_repository';
 
-const pathToHotForceMerge = 'phases.hot.actions.forcemerge.max_num_segments';
-
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
-    watch: [pathToHotPhaseSearchableSnapshot, pathToHotForceMerge],
+    watch: [pathToHotPhaseSearchableSnapshot, useRolloverPath, isUsingDefaultRolloverPath],
   });
+  const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
+  const rolloverSwitchEnabled = get(formData, useRolloverPath);
   return (
     <ConfigurationIssuesContext.Provider
       value={{
+        isUsingRollover: isUsingDefaultRollover === false ? rolloverSwitchEnabled : true,
         isUsingSearchableSnapshotInHotPhase:
           get(formData, pathToHotPhaseSearchableSnapshot) != null,
-        isUsingForceMergeInHotPhase: get(formData, pathToHotForceMerge) != null,
       }}
     >
       {children}

@@ -45,6 +45,7 @@ export function getTemplate({
   pipelineName,
   packageName,
   composedOfTemplates,
+  ilmPolicy,
   hidden,
 }: {
   type: string;
@@ -53,6 +54,7 @@ export function getTemplate({
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
+  ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
@@ -61,6 +63,7 @@ export function getTemplate({
     mappings,
     packageName,
     composedOfTemplates,
+    ilmPolicy,
     hidden
   );
   if (pipelineName) {
@@ -263,6 +266,7 @@ function getBaseTemplate(
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
+  ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
@@ -287,7 +291,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: type,
+            name: ilmPolicy ? ilmPolicy : type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',

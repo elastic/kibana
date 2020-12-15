@@ -40,4 +40,13 @@ describe('deprecations', () => {
       `);
     });
   });
+
+  it('logs a warning if max_workers is over limit', () => {
+    const { messages } = applyTaskManagerDeprecations({ max_workers: 1000 });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated. Values greater than 100 will not be supported starting in 8.0.",
+      ]
+    `);
+  });
 });

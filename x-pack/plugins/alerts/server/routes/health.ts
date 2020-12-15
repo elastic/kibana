@@ -11,7 +11,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -29,7 +29,7 @@ interface XPackUsageSecurity {
 
 export function healthRoute(
   router: IRouter,
-  licenseState: LicenseState,
+  licenseState: ILicenseState,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   router.get(

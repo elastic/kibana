@@ -25,6 +25,7 @@ export interface TimelineFilter {
 export const filter: TimelineFilter = {
   field: 'host.name',
   operator: 'exists',
+  value: 'exists',
 };
 
 export const timeline: CompleteTimeline = {
