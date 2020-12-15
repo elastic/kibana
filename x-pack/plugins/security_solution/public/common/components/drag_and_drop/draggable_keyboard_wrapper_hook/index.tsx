@@ -40,12 +40,12 @@ export const useDraggableKeyboardWrapper = ({
   const cancelDragActions = useCallback(() => {
     setDragActions((prevDragAction) => {
       if (prevDragAction) {
-        cancelDrag(dragActions);
+        cancelDrag(prevDragAction);
         return null;
       }
       return prevDragAction;
     });
-  }, [cancelDrag, dragActions]);
+  }, [cancelDrag]);
 
   const onKeyDown = useCallback(
     (keyboardEvent: React.KeyboardEvent) => {
