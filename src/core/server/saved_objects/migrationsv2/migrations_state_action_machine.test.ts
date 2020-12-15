@@ -232,6 +232,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexAlias": ".my-so-index_7.11.0_reindex",
             "reindexTargetMappings": Object {
               "dynamic": false,
               "properties": Object {
@@ -290,6 +291,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexAlias": ".my-so-index_7.11.0_reindex",
             "reindexTargetMappings": Object {
               "dynamic": false,
               "properties": Object {
@@ -428,6 +430,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexAlias": ".my-so-index_7.11.0_reindex",
             "reindexTargetMappings": Object {
               "dynamic": false,
               "properties": Object {
@@ -481,6 +484,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "reindexAlias": ".my-so-index_7.11.0_reindex",
             "reindexTargetMappings": Object {
               "dynamic": false,
               "properties": Object {

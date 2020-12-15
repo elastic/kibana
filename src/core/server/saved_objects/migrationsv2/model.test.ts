@@ -40,6 +40,9 @@ import {
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
   ReindexSourceToTargetVerify,
+  ReindexBlockSetWriteBlock,
+  ReindexBlockRemoveAlias,
+  ReindexBlockRemoveWriteBlock,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -75,6 +78,7 @@ describe('migrations v2 model', () => {
     currentAlias: '.kibana',
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
+    reindexAlias: '.kibana_7.11.0_reindex',
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -678,7 +682,7 @@ describe('migrations v2 model', () => {
           'reindex_succeeded'
         );
         const newState = model(reindexSourceToTargetWaitForState, res);
-        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+        expect(newState.controlState).toEqual('REINDEX_BLOCK_SET_WRITE_BLOCK');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -715,6 +719,69 @@ describe('migrations v2 model', () => {
         });
         const newState = model(reindexSourceToTargetVerify, res);
         expect(newState.controlState).toEqual('FATAL');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_BLOCK_SET_WRITE_BLOCK', () => {
+      const state: ReindexBlockSetWriteBlock = {
+        ...baseState,
+        controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      it('REINDEX_BLOCK_SET_WRITE_BLOCK -> REINDEX_BLOCK_REMOVE_ALIAS', () => {
+        const res: ResponseType<'REINDEX_BLOCK_SET_WRITE_BLOCK'> = Either.right(
+          'set_write_block_succeeded'
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_ALIAS');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_BLOCK_REMOVE_ALIAS', () => {
+      const state: ReindexBlockRemoveAlias = {
+        ...baseState,
+        controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      it('REINDEX_BLOCK_REMOVE_ALIAS -> REINDEX_BLOCK_REMOVE_WRITE_BLOCK when response is right update_aliases_succeeded', () => {
+        const res: ResponseType<'REINDEX_BLOCK_REMOVE_ALIAS'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_WRITE_BLOCK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      it('REINDEX_BLOCK_REMOVE_ALIAS -> REINDEX_BLOCK_REMOVE_WRITE_BLOCK when response is left alias_not_found_exception', () => {
+        const res: ResponseType<'REINDEX_BLOCK_REMOVE_ALIAS'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_WRITE_BLOCK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('REINDEX_BLOCK_REMOVE_WRITE_BLOCK', () => {
+      const state: ReindexBlockRemoveWriteBlock = {
+        ...baseState,
+        controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      it('REINDEX_BLOCK_REMOVE_WRITE_BLOCK -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
+        const res: ResponseType<'REINDEX_BLOCK_REMOVE_WRITE_BLOCK'> = Either.right(
+          'remove_write_block_succeeded'
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -988,6 +1055,7 @@ describe('migrations v2 model', () => {
           "preMigrationScript": Object {
             "_tag": "None",
           },
+          "reindexAlias": ".kibana_task_manager_8.1.0_reindex",
           "reindexTargetMappings": Object {
             "dynamic": false,
             "properties": Object {
