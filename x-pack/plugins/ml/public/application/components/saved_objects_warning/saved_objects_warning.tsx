@@ -30,7 +30,8 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
   useEffect(() => {
     initSavedObjects(true)
       .then(({ jobs }) => {
-        const missingJobs = jobType === undefined || jobs.some(({ type }) => type === jobType);
+        const missingJobs =
+          (jobType === undefined && jobs.length > 0) || jobs.some(({ type }) => type === jobType);
         setShowWarning(missingJobs);
       })
       .catch(() => {
