@@ -16,7 +16,7 @@ val BuildAgent = GoogleCloudAgent {
     sourceImageFamily = "elastic-kibana-ci-ubuntu-1804-lts"
     agentPrefix = "kibana-c2-16-"
     machineType = "c2-standard-16"
-    diskSizeGb = 75
+    diskSizeGb = 250
     diskType = GoogleCloudAgentDiskType.SSD
 }
 
