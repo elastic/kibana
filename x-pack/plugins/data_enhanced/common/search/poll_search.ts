@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, NEVER, Observable, timer } from 'rxjs';
+import { from, Observable, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';

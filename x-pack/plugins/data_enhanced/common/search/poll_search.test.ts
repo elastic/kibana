@@ -34,7 +34,7 @@ describe('pollSearch', () => {
     const cancelFn = jest.fn();
     await pollSearch(searchFn, cancelFn).toPromise();
     expect(searchFn).toBeCalledTimes(1);
-    expect(cancelFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(0);
   });
 
   test('Resolves when complete', async () => {
@@ -42,10 +42,10 @@ describe('pollSearch', () => {
     const cancelFn = jest.fn();
     await pollSearch(searchFn, cancelFn).toPromise();
     expect(searchFn).toBeCalledTimes(3);
-    expect(cancelFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(0);
   });
 
-  test('Throws AbortError on error', async () => {
+  test('Throws AbortError and cancels on error', async () => {
     const searchFn = getMockedSearch$(2, true);
     const cancelFn = jest.fn();
     const poll = pollSearch(searchFn, cancelFn).toPromise();
@@ -54,12 +54,11 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(1);
   });
 
-  test('Throws AbortError on external abort', async () => {
+  test('Throws AbortError and cancels on abort', async () => {
     const searchFn = getMockedSearch$(20);
     const cancelFn = jest.fn();
     const abortController = new AbortController();
     const poll = pollSearch(searchFn, cancelFn, {
-      pollInterval: 2000,
       abortSignal: abortController.signal,
     }).toPromise();
 
@@ -67,19 +66,23 @@ describe('pollSearch', () => {
     abortController.abort();
 
     await expect(poll).rejects.toThrow(AbortError);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     expect(searchFn).toBeCalledTimes(1);
     expect(cancelFn).toBeCalledTimes(1);
   });
 
-  test('Cleans up and stops on unsubscribe', async () => {
+  test("Stops, but doesn't cancel on unsubscribe", async () => {
     const searchFn = getMockedSearch$(20);
     const cancelFn = jest.fn();
-    const subscription = pollSearch(searchFn, cancelFn, { pollInterval: 2000 }).subscribe(() => {});
+    const subscription = pollSearch(searchFn, cancelFn).subscribe(() => {});
 
     await new Promise((resolve) => setTimeout(resolve, 500));
     subscription.unsubscribe();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect(searchFn).toBeCalledTimes(1);
-    expect(cancelFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(0);
   });
 });
