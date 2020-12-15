@@ -102,7 +102,13 @@ discover-app .discover-table-footer {
 */
 
 .dshAppContainer .embPanel__header {
+  /* hide the panel heading with the controls and title */
   display: none !important
+}
+
+.dshAppContainer .euiPanel {
+  /* Remove the border from the eui panel */
+  border: none !important;
 }
 
 /**
