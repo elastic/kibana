@@ -45,6 +45,34 @@ export function NoDataAvailable() {
   );
 }
 
+export function ValueAvailableButVitalsUnavailable() {
+  return (
+    <CoreVitalItem
+      thresholds={{ good: '0.1', bad: '0.25' }}
+      title={LCP_LABEL}
+      value={'0.00s'}
+      ranks={[100, 0, 0]}
+      loading={false}
+      helpLabel={LCP_HELP_LABEL}
+      hasVitals={false}
+    />
+  );
+}
+
+export function VitalsAvailableButValueUnavailable() {
+  return (
+    <CoreVitalItem
+      thresholds={{ good: '0.1', bad: '0.25' }}
+      title={LCP_LABEL}
+      value={''}
+      ranks={[100, 0, 0]}
+      loading={false}
+      helpLabel={LCP_HELP_LABEL}
+      hasVitals={true}
+    />
+  );
+}
+
 export function OneHundredPercentGood() {
   return (
     <CoreVitalItem
