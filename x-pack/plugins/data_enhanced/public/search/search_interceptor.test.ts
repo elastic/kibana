@@ -33,10 +33,10 @@ jest.useFakeTimers();
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
   fetchMock.mockImplementation(() => {
-    const { time = 0, value = {}, isError = false } = responses[i++];
+    const { time = 0, value = {}, isFetchError = false } = responses[i++];
     return new Promise((resolve, reject) =>
       setTimeout(() => {
-        return (isError ? reject : resolve)(value);
+        return (isFetchError ? reject : resolve)(value);
       }, time)
     );
   });
@@ -343,11 +343,11 @@ describe('EnhancedSearchInterceptor', () => {
           time: 10,
           value: {
             error: 'oh no',
-            isPartial: false,
+            isPartial: true,
             isRunning: false,
             id: 1,
           },
-          isError: true,
+          isFetchError: true,
         },
       ];
       mockFetchImplementation(responses);
@@ -366,7 +366,48 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBe(responses[1].value);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+    });
+
+    test('should DELETE a running async search on async timeout on failed ES result', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 10,
+          value: {
+            error: 'oh no',
+            isPartial: true,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout but not long enough to reach the next response
+      await timeTravel(10);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });

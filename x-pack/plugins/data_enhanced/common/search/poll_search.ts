@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, Observable, timer } from 'rxjs';
-import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { from, Observable, throwError, timer } from 'rxjs';
+import { catchError, expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
 import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/common';
@@ -31,6 +31,10 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         if (cancel) cancel();
         throw new AbortError();
       }
+    }),
+    catchError((e: any) => {
+      if (cancel) cancel();
+      return throwError(new AbortError());
     }),
     takeWhile<Response>(isPartialResponse, true),
     takeUntil<Response>(from(aborted.promise)),
