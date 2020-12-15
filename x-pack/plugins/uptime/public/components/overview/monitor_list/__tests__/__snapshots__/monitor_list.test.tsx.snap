@@ -1000,7 +1000,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_state.url.full_2"
               role="columnheader"
               scope="col"
-              style="width:40%"
+              style="width:30%"
             >
               <div
                 class="euiTableCellContent"
@@ -1014,7 +1014,24 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_state.tls.server.x509_3"
+              data-test-subj="tableHeaderCell_state.monitor.name_3"
+              role="columnheader"
+              scope="col"
+              style="width:12%"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Tags
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_state.tls.server.x509_4"
               role="columnheader"
               scope="col"
             >
@@ -1030,7 +1047,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-              data-test-subj="tableHeaderCell_histogram.points_4"
+              data-test-subj="tableHeaderCell_histogram.points_5"
               role="columnheader"
               scope="col"
             >
@@ -1046,7 +1063,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Status alert_5"
+              data-test-subj="tableHeaderCell_Status alert_6"
               role="columnheader"
               scope="col"
               style="width:100px"
@@ -1063,7 +1080,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <td
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_monitor_id_6"
+              data-test-subj="tableHeaderCell_monitor_id_7"
               role="columnheader"
               scope="col"
               style="width:40px"
@@ -1197,7 +1214,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:40%"
+              style="width:30%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1212,6 +1229,19 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 />
               </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              style="width:12%"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Tags
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              />
             </td>
             <td
               class="euiTableRowCell"
@@ -1436,7 +1466,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:40%"
+              style="width:30%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1451,6 +1481,19 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 />
               </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              style="width:12%"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Tags
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              />
             </td>
             <td
               class="euiTableRowCell"
