@@ -23,7 +23,8 @@ export const MAPBOX_STYLES = {
     layout: { visibility: 'visible' },
     paint: {
       'circle-color': [
-        'step',
+        'interpolate',
+        ['linear'],
         [
           'coalesce',
           [
@@ -45,13 +46,14 @@ export const MAPBOX_STYLES = {
                     '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1',
                   ],
                 ],
-                10.875,
+                12,
               ],
               3,
             ],
           ],
           2,
         ],
+        2,
         'rgba(0,0,0,0)',
         3,
         '#ecf1f7',
@@ -95,7 +97,8 @@ export const MAPBOX_STYLES = {
     layout: { visibility: 'visible' },
     paint: {
       'fill-color': [
-        'step',
+        'interpolate',
+        ['linear'],
         [
           'coalesce',
           [
@@ -117,13 +120,14 @@ export const MAPBOX_STYLES = {
                     '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1',
                   ],
                 ],
-                10.875,
+                12,
               ],
               3,
             ],
           ],
           2,
         ],
+        2,
         'rgba(0,0,0,0)',
         3,
         '#ecf1f7',

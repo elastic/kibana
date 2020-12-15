@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }) {
       const fillLayer = mapboxStyle.layers.find((layer) => layer.id === VECTOR_SOURCE_ID + '_fill');
       expect(fillLayer.paint).to.eql({
         'fill-color': [
-          ['step'],
+          'interpolate',
+          ['linear'],
           [
             'coalesce',
             [
@@ -45,12 +46,13 @@ export default function ({ getPageObjects, getService }) {
               0.3819660112501051,
               [
                 'max',
-                ['min', ['to-number', ['get', 'prop1']], 3.338525491562421],
+                ['min', ['to-number', ['get', 'prop1']], 3.618033988749895],
                 1.381966011250105,
               ],
             ],
             0.3819660112501051,
           ],
+          0.3819660112501051,
           'rgba(0,0,0,0)',
           1.381966011250105,
           '#ecf1f7',

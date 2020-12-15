@@ -388,17 +388,19 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
-          'step',
+          'interpolate',
+          ['linear'],
           [
             'coalesce',
             [
               'case',
               ['==', ['feature-state', 'foobar'], null],
               -1,
-              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 87.5], 0],
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
             ],
             -1,
           ],
+          -1,
           'rgba(0,0,0,0)',
           0,
           '#ecf1f7',

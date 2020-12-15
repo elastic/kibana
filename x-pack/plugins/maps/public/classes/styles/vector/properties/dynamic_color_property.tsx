@@ -147,48 +147,90 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    let colorStops: Array<number | string> | null = null;
+    const targetName = this.getFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
         return null;
       }
-      colorStops = this._getCustomRampColorStops();
-    } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
+
+      const colorStops: Array<number | string> = this._options.customColorRamp.reduce(
+        (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
+          return [...accumulatedStops, nextStop.stop, nextStop.color];
+        },
+        []
+      );
+      return [
+        'step',
+        makeMbClampedNumberExpression({
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
+          lookupFunction: this.getMbLookupFunction(),
+          fallback: (colorStops[0] as number) - 1,
+          fieldName: targetName,
+        }),
+        RGBA_0000, // MB will assign the base value to any features that is below the first stop value
+        ...colorStops,
+      ];
+    }
+
+    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
         return null;
       }
-      colorStops = getPercentilesMbColorRampStops(
+
+      const colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
         percentilesFieldMeta
       );
-    } else {
-      const rangeFieldMeta = this.getRangeFieldMeta();
-      if (!rangeFieldMeta) {
+      if (!colorStops) {
         return null;
       }
-      colorStops = getOrdinalMbColorRampStops(
-        this._options.color ? this._options.color : null,
-        rangeFieldMeta.min,
-        rangeFieldMeta.max
-      );
+
+      return [
+        'step',
+        makeMbClampedNumberExpression({
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
+          lookupFunction: this.getMbLookupFunction(),
+          fallback: (colorStops[0] as number) - 1,
+          fieldName: targetName,
+        }),
+        RGBA_0000,
+        ...colorStops,
+      ];
     }
 
-    return colorStops && colorStops.length >= 2
-      ? [
-          'step',
-          makeMbClampedNumberExpression({
-            minValue: colorStops[0] as number,
-            maxValue: colorStops[colorStops.length - 2] as number,
-            lookupFunction: this.getMbLookupFunction(),
-            fallback: (colorStops[0] as number) - 1,
-            fieldName: this.getFieldName(),
-          }),
-          RGBA_0000, // MB will assign the base value to any features that is below the first stop value
-          ...colorStops,
-        ]
-      : null;
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!rangeFieldMeta) {
+      return null;
+    }
+
+    const colorStops = getOrdinalMbColorRampStops(
+      this._options.color ? this._options.color : null,
+      rangeFieldMeta.min,
+      rangeFieldMeta.max
+    );
+    if (!colorStops) {
+      return null;
+    }
+
+    const lessThanFirstStopValue = rangeFieldMeta.min - 1;
+    return [
+      'interpolate',
+      ['linear'],
+      makeMbClampedNumberExpression({
+        minValue: rangeFieldMeta.min,
+        maxValue: rangeFieldMeta.max,
+        lookupFunction: this.getMbLookupFunction(),
+        fallback: lessThanFirstStopValue,
+        fieldName: targetName,
+      }),
+      lessThanFirstStopValue,
+      RGBA_0000,
+      ...colorStops,
+    ];
   }
 
   _getCustomRampColorStops(): Array<number | string> {
