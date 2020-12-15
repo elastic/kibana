@@ -22,7 +22,9 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
-const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
+const createInternalClientMock = (
+  res?: MockedTransportRequestPromise<unknown>
+): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new Client({
     node: 'http://localhost',
@@ -59,7 +61,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
       .filter(([key]) => !omitted.includes(key))
       .forEach(([key, descriptor]) => {
         if (typeof descriptor.value === 'function') {
-          obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
+          obj[key] = jest.fn(() => res ?? createSuccessTransportRequestPromise({}));
         } else if (typeof obj[key] === 'object' && obj[key] != null) {
           mockify(obj[key], omitted);
         }
@@ -95,8 +97,8 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (): ElasticsearchClientMock =>
-  (createInternalClientMock() as unknown) as ElasticsearchClientMock;
+const createClientMock = (res?: MockedTransportRequestPromise<unknown>): ElasticsearchClientMock =>
+  (createInternalClientMock(res) as unknown) as ElasticsearchClientMock;
 
 export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;

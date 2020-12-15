@@ -43,8 +43,8 @@ export function dataAccessLayerFactory(
           body: JSON.stringify({
             indexPatterns,
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             filter: JSON.stringify({
               bool: {
@@ -82,8 +82,8 @@ export function dataAccessLayerFactory(
         query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
           timeRange: {
-            from: timeRange.from.toISOString(),
-            to: timeRange.to.toISOString(),
+            from: timeRange.from,
+            to: timeRange.to,
           },
           indexPatterns,
           filter: JSON.stringify({
@@ -119,8 +119,8 @@ export function dataAccessLayerFactory(
           query: { limit },
           body: JSON.stringify({
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             indexPatterns,
             filter: JSON.stringify({
@@ -182,8 +182,8 @@ export function dataAccessLayerFactory(
           body: JSON.stringify({
             indexPatterns,
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             filter: JSON.stringify(filter),
           }),

@@ -66,9 +66,9 @@ export function ServiceOverviewThroughputChart({
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
-              'xpack.apm.serviceOverview.throughputChart.currentPeriodLabel',
+              'xpack.apm.serviceOverview.throughputChart.traffic',
               {
-                defaultMessage: 'Current period',
+                defaultMessage: 'Traffic',
               }
             ),
           },
