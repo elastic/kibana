@@ -26,7 +26,12 @@ import { next, TransformRawDocs } from './next';
 import { createInitialState, model } from './model';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 
-export async function ResilientMigrator({
+/**
+ * Migrates the provided indexPrefix index using a resilient algorithm that is
+ * completely lock-free so that any failure can always be retried by
+ * restarting Kibana.
+ */
+export async function runResilientMigrator({
   client,
   kibanaVersion,
   targetMappings,

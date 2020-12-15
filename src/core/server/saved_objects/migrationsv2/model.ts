@@ -185,8 +185,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // by the control state specific code below.
   if (Either.isLeft<unknown, unknown>(resW) && resW.left.type === 'retryable_es_client_error') {
     // Retry the same step after an exponentially increasing delay.
-    stateP = delayRetryState(stateP, resW.left);
-    return stateP;
+    return delayRetryState(stateP, resW.left);
   } else {
     // If the action didn't fail with a retryable_es_client_error, reset the
     // retry counter and retryDelay state

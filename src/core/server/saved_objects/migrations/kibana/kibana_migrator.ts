@@ -44,7 +44,7 @@ import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
-import { ResilientMigrator } from '../../migrationsv2';
+import { runResilientMigrator } from '../../migrationsv2';
 import { migrateRawDocs } from '../core/migrate_raw_docs';
 import { MigrationLogger } from '../core/migration_logger';
 
@@ -175,7 +175,7 @@ export class KibanaMigrator {
       if (this.savedObjectsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
-            return ResilientMigrator({
+            return runResilientMigrator({
               client: this.client,
               kibanaVersion: this.kibanaVersion,
               targetMappings: buildActiveMappings(indexMap[index].typeMappings),
