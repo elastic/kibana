@@ -12112,7 +12112,6 @@
     "xpack.ml.dataGridChart.histogramNotAvailable": "不支持图表。",
     "xpack.ml.dataGridChart.notEnoughData": "0 个文档包含字段。",
     "xpack.ml.dataGridChart.singleCategoryLegend": "{cardinality, plural, one {# 个类别} other {# 个类别}}",
-    "xpack.ml.dataGridChart.topCategoriesLegend": "{cardinality} 个类别中的排名前 {MAX_CHART_COLUMNS}",
     "xpack.ml.datavisualizer.actionsPanel.advancedDescription": "使用全部选项为更高级的用例创建作业",
     "xpack.ml.datavisualizer.actionsPanel.advancedTitle": "高级",
     "xpack.ml.datavisualizer.actionsPanel.createJobDescription": "使用“高级作业”向导创建作业，以查找此数据中的异常：",

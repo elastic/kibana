@@ -12098,7 +12098,6 @@
     "xpack.ml.dataGridChart.histogramNotAvailable": "グラフはサポートされていません。",
     "xpack.ml.dataGridChart.notEnoughData": "0個のドキュメントにフィールドが含まれます。",
     "xpack.ml.dataGridChart.singleCategoryLegend": "{cardinality, plural, one {カテゴリ} other {カテゴリ}}",
-    "xpack.ml.dataGridChart.topCategoriesLegend": "上位{MAX_CHART_COLUMNS}/{cardinality}カテゴリ",
     "xpack.ml.datavisualizer.actionsPanel.advancedDescription": "より高度なユースケースでは、ジョブの作成にすべてのオプションを使用します",
     "xpack.ml.datavisualizer.actionsPanel.advancedTitle": "高度な設定",
     "xpack.ml.datavisualizer.actionsPanel.createJobDescription": "高度なジョブウィザードでジョブを作成し、このデータの異常を検出します:",
