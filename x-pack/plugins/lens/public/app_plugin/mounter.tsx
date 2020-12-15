@@ -46,7 +46,7 @@ export async function mountApp(
 
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
-  const stateTransfer = embeddable?.getStateTransfer(params.history);
+  const stateTransfer = embeddable?.getStateTransfer();
   const historyLocationState = params.history.location.state as HistoryLocationState;
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
 
@@ -54,6 +54,7 @@ export async function mountApp(
     data,
     storage,
     navigation,
+    stateTransfer,
     savedObjectsTagging,
     attributeService: await attributeService(),
     http: coreStart.http,
@@ -86,13 +87,14 @@ export async function mountApp(
   );
 
   const getInitialInput = (
-    routeProps: RouteComponentProps<{ id?: string }>
+    routeProps: RouteComponentProps<{ id?: string }>,
+    editByValue?: boolean
   ): LensEmbeddableInput | undefined => {
+    if (editByValue) {
+      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
+    }
     if (routeProps.match.params.id) {
       return { savedObjectId: routeProps.match.params.id } as LensByReferenceInput;
-    }
-    if (embeddableEditorIncomingState?.valueInput) {
-      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
     }
   };
 
@@ -142,14 +144,16 @@ export async function mountApp(
     }
   };
 
-  // const featureFlagConfig = await getByValueFeatureFlag();
-  const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+  const renderEditor = (
+    routeProps: RouteComponentProps<{ id?: string }>,
+    editByValue?: boolean
+  ) => {
     trackUiEvent('loaded');
     return (
       <App
         incomingState={embeddableEditorIncomingState}
         editorFrame={instance}
-        initialInput={getInitialInput(routeProps)}
+        initialInput={getInitialInput(routeProps, editByValue)}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
         redirectToOrigin={redirectToOrigin}
         redirectToDashboard={redirectToDashboard}
@@ -182,7 +186,11 @@ export async function mountApp(
         <HashRouter>
           <Switch>
             <Route exact path="/edit/:id" render={renderEditor} />
-            <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
+            <Route
+              exact
+              path={`/${LENS_EDIT_BY_VALUE}`}
+              render={(routeProps) => renderEditor(routeProps, true)}
+            />
             <Route exact path="/" render={renderEditor} />
             <Route path="/" component={NotFound} />
           </Switch>
