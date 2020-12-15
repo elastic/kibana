@@ -207,6 +207,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+
+          await ml.testExecution.logTestStep('displays the map view for created job');
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
         });
       });
     }
