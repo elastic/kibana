@@ -25,7 +25,6 @@ When(`the user inspects the opbeans-node service`, () => {
     .click({ force: true });
 });
 
-Then(`should redirect to correct path with correct params`, () => {
-  cy.url().should('contain', `/app/apm/services/opbeans-node/transactions`);
-  cy.url().should('contain', `transactionType=request`);
+Then(`should redirect to correct path`, () => {
+  cy.url().should('contain', `/app/apm/services/opbeans-node/overview`);
 });

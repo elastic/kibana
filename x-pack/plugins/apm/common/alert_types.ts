@@ -29,6 +29,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionDuration]: {
@@ -37,6 +38,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionDurationAnomaly]: {
@@ -45,6 +47,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionErrorRate]: {
@@ -53,6 +56,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
 };

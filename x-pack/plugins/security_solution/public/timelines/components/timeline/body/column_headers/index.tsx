@@ -27,7 +27,10 @@ import {
 } from '../../../../../common/components/drag_and_drop/helpers';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
-import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -50,8 +53,16 @@ import * as i18n from './translations';
 import { timelineActions } from '../../../../store/timeline';
 
 const SortingColumnsContainer = styled.div`
-  .euiPopover .euiButtonEmpty .euiButtonContent .euiButtonEmpty__text {
-    display: none;
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiPopover .euiButtonEmpty .euiButtonContent {
+    padding: 0;
+
+    .euiButtonEmpty__text {
+      display: none;
+    }
   }
 `;
 
@@ -115,12 +126,8 @@ export const ColumnHeadersComponent = ({
 }: Props) => {
   const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const {
-    timelineFullScreen,
-    setTimelineFullScreen,
-    globalFullScreen,
-    setGlobalFullScreen,
-  } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -297,7 +304,11 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
