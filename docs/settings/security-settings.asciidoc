@@ -372,8 +372,8 @@ xpack.security.audit.appender:
   layout:
     kind: json
 ----------------------------------------
-<1> Rotates log files every 24 hours
-<2> Keeps maximum of 10 log files before deleting older ones
+<1> Rotates log files every 24 hours.
+<2> Keeps maximum of 10 log files before deleting older ones.
 
 | `xpack.security.audit.appender.kind`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file` or `rolling-file`. 
@@ -390,7 +390,7 @@ Refer to <<audit-logging-pattern-layout>> for layout specific settings.
 [[audit-logging-file-appender,file appender]]
 ===== File appender
 
-The `file` appender logs to a file and can be configured using the following settings:
+The `file` appender writes to a file and can be configured using the following settings:
 
 [cols="2*<"]
 |======
@@ -402,7 +402,7 @@ The `file` appender logs to a file and can be configured using the following set
 [[audit-logging-rolling-file-appender, rolling file appender]]
 ===== Rolling file appender
 
-The `rolling-file` appender logs to a file and rotates it using a rolling strategy, when a particular policy is triggered:
+The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
 
 [cols="2*<"]
 |======
