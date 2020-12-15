@@ -34,9 +34,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId }) => {
       <Visible show={show}>
         <Pane timelineId={timelineId} />
       </Visible>
-      <Visible show={!show}>
-        <FlyoutBottomBar timelineId={timelineId} />
-      </Visible>
+      <FlyoutBottomBar timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };

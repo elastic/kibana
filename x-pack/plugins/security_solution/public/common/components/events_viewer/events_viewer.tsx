@@ -209,6 +209,12 @@ const EventsViewerComponent: React.FC<Props> = ({
     queryFields,
   ]);
 
+  const prevSortField = useRef<
+    Array<{
+      field: string;
+      direction: Direction;
+    }>
+  >([]);
   const sortField = useMemo(
     () =>
       sort.map(({ columnId, sortDirection }) => ({
@@ -239,7 +245,11 @@ const EventsViewerComponent: React.FC<Props> = ({
       prevCombinedQueries.current = combinedQueries;
       dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
     }
-  }, [combinedQueries, dispatch, id]);
+    if (!deepEqual(prevSortField.current, sortField)) {
+      prevSortField.current = sortField;
+      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
+    }
+  }, [combinedQueries, dispatch, id, sortField]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
