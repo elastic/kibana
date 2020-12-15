@@ -19,14 +19,13 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart, ViewMode } from '../../../services/embeddable';
+import { PanelState, ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   switchViewMode?: (newViewMode: ViewMode) => void;
   container: DashboardContainer;
 }
@@ -101,7 +100,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container, PanelComponent } = this.props;
+    const { container } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const {
       isEmbeddedExternally,
@@ -139,7 +138,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          <DashboardGrid container={container} PanelComponent={PanelComponent} />
+          <DashboardGrid container={container} />
         </div>
       </React.Fragment>
     );

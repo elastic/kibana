@@ -14,6 +14,7 @@ import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'kibana/public';
@@ -39,10 +40,9 @@ import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { ISearchOptions } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper as IStorageWrapper_2 } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient as IUiSettingsClient_2 } from 'src/core/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -604,12 +604,10 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
     // (undocumented)
     getEmbeddableFactory: <I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>>(embeddableFactoryId: string) => EmbeddableFactory<I, O, E> | undefined;
-    // (undocumented)
-    getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
-    // Warning: (ae-forgotten-export) The symbol "ScopedHistory" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Storage" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
+    getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
 }
 
 // Warning: (ae-missing-release-tag) "EmbeddableStartDependencies" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -630,31 +628,25 @@ export interface EmbeddableStartDependencies {
     uiActions: UiActionsStart;
 }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ScopedHistory"
-//
 // @public
 export class EmbeddableStateTransfer {
     // Warning: (ae-forgotten-export) The symbol "ApplicationStart" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PublicAppInfo" needs to be exported by the entry point index.d.ts
-    constructor(navigateToApp: ApplicationStart['navigateToApp'], scopedHistory?: ScopedHistory<unknown> | undefined, appList?: ReadonlyMap<string, PublicAppInfo> | undefined);
+    constructor(navigateToApp: ApplicationStart['navigateToApp'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
+    // (undocumented)
+    clearEditorState(): void;
     getAppNameFromId: (appId: string) => string | undefined;
-    getIncomingEditorState(options?: {
-        keysToRemoveAfterFetch?: string[];
-    }): EmbeddableEditorState | undefined;
-    getIncomingEmbeddablePackage(options?: {
-        keysToRemoveAfterFetch?: string[];
-    }): EmbeddablePackageState | undefined;
+    getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
+    getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;
         state: EmbeddableEditorState;
-        appendToExistingState?: boolean;
     }): Promise<void>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToWithEmbeddablePackage(appId: string, options?: {
         path?: string;
         state: EmbeddablePackageState;
-        appendToExistingState?: boolean;
     }): Promise<void>;
     }
 
