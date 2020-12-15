@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { times } from 'lodash';
+import { curry, times } from 'lodash';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
@@ -52,72 +52,73 @@ function getAlwaysFiringAlertType() {
     },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
-    async executor(alertExecutorOptions) {
-      const {
-        services,
-        params,
-        state,
-        alertId,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-      } = alertExecutorOptions;
-      let group: string | null = 'default';
-      let subgroup: string | null = null;
-      const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
-
-      if (params.groupsToScheduleActionsInSeries) {
-        const index = state.groupInSeriesIndex || 0;
-        const [scheduledGroup, scheduledSubgroup] = (
-          params.groupsToScheduleActionsInSeries[index] ?? ''
-        ).split(':');
-
-        group = scheduledGroup;
-        subgroup = scheduledSubgroup;
-      }
-
-      if (group) {
-        const instance = services
-          .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true });
-
-        if (subgroup) {
-          instance.scheduleActionsWithSubGroup(group, subgroup, {
-            instanceContextValue: true,
-          });
-        } else {
-          instance.scheduleActions(group, {
-            instanceContextValue: true,
-          });
-        }
-      }
-
-      await services.scopedClusterClient.index({
-        index: params.index,
-        refresh: 'wait_for',
-        body: {
-          state,
-          params,
-          reference: params.reference,
-          source: 'alert:test.always-firing',
-          alertInfo,
-        },
-      });
-      return {
-        globalStateValue: true,
-        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
-      };
-    },
+    executor: curry(alwaysFiringExecutor)(),
   };
   return result;
+}
+
+async function alwaysFiringExecutor(alertExecutorOptions: any) {
+  const {
+    services,
+    params,
+    state,
+    alertId,
+    spaceId,
+    namespace,
+    name,
+    tags,
+    createdBy,
+    updatedBy,
+  } = alertExecutorOptions;
+  let group: string | null = 'default';
+  let subgroup: string | null = null;
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+
+  if (params.groupsToScheduleActionsInSeries) {
+    const index = state.groupInSeriesIndex || 0;
+    const [scheduledGroup, scheduledSubgroup] = (
+      params.groupsToScheduleActionsInSeries[index] ?? ''
+    ).split(':');
+
+    group = scheduledGroup;
+    subgroup = scheduledSubgroup;
+  }
+
+  if (group) {
+    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
+
+    if (subgroup) {
+      instance.scheduleActionsWithSubGroup(group, subgroup, {
+        instanceContextValue: true,
+      });
+    } else {
+      instance.scheduleActions(group, {
+        instanceContextValue: true,
+      });
+    }
+  }
+
+  await services.scopedClusterClient.index({
+    index: params.index,
+    refresh: 'wait_for',
+    body: {
+      state,
+      params,
+      reference: params.reference,
+      source: 'alert:test.always-firing',
+      alertInfo,
+    },
+  });
+  return {
+    globalStateValue: true,
+    groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+  };
 }
 
 function getCumulativeFiringAlertType() {
@@ -136,6 +137,7 @@ function getCumulativeFiringAlertType() {
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
@@ -154,7 +156,7 @@ function getCumulativeFiringAlertType() {
       };
     },
   };
-  return result;
+  return result as AlertType;
 }
 
 function getNeverFiringAlertType() {
@@ -180,6 +182,7 @@ function getNeverFiringAlertType() {
     },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
@@ -219,6 +222,7 @@ function getFailingAlertType() {
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
@@ -257,6 +261,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     ],
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     validate: {
       params: paramsSchema,
     },
@@ -342,6 +347,7 @@ function getValidationAlertType() {
       },
     ],
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
@@ -369,6 +375,7 @@ function getPatternFiringAlertType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
       const pattern = params.pattern;
@@ -429,6 +436,16 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    async executor() {},
+  };
+  const goldNoopAlertType: AlertType = {
+    id: 'test.gold.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'gold',
     async executor() {},
   };
   const onlyContextVariablesAlertType: AlertType = {
@@ -437,6 +454,7 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
@@ -451,6 +469,7 @@ export function defineAlertTypes(
     actionVariables: {
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
     },
+    minimumLicenseRequired: 'basic',
     async executor() {},
   };
   const throwAlertType: AlertType = {
@@ -464,6 +483,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {
       throw new Error('this alert is intended to fail');
     },
@@ -479,6 +499,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },
@@ -496,4 +517,5 @@ export function defineAlertTypes(
   alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
   alerts.registerType(longRunningAlertType);
+  alerts.registerType(goldNoopAlertType);
 }
