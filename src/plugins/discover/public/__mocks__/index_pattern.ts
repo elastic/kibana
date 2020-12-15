@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { IndexPattern, indexPatterns } from '../kibana_services';
 import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
+import { IndexPattern } from '../../../data/common';
+import { indexPatterns } from '../../../data/public';
+
 const fields = [
   {
     name: '_source',
@@ -78,11 +80,12 @@ const indexPattern = ({
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
-  timeFieldName: 'date',
+  timeFieldName: '',
   docvalueFields: [],
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
+indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 indexPattern.formatField = (hit: Record<string, any>, fieldName: string) => {
   return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
 };

@@ -18,6 +18,7 @@
  */
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
+import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 
 describe('Discover grid columns ', function () {
   it('returns eui grid columns without time column', async () => {
@@ -56,7 +57,13 @@ describe('Discover grid columns ', function () {
     `);
   });
   it('returns eui grid columns without time column showing default columns', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false, true);
+    const actual = getEuiGridColumns(
+      ['extension', 'message'],
+      {},
+      indexPatternWithTimefieldMock,
+      false,
+      true
+    );
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -87,7 +94,13 @@ describe('Discover grid columns ', function () {
     `);
   });
   it('returns eui grid columns with time column', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, true, false);
+    const actual = getEuiGridColumns(
+      ['extension', 'message'],
+      {},
+      indexPatternWithTimefieldMock,
+      true,
+      false
+    );
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -97,8 +110,8 @@ describe('Discover grid columns ', function () {
             "showMoveRight": true,
           },
           "cellActions": undefined,
-          "display": "Time (date)",
-          "id": "date",
+          "display": "Time (timestamp)",
+          "id": "timestamp",
           "initialWidth": 180,
           "isSortable": undefined,
           "schema": "json",

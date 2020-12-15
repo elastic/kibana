@@ -30,10 +30,7 @@ describe('getSharingData', () => {
       searchSourceMock,
       { columns: [] },
       ({
-        get: (key: string) => {
-          if (key === SORT_DEFAULT_ORDER_SETTING) {
-            return 'desc';
-          }
+        get: () => {
           return false;
         },
       } as unknown) as IUiSettingsClient,
@@ -42,9 +39,7 @@ describe('getSharingData', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "conflictedTypesFields": Array [],
-        "fields": Array [
-          "date",
-        ],
+        "fields": Array [],
         "indexPatternId": "the-index-pattern-id",
         "metaFields": Array [
           "_index",
@@ -52,11 +47,8 @@ describe('getSharingData', () => {
         ],
         "searchRequest": Object {
           "body": Object {
-            "_source": Object {
-              "includes": Array [
-                "date",
-              ],
-            },
+            "_source": Object {},
+            "fields": Array [],
             "query": Object {
               "bool": Object {
                 "filter": Array [],
@@ -69,12 +61,12 @@ describe('getSharingData', () => {
             "sort": Array [
               Object {
                 "_doc": Object {
-                  "order": "desc",
+                  "order": false,
                 },
               },
             ],
             "stored_fields": Array [
-              "date",
+              "*",
             ],
           },
           "index": "the-index-pattern-title",
