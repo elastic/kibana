@@ -18,15 +18,19 @@
  */
 
 import React, { Component } from 'react';
-import { matchPath, RouteChildrenProps } from 'react-router-dom';
 import { Subscription } from 'rxjs';
 import { UnregisterCallback } from 'history';
-import { parse, stringify } from 'query-string';
+import { parse } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
+import {
+  IUiSettingsClient,
+  DocLinksStart,
+  ToastsStart,
+  ScopedHistory,
+} from '../../../../core/public';
 import { url } from '../../../kibana_utils/public';
 
 import { CallOuts } from './components/call_outs';
@@ -42,18 +46,15 @@ import { parseErrorMsg } from './components/search/search';
 
 export const QUERY = 'query';
 
-interface RouteParams {
-  [QUERY]: string;
-}
-
-type AdvancedSettingsProps = RouteChildrenProps<RouteParams> & {
+interface AdvancedSettingsProps {
+  history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-};
+}
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
@@ -79,8 +80,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
     this.state = this.getQueryState();
-    this.unregister = this.props.history.listen(({ pathname, search }) => {
-      this.setState(this.getQueryState(pathname, search));
+    this.unregister = this.props.history.listen(({ search }) => {
+      this.setState(this.getQueryState(search));
     });
   }
 
@@ -164,25 +165,13 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     }
   }
 
-  private getQueryText(pathname?: string, search?: string): string {
-    const match = pathname
-      ? matchPath<RouteParams>(pathname, {
-          path: this.props.match?.path,
-          exact: this.props.match?.isExact,
-        })
-      : this.props.match;
-
-    const routeQuery = match?.params[QUERY] ?? '';
-
-    if (routeQuery) return routeQuery;
-
-    const query = parse(search ?? this.props.location.search) ?? {};
-
-    return (query[QUERY] as string) ?? '';
+  private getQueryText(search?: string): string {
+    const queryParams = parse(search ?? window.location.search) ?? {};
+    return (queryParams[QUERY] as string) ?? '';
   }
 
-  private getQueryState(pathname?: string, search?: string): AdvancedSettingsState {
-    const queryString = this.getQueryText(pathname, search);
+  private getQueryState(search?: string): AdvancedSettingsState {
+    const queryString = this.getQueryText(search);
     const query = this.getQuery(queryString);
     const filteredSettings = this.mapSettings(Query.execute(query, this.settings));
     const footerQueryMatched = Object.keys(filteredSettings).length > 0;
@@ -195,18 +184,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   setUrlQuery(q: string = '') {
-    const searchParams = parse(this.props.location.search);
-
-    if (q) {
-      searchParams[QUERY] = q;
-    } else {
-      delete searchParams[QUERY];
-    }
-
-    const search = stringify(url.encodeQuery(searchParams, undefined, false), {
-      sort: false,
-      encode: false,
-    });
+    const search = url.modifyParams(window.location.search, QUERY, q);
 
     this.props.history.push({
       pathname: '', // remove any route query param

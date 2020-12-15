@@ -19,18 +19,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { StartServicesAccessor } from 'src/core/public';
+
+import { LocationDescriptor } from 'history';
+import { url } from '../../../kibana_utils/public';
+import { ManagementAppMountParams } from '../../../management/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { StartServicesAccessor } from '../../../../core/public';
 
 import { AdvancedSettings, QUERY } from './advanced_settings';
-import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
@@ -45,6 +48,19 @@ const readOnlyBadge = {
     defaultMessage: 'Unable to save advanced settings',
   }),
   iconType: 'glasses',
+};
+
+// TODO: remove route `query` param in 7.12
+const redirectUrl = ({
+  match,
+  location,
+}: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
+  const search = url.modifyParams(location.search, QUERY, match?.params[QUERY]);
+
+  return {
+    pathname: '/',
+    search,
+  };
 };
 
 export async function mountManagementSection(
@@ -67,18 +83,17 @@ export async function mountManagementSection(
     <I18nProvider>
       <Router history={params.history}>
         <Switch>
-          <Route path={[`/:${QUERY}`, '/']}>
-            {(routeProps) => (
-              <AdvancedSettings
-                {...routeProps}
-                enableSaving={canSave}
-                toasts={notifications.toasts}
-                dockLinks={docLinks.links}
-                uiSettings={uiSettings}
-                componentRegistry={componentRegistry}
-                trackUiMetric={trackUiMetric}
-              />
-            )}
+          <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+          <Route path="/">
+            <AdvancedSettings
+              history={params.history}
+              enableSaving={canSave}
+              toasts={notifications.toasts}
+              dockLinks={docLinks.links}
+              uiSettings={uiSettings}
+              componentRegistry={componentRegistry}
+              trackUiMetric={trackUiMetric}
+            />
           </Route>
         </Switch>
       </Router>

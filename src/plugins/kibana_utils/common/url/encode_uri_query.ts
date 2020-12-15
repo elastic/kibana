@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ParsedQuery } from 'query-string';
+import { ParsedQuery, parse, stringify } from 'query-string';
 import { transform } from 'lodash';
 
 /**
@@ -56,3 +56,25 @@ export const encodeQuery = (
       );
     }
   });
+
+/**
+ * Method to help modify url query params.
+ *
+ * @param params
+ * @param key
+ * @param value
+ */
+export const modifyParams = (params: string, key: string, value?: string) => {
+  const queryParams = parse(params);
+
+  if (value) {
+    queryParams[key] = value;
+  } else {
+    delete queryParams[key];
+  }
+
+  return stringify(encodeQuery(queryParams, undefined, false), {
+    sort: false,
+    encode: false,
+  });
+};
