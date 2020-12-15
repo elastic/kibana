@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './expandable_section.scss';
+
 import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,7 +27,7 @@ export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = (props) =
   const splomSectionContent = (
     <>
       <EuiHorizontalRule size="full" margin="none" />
-      <div style={{ padding: '16px' }}>
+      <div className="mlExpandableSection-contentPadding">
         <ScatterplotMatrix {...props} />
       </div>
     </>
