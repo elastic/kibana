@@ -38,6 +38,7 @@ export class UrlDrilldownPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
     plugins.uiActionsEnhanced.registerDrilldown(
       new UrlDrilldown({
+        externalUrl: core.http.externalUrl,
         getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
         navigateToUrl: (url: string) =>
           core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),

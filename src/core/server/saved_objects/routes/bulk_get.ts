@@ -19,8 +19,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 
-export const registerBulkGetRoute = (router: IRouter) => {
+interface RouteDependencies {
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerBulkGetRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
   router.post(
     {
       path: '/_bulk_get',
@@ -35,6 +40,9 @@ export const registerBulkGetRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
+
       const result = await context.core.savedObjects.client.bulkGet(req.body);
       return res.ok({ body: result });
     })

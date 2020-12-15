@@ -22,6 +22,14 @@ import { CoreUsageStatsClient } from '.';
 const createUsageStatsClientMock = () =>
   (({
     getUsageStats: jest.fn().mockResolvedValue({}),
+    incrementSavedObjectsBulkCreate: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsBulkGet: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsBulkUpdate: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsCreate: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsDelete: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsFind: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsGet: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsUpdate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsImport: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsResolveImportErrors: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),

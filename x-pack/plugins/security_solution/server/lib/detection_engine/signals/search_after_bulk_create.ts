@@ -6,7 +6,7 @@
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
-import { filterEventsAgainstList } from './filter_events_with_list';
+import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
   createSearchAfterReturnType,
@@ -156,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
+            createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
           } = await singleBulkCreate({
@@ -183,6 +184,7 @@ export const searchAfterAndBulkCreate = async ({
             createSearchAfterReturnType({
               success: bulkSuccess,
               createdSignalsCount: createdCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
               errors: bulkErrors,
             }),

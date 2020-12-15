@@ -7,7 +7,20 @@
 jest.mock('../../meta', () => {
   return {};
 });
-jest.mock('../../kibana_services');
+jest.mock('../../kibana_services', () => {
+  return {
+    getEMSSettings() {
+      return {
+        isEMSEnabled: () => {
+          return true;
+        },
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
+  };
+});
 jest.mock('uuid/v4', () => {
   return function () {
     return '12345';
@@ -51,12 +64,6 @@ describe('EMS is enabled', () => {
       return null;
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../kibana_services').getEMSSettings = () => {
-      return {
-        isEMSEnabled: () => true,
-      };
-    };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../kibana_services').getEmsTileLayerId = () => ({
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
@@ -94,6 +101,9 @@ describe('EMS is not enabled', () => {
     require('../../kibana_services').getEMSSettings = () => {
       return {
         isEMSEnabled: () => false,
+        isEMSUrlSet() {
+          return false;
+        },
       };
     };
   });

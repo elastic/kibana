@@ -42,7 +42,7 @@ function LayerPanels(
       dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
-        newState,
+        updater: newState,
         clearStagedPreview: false,
       });
     },

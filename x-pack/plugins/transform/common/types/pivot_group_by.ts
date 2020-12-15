@@ -12,6 +12,7 @@ export type GenericAgg = object;
 export interface TermsAgg {
   terms: {
     field: EsFieldName;
+    missing_bucket?: boolean;
   };
 }
 
@@ -19,6 +20,7 @@ export interface HistogramAgg {
   histogram: {
     field: EsFieldName;
     interval: string;
+    missing_bucket?: boolean;
   };
 }
 
@@ -26,6 +28,7 @@ export interface DateHistogramAgg {
   date_histogram: {
     field: EsFieldName;
     calendar_interval: string;
+    missing_bucket?: boolean;
   };
 }
 
