@@ -1655,6 +1655,28 @@ describe('migration visualization', () => {
     });
   });
 
+  describe('7.11.0 Data table vis - enable toolbar', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.11.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc = {
+      attributes: {
+        title: 'My data table vis',
+        description: 'Data table vis for test.',
+        visState: `{"type":"table","params": {"perPage": 10,"showPartialRows": false,"showTotal": false,"totalFunc": "sum"}}`,
+      },
+    };
+
+    it('should enable toolbar in visState.params', () => {
+      const migratedDataTableVisDoc = migrate(testDoc);
+      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState);
+      expect(visState.params.showToolbar).toEqual(true);
+    });
+  });
+
   describe('7.12.0 update vislib pie defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.12.0'](
