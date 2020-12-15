@@ -165,6 +165,20 @@ export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
 export interface AlertMissingData extends AlertNodeStats {
   gapDuration: number;
 }
+export interface CCRReadExceptionsStats {
+  remoteCluster: string;
+  followerIndex: string;
+  shardId: number;
+  leaderIndex: string;
+  lastReadException: { type: string; reason: string };
+  clusterUuid: string;
+  ccs: string;
+}
+
+export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
+  instanceId: string;
+  itemLabel: string;
+}
 
 export interface AlertData {
   nodeName?: string;
