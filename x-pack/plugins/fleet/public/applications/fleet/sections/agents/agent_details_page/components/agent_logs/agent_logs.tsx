@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
@@ -180,6 +181,8 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     [http.basePath, state.start, state.end, logStreamQuery]
   );
 
+  const [logsPanelRef, { height: logPanelHeight }] = useMeasure();
+
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
   const isLogLevelSelectionAvailable = useMemo(() => {
     if (!agentVersion) {
@@ -259,9 +262,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel paddingSize="none">
+        <EuiPanel paddingSize="none" panelRef={logsPanelRef}>
           <LogStream
-            height="100%"
+            height={logPanelHeight}
             startTimestamp={dateRangeTimestamps.start}
             endTimestamp={dateRangeTimestamps.end}
             query={logStreamQuery}

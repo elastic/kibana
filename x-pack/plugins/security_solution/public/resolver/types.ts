@@ -208,6 +208,13 @@ export interface TreeFetcherParameters {
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
+
+  /**
+   * The count of data invalidation actions at the time the data was requested.
+   */
+  dataRequestID?: number;
+
+  filters: TimeFilters;
 }
 
 /**
@@ -236,6 +243,23 @@ export interface NodeEventsInCategoryState {
    */
 
   lastCursorRequested?: null | string;
+
+  /**
+   * Request ID for the currently displayed events.
+   */
+  dataRequestID?: number;
+
+  pendingRequest?: {
+    /**
+     * Parameters used for a request currently in progress.
+     */
+    parameters: PanelViewAndParameters;
+
+    /**
+     * Request ID for any inflight requests
+     */
+    dataRequestID: number;
+  };
 
   /**
    * Flag for showing an error message when fetching additional related events.
@@ -299,16 +323,16 @@ export interface NodeData {
  */
 export interface DataState {
   /**
-   * @deprecated Use the API
-   */
-  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-
-  /**
    * Used when the panelView is `nodeEventsInCategory`.
    * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
    * If new data is returned for the panel view, this may be updated.
    */
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
+
+  /**
+   * A counter used to have resolver fetch updated data.
+   */
+  readonly refreshCount: number;
 
   /**
    * Used when the panelView is `eventDetail`.
@@ -317,6 +341,7 @@ export interface DataState {
   readonly currentRelatedEvent: {
     loading: boolean;
     data: SafeResolverEvent | null;
+    dataRequestID?: number;
   };
 
   readonly tree?: {
@@ -680,8 +705,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: Date;
-  to: Date;
+  from: string;
+  to: string;
 }
 
 /**
@@ -791,6 +816,11 @@ export interface DataAccessLayer {
   }) => Promise<ResolverEntityIndex>;
 }
 
+export interface TimeFilters {
+  from?: string;
+  to?: string;
+}
+
 /**
  * The externally provided React props.
  */
@@ -815,6 +845,13 @@ export interface ResolverProps {
    * Indices that the backend should use to find the originating document.
    */
   indices: string[];
+
+  filters: TimeFilters;
+
+  /**
+   * A flag to update data from an external source
+   */
+  shouldUpdate: boolean;
 }
 
 /**

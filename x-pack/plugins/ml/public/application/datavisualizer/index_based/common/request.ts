@@ -5,12 +5,11 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
-
-import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
+import { MlJobFieldType } from '../../../../../common/types/field_types';
 
 export interface FieldRequestConfig {
   fieldName?: string;
-  type: ML_JOB_FIELD_TYPES;
+  type: MlJobFieldType;
   cardinality: number;
 }
 
