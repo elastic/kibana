@@ -12,7 +12,6 @@ import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../../common/types';
-import { getSavedObjectTypes } from '../../../common/utils';
 import {
   ExceptionListSoSchema,
   FilterOrUndefined,
@@ -23,7 +22,7 @@ import {
   SortOrderOrUndefined,
 } from '../../../common/schemas';
 
-import { transformSavedObjectsToFoundExceptionList } from './utils';
+import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceTypeArray;

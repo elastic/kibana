@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSavedObjectType } from '../../../common/utils';
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
@@ -17,7 +16,7 @@ import {
   NamespaceType,
 } from '../../../common/schemas';
 
-import { transformSavedObjectToExceptionListItem } from './utils';
+import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
 
 interface GetExceptionListItemOptions {
   id: IdOrUndefined;

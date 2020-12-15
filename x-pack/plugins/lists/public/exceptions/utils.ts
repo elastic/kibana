@@ -8,10 +8,36 @@ import { get } from 'lodash/fp';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import { NamespaceType } from '../../common/schemas';
-import { SavedObjectType } from '../../common/types';
-import { getSavedObjectTypes } from '../../common/utils';
+import { NamespaceTypeArray } from '../../common/schemas/types/default_namespace_array';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../common/types';
 
 import { ExceptionListFilter, ExceptionListIdentifiers } from './types';
+
+export const getSavedObjectType = ({
+  namespaceType,
+}: {
+  namespaceType: NamespaceType;
+}): SavedObjectType => {
+  if (namespaceType === 'agnostic') {
+    return exceptionListAgnosticSavedObjectType;
+  } else {
+    return exceptionListSavedObjectType;
+  }
+};
+
+export const getSavedObjectTypes = ({
+  namespaceType,
+}: {
+  namespaceType: NamespaceTypeArray;
+}): SavedObjectType[] => {
+  return namespaceType.map((singleNamespaceType) =>
+    getSavedObjectType({ namespaceType: singleNamespaceType })
+  );
+};
 
 export const getIdsAndNamespaces = ({
   lists,

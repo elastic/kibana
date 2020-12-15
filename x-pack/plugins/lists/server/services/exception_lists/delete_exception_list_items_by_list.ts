@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSavedObjectType } from '../../../common/utils';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
 import { ListId, NamespaceType } from '../../../common/schemas';
 
 import { findExceptionListItem } from './find_exception_list_item';
+import { getSavedObjectType } from './utils';
 
 const PER_PAGE = 100;
 

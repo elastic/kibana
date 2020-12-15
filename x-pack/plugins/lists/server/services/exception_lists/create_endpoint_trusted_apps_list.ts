@@ -7,7 +7,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
-import { getSavedObjectType } from '../../../common/utils';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -15,7 +14,7 @@ import {
 } from '../../../common/constants';
 import { ExceptionListSchema, ExceptionListSoSchema, Version } from '../../../common/schemas';
 
-import { transformSavedObjectToExceptionList } from './utils';
+import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 
 interface CreateEndpointListOptions {
   savedObjectsClient: SavedObjectsClientContract;

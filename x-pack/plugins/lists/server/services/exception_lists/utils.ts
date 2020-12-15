@@ -6,7 +6,12 @@
 import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
-import { exceptionListAgnosticSavedObjectType } from '../../../common/types';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../../common/types';
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import {
   CommentsArray,
   CreateComment,
@@ -22,6 +27,18 @@ import {
   exceptionListType,
 } from '../../../common/schemas';
 
+export const getSavedObjectType = ({
+  namespaceType,
+}: {
+  namespaceType: NamespaceType;
+}): SavedObjectType => {
+  if (namespaceType === 'agnostic') {
+    return exceptionListAgnosticSavedObjectType;
+  } else {
+    return exceptionListSavedObjectType;
+  }
+};
+
 export const getExceptionListType = ({
   savedObjectType,
 }: {
@@ -32,6 +49,16 @@ export const getExceptionListType = ({
   } else {
     return 'single';
   }
+};
+
+export const getSavedObjectTypes = ({
+  namespaceType,
+}: {
+  namespaceType: NamespaceTypeArray;
+}): SavedObjectType[] => {
+  return namespaceType.map((singleNamespaceType) =>
+    getSavedObjectType({ namespaceType: singleNamespaceType })
+  );
 };
 
 export const transformSavedObjectToExceptionList = ({
