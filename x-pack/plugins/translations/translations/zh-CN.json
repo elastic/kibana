@@ -16697,7 +16697,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionHighDescription": "高",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionLowDescription": "低",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionMediumDescription": "中",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError": "一个策略至少需要一个技术。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError": "KQL 无效",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError": "需要定制查询。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError": "所有匹配项都需要字段和威胁索引字段。",
