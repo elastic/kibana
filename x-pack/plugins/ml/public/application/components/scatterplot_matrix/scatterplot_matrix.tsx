@@ -72,17 +72,20 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   color,
   legendType,
 }) => {
-  const defaultFields =
-    allFields.length > SCATTERPLOT_MATRIX_DEFAULT_FIELDS
-      ? allFields.slice(0, SCATTERPLOT_MATRIX_DEFAULT_FIELDS)
-      : allFields;
-
   // dynamicSize is optionally used for outlier charts where the scatterplot marks
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
 
   // used to give the use the option to customize the fields used for the matrix axes
-  const [fields, setFields] = useState<string[]>(defaultFields);
+  const [fields, setFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    const defaultFields =
+      allFields.length > SCATTERPLOT_MATRIX_DEFAULT_FIELDS
+        ? allFields.slice(0, SCATTERPLOT_MATRIX_DEFAULT_FIELDS)
+        : allFields;
+    setFields(defaultFields);
+  }, [allFields]);
 
   // the amount of documents to be fetched
   const [fetchSize, setFetchSize] = useState<number>(SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useRef, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiComboBox,
@@ -115,6 +115,14 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     query: jobConfigQueryString ?? '',
     language: SEARCH_QUERY_LANGUAGE.KUERY,
   });
+
+  const scatterplotFieldOptions = useMemo(
+    () =>
+      includesTableItems
+        .filter((d) => d.feature_type === 'numerical' && d.is_included)
+        .map((d) => d.name),
+    [includesTableItems]
+  );
 
   const toastNotifications = getToastNotifications();
 
@@ -458,7 +466,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
-      {includes.length >= 2 && (
+      {scatterplotFieldOptions.length > 1 && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
@@ -481,7 +489,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
           >
             <ScatterplotMatrix
-              fields={includes}
+              fields={scatterplotFieldOptions}
               index={currentIndexPattern.title}
               color={
                 jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
