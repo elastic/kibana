@@ -99,5 +99,13 @@ export const derivativeOperation: OperationDefinition<
       })
     );
   },
+  getDisabledStatus(indexPattern, layer) {
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.movingAverage', {
+        defaultMessage: 'Moving average',
+      })
+    )?.join(', ');
+  },
   timeScalingMode: 'optional',
 };

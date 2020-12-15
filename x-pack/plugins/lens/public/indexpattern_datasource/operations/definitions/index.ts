@@ -157,8 +157,9 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * return an updated column. If not implemented, the `id` function is used instead.
    */
   onOtherColumnChanged?: (
-    currentColumn: C,
-    columns: Partial<Record<string, IndexPatternColumn>>
+    layer: IndexPatternLayer,
+    thisColumnId: string,
+    changedColumnId: string
   ) => C;
   /**
    * React component for operation specific settings shown in the popover editor
@@ -181,7 +182,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * but disable it from usage, this function returns the string describing
    * the status. Otherwise it returns undefined
    */
-  getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
+  getDisabledStatus?: (indexPattern: IndexPattern, layer: IndexPatternLayer) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *

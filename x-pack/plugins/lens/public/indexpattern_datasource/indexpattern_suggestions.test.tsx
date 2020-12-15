@@ -6,7 +6,7 @@
 
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
-import type { IndexPatternPrivateState, IndexPatternLayer } from './types';
+import type { IndexPatternPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,

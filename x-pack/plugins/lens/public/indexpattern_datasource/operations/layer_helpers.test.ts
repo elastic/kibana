@@ -820,18 +820,83 @@ describe('state_helpers', () => {
         field: indexPattern.fields[2], // bytes field
       });
 
-      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
-        col1: termsColumn,
-        col2: expect.objectContaining({
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
+      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
+        {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: termsColumn,
+            col2: expect.objectContaining({
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'avg',
+            }),
+          },
+          incompleteColumns: {},
+        },
+        'col1',
+        'col2'
+      );
+    });
 
-          // Private
-          operationType: 'avg',
-          sourceField: 'bytes',
-        }),
+    it('should execute adjustments for other columns when creating a reference', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'column', columnId: 'willBeReference' },
+          orderDirection: 'desc',
+          size: 5,
+        },
+      };
+
+      replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'willBeReference'],
+          columns: {
+            col1: termsColumn,
+            willBeReference: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+        },
+        indexPattern,
+        columnId: 'willBeReference',
+        op: 'cumulative_sum',
       });
+
+      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
+        {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'willBeReference'],
+          columns: {
+            col1: {
+              ...termsColumn,
+              params: { orderBy: { type: 'alphabetical' }, orderDirection: 'asc', size: 5 },
+            },
+            willBeReference: expect.objectContaining({
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'cumulative_sum',
+            }),
+          },
+          incompleteColumns: {},
+        },
+        'col1',
+        'willBeReference'
+      );
     });
 
     it('should not wrap the previous operation when switching to reference', () => {
@@ -1216,9 +1281,11 @@ describe('state_helpers', () => {
         columnId: 'col2',
       });
 
-      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
-        col1: termsColumn,
-      });
+      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
+        { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
+        'col1',
+        'col2'
+      );
     });
 
     it('should delete the column and all of its references', () => {

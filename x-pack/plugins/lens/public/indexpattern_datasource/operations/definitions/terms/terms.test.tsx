@@ -383,15 +383,25 @@ describe('terms', () => {
         },
         sourceField: 'category',
       };
-      const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
-        col1: {
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-          sourceField: 'Records',
-          operationType: 'count',
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
         },
-      });
+        'col2',
+        'col1'
+      );
+
       expect(updatedColumn).toBe(initialColumn);
     });
 
@@ -410,18 +420,74 @@ describe('terms', () => {
         },
         sourceField: 'category',
       };
-      const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
-        col1: {
-          label: 'Last Value',
-          dataType: 'number',
-          isBucketed: false,
-          sourceField: 'bytes',
-          operationType: 'last_value',
-          params: {
-            sortField: 'time',
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Last Value',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'last_value',
+              params: {
+                sortField: 'time',
+              },
+            },
           },
+          columnOrder: [],
+          indexPatternId: '',
         },
-      });
+        'col2',
+        'col1'
+      );
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'alphabetical' },
+        })
+      );
+    });
+
+    it('should switch to alphabetical ordering if metric is reference-based', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'column', columnId: 'col1' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Cumulative sum',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'cumulative_sum',
+              references: ['referenced'],
+            },
+            referenced: {
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'count',
+              sourceField: 'Records',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        'col2',
+        'col1'
+      );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
           orderBy: { type: 'alphabetical' },
@@ -432,20 +498,27 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if there are no columns to order by', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          label: 'Top value of category',
-          dataType: 'string',
-          isBucketed: true,
+          columns: {
+            col2: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
 
-          // Private
-          operationType: 'terms',
-          params: {
-            orderBy: { type: 'column', columnId: 'col1' },
-            size: 3,
-            orderDirection: 'asc',
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'column', columnId: 'col1' },
+                size: 3,
+                orderDirection: 'asc',
+              },
+              sourceField: 'category',
+            },
           },
-          sourceField: 'category',
+          columnOrder: [],
+          indexPatternId: '',
         },
-        {}
+        'col2',
+        'col1'
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
@@ -457,33 +530,39 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if the order column is not a metric anymore', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          label: 'Top value of category',
-          dataType: 'string',
-          isBucketed: true,
+          columns: {
+            col2: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
 
-          // Private
-          operationType: 'terms',
-          params: {
-            orderBy: { type: 'column', columnId: 'col1' },
-            size: 3,
-            orderDirection: 'asc',
-          },
-          sourceField: 'category',
-        },
-        {
-          col1: {
-            label: 'Value of timestamp',
-            dataType: 'date',
-            isBucketed: true,
-
-            // Private
-            operationType: 'date_histogram',
-            params: {
-              interval: 'w',
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'column', columnId: 'col1' },
+                size: 3,
+                orderDirection: 'asc',
+              },
+              sourceField: 'category',
             },
-            sourceField: 'timestamp',
+            col1: {
+              label: 'Value of timestamp',
+              dataType: 'date',
+              isBucketed: true,
+
+              // Private
+              operationType: 'date_histogram',
+              params: {
+                interval: 'w',
+              },
+              sourceField: 'timestamp',
+            },
           },
-        }
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        'col2',
+        'col1'
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({

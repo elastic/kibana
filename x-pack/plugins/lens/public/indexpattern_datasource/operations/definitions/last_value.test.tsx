@@ -322,22 +322,27 @@ describe('last_value', () => {
   it('should return disabledStatus if indexPattern does contain date field', () => {
     const indexPattern = createMockedIndexPattern();
 
-    expect(lastValueOperation.getDisabledStatus!(indexPattern)).toEqual(undefined);
+    expect(lastValueOperation.getDisabledStatus!(indexPattern, state.layers.first)).toEqual(
+      undefined
+    );
 
     const indexPatternWithoutTimeFieldName = {
       ...indexPattern,
       timeFieldName: undefined,
     };
-    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName)).toEqual(
-      undefined
-    );
+    expect(
+      lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, state.layers.first)
+    ).toEqual(undefined);
 
     const indexPatternWithoutTimefields = {
       ...indexPatternWithoutTimeFieldName,
       fields: indexPattern.fields.filter((f) => f.type !== 'date'),
     };
 
-    const disabledStatus = lastValueOperation.getDisabledStatus!(indexPatternWithoutTimefields);
+    const disabledStatus = lastValueOperation.getDisabledStatus!(
+      indexPatternWithoutTimefields,
+      state.layers.first
+    );
     expect(disabledStatus).toEqual(
       'This function requires the presence of a date field in your index'
     );

@@ -12,6 +12,7 @@ export {
   IndexPatternColumn,
   FieldBasedIndexPatternColumn,
   IncompleteColumn,
+  RequiredReference,
 } from './definitions';
 
 export { createMockedReferenceOperation } from './mocks';

@@ -80,8 +80,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (column, otherColumns) =>
-      optionalTimeScaling ? adjustTimeScaleOnOtherColumnChange(column, otherColumns) : column,
+    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+      optionalTimeScaling
+        ? adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId)
+        : layer.columns[thisColumnId],
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
     buildColumn: ({ field, previousColumn }) => ({

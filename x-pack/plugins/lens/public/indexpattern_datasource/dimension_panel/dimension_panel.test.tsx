@@ -1145,20 +1145,22 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([options![1].options![0]]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      layers: {
-        first: {
-          ...state.layers.first,
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            ...state.layers.first.columns,
-            col2: expect.objectContaining({
-              operationType: 'avg',
-              sourceField: 'bytes',
-            }),
+    expect(setState).toHaveBeenCalledWith(
+      {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                operationType: 'avg',
+                sourceField: 'bytes',
+              }),
+            },
+            incompleteColumns: {},
           },
-          incompleteColumns: {},
         },
       },
       true

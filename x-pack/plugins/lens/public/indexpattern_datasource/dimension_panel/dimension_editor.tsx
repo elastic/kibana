@@ -29,7 +29,6 @@ import {
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
-  OperationType,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -150,7 +149,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
         (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
       disabledStatus:
         definition.getDisabledStatus &&
-        definition.getDisabledStatus(state.indexPatterns[state.currentIndexPatternId]),
+        definition.getDisabledStatus(
+          state.indexPatterns[state.currentIndexPatternId],
+          state.layers[layerId]
+        ),
     };
   });
 
@@ -300,7 +302,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <ReferenceEditor
                   key={index}
                   layer={state.layers[layerId]}
-                  parentColumnId={columnId}
                   columnId={referenceId}
                   updateLayer={(newLayer) => {
                     setState(mergeLayer({ state, layerId, newLayer }));
@@ -367,15 +368,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFormRow>
         ) : null}
 
-        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <TimeScaling
-            selectedColumn={selectedColumn}
-            columnId={columnId}
-            layer={state.layers[layerId]}
-            updateLayer={setStateWrapper}
-          />
-        )}
-
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && ParamEditor && (
           <>
             <ParamEditor
@@ -392,6 +384,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               data={props.data}
             />
           </>
+        )}
+
+        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
+          <TimeScaling
+            selectedColumn={selectedColumn}
+            columnId={columnId}
+            layer={state.layers[layerId]}
+            updateLayer={setStateWrapper}
+          />
         )}
       </div>
 

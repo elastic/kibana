@@ -15,11 +15,10 @@ import {
   operationDefinitionMap,
   getOperationDisplay,
   insertOrReplaceColumn,
-  replaceColumn,
   deleteColumn,
-  RequiredReference,
   isOperationAllowedAsReference,
   FieldBasedIndexPatternColumn,
+  RequiredReference,
 } from '../operations';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
@@ -119,25 +118,39 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
   });
 
   function onChooseFunction(operationType: OperationType) {
-    // Clear invalid state because we are creating a valid column
     if (column?.operationType === operationType) {
       return;
     }
     const possibleFieldNames = operationSupportMatrix.fieldByOperation[operationType];
-    const possibleField =
-      possibleFieldNames?.size === 1
-        ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-        : undefined;
+    if (column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)) {
+      // Reuse the current field if possible
+      updateLayer(
+        insertOrReplaceColumn({
+          layer,
+          columnId,
+          op: operationType,
+          indexPattern: currentIndexPattern,
+          field: currentIndexPattern.getFieldByName(column.sourceField),
+        })
+      );
+    } else {
+      // If reusing the field is impossible, we generally can't choose for the user.
+      // The one exception is if the field is the only possible field, like Count of Records.
+      const possibleField =
+        possibleFieldNames?.size === 1
+          ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+          : undefined;
 
-    updateLayer(
-      insertOrReplaceColumn({
-        layer,
-        columnId,
-        op: operationType,
-        indexPattern: currentIndexPattern,
-        field: possibleField,
-      })
-    );
+      updateLayer(
+        insertOrReplaceColumn({
+          layer,
+          columnId,
+          op: operationType,
+          indexPattern: currentIndexPattern,
+          field: possibleField,
+        })
+      );
+    }
     trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
     return;
   }
@@ -183,7 +196,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
                   if (choices.length === 0) {
-                    // onDeleteColumn();
                     updateLayer(deleteColumn({ layer, columnId }));
                     return;
                   }
@@ -198,10 +210,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           </>
         ) : null}
 
-        {!column ||
-        // (incompatibleSelectedOperationType &&
-        //   operationDefinitionMap[incompatibleSelectedOperationType].input === 'field') ? (
-        selectedOperationDefinition.input === 'field' ? (
+        {!column || selectedOperationDefinition.input === 'field' ? (
           <EuiFormRow
             data-test-subj="indexPattern-reference-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {

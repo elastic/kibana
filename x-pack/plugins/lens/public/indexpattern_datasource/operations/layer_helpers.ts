@@ -268,20 +268,23 @@ export function replaceColumn({
     if (operationDefinition.input === 'fullReference') {
       const referenceIds = operationDefinition.requiredReferences.map(() => generateId());
 
-      const newColumns = {
-        ...tempLayer.columns,
-        [columnId]: operationDefinition.buildColumn({
-          ...baseOptions,
-          layer: tempLayer,
-          referenceIds,
-          previousColumn,
-        }),
+      const newLayer = {
+        ...tempLayer,
+        columns: {
+          ...tempLayer.columns,
+          [columnId]: operationDefinition.buildColumn({
+            ...baseOptions,
+            layer: tempLayer,
+            referenceIds,
+            previousColumn,
+          }),
+        },
       };
       return updateDefaultLabels(
         {
           ...tempLayer,
-          columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
-          columns: newColumns,
+          columnOrder: getColumnOrder(newLayer),
+          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
         },
         indexPattern
       );
@@ -291,12 +294,12 @@ export function replaceColumn({
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       newColumn = adjustLabel(newColumn, previousColumn);
 
-      const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
+      const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
       return updateDefaultLabels(
         {
           ...tempLayer,
-          columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
-          columns: adjustColumnReferencesForChangedColumn(newColumns, columnId),
+          columnOrder: getColumnOrder(newLayer),
+          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
         },
         indexPattern
       );
@@ -315,12 +318,13 @@ export function replaceColumn({
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
     newColumn = adjustLabel(newColumn, previousColumn);
 
-    const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
+    // const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
+    const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
         ...tempLayer,
-        columnOrder: getColumnOrder({ ...tempLayer, columns: newColumns }),
-        columns: adjustColumnReferencesForChangedColumn(newColumns, columnId),
+        columnOrder: getColumnOrder(newLayer),
+        columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
       },
       indexPattern
     );
@@ -338,12 +342,12 @@ export function replaceColumn({
       newColumn.label = previousColumn.label;
     }
 
-    const newColumns = { ...layer.columns, [columnId]: newColumn };
+    const newLayer = { ...layer, columns: { ...layer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
         ...resetIncomplete(layer, columnId),
-        columnOrder: getColumnOrder({ ...layer, columns: newColumns }),
-        columns: adjustColumnReferencesForChangedColumn(newColumns, columnId),
+        columnOrder: getColumnOrder(newLayer),
+        columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
       },
       indexPattern
     );
@@ -456,17 +460,18 @@ export function updateColumnParam<C extends IndexPatternColumn>({
   });
 }
 
-function adjustColumnReferencesForChangedColumn(
-  columns: Record<string, IndexPatternColumn>,
-  columnId: string
-) {
-  const newColumns = { ...columns };
+function adjustColumnReferencesForChangedColumn(layer: IndexPatternLayer, changedColumnId: string) {
+  const newColumns = { ...layer.columns };
   Object.keys(newColumns).forEach((currentColumnId) => {
-    if (currentColumnId !== columnId) {
+    if (currentColumnId !== changedColumnId) {
       const currentColumn = newColumns[currentColumnId];
       const operationDefinition = operationDefinitionMap[currentColumn.operationType];
       newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
-        ? operationDefinition.onOtherColumnChanged(currentColumn, newColumns)
+        ? operationDefinition.onOtherColumnChanged(
+            { ...layer, columns: newColumns },
+            currentColumnId,
+            changedColumnId
+          )
         : currentColumn;
     }
   });
@@ -498,7 +503,10 @@ export function deleteColumn({
 
   let newLayer = {
     ...layer,
-    columns: adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId),
+    columns: adjustColumnReferencesForChangedColumn(
+      { ...layer, columns: hypotheticalColumns },
+      columnId
+    ),
   };
 
   extraDeletions.forEach((id) => {
