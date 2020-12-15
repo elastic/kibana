@@ -65,3 +65,10 @@ export const ERROR_PUSH_TO_SERVICE = i18n.translate(
     defaultMessage: 'Error pushing to service',
   }
 );
+
+export const ERROR_GET_FIELDS = i18n.translate(
+  'xpack.securitySolution.case.configure.errorGetFields',
+  {
+    defaultMessage: 'Error getting fields from service',
+  }
+);
