@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('query should show failed shards pop up', async function () {
+    it.skip('query should show failed shards pop up', async function () {
       if (false) {
         /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
          */
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('query return results with valid scripted field', async function () {
+    it.skip('query return results with valid scripted field', async function () {
       if (false) {
         /* the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
         which are now saved in the esArchive.

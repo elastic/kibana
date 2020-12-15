@@ -14,6 +14,19 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
+export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+/**
+ * TIMELINE BODY
+ */
 export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
@@ -227,7 +240,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
     padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
@@ -374,3 +387,11 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
 export const EventsLoading = styled(EuiLoadingSpinner)`
   vertical-align: middle;
 `;
+
+export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
+  ({ $isVisible = false }) => ({
+    style: {
+      display: $isVisible ? 'block' : 'none',
+    },
+  })
+)<{ $isVisible: boolean }>``;
