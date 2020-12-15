@@ -53,7 +53,7 @@ The `bytes` property value for each feature will fit on a linear scale from the 
 
 For color styles, values are fit from the domain range to the color ramp with one of the following:
 
-* *Interpolate (default)*. Color ramp is divided into 8 bands. Values are interpolated between min and max to a color band on a linear scale.
+* *Interpolate (default)*. Interpolate values between min and max to a color band on a linear scale. The color ramp is divided into eight bands.
 * *Percentiles*. Use percentiles to divide the color ramp into bands that map to values.
 * *Custom*. Define custom color ramp bands and ranges.
 
