@@ -221,7 +221,6 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   onQueryChange = ({ query }: { query: Query }) => {
-    this.setUrlQuery(query.text);
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
@@ -229,7 +228,6 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   };
 
   clearQuery = () => {
-    this.setUrlQuery('');
     this.setState({
       query: Query.parse(''),
       footerQueryMatched: false,
