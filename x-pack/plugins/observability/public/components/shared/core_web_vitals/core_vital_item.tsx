@@ -90,13 +90,14 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if ((value === null || value !== undefined) && !hasVitals && !loading) {
+  if (!value && !hasVitals && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
 
   return (
     <>
       <EuiStat
+        aria-label={`${title} ${value}`}
         titleSize="s"
         title={value ?? ''}
         description={
