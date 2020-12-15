@@ -31,7 +31,7 @@ const actionParams = {
       externalId: null,
       parent: null,
     },
-    comments: [{ commentId: '1', comment: 'comment for jira' }],
+    comments: [],
   },
 };
 
@@ -287,76 +287,22 @@ describe('JiraParamsFields renders', () => {
   });
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    test('issueTypeSelect update triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const issueTypeSelect = wrapper.find('[data-test-subj="issueTypeSelect"]').first();
-      issueTypeSelect.prop('onChange')!(changeEvent);
-      expect(editAction.mock.calls.length).toEqual(2);
-      expect(editAction.mock.calls[1][1].incident.issueType).toEqual(changeEvent.target.value);
-    });
-    test('prioritySelect update triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const prioritySelect = wrapper.find('[data-test-subj="prioritySelect"]').first();
-      prioritySelect.prop('onChange')!(changeEvent);
-      expect(editAction.mock.calls.length).toEqual(2);
-      expect(editAction.mock.calls[1][1].incident.priority).toEqual(changeEvent.target.value);
-    });
-    test('A comment triggers editAction', () => {
-      const newProps = {
-        ...defaultProps,
-        actionParams: {
-          ...actionParams,
-          subActionParams: {
-            ...actionParams.subActionParams,
-            comments: [],
-          },
-        },
-      };
-      const wrapper = mount(<JiraParamsFields {...newProps} />);
-      const fullComment = { target: { value: 'sometext' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-      expect(comments.simulate('change', fullComment));
-      expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
-    });
-    test('An empty comment does not trigger editAction', () => {
-      const newProps = {
-        ...defaultProps,
-        actionParams: {
-          ...actionParams,
-          subActionParams: {
-            ...actionParams.subActionParams,
-            comments: [],
-          },
-        },
-      };
-      const wrapper = mount(<JiraParamsFields {...newProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-    });
-    test('Summary update triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const newValue = { target: { value: 'sometext' } };
-      const summary = wrapper.find('[data-test-subj="summaryInput"] input');
-      expect(editAction.mock.calls[0][1].incident.summary).toEqual(
-        actionParams.subActionParams.incident.summary
-      );
-      expect(summary.simulate('change', newValue));
-      expect(editAction.mock.calls[1][1].incident.summary).toEqual(newValue.target.value);
-    });
-    test('Description update triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const newValue = { target: { value: 'sometext' } };
-      const description = wrapper.find('[data-test-subj="descriptionTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].incident.description).toEqual(
-        actionParams.subActionParams.incident.description
-      );
-      expect(description.simulate('change', newValue));
-      expect(editAction.mock.calls[1][1].incident.description).toEqual(newValue.target.value);
-    });
+    const simpleFields = [
+      { dataTestSubj: 'input[data-test-subj="summaryInput"]', key: 'summary' },
+      { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
+      { dataTestSubj: '[data-test-subj="issueTypeSelect"]', key: 'issueType' },
+      { dataTestSubj: '[data-test-subj="prioritySelect"]', key: 'priority' },
+    ];
+
+    simpleFields.forEach((field) =>
+      test(`${field.key} update triggers editAction :D`, () => {
+        const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+        const theField = wrapper.find(field.dataTestSubj).first();
+        theField.prop('onChange')!(changeEvent);
+        expect(editAction.mock.calls[1][1].incident[field.key]).toEqual(changeEvent.target.value);
+      })
+    );
+
     test('Parent update triggers editAction', () => {
       useGetFieldsByIssueTypeMock.mockReturnValue({
         ...useGetFieldsByIssueTypeResponse,
@@ -424,6 +370,21 @@ describe('JiraParamsFields renders', () => {
         onCreateOption: (searchValue: string) => void;
       }).onCreateOption(searchValue);
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['kibana', searchValue]);
+    });
+    test('A comment triggers editAction', () => {
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
+      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
+      expect(comments.simulate('change', changeEvent));
+      expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
+    });
+    test('An empty comment does not trigger editAction', () => {
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+      const emptyComment = { target: { value: '' } };
+      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
+      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
+      expect(comments.simulate('change', emptyComment));
+      expect(editAction.mock.calls.length).toEqual(1);
     });
   });
 });
