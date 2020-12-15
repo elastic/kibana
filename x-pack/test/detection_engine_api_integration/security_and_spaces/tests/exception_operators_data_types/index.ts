@@ -16,18 +16,18 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./double'));
       loadTestFile(require.resolve('./float'));
       loadTestFile(require.resolve('./integer'));
+      loadTestFile(require.resolve('./ip'));
+      loadTestFile(require.resolve('./text_array'));
     });
 
     describe('', function () {
       this.tags('ciGroup12');
 
-      loadTestFile(require.resolve('./ip'));
       loadTestFile(require.resolve('./ip_array'));
       loadTestFile(require.resolve('./keyword'));
       loadTestFile(require.resolve('./keyword_array'));
       loadTestFile(require.resolve('./long'));
       loadTestFile(require.resolve('./text'));
-      loadTestFile(require.resolve('./text_array'));
     });
   });
 };
