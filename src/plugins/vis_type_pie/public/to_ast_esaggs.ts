@@ -18,23 +18,27 @@
  */
 
 import { Vis } from '../../visualizations/public';
-import { buildExpressionFunction } from '../../expressions/public';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 
 import { PieVisParams } from './types';
 
 /**
  * Get esaggs expressions function
- * TODO: replace this with vis.data.aggs!.toExpressionAst();
- * https://github.com/elastic/kibana/issues/61768
  * @param vis
  */
 export function getEsaggsFn(vis: Vis<PieVisParams>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 }
