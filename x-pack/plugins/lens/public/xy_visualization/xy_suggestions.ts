@@ -16,7 +16,7 @@ import {
   TableChangeType,
 } from '../types';
 import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
-import { getIconForSeries } from './state_helpers';
+import { getIconForSeries, isHorizontalSeries } from './state_helpers';
 
 const columnSortOrder = {
   document: 0,
@@ -136,12 +136,27 @@ function flipSeriesType(seriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar':
       return 'bar_horizontal';
+    case 'bar_stacked':
+      return 'bar_horizontal_stacked';
     case 'bar_horizontal_percentage_stacked':
       return 'bar_percentage_stacked';
     case 'bar_percentage_stacked':
       return 'bar_horizontal_percentage_stacked';
     default:
       return 'bar_horizontal';
+  }
+}
+
+function horizontalSeriesType(seriesType: SeriesType) {
+  switch (seriesType) {
+    case 'bar':
+      return 'bar_horizontal';
+    case 'bar_stacked':
+      return 'bar_horizontal_stacked';
+    case 'bar_percentage_stacked':
+      return 'bar_horizontal_percentage_stacked';
+    default:
+      return seriesType;
   }
 }
 
@@ -222,8 +237,21 @@ function getSuggestionsForLayer({
   mainPalette?: PaletteOutput;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
+  const flipXY =
+    yValues.length === 1 &&
+    xValue?.operation.dataType === 'string' &&
+    requestedSeriesType === undefined;
+  const overTime =
+    tableLabel === 'Over time' &&
+    xValue?.operation.dataType === 'date' &&
+    requestedSeriesType === undefined;
+  const series = requestedSeriesType || getSeriesType(currentState, layerId, xValue);
   const seriesType: SeriesType =
-    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+    overTime && isHorizontalSeries(series)
+      ? flipSeriesType(series)
+      : flipXY
+      ? horizontalSeriesType(series)
+      : series;
 
   const options = {
     currentState,
