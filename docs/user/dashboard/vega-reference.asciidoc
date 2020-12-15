@@ -427,11 +427,12 @@ kibanaSetTimeFilter(start, end)
 }
 ----
 
+[float]
 [[vega-notes]]
 [[resources-and-examples]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-Lite, refer to the resources and examples.
+To learn more about Vega and Vega-Lite, refer to the resources and examples.
 
 [float]
 [[vega-editor]]

@@ -2,33 +2,27 @@
 [[lens-end-to-end]]
 == Try it: Analyze website data on a dashboard
 
-You have collected data about your webiste, and you're ready to find the answers to some key questions. 
+You have collected data about your website, and you're ready to find the answers to some key questions. 
 
 When you're finished creating the dashboard, you'll be able to answer the following questions:
 
-* How many users have visited my website?
-* What’s the distribution of visitors by operating system?
-* What’s the ratio of code responses over time?
-* What’s the average bytes transfer per day? How does it relate to the number of visitors?
-* What's the percentage of small vs big files transfer?
-* How does website traffic look like hour by hour?
-* Where does the traffic come from for top three countries?
+* How many users have visited your website?
+* What is the distribution of visitors by operating system? 
+* What is the average of bytes transfer per day?
+* What is the health of your website?
+* What is the traffic for your website by the hour?
+* What is the percentage of small compared to large transferred files?
+* What are the top social media sources of website traffic, and from what countries?
 
 [discrete]
 [[add-the-sample-web-logs-data]]
-=== Add the web logs data
+=== Add the data and create the dashboard
 
-To analyze the website traffic data, add the data set to {kib}.
+To create visualizations of the website traffic data, add the data set to {kib}, then create the dashboard.
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
-
-[discrete]
-[[end-to-end-create-the-dashboard]]
-=== Create the dashboard
-
-Open the dashboard, then open the visualization builder. 
 
 . Open the main menu, click *Dashboard*.
 
@@ -38,7 +32,7 @@ Open the dashboard, then open the visualization builder.
 [[metric-vis]]
 === View the number of website visitors
 
-To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard
+To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
 . Click *Create panel*, then click *Lens* on the *New visualization* window.
 +

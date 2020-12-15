@@ -44,6 +44,11 @@ Use *Vega* and *Vega-Lite* when you want to create a visualization for:
 
 image::images/vega.png[Vega UI]
 
+For more information about *Vega* and *Vega-Lite*, refer to:
+
+* <<reference-for-kibana-extensions,Reference for {kib} extensions>>
+* <<resources-and-examples,Resources and examples>>
+
 [float]
 [[timelion-advanced-editor]]
 === Timelion

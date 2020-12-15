@@ -120,8 +120,8 @@ When you have finished adding and arranging panels, save the dashboard.
 
 . Click *Save*.
 
+[float]
 [[share-the-dashboard]]
-[[embedding-dashboards]]
 == Share the dashboard
 
 Share the dashboard with a larger audience.
@@ -129,34 +129,28 @@ Share the dashboard with a larger audience.
 . From the toolbar, click *Share*. 
 
 . Choose one of the following options:
-
-* *Embed code* &mdash; Embed the code in a web page. To view the embedded dashboard, users must have {kib} access.
+[[embedding-dashboards]]
+* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, 
 
 * *Permalinks* &mdash; Share a direct link to a {kib} dashboard.
-+
-TIP: When you share a link to a dashboard snapshot, select *Short URL*. Snapshot
-URLs are long and can be problematic for Internet Explorer and other
-tools. To create a short URL, you must have write access to {kib}.
 
 * *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
-* PNG Reports &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
+* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
-TIP: To create a link to a dashboard by title, use: +
-`${domain}/${basepath?}/app/dashboards#/list?title=${yourdashboardtitle}`
-
-[discrete]
 [float]
 [[import-dashboards]]
-=== Export the dashboard
+== Export the dashboard
 
-Export the dashboard outside of {kib}.
+To manually create a back up of the dashboard, export the dashboard as a saved object.
 
 . Open the main menu, then click *Stack Management > Saved Objects*. 
 
 . Select the dashboard you want to export, then click *Export*.
-
++
 For more information, refer to <<managing-saved-objects, Managing saved objects>>.
+
+To automate regular back ups of the dashboard, refer to <<Export dashboard API,dashboard-api-export>>.
 
 include::lens-end-to-end/lens-end-to-end.asciidoc[]
 
