@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify content
         await retry.waitFor('Wait until the app title shows up', async () => {
-          return await testSubjects.isDisplayed('dataStreamsEmptyPromptTemplateLink');
+          return await testSubjects.isDisplayed('dataStreamList');
         });
       });
     });
