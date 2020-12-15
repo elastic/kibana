@@ -15,7 +15,6 @@ import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { euiStyled } from '../../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
@@ -51,22 +50,25 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      <EuiFlexGroup gutterSize={'none'} alignItems="center">
+      <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
         <EuiFlexItem>
-          <QueryWrapper>
-            <EuiFieldSearch
-              fullWidth
-              placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
-                defaultMessage: 'Search for log entries...',
-              })}
-              value={textQuery}
-              isClearable
-              onChange={onQueryChange}
-            />
-          </QueryWrapper>
+          <EuiFieldSearch
+            fullWidth
+            placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
+              defaultMessage: 'Search for log entries...',
+            })}
+            value={textQuery}
+            isClearable
+            onChange={onQueryChange}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType={'popout'} {...nodeLogsMenuItemLinkProps}>
+          <EuiButtonEmpty
+            size={'xs'}
+            flush={'both'}
+            iconType={'popout'}
+            {...nodeLogsMenuItemLinkProps}
+          >
             <FormattedMessage
               id="xpack.infra.nodeDetails.logs.openLogsLink"
               defaultMessage="Open in Logs"
@@ -78,11 +80,6 @@ const TabComponent = (props: TabProps) => {
     </TabContent>
   );
 };
-
-const QueryWrapper = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.m};
-  padding-right: 0;
-`;
 
 export const LogsTab = {
   id: 'logs',

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 interface LocationLinkProps {
   location?: string | null;
@@ -32,8 +32,6 @@ export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
         description:
           'Text that instructs the user to navigate to our docs to add a geographic location to their data',
       })}
-      &nbsp;
-      <EuiIcon size="s" type="popout" />
     </EuiLink>
   );
 };

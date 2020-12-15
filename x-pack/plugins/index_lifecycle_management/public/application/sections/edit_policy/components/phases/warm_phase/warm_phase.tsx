@@ -4,35 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiDescribedFormGroup,
-} from '@elastic/eui';
+import { EuiSpacer, EuiDescribedFormGroup, EuiAccordion } from '@elastic/eui';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { Phases } from '../../../../../../../common/types';
 
-import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared_fields';
-
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useConfigurationIssues } from '../../../form';
 
-import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
+import { ActiveBadge, DescribedFormRow } from '../../';
 
-import { DataTierAllocationField } from '../shared_fields';
+import {
+  useRolloverPath,
+  MinAgeInputField,
+  ForcemergeField,
+  SetPriorityInputField,
+  DataTierAllocationField,
+  ShrinkField,
+  ReadonlyField,
+} from '../shared_fields';
 
 const i18nTexts = {
-  shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
-    defaultMessage: 'Shrink index',
-  }),
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage: 'Move data to nodes optimized for less-frequent, read-only access.',
@@ -49,6 +47,7 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
@@ -74,7 +73,7 @@ export const WarmPhase: FunctionComponent = () => {
           }
           titleSize="s"
           description={
-            <Fragment>
+            <>
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
@@ -93,13 +92,13 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </Fragment>
+            </>
           }
           fullWidth
         >
-          <Fragment>
+          <>
             {enabled && (
-              <Fragment>
+              <>
                 {hotPhaseRolloverEnabled && (
                   <UseField
                     path={formFieldPaths.warmPhaseOnRollover}
@@ -118,20 +117,23 @@ export const WarmPhase: FunctionComponent = () => {
                     <MinAgeInputField phase="warm" />
                   </>
                 )}
-              </Fragment>
+              </>
             )}
-          </Fragment>
+          </>
         </EuiDescribedFormGroup>
 
         {enabled && (
-          <Fragment>
-            {/* Data tier allocation section */}
-            <DataTierAllocationField
-              description={i18nTexts.dataTierAllocation.description}
-              phase={warmProperty}
-            />
-
-            <DescribedFormField
+          <EuiAccordion
+            id="ilmWarmPhaseAdvancedSettings"
+            buttonContent={i18n.translate(
+              'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
+              {
+                defaultMessage: 'Advanced settings',
+              }
+            )}
+            paddingSize="m"
+          >
+            <DescribedFormRow
               title={
                 <h3>
                   {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
@@ -152,7 +154,7 @@ export const WarmPhase: FunctionComponent = () => {
                   'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
                 ),
-                initialValue: Boolean(policy.phases.warm?.actions?.allocate?.number_of_replicas),
+                initialValue: policy.phases.warm?.actions?.allocate?.number_of_replicas != null,
               }}
               fullWidth
             >
@@ -167,59 +169,21 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </DescribedFormField>
-            <DescribedFormField
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
-                    defaultMessage="Shrink"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
-                    defaultMessage="Shrink the index into a new index with fewer primary shards."
-                  />{' '}
-                  <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
-                </EuiTextColor>
-              }
-              titleSize="xs"
-              switchProps={{
-                'aria-controls': 'shrinkContent',
-                'data-test-subj': 'shrinkSwitch',
-                label: i18nTexts.shrinkLabel,
-                'aria-label': i18nTexts.shrinkLabel,
-                initialValue: Boolean(policy.phases.warm?.actions?.shrink),
-              }}
-              fullWidth
-            >
-              <div id="shrinkContent" aria-live="polite" role="region">
-                <EuiSpacer />
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <UseField
-                      path="phases.warm.actions.shrink.number_of_shards"
-                      component={NumericField}
-                      componentProps={{
-                        euiFieldProps: {
-                          'data-test-subj': `${warmProperty}-selectedPrimaryShardCount`,
-                          min: 1,
-                        },
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-              </div>
-            </DescribedFormField>
+            </DescribedFormRow>
 
-            <Forcemerge phase="warm" />
+            {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
-            <SetPriorityInput phase="warm" />
-          </Fragment>
+            {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
+
+            <ReadonlyField phase={'warm'} />
+
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={i18nTexts.dataTierAllocation.description}
+              phase={warmProperty}
+            />
+            <SetPriorityInputField phase="warm" />
+          </EuiAccordion>
         )}
       </>
     </div>

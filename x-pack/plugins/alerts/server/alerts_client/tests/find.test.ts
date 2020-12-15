@@ -14,16 +14,18 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -45,6 +47,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -82,6 +85,7 @@ describe('find()', () => {
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
             actions: [
               {
                 group: 'default',
@@ -140,6 +144,7 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
+            "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
             },
@@ -231,6 +236,7 @@ describe('find()', () => {
             Object {
               "actions": Array [],
               "id": "1",
+              "notifyWhen": undefined,
               "schedule": undefined,
               "tags": Array [
                 "myTag",
@@ -249,6 +255,66 @@ describe('find()', () => {
       });
       expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
       expect(logSuccessfulAuthorization).toHaveBeenCalled();
+    });
+  });
+
+  describe('auditLogger', () => {
+    test('logs audit event when searching alerts', async () => {
+      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      await alertsClient.find();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_find',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to search alerts', async () => {
+      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(alertsClient.find()).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_find',
+            outcome: 'failure',
+          }),
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to search alert type', async () => {
+      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        ensureAlertTypeIsAuthorized: jest.fn(() => {
+          throw new Error('Unauthorized');
+        }),
+        logSuccessfulAuthorization: jest.fn(),
+      });
+
+      await expect(async () => await alertsClient.find()).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_find',
+            outcome: 'failure',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
     });
   });
 });

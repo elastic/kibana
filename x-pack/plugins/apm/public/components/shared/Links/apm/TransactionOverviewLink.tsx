@@ -15,6 +15,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'containerId',
   'podName',
   'serviceVersion',
+  'latencyAggregationType',
 ];
 
 export function useTransactionOverviewHref(serviceName: string) {

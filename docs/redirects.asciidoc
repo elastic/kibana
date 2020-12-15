@@ -168,6 +168,11 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
+[role="exclude",id="lens"]
+== Lens
+
+This content has moved. See <<create-panels-with-lens>>.
+
 [role="exclude",id="known-plugins"]
 == Known plugins
 

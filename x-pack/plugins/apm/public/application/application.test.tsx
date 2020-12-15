@@ -9,10 +9,12 @@ import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),
@@ -55,6 +57,19 @@ describe('renderApp', () => {
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
     };
+
+    const data = dataPluginMock.createStartContract();
+    const embeddable = embeddablePluginMock.createStartContract();
+    const startDeps = {
+      triggersActionsUi: {
+        actionTypeRegistry: {},
+        alertTypeRegistry: {},
+        getAddAlertFlyout: jest.fn(),
+        getEditAlertFlyout: jest.fn(),
+      },
+      data,
+      embeddable,
+    };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core.http as unknown) as HttpSetup);
 
@@ -75,7 +90,8 @@ describe('renderApp', () => {
         (core as unknown) as CoreStart,
         (plugins as unknown) as ApmPluginSetupDeps,
         (params as unknown) as AppMountParameters,
-        config
+        config,
+        (startDeps as unknown) as ApmPluginStartDeps
       );
     });
 

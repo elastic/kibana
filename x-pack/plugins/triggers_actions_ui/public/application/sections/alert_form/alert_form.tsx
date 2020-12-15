@@ -32,8 +32,6 @@ import {
   EuiNotificationBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { some, filter, map, fold } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
@@ -50,16 +48,24 @@ import {
   AlertTypeIndex,
   AlertType,
   ValidationResult,
+  AlertTypeRegistryContract,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
-import { AlertActionParam, ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import {
+  AlertActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
+import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { AlertNotifyWhen } from './alert_notify_when';
 
 const ENTER_KEY = 13;
 
@@ -113,14 +119,17 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
-interface AlertFormProps {
+interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  operation: string;
+  metadata?: MetaData;
 }
 
 export const AlertForm = ({
@@ -131,17 +140,19 @@ export const AlertForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   operation,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  metadata,
 }: AlertFormProps) => {
-  const alertsContext = useAlertsContext();
   const {
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
+    notifications: { toasts },
     docLinks,
-    capabilities,
+    application: { capabilities },
     kibanaFeatures,
-  } = alertsContext;
+    charts,
+    data,
+  } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
@@ -156,7 +167,7 @@ export const AlertForm = ({
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
@@ -185,6 +196,7 @@ export const AlertForm = ({
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
+
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
 
@@ -207,7 +219,7 @@ export const AlertForm = ({
           new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
         );
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
             { defaultMessage: 'Unable to load alert types' }
@@ -308,9 +320,33 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
-  const selectedAlertType = alert?.alertTypeId && alertTypesIndex?.get(alert?.alertTypeId);
+  const selectedAlertType = alert?.alertTypeId
+    ? alertTypesIndex?.get(alert?.alertTypeId)
+    : undefined;
+  const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
+  const getDefaultActionParams = useCallback(
+    (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
+      getDefaultsForActionParams(
+        actionTypeId,
+        actionGroupId,
+        actionGroupId === recoveryActionGroup
+      ),
+    [recoveryActionGroup]
+  );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
+
+  const isActionGroupDisabledForActionType = useCallback(
+    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+      return isActionGroupDisabledForActionTypeId(
+        actionGroupId === alertType?.recoveryActionGroup?.id
+          ? RecoveredActionGroup.id
+          : actionGroupId,
+        actionTypeId
+      );
+    },
+    []
+  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
@@ -474,9 +510,11 @@ export const AlertForm = ({
               errors={errors}
               setAlertParams={setAlertParams}
               setAlertProperty={setAlertProperty}
-              alertsContext={alertsContext}
               defaultActionGroupId={defaultActionGroupId}
               actionGroups={selectedAlertType.actionGroups}
+              metadata={metadata}
+              charts={charts}
+              data={data}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -492,6 +530,9 @@ export const AlertForm = ({
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+          }
           actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
             actionGroup.id === selectedAlertType.recoveryActionGroup.id
               ? {
@@ -501,9 +542,7 @@ export const AlertForm = ({
                 }
               : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
           )}
-          getDefaultActionParams={getDefaultsForActionParams(
-            (actionGroupId) => actionGroupId === selectedAlertType.recoveryActionGroup.id
-          )}
+          getDefaultActionParams={getDefaultActionParams}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
             setActionProperty('group', group, index)
@@ -532,22 +571,6 @@ export const AlertForm = ({
     </>
   );
 
-  const labelForAlertRenotify = (
-    <>
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Notify every"
-      />{' '}
-      <EuiIconTip
-        position="right"
-        type="questionInCircle"
-        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
-        })}
-      />
-    </>
-  );
-
   return (
     <EuiForm>
       <EuiFlexGrid columns={2}>
@@ -568,7 +591,6 @@ export const AlertForm = ({
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
-              compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
@@ -593,7 +615,6 @@ export const AlertForm = ({
             <EuiComboBox
               noSuggestions
               fullWidth
-              compressed
               data-test-subj="tagsComboBox"
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
@@ -634,7 +655,6 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   isInvalid={errors.interval.length > 0}
-                  compressed
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
@@ -649,7 +669,6 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   fullWidth
-                  compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
                   onChange={(e) => {
@@ -662,52 +681,25 @@ export const AlertForm = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={labelForAlertRenotify}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  compressed
-                  value={alertThrottle || ''}
-                  name="throttle"
-                  data-test-subj="throttleInput"
-                  onChange={(e) => {
-                    pipe(
-                      some(e.target.value.trim()),
-                      filter((value) => value !== ''),
-                      map((value) => parseInt(value, 10)),
-                      filter((value) => !isNaN(value)),
-                      fold(
-                        () => {
-                          // unset throttle
-                          setAlertThrottle(null);
-                          setAlertProperty('throttle', null);
-                        },
-                        (throttle) => {
-                          setAlertThrottle(throttle);
-                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
-                        }
-                      )
-                    );
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  compressed
-                  value={alertThrottleUnit}
-                  options={getTimeOptions(alertThrottle ?? 1)}
-                  onChange={(e) => {
-                    setAlertThrottleUnit(e.target.value);
-                    if (alertThrottle) {
-                      setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          <AlertNotifyWhen
+            alert={alert}
+            throttle={alertThrottle}
+            throttleUnit={alertThrottleUnit}
+            onNotifyWhenChange={useCallback(
+              (notifyWhen) => {
+                setAlertProperty('notifyWhen', notifyWhen);
+              },
+              [setAlertProperty]
+            )}
+            onThrottleChange={useCallback(
+              (throttle: number | null, throttleUnit: string) => {
+                setAlertThrottle(throttle);
+                setAlertThrottleUnit(throttleUnit);
+                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+              },
+              [setAlertProperty]
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />

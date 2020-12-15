@@ -140,9 +140,7 @@ export const createEntryNested = (field: string, entries: NestedEntriesArray): E
   return { field, entries, type: 'nested' };
 };
 
-export const conditionEntriesToEntries = (
-  conditionEntries: Array<ConditionEntry<ConditionEntryField>>
-): EntriesArray => {
+export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
     if (conditionEntry.field === ConditionEntryField.HASH) {
       return createEntryMatch(

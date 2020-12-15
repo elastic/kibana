@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui
 import React, { useEffect, useCallback } from 'react';
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
@@ -23,6 +24,7 @@ import {
   PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
 import { FieldBrowserProps, OnHideFieldBrowser } from './types';
+import { timelineActions } from '../../store/timeline';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
@@ -46,7 +48,7 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -86,10 +88,6 @@ type Props = Pick<
    * Invoked when the user types in the search input
    */
   onSearchInputChange: (newSearchInput: string) => void;
-  /**
-   * Invoked to add or remove a column from the timeline
-   */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
 
 /**
@@ -106,13 +104,18 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   onHideFieldBrowser,
   onSearchInputChange,
   onOutsideClick,
-  onUpdateColumns,
   searchInput,
   selectedCategoryId,
   timelineId,
-  toggleColumn,
   width,
 }) => {
+  const dispatch = useDispatch();
+
+  const onUpdateColumns = useCallback(
+    (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+    [dispatch, timelineId]
+  );
+
   /** Focuses the input that filters the field browser */
   const focusInput = () => {
     const elements = document.getElementsByClassName(
@@ -219,7 +222,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               searchInput={searchInput}
               selectedCategoryId={selectedCategoryId}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
               width={FIELDS_PANE_WIDTH}
             />
           </EuiFlexItem>

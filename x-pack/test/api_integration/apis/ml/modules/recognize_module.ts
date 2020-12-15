@@ -132,7 +132,17 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['auditbeat_process_hosts_ecs', 'siem_auditbeat'],
+        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for security endpoint dataset',
+      sourceDataArchive: 'ml/module_security_endpoint',
+      indexPattern: 'ft_logs-endpoint.events.*',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_linux', 'security_windows'],
       },
     },
   ];

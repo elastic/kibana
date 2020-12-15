@@ -8,8 +8,11 @@ import { KibanaRequest } from 'src/core/server';
 import { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
- * Audit event schema using ECS format.
- * https://www.elastic.co/guide/en/ecs/1.5/index.html
+ * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html
+ *
+ * If you add additional fields to the schema ensure you update the Kibana Filebeat module:
+ * https://github.com/elastic/beats/tree/master/filebeat/module/kibana
+ *
  * @public
  */
 export interface AuditEvent {
@@ -37,20 +40,45 @@ export interface AuditEvent {
   };
   kibana?: {
     /**
-     * Current space id of the request.
+     * The ID of the space associated with this event.
      */
     space_id?: string;
     /**
-     * Saved object that was created, changed, deleted or accessed as part of the action.
+     * The ID of the user session associated with this event. Each login attempt
+     * results in a unique session id.
+     */
+    session_id?: string;
+    /**
+     * Saved object that was created, changed, deleted or accessed as part of this event.
      */
     saved_object?: {
       type: string;
-      id?: string;
+      id: string;
     };
     /**
-     * Any additional event specific fields.
+     * Name of authentication provider associated with a login event.
      */
-    [x: string]: any;
+    authentication_provider?: string;
+    /**
+     * Type of authentication provider associated with a login event.
+     */
+    authentication_type?: string;
+    /**
+     * Name of Elasticsearch realm that has authenticated the user.
+     */
+    authentication_realm?: string;
+    /**
+     * Name of Elasticsearch realm where the user details were retrieved from.
+     */
+    lookup_realm?: string;
+    /**
+     * Set of space IDs that a saved object was shared to.
+     */
+    add_to_spaces?: readonly string[];
+    /**
+     * Set of space IDs that a saved object was removed from.
+     */
+    delete_from_spaces?: readonly string[];
   };
   error?: {
     code?: string;
@@ -178,7 +206,9 @@ export enum SavedObjectAction {
   REMOVE_REFERENCES = 'saved_object_remove_references',
 }
 
-const eventVerbs = {
+type VerbsTuple = [string, string, string];
+
+const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
   saved_object_update: ['update', 'updating', 'updated'],
@@ -193,7 +223,7 @@ const eventVerbs = {
   ],
 };
 
-const eventTypes = {
+const eventTypes: Record<SavedObjectAction, EventType> = {
   saved_object_create: EventType.CREATION,
   saved_object_get: EventType.ACCESS,
   saved_object_update: EventType.CHANGE,
@@ -204,10 +234,10 @@ const eventTypes = {
   saved_object_remove_references: EventType.CHANGE,
 };
 
-export interface SavedObjectParams {
+export interface SavedObjectEventParams {
   action: SavedObjectAction;
   outcome?: EventOutcome;
-  savedObject?: Required<Required<AuditEvent>['kibana']>['saved_object'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   addToSpaces?: readonly string[];
   deleteFromSpaces?: readonly string[];
   error?: Error;
@@ -220,12 +250,12 @@ export function savedObjectEvent({
   deleteFromSpaces,
   outcome,
   error,
-}: SavedObjectParams): AuditEvent | undefined {
+}: SavedObjectEventParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === 'unknown'
+    : outcome === EventOutcome.UNKNOWN
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];

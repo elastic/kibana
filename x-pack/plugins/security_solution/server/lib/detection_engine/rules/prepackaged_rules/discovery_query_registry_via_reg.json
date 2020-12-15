@@ -1,0 +1,43 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Enumeration or discovery of the Windows registry using reg.exe. This information can be used to perform follow-on activities.",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Query Registry via reg.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"reg.exe\" or process.pe.original_file_name == \"reg.exe\") and\n  process.args == \"query\"\n",
+  "risk_score": 21,
+  "rule_id": "68113fdc-3105-4cdd-85bb-e643c416ef0b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1012",
+          "name": "Query Registry",
+          "reference": "https://attack.mitre.org/techniques/T1012/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

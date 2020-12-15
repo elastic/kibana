@@ -18,15 +18,17 @@ import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -44,10 +46,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -66,6 +70,7 @@ describe('update()', () => {
       scheduledTaskId: 'task-123',
       params: {},
       throttle: null,
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -140,6 +145,7 @@ describe('update()', () => {
             },
           },
         ],
+        notifyWhen: 'onActiveAlert',
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -181,6 +187,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyWhen: 'onActiveAlert',
         actions: [
           {
             group: 'default',
@@ -237,6 +244,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -291,6 +299,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },
@@ -364,6 +373,7 @@ describe('update()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -414,6 +424,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -441,6 +452,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -475,6 +487,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -536,6 +549,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        notifyWhen: 'onThrottleInterval',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [
@@ -579,6 +593,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -607,6 +622,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -641,6 +657,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
         },
@@ -698,6 +715,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -826,6 +844,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -933,6 +952,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -994,6 +1014,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1114,6 +1135,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1145,6 +1167,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1181,6 +1204,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1216,6 +1240,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1269,6 +1294,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyWhen: null,
           actions: [],
         },
       });
@@ -1292,6 +1318,7 @@ describe('update()', () => {
               bar: true,
             },
             throttle: null,
+            notifyWhen: null,
             actions: [],
           },
         })
@@ -1300,6 +1327,93 @@ describe('update()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'update');
+    });
+  });
+
+  describe('auditLogger', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [],
+      });
+    });
+
+    test('logs audit event when updating an alert', async () => {
+      await alertsClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          actions: [],
+          notifyWhen: null,
+        },
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_update',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to update an alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        alertsClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '10s' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            actions: [],
+            notifyWhen: null,
+          },
+        })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            outcome: 'failure',
+            action: 'alert_update',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
     });
   });
 });

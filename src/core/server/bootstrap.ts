@@ -27,9 +27,6 @@ interface KibanaFeatures {
   // a child process together with optimizer "worker" processes that are
   // orchestrated by a parent process (dev mode only feature).
   isCliDevModeSupported: boolean;
-
-  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
-  isReplModeSupported: boolean;
 }
 
 interface BootstrapArgs {
@@ -50,10 +47,6 @@ export async function bootstrap({
   applyConfigOverrides,
   features,
 }: BootstrapArgs) {
-  if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('Kibana REPL mode can only be run in development mode.');
-  }
-
   if (cliArgs.optimize) {
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;

@@ -1831,19 +1831,14 @@ describe('SavedObjectsRepository', () => {
     };
 
     describe('client calls', () => {
-      it(`should use the ES create action if ID is undefined and overwrite=true`, async () => {
+      it(`should use the ES index action if overwrite=true`, async () => {
         await createSuccess(type, attributes, { overwrite: true });
-        expect(client.create).toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
       });
 
-      it(`should use the ES create action if ID is undefined and overwrite=false`, async () => {
+      it(`should use the ES create action if overwrite=false`, async () => {
         await createSuccess(type, attributes);
         expect(client.create).toHaveBeenCalled();
-      });
-
-      it(`should use the ES index action if ID is defined and overwrite=true`, async () => {
-        await createSuccess(type, attributes, { id, overwrite: true });
-        expect(client.index).toHaveBeenCalled();
       });
 
       it(`should use the ES index with version if ID and version are defined and overwrite=true`, async () => {

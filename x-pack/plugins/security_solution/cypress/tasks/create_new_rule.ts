@@ -35,10 +35,7 @@ import {
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
-  MITRE_BTN,
   MITRE_TACTIC,
-  MITRE_TACTIC_DROPDOWN,
-  MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_INPUT,
@@ -67,11 +64,17 @@ import {
   EQL_QUERY_VALIDATION_SPINNER,
   COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_RESULT,
+  MITRE_ATTACK_TACTIC_DROPDOWN,
+  MITRE_ATTACK_TECHNIQUE_DROPDOWN,
+  MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN,
+  MITRE_ATTACK_ADD_TACTIC_BUTTON,
+  MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
+  MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
 } from '../screens/create_new_rule';
-import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
+import { TOAST_ERROR } from '../screens/shared';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { NUMBER_OF_ALERTS } from '../screens/alerts';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -109,18 +112,29 @@ export const fillAboutRule = (
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
-  rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
+  let techniqueIndex = 0;
+  let subtechniqueInputIndex = 0;
+  rule.mitre.forEach((mitre, tacticIndex) => {
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT)
-        .eq(index)
-        .clear({ force: true })
-        .type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
+      cy.contains(MITRE_TACTIC, technique.name).click();
+
+      technique.subtechniques.forEach((subtechnique) => {
+        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+          .eq(subtechniqueInputIndex)
+          .click({ force: true });
+        cy.contains(MITRE_TACTIC, subtechnique).click();
+        subtechniqueInputIndex++;
+      });
+      techniqueIndex++;
     });
 
-    cy.get(MITRE_BTN).click({ force: true });
+    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(rule.note, { force: true });
@@ -173,15 +187,29 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
-  rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
+  let techniqueIndex = 0;
+  let subtechniqueInputIndex = 0;
+  rule.mitre.forEach((mitre, tacticIndex) => {
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
+      cy.contains(MITRE_TACTIC, technique.name).click();
+
+      technique.subtechniques.forEach((subtechnique) => {
+        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+          .eq(subtechniqueInputIndex)
+          .click({ force: true });
+        cy.contains(MITRE_TACTIC, subtechnique).click();
+        subtechniqueInputIndex++;
+      });
+      techniqueIndex++;
     });
 
-    cy.get(MITRE_BTN).click({ force: true });
+    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
@@ -201,7 +229,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timelineId!)).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -234,11 +262,20 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  cy.get(EQL_QUERY_INPUT).should('exist');
+  cy.get(EQL_QUERY_INPUT).should('be.visible');
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
   cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
-  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+    .invoke('text')
+    .then((text) => {
+      if (text !== 'Hits') {
+        cy.get(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+      }
+    });
+  cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
@@ -303,6 +340,22 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(
+    () => {
+      refreshPage();
+      return cy
+        .get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount > 0;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
@@ -310,18 +363,5 @@ export const waitForTheRuleToBeExecuted = () => {
       .get(RULE_STATUS)
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
-};
-
-export const waitForAlertsToPopulate = async () => {
-  cy.waitUntil(() => {
-    refreshPage();
-    return cy
-      .get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((countText) => {
-        const alertCount = parseInt(countText, 10) || 0;
-        return alertCount > 0;
-      });
   });
 };

@@ -118,6 +118,7 @@ test('enqueues execution per selected action', async () => {
           "kibana": Object {
             "alerting": Object {
               "action_group_id": "default",
+              "action_subgroup": undefined,
               "instance_id": "2",
             },
             "saved_objects": Array [
