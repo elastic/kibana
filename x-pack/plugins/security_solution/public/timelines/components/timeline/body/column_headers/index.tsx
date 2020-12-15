@@ -304,7 +304,11 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
