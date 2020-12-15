@@ -128,8 +128,7 @@ describe('alert_add', () => {
     wrapper = mountWithIntl(
       <AlertAdd
         consumer={ALERTS_FEATURE_ID}
-        addFlyoutVisible={true}
-        setAddFlyoutVisibility={() => {}}
+        onClose={() => {}}
         initialValues={initialValues}
         reloadAlerts={() => {
           return new Promise<void>(() => {});
