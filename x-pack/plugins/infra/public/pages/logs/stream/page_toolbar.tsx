@@ -58,6 +58,7 @@ export const LogsToolbar = () => {
         <EuiFlexItem>
           <QueryStringInput
             disableLanguageSwitcher={true}
+            iconType="search"
             indexPatterns={[derivedIndexPattern]}
             isInvalid={!isFilterQueryDraftValid}
             onChange={(expression: Query) => {
