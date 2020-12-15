@@ -81,6 +81,7 @@ export const createEmbeddablePanelMock = ({
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {
+    clearEditorState: jest.fn(),
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
@@ -125,7 +126,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     migrate: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),
   };
