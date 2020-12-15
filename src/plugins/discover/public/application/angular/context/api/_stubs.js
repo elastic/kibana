@@ -47,6 +47,7 @@ export function createSearchSourceStub(hits, timeField) {
 
   searchSourceStub.setParent = sinon.spy(() => searchSourceStub);
   searchSourceStub.setField = sinon.spy(() => searchSourceStub);
+  searchSourceStub.removeField = sinon.spy(() => searchSourceStub);
 
   searchSourceStub.getField = sinon.spy((key) => {
     const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;

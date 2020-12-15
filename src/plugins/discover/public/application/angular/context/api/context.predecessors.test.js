@@ -227,4 +227,81 @@ describe('context app', function () {
       });
     });
   });
+
+  describe('function fetchPredecessors with useNewFieldsApi set', function () {
+    let fetchPredecessors;
+    let mockSearchSource;
+
+    beforeEach(() => {
+      mockSearchSource = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+
+      setServices({
+        data: {
+          search: {
+            searchSource: {
+              create: jest.fn().mockImplementation(() => mockSearchSource),
+            },
+          },
+        },
+      });
+
+      fetchPredecessors = (
+        indexPatternId,
+        timeField,
+        sortDir,
+        timeValIso,
+        timeValNr,
+        tieBreakerField,
+        tieBreakerValue,
+        size
+      ) => {
+        const anchor = {
+          _source: {
+            [timeField]: timeValIso,
+          },
+          sort: [timeValNr, tieBreakerValue],
+        };
+
+        return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
+          'predecessors',
+          indexPatternId,
+          anchor,
+          timeField,
+          tieBreakerField,
+          sortDir,
+          size,
+          []
+        );
+      };
+    });
+
+    it('should perform exactly one query when enough hits are returned', function () {
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 2),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 1),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 2000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 1000),
+      ];
+
+      return fetchPredecessors(
+        'INDEX_PATTERN_ID',
+        '@timestamp',
+        'desc',
+        ANCHOR_TIMESTAMP_3000,
+        MS_PER_DAY * 3000,
+        '_doc',
+        0,
+        3,
+        []
+      ).then((hits) => {
+        const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
+        const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
+        expect(mockSearchSource.fetch.calledOnce).toBe(true);
+        expect(removeFieldsSpy.calledOnce).toBe(true);
+        expect(setFieldsSpy.calledOnce).toBe(true);
+        expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+      });
+    });
+  });
 });
