@@ -384,6 +384,13 @@ Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-append
 | Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
 
 Refer to <<audit-logging-pattern-layout>> for layout specific settings.
+
+2+a| 
+[TIP]
+============
+We recommend using `json` format to allow ingesting {kib} audit logs into {es} using Filebeat.
+============
+
 |======
 
 [float]
