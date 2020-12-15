@@ -43,7 +43,7 @@ export const getDeleteAction = ({
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {
           defaultMessage:
             'By deleting this tag, you will no longer be able to assign it to saved objects. ' +
-            'This tag will be removed from any saved objects that currently use it',
+            'This tag will be removed from any saved objects that currently use it.',
         }),
         {
           title: i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.title', {
