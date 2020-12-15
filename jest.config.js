@@ -20,4 +20,6 @@
 module.exports = {
   rootDir: '.',
   projects: [...require('./jest.config.oss').projects, ...require('./x-pack/jest.config').projects],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
+  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
 };
