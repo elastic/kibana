@@ -135,6 +135,7 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
       startTimestamp={startTimestamp - framePaddingMs}
       endTimestamp={endTimestamp + framePaddingMs}
       query={`trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`}
+      height={640}
     />
   );
 }

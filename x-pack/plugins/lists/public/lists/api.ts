@@ -123,7 +123,7 @@ const importListWithValidation = async ({
     ),
     chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
-    flow(toPromise)
+    toPromise
   );
 
 export { importListWithValidation as importList };

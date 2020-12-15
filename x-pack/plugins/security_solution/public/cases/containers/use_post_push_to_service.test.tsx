@@ -141,6 +141,7 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush.connector.id,
+        samplePush.connector.type,
         formatServiceRequestData(
           basicCase,
           samplePush.connector,
@@ -174,6 +175,7 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush2.connector.id,
+        samplePush2.connector.type,
         formatServiceRequestData(basicCase, samplePush2.connector, {}),
         abortCtrl.signal
       );

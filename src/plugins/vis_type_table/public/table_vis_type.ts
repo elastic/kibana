@@ -43,11 +43,8 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
       perPage: 10,
       showPartialRows: false,
       showMetricsAtAllLevels: false,
-      sort: {
-        columnIndex: null,
-        direction: null,
-      },
       showTotal: false,
+      showToolbar: false,
       totalFunc: 'sum',
       percentageCol: '',
     },
@@ -91,7 +88,5 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
     ]),
   },
   toExpressionAst,
-  hierarchicalData: (vis) => {
-    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-  },
+  hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
 };
