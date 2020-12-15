@@ -235,7 +235,7 @@ image::images/lens_data_info_documents.png[Data summary analyzed documents]
 
 *Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
 
-When *Lens* presents the top 10 values distribution every other value, together with documents with no data for the inspected field, are shown with the "Other" entry in the distribution chart.
+When *Lens* presents the top 10 values distribution, it also shows the percentage of "Other" values. For array value fields, the percentage distribution is considers each value in the array separate.
 
 [role="screenshot"]
 image::images/lens_data_info_other.png[Data summary window with Other]
