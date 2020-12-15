@@ -28,8 +28,13 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
   const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
+    let unmounted = false;
     initSavedObjects(true)
       .then(({ jobs }) => {
+        if (unmounted === true) {
+          return;
+        }
+
         const missingJobs =
           jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
         setShowWarning(missingJobs);
@@ -37,6 +42,9 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
       .catch(() => {
         console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
       });
+    return () => {
+      unmounted = true;
+    };
   }, []);
 
   return showWarning === false ? null : (
