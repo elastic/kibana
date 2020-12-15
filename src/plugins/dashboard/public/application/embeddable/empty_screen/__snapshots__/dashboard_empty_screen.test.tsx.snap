@@ -1036,6 +1036,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                                       aria-label="Edit dashboard"
                                       className="euiLink euiLink--primary"
                                       data-test-subj=""
+                                      disabled={false}
                                       onClick={[MockFunction]}
                                       type="button"
                                     >

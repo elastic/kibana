@@ -11,6 +11,7 @@ exports[`Storyshots components/PanelToolbar default 1`] = `
     <button
       className="euiButton euiButton--primary euiButton--small euiButton--fill"
       data-test-subj="addVisualizationButton"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -40,6 +41,7 @@ exports[`Storyshots components/PanelToolbar default 1`] = `
   >
     <button
       className="euiButton euiButton--text euiButton--small panelToolbarButton"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {

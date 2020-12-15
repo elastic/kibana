@@ -9,8 +9,7 @@ import '../../../__mocks__/enterprise_search_url.mock';
 import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
 
 import React from 'react';
-import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 
 import { EnginesTable } from './engines_table';
 
@@ -55,10 +54,10 @@ describe('EnginesTable', () => {
   });
 
   it('contains engine links which send telemetry', () => {
-    const engineLinks = wrapper.find(EuiLinkTo);
+    const engineLinks = wrapper.find(EuiLink);
 
     engineLinks.forEach((link) => {
-      expect(link.prop('to')).toEqual('/engines/test-engine');
+      expect(link.prop('href')).toEqual('http://localhost:3002/as/engines/test-engine');
       link.simulate('click');
 
       expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalledWith({
