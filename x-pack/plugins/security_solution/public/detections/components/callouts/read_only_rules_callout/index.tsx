@@ -13,8 +13,8 @@ import * as i18n from './translations';
 const readOnlyAccessToRulesMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-rules',
-  title: i18n.READ_ONLY_CALLOUT_TITLE,
-  description: <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>,
+  title: i18n.READ_ONLY_RULES_CALLOUT_TITLE,
+  description: <p>{i18n.READ_ONLY_RULES_CALLOUT_MSG}</p>,
 };
 
 const ReadOnlyRulesCallOutComponent = () => {

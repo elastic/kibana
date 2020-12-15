@@ -13,8 +13,8 @@ import * as i18n from './translations';
 const readOnlyAccessToAlertsMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-alerts',
-  title: i18n.NO_WRITE_ALERTS_CALLOUT_TITLE,
-  description: <p>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</p>,
+  title: i18n.READ_ONLY_ALERTS_CALLOUT_TITLE,
+  description: <p>{i18n.READ_ONLY_ALERTS_CALLOUT_MSG}</p>,
 };
 
 const ReadOnlyAlertsCallOutComponent = () => {
