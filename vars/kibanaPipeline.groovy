@@ -328,7 +328,7 @@ def runErrorReporter(workspaces) {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
+  def config = [timeoutMinutes: 180, checkPrChanges: false, setCommitStatus: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
