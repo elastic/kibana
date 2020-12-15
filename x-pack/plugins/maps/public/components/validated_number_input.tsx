@@ -73,7 +73,7 @@ export class ValidatedNumberInput extends Component<Props, State> {
   }, 250);
 
   _onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = (e.target as HTMLInputElement).value;
+    const value = e.target.value;
     const { isValid, errorMessage, parsedValue } = isNumberValid(
       value,
       this.props.min,
@@ -100,6 +100,7 @@ export class ValidatedNumberInput extends Component<Props, State> {
         display="columnCompressed"
       >
         <EuiFieldNumber
+          isInvalid={!this.state.isValid}
           min={this.props.min}
           max={this.props.max}
           value={this.state.value}
