@@ -28,8 +28,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     expand(() => timer(pollInterval).pipe(switchMap(search))),
     tap((response) => {
       if (isErrorResponse(response)) {
-        if (cancel) cancel();
-        throw new AbortError();
+        throw new Error('Received incomplete result');
       }
     }),
     catchError((e: any) => {
