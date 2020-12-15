@@ -94,22 +94,20 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       id={id}
       buttonContent={
         <EuiText size="xs">
-          <p>
-            <strong className={titleClassname}>{label}</strong>
-            {!!helpTooltip && (
-              <EuiIconTip
-                aria-label={helpTooltip}
-                type="questionInCircle"
-                color="subdued"
-                size="s"
-                position="right"
-                content={helpTooltip}
-                iconProps={{
-                  className: 'eui-alignTop',
-                }}
-              />
-            )}
-          </p>
+          <strong className={titleClassname}>{label}</strong>
+          {!!helpTooltip && (
+            <EuiIconTip
+              aria-label={helpTooltip}
+              type="questionInCircle"
+              color="subdued"
+              size="s"
+              position="right"
+              content={helpTooltip}
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+            />
+          )}
         </EuiText>
       }
       extraAction={
