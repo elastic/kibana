@@ -1,13 +1,16 @@
 
-.mlTopValuesLabelContainer {
+.mlTopValuesValueLabelContainer {
   padding-right: $euiSizeM;
-
-  &.mlTopValuesLabelContainer--small {
-    width: 50px !important;
+  &.mlTopValuesValueLabelContainer--small {
+    width:70px;
   }
 
-  &.mlTopValuesLabelContainer--large {
-    width: 200px !important;
+  &.mlTopValuesValueLabelContainer--large {
+    width: 200px;
   }
+}
 
+.mlTopValuesPercentLabelContainer {
+  padding-left: $euiSizeM;
+  width:70px;
 }

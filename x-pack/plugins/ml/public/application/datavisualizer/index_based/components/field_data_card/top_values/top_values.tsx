@@ -54,8 +54,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
               grow={false}
               className={classNames(
                 'eui-textTruncate',
-                'mlTopValuesLabelContainer',
-                `mlTopValuesLabelContainer--${compressed === true ? 'small' : 'large'}`
+                'mlTopValuesValueLabelContainer',
+                `mlTopValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
               )}
             >
               <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
@@ -67,7 +67,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
             <EuiFlexItem data-test-subj="mlFieldDataCardTopValueBar">
               <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
+            <EuiFlexItem
+              grow={false}
+              className={classNames('eui-textTruncate', 'mlTopValuesPercentLabelContainer')}
+            >
               <EuiText size="xs" textAlign="left" color="subdued">
                 {getPercentLabel(value.doc_count, progressBarMax)}
               </EuiText>
