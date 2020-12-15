@@ -51,6 +51,7 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
+    activeTab,
     browserFields,
     columnHeaders,
     data,
@@ -161,6 +162,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
             <Events
               actionsColumnWidth={actionsColumnWidth}
+              activeTab={activeTab}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
@@ -184,6 +186,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
   },
   (prevProps, nextProps) =>
+    prevProps.activeTab === nextProps.activeTab &&
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
@@ -211,6 +214,7 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const {
+      activeTab,
       columns,
       eventIdToNoteIds,
       excludedRowRendererIds,
@@ -222,6 +226,7 @@ const makeMapStateToProps = () => {
     } = timeline;
 
     return {
+      activeTab: id === TimelineId.active ? activeTab : undefined,
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
       excludedRowRendererIds,

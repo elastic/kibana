@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
 import { getAllFieldsByName } from '../../containers/source';
@@ -77,7 +77,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
-
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
     if (closePopOver != null) {
@@ -118,8 +117,11 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     }
   }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
-  const handleGoGetTimelineId = useCallback(() => {
-    if (goGetTimelineId != null && timelineId == null) {
+  const isInit = useRef(true);
+
+  useEffect(() => {
+    if (isInit.current && goGetTimelineId != null && timelineId == null) {
+      isInit.current = false;
       goGetTimelineId(true);
     }
   }, [goGetTimelineId, timelineId]);
@@ -134,7 +136,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-for-value"
             iconType="magnifyWithPlus"
             onClick={filterForValue}
-            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -147,7 +148,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-out-value"
             iconType="magnifyWithMinus"
             onClick={filterOutValue}
-            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -178,7 +178,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                   data-test-subj="show-top-field"
                   iconType="visBarVertical"
                   onClick={toggleTopN}
-                  onMouseEnter={handleGoGetTimelineId}
                 />
               </EuiToolTip>
             )}

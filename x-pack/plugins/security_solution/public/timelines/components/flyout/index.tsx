@@ -32,7 +32,7 @@ interface OwnProps {
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
 
@@ -77,13 +77,12 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }
     });
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
-
   return (
     <>
       <Visible show={show}>
         <Pane timelineId={timelineId} />
       </Visible>
-      <FlyoutBottomBar timelineId={timelineId} showDataproviders={!show} />
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };

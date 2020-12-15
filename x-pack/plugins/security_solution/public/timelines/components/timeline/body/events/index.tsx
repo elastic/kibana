@@ -12,7 +12,7 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -21,6 +21,7 @@ import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
 
 interface Props {
+  activeTab?: TimelineTabs;
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -41,6 +42,7 @@ interface Props {
 
 const EventsComponent: React.FC<Props> = ({
   actionsColumnWidth,
+  activeTab,
   browserFields,
   columnHeaders,
   columnRenderers,
@@ -60,6 +62,7 @@ const EventsComponent: React.FC<Props> = ({
   <EventsTbody data-test-subj="events">
     {data.map((event) => (
       <StatefulEvent
+        activeTab={activeTab}
         actionsColumnWidth={actionsColumnWidth}
         browserFields={browserFields}
         columnHeaders={columnHeaders}

@@ -14,7 +14,7 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
@@ -32,6 +32,7 @@ import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 interface Props {
   actionsColumnWidth: number;
+  activeTab?: TimelineTabs;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
@@ -60,6 +61,7 @@ EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWra
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
+  activeTab,
   browserFields,
   columnHeaders,
   columnRenderers,
@@ -156,6 +158,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       <EventColumnView
         id={event._id}
         actionsColumnWidth={actionsColumnWidth}
+        activeTab={activeTab}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         data={event.data}

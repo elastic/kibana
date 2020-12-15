@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
@@ -34,6 +34,7 @@ import { AddToCaseAction } from '../../../../../cases/components/timeline_action
 interface Props {
   id: string;
   actionsColumnWidth: number;
+  activeTab?: TimelineTabs;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
@@ -62,6 +63,7 @@ export const EventColumnView = React.memo<Props>(
   ({
     id,
     actionsColumnWidth,
+    activeTab,
     columnHeaders,
     columnRenderers,
     data,
@@ -192,6 +194,7 @@ export const EventColumnView = React.memo<Props>(
 
         <DataDrivenColumns
           _id={id}
+          activeTab={activeTab}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}

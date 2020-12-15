@@ -9,13 +9,14 @@ import { getOr } from 'lodash/fp';
 
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
 
 interface Props {
   _id: string;
+  activeTab?: TimelineTabs;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
@@ -24,7 +25,7 @@ interface Props {
 }
 
 export const DataDrivenColumns = React.memo<Props>(
-  ({ _id, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
+  ({ _id, activeTab, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
       {columnHeaders.map((header) => (
         <EventsTd key={header.id} width={header.width}>
@@ -34,7 +35,7 @@ export const DataDrivenColumns = React.memo<Props>(
               eventId: _id,
               field: header,
               linkValues: getOr([], header.linkField ?? '', ecsData),
-              timelineId,
+              timelineId: activeTab != null ? `${timelineId}-${activeTab}` : timelineId,
               truncate: true,
               values: getMappedNonEcsValue({
                 data,
