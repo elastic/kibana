@@ -31,6 +31,7 @@ export const rulesNotificationAlertType = ({
       ruleAlertId: schema.string(),
     }),
   },
+  minimumLicenseRequired: 'basic',
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
       'alert',

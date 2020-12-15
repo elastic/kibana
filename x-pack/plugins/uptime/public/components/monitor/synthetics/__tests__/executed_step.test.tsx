@@ -75,6 +75,7 @@ describe('ExecutedStep', () => {
         <EuiLink>
           <button
             className="euiLink euiLink--primary"
+            disabled={false}
             type="button"
           >
             <Link
