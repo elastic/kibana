@@ -130,9 +130,19 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       [handleSearch]
     );
 
+    const paginationMemo = useMemo(
+      () => ({
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.perPage,
+        totalItemCount: pagination.total,
+        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+      }),
+      [pagination]
+    );
+
     return (
       <>
-        <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allRulesPanel">
+        <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
           <>
             {loadingTableInfo && (
               <EuiProgress
@@ -169,7 +179,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 <AllRulesUtilityBar
                   showBulkActions={false}
                   userHasNoPermissions={hasNoPermissions}
-                  paginationTotal={pagination.total ?? 0}
+                  paginationTotal={data.length ?? 0}
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
                 />
@@ -181,7 +191,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                   items={data ?? []}
                   noItemsMessage={emptyPrompt}
                   onChange={() => {}}
-                  pagination={pagination ?? { total: 0, page: 1, perPage: 20 }}
+                  pagination={paginationMemo}
                 />
               </>
             )}
