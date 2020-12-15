@@ -42,6 +42,9 @@ import {
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
   ReindexSourceToTargetVerify,
+  ReindexBlockSetWriteBlock,
+  ReindexBlockRemoveAlias,
+  ReindexBlockRemoveWriteBlock,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -69,13 +72,24 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex(client, state.targetIndex, state.targetMappings),
     CREATE_REINDEX_TARGET: (state: CreateReindexTargetState) =>
-      Actions.createIndex(client, state.targetIndex, state.reindexTargetMappings),
+      Actions.createIndex(client, state.targetIndex, state.reindexTargetMappings, [
+        state.versionAlias,
+        state.reindexAlias,
+      ]),
     REINDEX_SOURCE_TO_TARGET: (state: ReindexSourceToTargetState) =>
-      Actions.reindex(client, state.sourceIndex.value, state.targetIndex, Option.none),
+      Actions.reindex(client, state.sourceIndex.value, state.reindexAlias, Option.none, true),
     REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: (state: ReindexSourceToTargetWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.reindexSourceToTargetTaskId, '60s'),
     REINDEX_SOURCE_TO_TARGET_VERIFY: (state: ReindexSourceToTargetVerify) =>
       Actions.verifyReindex(client, state.sourceIndex.value, state.targetIndex),
+    REINDEX_BLOCK_SET_WRITE_BLOCK: (state: ReindexBlockSetWriteBlock) =>
+      Actions.setWriteBlock(client, state.reindexAlias),
+    REINDEX_BLOCK_REMOVE_ALIAS: (state: ReindexBlockRemoveAlias) =>
+      Actions.updateAliases(client, [
+        { remove: { index: state.targetIndex, alias: state.reindexAlias, must_exist: false } },
+      ]),
+    REINDEX_BLOCK_REMOVE_WRITE_BLOCK: (state: ReindexBlockRemoveWriteBlock) =>
+      Actions.removeWriteBlock(client, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
@@ -103,7 +117,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>
       Actions.createIndex(client, state.sourceIndex.value, state.legacyReindexTargetMappings),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
-      Actions.reindex(client, state.legacyIndex, state.sourceIndex.value, state.preMigrationScript),
+      Actions.reindex(
+        client,
+        state.legacyIndex,
+        state.sourceIndex.value,
+        state.preMigrationScript,
+        false
+      ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>

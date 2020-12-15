@@ -128,6 +128,39 @@ export const setWriteBlock = (
     .catch(catchRetryableEsClientErrors);
 };
 
+/**
+ * Removes a write block from an index
+ */
+export const removeWriteBlock = (
+  client: ElasticsearchClient,
+  index: string
+): TaskEither.TaskEither<RetryableEsClientError, 'remove_write_block_succeeded'> => () => {
+  return client.indices
+    .putSettings<{
+      acknowledged: boolean;
+      shards_acknowledged: boolean;
+    }>(
+      {
+        index,
+        // Don't change any existing settings
+        preserve_existing: true,
+        body: {
+          'index.blocks.write': false,
+        },
+      },
+      { maxRetries: 0 /** handle retry ourselves for now */ }
+    )
+    .then((res) => {
+      return res.body.acknowledged === true
+        ? Either.right('remove_write_block_succeeded' as const)
+        : Either.left({
+            type: 'retryable_es_client_error' as const,
+            message: 'remove_write_block_failed',
+          });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
 const waitForIndexStatusGreen = (
   client: ElasticsearchClient,
   index: string
@@ -336,12 +369,15 @@ export const reindex = (
   client: ElasticsearchClient,
   sourceIndex: string,
   targetIndex: string,
-  reindexScript: Option.Option<string>
+  reindexScript: Option.Option<string>,
+  requireAlias: boolean
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
+      // @ts-expect-error This API isn't documented
+      require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents
         conflicts: 'proceed',
@@ -566,12 +602,18 @@ export interface AcknowledgeResponse {
 export const createIndex = (
   client: ElasticsearchClient,
   indexName: string,
-  mappings: IndexMapping
+  mappings: IndexMapping,
+  aliases?: string[]
 ): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError,
     AcknowledgeResponse
   > = () => {
+    const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
+      acc[alias] = {};
+      return acc;
+    }, {} as Record<string, {}>);
+
     return client.indices
       .create(
         {
@@ -584,6 +626,7 @@ export const createIndex = (
           timeout: DEFAULT_TIMEOUT,
           body: {
             mappings,
+            aliases: aliasesObject,
             settings: {
               index: {
                 // ES rule of thumb: shards should be several GB to 10's of GB, so

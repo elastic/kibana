@@ -173,6 +173,11 @@ describe('migration actions', () => {
     });
   });
 
+  describe('removeWriteBlock', () => {
+    it.todo('resolves right if successful');
+    it.todo('rejects if there is a non-retryable error');
+  });
+
   describe('cloneIndex', () => {
     afterEach(async () => {
       try {
@@ -249,7 +254,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -278,7 +284,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_2',
-        Option.some(`ctx._source.title = ctx._source.title + '_updated'`)
+        Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -307,7 +314,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_3',
-        Option.some(`ctx._source.title = ctx._source.title + '_updated'`)
+        Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
+        false
       )()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -322,7 +330,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_3',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -368,7 +377,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_4',
-        Option.some(`ctx._source.title = ctx._source.title + '_updated'`)
+        Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -414,7 +424,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_5',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -446,7 +457,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_6',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -464,7 +476,8 @@ describe('migration actions', () => {
         client,
         'no_such_index',
         'reindex_target',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       return expect(task()).resolves.toMatchInlineSnapshot(`
@@ -482,7 +495,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'existing_index_with_write_block',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -496,6 +510,7 @@ describe('migration actions', () => {
                           }
                     `);
     });
+    it.todo('resolves left if requireAlias=true and the target is not an alias');
   });
 
   describe('verifyReindex', () => {
@@ -504,7 +519,8 @@ describe('migration actions', () => {
         client,
         'existing_index_with_docs',
         'reindex_target_7',
-        Option.none
+        Option.none,
+        false
       )()) as Either.Right<ReindexResponse>;
       await waitForReindexTask(client, res.right.taskId, '10s')();
 

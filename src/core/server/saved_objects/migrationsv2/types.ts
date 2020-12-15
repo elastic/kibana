@@ -63,6 +63,11 @@ export interface BaseState extends ControlState {
    * The index used by this version of Kibana e.g. `.kibana_7.11.0_001`
    */
   readonly versionIndex: string;
+  /**
+   * An alias on the target index used as part of an "reindex block" that
+   * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
+   */
+  readonly reindexAlias: string;
 }
 
 export type InitState = BaseState & {
@@ -133,6 +138,30 @@ export type ReindexSourceToTargetWaitForTaskState = PostInitState & {
   readonly controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK';
   readonly sourceIndex: Option.Some<string>;
   readonly reindexSourceToTargetTaskId: string;
+};
+
+export type ReindexBlockSetWriteBlock = PostInitState & {
+  /**
+   *
+   */
+  readonly controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK';
+  readonly sourceIndex: Option.Some<string>;
+};
+
+export type ReindexBlockRemoveAlias = PostInitState & {
+  /**
+   *
+   */
+  readonly controlState: 'REINDEX_BLOCK_REMOVE_ALIAS';
+  readonly sourceIndex: Option.Some<string>;
+};
+
+export type ReindexBlockRemoveWriteBlock = PostInitState & {
+  /**
+   *
+   */
+  readonly controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK';
+  readonly sourceIndex: Option.Some<string>;
 };
 
 export type ReindexSourceToTargetVerify = PostInitState & {
@@ -260,6 +289,9 @@ export type State =
   | CreateReindexTargetState
   | ReindexSourceToTargetState
   | ReindexSourceToTargetWaitForTaskState
+  | ReindexBlockSetWriteBlock
+  | ReindexBlockRemoveAlias
+  | ReindexBlockRemoveWriteBlock
   | ReindexSourceToTargetVerify
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState

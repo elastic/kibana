@@ -479,7 +479,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+        controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
       };
     } else {
       const left = res.left;
@@ -501,15 +501,29 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY',
         };
       } else if (
-        left.type === 'index_not_found_exception' ||
-        left.type === 'target_index_had_write_block'
+        left.type === 'target_index_had_write_block' ||
+        (left.type === 'index_not_found_exception' && left.index === stateP.reindexAlias)
       ) {
-        // We don't handle these errors as the migration algorithm will never
-        // cause them to occur here. These left responses are only relevant to
-        // the LEGACY_REINDEX_WAIT_FOR_TASK step.
+        // target_index_had_write_block:
+        //   another instance completed the REINDEX_BLOCK_SET_WRITE_BLOCK
+        //   by adding a write block on the target index (but hasn't yet
+        //   completed the REINDEX_BLOCK_REMOVE_ALIAS step)
+        // index_not_found_exception:
+        //   another instance completed the REINDEX_BLOCK_REMOVE_ALIAS step by
+        //   removing the reindexAlias from the target index.
+        //
+        // For simplicity we repeat the `REINDEX_BLOCK_*` steps even if we
+        // know another instance already completed these.
+        return {
+          ...stateP,
+          controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
+        };
+      } else {
+        // We can only reach this condition because of an
+        // index_not_found_exception for the reindex source: state.sourceAlias
+        // This can never be caused by the migration algorithm.
         throwBadResponse(stateP, left as never);
       }
-      throwBadResponse(stateP, left);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_VERIFY') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -524,6 +538,51 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'FATAL',
         reason: `Reindex from the source index [${stateP.sourceIndex.value}] to the target index [${stateP.targetIndex}] failed because of incompatible mappings in the target index. Remove any index templates whose index_patterns match the target index and delete the target index before trying again.`,
       };
+    }
+  } else if (stateP.controlState === 'REINDEX_BLOCK_SET_WRITE_BLOCK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
+      };
+    } else {
+      // Don't handle index_not_found_exception as we will never remove the
+      // target index
+      throwBadResponse(stateP, res as never);
+    }
+  } else if (stateP.controlState === 'REINDEX_BLOCK_REMOVE_ALIAS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
+      };
+    } else {
+      const left = res.left;
+      if (left.type === 'alias_not_found_exception') {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
+        };
+      } else {
+        // Ignore the following errors which can't be caused by our algorithm
+        //   - index_not_found_exception we will never delete the target index
+        //   - remove_index_not_a_concrete_index REINDEX_BLOCK_REMOVE_ALIAS
+        //     doesn't specify a remove_index alias action
+        throwBadResponse(stateP, left as never);
+      }
+    }
+  } else if (stateP.controlState === 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+      };
+    } else {
+      // It should never fail unless it was a retryable ES error
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -715,8 +774,9 @@ export const createInitialState = ({
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
-    versionAlias: indexPrefix + '_' + kibanaVersion,
+    versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
+    reindexAlias: `${indexPrefix}_${kibanaVersion}_reindex`,
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetMappings,
