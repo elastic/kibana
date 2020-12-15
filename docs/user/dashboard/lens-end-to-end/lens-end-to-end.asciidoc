@@ -2,7 +2,7 @@
 [[lens-end-to-end]]
 == Try it: Analyze website data on a dashboard
 
-You have collected data about your webiste, and you're ready to find the answers to some key questions. 
+Most dashboards use similar types of analysis to answer key questions. In this tutorial you will base your analysis off of {kib} sample data which resembles logs from the Apache web server.
 
 When you're finished creating the dashboard, you'll be able to answer the following questions:
 
@@ -502,5 +502,4 @@ That's it! You've created a dashboard that provides you with a complete picture 
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
-
 
