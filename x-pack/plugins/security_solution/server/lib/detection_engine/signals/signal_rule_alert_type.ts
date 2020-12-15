@@ -29,8 +29,8 @@ import {
   SignalRuleAlertTypeDefinition,
   RuleAlertAttributes,
   EqlSignalSearchResponse,
-  BaseSignalHit,
   ThresholdQueryBucket,
+  WrappedSignalHit,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -266,6 +266,7 @@ export const signalRulesAlertType = ({
             errors,
             bulkCreateDuration,
             createdItemsCount,
+            createdItems,
           } = await bulkCreateMlSignals({
             actions,
             throttle,
@@ -300,6 +301,7 @@ export const signalRulesAlertType = ({
               success: success && filteredAnomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
@@ -372,6 +374,7 @@ export const signalRulesAlertType = ({
             success,
             bulkCreateDuration,
             createdItemsCount,
+            createdItems,
             errors,
           } = await bulkCreateThresholdSignals({
             actions,
@@ -407,6 +410,7 @@ export const signalRulesAlertType = ({
               success,
               errors: [...errors, ...previousSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
@@ -540,10 +544,10 @@ export const signalRulesAlertType = ({
             'transport.request',
             request
           );
-          let newSignals: BaseSignalHit[] | undefined;
+          let newSignals: WrappedSignalHit[] | undefined;
           if (response.hits.sequences !== undefined) {
             newSignals = response.hits.sequences.reduce(
-              (acc: BaseSignalHit[], sequence) =>
+              (acc: WrappedSignalHit[], sequence) =>
                 acc.concat(buildSignalGroupFromSequence(sequence, savedObject, outputIndex)),
               []
             );
@@ -563,6 +567,7 @@ export const signalRulesAlertType = ({
             const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
             result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
             result.createdSignalsCount += insertResult.createdItemsCount;
+            result.createdSignals = insertResult.createdItems;
           }
           result.success = true;
         } else {
@@ -597,6 +602,7 @@ export const signalRulesAlertType = ({
               scheduleNotificationActions({
                 alertInstance,
                 signalsCount: result.createdSignalsCount,
+                signals: result.createdSignals,
                 resultsLink,
                 ruleParams: notificationRuleParams,
               });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -26,14 +26,13 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const { customMetrics } = inventoryPrefill;
-
+  const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
       triggersActionsUI.getAddAlertFlyout({
         consumer: 'infrastructure',
-        addFlyoutVisible: visible!,
-        setAddFlyoutVisibility: setVisible,
+        onClose: onCloseFlyout,
         canChangeTrigger: false,
         alertTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
         metadata: {
@@ -47,5 +46,5 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
     [triggersActionsUI, visible]
   );
 
-  return <>{AddAlertFlyout}</>;
+  return <>{visible && AddAlertFlyout}</>;
 };
