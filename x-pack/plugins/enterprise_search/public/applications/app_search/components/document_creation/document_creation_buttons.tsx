@@ -22,6 +22,7 @@ import {
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DOCS_PREFIX, getEngineRoute, ENGINE_CRAWLER_PATH } from '../../routes';
+import { AppLogic } from '../../app_logic';
 import { EngineLogic } from '../engine';
 
 import { DocumentCreationLogic } from './';
@@ -32,7 +33,13 @@ interface Props {
 
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
-  const { engineName } = useValues(EngineLogic);
+
+  const { engineName, isSampleEngine } = useValues(EngineLogic);
+  const {
+    myRole: { canViewEngineCrawler },
+  } = useValues(AppLogic);
+  const showCrawlerLink = canViewEngineCrawler && !isSampleEngine;
+  const crawlerLink = getEngineRoute(engineName) + ENGINE_CRAWLER_PATH;
 
   return (
     <>
@@ -54,7 +61,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={showCrawlerLink ? 2 : 3}>
         <EuiFlexItem>
           <EuiCard
             title={i18n.translate(
@@ -91,29 +98,31 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
             isDisabled={disabled}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCardTo
-            title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
-              { defaultMessage: 'Use the Crawler' }
-            )}
-            description=""
-            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
-            betaBadgeLabel={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTitle',
-              { defaultMessage: 'Beta' }
-            )}
-            betaBadgeTooltipContent={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTooltip',
-              {
-                defaultMessage:
-                  'The Elastic Crawler is not GA. Please help us by reporting any bugs.',
-              }
-            )}
-            to={getEngineRoute(engineName) + ENGINE_CRAWLER_PATH}
-            isDisabled={disabled}
-          />
-        </EuiFlexItem>
+        {showCrawlerLink && (
+          <EuiFlexItem>
+            <EuiCardTo
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
+                { defaultMessage: 'Use the Crawler' }
+              )}
+              description=""
+              icon={<EuiIcon type="globe" size="xxl" color="primary" />}
+              betaBadgeLabel={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTitle',
+                { defaultMessage: 'Beta' }
+              )}
+              betaBadgeTooltipContent={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTooltip',
+                {
+                  defaultMessage:
+                    'The Elastic Crawler is not GA. Please help us by reporting any bugs.',
+                }
+              )}
+              to={crawlerLink}
+              isDisabled={disabled}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGrid>
     </>
   );

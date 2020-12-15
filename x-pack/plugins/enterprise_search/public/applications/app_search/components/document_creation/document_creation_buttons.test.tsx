@@ -14,12 +14,19 @@ import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DocumentCreationButtons } from './';
 
 describe('DocumentCreationButtons', () => {
-  const openDocumentCreation = jest.fn();
+  const values = {
+    engineName: 'test-engine',
+    isSampleEngine: false,
+    myRole: { canViewEngineCrawler: true },
+  };
+  const actions = {
+    openDocumentCreation: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues({ engineName: 'test-engine' });
-    setMockActions({ openDocumentCreation });
+    setMockValues(values);
+    setMockActions(actions);
   });
 
   it('renders', () => {
@@ -40,18 +47,34 @@ describe('DocumentCreationButtons', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     wrapper.find(EuiCard).at(0).simulate('click');
-    expect(openDocumentCreation).toHaveBeenCalledWith('text');
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('text');
 
     wrapper.find(EuiCard).at(1).simulate('click');
-    expect(openDocumentCreation).toHaveBeenCalledWith('file');
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('file');
 
     wrapper.find(EuiCard).at(2).simulate('click');
-    expect(openDocumentCreation).toHaveBeenCalledWith('api');
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
   });
 
-  it('renders the Crawler button with a link to the crawler page', () => {
-    const wrapper = shallow(<DocumentCreationButtons />);
+  describe('crawler card', () => {
+    it('renders the crawler button with a link to the crawler page', () => {
+      const wrapper = shallow(<DocumentCreationButtons />);
 
-    expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/test-engine/crawler');
+      expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/test-engine/crawler');
+    });
+
+    it('does not render the crawler button if the user does not have access', () => {
+      setMockValues({ ...values, myRole: { canViewEngineCrawler: false } });
+      const wrapper = shallow(<DocumentCreationButtons />);
+
+      expect(wrapper.find(EuiCardTo)).toHaveLength(0);
+    });
+
+    it('does not render the crawler button for the sample engine', () => {
+      setMockValues({ ...values, isSampleEngine: true });
+      const wrapper = shallow(<DocumentCreationButtons />);
+
+      expect(wrapper.find(EuiCardTo)).toHaveLength(0);
+    });
   });
 });
