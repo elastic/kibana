@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState, ChangeEvent } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
@@ -14,46 +14,59 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { History } from 'history';
+import { set } from 'lodash/fp';
 
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';
-import { Pagination } from '../../../../../../lists_plugin_deps';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
-import * as i18n from '../../translations';
+import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
 import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
-import { ExceptionListInfo } from './use_all_exception_lists';
+import { useAllExceptionLists } from './use_all_exception_lists';
 
 // Known lost battle with Eui :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
+export type Func = () => void;
+export interface ExceptionListFilter {
+  name?: string | null;
+  list_id?: string | null;
+  created_by?: string | null;
+}
+
 interface ExceptionListsTableProps {
   history: History;
   hasNoPermissions: boolean;
   loading: boolean;
-  loadingExceptions: boolean;
-  loadingTableInfo: boolean;
-  data: ExceptionListInfo[];
-  pagination: Pagination;
   formatUrl: FormatUrl;
-  onRefresh: () => void | null;
 }
 
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
-  ({
-    formatUrl,
-    history,
-    hasNoPermissions,
-    loading,
-    loadingExceptions,
-    loadingTableInfo,
-    data,
-    pagination,
-    onRefresh,
-  }) => {
+  ({ formatUrl, history, hasNoPermissions, loading }) => {
+    const {
+      services: { http, notifications },
+    } = useKibana();
+    const [filters, setFilters] = useState<ExceptionListFilter>({
+      name: null,
+      list_id: null,
+      created_by: null,
+    });
+    const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
+      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+      filterOptions: filters,
+      http,
+      namespaceTypes: ['single', 'agnostic'],
+      notifications,
+      showTrustedApps: false,
+    });
+    const [loadingTableInfo, data] = useAllExceptionLists({
+      exceptionLists: exceptions ?? [],
+    });
     const [initLoading, setInitLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(Date.now());
 
@@ -66,11 +79,11 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     }, [handleExport, handleDelete, history, formatUrl]);
 
     const handleRefresh = useCallback((): void => {
-      if (onRefresh != null) {
+      if (refreshExceptions != null) {
         setLastUpdated(Date.now());
-        onRefresh();
+        refreshExceptions();
       }
-    }, [onRefresh]);
+    }, [refreshExceptions]);
 
     useEffect(() => {
       if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
@@ -83,38 +96,43 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         <EuiEmptyPrompt
           title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
           titleSize="xs"
-          body={i18n.NO_RULES_BODY}
+          body={i18n.NO_LISTS_BODY}
         />
       );
     }, []);
-    console.log(data);
+
     const handleSearch = useCallback((search: string) => {
-      const a = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
-      console.log('a', a);
-      const b = a
+      const regex = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
+      const formattedFilter = regex
         .filter((c) => c != null)
-        .reduce(
+        .reduce<ExceptionListFilter>(
           (filter, term) => {
             const [qualifier, value] = term.split(':');
-            console.log('b', qualifier, value);
 
             if (qualifier == null) {
               filter.name = search;
-            } else if (qualifier != null && value != null) {
-              filter[qualifier] = value;
+            } else if (value != null && Object.keys(filter).includes(qualifier)) {
+              return set(qualifier, value, filter);
             }
 
             return filter;
           },
           { name: null, list_id: null, created_by: null }
         );
-
-      console.log(b);
+      setFilters(formattedFilter);
     }, []);
+
+    const handleSearchChange = useCallback(
+      (event: ChangeEvent<HTMLInputElement>) => {
+        const val = event.target.value;
+        handleSearch(val);
+      },
+      [handleSearch]
+    );
 
     return (
       <>
-        <Panel loading={loadingTableInfo} data-test-subj="allRulesPanel">
+        <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allRulesPanel">
           <>
             {loadingTableInfo && (
               <EuiProgress
@@ -134,7 +152,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
                 placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
                 onSearch={handleSearch}
-                onChange={handleSearch}
+                onChange={handleSearchChange}
                 disabled={initLoading}
                 incremental={false}
                 fullWidth
@@ -144,26 +162,29 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
             {loadingTableInfo && !initLoading && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
-            {initLoading && (
+            {initLoading ? (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+            ) : (
+              <>
+                <AllRulesUtilityBar
+                  showBulkActions={false}
+                  userHasNoPermissions={hasNoPermissions}
+                  paginationTotal={pagination.total ?? 0}
+                  numberSelectedItems={0}
+                  onRefresh={handleRefresh}
+                />
+                <MyEuiBasicTable
+                  data-test-subj="exceptions-table"
+                  columns={exceptionsColumns}
+                  isSelectable={!hasNoPermissions ?? false}
+                  itemId="id"
+                  items={data ?? []}
+                  noItemsMessage={emptyPrompt}
+                  onChange={() => {}}
+                  pagination={pagination ?? { total: 0, page: 1, perPage: 20 }}
+                />
+              </>
             )}
-            <AllRulesUtilityBar
-              showBulkActions={false}
-              userHasNoPermissions={hasNoPermissions}
-              paginationTotal={pagination.total ?? 0}
-              numberSelectedItems={0}
-              onRefresh={handleRefresh}
-            />
-            <MyEuiBasicTable
-              data-test-subj="exceptions-table"
-              columns={exceptionsColumns}
-              isSelectable={!hasNoPermissions ?? false}
-              itemId="id"
-              items={data ?? []}
-              noItemsMessage={emptyPrompt}
-              onChange={() => {}}
-              pagination={pagination}
-            />
           </>
         </Panel>
       </>

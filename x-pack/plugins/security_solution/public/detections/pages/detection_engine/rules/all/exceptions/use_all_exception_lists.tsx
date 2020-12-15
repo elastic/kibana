@@ -52,19 +52,11 @@ export const useAllExceptionLists = ({
           },
           {}
         );
-        console.log('YOOO', listsSkeleton);
+
         const { data: rules } = await fetchRules({
-          filterOptions: {
-            filter: '',
-            showCustomRules: true,
-            showElasticRules: true,
-            sortField: 'updated_at',
-            sortOrder: 'desc',
-            tags: [],
-          },
           pagination: {
             page: 1,
-            perPage: 9999,
+            perPage: 100,
             total: 0,
           },
           signal: abortCtrl.signal,

@@ -108,17 +108,16 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const ruleTypeFilter = [
-    ...(filterOptions.showCustomRules
-      ? [`alert.attributes.tags: "__internal_immutable:false"`]
-      : []),
-    ...(filterOptions.showElasticRules
-      ? [`alert.attributes.tags: "__internal_immutable:true"`]
-      : []),
-  ].join(' OR ');
+  const showCustomRuleFilter = filterOptions.showCustomRules
+    ? [`alert.attributes.tags: "__internal_immutable:false"`]
+    : [];
+  const showElasticRuleFilter = filterOptions.showElasticRules
+    ? [`alert.attributes.tags: "__internal_immutable:true"`]
+    : [];
   const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    `(${ruleTypeFilter})`,
+    ...showCustomRuleFilter,
+    ...showElasticRuleFilter,
   ].join(' AND ');
 
   const tags = [
@@ -133,7 +132,7 @@ export const fetchRules = async ({
   const getFieldNameForSortField = (field: string) => {
     return field === 'name' ? `${field}.keyword` : field;
   };
-  console.log(filterString);
+
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,

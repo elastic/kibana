@@ -181,13 +181,6 @@ export const ALL_RULES = i18n.translate(
   }
 );
 
-export const ALL_EXCEPTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
-  {
-    defaultMessage: 'Exception Lists',
-  }
-);
-
 export const SEARCH_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchAriaLabel',
   {
@@ -601,20 +594,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
   {
     defaultMessage: 'Refresh settings',
-  }
-);
-
-export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.search.placeholder',
-  {
-    defaultMessage: 'Search exception lists',
-  }
-);
-
-export const NO_EXCEPTION_LISTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.filters.noExceptionsTitle',
-  {
-    defaultMessage: 'No exception lists found',
   }
 );
 

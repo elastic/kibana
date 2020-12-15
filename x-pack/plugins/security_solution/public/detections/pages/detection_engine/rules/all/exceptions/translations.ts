@@ -47,3 +47,31 @@ export const ERROR_EXCEPTION_LISTS = i18n.translate(
     defaultMessage: 'Error fetching exception lists',
   }
 );
+
+export const NO_EXCEPTION_LISTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.filters.noExceptionsTitle',
+  {
+    defaultMessage: 'No exception lists found',
+  }
+);
+
+export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptionLists.search.placeholder',
+  {
+    defaultMessage: 'Search exception lists',
+  }
+);
+
+export const ALL_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
+  {
+    defaultMessage: 'Exception Lists',
+  }
+);
+
+export const NO_LISTS_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody',
+  {
+    defaultMessage: "We weren't able to find any exception lists.",
+  }
+);
