@@ -12,8 +12,9 @@ import {
   MONITOR_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
+  STEP_DETAIL_ROUTE,
 } from '../common/constants';
-import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
+import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { PageHeader } from './components/common/header/page_header';
@@ -49,6 +50,13 @@ const Routes: RouteProps[] = [
     component: CertificatesPage,
     dataTestSubj: 'uptimeCertificatesPage',
     telemetryId: UptimePage.Certificates,
+  },
+  {
+    title: baseTitle,
+    path: STEP_DETAIL_ROUTE,
+    component: StepDetailPage,
+    dataTestSubj: 'uptimeStepDetailPage',
+    telemetryId: UptimePage.StepDetail,
   },
   {
     title: baseTitle,
