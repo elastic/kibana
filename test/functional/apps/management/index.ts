@@ -34,7 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup7');
+      this.tags('ciGroup3');
 
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
@@ -48,7 +48,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup8');
+      this.tags('ciGroup5');
 
       loadTestFile(require.resolve('./_index_pattern_filter'));
       loadTestFile(require.resolve('./_scripted_fields_filter'));

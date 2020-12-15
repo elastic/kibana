@@ -12,10 +12,6 @@ JOB:
   - kibana-ciGroup6
   - kibana-ciGroup7
   - kibana-ciGroup8
-  - kibana-ciGroup9
-  - kibana-ciGroup10
-  - kibana-ciGroup11
-  - kibana-ciGroup12
   - kibana-accessibility
   - kibana-visualRegression
 
