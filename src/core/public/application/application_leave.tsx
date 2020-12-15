@@ -26,8 +26,8 @@ import {
 } from './types';
 
 const appLeaveActionFactory: AppLeaveActionFactory = {
-  confirm(text: string, title?: string) {
-    return { type: AppLeaveActionType.confirm, text, title };
+  confirm(text: string, title?: string, callback?: () => void) {
+    return { type: AppLeaveActionType.confirm, text, title, callback };
   },
   default() {
     return { type: AppLeaveActionType.default };
@@ -38,9 +38,9 @@ export function isConfirmAction(action: AppLeaveAction): action is AppLeaveConfi
   return action.type === AppLeaveActionType.confirm;
 }
 
-export function getLeaveAction(handler?: AppLeaveHandler): AppLeaveAction {
+export function getLeaveAction(handler?: AppLeaveHandler, nextAppId?: string): AppLeaveAction {
   if (!handler) {
     return appLeaveActionFactory.default();
   }
-  return handler(appLeaveActionFactory);
+  return handler(appLeaveActionFactory, nextAppId);
 }
