@@ -8,7 +8,7 @@ import { orderBy } from 'lodash';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../typings/elasticsearch/aggregations';
 
 export interface TopSigTerm {
   bgCount: number;
@@ -18,15 +18,19 @@ export interface TopSigTerm {
   score: number;
 }
 
-type SigTermAggs = AggregationResultOf<
+type SigTermAgg = AggregationResultOf<
   { significant_terms: AggregationOptionsByType['significant_terms'] },
   {}
 >;
 
-export function formatTopSignificantTerms(
-  aggregations?: Record<string, SigTermAggs>
-) {
-  const significantTerms = Object.entries(aggregations ?? []).flatMap(
+export function processSignificantTermAggs({
+  sigTermAggs,
+  thresholdPercentage,
+}: {
+  sigTermAggs: Record<string, SigTermAgg>;
+  thresholdPercentage: number;
+}) {
+  const significantTerms = Object.entries(sigTermAggs).flatMap(
     ([fieldName, agg]) => {
       return agg.buckets.map((bucket) => ({
         fieldName,
@@ -39,6 +43,11 @@ export function formatTopSignificantTerms(
   );
 
   // get top 10 terms ordered by score
-  const topSigTerms = orderBy(significantTerms, 'score', 'desc').slice(0, 10);
+  const topSigTerms = orderBy(significantTerms, 'score', 'desc')
+    .filter(({ bgCount, fgCount }) => {
+      // only include results that are above the threshold
+      return Math.floor((fgCount / bgCount) * 100) > thresholdPercentage;
+    })
+    .slice(0, 10);
   return topSigTerms;
 }
