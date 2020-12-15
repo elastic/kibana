@@ -5,8 +5,8 @@
  */
 
 import React, { memo } from 'react';
-import { CallOutMessage, CallOutSwitcher } from '../../../common/components/callouts';
-import { useUserData } from '../user_info';
+import { CallOutMessage, CallOutSwitcher } from '../../../../common/components/callouts';
+import { useUserData } from '../../user_info';
 
 import * as i18n from './translations';
 
@@ -17,7 +17,7 @@ const readOnlyAccessToAlertsMessage: CallOutMessage = {
   description: <p>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</p>,
 };
 
-const NoWriteAlertsCallOutComponent = () => {
+const ReadOnlyAlertsCallOutComponent = () => {
   const [{ hasIndexWrite }] = useUserData();
 
   return (
@@ -29,4 +29,4 @@ const NoWriteAlertsCallOutComponent = () => {
   );
 };
 
-export const NoWriteAlertsCallOut = memo(NoWriteAlertsCallOutComponent);
+export const ReadOnlyAlertsCallOut = memo(ReadOnlyAlertsCallOutComponent);

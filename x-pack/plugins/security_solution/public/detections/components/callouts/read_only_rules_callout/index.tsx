@@ -17,7 +17,7 @@ const readOnlyAccessToRulesMessage: CallOutMessage = {
   description: <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>,
 };
 
-const ReadOnlyCallOutComponent = () => {
+const ReadOnlyRulesCallOutComponent = () => {
   const [{ canUserCRUD }] = useUserData();
 
   return (
@@ -29,4 +29,4 @@ const ReadOnlyCallOutComponent = () => {
   );
 };
 
-export const ReadOnlyCallOut = memo(ReadOnlyCallOutComponent);
+export const ReadOnlyRulesCallOut = memo(ReadOnlyRulesCallOutComponent);
