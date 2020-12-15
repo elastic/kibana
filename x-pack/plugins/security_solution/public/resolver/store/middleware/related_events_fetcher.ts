@@ -11,7 +11,6 @@ import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import { createRange } from './../../models/time_range';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,

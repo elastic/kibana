@@ -19,6 +19,7 @@ const initialState: DataState = {
   },
   resolverComponentInstanceID: undefined,
   refreshCount: 0,
+  nodeDataRequestID: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -213,6 +214,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return {
       ...state,
       nodeData: updatedNodeData,
+      nodeDataRequestID: action.payload.dataRequestID,
     };
   } else if (action.type === 'userReloadedResolverNode') {
     const updatedNodeData = nodeDataModel.setReloadedNodes(state.nodeData, action.payload);

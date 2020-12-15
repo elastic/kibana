@@ -123,9 +123,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
 
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
-  const getStartSelector = startSelector();
-  const getEndSelector = endSelector();
-  const getIsLoadingSelector = isLoadingSelector();
+  const getStartSelector = useMemo(() => startSelector(), []);
+  const getEndSelector = useMemo(() => endSelector(), []);
+  const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
   const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
   const shouldUpdate = useDeepEqualSelector((state) => {
     if (isActive) {

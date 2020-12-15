@@ -10,7 +10,6 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import { createRange } from './../../models/time_range';
 import { ResolverAction } from '../actions';
 
 /**

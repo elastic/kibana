@@ -34,6 +34,7 @@ import {
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as timeRangeModel from '../../models/time_range';
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 
@@ -135,6 +136,18 @@ export const currentRelatedEventIsStale = createSelector(
 const nodeData = (state: DataState): Map<string, NodeData> | undefined => {
   return state.nodeData;
 };
+
+const nodeDataRequestID = (state: DataState): number => {
+  return state.nodeDataRequestID;
+};
+
+export const nodeDataIsStale = createSelector(
+  nodeDataRequestID,
+  refreshCount,
+  function nodeDataIsStale(oldID, newID) {
+    return refreshCount > nodeDataRequestID;
+  }
+);
 
 /**
  * Returns a function that can be called to retrieve the node data for a specific node ID.
@@ -348,10 +361,8 @@ export const timeRangeFilters = createSelector(
   treeParametersToFetch,
   function timeRangeFilters(treeParameters): TimeRange {
     // Should always be provided from date picker, but provide valid defaults in any case.
-    const from = new Date();
-    from.setTime(1);
-    const to = new Date();
-    to.setTime(8640000000000000);
+    const from = new Date(0);
+    const to = new Date(timeRangeModel.maxDate);
     const timeRange = {
       from: from.toISOString(),
       to: to.toISOString(),

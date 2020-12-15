@@ -15,7 +15,6 @@ import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
-import { createRange } from './../../models/time_range';
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.

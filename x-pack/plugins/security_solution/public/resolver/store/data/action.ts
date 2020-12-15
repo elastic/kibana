@@ -135,6 +135,8 @@ interface ServerReturnedNodeData {
      * that we'll request their data in a subsequent request.
      */
     numberOfRequestedEvents: number;
+
+    dataRequestID: number;
   };
 }
 

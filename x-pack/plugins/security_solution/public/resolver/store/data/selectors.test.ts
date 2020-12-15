@@ -510,6 +510,7 @@ describe('data state', () => {
           // mock the requested size being larger than the returned number of events so we
           // avoid the case where the limit was reached
           numberOfRequestedEvents: nodeData.length + 1,
+          dataRequestID: 0,
         },
       });
     });

@@ -40,6 +40,8 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
