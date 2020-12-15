@@ -112,9 +112,6 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   min-width: 0;
   padding-left: ${({ isEventViewer }) =>
     !isEventViewer ? '4px;' : '0;'}; // match timeline event border
-  button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -390,3 +387,11 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
 export const EventsLoading = styled(EuiLoadingSpinner)`
   vertical-align: middle;
 `;
+
+export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
+  ({ $isVisible = false }) => ({
+    style: {
+      display: $isVisible ? 'block' : 'none',
+    },
+  })
+)<{ $isVisible: boolean }>``;
