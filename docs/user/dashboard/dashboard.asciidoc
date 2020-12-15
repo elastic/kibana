@@ -228,12 +228,19 @@ To view the data field summary information, navigate to the field, then click *i
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window]
 
-*Lens* inspects the top 10 values to build the value distribution: every other value, together with documents with no data for the inspected field, are shown with the "Other" entry in the distribution chart.
+Depending on the type of data, *Lens* shows a summary that better suits the field analysis: for date types the time distribution, for string types the top 10 values and for numeric types are shown a detailed summary with the top 10 values and a value distribution.
+
+[role="screenshot"]
+image::images/lens_data_info_documents.png[Data summary analyzed documents]
+
+*Lens* uses a sample of 5000 documents to perform the fields analysis, therefore the bottom line of the summary hints how many documents have been analyzed to build the distribution.
+
+When *Lens* presents the top 10 values distribution every other value, together with documents with no data for the inspected field, are shown with the "Other" entry in the distribution chart.
 
 [role="screenshot"]
 image::images/lens_data_info_other.png[Data summary window with Other]
 
-NOTE: because the distribution is based on single values, the sum of all the entries and "Other" may be above 100%, because entries in array values are counted as distinct values.
+NOTE: the sum of all the entries and "Other" may be above 100% by a small amount, that is due to a rounding problem when presenting all values as integers.
 
 [float]
 [[change-the-visualization-type]]
