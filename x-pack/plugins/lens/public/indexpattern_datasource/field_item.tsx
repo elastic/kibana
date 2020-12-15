@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -142,10 +143,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   }
 
   function togglePopover() {
-    if (hideDetails) {
-      return;
-    }
-
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
       trackUiEvent('indexpattern_field_info_click');
@@ -247,6 +244,9 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     sampledValues,
     chartsThemeService,
     data: { fieldFormats },
+    dropOntoWorkspace,
+    getSuggestionForField,
+    hideDetails,
   } = props;
 
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -269,6 +269,22 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   }
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
+
+  if (hideDetails) {
+    return (
+      <EuiFlexItem grow={true}>
+        <DragToWorkspaceButton
+          getSuggestionForField={getSuggestionForField}
+          dropOntoWorkspace={dropOntoWorkspace}
+          field={{
+            indexPatternId: indexPattern.id,
+            id: field.name,
+            field,
+          }}
+        />
+      </EuiFlexItem>
+    );
+  }
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
@@ -300,12 +316,25 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
     return (
-      <EuiText size="s">
-        {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage:
-            'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
-        })}
-      </EuiText>
+      <div>
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+            defaultMessage:
+              'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
+          })}
+        </EuiText>
+        <EuiFlexItem grow={true}>
+          <DragToWorkspaceButton
+            getSuggestionForField={getSuggestionForField}
+            dropOntoWorkspace={dropOntoWorkspace}
+            field={{
+              indexPatternId: indexPattern.id,
+              id: field.name,
+              field,
+            }}
+          />
+        </EuiFlexItem>
+      </div>
     );
   }
 
@@ -384,6 +413,17 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                 defaultMessage: 'documents',
               })}
             </EuiText>
+            <EuiFlexItem grow={true}>
+              <DragToWorkspaceButton
+                getSuggestionForField={getSuggestionForField}
+                dropOntoWorkspace={dropOntoWorkspace}
+                field={{
+                  indexPatternId: indexPattern.id,
+                  id: field.name,
+                  field,
+                }}
+              />
+            </EuiFlexItem>
           </EuiPopoverFooter>
         ) : (
           <></>
@@ -543,3 +583,47 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   }
   return <></>;
 }
+
+const DragToWorkspaceButton = ({ field, getSuggestionForField, dropOntoWorkspace }) => {
+  if (!getSuggestionForField(field)) {
+    return (
+      <EuiToolTip
+        position="right"
+        content={i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabledTooltip', {
+          defaultMessage: `Field cannot be moved to workspace. There are no suggestions for this field for current visualization. Move the field directly to the editor.`,
+        })}
+      >
+        <EuiButton
+          iconSide="right"
+          iconType="arrowRight"
+          color="primary"
+          fullWidth
+          disabled
+          onClick={() => {
+            dropOntoWorkspace(field);
+          }}
+        >
+          {i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
+            defaultMessage: 'Move to workspace',
+          })}
+        </EuiButton>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiButton
+      iconSide="right"
+      iconType="arrowRight"
+      color="primary"
+      fullWidth
+      onClick={() => {
+        dropOntoWorkspace(field);
+      }}
+    >
+      {i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
+        defaultMessage: 'Move to workspace',
+      })}
+    </EuiButton>
+  );
+};

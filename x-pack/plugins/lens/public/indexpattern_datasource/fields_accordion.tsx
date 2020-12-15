@@ -64,6 +64,8 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   exists,
   hideDetails,
   showExistenceFetchError,
+  dropOntoWorkspace,
+  getSuggestionForField,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => (
@@ -73,9 +75,11 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
         field={field}
         exists={exists(field)}
         hideDetails={hideDetails}
+        dropOntoWorkspace={dropOntoWorkspace}
+        getSuggestionForField={getSuggestionForField}
       />
     ),
-    [fieldProps, exists, hideDetails]
+    [fieldProps, exists, hideDetails, dropOntoWorkspace, getSuggestionForField]
   );
 
   return (

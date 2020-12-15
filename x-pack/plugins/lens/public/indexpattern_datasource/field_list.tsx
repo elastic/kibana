@@ -47,6 +47,8 @@ export function FieldList({
   filter,
   currentIndexPatternId,
   existFieldsInIndex,
+  dropOntoWorkspace,
+  getSuggestionForField,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -136,6 +138,8 @@ export function FieldList({
                   field={field}
                   hideDetails={true}
                   key={field.name}
+                  dropOntoWorkspace={dropOntoWorkspace}
+                  getSuggestionForField={getSuggestionForField}
                 />
               ))
             )}
@@ -146,6 +150,8 @@ export function FieldList({
           .map(([key, fieldGroup]) => (
             <Fragment key={key}>
               <FieldsAccordion
+                dropOntoWorkspace={dropOntoWorkspace}
+                getSuggestionForField={getSuggestionForField}
                 initialIsOpen={Boolean(accordionState[key])}
                 key={key}
                 id={`lnsIndexPattern${key}`}

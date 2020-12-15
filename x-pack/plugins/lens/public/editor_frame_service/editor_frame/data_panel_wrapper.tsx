@@ -51,6 +51,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dateRange: props.dateRange,
     filters: props.filters,
     showNoDataPopover: props.showNoDataPopover,
+    dropOntoWorkspace: props.dropOntoWorkspace,
+    getSuggestionForField: props.getSuggestionForField,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

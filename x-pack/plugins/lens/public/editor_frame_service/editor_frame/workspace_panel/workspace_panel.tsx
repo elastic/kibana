@@ -96,43 +96,11 @@ export function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
+  getSuggestionForField,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(
-    () => {
-      if (!dragDropContext.dragging || !activeDatasourceId) {
-        return;
-      }
-
-      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-        (datasource) => datasource.getTableSpec().length > 0
-      );
-
-      const mainPalette =
-        activeVisualizationId &&
-        visualizationMap[activeVisualizationId] &&
-        visualizationMap[activeVisualizationId].getMainPalette
-          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
-          : undefined;
-      const suggestions = getSuggestions({
-        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-        datasourceStates,
-        visualizationMap:
-          hasData && activeVisualizationId
-            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-            : visualizationMap,
-        activeVisualizationId,
-        visualizationState,
-        field: dragDropContext.dragging,
-        mainPalette,
-      });
-
-      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragDropContext.dragging]
-  );
+  const suggestionForDraggedField = getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
