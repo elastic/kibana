@@ -29,6 +29,12 @@ const fields = [
     filterable: true,
   },
   {
+    name: 'timestamp',
+    type: 'date',
+    scripted: false,
+    filterable: true,
+  },
+  {
     name: 'message',
     type: 'string',
     scripted: false,
@@ -59,8 +65,8 @@ fields.getByName = (name: string) => {
 };
 
 const indexPattern = ({
-  id: 'the-index-pattern-id',
-  title: 'the-index-pattern-title',
+  id: 'index-pattern-with-timefield-id',
+  title: 'index-pattern-without-timefield',
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
@@ -68,10 +74,10 @@ const indexPattern = ({
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
-  timeFieldName: '',
+  timeFieldName: 'timestamp',
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 
-export const indexPatternMock = indexPattern;
+export const indexPatternWithTimefieldMock = indexPattern;
