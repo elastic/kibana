@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('query should show failed shards pop up', async function () {
+    it.skip('query should show failed shards pop up', async function () {
       if (false) {
         /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
          */

@@ -15,6 +15,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asDuration,
   asPercent,
@@ -64,9 +66,39 @@ const StyledTransactionDetailLink = styled(TransactionDetailLink)`
   ${truncate('100%')}
 `;
 
-export function ServiceOverviewTransactionsTable(props: Props) {
-  const { serviceName } = props;
+function getLatencyAggregationTypeLabel(
+  latencyAggregationType?: LatencyAggregationType
+) {
+  switch (latencyAggregationType) {
+    case 'p95': {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
+        {
+          defaultMessage: 'Latency (95th)',
+        }
+      );
+    }
+    case 'p99': {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
+        {
+          defaultMessage: 'Latency (99th)',
+        }
+      );
+    }
+    default: {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
+        {
+          defaultMessage: 'Latency (avg.)',
+        }
+      );
+    }
+  }
+}
 
+export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+  const latencyAggregationType = useLatencyAggregationType();
   const {
     uiFilters,
     urlParams: { start, end },
@@ -94,7 +126,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !latencyAggregationType) {
       return;
     }
 
@@ -112,6 +144,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          latencyAggregationType,
         },
       },
     }).then((response) => {
@@ -135,6 +168,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    latencyAggregationType,
   ]);
 
   const {
@@ -170,12 +204,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     {
       field: 'latency',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency',
-        {
-          defaultMessage: 'Latency',
-        }
-      ),
+      name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (

@@ -755,6 +755,19 @@ describe('#start()', () => {
       `);
     });
 
+    it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
+      service.setup(setupDeps);
+      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('myTestApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
+
+      await navigateToApp('myOtherApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
+    });
+
     describe('when `replace` option is true', () => {
       it('use `history.replace` instead of `history.push`', async () => {
         service.setup(setupDeps);
