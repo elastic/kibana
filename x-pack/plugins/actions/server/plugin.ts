@@ -215,6 +215,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 
     const usageCollection = plugins.usageCollection;
