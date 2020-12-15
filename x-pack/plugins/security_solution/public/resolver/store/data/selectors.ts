@@ -137,18 +137,6 @@ const nodeData = (state: DataState): Map<string, NodeData> | undefined => {
   return state.nodeData;
 };
 
-const nodeDataRequestID = (state: DataState): number => {
-  return state.nodeDataRequestID;
-};
-
-export const nodeDataIsStale = createSelector(
-  nodeDataRequestID,
-  refreshCount,
-  function nodeDataIsStale(oldID, newID) {
-    return newID > oldID;
-  }
-);
-
 /**
  * Returns a function that can be called to retrieve the node data for a specific node ID.
  */
@@ -160,6 +148,28 @@ export const nodeDataForID: (
     return info;
   };
 });
+
+const nodeDataRequestID: (state: DataState) => (id: string) => number | undefined = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      return nodeInfo(id)?.dataRequestID;
+    };
+  }
+);
+
+export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataRequestID,
+  refreshCount,
+  (nodeRequestID, newID) => {
+    return (id: string) => {
+      const oldID = nodeRequestID(id);
+      // if we don't have the node in the map then it's data must be stale or if the refreshCount is greater than the
+      // node's requestID then it is also stale
+      return oldID === undefined || newID > oldID;
+    };
+  }
+);
 
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.

@@ -397,10 +397,9 @@ export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.
 export const newIDsToRequest: (
   state: ResolverState
 ) => (time: number) => Set<string> = createSelector(
-  composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
-  visibleNodesAndEdgeLines,
   composeSelectors(dataStateSelector, dataSelectors.nodeDataIsStale),
-  function (nodeData, visibleNodesAndEdgeLinesAtTime, shouldUpdateAllNodes) {
+  visibleNodesAndEdgeLines,
+  function (nodeDataIsStale, visibleNodesAndEdgeLinesAtTime) {
     return defaultMemoize((time: number) => {
       const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 
@@ -411,12 +410,8 @@ export const newIDsToRequest: (
         // if the node has a valid ID field, and we either don't have any node data currently, or
         // the map doesn't have info for this particular node, then add it to the set so it'll be requested
         // by the middleware
-        if (id !== undefined) {
-          if (shouldUpdateAllNodes) {
-            nodes.add(id);
-          } else if (!nodeData || !nodeData.has(id)) {
-            nodes.add(id);
-          }
+        if (id !== undefined && nodeDataIsStale(id)) {
+          nodes.add(id);
         }
       }
       return nodes;

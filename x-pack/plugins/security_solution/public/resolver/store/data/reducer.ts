@@ -19,7 +19,6 @@ const initialState: DataState = {
   },
   resolverComponentInstanceID: undefined,
   refreshCount: 0,
-  nodeDataRequestID: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -195,12 +194,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       receivedEvents: action.payload.nodeData,
       requestedNodes: action.payload.requestedIDs,
       numberOfRequestedEvents: action.payload.numberOfRequestedEvents,
+      dataRequestID: action.payload.dataRequestID,
     });
 
     return {
       ...state,
       nodeData: updatedNodeData,
-      nodeDataRequestID: action.payload.dataRequestID,
     };
   } else if (action.type === 'userReloadedResolverNode') {
     const updatedNodeData = nodeDataModel.setReloadedNodes(state.nodeData, action.payload);
@@ -211,7 +210,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   } else if (action.type === 'appRequestingNodeData') {
     const updatedNodeData = nodeDataModel.setRequestedNodes(
       state.nodeData,
-      action.payload.requestedIDs
+      action.payload.requestedIDs,
+      action.payload.dataRequestID
     );
 
     return {
@@ -219,7 +219,11 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       nodeData: updatedNodeData,
     };
   } else if (action.type === 'serverFailedToReturnNodeData') {
-    const updatedData = nodeDataModel.setErrorNodes(state.nodeData, action.payload.requestedIDs);
+    const updatedData = nodeDataModel.setErrorNodes(
+      state.nodeData,
+      action.payload.requestedIDs,
+      action.payload.dataRequestID
+    );
 
     return {
       ...state,
