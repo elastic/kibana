@@ -64,25 +64,30 @@ uiRoutes.when('/elasticsearch/indices', {
         this.updateData();
       };
 
+      const renderComponent = () => {
+        const { clusterStatus, indices } = this.data;
+        this.renderReact(
+          <ElasticsearchIndices
+            clusterStatus={clusterStatus}
+            indices={indices}
+            showSystemIndices={showSystemIndices}
+            toggleShowSystemIndices={toggleShowSystemIndices}
+            sorting={this.sorting}
+            pagination={this.pagination}
+            onTableChange={this.onTableChange}
+          />
+        );
+      };
+
+      this.onTableChangeRender = renderComponent;
+
       $scope.$watch(
         () => this.data,
         (data) => {
           if (!data) {
             return;
           }
-
-          const { clusterStatus, indices } = data;
-          this.renderReact(
-            <ElasticsearchIndices
-              clusterStatus={clusterStatus}
-              indices={indices}
-              showSystemIndices={showSystemIndices}
-              toggleShowSystemIndices={toggleShowSystemIndices}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
-            />
-          );
+          renderComponent();
         }
       );
     }
