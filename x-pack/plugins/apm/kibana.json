@@ -20,7 +20,8 @@
     "observability",
     "security",
     "ml",
-    "home"
+    "home",
+    "maps"
   ],
   "server": true,
   "ui": true,
