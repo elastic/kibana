@@ -11,6 +11,7 @@ import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCheckPrivilegesRoutes } from './privileges';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
@@ -36,7 +37,9 @@ describe('Check API keys privileges', () => {
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
       };
 
-      mockRouteDefinitionParams.authc.areAPIKeysEnabled.mockResolvedValue(areAPIKeysEnabled);
+      const authc = authenticationServiceMock.createStart();
+      authc.apiKeys.areAPIKeysEnabled.mockResolvedValue(areAPIKeysEnabled);
+      mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
       if (apiResponse) {
         mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockImplementation(

@@ -66,10 +66,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.error_groups.map((group: any) => group.name)).toMatchInline(`
           Array [
-            "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getCost(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getCost() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy133[\\"cost\\"])",
+            "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy132[\\"revenue\\"])",
             "java.io.IOException: Connection reset by peer",
-            "Connection reset by peer",
-            "Could not write JSON: Unable to find co.elastic.apm.opbeans.model.Customer with id 6617; nested exception is com.fasterxml.jackson.databind.JsonMappingException: Unable to find co.elastic.apm.opbeans.model.Customer with id 6617 (through reference chain: co.elastic.apm.opbeans.model.Customer_$$_jvst369_3[\\"email\\"])",
+            "java.io.IOException: Connection reset by peer",
+            "Could not write JSON: Unable to find co.elastic.apm.opbeans.model.Customer with id 7173; nested exception is com.fasterxml.jackson.databind.JsonMappingException: Unable to find co.elastic.apm.opbeans.model.Customer with id 7173 (through reference chain: co.elastic.apm.opbeans.model.Customer_$$_jvst101_3[\\"email\\"])",
             "Request method 'POST' not supported",
           ]
         `);
@@ -77,9 +77,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(response.body.error_groups.map((group: any) => group.occurrences.value))
           .toMatchInline(`
           Array [
-            8,
+            5,
+            3,
             2,
-            1,
             1,
             1,
           ]
@@ -91,16 +91,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Object {
             "group_id": "051f95eabf120ebe2f8b0399fe3e54c5",
-            "last_seen": 1601391561523,
-            "name": "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getCost(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getCost() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy133[\\"cost\\"])",
+            "last_seen": 1607437366098,
+            "name": "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy132[\\"revenue\\"])",
             "occurrences": Object {
-              "value": 8,
+              "value": 5,
             },
           }
         `);
 
         const visibleDataPoints = firstItem.occurrences.timeseries.filter(({ y }: any) => y > 0);
-        expectSnapshot(visibleDataPoints.length).toMatchInline(`7`);
+        expectSnapshot(visibleDataPoints.length).toMatchInline(`4`);
       });
 
       it('sorts items in the correct order', async () => {

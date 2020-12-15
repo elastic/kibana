@@ -28,6 +28,7 @@ interface SetupDependencies {
 
 export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
   private readonly logger: Logger;
+  private sessionService!: BackgroundSessionService;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('data_enhanced');
@@ -53,10 +54,12 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       eqlSearchStrategyProvider(this.logger)
     );
 
+    this.sessionService = new BackgroundSessionService(this.logger);
+
     deps.data.__enhance({
       search: {
         defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
-        sessionService: new BackgroundSessionService(),
+        sessionService: this.sessionService,
       },
     });
 
@@ -64,9 +67,13 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     registerSessionRoutes(router);
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    this.sessionService.start(core, this.initializerContext.config.create());
+  }
 
-  public stop() {}
+  public stop() {
+    this.sessionService.stop();
+  }
 }
 
 export { EnhancedDataServerPlugin as Plugin };

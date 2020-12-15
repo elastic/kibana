@@ -16,7 +16,7 @@ import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/tim
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { EventsViewer } from './events_viewer';
 import { InspectButtonContainer } from '../inspect';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { EventDetailsFlyout } from './event_details_flyout';
@@ -51,6 +51,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
+  expandedEvent,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -77,7 +78,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -111,6 +112,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             dataProviders={dataProviders!}
             deletedEventIds={deletedEventIds}
             end={end}
+            expandedEvent={expandedEvent}
             isLoadingIndexPattern={isLoadingIndexPattern}
             filters={globalFilters}
             headerFilterGroup={headerFilterGroup}
@@ -142,27 +144,29 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getEvents = timelineSelectors.getEventsByIdSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
+      expandedEvent,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       sort,
       showCheckboxes,
-    } = events;
+    } = timeline;
 
     return {
       columns,
       dataProviders,
       deletedEventIds,
+      expandedEvent,
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
@@ -175,7 +179,7 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
+      graphEventId,
     };
   };
   return mapStateToProps;

@@ -69,8 +69,8 @@ function start(opts) {
       // Generate autocomplete definitions
       painlessContextFolderContents
         .filter((file) => {
-          // Expected filename format: whitelist-<contextName>.json
-          const contextName = file.split('.')[0].split('whitelist-').pop();
+          // Expected filename format: painless-<contextName>.json
+          const contextName = file.split('.')[0].split('painless-').pop();
           return supportedContexts.includes(contextName);
         })
         .forEach((file) => {
@@ -78,7 +78,8 @@ function start(opts) {
             const { name, classes: painlessClasses } = JSON.parse(
               readFileSync(join(esPainlessContextFolder, file), 'utf8')
             );
-            const filePath = join(autocompleteOutputFolder, `${name}.json`);
+            const contextName = name ? name : 'common'; // The common allowlist does not have a name associated to it.
+            const filePath = join(autocompleteOutputFolder, `${contextName}.json`);
             const code = JSON.stringify(
               { suggestions: createAutocompleteDefinitions(painlessClasses) },
               null,

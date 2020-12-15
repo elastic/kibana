@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { JsonValue } from '../../../../common/typed_json';
 import { euiStyled } from '../../../../../observability/public';
 import { LogColumn } from '../../../../common/http_api';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
@@ -22,6 +23,7 @@ interface LogEntryFieldColumnProps {
   highlights: LogColumn[];
   isActiveHighlight: boolean;
   wrapMode: WrapMode;
+  render?: (value: JsonValue) => React.ReactNode;
 }
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
@@ -29,6 +31,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   highlights: [firstHighlight], // we only support one highlight for now
   isActiveHighlight,
   wrapMode,
+  render,
 }) => {
   if (isFieldColumn(columnValue)) {
     return (
@@ -37,6 +40,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
           highlightTerms={isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : []}
           isActiveHighlight={isActiveHighlight}
           value={columnValue.value}
+          render={render}
         />
       </FieldColumnContent>
     );

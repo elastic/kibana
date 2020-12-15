@@ -40,7 +40,8 @@ export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
 export const HEADER = '[data-test-subj="header"]';
 
-export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
+export const HEADERS_GROUP =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
