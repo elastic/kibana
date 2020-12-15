@@ -139,6 +139,33 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should allow customizing the kibana footer link', async () => {
+      await supertest
+        .post(`/api/actions/action/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'message with markdown',
+            message: 'message',
+            kibanaFooterLink: {
+              path: '/my/path',
+              text: 'View my path in Kibana',
+            },
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { text, html } = resp.body.data.message;
+          expect(text).to.eql(
+            'message\n\n--\n\nThis message was sent by Kibana. [View my path in Kibana](https://localhost:5601/my/path).'
+          );
+          expect(html).to.eql(
+            `<p>message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601/my/path\">View my path in Kibana</a>.</p>\n`
+          );
+        });
+    });
+
     it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
       await supertest
         .post('/api/actions/action')
