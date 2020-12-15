@@ -19,7 +19,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, truncate, unit } from '../../../../style/variables';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
@@ -124,7 +124,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       width: px(unit * 12),
       render: (_, { occurrences }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             series={occurrences.timeseries ?? undefined}
             valueLabel={i18n.translate(

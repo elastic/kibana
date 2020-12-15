@@ -34,7 +34,7 @@ import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDeta
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TableLinkFlexItem } from '../table_link_flex_item';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -209,7 +209,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
@@ -229,7 +229,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { throughput }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis0"
             compact
             series={throughput.timeseries ?? undefined}
@@ -249,7 +249,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 8),
       render: (_, { errorRate }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             compact
             series={errorRate.timeseries ?? undefined}

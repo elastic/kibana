@@ -12,6 +12,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -28,7 +29,7 @@ import {
 } from '../../../../services/rest/createCallApmApi';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { px, unit } from '../../../../style/variables';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
@@ -61,32 +62,32 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       ),
       render: (_, item) => {
         const { serviceNodeName } = item;
-        const isMissing = serviceNodeName === SERVICE_NODE_NAME_MISSING;
-        const text = isMissing
+        const isMissingServiceNodeName =
+          serviceNodeName === SERVICE_NODE_NAME_MISSING;
+        const text = isMissingServiceNodeName
           ? UNIDENTIFIED_SERVICE_NODES_LABEL
           : serviceNodeName;
 
-        const link =
-          agentName === 'java' ? (
-            <ServiceNodeMetricOverviewLink
-              serviceName={serviceName}
-              serviceNodeName={item.serviceNodeName}
-            >
-              {text}
-            </ServiceNodeMetricOverviewLink>
-          ) : (
-            <MetricOverviewLink
-              serviceName={serviceName}
-              mergeQuery={(query) => ({
-                ...query,
-                kuery: isMissing
-                  ? `NOT (service.node.name:*)`
-                  : `service.node.name:"${item.serviceNodeName}"`,
-              })}
-            >
-              {text}
-            </MetricOverviewLink>
-          );
+        const link = isJavaAgentName(agentName) ? (
+          <ServiceNodeMetricOverviewLink
+            serviceName={serviceName}
+            serviceNodeName={item.serviceNodeName}
+          >
+            {text}
+          </ServiceNodeMetricOverviewLink>
+        ) : (
+          <MetricOverviewLink
+            serviceName={serviceName}
+            mergeQuery={(query) => ({
+              ...query,
+              kuery: isMissingServiceNodeName
+                ? `NOT (service.node.name:*)`
+                : `service.node.name:"${item.serviceNodeName}"`,
+            })}
+          >
+            {text}
+          </MetricOverviewLink>
+        );
 
         return <TruncateWithTooltip text={text} content={link} />;
       },
@@ -103,7 +104,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis1"
             series={latency?.timeseries}
             valueLabel={asDuration(latency?.value)}
@@ -123,7 +124,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { throughput }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis0"
             series={throughput?.timeseries}
@@ -144,7 +145,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       width: px(unit * 8),
       render: (_, { errorRate }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis7"
             series={errorRate?.timeseries}
@@ -165,7 +166,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       width: px(unit * 8),
       render: (_, { cpuUsage }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis2"
             series={cpuUsage?.timeseries}
@@ -186,7 +187,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       width: px(unit * 8),
       render: (_, { memoryUsage }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis3"
             series={memoryUsage?.timeseries}
