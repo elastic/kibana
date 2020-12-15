@@ -6,13 +6,9 @@
 
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../types';
-
-const migrationToken = NonEmptyString;
-
 export const finalizeSignalsMigrationSchema = t.exact(
   t.type({
-    migration_token: migrationToken,
+    migration_ids: t.array(t.string),
   })
 );
 
