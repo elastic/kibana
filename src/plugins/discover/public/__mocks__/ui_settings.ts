@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IUiSettingsClient } from 'kibana/public';
+import { SAMPLE_SIZE_SETTING } from '../../common';
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/src/test_utils'],
-};
+export const uiSettingsMock = ({
+  get: (key: string) => {
+    if (key === SAMPLE_SIZE_SETTING) {
+      return 10;
+    }
+  },
+} as unknown) as IUiSettingsClient;
