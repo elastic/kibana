@@ -23,7 +23,7 @@ interface ExpandableSectionSplomProps {
 }
 
 export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = (props) => {
-  const splomSectionHeaderItems = undefined; // getSplomSectionHeaderItems(splom);
+  const splomSectionHeaderItems = undefined;
   const splomSectionContent = (
     <>
       <EuiHorizontalRule size="full" margin="none" />

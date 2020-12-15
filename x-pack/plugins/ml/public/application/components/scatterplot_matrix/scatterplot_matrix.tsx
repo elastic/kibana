@@ -179,7 +179,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     return () => {
       options.didCancel = true;
     };
-  }, [fetchSize, fields, index, randomizeQuery, resultsField]);
+    // stringify the fields array, otherwise the comparator will trigger on new but identical instances.
+  }, [fetchSize, JSON.stringify(fields), index, randomizeQuery, resultsField]);
 
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
