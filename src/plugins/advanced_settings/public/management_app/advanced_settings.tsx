@@ -20,15 +20,19 @@
 import React, { Component } from 'react';
 import { matchPath, RouteChildrenProps } from 'react-router-dom';
 import { Subscription } from 'rxjs';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 import { UnregisterCallback } from 'history';
+import { parse, stringify } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
+import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+
+import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
+import { url } from '../../../kibana_utils/public';
+
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
@@ -163,7 +167,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
     if (routeQuery) return routeQuery;
 
-    return new URLSearchParams(search ?? this.props.location.search).get(QUERY) ?? '';
+    const query = parse(search ?? this.props.location.search) ?? {};
+
+    return (query[QUERY] as string) ?? '';
   }
 
   private getQueryState(pathname?: string, search?: string): AdvancedSettingsState {
@@ -180,16 +186,22 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   setUrlQuery(q: string = '') {
-    const searchParams = new URLSearchParams(this.props.location.search);
+    const searchParams = parse(this.props.location.search);
+
     if (q) {
-      searchParams.set(QUERY, q);
+      searchParams[QUERY] = q;
     } else {
-      searchParams.delete(QUERY);
+      delete searchParams[QUERY];
     }
+
+    const search = stringify(url.encodeQuery(searchParams, undefined, false), {
+      sort: false,
+      encode: false,
+    });
+
     this.props.history.push({
-      // remove any route query param
-      pathname: '',
-      search: searchParams.toString(),
+      pathname: '', // remove any route query param
+      search,
     });
   }
 

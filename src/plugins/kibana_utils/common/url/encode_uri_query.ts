@@ -43,15 +43,16 @@ export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
 
 export const encodeQuery = (
   query: ParsedQuery,
-  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
-) =>
-  transform(query, (result: any, value, key) => {
+  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery,
+  pctEncodeSpaces = true
+): ParsedQuery =>
+  transform<any, ParsedQuery>(query, (result, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;
 
       result[key] = encodeFunction(
         singleValue === undefined || singleValue === null ? '' : singleValue,
-        true
+        pctEncodeSpaces
       );
     }
   });
