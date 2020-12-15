@@ -47,7 +47,6 @@ import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../e
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { getAsset } from '../../services/epm/archive/storage';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
