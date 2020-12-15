@@ -6,9 +6,10 @@
 
 import { disableAlertRoute } from './disable';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const alertsClient = alertsClientMock.create();
 
@@ -22,7 +23,7 @@ beforeEach(() => {
 
 describe('disableAlertRoute', () => {
   it('disables an alert', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     disableAlertRoute(router, licenseState);
@@ -55,5 +56,25 @@ describe('disableAlertRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('ensures the alert type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    disableAlertRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    alertsClient.disable.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

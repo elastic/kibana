@@ -5,36 +5,37 @@
  */
 
 import {
-  CaseResponse,
-  CasesResponse,
-  CasesFindResponse,
+  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
+  CaseResponse,
+  CasesFindResponse,
+  CasesResponse,
   CasesStatusResponse,
-  CommentRequestUserType,
-  User,
+  CaseStatuses,
   CaseUserActionsResponse,
-  CaseExternalServiceRequest,
+  CommentRequest,
+  CommentType,
+  ConnectorField,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
-  ActionTypeExecutorResult,
-  CommentType,
-  CaseStatuses,
+  User,
 } from '../../../../case/common/api';
 
 import {
-  CASE_STATUS_URL,
-  CASES_URL,
-  CASE_TAGS_URL,
-  CASE_REPORTERS_URL,
   ACTION_TYPES_URL,
-  ACTION_URL,
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
 } from '../../../../case/common/constants';
 
 import {
+  getCaseCommentsUrl,
+  getCaseConfigurePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
-  getCaseCommentsUrl,
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -61,9 +62,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeServiceConnectorCaseResponse,
 } from './utils';
-
 import * as i18n from './translations';
-
+import { ActionTypeExecutorResult } from '../../../../actions/common';
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
@@ -183,7 +183,7 @@ export const patchCasesStatus = async (
 };
 
 export const postComment = async (
-  newComment: CommentRequestUserType,
+  newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<Case> => {
@@ -245,15 +245,17 @@ export const pushCase = async (
 
 export const pushToService = async (
   connectorId: string,
+  connectorType: string,
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<
     ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
-  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
+  >(`${getCaseConfigurePushUrl(connectorId)}`, {
     method: 'POST',
     body: JSON.stringify({
-      params: { subAction: 'pushToService', subActionParams: casePushParams },
+      connector_type: connectorType,
+      params: casePushParams,
     }),
     signal,
   });
@@ -261,7 +263,6 @@ export const pushToService = async (
   if (response.status === 'error') {
     throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
   }
-
   return decodeServiceConnectorCaseResponse(response.data);
 };
 
@@ -270,5 +271,22 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
     method: 'GET',
     signal,
   });
+  return response;
+};
+export const getFields = async (
+  connectorId: string,
+  connectorType: string,
+  signal: AbortSignal
+): Promise<ConnectorField[]> => {
+  const response = await KibanaServices.get().http.fetch<ConnectorField[]>(
+    `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}`,
+    {
+      query: {
+        connector_type: connectorType,
+      },
+      method: 'GET',
+      signal,
+    }
+  );
   return response;
 };

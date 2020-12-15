@@ -18,16 +18,10 @@ import {
   isOutdatedResourceState,
   LoadedResourceState,
   Pagination,
-  TrustedAppCreateFailure,
   TrustedAppsListData,
   TrustedAppsListPageLocation,
   TrustedAppsListPageState,
 } from '../state';
-import {
-  isTrustedAppCreateFailureState,
-  isTrustedAppCreatePendingState,
-  isTrustedAppCreateSuccessState,
-} from '../state/type_guards';
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const freshDataTimestamp = state.listView.freshDataTimestamp;
@@ -133,26 +127,38 @@ export const getDeletionDialogEntry = (
   return state.deletionDialog.entry;
 };
 
-export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
-  createView,
-}) => {
-  return isTrustedAppCreatePendingState(createView);
+export const isCreationDialogLocation = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.location.show === 'create';
 };
 
-export const getTrustedAppCreateData: (
+export const getCreationSubmissionResourceState = (
   state: Immutable<TrustedAppsListPageState>
-) => undefined | Immutable<NewTrustedApp> = ({ createView }) => {
-  return (isTrustedAppCreatePendingState(createView) && createView.data) || undefined;
+): Immutable<AsyncResourceState<TrustedApp>> => {
+  return state.creationDialog.submissionResourceState;
 };
 
-export const getApiCreateErrors: (
+export const getCreationDialogFormEntry = (
   state: Immutable<TrustedAppsListPageState>
-) => undefined | TrustedAppCreateFailure['data'] = ({ createView }) => {
-  return (isTrustedAppCreateFailureState(createView) && createView.data) || undefined;
+): Immutable<NewTrustedApp> | undefined => {
+  return state.creationDialog.formState?.entry;
 };
 
-export const wasCreateSuccessful: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
-  createView,
-}) => {
-  return isTrustedAppCreateSuccessState(createView);
+export const isCreationDialogFormValid = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.creationDialog.formState?.isValid || false;
+};
+
+export const isCreationInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadingResourceState(state.creationDialog.submissionResourceState);
+};
+
+export const isCreationSuccessful = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadedResourceState(state.creationDialog.submissionResourceState);
+};
+
+export const getCreationError = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<ServerApiError> | undefined => {
+  const submissionResourceState = state.creationDialog.submissionResourceState;
+
+  return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };

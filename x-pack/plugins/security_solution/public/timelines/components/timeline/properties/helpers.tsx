@@ -4,40 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiModal,
-  EuiOverlayMask,
-  EuiToolTip,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip, EuiTextArea } from '@elastic/eui';
 import { pick } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  TimelineTypeLiteral,
-  TimelineType,
-  TimelineStatusLiteral,
-} from '../../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 
-import { Notes } from '../../notes';
-import { AssociateNote } from '../../notes/helpers';
-
-import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, NameWrapper } from './styles';
+import { DescriptionContainer, NameField, NameWrapper } from './styles';
 import * as i18n from './translations';
 import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
@@ -79,6 +59,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       fill={isFavorite}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
     >
       {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
     </EuiButton>
@@ -89,8 +70,8 @@ AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 interface DescriptionProps {
+  autoFocus?: boolean;
   timelineId: string;
-  isTextArea?: boolean;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
   disabled?: boolean;
@@ -98,8 +79,8 @@ interface DescriptionProps {
 
 export const Description = React.memo<DescriptionProps>(
   ({
+    autoFocus = false,
     timelineId,
-    isTextArea = false,
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
@@ -125,28 +106,21 @@ export const Description = React.memo<DescriptionProps>(
     );
 
     const inputField = useMemo(
-      () =>
-        isTextArea ? (
-          <EuiTextArea
-            data-test-subj="timeline-description-textarea"
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            onChange={onDescriptionChanged}
-            placeholder={i18n.DESCRIPTION}
-            value={description}
-            disabled={disabled}
-          />
-        ) : (
-          <EuiFieldText
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            data-test-subj="timeline-description-input"
-            onChange={onDescriptionChanged}
-            placeholder={i18n.DESCRIPTION}
-            spellCheck={true}
-            value={description}
-          />
-        ),
-      [description, isTextArea, onDescriptionChanged, disabled]
+      () => (
+        <EuiTextArea
+          autoFocus={autoFocus}
+          data-test-subj="timeline-description-textarea"
+          aria-label={i18n.TIMELINE_DESCRIPTION}
+          fullWidth
+          onChange={onDescriptionChanged}
+          placeholder={i18n.DESCRIPTION}
+          value={description}
+          disabled={disabled}
+        />
+      ),
+      [autoFocus, description, onDescriptionChanged, disabled]
     );
+
     return (
       <DescriptionContainer data-test-subj="description-container">
         {disableTooltip ? (
@@ -182,7 +156,6 @@ export const Name = React.memo<NameProps>(
     timelineId,
   }) => {
     const dispatch = useDispatch();
-    const timelineNameRef = useRef<HTMLInputElement>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
     const { title, timelineType } = useDeepEqualSelector((state) =>
@@ -197,15 +170,10 @@ export const Name = React.memo<NameProps>(
       [dispatch, timelineId, disableAutoSave]
     );
 
-    useEffect(() => {
-      if (autoFocus && timelineNameRef && timelineNameRef.current) {
-        timelineNameRef.current.focus();
-      }
-    }, [autoFocus]);
-
     const nameField = useMemo(
       () => (
         <NameField
+          autoFocus={autoFocus}
           aria-label={i18n.TIMELINE_TITLE}
           data-test-subj="timeline-title-input"
           disabled={disabled}
@@ -215,10 +183,9 @@ export const Name = React.memo<NameProps>(
           }
           spellCheck={true}
           value={title}
-          inputRef={timelineNameRef}
         />
       ),
-      [handleChange, timelineType, title, disabled]
+      [autoFocus, handleChange, timelineType, title, disabled]
     );
 
     return (
@@ -258,42 +225,11 @@ export const NewTimeline = React.memo<NewTimelineProps>(
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
-  animate?: boolean;
-  associateNote: AssociateNote;
-  noteIds: string[];
-  size: 's' | 'l';
-  status: TimelineStatusLiteral;
   showNotes: boolean;
   toggleShowNotes: () => void;
-  text?: string;
   toolTip?: string;
   timelineType: TimelineTypeLiteral;
 }
-
-interface LargeNotesButtonProps {
-  noteIds: string[];
-  text?: string;
-  toggleShowNotes: () => void;
-}
-
-const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
-  <EuiButton data-test-subj="timeline-notes-button-large" onClick={toggleShowNotes} size="m">
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="subdued" size="m" type="editorComment" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {text && text.length ? <LabelText>{text}</LabelText> : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
-          {noteIds.length}
-        </NotesCountBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiButton>
-));
-LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
   toggleShowNotes: () => void;
@@ -315,83 +251,13 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, t
 });
 SmallNotesButton.displayName = 'SmallNotesButton';
 
-/**
- * The internal implementation of the `NotesButton`
- */
-const NotesButtonComponent = React.memo<NotesButtonProps>(
-  ({
-    animate = true,
-    associateNote,
-    noteIds,
-    showNotes,
-    size,
-    status,
-    toggleShowNotes,
-    text,
-    timelineType,
-  }) => (
-    <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
-      <>
-        {size === 'l' ? (
-          <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
-        ) : (
-          <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
-        )}
-        {size === 'l' && showNotes ? (
-          <EuiOverlayMask>
-            <EuiModal
-              data-test-subj="notesModal"
-              maxWidth={NOTES_PANEL_WIDTH}
-              onClose={toggleShowNotes}
-            >
-              <Notes associateNote={associateNote} status={status} noteIds={noteIds} />
-            </EuiModal>
-          </EuiOverlayMask>
-        ) : null}
-      </>
-    </ButtonContainer>
-  )
-);
-NotesButtonComponent.displayName = 'NotesButtonComponent';
-
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({
-    animate = true,
-    associateNote,
-    noteIds,
-    showNotes,
-    size,
-    status,
-    timelineType,
-    toggleShowNotes,
-    toolTip,
-    text,
-  }) =>
+  ({ showNotes, timelineType, toggleShowNotes, toolTip }) =>
     showNotes ? (
-      <NotesButtonComponent
-        animate={animate}
-        associateNote={associateNote}
-        noteIds={noteIds}
-        showNotes={showNotes}
-        size={size}
-        status={status}
-        toggleShowNotes={toggleShowNotes}
-        text={text}
-        timelineType={timelineType}
-      />
+      <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <NotesButtonComponent
-          animate={animate}
-          associateNote={associateNote}
-          noteIds={noteIds}
-          showNotes={showNotes}
-          size={size}
-          status={status}
-          toggleShowNotes={toggleShowNotes}
-          text={text}
-          timelineType={timelineType}
-        />
+        <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
       </EuiToolTip>
     )
 );

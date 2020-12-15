@@ -20,7 +20,7 @@
 import * as React from 'react';
 import { DashboardContainerInput } from './dashboard_container';
 import { DashboardContainerFactory } from './dashboard_container_factory';
-import { EmbeddableRenderer } from '../../../../embeddable/public';
+import { EmbeddableRenderer } from '../../services/embeddable';
 
 interface Props {
   input: DashboardContainerInput;
