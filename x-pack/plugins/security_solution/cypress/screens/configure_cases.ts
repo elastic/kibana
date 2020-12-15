@@ -28,3 +28,5 @@ export const TOASTER = '[data-test-subj="euiToastHeader"]';
 export const URL = '[data-test-subj="apiUrlFromInput"]';
 
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
+
+export const SERVICE_NOW_MAPPING = 'code[data-test-subj="field-mapping-target"]';
