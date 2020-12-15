@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldTypesSelect } from './field_types_select';
+export { ExpandedRowFieldHeader } from './expanded_row_field_header';
