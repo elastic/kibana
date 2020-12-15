@@ -126,11 +126,17 @@ export async function getTransactionBreakdown({
         const type = bucket.key as string;
 
         return bucket.subtypes.buckets.map((subBucket) => {
+          const totalSelfTimePerSubtype =
+            subBucket.total_self_time_per_subtype.value || 0;
+
+          const percentage =
+            sumAllSelfTimes < 0 || totalSelfTimePerSubtype < 0
+              ? 0
+              : totalSelfTimePerSubtype / sumAllSelfTimes;
+
           return {
             name: (subBucket.key as string) || type,
-            percentage:
-              (subBucket.total_self_time_per_subtype.value || 0) /
-              sumAllSelfTimes,
+            percentage,
           };
         });
       })
