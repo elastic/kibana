@@ -31,7 +31,6 @@ import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
-import { RouteChildrenProps } from 'react-router-dom';
 import { Search } from './components/search';
 
 jest.mock('./components/field', () => ({
@@ -236,28 +235,29 @@ function mockConfig() {
 
 describe('AdvancedSettings', () => {
   const defaultQuery = 'test:string:setting';
-  const getMockRouteParams = (
-    query: string = defaultQuery
-  ): RouteChildrenProps<{ query: string }> =>
-    ({
-      match: {
-        params: {
-          query,
-        },
-      },
-      location: {
-        search: `?query=${query}`,
-      },
-      history: {
-        push: jest.fn(),
-        listen: jest.fn(),
-      },
-    } as any);
+  const mockHistory = {
+    listen: jest.fn(),
+  } as any;
+  const locationSpy = jest.spyOn(window, 'location', 'get');
+
+  afterAll(() => {
+    locationSpy.mockRestore();
+  });
+
+  const mockQuery = (query = defaultQuery) => {
+    locationSpy.mockImplementation(
+      () =>
+        ({
+          search: `?query=${query}`,
+        } as any)
+    );
+  };
 
   it('should render specific setting if given setting key', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
       <AdvancedSettings
-        {...getMockRouteParams()}
+        history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -276,9 +276,10 @@ describe('AdvancedSettings', () => {
   });
 
   it('should render read-only when saving is disabled', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
       <AdvancedSettings
-        {...getMockRouteParams()}
+        history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -299,11 +300,12 @@ describe('AdvancedSettings', () => {
 
   it('should render unfiltered with query parsing error', async () => {
     const badQuery = 'category:(accessibility))';
+    mockQuery(badQuery);
     const { toasts } = notificationServiceMock.createStartContract();
     const getComponent = () =>
       shallowWithI18nProvider(
         <AdvancedSettings
-          {...getMockRouteParams(badQuery)}
+          history={mockHistory}
           enableSaving={false}
           toasts={toasts}
           dockLinks={docLinksServiceMock.createStartContract().links}
