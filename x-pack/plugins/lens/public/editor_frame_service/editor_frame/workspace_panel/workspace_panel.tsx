@@ -219,12 +219,11 @@ export function WorkspacePanel({
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
-          dispatch({
-            type: 'UPDATE_VISUALIZATION_STATE',
-            visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
-          });
-        }
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+        });
       }
     },
     [plugins.uiActions, dispatch, activeVisualization]
