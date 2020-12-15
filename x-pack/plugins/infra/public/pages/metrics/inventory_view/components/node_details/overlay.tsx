@@ -8,6 +8,7 @@ import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elas
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiOutsideClickDetector } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../observability/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -69,54 +70,60 @@ export const NodeContextPopover = ({
   }
 
   return (
-    <EuiPortal>
-      <OverlayPanel>
-        <OverlayHeader>
-          <EuiFlexGroup responsive={false} gutterSize="m">
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="xs">
-                <h4>{node.name}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconSide={'left'}
-                    iconType={'popout'}
-                    href={nodeDetailMenuItemLinkProps.href}
-                    flush="both"
-                  >
-                    <FormattedMessage
-                      id="xpack.infra.infra.nodeDetails.openAsPage"
-                      defaultMessage="Open as page"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" onClick={onClose} iconType="cross" flush="both">
-                    <FormattedMessage
-                      id="xpack.infra.infra.nodeDetails.close"
-                      defaultMessage="Close"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiTabs size="s">
-            {tabs.map((tab, i) => (
-              <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </OverlayHeader>
-        {tabs[selectedTab].content}
-      </OverlayPanel>
-    </EuiPortal>
+    <EuiOutsideClickDetector onOutsideClick={onClose}>
+      <EuiPortal>
+        <OverlayPanel>
+          <OverlayHeader>
+            <EuiFlexGroup responsive={false} gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="xs">
+                  <h4>{node.name}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconSide={'left'}
+                      iconType={'popout'}
+                      href={nodeDetailMenuItemLinkProps.href}
+                      flush="both"
+                    >
+                      <FormattedMessage
+                        id="xpack.infra.infra.nodeDetails.openAsPage"
+                        defaultMessage="Open as page"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="xs" onClick={onClose} iconType="cross" flush="both">
+                      <FormattedMessage
+                        id="xpack.infra.infra.nodeDetails.close"
+                        defaultMessage="Close"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiTabs size="s">
+              {tabs.map((tab, i) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={i === selectedTab}
+                  onClick={() => setSelectedTab(i)}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </OverlayHeader>
+          {tabs[selectedTab].content}
+        </OverlayPanel>
+      </EuiPortal>
+    </EuiOutsideClickDetector>
   );
 };
 
