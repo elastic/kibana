@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiBasicTableProps } from '@elastic/eui';
-import React from 'react';
 import styled from 'styled-components';
 
 /**
@@ -43,14 +41,3 @@ export const ServiceOverviewTableContainer = styled.div<{
       isEmptyAndLoading ? 'hidden' : 'visible'};
   }
 `;
-
-export function ServiceOverviewTable<T>(props: EuiBasicTableProps<T>) {
-  const { items, loading } = props;
-  const isEmptyAndLoading = !!(items.length === 0 && loading);
-
-  return (
-    <ServiceOverviewTableContainer isEmptyAndLoading={isEmptyAndLoading}>
-      <EuiBasicTable {...props} />
-    </ServiceOverviewTableContainer>
-  );
-}

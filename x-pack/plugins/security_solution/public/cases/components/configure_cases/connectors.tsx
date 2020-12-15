@@ -18,7 +18,9 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector } from '../../containers/configure/types';
+import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
+import { Mapping } from './mapping';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -31,24 +33,26 @@ const EuiFormRowExtended = styled(EuiFormRow)`
 export interface Props {
   connectors: ActionConnector[];
   disabled: boolean;
-  isLoading: boolean;
-  updateConnectorDisabled: boolean;
-  onChangeConnector: (id: string) => void;
-  selectedConnector: string;
   handleShowEditFlyout: () => void;
+  isLoading: boolean;
+  mappings: CaseConnectorMapping[];
+  onChangeConnector: (id: string) => void;
+  selectedConnector: { id: string; type: string };
+  updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
   connectors,
-  isLoading,
   disabled,
-  updateConnectorDisabled,
+  handleShowEditFlyout,
+  isLoading,
+  mappings,
   onChangeConnector,
   selectedConnector,
-  handleShowEditFlyout,
+  updateConnectorDisabled,
 }) => {
   const connectorsName = useMemo(
-    () => connectors.find((c) => c.id === selectedConnector)?.name ?? 'none',
-    [connectors, selectedConnector]
+    () => connectors.find((c) => c.id === selectedConnector.id)?.name ?? 'none',
+    [connectors, selectedConnector.id]
   );
 
   const dropDownLabel = useMemo(
@@ -68,10 +72,8 @@ const ConnectorsComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorsName, updateConnectorDisabled]
+    [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
-
   return (
     <>
       <EuiDescribedFormGroup
@@ -85,15 +87,28 @@ const ConnectorsComponent: React.FC<Props> = ({
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
         >
-          <ConnectorsDropdown
-            connectors={connectors}
-            disabled={disabled}
-            selectedConnector={selectedConnector}
-            isLoading={isLoading}
-            onChange={onChangeConnector}
-            data-test-subj="case-connectors-dropdown"
-            appendAddConnectorButton={true}
-          />
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <ConnectorsDropdown
+                connectors={connectors}
+                disabled={disabled}
+                selectedConnector={selectedConnector.id}
+                isLoading={isLoading}
+                onChange={onChangeConnector}
+                data-test-subj="case-connectors-dropdown"
+                appendAddConnectorButton={true}
+              />
+            </EuiFlexItem>
+            {selectedConnector.type !== ConnectorTypes.none ? (
+              <EuiFlexItem grow={false}>
+                <Mapping
+                  connectorActionTypeId={selectedConnector.type}
+                  isLoading={isLoading}
+                  mappings={mappings}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>
     </>
