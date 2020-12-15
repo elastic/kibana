@@ -10,6 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiModal, EuiModalBody } from '@elastic/eui';
 
+import { ApiCodeExample } from './modal_components';
 import { DocumentCreationStep } from './types';
 import { DocumentCreationModal, DocumentCreationButtons } from './';
 
@@ -57,7 +58,7 @@ describe('DocumentCreationModal', () => {
         setMockValues({ ...values, creationMode: 'api' });
         const wrapper = shallow(<DocumentCreationModal />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('ApiCodeExample'); // TODO: actual component
+        expect(wrapper.find(ApiCodeExample)).toHaveLength(1);
       });
 
       it('renders PasteJsonText', () => {

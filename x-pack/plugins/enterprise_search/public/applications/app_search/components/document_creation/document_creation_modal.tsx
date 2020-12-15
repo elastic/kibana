@@ -20,6 +20,8 @@ import {
 import { DocumentCreationLogic, DocumentCreationButtons } from './';
 import { DocumentCreationStep } from './types';
 
+import { ApiCodeExample } from './creation_mode_components';
+
 export const DocumentCreationModal: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
   const { isDocumentCreationOpen, creationMode, creationStep } = useValues(DocumentCreationLogic);
@@ -40,7 +42,7 @@ export const DocumentCreationModal: React.FC = () => {
           {creationStep === DocumentCreationStep.ShowError && <>DocumentCreationError</>}
           {creationStep === DocumentCreationStep.ShowCreationModes && <DocumentCreationButtons />}
           {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'api' && (
-            <>ApiCodeExample</>
+            <ApiCodeExample />
           )}
           {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'text' && (
             <>PasteJsonText</>
