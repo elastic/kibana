@@ -408,8 +408,6 @@ export interface DataState {
    * If a node ID exists in the map it means that node came into view in the graph.
    */
   readonly nodeData?: Map<string, NodeData>;
-
-  readonly nodeDataRequestID: number;
 }
 
 /**

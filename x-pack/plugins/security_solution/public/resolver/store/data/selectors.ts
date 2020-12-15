@@ -117,7 +117,7 @@ export const eventsInCategoryResultIsStale = createSelector(
   currentNodeEventsInCategoryRequestID,
   refreshCount,
   function eventsInCategoryResultIsStale(oldID, newID) {
-    return oldID !== undefined && newID !== undefined && oldID !== newID;
+    return oldID !== undefined && oldID !== newID;
   }
 );
 
@@ -125,7 +125,7 @@ export const currentRelatedEventIsStale = createSelector(
   currentRelatedEventRequestID,
   refreshCount,
   function currentRelatedEventIsStale(oldID, newID) {
-    return oldID !== undefined && newID !== undefined && oldID !== newID;
+    return oldID !== undefined && oldID !== newID;
   }
 );
 
@@ -136,18 +136,6 @@ export const currentRelatedEventIsStale = createSelector(
 const nodeData = (state: DataState): Map<string, NodeData> | undefined => {
   return state.nodeData;
 };
-
-const nodeDataRequestID = (state: DataState): number => {
-  return state.nodeDataRequestID;
-};
-
-export const nodeDataIsStale = createSelector(
-  nodeDataRequestID,
-  refreshCount,
-  function nodeDataIsStale(oldID, newID) {
-    return newID > oldID;
-  }
-);
 
 /**
  * Returns a function that can be called to retrieve the node data for a specific node ID.
