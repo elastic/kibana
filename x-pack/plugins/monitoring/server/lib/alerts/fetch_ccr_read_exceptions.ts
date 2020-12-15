@@ -10,7 +10,8 @@ import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 export async function fetchCCRReadExceptions(
   callCluster: any,
   index: string,
-  duration: string,
+  startMs: number,
+  endMs: number,
   size: number
 ): Promise<CCRReadExceptionsStats[]> {
   const params = {
@@ -25,7 +26,9 @@ export async function fetchCCRReadExceptions(
               nested: {
                 path: 'ccr_stats.read_exceptions',
                 query: {
-                  match_all: {},
+                  exists: {
+                    field: 'ccr_stats.read_exceptions.exception',
+                  },
                 },
               },
             },
@@ -37,7 +40,9 @@ export async function fetchCCRReadExceptions(
             {
               range: {
                 timestamp: {
-                  gte: `now-${duration}`,
+                  format: 'epoch_millis',
+                  gte: startMs,
+                  lte: endMs,
                 },
               },
             },

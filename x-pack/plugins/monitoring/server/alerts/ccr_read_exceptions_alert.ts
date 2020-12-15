@@ -26,6 +26,7 @@ import {
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { parseDuration } from '../../../alerts/common/parse_duration';
 import { SanitizedAlert } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -74,11 +75,15 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const { duration } = params;
+    const { duration: durationString } = params;
+    const duration = parseDuration(durationString);
+    const endMs = +new Date();
+    const startMs = endMs - duration;
     const stats = await fetchCCRReadExceptions(
       callCluster,
       esIndexPattern,
-      duration as string,
+      startMs,
+      endMs,
       Globals.app.config.ui.max_bucket_size
     );
 
@@ -212,7 +217,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
       'xpack.monitoring.alerts.ccrReadExceptions.shortAction',
       {
         defaultMessage:
-          'Verify follower/leader index relationships across the affected remote clusters.',
+          'Verify follower and leader index relationships across the affected remote clusters.',
       }
     );
     const fullActionText = i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.fullAction', {
@@ -240,10 +245,10 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.firing.internalFullMessage',
       {
-        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. Current 'follower_index' indices are affected: {followerIndicesList}. {shortActionText}`,
+        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. Current 'follower_index' indices are affected: {followerIndicesList}. {action}`,
         values: {
+          action,
           remoteClustersList,
-          shortActionText,
           followerIndicesList,
         },
       }
