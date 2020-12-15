@@ -105,13 +105,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
 
   const pivotPreviewProps = {
-    ...usePivotData(
-      indexPattern.title,
-      pivotQuery,
-      stepDefineForm.transformFunction,
-      validationStatus,
-      requestPayload
-    ),
+    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
   };

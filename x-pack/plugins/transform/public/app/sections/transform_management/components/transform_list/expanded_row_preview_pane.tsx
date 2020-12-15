@@ -28,7 +28,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const { searchQuery, transformFunction, validationStatus, previewRequest } = useMemo(
+  const { searchQuery, validationStatus, previewRequest } = useMemo(
     () =>
       applyTransformConfigToDefineState(
         getDefaultStepDefineState({} as SearchItems),
@@ -46,7 +46,6 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
   const pivotPreviewProps = usePivotData(
     indexPatternTitle,
     pivotQuery,
-    transformFunction,
     validationStatus,
     previewRequest
   );

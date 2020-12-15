@@ -85,7 +85,7 @@ export function useLatestFunctionConfig(
   sortFieldOptions: Array<EuiComboBoxOptionOption<string>>;
   updateLatestFunctionConfig: (update: Partial<LatestFunctionConfigUI>) => void;
   validationStatus: { isValid: boolean; errorMessage?: string };
-  requestPayload: { latest: LatestFunctionConfig | undefined };
+  requestPayload: { latest: LatestFunctionConfig } | undefined;
 } {
   const [config, setLatestFunctionConfig] = useState<LatestFunctionConfigUI>({
     unique_key: defaults.unique_key,
@@ -105,12 +105,13 @@ export function useLatestFunctionConfig(
     [config]
   );
 
-  const requestPayload: { latest: LatestFunctionConfig | undefined } = useMemo(() => {
-    return { latest: latestConfigMapper.toAPIConfig(config) };
+  const requestPayload: { latest: LatestFunctionConfig } | undefined = useMemo(() => {
+    const latest = latestConfigMapper.toAPIConfig(config);
+    return latest ? { latest } : undefined;
   }, [config]);
 
-  const validationStatus = useMemo(() => validateLatestConfig(requestPayload.latest), [
-    requestPayload.latest,
+  const validationStatus = useMemo(() => validateLatestConfig(requestPayload?.latest), [
+    requestPayload?.latest,
   ]);
 
   return {

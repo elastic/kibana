@@ -42,5 +42,16 @@ export interface StepDefineExposedState {
   sourceConfigUpdated: boolean;
   valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
-  previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition };
+  /**
+   * Undefined when the form is incomplete or invalid
+   */
+  previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
+}
+
+export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
+  return typeof arg === 'object' && arg.hasOwnProperty('pivot');
+}
+
+export function isLatestPartialRequest(arg: any): arg is { latest: LatestFunctionConfig } {
+  return typeof arg === 'object' && arg.hasOwnProperty('latest');
 }

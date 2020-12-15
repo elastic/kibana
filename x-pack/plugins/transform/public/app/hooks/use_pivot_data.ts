@@ -21,24 +21,29 @@ import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
-import { getPreviewTransformRequestBody, PivotGroupByConfig, PivotQuery } from '../common';
+import { getPreviewTransformRequestBody, PivotQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
-import { TRANSFORM_FUNCTION, TransformFunction } from '../../../common/constants';
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { dictionaryToArray } from '../../../common/types/common';
+import {
+  isLatestPartialRequest,
+  isPivotPartialRequest,
+} from '../sections/create_transform/components/step_define/common/types';
 
-function sortColumns(groupByArr: PivotGroupByConfig[]) {
+function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some((d) => d.aggName === a) && groupByArr.some((d) => d.aggName === b)) {
+    if (
+      groupByArr.some((aggName) => aggName === a) &&
+      groupByArr.some((aggName) => aggName === b)
+    ) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some((d) => d.aggName === a)) {
+    if (groupByArr.some((aggName) => aggName === a)) {
       return -1;
     }
-    if (groupByArr.some((d) => d.aggName === b)) {
+    if (groupByArr.some((aggName) => aggName === b)) {
       return 1;
     }
     return a.localeCompare(b);
@@ -64,7 +69,6 @@ function sortColumnsForLatest(sortField: string) {
 export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
-  transformFunction: TransformFunction,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest']
 ): UseIndexDataReturnType => {
@@ -82,11 +86,11 @@ export const usePivotData = (
     (key) => previewMappingsProperties[key].type !== 'object'
   );
 
-  if (transformFunction === TRANSFORM_FUNCTION.PIVOT) {
-    const groupByArr = dictionaryToArray(requestPayload.pivot!.group_by);
+  if (isPivotPartialRequest(requestPayload)) {
+    const groupByArr = Object.keys(requestPayload.pivot.group_by);
     columnKeys.sort(sortColumns(groupByArr));
-  } else {
-    columnKeys.sort(sortColumnsForLatest(requestPayload.latest?.sort));
+  } else if (isLatestPartialRequest(requestPayload)) {
+    columnKeys.sort(sortColumnsForLatest(requestPayload.latest.sort));
   }
 
   // EuiDataGrid State

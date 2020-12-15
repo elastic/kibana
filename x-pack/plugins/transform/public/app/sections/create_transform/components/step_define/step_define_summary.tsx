@@ -27,7 +27,7 @@ import { GroupByListSummary } from '../group_by_list';
 
 import { StepDefineExposedState } from './common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
-import { isLatestTransform } from '../../../../../../common/types/transform';
+import { isLatestPartialRequest } from './common/types';
 
 interface Props {
   formState: StepDefineExposedState;
@@ -62,7 +62,6 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotPreviewProps = usePivotData(
     searchItems.indexPattern.title,
     pivotQuery,
-    transformFunction,
     validationStatus,
     partialPreviewRequest
   );
@@ -72,9 +71,9 @@ export const StepDefineSummary: FC<Props> = ({
     !isDefaultQuery(pivotQuery) &&
     !isMatchAllQuery(pivotQuery);
 
-  let uniqueKeys = [];
+  let uniqueKeys: string[] = [];
   let sortField = '';
-  if (isLatestTransform(previewRequest)) {
+  if (isLatestPartialRequest(previewRequest)) {
     uniqueKeys = previewRequest.latest.unique_key;
     sortField = previewRequest.latest.sort;
   }
