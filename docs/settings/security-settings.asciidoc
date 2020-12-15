@@ -340,13 +340,12 @@ You can enable audit logging to support compliance, accountability, and security
 For more details and a reference of audit events, refer to <<xpack-security-audit-logging>>.
 
 [cols="2*<"]
-|===
+|======
 | `xpack.security.audit.enabled`
 | Set to `true` to enable audit logging for security events. *Default:* `false`
 
-2+a| 
-[float]
 [[ecs-audit-logging-settings]]
+2+a| 
 ==== ECS audit logging settings
 
 To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify where you want to write the audit events using `xpack.security.audit.appender`.
@@ -370,8 +369,8 @@ xpack.security.audit.appender:
   layout:
     kind: json
 ----------------------------------------
-<1> Rotate log files every 24 hours
-<2> Keep maximum of 10 log files before deleting older ones
+<1> Rotates log files every 24 hours
+<2> Keeps maximum of 10 log files before deleting older ones
 
 | `xpack.security.audit.appender.kind`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file` or `rolling-file`. 
@@ -383,9 +382,8 @@ Refer to <<audit-logging-file-appender, file appender>> and <<audit-logging-roll
 
 Refer to <<audit-logging-pattern-layout, pattern layout>> for layout specific settings.
 
-2+a| 
-[float]
 [[audit-logging-file-appender]]
+2+a| 
 ===== File appender
 
 The `file` appender logs to a file and can be configured using the following settings:
@@ -393,9 +391,8 @@ The `file` appender logs to a file and can be configured using the following set
 | `xpack.security.audit.appender.path`
 | Required. Full file path the log file should be written to.
 
-2+a| 
-[float]
 [[audit-logging-rolling-file-appender]]
+2+a| 
 ===== Rolling file appender
 
 The `rolling-file` appender logs to a file and rotates it using a rolling strategy, when a particular policy is triggered:
@@ -412,19 +409,17 @@ Refer to <<audit-logging-size-limit-policy, size limit policy>> and <<audit-logg
 
 Refer to <<audit-logging-numeric-strategy, numeric strategy>> for strategy specific settings.
 
-2+a| 
-[float]
 [[audit-logging-size-limit-policy]]
+2+a| 
 ===== Size limit triggering policy
 
-The `size-limit` triggering policy will suffix the log file with a given pattern when rolling over, and will limit the number of rolled files to a fixed amount:
+The `size-limit` triggering policy will rotate the file when it reaches a certain size:
 
 | `xpack.security.audit.appender.policy.size`
 | Maximum size the log file should reach before a rollover should be performed. *Default:* `100mb`
 
-2+a| 
-[float]
 [[audit-logging-time-interval-policy]]
+2+a| 
 ===== Time interval triggering policy
 
 The `time-interval` triggering policy will rotate the file every given interval of time:
@@ -435,9 +430,8 @@ The `time-interval` triggering policy will rotate the file every given interval 
 | `xpack.security.audit.appender.policy.modulate`
 | Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. *Default:* `true`
 
-2+a| 
-[float]
 [[audit-logging-numeric-strategy]]
+2+a| 
 ===== Numeric rolling strategy
 
 The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
@@ -448,9 +442,8 @@ The `numeric` rolling strategy will suffix the log file with a given pattern whe
 | `xpack.security.audit.appender.strategy.max`
 | Maximum number of files to keep. Once this number is reached, oldest files will be deleted. *Default:* `7`
 
-2+a| 
-[float]
 [[audit-logging-pattern-layout]]
+2+a| 
 ===== Pattern layout
 
 The `pattern` layout outputs a string, formatted using a pattern with special placeholders, that will be replaced with data from the actual log message:
@@ -461,9 +454,8 @@ The `pattern` layout outputs a string, formatted using a pattern with special pl
 | `xpack.security.audit.appender.layout.highlight`
 | Optional. Set to `true` to enable highlighting log messages with colors.
 
-2+a| 
-[float]
 [[audit-logging-ignore-filters]]
+2+a| 
 ===== Ignore filters
 
 | `xpack.security.audit.ignore_filters[]`
@@ -492,4 +484,4 @@ xpack.security.audit.ignore_filters:
 
 | `xpack.security.audit.ignore_filters[].outcomes[]`
 | List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
-|===
+|======
