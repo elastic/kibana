@@ -38,6 +38,7 @@ export const TopValuesPreview: FC<FieldDataCardProps> = ({ config }) => {
       columnType={columnType}
       dataTestSubj={`mlDataGridChart-${config.fieldName}`}
       hideLabel={true}
+      maxChartColumns={10}
     />
   );
 };

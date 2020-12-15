@@ -19,6 +19,7 @@ interface Props {
   columnType: EuiDataGridColumn;
   dataTestSubj: string;
   hideLabel?: boolean;
+  maxChartColumns?: number;
 }
 
 const columnChartTheme = {
@@ -37,8 +38,14 @@ const columnChartTheme = {
   },
   scales: { barsPadding: 0.1 },
 };
-export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, hideLabel }) => {
-  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType);
+export const ColumnChart: FC<Props> = ({
+  chartData,
+  columnType,
+  dataTestSubj,
+  hideLabel,
+  maxChartColumns,
+}) => {
+  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (
     <div data-test-subj={dataTestSubj}>
@@ -68,7 +75,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, hi
       >
         {legendText}
       </div>
-      {hideLabel !== true && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
+      {!hideLabel && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
     </div>
   );
 };
