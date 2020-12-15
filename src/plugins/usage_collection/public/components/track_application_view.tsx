@@ -18,11 +18,11 @@
  */
 
 import { Component, ReactNode } from 'react';
-import { ApplicationUsageTracker } from '@kbn/analytics';
+import { UsageCollectionSetup } from '../plugin';
 
 interface Props {
   viewId: string;
-  applicationUsageTracker?: ApplicationUsageTracker;
+  applicationUsageTracker?: UsageCollectionSetup['applicationUsageTracker'];
   children: ReactNode;
 }
 

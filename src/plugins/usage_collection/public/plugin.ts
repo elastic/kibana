@@ -38,7 +38,10 @@ export interface PublicConfigType {
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
-  applicationUsageTracker: ApplicationUsageTracker;
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'trackApplicationViewUsage' | 'flushTrackedView'
+  >;
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
@@ -55,7 +58,10 @@ export interface UsageCollectionSetup {
 export interface UsageCollectionStart {
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
-  applicationUsageTracker: ApplicationUsageTracker;
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'trackApplicationViewUsage' | 'flushTrackedView'
+  >;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -86,7 +92,14 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     this.applicationUsageTracker = new ApplicationUsageTracker(this.reporter);
 
     return {
-      applicationUsageTracker: this.applicationUsageTracker,
+      applicationUsageTracker: {
+        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
+          this.applicationUsageTracker
+        ),
+        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
+          this.applicationUsageTracker
+        ),
+      },
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
@@ -117,7 +130,14 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     }
 
     return {
-      applicationUsageTracker: this.applicationUsageTracker,
+      applicationUsageTracker: {
+        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
+          this.applicationUsageTracker
+        ),
+        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
+          this.applicationUsageTracker
+        ),
+      },
       reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
     };
