@@ -15,6 +15,7 @@ interface DocumentCreationValues {
   creationMode: DocumentCreationMode;
   creationStep: DocumentCreationStep;
   textInput: string;
+  fileInput: FileList | [];
 }
 
 interface DocumentCreationActions {
@@ -23,6 +24,7 @@ interface DocumentCreationActions {
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
   setTextInput(textInput: string): { textInput: string };
+  setFileInput(fileInput: FileList): { fileInput: FileList };
 }
 
 export const DocumentCreationLogic = kea<
@@ -35,6 +37,7 @@ export const DocumentCreationLogic = kea<
     closeDocumentCreation: () => null,
     setCreationStep: (creationStep) => ({ creationStep }),
     setTextInput: (textInput) => ({ textInput }),
+    setFileInput: (fileInput) => ({ fileInput }),
   }),
   reducers: () => ({
     isDocumentCreationOpen: [
@@ -63,6 +66,12 @@ export const DocumentCreationLogic = kea<
       dedent(DOCUMENTS_API_JSON_EXAMPLE),
       {
         setTextInput: (_, { textInput }) => textInput,
+      },
+    ],
+    fileInput: [
+      [],
+      {
+        setFileInput: (_, { fileInput }) => fileInput,
       },
     ],
   }),

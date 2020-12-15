@@ -6,3 +6,4 @@
 
 export { ApiCodeExample } from './api_code_example';
 export { PasteJsonText } from './paste_json_text';
+export { UploadJsonFile } from './upload_json_file';

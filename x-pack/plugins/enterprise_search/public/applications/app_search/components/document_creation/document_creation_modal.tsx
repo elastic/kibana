@@ -20,7 +20,7 @@ import {
 import { DocumentCreationLogic, DocumentCreationButtons } from './';
 import { DocumentCreationStep } from './types';
 
-import { ApiCodeExample, PasteJsonText } from './creation_mode_components';
+import { ApiCodeExample, PasteJsonText, UploadJsonFile } from './creation_mode_components';
 
 export const DocumentCreationModal: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
@@ -48,7 +48,7 @@ export const DocumentCreationModal: React.FC = () => {
             <PasteJsonText />
           )}
           {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'file' && (
-            <>UploadJsonFile</>
+            <UploadJsonFile />
           )}
           {creationStep === DocumentCreationStep.ShowErrorSummary && <>DocumentCreationSummary</>}
           {creationStep === DocumentCreationStep.ShowSuccessSummary && <>DocumentCreationSummary</>}

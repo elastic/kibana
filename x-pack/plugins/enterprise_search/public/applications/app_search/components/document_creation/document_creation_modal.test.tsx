@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiModal, EuiModalBody } from '@elastic/eui';
 
-import { ApiCodeExample, PasteJsonText } from './modal_components';
+import { ApiCodeExample, PasteJsonText, UploadJsonFile } from './modal_components';
 import { DocumentCreationStep } from './types';
 import { DocumentCreationModal, DocumentCreationButtons } from './';
 
@@ -72,7 +72,7 @@ describe('DocumentCreationModal', () => {
         setMockValues({ ...values, creationMode: 'file' });
         const wrapper = shallow(<DocumentCreationModal />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('UploadJsonFile'); // TODO: actual component
+        expect(wrapper.find(UploadJsonFile)).toHaveLength(1);
       });
     });
 

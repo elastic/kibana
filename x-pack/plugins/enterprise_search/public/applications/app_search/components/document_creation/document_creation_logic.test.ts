@@ -17,6 +17,7 @@ describe('DocumentCreationLogic', () => {
     creationMode: 'text',
     creationStep: DocumentCreationStep.AddDocuments,
     textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
+    fileInput: [],
   };
 
   const mount = () => {
@@ -143,6 +144,20 @@ describe('DocumentCreationLogic', () => {
           expect(DocumentCreationLogic.values).toEqual({
             ...DEFAULT_VALUES,
             textInput: 'hello world',
+          });
+        });
+      });
+    });
+
+    describe('setFileInput', () => {
+      describe('fileInput', () => {
+        it('should be set to the provided value', () => {
+          mount();
+          DocumentCreationLogic.actions.setFileInput((['mock file'] as unknown) as FileList);
+
+          expect(DocumentCreationLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            fileInput: ['mock file'],
           });
         });
       });
