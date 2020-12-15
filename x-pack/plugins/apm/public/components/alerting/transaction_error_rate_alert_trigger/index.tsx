@@ -3,22 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useParams } from 'react-router-dom';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
-
+import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { asPercent } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { ChartPreview } from '../chart_preview';
 import {
-  ServiceField,
-  TransactionTypeField,
   EnvironmentField,
   IsAboveField,
+  ServiceField,
+  TransactionTypeField,
 } from '../fields';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { getAbsoluteTimeRange } from '../helper';
+import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
   windowSize: number;
@@ -46,6 +50,32 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     start,
     end,
   });
+
+  const { threshold, windowSize, windowUnit, environment } = alertParams;
+
+  const thresholdAsPercent = (threshold ?? 0) / 100;
+
+  const { data } = useFetcher(() => {
+    if (windowSize && windowUnit) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+        params: {
+          query: {
+            ...getAbsoluteTimeRange(windowSize, windowUnit),
+            environment,
+            serviceName,
+            transactionType: alertParams.transactionType,
+          },
+        },
+      });
+    }
+  }, [
+    alertParams.transactionType,
+    environment,
+    serviceName,
+    windowSize,
+    windowUnit,
+  ]);
 
   if (serviceName && !transactionTypes.length) {
     return null;
@@ -79,7 +109,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     <IsAboveField
       value={params.threshold}
       unit="%"
-      onChange={(value) => setAlertParams('threshold', value)}
+      onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
@@ -97,6 +127,14 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     />,
   ];
 
+  const chartPreview = (
+    <ChartPreview
+      data={data}
+      yTickFormat={(d: number | null) => asPercent(d, 1)}
+      threshold={thresholdAsPercent}
+    />
+  );
+
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate].name}
@@ -104,6 +142,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       defaults={defaultParams}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
+      chartPreview={chartPreview}
     />
   );
 }
