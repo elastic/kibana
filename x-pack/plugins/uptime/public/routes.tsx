@@ -81,19 +81,17 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 
 export const PageRouter: FC = () => {
   return (
-    <>
-      <PageHeader />
-      <Switch>
-        {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
-          <Route path={path} key={telemetryId} exact={true}>
-            <div data-test-subj={dataTestSubj}>
-              <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <RouteComponent />
-            </div>
-          </Route>
-        ))}
-        <Route component={NotFoundPage} />
-      </Switch>
-    </>
+    <Switch>
+      {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+        <Route path={path} key={telemetryId} exact={true}>
+          <div data-test-subj={dataTestSubj}>
+            <PageHeader />
+            <RouteInit title={title} path={path} telemetryId={telemetryId} />
+            <RouteComponent />
+          </div>
+        </Route>
+      ))}
+      <Route component={NotFoundPage} />
+    </Switch>
   );
 };

@@ -51,7 +51,7 @@ export const PageHeader = () => {
       </StyledPicker>
     );
 
-  const isMonRoute = useRouteMatch(MONITOR_ROUTE);
+  const isMonitorRoute = useRouteMatch(MONITOR_ROUTE);
 
   if (isStepDetailRoute) {
     return null;
@@ -61,13 +61,13 @@ export const PageHeader = () => {
     <>
       <SyntheticsCallout />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap responsive={false}>
-        <EuiFlexItem>{isMonRoute ? <MonitorPageTitle /> : <PageTabs />}</EuiFlexItem>
+        <EuiFlexItem>{isMonitorRoute ? <MonitorPageTitle /> : <PageTabs />}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         {!isSettingsRoute && <DatePickerComponent />}
       </EuiFlexGroup>
-      {!isMonRoute && <EuiSpacer size="m" />}
+      {!isMonitorRoute && <EuiSpacer size="m" />}
     </>
   );
 };
