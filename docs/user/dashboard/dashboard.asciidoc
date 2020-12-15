@@ -228,7 +228,7 @@ To view the data field summary information, navigate to the field, then click *i
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window]
 
-Depending on the type of data, *Lens* shows a summary that better suits the field analysis: for date types the time distribution, for string types the top 10 values and for numeric types are shown a detailed summary with the top 10 values and a value distribution.
+*Lens* shows a summary depending on the type of data: date fields show the time distribution, string fields show the top 10 values, and numeric fields show a detailed summary with the top 10 values and a value distribution.
 
 [role="screenshot"]
 image::images/lens_data_info_documents.png[Data summary analyzed documents]
