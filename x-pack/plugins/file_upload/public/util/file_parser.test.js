@@ -77,6 +77,31 @@ describe('parse file', () => {
     expect(errors.length).toEqual(0);
   });
 
+  it('should normally read a valid single feature file', async () => {
+    const testSinglePointJson = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [30, 10],
+      },
+      properties: {
+        name: 'Point island',
+      },
+    };
+
+    const fileRef = getFileRef(testSinglePointJson);
+    const getFileParseActive = getFileParseActiveFactory();
+    const { errors } = await fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate: (x) => x,
+      getFileParseActive,
+    });
+
+    expect(setFileProgress.mock.calls.length).toEqual(1);
+    expect(errors.length).toEqual(0);
+  });
+
   it('should throw if no valid features', async () => {
     const fileRef = getFileRef();
     const getFileParseActive = getFileParseActiveFactory();
