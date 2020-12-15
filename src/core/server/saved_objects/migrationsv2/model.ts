@@ -219,8 +219,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          targetMappings: disableUnknownTypeMappingFields(
-            stateP.targetMappings,
+          targetIndexMappings: disableUnknownTypeMappingFields(
+            stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]].mappings
           ),
           versionIndexReadyActions: Option.none,
@@ -252,14 +252,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           sourceIndex: Option.some(source) as Option.Some<string>,
           targetIndex: target,
-          targetMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetMappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
             indices[source].mappings
           ),
           versionIndexReadyActions: Option.some<AliasAction[]>([
             { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
             { add: { index: target, alias: stateP.currentAlias } },
             { add: { index: target, alias: stateP.versionAlias } },
+            { remove_index: { index: stateP.tempIndex } },
           ]),
         };
       } else if (indices[stateP.legacyIndex] != null) {
@@ -288,8 +289,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetMappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
             indices[stateP.legacyIndex].mappings
           ),
           legacyReindexTargetMappings: indices[stateP.legacyIndex].mappings,
@@ -312,6 +313,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             },
             { add: { index: target, alias: stateP.currentAlias } },
             { add: { index: target, alias: stateP.versionAlias } },
+            { remove_index: { index: stateP.tempIndex } },
           ]),
         };
       } else {
@@ -444,7 +446,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // If the write block is successfully in place, proceed to the next step.
       return {
         ...stateP,
-        controlState: 'CREATE_REINDEX_TARGET',
+        controlState: 'CREATE_REINDEX_TEMP',
       };
     } else {
       // We don't handle the following errors as the migration algorithm
@@ -452,22 +454,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // - index_not_found_exception
       return throwBadResponse(stateP, res as never);
     }
-  } else if (stateP.controlState === 'CREATE_REINDEX_TARGET') {
+  } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TARGET' };
+      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP' };
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
       // left responses to handle here.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK',
         reindexSourceToTargetTaskId: res.right.taskId,
       };
     } else {
@@ -475,123 +477,79 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // errors only show up in the returned task.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
+        controlState: 'SET_TEMP_WRITE_BLOCK',
       };
     } else {
       const left = res.left;
-      if (left.type === 'incompatible_mapping_exception') {
-        // We create the target with a permissive `dynamic: false` mapping but
-        // once another instance reaches the UPDATE_TARGET_MAPPINGS step it
-        // will set the mappings to `dynamic: strict`. The reindex operation
-        // checks whether mappings are compatible _before_ it checks if a
-        // document already exists. This could cause a slower instance to hit a
-        // incompatible_mapping_exception when it tries to reindex an
-        // outdated document. This should only happen if another instance
-        // already successfully reindexed all documents.
-        // However, there is a small chance that an interefering mappings
-        // template caused the mappings exceptions in which case no instances
-        // will be able to complete a reindex, so as a precaution we verify
-        // that another instance has completed the reindex.
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY',
-        };
-      } else if (
-        left.type === 'target_index_had_write_block' ||
-        (left.type === 'index_not_found_exception' && left.index === stateP.reindexAlias)
-      ) {
-        // target_index_had_write_block:
-        //   another instance completed the REINDEX_BLOCK_SET_WRITE_BLOCK
-        //   by adding a write block on the target index (but hasn't yet
-        //   completed the REINDEX_BLOCK_REMOVE_ALIAS step)
+      if (left.type === 'index_not_found_exception' && left.index === stateP.tempIndex) {
         // index_not_found_exception:
-        //   another instance completed the REINDEX_BLOCK_REMOVE_ALIAS step by
-        //   removing the reindexAlias from the target index.
+        //   another instance completed the MARK_VERSION_INDEX_READY and
+        //   removed the temp index.
         //
-        // For simplicity we repeat the `REINDEX_BLOCK_*` steps even if we
-        // know another instance already completed these.
+        // For simplicity we continue linearly through the next steps even if
+        // we know another instance already completed these.
         return {
           ...stateP,
-          controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
+          controlState: 'SET_TEMP_WRITE_BLOCK',
         };
       } else {
-        // We can only reach this condition because of an
-        // index_not_found_exception for the reindex source: state.sourceAlias
-        // This can never be caused by the migration algorithm.
+        // Don't handle target_index_had_write_block and
+        // incompatible_mapping_exception as we will never add a write
+        // block to the temp index or change the mappings.
         throwBadResponse(stateP, left as never);
       }
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TARGET_VERIFY') {
+  } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLONE_TEMP_TO_TARGET',
+      };
+    } else {
+      const left = res.left;
+      if (left.type === 'index_not_found_exception') {
+        // index_not_found_exception:
+        //   another instance completed the MARK_VERSION_INDEX_READY and
+        //   removed the temp index.
+        //
+        // For simplicity we continue linearly through the next steps even if
+        // we know another instance already completed these.
+        return {
+          ...stateP,
+          controlState: 'CLONE_TEMP_TO_TARGET',
+        };
+      } else {
+        // @ts-expect-error TS doesn't correctly narrow this to never
+        throwBadResponse(stateP, left);
+      }
+    }
+  } else if (stateP.controlState === 'CLONE_TEMP_TO_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-      };
-    } else {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: `Reindex from the source index [${stateP.sourceIndex.value}] to the target index [${stateP.targetIndex}] failed because of incompatible mappings in the target index. Remove any index templates whose index_patterns match the target index and delete the target index before trying again.`,
-      };
-    }
-  } else if (stateP.controlState === 'REINDEX_BLOCK_SET_WRITE_BLOCK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
       };
     } else {
       const left = res.left;
       if (left.type === 'index_not_found_exception') {
         // index_not_found_exception means another instance alread completed
-        // the REINDEX_BLOCK_REMOVE_ALIAS step and removed the reindexAlias
-        // for simplicity we don't skip the step but just continue
+        // the MARK_VERSION_INDEX_READY step and removed the temp index
+        // We still perform the OUTDATED_DOCUMENTS_* and
+        // UPDATE_TARGET_MAPPINGS steps since we might have plugins enabled
+        // which the other instances don't.
         return {
           ...stateP,
-          controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
         };
       }
       throwBadResponse(stateP, res as never);
-    }
-  } else if (stateP.controlState === 'REINDEX_BLOCK_REMOVE_ALIAS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
-      };
-    } else {
-      const left = res.left;
-      if (left.type === 'alias_not_found_exception') {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
-        };
-      } else {
-        // Ignore the following errors which can't be caused by our algorithm
-        //   - index_not_found_exception we will never delete the target index
-        //   - remove_index_not_a_concrete_index REINDEX_BLOCK_REMOVE_ALIAS
-        //     doesn't specify a remove_index alias action
-        throwBadResponse(stateP, left as never);
-      }
-    }
-  } else if (stateP.controlState === 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-      };
-    } else {
-      // It should never fail unless it was a retryable ES error
-      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -785,11 +743,11 @@ export const createInitialState = ({
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    reindexAlias: `${indexPrefix}_${kibanaVersion}_reindex`,
+    tempIndex: `${indexPrefix}_${kibanaVersion}_temp`,
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetMappings,
-    reindexTargetMappings,
+    targetIndexMappings: targetMappings,
+    tempIndexMappings: reindexTargetMappings,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,

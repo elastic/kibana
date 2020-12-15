@@ -272,6 +272,18 @@ describe('migration actions', () => {
         `);
       });
     });
+    it('resolves left index_not_found_exception if the source index does not exist', () => {
+      const task = cloneIndex(client, 'no_such_index', 'yellow_then_green_index');
+      expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "no_such_index",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
+    });
   });
 
   // Reindex doesn't return any errors on it's own, so we have to test

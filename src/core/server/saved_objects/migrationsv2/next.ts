@@ -23,7 +23,7 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { pipe } from 'fp-ts/lib/pipeable';
 import {
   AllActionStates,
-  ReindexSourceToTargetState,
+  ReindexSourceToTempState,
   MarkVersionIndexReady,
   InitState,
   LegacyCreateReindexTargetState,
@@ -37,14 +37,12 @@ import {
   State,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
-  CreateReindexTargetState,
-  ReindexSourceToTargetWaitForTaskState,
+  CreateReindexTempState,
+  ReindexSourceToTempWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
-  ReindexSourceToTargetVerify,
-  ReindexBlockSetWriteBlock,
-  ReindexBlockRemoveAlias,
-  ReindexBlockRemoveWriteBlock,
+  CloneTempToSource,
+  SetTempWriteBlock,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -70,28 +68,19 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
-      Actions.createIndex(client, state.targetIndex, state.targetMappings),
-    CREATE_REINDEX_TARGET: (state: CreateReindexTargetState) =>
-      Actions.createIndex(client, state.targetIndex, state.reindexTargetMappings, [
-        state.versionAlias,
-        state.reindexAlias,
-      ]),
-    REINDEX_SOURCE_TO_TARGET: (state: ReindexSourceToTargetState) =>
-      Actions.reindex(client, state.sourceIndex.value, state.reindexAlias, Option.none, true),
-    REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK: (state: ReindexSourceToTargetWaitForTaskState) =>
+      Actions.createIndex(client, state.targetIndex, state.targetIndexMappings),
+    CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
+      Actions.createIndex(client, state.tempIndex, state.tempIndexMappings),
+    REINDEX_SOURCE_TO_TEMP: (state: ReindexSourceToTempState) =>
+      Actions.reindex(client, state.sourceIndex.value, state.tempIndex, Option.none, false),
+    SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
+      Actions.setWriteBlock(client, state.tempIndex),
+    REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK: (state: ReindexSourceToTempWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.reindexSourceToTargetTaskId, '60s'),
-    REINDEX_SOURCE_TO_TARGET_VERIFY: (state: ReindexSourceToTargetVerify) =>
-      Actions.verifyReindex(client, state.sourceIndex.value, state.targetIndex),
-    REINDEX_BLOCK_SET_WRITE_BLOCK: (state: ReindexBlockSetWriteBlock) =>
-      Actions.setWriteBlock(client, state.reindexAlias),
-    REINDEX_BLOCK_REMOVE_ALIAS: (state: ReindexBlockRemoveAlias) =>
-      Actions.updateAliases(client, [
-        { remove: { index: state.targetIndex, alias: state.reindexAlias, must_exist: false } },
-      ]),
-    REINDEX_BLOCK_REMOVE_WRITE_BLOCK: (state: ReindexBlockRemoveWriteBlock) =>
-      Actions.removeWriteBlock(client, state.targetIndex),
+    CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
+      Actions.cloneIndex(client, state.tempIndex, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
-      Actions.updateAndPickupMappings(client, state.targetIndex, state.targetMappings),
+      Actions.updateAndPickupMappings(client, state.targetIndex, state.targetIndexMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>

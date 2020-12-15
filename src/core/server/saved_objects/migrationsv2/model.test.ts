@@ -28,21 +28,19 @@ import {
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacyDeleteState,
-  ReindexSourceToTargetState,
+  ReindexSourceToTempState,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   OutdatedDocumentsSearch,
   OutdatedDocumentsTransform,
   MarkVersionIndexReady,
   BaseState,
-  CreateReindexTargetState,
-  ReindexSourceToTargetWaitForTaskState,
+  CreateReindexTempState,
+  ReindexSourceToTempWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
-  ReindexSourceToTargetVerify,
-  ReindexBlockSetWriteBlock,
-  ReindexBlockRemoveAlias,
-  ReindexBlockRemoveWriteBlock,
+  CloneTempToSource,
+  SetTempWriteBlock,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -59,7 +57,7 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
-    targetMappings: {
+    targetIndexMappings: {
       properties: {
         new_saved_object_type: {
           properties: {
@@ -73,12 +71,12 @@ describe('migrations v2 model', () => {
         },
       },
     },
-    reindexTargetMappings: { properties: {} },
+    tempIndexMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
-    reindexAlias: '.kibana_7.11.0_reindex',
+    tempIndex: '.kibana_7.11.0_reindex',
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -222,7 +220,7 @@ describe('migrations v2 model', () => {
         const newState = model(initState, res);
 
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
-        expect(newState.targetMappings).toMatchInlineSnapshot(`
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
           Object {
             "_meta": Object {
               "migrationMappingPropertyHashes": Object {
@@ -623,163 +621,109 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TARGET if action succeeds with set_write_block_succeeded', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TEMP if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
         );
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CREATE_REINDEX_TARGET');
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('CREATE_REINDEX_TARGET', () => {
-      const createReindexTargetState: CreateReindexTargetState = {
+    describe('CREATE_REINDEX_TEMP', () => {
+      const createReindexTargetState: CreateReindexTempState = {
         ...baseState,
-        controlState: 'CREATE_REINDEX_TARGET',
+        controlState: 'CREATE_REINDEX_TEMP',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
-        reindexTargetMappings: { properties: {} },
+        tempIndexMappings: { properties: {} },
       };
-      it('CREATE_REINDEX_TARGET -> REINDEX_SOURCE_TO_TARGET if action succeeds', () => {
-        const res: ResponseType<'CREATE_REINDEX_TARGET'> = Either.right('create_index_succeeded');
+      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP if action succeeds', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
         const newState = model(createReindexTargetState, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET');
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('REINDEX_SOURCE_TO_TARGET', () => {
-      const reindexSourceToTargetState: ReindexSourceToTargetState = {
+    describe('REINDEX_SOURCE_TO_TEMP', () => {
+      const reindexSourceToTargetState: ReindexSourceToTempState = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TARGET',
+        controlState: 'REINDEX_SOURCE_TO_TEMP',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('REINDEX_SOURCE_TO_TARGET -> REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET'> = Either.right({
+      test('REINDEX_SOURCE_TO_TEMP -> REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP'> = Either.right({
           taskId: 'reindex-task-id',
         });
         const newState = model(reindexSourceToTargetState, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK');
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK', () => {
-      const reindexSourceToTargetWaitForState: ReindexSourceToTargetWaitForTaskState = {
+    describe('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK', () => {
+      const state: ReindexSourceToTempWaitForTaskState = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK',
+        controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         reindexSourceToTargetTaskId: 'reindex-task-id',
       };
-      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.right(
+      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is right', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.right(
           'reindex_succeeded'
         );
-        const newState = model(reindexSourceToTargetWaitForState, res);
-        expect(newState.controlState).toEqual('REINDEX_BLOCK_SET_WRITE_BLOCK');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-      test('REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK -> REINDEX_SOURCE_TO_TARGET_VERIFY when response is left incompatible_mapping_exception', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK'> = Either.left({
-          type: 'incompatible_mapping_exception',
-        });
-        const newState = model(reindexSourceToTargetWaitForState, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TARGET_VERIFY');
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
-    describe('REINDEX_SOURCE_TO_TARGET_VERIFY', () => {
-      const reindexSourceToTargetVerify: ReindexSourceToTargetVerify = {
+    describe('SET_TEMP_WRITE_BLOCK', () => {
+      const state: SetTempWriteBlock = {
         ...baseState,
-        controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY',
+        controlState: 'SET_TEMP_WRITE_BLOCK',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('REINDEX_SOURCE_TO_TARGET_VERIFY -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_VERIFY'> = Either.right(
-          'verify_reindex_succeeded'
-        );
-        const newState = model(reindexSourceToTargetVerify, res);
+      test('SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET when response is right', () => {
+        const res: ResponseType<'SET_TEMP_WRITE_BLOCK'> = Either.right('set_write_block_succeeded');
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('CLONE_TEMP_TO_TARGET', () => {
+      const state: CloneTempToSource = {
+        ...baseState,
+        controlState: 'CLONE_TEMP_TO_TARGET',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      it('CLONE_TEMP_TO_TARGET -> OUTDATED_DOCUMENTS_SEARCH if response is right', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
+          acknowledged: true,
+          shardsAcknowledged: true,
+        });
+        const newState = model(state, res);
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('REINDEX_SOURCE_TO_TARGET_VERIFY -> FATAL when response is left', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TARGET_VERIFY'> = Either.left({
-          type: 'verify_reindex_failed',
+      it('CLONE_TEMP_TO_TARGET -> OUTDATED_DOCUMENTS_SEARCH if response is left index_not_fonud_exception', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
+          type: 'index_not_found_exception',
+          index: 'temp_index',
         });
-        const newState = model(reindexSourceToTargetVerify, res);
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-    });
-    describe('REINDEX_BLOCK_SET_WRITE_BLOCK', () => {
-      const state: ReindexBlockSetWriteBlock = {
-        ...baseState,
-        controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK',
-        versionIndexReadyActions: Option.none,
-        sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-      };
-      it('REINDEX_BLOCK_SET_WRITE_BLOCK -> REINDEX_BLOCK_REMOVE_ALIAS', () => {
-        const res: ResponseType<'REINDEX_BLOCK_SET_WRITE_BLOCK'> = Either.right(
-          'set_write_block_succeeded'
-        );
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_ALIAS');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-    });
-    describe('REINDEX_BLOCK_REMOVE_ALIAS', () => {
-      const state: ReindexBlockRemoveAlias = {
-        ...baseState,
-        controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
-        versionIndexReadyActions: Option.none,
-        sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-      };
-      it('REINDEX_BLOCK_REMOVE_ALIAS -> REINDEX_BLOCK_REMOVE_WRITE_BLOCK when response is right update_aliases_succeeded', () => {
-        const res: ResponseType<'REINDEX_BLOCK_REMOVE_ALIAS'> = Either.right(
-          'update_aliases_succeeded'
-        );
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_WRITE_BLOCK');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-      it('REINDEX_BLOCK_REMOVE_ALIAS -> REINDEX_BLOCK_REMOVE_WRITE_BLOCK when response is left alias_not_found_exception', () => {
-        const res: ResponseType<'REINDEX_BLOCK_REMOVE_ALIAS'> = Either.left({
-          type: 'alias_not_found_exception',
-        });
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_BLOCK_REMOVE_WRITE_BLOCK');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
-      });
-    });
-    describe('REINDEX_BLOCK_REMOVE_WRITE_BLOCK', () => {
-      const state: ReindexBlockRemoveWriteBlock = {
-        ...baseState,
-        controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK',
-        versionIndexReadyActions: Option.none,
-        sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-      };
-      it('REINDEX_BLOCK_REMOVE_WRITE_BLOCK -> OUTDATED_DOCUMENTS_SEARCH when response is right', () => {
-        const res: ResponseType<'REINDEX_BLOCK_REMOVE_WRITE_BLOCK'> = Either.right(
-          'remove_write_block_succeeded'
-        );
         const newState = model(state, res);
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
         expect(newState.retryCount).toEqual(0);
@@ -1055,22 +999,9 @@ describe('migrations v2 model', () => {
           "preMigrationScript": Object {
             "_tag": "None",
           },
-          "reindexAlias": ".kibana_task_manager_8.1.0_reindex",
-          "reindexTargetMappings": Object {
-            "dynamic": false,
-            "properties": Object {
-              "migrationVersion": Object {
-                "dynamic": "true",
-                "type": "object",
-              },
-              "type": Object {
-                "type": "keyword",
-              },
-            },
-          },
           "retryCount": 0,
           "retryDelay": 0,
-          "targetMappings": Object {
+          "targetIndexMappings": Object {
             "dynamic": "strict",
             "properties": Object {
               "my_type": Object {
@@ -1079,6 +1010,19 @@ describe('migrations v2 model', () => {
                     "type": "text",
                   },
                 },
+              },
+            },
+          },
+          "tempIndex": ".kibana_task_manager_8.1.0_temp",
+          "tempIndexMappings": Object {
+            "dynamic": false,
+            "properties": Object {
+              "migrationVersion": Object {
+                "dynamic": "true",
+                "type": "object",
+              },
+              "type": Object {
+                "type": "keyword",
               },
             },
           },

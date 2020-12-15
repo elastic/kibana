@@ -34,15 +34,15 @@ export interface BaseState extends ControlState {
   /** Kibana version number */
   readonly kibanaVersion: string;
   /** The mappings to apply to the target index */
-  readonly targetMappings: IndexMapping;
+  readonly targetIndexMappings: IndexMapping;
   /**
-   * Special mappings set when creating the reindex target. These mappings
-   * have `dynamic: false` to allow for any kind of outdated document to be
-   * written to the index, but still define mappings for the
+   * Special mappings set when creating the temp index into which we reindex.
+   * These mappings have `dynamic: false` to allow for any kind of outdated
+   * document to be written to the index, but still define mappings for the
    * `migrationVersion` and `type` fields so that we can search for and
    * transform outdated documents.
    */
-  readonly reindexTargetMappings: IndexMapping;
+  readonly tempIndexMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: Record<string, unknown>;
@@ -67,7 +67,7 @@ export interface BaseState extends ControlState {
    * An alias on the target index used as part of an "reindex block" that
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
-  readonly reindexAlias: string;
+  readonly tempIndex: string;
 }
 
 export type InitState = BaseState & {
@@ -115,64 +115,44 @@ export type CreateNewTargetState = PostInitState & {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
-export type CreateReindexTargetState = PostInitState & {
+export type CreateReindexTempState = PostInitState & {
   /**
    * Create a target index with mappings from the source index and registered
    * plugins
    */
-  readonly controlState: 'CREATE_REINDEX_TARGET';
+  readonly controlState: 'CREATE_REINDEX_TEMP';
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexSourceToTargetState = PostInitState & {
+export type ReindexSourceToTempState = PostInitState & {
   /** Reindex documents from the source index into the target index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TARGET';
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexSourceToTargetWaitForTaskState = PostInitState & {
+export type ReindexSourceToTempWaitForTaskState = PostInitState & {
   /**
    * Wait until reindexing documents from the source index into the target
    * index has completed
    */
-  readonly controlState: 'REINDEX_SOURCE_TO_TARGET_WAIT_FOR_TASK';
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK';
   readonly sourceIndex: Option.Some<string>;
   readonly reindexSourceToTargetTaskId: string;
 };
 
-export type ReindexBlockSetWriteBlock = PostInitState & {
+export type SetTempWriteBlock = PostInitState & {
   /**
    *
    */
-  readonly controlState: 'REINDEX_BLOCK_SET_WRITE_BLOCK';
+  readonly controlState: 'SET_TEMP_WRITE_BLOCK';
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexBlockRemoveAlias = PostInitState & {
+export type CloneTempToSource = PostInitState & {
   /**
-   *
+   * Clone the temporary reindex index into
    */
-  readonly controlState: 'REINDEX_BLOCK_REMOVE_ALIAS';
-  readonly sourceIndex: Option.Some<string>;
-};
-
-export type ReindexBlockRemoveWriteBlock = PostInitState & {
-  /**
-   *
-   */
-  readonly controlState: 'REINDEX_BLOCK_REMOVE_WRITE_BLOCK';
-  readonly sourceIndex: Option.Some<string>;
-};
-
-export type ReindexSourceToTargetVerify = PostInitState & {
-  /**
-   * If we received incompatible_mappings_exception during a reindex there is
-   * a small chance that this is caused by an interfering index template and
-   * not by another instance that already completed the UPDATE_TARGET_MAPPINGS
-   * step. In this step we verify that the reindex succeeded by asserting that
-   * target_document_count >= source_document_count
-   */
-  readonly controlState: 'REINDEX_SOURCE_TO_TARGET_VERIFY';
+  readonly controlState: 'CLONE_TEMP_TO_TARGET';
   readonly sourceIndex: Option.Some<string>;
 };
 
@@ -286,13 +266,11 @@ export type State =
   | DoneState
   | SetSourceWriteBlockState
   | CreateNewTargetState
-  | CreateReindexTargetState
-  | ReindexSourceToTargetState
-  | ReindexSourceToTargetWaitForTaskState
-  | ReindexBlockSetWriteBlock
-  | ReindexBlockRemoveAlias
-  | ReindexBlockRemoveWriteBlock
-  | ReindexSourceToTargetVerify
+  | CreateReindexTempState
+  | ReindexSourceToTempState
+  | ReindexSourceToTempWaitForTaskState
+  | SetTempWriteBlock
+  | CloneTempToSource
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearch

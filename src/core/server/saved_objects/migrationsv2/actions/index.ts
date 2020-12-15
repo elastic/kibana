@@ -189,8 +189,14 @@ export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
   target: string
-): TaskEither.TaskEither<RetryableEsClientError, CloneIndexResponse> => {
-  const cloneTask: TaskEither.TaskEither<RetryableEsClientError, AcknowledgeResponse> = () => {
+): TaskEither.TaskEither<
+  RetryableEsClientError | { type: 'index_not_found_exception'; index: string },
+  CloneIndexResponse
+> => {
+  const cloneTask: TaskEither.TaskEither<
+    RetryableEsClientError | { type: 'index_not_found_exception'; index: string },
+    AcknowledgeResponse
+  > = () => {
     return client.indices
       .clone(
         {
@@ -233,7 +239,12 @@ export const cloneIndex = (
         });
       })
       .catch((error: EsErrors.ResponseError) => {
-        if (error.message === 'resource_already_exists_exception') {
+        if (error.body.error.type === 'index_not_found_exception') {
+          return Either.left({
+            type: 'index_not_found_exception' as const,
+            index: error.body.error.index,
+          });
+        } else if (error.body.error.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous clone
            * operation had already been started. However, we can't be sure
@@ -661,7 +672,7 @@ export const createIndex = (
         });
       })
       .catch((error) => {
-        if (error.message === 'resource_already_exists_exception') {
+        if (error.body.error.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous create
            * operation had already been started. However, we can't be sure

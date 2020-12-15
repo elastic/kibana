@@ -179,7 +179,7 @@ describe('KibanaMigrator', () => {
           expect.arrayContaining([
             // LEGACY_CREATE_REINDEX_TARGET
             expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
-            // CREATE_REINDEX_TARGET
+            // CREATE_REINDEX_TEMP
             expect.arrayContaining([expect.objectContaining({ index: '.my-index_8.2.3_001' })]),
             // CREATE_NEW_TARGET
             expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
@@ -194,7 +194,7 @@ describe('KibanaMigrator', () => {
             }),
           })
         );
-        // REINDEX_SOURCE_TO_TARGET
+        // REINDEX_SOURCE_TO_TEMP
         expect(options.client.reindex.mock.calls[1][0]).toEqual(
           expect.objectContaining({
             body: expect.objectContaining({
