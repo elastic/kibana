@@ -2,6 +2,7 @@
   "include": [],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/dashboard/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
     { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
@@ -9,6 +10,7 @@
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
     { "path": "./src/plugins/newsfeed/tsconfig.json" },
+    { "path": "./src/plugins/presentation_util/tsconfig.json" },
     { "path": "./src/plugins/security_oss/tsconfig.json" },
     { "path": "./src/plugins/share/tsconfig.json" },
     { "path": "./src/plugins/telemetry/tsconfig.json" },
