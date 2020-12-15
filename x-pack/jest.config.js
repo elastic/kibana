@@ -5,12 +5,11 @@
  */
 
 module.exports = {
+  preset: '@kbn/test',
   rootDir: '..',
   projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
   reporters: [
     'default',
     ['<rootDir>/packages/kbn-test/target/jest/junit_reporter', { reportName: 'X-Pack Jest Tests' }],
   ],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
-  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
 };

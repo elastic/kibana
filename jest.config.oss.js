@@ -18,6 +18,7 @@
  */
 
 module.exports = {
+  preset: '@kbn/test',
   rootDir: '.',
   projects: [
     '<rootDir>/packages/*/jest.config.js',
@@ -27,6 +28,4 @@ module.exports = {
     '<rootDir>/test/*/jest.config.js',
   ],
   reporters: ['default', '<rootDir>/packages/kbn-test/target/jest/junit_reporter'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
-  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
 };
