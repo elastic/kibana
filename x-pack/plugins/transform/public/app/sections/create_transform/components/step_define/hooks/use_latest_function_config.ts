@@ -17,7 +17,7 @@ import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/tr
  */
 export const latestConfigMapper = {
   toAPIConfig(uiConfig: LatestFunctionConfigUI): LatestFunctionConfig | undefined {
-    if (uiConfig.sort === undefined || uiConfig.unique_key.length === 0) {
+    if (uiConfig.sort === undefined || !uiConfig.unique_key?.length) {
       return;
     }
 

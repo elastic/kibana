@@ -56,6 +56,6 @@ export function isLatestTransform(
 }
 
 export interface LatestFunctionConfigUI {
-  unique_key: Array<EuiComboBoxOptionOption<string>>;
-  sort: EuiComboBoxOptionOption<string>;
+  unique_key: Array<EuiComboBoxOptionOption<string>> | undefined;
+  sort: EuiComboBoxOptionOption<string> | undefined;
 }
