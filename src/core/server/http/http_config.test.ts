@@ -331,51 +331,67 @@ describe('with compression', () => {
 });
 
 describe('cors', () => {
-  describe('origin', () => {
+  describe('allowOrigin', () => {
     it('list cannot be empty', () => {
       expect(() =>
         config.schema.validate({
           cors: {
-            origin: [],
+            allowOrigin: [],
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-              "[cors.origin]: types that failed validation:
-              - [cors.origin.0]: expected value to equal [*]
-              - [cors.origin.1]: array size is [0], but cannot be smaller than [1]"
-          `);
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0]: array size is [0], but cannot be smaller than [1]
+        - [cors.allowOrigin.1]: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     it('list of valid URLs', () => {
-      const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      const allowOrigin = ['http://127.0.0.1:3000', 'https://elastic.co'];
       expect(
         config.schema.validate({
-          cors: { origin },
-        }).cors.origin
-      ).toStrictEqual(origin);
+          cors: { allowOrigin },
+        }).cors.allowOrigin
+      ).toStrictEqual(allowOrigin);
 
       expect(() =>
         config.schema.validate({
           cors: {
-            origin: ['*://elastic.co/*'],
+            allowOrigin: ['*://elastic.co/*'],
           },
         })
       ).toThrow();
     });
 
     it('can be configured as "*" wildcard', () => {
-      expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
+      expect(config.schema.validate({ cors: { allowOrigin: ['*'] } }).cors.allowOrigin).toEqual([
+        '*',
+      ]);
+    });
+
+    it('cannot mix wildcard "*" with valid URLs', () => {
+      expect(
+        () =>
+          config.schema.validate({ cors: { allowOrigin: ['*', 'https://elastic.co'] } }).cors
+            .allowOrigin
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0.0]: expected URI with scheme [http|https].
+        - [cors.allowOrigin.1.1]: expected value to equal [*]"
+      `);
     });
   });
   describe('credentials', () => {
-    it('cannot use wildcard origin if "credentials: true"', () => {
+    it('cannot use wildcard allowOrigin if "credentials: true"', () => {
       expect(
-        () => config.schema.validate({ cors: { credentials: true, origin: '*' } }).cors.origin
+        () =>
+          config.schema.validate({ cors: { allowCredentials: true, allowOrigin: ['*'] } }).cors
+            .allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
         `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
       );
       expect(
-        () => config.schema.validate({ cors: { credentials: true } }).cors.origin
+        () => config.schema.validate({ cors: { allowCredentials: true } }).cors.allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
         `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
       );

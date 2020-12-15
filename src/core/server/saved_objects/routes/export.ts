@@ -104,10 +104,9 @@ export const registerExportRoute = (
         }
       }
 
-      const { headers } = req;
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsExport({ headers, types, supportedTypes })
+        .incrementSavedObjectsExport({ request: req, types, supportedTypes })
         .catch(() => {});
 
       const exportStream = await exportSavedObjectsToStream({

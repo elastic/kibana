@@ -31,6 +31,7 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                 aria-label="Date quick select"
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -112,6 +113,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                 aria-label="Date quick select"
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -223,6 +225,7 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                 aria-label="Date quick select"
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -304,6 +307,7 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                 aria-label="Date quick select"
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -385,6 +389,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                 aria-label="Date quick select"
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >

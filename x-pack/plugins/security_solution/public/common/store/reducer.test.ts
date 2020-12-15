@@ -20,6 +20,7 @@ describe('createInitialState', () => {
         {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: ['auditbeat-*', 'filebeat'],
+          signalIndexName: 'siem-signals-default',
         }
       );
 
@@ -32,6 +33,7 @@ describe('createInitialState', () => {
         {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: [],
+          signalIndexName: 'siem-signals-default',
         }
       );
 

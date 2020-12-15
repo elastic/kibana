@@ -22,6 +22,9 @@ import { PluginConfigDescriptor } from 'kibana/server';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    legacyVisEnabled: true,
+  },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),

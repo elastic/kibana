@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { IndexPattern, indexPatterns } from '../kibana_services';
 import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
+import { IndexPattern } from '../../../data/common';
+import { indexPatterns } from '../../../data/public';
 
 const fields = [
   {
@@ -67,8 +68,10 @@ const indexPattern = ({
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
+  timeFieldName: '',
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
+indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 
 export const indexPatternMock = indexPattern;

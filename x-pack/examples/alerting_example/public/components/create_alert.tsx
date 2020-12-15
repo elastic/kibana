@@ -11,7 +11,9 @@ import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
-export const CreateAlert = ({ triggersActionsUi }: AlertingExampleComponentParams) => {
+export const CreateAlert = ({
+  triggersActionsUi,
+}: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   const AddAlertFlyout = useMemo(

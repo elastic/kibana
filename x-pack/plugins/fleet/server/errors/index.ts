@@ -30,3 +30,4 @@ export class PackageInvalidArchiveError extends IngestManagerError {}
 export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
 export class FleetAdminUserInvalidError extends IngestManagerError {}
+export class ConcurrentInstallOperationError extends IngestManagerError {}

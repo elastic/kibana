@@ -460,6 +460,14 @@ const expectAssetsInstalled = ({
       ],
       installed_es: [
         {
+          id: 'logs-all_assets.test_logs-all_assets',
+          type: 'data_stream_ilm_policy',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics-all_assets',
+          type: 'data_stream_ilm_policy',
+        },
+        {
           id: 'logs-all_assets.test_logs',
           type: 'index_template',
         },
@@ -496,6 +504,7 @@ const expectAssetsInstalled = ({
         { id: '96c6eb85-fe2e-56c6-84be-5fda976796db', type: 'epm-packages-assets' },
         { id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb', type: 'epm-packages-assets' },
         { id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362', type: 'epm-packages-assets' },
+        { id: '691f0505-18c5-57a6-9f40-06e8affbdf7a', type: 'epm-packages-assets' },
         { id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274', type: 'epm-packages-assets' },
         { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
         { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },

@@ -86,7 +86,6 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        typeName: id.replace('.', ''),
       };
     });
 

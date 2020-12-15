@@ -15,10 +15,12 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
+
     const result = await libs.requests.getJourneyScreenshot({
       uptimeEsClient,
       checkGroup,

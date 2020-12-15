@@ -217,7 +217,7 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-describe('Custom detection rules deletion and edition', () => {
+describe.skip('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

@@ -16,7 +16,7 @@ import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/tim
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { EventsViewer } from './events_viewer';
 import { InspectButtonContainer } from '../inspect';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { EventDetailsFlyout } from './event_details_flyout';
@@ -78,7 +78,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {

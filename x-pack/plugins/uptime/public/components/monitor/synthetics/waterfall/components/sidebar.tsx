@@ -27,7 +27,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, height, render }) => {
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
       <WaterfallChartSidebarContainer height={height}>
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
-          <WaterfallChartSidebarContainerFlexGroup direction="column" gutterSize="none">
+          <WaterfallChartSidebarContainerFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+          >
             {items.map((item, index) => {
               return (
                 <WaterfallChartSidebarFlexItem key={index}>

@@ -103,6 +103,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
@@ -695,6 +696,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
@@ -1045,6 +1047,7 @@ describe('update()', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',

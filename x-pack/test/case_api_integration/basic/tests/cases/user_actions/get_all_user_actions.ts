@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector']`, async () => {
+    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings]`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -51,7 +51,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.length).to.eql(1);
 
-      expect(body[0].action_field).to.eql(['description', 'status', 'tags', 'title', 'connector']);
+      expect(body[0].action_field).to.eql([
+        'description',
+        'status',
+        'tags',
+        'title',
+        'connector',
+        'settings',
+      ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
       expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
