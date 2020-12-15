@@ -12,13 +12,7 @@ import {
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createSignalsIndex,
-  deleteMigrations,
-  deleteSignalsIndex,
-  getIndexNameFromLoad,
-  waitFor,
-} from '../../utils';
+import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
 import { createUserAndRole } from '../roles_users_utils';
 
 interface CreateResponse {
@@ -35,7 +29,6 @@ interface FinalizeResponse extends CreateResponse {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
-  const kbnClient = getService('kibanaServer');
   const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
