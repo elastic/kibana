@@ -5,12 +5,29 @@ Now that you have added panels to your dashboard, you can add filter panels to i
 To make your dashboard look the way you want, use the editing options.
 
 [float]
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+=== Arrange panels
+
+To compare the data in the dashboard panels, move, resize, and customize the panels, or remove the panels from the dashboards.
+
+Put the dashboard in *Edit* mode, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To delete, open the panel menu, then select *Delete from dashboard*. When you delete a panel from the dashboard, the 
+visualization or saved search from the panel is still available in {kib}.
+
+[float]
 [[add-controls]]
 === Add controls
 
 To filter the data on your dashboard in real-time, add a *Controls* panel.
 
-You can add two types of *Controls*:
+{kib} supports two types of *Controls*:
 
 * *Options list* — Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
 For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
@@ -25,7 +42,7 @@ To configure *Controls* for your dashboard:
 
 . Click *Options*, then configure the following:
 
-* *Update Kibana filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
+* *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
  {kib} filters are created only when you click *Apply changes*.
 
 * *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
@@ -65,37 +82,20 @@ The following image is displayed:
 image::images/markdown_example_4.png[]
 
 [float]
-[[add-existing-panels]]
-=== Add existing panels
+[[dashboard-customize-filter]]
+=== Customize time ranges
 
-Add panels that you’ve already created to your dashboard.
+You can configure each visualization, saved search, and map on your dashboard
+for a specific time range. For example, you might want one visualization to show
+the monthly trend for CPU usage and another to show the current CPU usage.
 
-On the dashboard, click *Add an existing*, then select the panel you want to add.
-
-When a panel contains a stored query, both queries are applied.
+From the panel menu, select *Customize time range* to expose a time filter
+dedicated to that panel. Panels that are not restricted by a specific
+time range are controlled by the
+<<set-time-filter,time filter>>.
 
 [role="screenshot"]
-image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
-
-To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu.
-The changes you make appear in every dashboard that uses the panel, except if you edit the panel title. Changes to the panel title appear only on the dashboard where you made the change.
-
-[float]
-[[arrange-panels]]
-[[moving-containers]]
-[[resizing-containers]]
-=== Arrange panels
-
-To make your dashboard panels look exactly how you want, you can move, resize, customize, and delete them.
-
-Put the dashboard in *Edit* mode, then use the following options:
-
-* To move, click and hold the panel header, then drag to the new location.
-
-* To resize, click the resize control, then drag to the new dimensions.
-
-* To delete, open the panel menu, then select *Delete from dashboard*. When you delete a panel from the dashboard, the 
-visualization or saved search from the panel is still available in Kibana.
+image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 [float]
 [[clone-panels]]
@@ -114,18 +114,4 @@ All cloned visualization panels appear in the visualization list.
 [role="screenshot"]
 image:images/clone_panel.gif[clone panel]
 
-[float]
-[[dashboard-customize-filter]]
-=== Customize time ranges
 
-You can configure each visualization, saved search, and map on your dashboard
-for a specific time range. For example, you might want one visualization to show
-the monthly trend for CPU usage and another to show the current CPU usage.
-
-From the panel menu, select *Customize time range* to expose a time filter
-dedicated to that panel. Panels that are not restricted by a specific
-time range are controlled by the
-<<set-time-filter,time filter>>.
-
-[role="screenshot"]
-image:images/time_range_per_panel.gif[Time range per dashboard panel]

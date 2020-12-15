@@ -18,7 +18,7 @@ When you're finished creating the dashboard, you'll be able to answer the follow
 [[add-the-sample-web-logs-data]]
 === Add the data and create the dashboard
 
-To create visualizations of the website traffic data, add the data set to {kib}, then create the dashboard.
+To create visualizations of the website traffic data, add the data set, then create the dashboard.
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
@@ -28,50 +28,7 @@ To create visualizations of the website traffic data, add the data set to {kib},
 
 . Click *Create dashboard*.
 
-[discrete]
-[[metric-vis]]
-=== View the number of website visitors
 
-To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
-
-. Click *Create panel*, then click *Lens* on the *New visualization* window.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_1.png[New visualization popover]
-
-. Make sure the *kibana_sample_data_logs* index appears, then <<set-time-filter,set the time filter>> to *Last 90 days*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
-
-. From the *Chart Type* dropdown, select *Metric*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
-
-. From the *Available fields* list, drag and drop *clientip* to the visualization builder.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
-
-. From the editor, click *Unique count of clientip*.
-
-.. In the *Display name* field, enter `Unique visitors` .
-
-.. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_4.png[Flyout config open]
-
-. Save the visualization, then add it to the dashboard.
-
-.. From the toolbar, click *Save*.
-
-..  In the *Title* field, enter `Unique visitors`. 
-
-.. Select *Add to dashboard after saving*.
-
-.. Click *Save and return*.
 
 [discrete]
 [[donut-vis]]

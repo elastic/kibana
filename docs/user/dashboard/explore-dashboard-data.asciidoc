@@ -1,7 +1,7 @@
 [[explore-dashboard-data]]
-== Explore dashboard data
+== Explore the dashboard data
 
-Get a closer look at your data by inspecting elements and using drilldown actions.
+To get a closer look at your data, drill down into the data elements, or explore and download the underlying data.
 
 [float]
 [[viewing-detailed-information]]
@@ -15,5 +15,40 @@ The data that displays depends on the element that you inspect.
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
-include::explore-underlying-data.asciidoc[]
-include::download-underlying-data.asciidoc[]
+[float]
+[[explore-the-underlying-data]]
+=== Explore the panel data
+
+To explore the data in your dashboard panels, view and filter the data in *Discover*. When {kib} opens *Discover*, the index pattern, filters, query, and time range for the visualization continue to apply.
+
+TIP: *Explore underlying data* is available only for visualization panels with a single index pattern.
+
+To enable, add the following to kibana.yml:
+
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
+-----------
+
+. Open the panel menu, then click *Explore underlying data*.
++
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+. Interact with the chart, then click *Explore underlying data* on the menu that appears.
++
+[role="screenshot"]
+image::images/explore_data_in_chart.png[Explore underlying data from chart]
+
+[float]
+[role="xpack"]
+[[download_csv]]
+=== Download the underlying data
+
+To download the *Dashboard* data, download the CSV file. You can download multiple CSV files. For example, you can download the underlying for a *Lens*
+bar chart with multiple layers.
+
+Open the panel menu, then click *Download as CSV*.
+
+[role="screenshot"]
+image::images/download_csv_context_menu.png[Download as CSV from panel context menu]

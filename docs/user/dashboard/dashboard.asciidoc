@@ -4,24 +4,21 @@
 [partintro]
 --
 
-A dashboard is a collection of panels that you use to analyze your data. Each panel contains data from one or more <<index-patterns, index patterns>>, which allows
-you to create a complete overview of your data on a single dashboard. {kib} supports many types of panels that enable you to see your data from multiple perspectives. 
+Use dashboards to analyze and monitor your data. A dashboard is a collection of panels that display the data from one or more <<index-patterns, index patterns>>. 
+Each panel displays your data in a supported panel type, such as charts, tables, maps, and more. 
+
+Dashboards are helpful for when you want to:
+
+* Identify patterns in your data
+
+* Compare the data from multiple index patterns
+
+* Tell a story about your data
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[float]
-[[create-visualizations-of-your-data]]
-== Create visualizations panels of your data
-
-{kib} provides you with several ways to create visualization panels of your data. 
-
-The quickest way to create visualization panels is to use the *Lens* visualization builder. With *Lens*, you add your data fields, then {kib} uses heuristics to apply each field 
-and create the visualizations for you.
-
 [[tsvb]]
-If you'd like to  manually create visualization panels, you can use one of the <<add-panels-with-advanced-editors,advanced editors>> or 
-<<add-aggregation-based-visualization-panels,aggregation-based options>>.
 
 [float]
 == Prerequisites
@@ -42,7 +39,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 [[create-the-dashboard]]
 == Create dashboards
 
-Open the dashboard, then open the visualization builder. 
+To create dashboards, use the *Lens* visualization builder to create panels, or add existing panels. 
 
 . Open the main menu, click *Dashboard*.
 
@@ -50,53 +47,526 @@ Open the dashboard, then open the visualization builder.
 +
 To open an existing dashboard, click the dashboard you want to view.
 
-. To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
-+
-To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
+. To add panels, use one of the following options:
+
+* To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
 [float]
 [[create-panels-with-lens]]
-== Create visualizations
+== Tutorial: Create a dashboard of panels with website data
 
-Drag and drop the fields onto the visualization builder. The fields that appear are based on the selected 
-<<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters.
+You've collected data from your web server, and you're ready to create a dashboard and visualize your data in one place. In this tutorial, you'll learn how to 
+create a variety of panels using the *Lens* visualization builder. With *Lens*, you drag and drop your data fields, 
+then *Lens* uses heuristics to apply each field and create a visualization for you.
 
-. From the *Avialable fields* list, drag and drop the fields to the visualization builder. 
-+
-To preview a field, click *i* next to the field.
+[discrete]
+[[add-the-sample-web-logs-data]]
+=== Add the data and create the dashboard
 
-. To change the visualization type, use the following options:
+To create visualizations of the data from the web server, add the data set, then create the dashboard.
 
-* Click the *Suggestions*.
+. From the {kib} *Home* page, click *Try our sample data*.
 
-* Click the *Chart Type* dropdown, then select the visualization you want to use.
-+
-When there is an exclamation point (!) next to a visualization, {kib} is unable to transfer your data, but still allows you to change the visualization.
+. From *Sample web logs*, click *Add data*.
 
-. To customize the data, click the fields in the editor, then change the options. The options available depend on the visualization type. 
+. Open the main menu, click *Dashboard*.
 
-. To add data from another index pattern, add a layer. 
-+
-Area, line, and bar charts support layers.
+. Click *Create dashboard*.
 
-.. From the editor, click *+*.
+[discrete]
+[[metric-vis]]
+=== View the number of website visitors
 
-.. Drag and drop the fields to the *Drop a field or click to add* fields.
+To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
-.. From the *Change Index Pattern* dropdown, select the index pattern you want to add.
+. Click *Create panel*, then click *Lens* on the *New visualization* window.
 +
 [role="screenshot"]
-image::images/lens_index_pattern.png[Add index pattern]
+image::images/lens_end_to_end_1_1.png[New visualization popover]
+
+. Make sure the *kibana_sample_data_logs* index appears, then <<set-time-filter,set the time filter>> to *Last 90 days*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
+
+. From the *Chart Type* dropdown, select *Metric*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
+
+. From the *Available fields* list, drag and drop *clientip* to the visualization builder.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
+
+. From the editor, click *Unique count of clientip*.
+
+.. In the *Display name* field, enter `Unique visitors` .
+
+.. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_4.png[Flyout config open]
 
 [float]
-[[save-the-panel]]
-=== Save the panel
+==== Save the panel
 
 Save and add the visualization panel to the dashboard.
 
 . From the toolbar, click *Save*.
 
-. Add the *Title* and optional *Description*.
+. In the *Title* field, enter `Unique visitors`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[donut-vis]]
+=== View the distribution of visitors by operating system
+
+To determine the operating systems you should continue to support, and the importance of mobile traffic from iOS devices, 
+create a donut chart that displays the top operating systems that your visitors use to access your website.
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears, and the <<set-time-filter,time filter>> is set to *Last 90 days*.
+
+. From the *Chart Type* dropdown, select *Donut*.
+
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+
+.. Drag and drop *clientip* to the *Size by* field.
+
+.. Drag and drop *machine.os.keyword* to the *Slice by* field.
++
+[role="screenshot"]
+image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os.keyword fields]
+
+. Change the color palette. 
+
+.. From the editor, click *Top values of machine.os.keyword*. 
+
+.. From the *Color palette* dropdown, select *Compatibility*.
+
+.. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `Visitors by OS`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[mixed-multiaxis]]
+=== View the average of bytes transfer per day
+
+To prevent potential server failures and optimize the cost of website maintenance, create an area chart that displays the average of bytes transfer, 
+then add a line chart layer to compare the data to the number of visitors to your website.  
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears.
+
+. From the *Available fields* list, drag and drop *bytes* to the visualization builder.
+
+. To zoom in on the data you want to view, click and drag your cursor across the bars. 
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
+
+. Change the *timestamp* interval.
+
+.. From the editor, click *timestamp*.
+
+.. Select *Customize time interval*.
+
+.. Change the *Minimum interval* to `1 days`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_1.png[Customize time interval]
+
+.. Click *Close*.
+
+. From the *Chart Type* dropdown, select *Area*.
+
+[discrete]
+[[add-a-data-layer]]
+==== Add the line chart layer
+
+To compare the average of bytes transfer to the number of users that visit your website, add a line chart layer.
+
+. From the editor, click *+*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_2.png[Add new layer button]
+
+. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_3.png[Change layer type]
++
+The chart type for the visualization changes to *Mixed XY*.
+
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+
+.. Drag and drop *timestamp* to the *Horizontal axis* field.
+
+.. Drag and drop *clientip* to the *Vertical axis* field.
+
+. Change the *timestamp* interval.
+
+.. From the editor, click *timestamp* in the line chart layer.
+
+.. Select *Customize time interval*.
+
+.. Change the *Minimum interval* to `1 days`.
+
+.. Click *Close*.
+
+. Change the *Unique count of clientip* label and color.
+
+.. From the editor, click *Unique count of clientip*.
+
+.. In the *Display name* field, enter `Unique visitors` in the line chart layer.
+
+.. In the *Series color* field, enter *#CA8EAE*.
+
+.. Click *Close*.
+
+[discrete]
+[[configure-the-multiaxis-chart]]
+==== Configure the y-axes
+
+There is a significant difference between the *timestamp per day* and *Unique visitors* data, which makes the *Unique visitors* data difficult to read. To improve the readability, 
+display the *Unique visitors* data along a second y-axis, then change the formatting. When functions contain multiple formats, separate axes are created by default. 
+
+. From the editor, click *Unique visitors* in the line chart layer.
+
+.. For *Axis side*, click *Right*.
+
+.. Click *Close*.
+
+. From the editor, click *Average of bytes* in the area chart layer. 
+
+.. From the *Value format* dropdown, select *Bytes (1024)*. 
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_4.png[Multiaxis chart]
+
+.. Click *Close*.
+
+[discrete]
+[[lens-legend-position]]
+==== Change the legend position
+
+The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
+
+From the *Legend* dropdown, select the top position.
+
+[role="screenshot"]
+image::images/lens_end_to_end_3_5.png[legend position]
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `Average Bytes vs. Unique Visitors`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[percentage-stacked-area]]
+=== View the health of your website 
+
+To detect unusual traffic, bad website links, and server errors, create a percentage stacked area chart that displays the associated response codes.
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears.
+
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+
+.. Drag and drop *Records* to the *Vertical axis* field.
+
+.. Drag and drop *@timestamp* to the *Horizontal axis* field.
+
+. From the *Chart Type* dropdown, select *Percentage bar*.
+
+. To remove the vertical axis label, click *Left axis*, then deselect *Show*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_3.png[Turn off axis name]
+
+[discrete]
+[[add-the-response-code-filters]]
+==== Add the response code filters
+
+For each response code that you want to display, create a filter. 
+
+. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
+
+. From *Select a function*, click *Filters*.
+
+. Add the filter for the successful response codes. 
+
+.. Click *All records*.
+
+.. In the *KQL* field, enter `response.keyword>=200 AND response.keyword<300`. 
+
+.. In the *Label* field, enter `2XX`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
+
+.. Press Return.
+
+. Add the filter for the redirect codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=300 AND response.keyword<400`. 
+
+.. In the *Label* field, enter `3XX`, then press Return.
+
+. Add the filter for the client error codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=400 AND response.keyword<500`. 
+
+.. In the *Label* field, enter `4XX`, then press Return.
+
+. Add the filter for the server error codes. 
+
+.. Click *Add a filter*.
+
+.. In the *KQL* field, enter `response.keyword>=500 AND response.keyword<600`. 
+
+.. In the *Label* field, enter `5XX`, then press Return.
+
+. To change the color palette, select *Status* from the *Color palette* dropdown.
+
+.. Click *Close*.
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `Response Codes Over Time`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[histogram]]
+=== View the traffic for your website by the hour 
+
+To find the best time to shut down your website for maintenance, create a histogram that displays the traffic for your website by the hour.
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears.
+
+. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
+
+.. Click *Average of bytes*.
+
+.. From *Select a function*, click *Sum*.
+
+.. In the *Display name* field, enter `Transferred bytes`.
+
+.. From the *Value format* dropdown, select `Bytes (1024)`.
+
+.. Click *Close*.
+
+. From the *Available fields* list, drag and drop *hour_of_day* to *Horizontal axis* in the editor, then configure the options.
+
+.. Click *hour_of_day*.
+
+.. Click and slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
++
+[role="screenshot"]
+image::images/lens_end_to_end_5_2.png[Create custom ranges]
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `Hourly Traffic Distribution`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[custom-ranges]]
+=== View the percent of small versus large transferred files 
+ 
+To determine if your users transfer more small files versus large files, create a pie chart that displays the percentage of each size. 
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears.
+
+. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
+
+.. Click *Average of bytes*.
+
+.. From *Select a function*, click *Sum*.
+
+.. Click *Close*.
+
+. From the *Available fields* list, drag and drop *bytes* to *Break down by* in the editor, then specify the file size ranges.
+
+.. Click *bytes*.
+
+.. Click *Create custom ranges*, enter the following, then press Return:
+
+* *Ranges* &mdash; `0` -> `10240`
+
+* *Label* &mdash; `Below 10KB`
+
+.. Click *Add range*, enter the following, then press Return:
+
+* *Ranges* &mdash; `10240` -> `+∞`
+
+* *Label* &mdash; `Above 10KB`
++
+[role="screenshot"]
+image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
+
+.. From the *Value format* dropdown, select *Bytes (1024)*.
+
+.. Click *Close*.
+
+. From the *Chart Type* dropdown, select *Pie*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_6_2.png[Files size distribution]
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `File size distribution`. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[discrete]
+[[treemap]]
+=== View the top sources of website traffic
+
+To determine how users find out about your website and where your users are located, create a treemap that displays the percentage of users that 
+enter your website from specific social media websites, and the top countries where users are located.  
+
+. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
+
+. Make sure the *kibana_sample_data_logs* index appears.
+
+. From the *Chart Type* dropdown, select *Treemap*.
+
+. From the *Available fields* list, drag and drop *Records* to the *Size by* field in the editor. 
+
+. From the editor, click the *Drop a field or click to add* field for *Group by*, then create a filter for each website traffic source.
+
+.. From *Select a function*, click *Filters*.
+
+.. Click *All records*, enter the following, then press Return:
+
+* *KQL* &mdash; `referer : *facebook.com*`
+
+* *Label* &mdash; `Facebook`
+
+.. Click *Add a filter*, enter the following, then press Return:
+
+* *KQL* &mdash; `referer : *twitter.com*`
+
+* *Label* &mdash; `Twitter`
+
+.. Click *Add a filter*, enter the following, then press Return:
+
+* *KQL* &mdash; `NOT referer : *twitter* OR NOT referer: *facebook.com*`
+
+* *Label* &mdash; `Other`
+
+.. Click *Close*.
+
+[discrete]
+[[add-the-countries]]
+==== Add the geographic data
+
+To determine the top countries where users are located, add the geographic data.
+
+Compare the top sources of website traffic data to the top three countries. 
+
+. From the *Available fields* list, drag and drop *geo.src* to the visualization builder. 
+
+. To change the *Group by* order, click and drag *Top values of geo.src* so that it appears first in the editor.
++
+[role="screenshot"]
+image::images/lens_end_to_end_7_2.png[Treemap vis]
+
+. To view only the Facebook and Twitter data, remove the *Other* category. 
+
+.. From the editor, click *Top values of geo.src*.
+
+.. From the *Advanced* dropdown, deselect *Group other values as "Other"*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_7_3.png[Group other values as Other]
+
+.. Click *Close*.
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. In the *Title* field, enter `Traffic Source For Top 3 Countries`. 
 
 . From the *Tags* drop down, select any applicable tags. 
 
@@ -120,56 +590,16 @@ When you have finished adding and arranging panels, save the dashboard.
 
 . Click *Save*.
 
-[float]
-[[share-the-dashboard]]
-== Share the dashboard
+That's it! You've created a dashboard that provides you with a complete picture of the data from your web server.
 
-Share the dashboard with a larger audience.
-
-. From the toolbar, click *Share*. 
-
-. Choose one of the following options:
-<<<<<<< HEAD
-[[embedding-dashboards]]
-* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, 
-
-* *Permalinks* &mdash; Share a direct link to a {kib} dashboard.
-=======
-
-* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, which can be provided by the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details, learn about <<kibana-authentication>>.
-
-* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
-+
-TIP: When you share a link to a dashboard snapshot, select *Short URL*. Snapshot
-URLs are long and can be problematic for Internet Explorer and other
-tools. To create a short URL, you must have write access to {kib}.
->>>>>>> 077c81ff0e49ae1fb3466b7188b3a767f227c4a0
-
-* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
-
-* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
-
-[float]
-[[import-dashboards]]
-== Export the dashboard
-
-To manually create a back up of the dashboard, export the dashboard as a saved object.
-
-. Open the main menu, then click *Stack Management > Saved Objects*. 
-
-. Select the dashboard you want to export, then click *Export*.
-+
-For more information, refer to <<managing-saved-objects, Managing saved objects>>.
-
-To automate regular back ups of the dashboard, refer to <<Export dashboard API,dashboard-api-export>>.
-
-include::lens-end-to-end/lens-end-to-end.asciidoc[]
+[role="screenshot"]
+image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
 
 [float]
 [[lens-tutorial-next-steps]]
 == What's next?
 
-To add different types of panels to your dashboard, refer to the following:
+To add other types of panels to your dashboard:
 
 * Create a <<maps,Maps>> panel with your geographical data. 
 
@@ -179,6 +609,30 @@ To add different types of panels to your dashboard, refer to the following:
 
 * Create a panel with your <<xpack-ml-anomalies,machine learning anomaly detection>> data.
 
+[[share-the-dashboard]]
+To share the dashboard with a larger audience:
+
+From the toolbar, click *Share*, then choose one of the following options:
+
+* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, which can be provided by the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details, learn about <<kibana-authentication>>.
+
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
+
+* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
+
+* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
+
+[[import-dashboards]]
+To create a back up of the dashboard:
+
+. Open the main menu, then click *Stack Management > Saved Objects*. 
+
+. Select the dashboard you want to export, then click *Export*.
++
+For more information, refer to <<managing-saved-objects, Managing saved objects>>.
+
+To automate regular back ups of the dashboard, refer to <<dashboard-api-export,Export dashboard API>>.
+    
 --
 include::advanced-editors.asciidoc[]
 

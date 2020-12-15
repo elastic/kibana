@@ -1,7 +1,7 @@
 [[vega-reference]]
 == Vega reference
 
-For additional *Vega* and *Vega-Lite* information, refer to the reference sections.
+Learn more about {kib} extension, additional *Vega* resources, and examples.
 
 [float]
 [[reference-for-kibana-extensions]]
