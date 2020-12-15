@@ -86,7 +86,6 @@ export const useStatefulEventFocus = ({
       lastFocusedAriaColindex,
       onColumnFocused,
       rowindexAttribute,
-      setFocusOwnership,
     ]
   );
 
