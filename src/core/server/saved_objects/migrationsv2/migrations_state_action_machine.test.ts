@@ -331,7 +331,7 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again.]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. ResponseError: snapshot_in_progress_exception]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
@@ -363,7 +363,7 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again.]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: this action throws]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {

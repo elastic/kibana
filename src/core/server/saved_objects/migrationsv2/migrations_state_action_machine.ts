@@ -169,7 +169,7 @@ export async function migrationStateActionMachine({
     }
     dumpExecutionLog(logger, logMessagePrefix, executionLog);
     throw new Error(
-      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again.`
+      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${e}`
     );
   }
 }
