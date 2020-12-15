@@ -32,7 +32,7 @@ describe('finalizing signals migrations', () => {
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      indices: [],
+      migrations: [],
     });
   });
 
@@ -46,7 +46,7 @@ describe('finalizing signals migrations', () => {
     const response = await server.inject(getFinalizeSignalsMigrationRequest());
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      indices: [
+      migrations: [
         expect.objectContaining({
           id: mockMigrations[0].id,
           error: {

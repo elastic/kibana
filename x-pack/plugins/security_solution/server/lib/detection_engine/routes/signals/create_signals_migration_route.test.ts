@@ -75,8 +75,9 @@ describe('creating signals migrations route', () => {
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({
-      message:
-        'Cannot migrate due to the signals template being out of date. Please visit Detections to automatically update your template, then try again.',
+      message: expect.stringMatching(
+        /Cannot migrate due to the signals template being out of date\. Latest version: \[\d+\], template version: \[\d+\]\. Please visit Detections to automatically update your template, then try again\./
+      ),
       status_code: 400,
     });
   });
