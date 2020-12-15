@@ -19,6 +19,7 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
@@ -70,11 +71,13 @@ function getModalContent(
         />
       ),
       modalText: (
-        <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.modalTextNoAction"
-          defaultMessage="{ids} have different space permissions. When you delete multiple jobs, they must have the same permissions. De-select those jobs then re-try the deletion."
-          values={{ ids: jobIds.join(', ') }}
-        />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ml.deleteJobCheckModal.modalTextNoAction"
+            defaultMessage="{ids} have different space permissions. When you delete multiple jobs, they must have the same permissions. Deselect the jobs and try deleting each job individually."
+            values={{ ids: jobIds.join(', ') }}
+          />
+        </EuiText>
       ),
     };
   }
@@ -84,11 +87,13 @@ function getModalContent(
       <FormattedMessage id="xpack.ml.deleteJobCheckModal.buttonTextClose" defaultMessage="Close" />
     ),
     modalText: (
-      <FormattedMessage
-        id="xpack.ml.deleteJobCheckModal.modalTextClose"
-        defaultMessage="{ids} cannot be deleted and cannot be removed from the current space."
-        values={{ ids: jobIds.join(', ') }}
-      />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.ml.deleteJobCheckModal.modalTextClose"
+          defaultMessage="{ids} cannot be deleted and cannot be removed from the current space. This job is assigned to the * space and you do not have access to all spaces."
+          values={{ ids: jobIds.join(', ') }}
+        />
+      </EuiText>
     ),
   };
 
@@ -102,11 +107,13 @@ function getModalContent(
         />
       ),
       modalText: (
-        <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.modalTextCanDelete"
-          defaultMessage="{ids} can be deleted."
-          values={{ ids: jobIds.join(', ') }}
-        />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ml.deleteJobCheckModal.modalTextCanDelete"
+            defaultMessage="{ids} can be deleted."
+            values={{ ids: jobIds.join(', ') }}
+          />
+        </EuiText>
       ),
     };
   } else if (canUntag) {
@@ -118,11 +125,13 @@ function getModalContent(
         />
       ),
       modalText: (
-        <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.modalTextCanUnTag"
-          defaultMessage="{ids} cannot be deleted but can be removed from the current space."
-          values={{ ids: jobIds.join(', ') }}
-        />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ml.deleteJobCheckModal.modalTextCanUnTag"
+            defaultMessage="{ids} cannot be deleted but can be removed from the current space."
+            values={{ ids: jobIds.join(', ') }}
+          />
+        </EuiText>
       ),
     };
   } else {
