@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ApiCodeExample } from './api_code_example';
-export { PasteJsonText } from './paste_json_text';
+.pasteJsonTextArea {
+  font-family: $euiCodeFontFamily;
+}
