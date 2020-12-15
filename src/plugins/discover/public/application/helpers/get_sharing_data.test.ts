@@ -21,7 +21,6 @@ import { getSharingData } from './get_sharing_data';
 import { IUiSettingsClient } from 'kibana/public';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 
 describe('getSharingData', () => {
   test('returns valid data for sharing', async () => {

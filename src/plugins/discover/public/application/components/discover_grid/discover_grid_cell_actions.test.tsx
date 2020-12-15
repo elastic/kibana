@@ -43,6 +43,7 @@ describe('Discover cell actions ', function () {
           rowIndex={1}
           columnId={'extension'}
           isExpanded={false}
+          closePopover={jest.fn()}
         />
       </DiscoverGridContext.Provider>
     );
@@ -66,6 +67,7 @@ describe('Discover cell actions ', function () {
           rowIndex={1}
           columnId={'extension'}
           isExpanded={false}
+          closePopover={jest.fn()}
         />
       </DiscoverGridContext.Provider>
     );
