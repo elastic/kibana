@@ -77,9 +77,17 @@ export const ALERT_ERROR_EXECUTION_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonLicense',
+  {
+    defaultMessage: 'Cannot run alert',
+  }
+);
+
 export const alertsErrorReasonTranslationsMapping = {
   read: ALERT_ERROR_READING_REASON,
   decrypt: ALERT_ERROR_DECRYPTING_REASON,
   execute: ALERT_ERROR_EXECUTION_REASON,
   unknown: ALERT_ERROR_UNKNOWN_REASON,
+  license: ALERT_ERROR_LICENSE_REASON,
 };

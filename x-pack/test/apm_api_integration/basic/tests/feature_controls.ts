@@ -107,21 +107,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/charts/latency?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
+        url: `/api/apm/services/foo/transactions/charts/latency?start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/charts/latency?start=${start}&end=${end}&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: {
-        url: `/api/apm/services/foo/transactions/charts/latency?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
+        url: `/api/apm/services/foo/transactions/charts/latency?start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

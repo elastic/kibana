@@ -26,6 +26,7 @@ import {
   serviceDependenciesRoute,
   serviceDetailsRoute,
   serviceDetailsIconsRoute,
+  serviceInstancesRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -103,6 +104,11 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
 } from './rum_client';
+import {
+  transactionErrorRateChartPreview,
+  transactionErrorCountChartPreview,
+  transactionDurationChartPreview,
+} from './alerts/chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -128,6 +134,7 @@ const createApmApi = () => {
     .add(serviceDependenciesRoute)
     .add(serviceDetailsRoute)
     .add(serviceDetailsIconsRoute)
+    .add(serviceInstancesRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -208,7 +215,12 @@ const createApmApi = () => {
     .add(rumJSErrors)
     .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
-    .add(rumHasDataRoute);
+    .add(rumHasDataRoute)
+
+    // Alerting
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorRateChartPreview);
 
   return api;
 };
