@@ -43,10 +43,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(response.body).toMatchInline(`
           Object {
             "container": Object {
-              "avgNumberInstances": 1,
               "isContainerized": true,
               "orchestration": "Kubernetes",
               "os": "Linux",
+              "totalNumberInstances": 1,
             },
             "service": Object {
               "agent": Object {
@@ -87,10 +87,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "provider": "gcp",
             },
             "container": Object {
-              "avgNumberInstances": 1,
               "isContainerized": true,
               "orchestration": "Kubernetes",
               "os": "linux",
+              "totalNumberInstances": 1,
             },
             "service": Object {
               "agent": Object {

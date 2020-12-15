@@ -22,7 +22,6 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -48,7 +47,7 @@ interface ServiceMetadataDetails {
   container?: {
     os?: string;
     isContainerized?: boolean;
-    avgNumberInstances?: number;
+    totalNumberInstances?: number;
     orchestration?: Orchestration;
   };
   cloud?: {
@@ -67,7 +66,6 @@ export async function getServiceMetadataDetails({
   setup: Setup & SetupTimeRange;
 }): Promise<ServiceMetadataDetails> {
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -112,20 +110,7 @@ export async function getServiceMetadataDetails({
             size: 10,
           },
         },
-        histogram: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
-          },
-          aggs: {
-            total_instances: { cardinality: { field: SERVICE_NODE_NAME } },
-          },
-        },
-        avgNumberInstances: {
-          avg_bucket: { buckets_path: 'histogram>total_instances' },
-        },
+        totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
     },
   };
@@ -152,18 +137,18 @@ export async function getServiceMetadataDetails({
     agent,
   };
 
-  const avgNumberInstances =
-    response.aggregations?.avgNumberInstances.value || undefined;
+  const totalNumberInstances =
+    response.aggregations?.totalNumberInstances.value;
 
   const containerDetails =
-    host || container || avgNumberInstances || kubernetes
+    host || container || totalNumberInstances || kubernetes
       ? {
           os: host?.os?.platform,
           orchestration: (!!kubernetes
             ? 'Kubernetes'
             : 'Docker') as Orchestration,
           isContainerized: !!container?.id,
-          avgNumberInstances,
+          totalNumberInstances,
         }
       : undefined;
 

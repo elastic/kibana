@@ -47,13 +47,13 @@ export function ContainerDetails({ container }: Props) {
     });
   }
 
-  if (container.avgNumberInstances) {
+  if (container.totalNumberInstances) {
     listItems.push({
       title: i18n.translate(
-        'xpack.apm.serviceNameHeader.container.avgNumberInstances',
-        { defaultMessage: 'Avg. number of instances' }
+        'xpack.apm.serviceNameHeader.container.totalNumberInstances',
+        { defaultMessage: 'Total number of instances' }
       ),
-      description: Math.round(container.avgNumberInstances),
+      description: Math.round(container.totalNumberInstances),
     });
   }
 
