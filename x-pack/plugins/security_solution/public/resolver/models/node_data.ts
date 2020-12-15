@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { entityIDSafeVersion, timestampSafeVersion } from '../../../common/endpoint/models/event';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { FetchedNodeData, NodeData } from '../types';
 import { isTerminatedProcess } from './process_event';
