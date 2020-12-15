@@ -24,6 +24,7 @@ import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { ValidationTelemetryServiceSetup } from '../index';
 import { Framework } from '../plugin';
+import { validateObject } from '../../../../core/server';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -41,6 +42,7 @@ export const visDataRoutes = (
     },
     async (requestContext, request, response) => {
       try {
+        validateObject(request.body);
         visPayloadSchema.validate(request.body);
       } catch (error) {
         logFailedValidation();
