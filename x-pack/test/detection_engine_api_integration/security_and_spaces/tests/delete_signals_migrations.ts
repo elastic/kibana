@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import {
+  DEFAULT_SIGNALS_INDEX,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
@@ -28,6 +29,7 @@ interface FinalizeResponse extends CreateResponse {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const supertest = getService('supertest');
@@ -84,6 +86,20 @@ export default ({ getService }: FtrProviderContext): void => {
       const deletedMigration = body.migrations[0];
       expect(deletedMigration.id).to.eql(createdMigration.migration_id);
       expect(deletedMigration.sourceIndex).to.eql(outdatedSignalsIndexName);
+    });
+
+    it('marks the original index for deletion by applying our cleanup policy', async () => {
+      await supertest
+        .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: [createdMigration.migration_id] })
+        .expect(200);
+
+      const { body } = await es.indices.getSettings({ index: createdMigration.index });
+      const indexSettings = body[createdMigration.index].settings.index;
+      expect(indexSettings.lifecycle.name).to.eql(
+        `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
+      );
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {

@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 
 import {
-  DEFAULT_SIGNALS_INDEX,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -42,7 +41,6 @@ interface FinalizeResponse {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
   const security = getService('security');
@@ -163,28 +161,6 @@ export default ({ getService }: FtrProviderContext): void => {
         createdMigrations.map((c) => c.migration_index)
       );
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
-    });
-
-    it('marks the original index for deletion by applying our cleanup policy', async () => {
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
-
-        return completed;
-      }, `polling finalize_migration until complete`);
-
-      const { body } = await es.indices.getSettings({ index: createdMigration.index });
-      const indexSettings = body[createdMigration.index].settings.index;
-      expect(indexSettings.lifecycle.name).to.eql(
-        `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
-      );
     });
 
     it.skip('deletes the underlying migration task', async () => {
