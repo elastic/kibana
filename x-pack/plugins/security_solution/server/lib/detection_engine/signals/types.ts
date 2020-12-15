@@ -123,6 +123,7 @@ export interface GetResponse {
 export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = BaseHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
@@ -174,6 +175,7 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Signal;
+  [key: string]: SearchTypes;
 }
 
 export interface AlertAttributes {
@@ -242,6 +244,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  createdSignals: SignalHit[];
   errors: string[];
 }
 

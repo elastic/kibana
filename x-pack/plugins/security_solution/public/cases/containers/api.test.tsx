@@ -384,6 +384,9 @@ describe('Case Configuration API', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: true,
+      },
     };
 
     test('check url, method, signal', async () => {

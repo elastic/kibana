@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseConfigureServiceSetup, CaseServiceSetup, CaseUserActionServiceSetup } from '.';
+import {
+  CaseConfigureServiceSetup,
+  CaseServiceSetup,
+  CaseUserActionServiceSetup,
+  AlertServiceContract,
+} from '.';
 
 export type CaseServiceMock = jest.Mocked<CaseServiceSetup>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureServiceSetup>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
+export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 
 export const createCaseServiceMock = (): CaseServiceMock => ({
   deleteCase: jest.fn(),
@@ -40,4 +46,9 @@ export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => ({
   getUserActions: jest.fn(),
   postUserActions: jest.fn(),
+});
+
+export const createAlertServiceMock = (): AlertServiceMock => ({
+  initialize: jest.fn(),
+  updateAlertsStatus: jest.fn(),
 });

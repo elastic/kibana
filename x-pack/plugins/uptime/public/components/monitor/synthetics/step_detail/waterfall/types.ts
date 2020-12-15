@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { NetworkEvent } from '../../../../../../common/runtime_types';
 
 export enum Timings {
   Blocked = 'blocked',
@@ -33,7 +34,7 @@ export const FriendlyTimingLabels = {
     }
   ),
   [Timings.Ssl]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.ssl', {
-    defaultMessage: 'SSL',
+    defaultMessage: 'TLS',
   }),
   [Timings.Send]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.send', {
     defaultMessage: 'Sending request',
@@ -144,21 +145,7 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/font-sfnt': MimeType.Font,
 };
 
-export interface NetworkItem {
-  timestamp: string;
-  method: string;
-  url: string;
-  status: number;
-  mimeType?: string;
-  // NOTE: This is the time the request was actually issued. timing.request_time might be later if the request was queued.
-  requestSentTime: number;
-  responseReceivedTime: number;
-  // NOTE: Denotes the earlier figure out of request sent time and request start time (part of timings). This can vary based on queue times, and
-  // also whether an entry actually has timings available.
-  // Ref: https://github.com/ChromeDevTools/devtools-frontend/blob/ed2a064ac194bfae4e25c4748a9fa3513b3e9f7d/front_end/network/RequestTimingView.js#L154
-  earliestRequestTime: number;
-  timings: CalculatedTimings | null;
-}
+export type NetworkItem = NetworkEvent;
 export type NetworkItems = NetworkItem[];
 
 // NOTE: A number will always be present if the property exists, but that number might be -1, which represents no value.
