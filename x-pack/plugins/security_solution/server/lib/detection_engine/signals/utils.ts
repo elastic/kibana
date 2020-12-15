@@ -713,33 +713,30 @@ export const getIndexesMatchingIndexPatterns = async (
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<Record<string, string[]>> => {
-  try {
-    const res = await indices.reduce(async (acc, indexPattern) => {
-      try {
-        const totalIndices: Array<Record<'index', string>> = await services.callCluster(
-          'cat.indices',
-          {
-            index: indexPattern,
-            format: 'json',
-          }
-        );
-        return { [indexPattern]: totalIndices.map((item) => item.index), ...(await acc) };
-      } catch (exc) {
-        logger.error(
-          buildRuleMessage(`[-] failed to cat indices: ${JSON.stringify(indices, null, 2)}`)
-        );
-        logger.error(buildRuleMessage(`Exception: ${exc}`));
-        return { ...(await acc) };
-      }
-    }, {} as Promise<Record<string, string[]>>);
-    return res;
-  } catch (exc) {
-    logger.error(
-      buildRuleMessage(`[-] failed to cat indices: ${JSON.stringify(indices, null, 2)}`)
-    );
-    logger.error(buildRuleMessage(`Exception: ${exc}`));
-    return Promise.resolve({});
-  }
+  const indexPatternIndices: Array<Record<string, string[]>> = await Promise.all(
+    indices.map(async (indexPattern) => ({
+      [indexPattern]: await services
+        .callCluster('cat.indices', {
+          index: indexPattern,
+          format: 'json',
+        })
+        .then((concreteIndices) =>
+          concreteIndices.map((item: Record<'index', string>) => item.index)
+        )
+        .catch((exc) => {
+          logger.error(
+            buildRuleMessage(`An error occurred while querying cat.indices api: ${exc}`)
+          );
+          return {};
+        }),
+    }))
+  );
+  const res = indexPatternIndices.reduce((acc, indxPattIndc) => {
+    const entry = Object.entries(indxPattIndc);
+    return { [entry[0][0]]: entry[0][1], ...acc };
+  }, {});
+
+  return res;
 };
 
 export const findIndicesWithTimestampAndWithout = (
@@ -807,6 +804,7 @@ export const timestampFieldCheck = async (
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<PreCheckRuleResultInterface> => {
+  // view_index_metadata privileges required here
   const timestampsAndIndices = await checkIndexMappingsForTimestampFields(
     indices,
     timestamps,
@@ -835,6 +833,7 @@ export const timestampFieldCheck = async (
   // IMPORTANT: this uses cat.indices api which requires
   // 'monitor' privilege on both the cluster and the index
   // patterns
+  // monitor privilege on index patterns AND monitor on cluster priv
   const indexPatternIndices = await getIndexesMatchingIndexPatterns(
     indices,
     services,
