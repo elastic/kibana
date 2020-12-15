@@ -46,7 +46,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
-    <div data-test-subj="mlFieldDataCardTopValues">
+    <div data-test-subj="mlFieldDataTopValues">
       {Array.isArray(topValues) &&
         topValues.map((value: any) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>

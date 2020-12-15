@@ -61,21 +61,53 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
       await testSubjects.existOrFail(this.rowSelector(fieldName));
     }
 
-    public async expandRowDetails(fieldName: string, fieldType: string) {
+    public detailsSelector(fieldName: string, subSelector?: string) {
+      const row = `~mlDataVisualizerTable > ~mlDataVisualizerFieldExpandedRow-${fieldName}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
+    }
+
+    public async ensureDetailsOpen(fieldName: string) {
+      await retry.tryForTime(10000, async () => {
+        if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
+          await testSubjects.click(this.rowSelector(fieldName, 'mlDataVisualizerDetailsToggle'));
+          await testSubjects.existOrFail(
+            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowUp`),
+            {
+              timeout: 1000,
+            }
+          );
+          await testSubjects.existOrFail(this.detailsSelector(fieldName), { timeout: 1000 });
+        }
+      });
+    }
+
+    public async ensureDetailsClosed(fieldName: string) {
+      await retry.tryForTime(10000, async () => {
+        if (await testSubjects.exists(this.detailsSelector(fieldName))) {
+          await testSubjects.click(this.rowSelector(fieldName, 'mlDataVisualizerDetailsToggle'));
+          await testSubjects.existOrFail(
+            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`),
+            {
+              timeout: 1000,
+            }
+          );
+          await testSubjects.missingOrFail(this.detailsSelector(fieldName), { timeout: 1000 });
+        }
+      });
+    }
+
+    public async openDetails(fieldName: string) {
+      await this.ensureDetailsClosed(fieldName);
+
       const selector = this.rowSelector(
         fieldName,
-        `mlDataVisualizerToggleDetails ${fieldName} arrowDown`
+        `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`
       );
       await testSubjects.existOrFail(selector);
       await testSubjects.click(selector);
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(
-          this.rowSelector(fieldName, `mlDataVisualizerToggleDetails ${fieldName} arrowUp`)
-        );
-        await testSubjects.existOrFail(
-          `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType}`
-        );
-      });
+      await this.ensureDetailsOpen(fieldName);
+
+      await retry.tryForTime(5000, async () => {});
     }
 
     public async assertFieldDocCount(fieldName: string, docCountFormatted: string) {
@@ -91,73 +123,71 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
       );
     }
 
-    public async assertNumberRowContents(fieldName: string, docCountFormatted: string) {
+    public async assertNumberFieldContents(fieldName: string, docCountFormatted: string) {
       const fieldType = ML_JOB_FIELD_TYPES.NUMBER;
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.expandRowDetails(fieldName, fieldType);
+      await this.openDetails(fieldName, fieldType);
 
       await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlNumberSummaryTable`
+        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlNumberSummaryTable`
       );
 
+      await testSubjects.existOrFail(`mlDataVisualizerFieldExpandedRow-${fieldName} > mlTopValues`);
       await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlTopValues`
-      );
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlMetricDistribution`
+        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlMetricDistribution`
       );
     }
 
-    public async assertDateRowContents(fieldName: string, docCountFormatted: string) {
+    public async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
       const fieldType = ML_JOB_FIELD_TYPES.DATE;
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.expandRowDetails(fieldName, fieldType);
+      await this.openDetails(fieldName, fieldType);
 
       await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlDateSummaryTable`
+        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlDateSummaryTable`
       );
     }
 
-    public async assertKeywordRowContents(fieldName: string, docCountFormatted: string) {
+    public async assertKeywordFieldContents(fieldName: string, docCountFormatted: string) {
       const fieldType = ML_JOB_FIELD_TYPES.KEYWORD;
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.expandRowDetails(fieldName, fieldType);
+      await this.openDetails(fieldName, fieldType);
 
       await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlFieldDataCardTopValues`
+        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlFieldDataTopValues`
       );
     }
 
-    public async assertTextRowContents(fieldName: string, docCountFormatted: string) {
+    public async assertTextFieldContents(fieldName: string, docCountFormatted: string) {
       const fieldType = ML_JOB_FIELD_TYPES.TEXT;
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.expandRowDetails(fieldName, fieldType);
+      await this.openDetails(fieldName, fieldType);
 
       await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow ${fieldName} ${fieldType} > mlFieldDataCardExamplesList`
+        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlFieldDataExamplesList`
       );
     }
 
-    async assertNonMetricCardContents(
+    async assertNonMetricFieldContents(
       cardType: string,
       fieldName: string,
       docCountFormatted: string
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (cardType === ML_JOB_FIELD_TYPES.DATE) {
-        await this.assertDateRowContents(fieldName, docCountFormatted);
+        await this.assertDateFieldContents(fieldName, docCountFormatted);
       } else if (cardType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordRowContents(fieldName, docCountFormatted!);
+        await this.assertKeywordFieldContents(fieldName, docCountFormatted!);
       } else if (cardType === ML_JOB_FIELD_TYPES.TEXT) {
-        await this.assertTextRowContents(fieldName, docCountFormatted!);
+        await this.assertTextFieldContents(fieldName, docCountFormatted!);
       }
     }
   })();

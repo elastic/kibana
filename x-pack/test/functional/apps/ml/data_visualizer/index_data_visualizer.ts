@@ -28,7 +28,6 @@ interface TestData {
   expected: {
     totalDocCountFormatted: string;
     fieldsPanelCount: number;
-    documentCountCard: FieldVisConfig;
     metricCards?: MetricFieldVisConfig[];
     nonMetricCards?: NonMetricFieldVisConfig[];
     nonMetricFieldsTypeFilterCardCount: number;
@@ -54,12 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
     expected: {
       totalDocCountFormatted: '86,274',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
       metricCards: [
         {
           fieldName: 'responsetime',
@@ -146,12 +139,6 @@ export default function ({ getService }: FtrProviderContext) {
     expected: {
       totalDocCountFormatted: '34,415',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
       metricCards: [
         {
           fieldName: 'responsetime',
@@ -238,12 +225,6 @@ export default function ({ getService }: FtrProviderContext) {
     expected: {
       totalDocCountFormatted: '34,416',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
       metricCards: [
         {
           fieldName: 'responsetime',
@@ -345,17 +326,23 @@ export default function ({ getService }: FtrProviderContext) {
         testData.expected.totalDocCountFormatted
       );
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the doc count`);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the doc count panel correctly`
+      );
       await ml.dataVisualizerIndexBased.assertTotalDocCountHeaderExist();
       await ml.dataVisualizerIndexBased.assertTotalDocCountChartExist();
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the search panel count`);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the search panel correctly`
+      );
       await ml.dataVisualizerIndexBased.assertSearchPanelExist();
       await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
       await ml.dataVisualizerIndexBased.assertFieldTypeInputExists();
       await ml.dataVisualizerIndexBased.assertFieldNameInputExists();
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the field count`);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the field count panel correctly`
+      );
       await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
       await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
@@ -377,12 +364,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
       await ml.testExecution.logTestStep(
-        'displays details for the created job in the analytics table'
+        'displays details for metric fields and non-metric fields correctly'
       );
       for (const fieldCard of testData.expected.metricCards as Array<
         Required<MetricFieldVisConfig>
       >) {
-        await ml.dataVisualizerTable.assertNumberRowContents(
+        await ml.dataVisualizerTable.assertNumberFieldContents(
           fieldCard.fieldName,
           fieldCard.docCountFormatted
         );
@@ -395,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       for (const fieldCard of testData.expected.nonMetricCards!) {
-        await ml.dataVisualizerTable.assertNonMetricCardContents(
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
           fieldCard.type,
           fieldCard.fieldName!,
           fieldCard.docCountFormatted
