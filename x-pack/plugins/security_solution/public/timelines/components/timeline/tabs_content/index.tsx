@@ -152,13 +152,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     );
   }, [dispatch, timelineId]);
 
-  const setGraphAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
-      ),
-    [dispatch, timelineId]
-  );
+  const setGraphAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
+    );
+  }, [dispatch, timelineId]);
 
   const setNotesAsActiveTab = useCallback(() => {
     dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
@@ -167,13 +166,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     );
   }, [dispatch, timelineId]);
 
-  const setPinnedAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
-      ),
-    [dispatch, timelineId]
-  );
+  const setPinnedAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
+    );
+  }, [dispatch, timelineId]);
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {

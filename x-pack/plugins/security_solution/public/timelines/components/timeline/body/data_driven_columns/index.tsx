@@ -28,7 +28,10 @@ export const DataDrivenColumns = React.memo<Props>(
   ({ _id, activeTab, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
       {columnHeaders.map((header) => (
-        <EventsTd key={header.id} width={header.width}>
+        <EventsTd
+          key={activeTab != null ? `${header.id}_${activeTab}` : `${header.id}`}
+          width={header.width}
+        >
           <EventsTdContent data-test-subj="cell-container">
             {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
               columnName: header.id,

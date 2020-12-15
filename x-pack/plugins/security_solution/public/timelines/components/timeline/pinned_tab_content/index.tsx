@@ -12,7 +12,7 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -21,12 +21,9 @@ import deepEqual from 'fast-deep-equal';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
-import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { useManageTimeline } from '../../manage_timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -119,9 +116,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     SourcererScopeName.timeline
   );
 
-  const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
-
   const filterQuery = useMemo(() => {
     const filterObj = Object.entries(pinnedEventIds).reduce<PinnedFilter>(
       (acc, [pinnedId, isPinned]) => {
@@ -173,14 +167,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const { initializeTimeline } = useManageTimeline();
-  useEffect(() => {
-    initializeTimeline({
-      filterManager,
-      id: timelineId,
-    });
-  }, [initializeTimeline, filterManager, timelineId]);
-
   const [
     isQueryLoading,
     { events, totalCount, pageInfo, loadPage, updatedAt, refetch },
@@ -201,13 +187,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const handleOnEventClosed = useCallback(() => {
     onEventClosed({ timelineId });
   }, [timelineId, onEventClosed]);
-
-  useEffect(() => {
-    handleOnEventClosed();
-    return () => {
-      handleOnEventClosed();
-    };
-  }, [handleOnEventClosed]);
 
   return (
     <>
