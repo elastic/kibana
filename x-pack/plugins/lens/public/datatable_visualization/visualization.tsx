@@ -22,6 +22,10 @@ export interface LayerState {
 
 export interface DatatableVisualizationState {
   layers: LayerState[];
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
 }
 
 function newLayerState(layerId: string): LayerState {
@@ -196,6 +200,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             }
           : l
       ),
+      sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
 
@@ -232,6 +237,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map((o) => o.columnId),
+                      sortBy: [state.sorting?.columnId || ''],
+                      sortDirection: [state.sorting?.direction || 'none'],
                     },
                   },
                 ],
@@ -245,6 +252,19 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
   getErrorMessages(state, frame) {
     return undefined;
+  },
+
+  onEditAction(state, event) {
+    if (event.data.action !== 'sort') {
+      return state;
+    }
+    return {
+      ...state,
+      sorting: {
+        columnId: event.data.columnId,
+        direction: event.data.direction,
+      },
+    };
   },
 };
 
