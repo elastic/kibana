@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const HelpMenu = React.memo(() => {
-  const { chrome, docLinks } = useKibana().services;
+  const { chrome, docLinks } = useMlKibana().services;
 
   useEffect(() => {
     chrome.setHelpExtension({
