@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_schema';
+import { GetSignalsMigrationStatusSchema } from './get_signals_migration_status_schema';
 
-export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeSignalsMigrationSchema => ({
-  migration_ids: ['migrationSOIdentifier'],
+export const getSignalsMigrationStatusSchemaMock = (): GetSignalsMigrationStatusSchema => ({
+  from: 'now-30d',
 });

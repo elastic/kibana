@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_schema';
+import * as t from 'io-ts';
 
-export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeSignalsMigrationSchema => ({
-  migration_ids: ['migrationSOIdentifier'],
-});
+export const deleteSignalsMigrationSchema = t.exact(
+  t.type({
+    migration_ids: t.array(t.string),
+  })
+);
+
+export type DeleteSignalsMigrationSchema = t.TypeOf<typeof deleteSignalsMigrationSchema>;

@@ -6,8 +6,14 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
-import { createSignalsMigrationIndex } from './create_signals_migration_index';
-import { MigrationDetails } from './types';
+import { createMigrationIndex } from './create_migration_index';
+
+export interface CreatedMigration {
+  destinationIndex: string;
+  sourceIndex: string;
+  taskId: string;
+  version: number;
+}
 
 /**
  * Migrates signals for a given concrete index. Signals are reindexed into a
@@ -19,10 +25,10 @@ import { MigrationDetails } from './types';
  * @param version version of the current signals template/mappings
  * @param reindexOptions object containing reindex options {@link SignalsReindexOptions}
  *
- * @returns identifying information representing the {@link MigrationDetails}
+ * @returns identifying information representing the {@link MigrationInfo}
  * @throws if elasticsearch returns an error
  */
-export const migrateSignals = async ({
+export const createMigration = async ({
   esClient,
   index,
   reindexOptions,
@@ -32,8 +38,8 @@ export const migrateSignals = async ({
   index: string;
   reindexOptions: SignalsReindexOptions;
   version: number;
-}): Promise<MigrationDetails> => {
-  const migrationIndex = await createSignalsMigrationIndex({
+}): Promise<CreatedMigration> => {
+  const migrationIndex = await createMigrationIndex({
     esClient,
     index,
     version,
@@ -67,5 +73,6 @@ export const migrateSignals = async ({
     destinationIndex: migrationIndex,
     sourceIndex: index,
     taskId: response.body.task,
+    version,
   };
 };
