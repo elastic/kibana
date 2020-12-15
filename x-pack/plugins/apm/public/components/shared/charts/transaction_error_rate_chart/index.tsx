@@ -84,8 +84,8 @@ export function TransactionErrorRateChart({
             type: 'linemark',
             color: theme.eui.euiColorVis7,
             hideLegend: true,
-            title: i18n.translate('xpack.apm.errorRate.currentPeriodLabel', {
-              defaultMessage: 'Current period',
+            title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+              defaultMessage: 'Error rate',
             }),
           },
         ]}
