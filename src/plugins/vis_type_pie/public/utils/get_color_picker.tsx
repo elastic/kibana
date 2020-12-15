@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent } from 'react';
+import React, { BaseSyntheticEvent, useRef, useEffect, useCallback } from 'react';
 import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
-import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
+import { PopoverAnchorPosition, EuiPopover } from '@elastic/eui';
 import { DatatableRow } from '../../../expressions/public';
 import { BucketColumns } from '../types';
 import { ColorPicker } from '../temp';
@@ -67,14 +67,34 @@ export const getColorPicker = (
   palette: string,
   data: DatatableRow[]
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
   const seriesName = seriesIdentifier.key;
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-    onClose();
+    if (!seriesName) {
+      return;
+    }
     if (newColor) {
       onChange(newColor);
     }
     setColor(newColor, seriesName, event);
+    onClose();
   };
+
+  const handleOutsideClick = useCallback(
+    (e: MouseEvent) => {
+      if (!(ref.current! as any).contains(e.target)) {
+        onClose?.();
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, [handleOutsideClick]);
 
   // For the EuiPalette we want the user to be able to change only the colors of the inner layer
   if (palette !== 'kibana_palette') {
@@ -83,7 +103,8 @@ export const getColorPicker = (
   }
   const hexColor = new Color(color).hex();
   return (
-    <EuiWrappingPopover
+    <EuiPopover
+      popoverRef={ref}
       isOpen
       ownFocus
       display="block"
@@ -99,6 +120,6 @@ export const getColorPicker = (
         maxDepth={bucketColumns.length}
         layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
       />
-    </EuiWrappingPopover>
+    </EuiPopover>
   );
 };

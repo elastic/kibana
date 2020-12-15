@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
-import { EuiWrappingPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -69,7 +69,7 @@ describe('getColorPicker', function () {
 
   it('renders the picker on the correct position', () => {
     wrapper = mount(<Component {...wrapperProps} />);
-    expect(wrapper.find(EuiWrappingPopover).prop('anchorPosition')).toEqual('rightCenter');
+    expect(wrapper.find(EuiPopover).prop('anchorPosition')).toEqual('rightCenter');
   });
 
   it('converts the color to the right hex and passes it to the color picker', () => {
