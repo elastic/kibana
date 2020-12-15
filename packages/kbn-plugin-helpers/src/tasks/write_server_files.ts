@@ -52,6 +52,7 @@ export async function writeServerFiles({
           ? config.serverSourcePatterns || [
               'yarn.lock',
               'tsconfig.json',
+              'package.json',
               'index.{js,ts}',
               '{lib,server,common,translations}/**/*',
             ]
