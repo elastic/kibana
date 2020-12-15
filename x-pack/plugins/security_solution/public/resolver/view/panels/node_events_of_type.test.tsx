@@ -41,6 +41,8 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
