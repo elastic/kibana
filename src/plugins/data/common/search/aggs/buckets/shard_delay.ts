@@ -24,7 +24,7 @@ import { aggShardDelayFnName } from './shard_delay_fn';
 export const SHARD_DELAY_AGG_NAME = 'shard_delay';
 
 export interface AggParamsShardDelay extends BaseAggParams {
-  delay?: number;
+  delay?: string;
 }
 
 export const getShardDelayBucketAgg = () =>
