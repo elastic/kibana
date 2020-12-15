@@ -122,7 +122,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
               <TopValues
                 stats={stats}
                 fieldFormat={fieldFormat}
-                barColor="primary"
+                barColor="secondary"
                 compressed={true}
               />
             </EuiFlexItem>

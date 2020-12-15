@@ -53,6 +53,7 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
       <div className={'mlDataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
+            <EuiSpacer size="s" />
             <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
               <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.min}</EuiFlexItem>
               <EuiFlexItem
@@ -64,7 +65,6 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
                 {legendText.max}
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
           </>
         )}
       </div>

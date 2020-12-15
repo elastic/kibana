@@ -191,7 +191,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       {detailsMode === DETAILS_MODE.TOP_VALUES && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
+            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

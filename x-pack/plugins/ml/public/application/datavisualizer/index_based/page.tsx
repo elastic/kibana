@@ -705,6 +705,7 @@ export const Page: FC = () => {
                       />
                     </EuiFlexItem>
                   )}
+                  <EuiSpacer size={'m'} />
 
                   <SearchPanel
                     indexPattern={currentIndexPattern}
@@ -722,7 +723,7 @@ export const Page: FC = () => {
                     setVisibleFieldNames={setVisibleFieldNames}
                     showEmptyFields={showEmptyFields}
                   />
-                  <EuiSpacer size={'m'} />
+                  <EuiSpacer size={'l'} />
                   <FieldCountPanel
                     showEmptyFields={showEmptyFields}
                     toggleShowEmptyFields={toggleShowEmptyFields}

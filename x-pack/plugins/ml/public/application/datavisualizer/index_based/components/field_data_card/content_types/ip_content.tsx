@@ -28,7 +28,7 @@ export const IpContent: FC<FieldDataCardProps> = ({ config }) => {
         />
       </ExpandedRowFieldHeader>
       <EuiSpacer size="xs" />
-      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
+      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
     </div>
   );
 };

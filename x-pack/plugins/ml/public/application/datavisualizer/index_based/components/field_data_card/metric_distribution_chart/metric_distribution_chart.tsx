@@ -61,7 +61,7 @@ export const MetricDistributionChart: FC<Props> = ({
 
   const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-  const AREA_SERIES_COLOR = themeName.euiColorVis1;
+  const AREA_SERIES_COLOR = themeName.euiColorVis0;
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
@@ -83,6 +83,13 @@ export const MetricDistributionChart: FC<Props> = ({
       <Chart size={{ width, height }}>
         <Settings
           theme={{
+            axes: {
+              tickLabel: {
+                fontSize: parseInt(themeName.euiFontSizeXS, 10),
+                fontFamily: themeName.euiFontFamily,
+                fontStyle: 'italic',
+              },
+            },
             background: { color: 'transparent' },
             chartMargins: {
               left: 0,
