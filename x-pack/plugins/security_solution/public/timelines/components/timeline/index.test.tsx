@@ -7,16 +7,10 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 
-import {
-  mockIndexNames,
-  mockIndexPattern,
-  mockTimelineData,
-  TestProviders,
-} from '../../../common/mock';
+import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
@@ -61,7 +55,16 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: [],
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
   });
 
   test('renders ', () => {

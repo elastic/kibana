@@ -17,7 +17,7 @@ describe('FlyoutBottomBar', () => {
       <TestProviders>
         <FlyoutBottomBar
           timelineId="test"
-          showDataproviders={false}
+          showDataproviders={true}
           activeTab={TimelineTabs.query}
         />
       </TestProviders>
@@ -31,8 +31,64 @@ describe('FlyoutBottomBar', () => {
       <TestProviders>
         <FlyoutBottomBar
           timelineId="test"
+          showDataproviders={true}
+          activeTab={TimelineTabs.query}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(true);
+  });
+
+  test('it renders the flyout header panel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FlyoutBottomBar
+          timelineId="test"
+          showDataproviders={true}
+          activeTab={TimelineTabs.query}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="timeline-flyout-header-panel"]').exists()).toBe(true);
+  });
+
+  test('it hides the data providers drop target area', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FlyoutBottomBar
+          timelineId="test"
           showDataproviders={false}
           activeTab={TimelineTabs.query}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(false);
+  });
+
+  test('it hides the flyout header panel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FlyoutBottomBar
+          timelineId="test"
+          showDataproviders={false}
+          activeTab={TimelineTabs.query}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="timeline-flyout-header-panel"]').exists()).toBe(false);
+  });
+
+  test('it renders the data providers drop target area when showDataproviders=false and tab is not query', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FlyoutBottomBar
+          timelineId="test"
+          showDataproviders={false}
+          activeTab={TimelineTabs.notes}
         />
       </TestProviders>
     );

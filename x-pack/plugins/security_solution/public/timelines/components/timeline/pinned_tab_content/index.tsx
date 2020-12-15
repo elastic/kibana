@@ -37,13 +37,6 @@ import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 
-const TimelineHeaderContainer = styled.div`
-  margin-top: 6px;
-  width: 100%;
-`;
-
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
-
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
   flex: 1;
@@ -74,15 +67,6 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
-
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-
-DatePicker.displayName = 'DatePicker';
 
 const VerticalRule = styled.div`
   width: 2px;
