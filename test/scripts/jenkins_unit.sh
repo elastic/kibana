@@ -35,7 +35,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_hardening.sh
 else
   # echo " -> Running jest tests with coverage"
-  # node scripts/jest --ci --verbose --coverage
+  # node scripts/jest --ci --verbose --coverage --config jest.config.oss.js
   # rename_coverage_file "oss"
   # echo ""
   # echo ""
