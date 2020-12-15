@@ -145,7 +145,7 @@ export const nodeDataIsStale = createSelector(
   nodeDataRequestID,
   refreshCount,
   function nodeDataIsStale(oldID, newID) {
-    return oldID > newID;
+    return newID > oldID;
   }
 );
 
