@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
 import { MlCommonUI } from './common_ui';
+import { MlJobFieldType } from '../../../../plugins/ml/common/types/field_types';
 
 export function MachineLearningDataVisualizerIndexBasedProvider(
   { getService }: FtrProviderContext,
@@ -121,7 +122,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await testSubjects.existOrFail(`mlDataVisualizerTable`);
     },
 
-    async assertFieldsPanelForTypesExist(fieldTypes: ML_JOB_FIELD_TYPES[]) {
+    async assertFieldsPanelForTypesExist(fieldTypes: MlJobFieldType[]) {
       await testSubjects.existOrFail(`mlDataVisualizerFieldsPanel ${fieldTypes}`);
     },
 
