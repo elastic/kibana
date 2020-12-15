@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { letBrowserHandleEvent } from './link_events';
-export { createHref, CreateHrefOptions } from './create_href';
-export { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
+export type DocumentCreationMode = 'text' | 'file' | 'api';
+
+export enum DocumentCreationStep {
+  ShowCreationModes,
+  AddDocuments,
+  ShowErrorSummary,
+  ShowSuccessSummary,
+  ShowError,
+}
