@@ -57,8 +57,35 @@ test('should show indicator in case there is an active search session', async ()
   await waitFor(() => getByTestId('backgroundSessionIndicator'));
 });
 
+test('should be disabled when permissions are off', async () => {
+  const state$ = new BehaviorSubject(SessionState.Loading);
+  coreStart.application.currentAppId$ = new BehaviorSubject('discover');
+  (coreStart.application.capabilities as any) = {
+    discover: {
+      storeSearchSession: false,
+    },
+  };
+  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+    sessionService: { ...sessionService, state$ },
+    application: coreStart.application,
+    timeFilter,
+  });
+
+  render(<BackgroundSessionIndicator />);
+
+  await waitFor(() => screen.getByTestId('backgroundSessionIndicator'));
+
+  expect(screen.getByTestId('backgroundSessionIndicator').querySelector('button')).toBeDisabled();
+});
+
 test('should be disabled during auto-refresh', async () => {
   const state$ = new BehaviorSubject(SessionState.Loading);
+  coreStart.application.currentAppId$ = new BehaviorSubject('discover');
+  (coreStart.application.capabilities as any) = {
+    discover: {
+      storeSearchSession: true,
+    },
+  };
   const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,

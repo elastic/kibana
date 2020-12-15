@@ -21,8 +21,22 @@ export default function ({ getService }: FtrProviderContext) {
         const expected = {
           features: {
             discover: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            dashboard: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            visualize: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
+            dashboard: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
