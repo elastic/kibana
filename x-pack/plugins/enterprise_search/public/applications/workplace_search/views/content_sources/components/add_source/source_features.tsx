@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { useValues } from 'kea';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
@@ -24,6 +25,16 @@ import { AppLogic } from '../../../../app_logic';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import { Features, FeatureIds } from '../../../../types';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
+
+import {
+  SOURCE_FEATURES_SEARCHABLE,
+  SOURCE_FEATURES_REMOTE_FEATURE,
+  SOURCE_FEATURES_PRIVATE_FEATURE,
+  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE,
+  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
+  SOURCE_FEATURES_EXPLORE_BUTTON,
+  SOURCE_FEATURES_INCLUDED_FEATURES_TITLE,
+} from './constants';
 
 interface ConnectInstanceProps {
   features?: Features;
@@ -50,8 +61,14 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     <Feature title="Syncs every 2 hours">
       <EuiText size="xs">
         <p>
-          This source gets new content from {name} every <strong>2 hours</strong> (following the
-          initial&nbsp;sync).
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.syncFrequency.text"
+            defaultMessage="This source gets new content from {name} every {duration} (following the initial sync)."
+            values={{
+              name,
+              duration: <strong>2 hours</strong>,
+            }}
+          />
         </p>
       </EuiText>
     </Feature>
@@ -61,7 +78,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     <Feature title="Synced items">
       <>
         <EuiText size="xs">
-          <p>The following items are searchable:</p>
+          <p>{SOURCE_FEATURES_SEARCHABLE}</p>
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiText size="xs">
@@ -79,7 +96,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     <Feature title="Searchable content">
       <EuiText size="xs">
         <EuiText size="xs">
-          <p>The following items are searchable:</p>
+          <p>{SOURCE_FEATURES_SEARCHABLE}</p>
         </EuiText>
         <EuiSpacer size="xs" />
         <ul>
@@ -94,10 +111,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const RemoteFeature = (
     <Feature title="Always up-to-date">
       <EuiText size="xs">
-        <p>
-          Message data and other information is searchable in real-time from the Workplace Search
-          experience.
-        </p>
+        <p>{SOURCE_FEATURES_REMOTE_FEATURE}</p>
       </EuiText>
     </Feature>
   );
@@ -105,10 +119,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const PrivateFeature = (
     <Feature title="Always private">
       <EuiText size="xs">
-        <p>
-          Results returned are specific and relevant to you. Connecting this source does not expose
-          your personal data to other search users - only you.
-        </p>
+        <p>{SOURCE_FEATURES_PRIVATE_FEATURE}</p>
       </EuiText>
     </Feature>
   );
@@ -116,11 +127,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const GlobalAccessPermissionsFeature = (
     <Feature title="Global access permissions">
       <EuiText size="xs">
-        <p>
-          All documents accessible to the connecting service user will be synchronized and made
-          available to the organization’s users, or group’s users. Documents are immediately
-          available for search
-        </p>
+        <p>{SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE}</p>
       </EuiText>
     </Feature>
   );
@@ -128,12 +135,9 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const DocumentLevelPermissionsFeature = (
     <Feature title="Document-level permission synchronization">
       <EuiText size="xs">
-        <p>
-          Document-level permissions manage user content access based on defined rules. Allow or
-          deny access to certain documents for individuals and groups.
-        </p>
+        <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
         <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          Explore Platinum features
+          {SOURCE_FEATURES_EXPLORE_BUTTON}
         </EuiLink>
       </EuiText>
     </Feature>
@@ -170,7 +174,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     return (
       <EuiPanel hasShadow={false} paddingSize="l" className="euiPanel--outline euiPanel--noShadow">
         <EuiTitle size="xs">
-          <h4>Included features</h4>
+          <h4>{SOURCE_FEATURES_INCLUDED_FEATURES_TITLE}</h4>
         </EuiTitle>
         {includedFeatures.map((featureId, i) => (
           <FeaturesRouter key={i} featureId={featureId} />

@@ -329,6 +329,10 @@ export class SavedMap {
     this._mapEmbeddableInput = updatedMapEmbeddableInput;
     // break connection to originating application
     this._originatingApp = undefined;
+
+    // remove editor state so the connection is still broken after reload
+    this._getStateTransfer().clearEditorState();
+
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,
