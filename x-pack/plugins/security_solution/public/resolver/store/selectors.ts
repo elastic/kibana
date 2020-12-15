@@ -133,6 +133,13 @@ export const currentRelatedEventData = composeSelectors(
 );
 
 /**
+ * A counter indicating how many times a user has requested new data for resolver.
+ */
+export const refreshCount = composeSelectors(dataStateSelector, dataSelectors.refreshCount);
+
+export const timeRangeFilters = composeSelectors(dataStateSelector, dataSelectors.timeRangeFilters);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const ariaActiveDescendant = composeSelectors(
@@ -359,6 +366,16 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
+export const eventsInCategoryResultIsStale = composeSelectors(
+  dataStateSelector,
+  dataSelectors.eventsInCategoryResultIsStale
+);
+
+export const currentRelatedEventIsStale = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventIsStale
+);
+
 /**
  * Returns the state of the node, loading, running, or terminated.
  */
@@ -382,7 +399,8 @@ export const newIDsToRequest: (
 ) => (time: number) => Set<string> = createSelector(
   composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
   visibleNodesAndEdgeLines,
-  function (nodeData, visibleNodesAndEdgeLinesAtTime) {
+  composeSelectors(dataStateSelector, dataSelectors.nodeDataIsStale),
+  function (nodeData, visibleNodesAndEdgeLinesAtTime, shouldUpdateAllNodes) {
     return defaultMemoize((time: number) => {
       const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 
@@ -393,8 +411,12 @@ export const newIDsToRequest: (
         // if the node has a valid ID field, and we either don't have any node data currently, or
         // the map doesn't have info for this particular node, then add it to the set so it'll be requested
         // by the middleware
-        if (id !== undefined && (!nodeData || !nodeData.has(id))) {
-          nodes.add(id);
+        if (id !== undefined) {
+          if (shouldUpdateAllNodes) {
+            nodes.add(id);
+          } else if (!nodeData || !nodeData.has(id)) {
+            nodes.add(id);
+          }
         }
       }
       return nodes;
