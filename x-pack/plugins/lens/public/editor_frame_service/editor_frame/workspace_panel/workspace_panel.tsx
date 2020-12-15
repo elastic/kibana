@@ -218,8 +218,7 @@ export function WorkspacePanel({
           data: event.data,
         });
       }
-      if (isLensEditEvent(event)) {
-        if (activeVisualization?.onEditAction) {
+      if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
           dispatch({
             type: 'UPDATE_VISUALIZATION_STATE',
             visualizationId: activeVisualization.id,
