@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ChangeEvent, MouseEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
@@ -52,27 +52,27 @@ function isNumberValid(value: number | string, min: number, max: number) {
 }
 
 export class ValidatedNumberInput extends Component<Props, State> {
-  // @ts-expect-error state populated by getDerivedStateFromProps
-  state: State = {};
-
   constructor(props: Props) {
     super(props);
 
-    const { isValid, errorMessage, parsedValue } = isNumberValid(
+    const { isValid, errorMessage } = isNumberValid(
       props.initialValue,
       this.props.min,
       this.props.max
     );
-    this.state.value = isValid ? (parsedValue as number) : props.initialValue;
-    this.state.errorMessage = errorMessage;
-    this.state.isValid = isValid;
+
+    this.state = {
+      value: props.initialValue,
+      errorMessage,
+      isValid,
+    };
   }
 
   _submit = _.debounce((value) => {
     this.props.onChange(value);
   }, 250);
 
-  _onChange = (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
+  _onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = (e.target as HTMLInputElement).value;
     const { isValid, errorMessage, parsedValue } = isNumberValid(
       value,
