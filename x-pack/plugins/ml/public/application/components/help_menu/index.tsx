@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useMlKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const HelpMenu = React.memo(() => {
   const { chrome, docLinks } = useKibana().services;
@@ -14,7 +14,7 @@ export const HelpMenu = React.memo(() => {
   useEffect(() => {
     chrome.setHelpExtension({
       appName: i18n.translate('xpack.ml.chrome.help.appName', {
-        defaultMessage: 'Machine learning',
+        defaultMessage: 'Machine Learning',
       }),
       links: [
         {
