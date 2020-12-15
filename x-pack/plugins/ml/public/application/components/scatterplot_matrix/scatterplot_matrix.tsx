@@ -221,14 +221,13 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   return (
     <>
-      {splom === undefined && (
+      {splom === undefined ? (
         <EuiText textAlign="center">
           <EuiSpacer size="l" />
           <EuiLoadingSpinner size="l" />
           <EuiSpacer size="l" />
         </EuiText>
-      )}
-      {splom !== undefined && (
+      ) : (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -267,7 +266,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                   compressed
                   options={sampleSizeOptions}
                   value={fetchSize}
-                  onChange={(e) => fetchSizeOnChange(e)}
+                  onChange={fetchSizeOnChange}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -283,7 +282,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}
-                  onChange={() => randomizeQueryOnChange()}
+                  onChange={randomizeQueryOnChange}
                   disabled={isLoading}
                 />
               </EuiFormRow>
@@ -301,7 +300,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                     name="mlScatterplotMatrixDynamicSize"
                     label={dynamicSize ? TOGGLE_ON : TOGGLE_OFF}
                     checked={dynamicSize}
-                    onChange={() => dynamicSizeOnChange()}
+                    onChange={dynamicSizeOnChange}
                     disabled={isLoading}
                   />
                 </EuiFormRow>
