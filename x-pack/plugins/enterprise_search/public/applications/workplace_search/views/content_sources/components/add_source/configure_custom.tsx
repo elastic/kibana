@@ -8,6 +8,8 @@ import React, { ChangeEvent, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiFieldText,
@@ -20,6 +22,7 @@ import {
 
 import { CUSTOM_SOURCE_DOCS_URL } from '../../../../routes';
 import { SourceLogic } from '../../source_logic';
+import { CONFIG_CUSTOM_BUTTON } from './constants';
 
 interface ConfigureCustomProps {
   header: React.ReactNode;
@@ -51,10 +54,17 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
           <EuiText grow={false}>
             <p>{helpText}</p>
             <p>
-              <EuiLink href={CUSTOM_SOURCE_DOCS_URL} target="_blank">
-                Read the documentation
-              </EuiLink>{' '}
-              to learn more about Custom API Sources.
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link"
+                defaultMessage="{link} to learn more about Custom API Sources."
+                values={{
+                  link: (
+                    <EuiLink href={CUSTOM_SOURCE_DOCS_URL} target="_blank">
+                      Read the documentation
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
           <EuiSpacer size="xxl" />
@@ -76,7 +86,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
               isLoading={buttonLoading}
               data-test-subj="CreateCustomButton"
             >
-              Create Custom API Source
+              {CONFIG_CUSTOM_BUTTON}
             </EuiButton>
           </EuiFormRow>
         </EuiForm>
