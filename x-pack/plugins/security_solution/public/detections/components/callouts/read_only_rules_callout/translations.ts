@@ -6,24 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const READ_ONLY_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.readOnlyCallOutTitle',
+export const READ_ONLY_RULES_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.readOnlyRulesCallOutTitle',
   {
     defaultMessage: 'Rule permissions required',
   }
 );
 
-export const READ_ONLY_CALLOUT_MSG = i18n.translate(
-  'xpack.securitySolution.detectionEngine.readOnlyCallOutMsg',
+export const READ_ONLY_RULES_CALLOUT_MSG = i18n.translate(
+  'xpack.securitySolution.detectionEngine.readOnlyRulesCallOutMsg',
   {
     defaultMessage:
       'You are currently missing the required permissions to create/edit detection engine rule. Please contact your administrator for further assistance.',
-  }
-);
-
-export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.dismissButton',
-  {
-    defaultMessage: 'Dismiss',
   }
 );
