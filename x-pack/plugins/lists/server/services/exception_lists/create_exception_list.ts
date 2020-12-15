@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
+import { getSavedObjectType } from '../../../common/utils';
 import {
   Description,
   ExceptionListSchema,
@@ -21,7 +22,7 @@ import {
   Version,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
+import { transformSavedObjectToExceptionList } from './utils';
 
 interface CreateExceptionListOptions {
   listId: ListId;

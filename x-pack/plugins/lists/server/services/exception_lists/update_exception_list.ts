@@ -6,6 +6,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { getSavedObjectType } from '../../../common/utils';
 import {
   DescriptionOrUndefined,
   ExceptionListSchema,
@@ -22,7 +23,7 @@ import {
   _VersionOrUndefined,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
+import { transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {

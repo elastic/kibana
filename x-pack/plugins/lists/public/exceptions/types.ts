@@ -112,9 +112,15 @@ export interface UseExceptionListsSuccess {
   pagination: Pagination;
 }
 
+export interface ExceptionListFilter {
+  name?: string | null;
+  list_id?: string | null;
+  created_by?: string | null;
+}
+
 export interface UseExceptionListsProps {
   errorMessage: string;
-  filterOptions?: Record<string, string>;
+  filterOptions?: ExceptionListFilter;
   http: HttpStart;
   namespaceTypes: NamespaceType[];
   notifications: NotificationsStart;

@@ -11,7 +11,7 @@ import { Pagination, UseExceptionListsProps } from '../types';
 import { ExceptionListSchema } from '../../../common/schemas';
 import { getFilters } from '../utils';
 
-type Func = () => void;
+export type Func = () => void;
 export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, Func | null];
 
 /**

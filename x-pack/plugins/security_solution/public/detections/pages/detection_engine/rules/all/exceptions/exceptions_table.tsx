@@ -143,7 +143,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               />
             )}
             <HeaderSection
-              split={false}
+              split
               title={i18n.ALL_EXCEPTIONS}
               subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
             >

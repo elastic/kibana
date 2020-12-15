@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash/fp';
+
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import { NamespaceType } from '../../common/schemas';
 import { SavedObjectType } from '../../common/types';
 import { getSavedObjectTypes } from '../../common/utils';
 
-import { ExceptionListIdentifiers } from './types';
+import { ExceptionListFilter, ExceptionListIdentifiers } from './types';
 
 export const getIdsAndNamespaces = ({
   lists,
@@ -39,12 +41,12 @@ export const getIdsAndNamespaces = ({
     );
 
 export const getGeneralFilters = (
-  filters: Record<string, string>,
+  filters: ExceptionListFilter,
   namespaceTypes: SavedObjectType[]
 ): string => {
   return Object.keys(filters)
     .map((filterKey) => {
-      const value = filters[filterKey];
+      const value = get(filterKey, filters);
       if (value != null) {
         const filtersByNamespace = namespaceTypes
           .map((namespace) => {
@@ -76,7 +78,7 @@ export const getTrustedAppsFilter = (
 };
 
 export const getFilters = (
-  filters: Record<string, string>,
+  filters: ExceptionListFilter,
   namespaceTypes: NamespaceType[],
   showTrustedApps: boolean
 ): string => {

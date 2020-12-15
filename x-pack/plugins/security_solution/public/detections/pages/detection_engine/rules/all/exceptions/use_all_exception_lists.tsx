@@ -37,6 +37,11 @@ export const useAllExceptionLists = ({
     const abortCtrl = new AbortController();
 
     const fetchData = async (): Promise<void> => {
+      if (exceptionLists.length === 0 && isSubscribed) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
 
@@ -96,9 +101,7 @@ export const useAllExceptionLists = ({
       }
     };
 
-    if (exceptionLists.length > 0) {
-      fetchData();
-    }
+    fetchData();
 
     return (): void => {
       isSubscribed = false;

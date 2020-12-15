@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
+import { getSavedObjectType } from '../../../common/utils';
 import {
   CreateCommentsArray,
   Description,
@@ -24,7 +25,6 @@ import {
 } from '../../../common/schemas';
 
 import {
-  getSavedObjectType,
   transformCreateCommentsToComments,
   transformSavedObjectToExceptionListItem,
 } from './utils';

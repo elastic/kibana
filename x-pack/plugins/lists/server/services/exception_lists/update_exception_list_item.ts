@@ -6,6 +6,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { getSavedObjectType } from '../../../common/utils';
 import {
   DescriptionOrUndefined,
   EntriesArray,
@@ -24,7 +25,6 @@ import {
 } from '../../../common/schemas';
 
 import {
-  getSavedObjectType,
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
 } from './utils';
