@@ -23,7 +23,7 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 
 import { parseQueryParams } from '../../../../../../applications/shared/query_params';
 import { Loading } from '../../../../../../applications/shared/loading';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 
 import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
 
@@ -47,13 +47,13 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
     getPreContentSourceConfigData,
     setSelectedGithubOrganizations,
     createContentSource,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
   const {
     currentServiceType,
     githubOrganizations,
     selectedGithubOrganizationsMap,
     sectionLoading,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const checkboxOptions = githubOrganizations.map((item) => ({ id: item, label: item }));
 
