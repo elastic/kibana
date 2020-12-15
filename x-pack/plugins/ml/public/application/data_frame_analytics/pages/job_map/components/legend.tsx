@@ -21,7 +21,7 @@ import { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>
-    <EuiListGroup>
+    <EuiListGroup flush>
       <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
 
       <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
