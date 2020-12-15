@@ -38,7 +38,7 @@ Open the dashboard, then open the visualization builder.
 [[metric-vis]]
 === View the number of website visitors
 
-To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard
+To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
 . Click *Create panel*, then click *Lens* on the *New visualization* window.
 +
@@ -502,4 +502,3 @@ That's it! You've created a dashboard that provides you with a complete picture 
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
-
