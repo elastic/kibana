@@ -78,7 +78,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   // ${i18n.translate(
     'apmOss.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
     {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     }
   )}
   environment: 'production'
@@ -158,7 +158,7 @@ ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
     {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     }
   )}
   'ENVIRONMENT': 'production',
@@ -246,7 +246,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.flaskClient.configure.commands.setServiceEnvironmentComment',
     {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     }
   )}
   'ENVIRONMENT': 'production',
@@ -294,7 +294,7 @@ secret_token: '${secretToken}'
 # Set the custom APM Server URL (default: http://localhost:8200)
 server_url: '${apmServerUrl || 'http://localhost:8200'}'
 
-# Set the service environment (default: production)
+# Set the service environment
 environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.railsClient.configure.textPost', {
       defaultMessage:
@@ -388,7 +388,7 @@ secret_token: '${secretToken}'
 server_url: '${apmServerUrl || 'http://localhost:8200'}',
 
 # ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setServiceEnvironment', {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     })}
 environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.rackClient.createConfig.textPost', {
@@ -458,7 +458,7 @@ var apm = initApm({curlyOpen}
   // ${i18n.translate(
     'apmOss.tutorial.jsClient.installDependency.commands.setServiceEnvironmentComment',
     {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     }
   )}
   environment: 'production'
@@ -548,7 +548,7 @@ export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 export ELASTIC_APM_SECRET_TOKEN=${secretToken}
 
 # ${i18n.translate('apmOss.tutorial.goClient.configure.commands.setServiceEnvironment', {
-      defaultMessage: 'Set the service environment (default: production)',
+      defaultMessage: 'Set the service environment',
     })}
 export ELASTIC_APM_ENVIRONMENT=
 `.split('\n'),
@@ -617,7 +617,7 @@ Do **not** add the agent as a dependency to your application.',
 * Set the required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
 * Set the custom APM Server URL (default: {customApmServerUrl})\n \
 * Set the APM Server secret token\n \
-* Set the service environment (default: production)\n \
+* Set the service environment\n \
 * Set the base package of your application',
       values: { customApmServerUrl: 'http://localhost:8200' },
     }),
@@ -697,7 +697,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       apmServerUrl || 'http://localhost:8200'
     }", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName": "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
-    "Environment": "production", // Set the service environment (default: production)
+    "Environment": "production", // Set the service environment
   {curlyClose}
 {curlyClose}`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.dotNetClient.configureAgent.textPost', {
