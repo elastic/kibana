@@ -10,16 +10,18 @@
  */
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { rerender } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiFilePicker, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFilePicker, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { UploadJsonFile, ModalHeader, ModalBody, ModalFooter } from './upload_json_file';
 
 describe('UploadJsonFile', () => {
   const values = {
     fileInput: [],
+    hasFile: false,
     configuredLimits: {
       engine: {
         maxDocumentByteSize: 102400,
@@ -66,6 +68,15 @@ describe('UploadJsonFile', () => {
 
       wrapper.find(EuiButtonEmpty).simulate('click');
       expect(actions.closeDocumentCreation).toHaveBeenCalled();
+    });
+
+    it('disables/enables the Continue button based on whether files have been uploaded', () => {
+      const wrapper = shallow(<ModalFooter />);
+      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(true);
+
+      setMockValues({ ...values, hasFile: true });
+      rerender(wrapper);
+      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(false);
     });
   });
 });

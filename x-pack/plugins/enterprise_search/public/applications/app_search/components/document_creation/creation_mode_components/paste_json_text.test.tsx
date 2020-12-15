@@ -5,10 +5,11 @@
  */
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { rerender } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiTextArea, EuiButtonEmpty } from '@elastic/eui';
+import { EuiTextArea, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { PasteJsonText, ModalHeader, ModalBody, ModalFooter } from './paste_json_text';
 
@@ -65,6 +66,15 @@ describe('PasteJsonText', () => {
 
       wrapper.find(EuiButtonEmpty).simulate('click');
       expect(actions.closeDocumentCreation).toHaveBeenCalled();
+    });
+
+    it('disables/enables the Continue button based on whether text has been entered', () => {
+      const wrapper = shallow(<ModalFooter />);
+      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(false);
+
+      setMockValues({ ...values, textInput: '' });
+      rerender(wrapper);
+      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(true);
     });
   });
 });

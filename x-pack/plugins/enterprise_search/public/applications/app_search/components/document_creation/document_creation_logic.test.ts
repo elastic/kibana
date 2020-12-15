@@ -18,6 +18,7 @@ describe('DocumentCreationLogic', () => {
     creationStep: DocumentCreationStep.AddDocuments,
     textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
     fileInput: [],
+    hasFile: false,
   };
 
   const mount = () => {
@@ -150,14 +151,37 @@ describe('DocumentCreationLogic', () => {
     });
 
     describe('setFileInput', () => {
+      const EXPECTED_VALUES = {
+        ...DEFAULT_VALUES,
+        fileInput: ['mock file'],
+        hasFile: true,
+      };
       describe('fileInput', () => {
         it('should be set to the provided value', () => {
           mount();
           DocumentCreationLogic.actions.setFileInput((['mock file'] as unknown) as FileList);
 
           expect(DocumentCreationLogic.values).toEqual({
-            ...DEFAULT_VALUES,
+            ...EXPECTED_VALUES,
             fileInput: ['mock file'],
+          });
+        });
+      });
+
+      describe('hasFile', () => {
+        it('should be set to true or false based on whether fileInput is empty', () => {
+          mount();
+
+          DocumentCreationLogic.actions.setFileInput((['mock file'] as unknown) as FileList);
+          expect(DocumentCreationLogic.values).toEqual({
+            ...EXPECTED_VALUES,
+            hasFile: true,
+          });
+
+          DocumentCreationLogic.actions.setFileInput(([] as unknown) as FileList);
+          expect(DocumentCreationLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            hasFile: false,
           });
         });
       });

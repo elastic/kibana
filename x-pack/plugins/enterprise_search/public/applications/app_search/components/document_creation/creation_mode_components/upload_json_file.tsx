@@ -87,12 +87,15 @@ export const ModalBody: React.FC = () => {
 };
 
 export const ModalFooter: React.FC = () => {
+  const { hasFile } = useValues(DocumentCreationLogic);
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
     <EuiModalFooter>
       <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-      <EuiButton fill>{MODAL_CONTINUE_BUTTON}</EuiButton>
+      <EuiButton fill isDisabled={!hasFile}>
+        {MODAL_CONTINUE_BUTTON}
+      </EuiButton>
     </EuiModalFooter>
   );
 };
