@@ -91,7 +91,13 @@ describe('actions', () => {
 
   describe('reindex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.reindex(client, 'my_source_index', 'my_target_index', Option.none);
+      const task = Actions.reindex(
+        client,
+        'my_source_index',
+        'my_target_index',
+        Option.none,
+        false
+      );
       try {
         await task();
       } catch (e) {
