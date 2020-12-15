@@ -188,10 +188,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       return;
     }
 
-    const { items, columns: rawColumns } = splom;
-
-    // Vega doesn't support dashes in attribute names
-    const columns = rawColumns.map((column) => `${column.split('-').join('_')}`);
+    const { items, columns } = splom;
 
     const values =
       resultsField !== undefined

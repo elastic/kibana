@@ -126,7 +126,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
-      {typeof jobConfig?.id === 'string' && (
+      {typeof jobConfig?.id === 'string' && jobConfig?.analyzed_fields.includes.length > 1 && (
         <ExpandableSectionSplom
           fields={jobConfig?.analyzed_fields.includes}
           index={jobConfig?.dest.index}

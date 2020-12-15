@@ -127,6 +127,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
           : {}),
         ...(outliers
           ? {
+              order: { field: OUTLIER_SCORE_FIELD },
               size: {
                 ...(!dynamicSize
                   ? {
@@ -148,7 +149,6 @@ export const getScatterplotMatrixVegaLiteSpec = (
               },
             }
           : {}),
-        tooltip: { type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD },
         x: {
           type: LEGEND_TYPES.QUANTITATIVE,
           field: { repeat: 'column' },
@@ -159,11 +159,12 @@ export const getScatterplotMatrixVegaLiteSpec = (
           field: { repeat: 'row' },
           scale: { zero: false },
         },
-        ...(outliers
-          ? {
-              order: { field: OUTLIER_SCORE_FIELD },
-            }
-          : {}),
+        tooltip: [
+          ...columns.map((d) => ({ type: LEGEND_TYPES.QUANTITATIVE, field: d })),
+          ...(outliers
+            ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD, format: '.3f' }]
+            : []),
+        ],
       },
       ...(outliers
         ? {
