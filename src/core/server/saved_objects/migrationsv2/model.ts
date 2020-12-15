@@ -61,7 +61,9 @@ function throwBadControlState(controlState: any) {
  */
 function throwBadResponse(state: State, p: never): never;
 function throwBadResponse(state: State, res: any): never {
-  throw new Error(`${state.controlState} received unexpected action response: ` + res);
+  throw new Error(
+    `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
+  );
 }
 
 /**
@@ -546,8 +548,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
       };
     } else {
-      // Don't handle index_not_found_exception as we will never remove the
-      // target index
+      const left = res.left;
+      if (left.type === 'index_not_found_exception') {
+        // index_not_found_exception means another instance alread completed
+        // the REINDEX_BLOCK_REMOVE_ALIAS step and removed the reindexAlias
+        // for simplicity we don't skip the step but just continue
+        return {
+          ...stateP,
+          controlState: 'REINDEX_BLOCK_REMOVE_ALIAS',
+        };
+      }
       throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_BLOCK_REMOVE_ALIAS') {

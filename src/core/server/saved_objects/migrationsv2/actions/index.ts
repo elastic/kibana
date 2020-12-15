@@ -571,8 +571,9 @@ export const updateAliases = (
         ) {
           return Either.left({ type: 'remove_index_not_a_concrete_index' as const });
         } else if (
-          err.body.error.type === 'resource_not_found_exception' &&
-          err.body.error.reason.match(/required alias \[.+\] does not exist/)
+          err.body.error.type === 'aliases_not_found_exception' ||
+          (err.body.error.type === 'resource_not_found_exception' &&
+            err.body.error.reason.match(/required alias \[.+\] does not exist/))
         ) {
           return Either.left({
             type: 'alias_not_found_exception' as const,

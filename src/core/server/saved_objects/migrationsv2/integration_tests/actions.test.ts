@@ -755,6 +755,27 @@ describe('migration actions', () => {
                   }
                 `);
       });
+      describe('with must_exist=false', () => {
+        it('resolves left alias_not_found_exception when alias does not exist', async () => {
+          const task = updateAliases(client, [
+            {
+              remove: {
+                alias: 'no_such_alias',
+                index: 'existing_index_with_docs',
+                must_exist: false,
+              },
+            },
+          ]);
+          return expect(task()).resolves.toMatchInlineSnapshot(`
+                    Object {
+                      "_tag": "Left",
+                      "left": Object {
+                        "type": "alias_not_found_exception",
+                      },
+                    }
+                  `);
+        });
+      });
       describe('with must_exist=true', () => {
         it('resolves left alias_not_found_exception when alias does not exist on specified index', async () => {
           const task = updateAliases(client, [
