@@ -25,7 +25,7 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
+import { AttributeService, ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
@@ -221,6 +221,74 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
+  it('should re-render when dashboard view/edit mode changes', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      viewMode: ViewMode.VIEW,
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render when dynamic actions input changes', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      enhancements: {
+        dynamicActions: {},
+      },
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
   it('should pass context to embeddable', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
@@ -394,6 +462,37 @@ describe('embeddable', () => {
     expect(trigger.exec).toHaveBeenCalledWith(
       expect.objectContaining({ data: eventData, embeddable: expect.anything() })
     );
+  });
+
+  it('should execute trigger on row click event from expression renderer', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
+
+    onEvent({ name: 'tableRowContextMenuClick', data: {} });
+
+    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick);
   });
 
   it('should not re-render if only change is in disabled filter', async () => {

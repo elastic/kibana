@@ -6,10 +6,11 @@
 
 import { updateAlertRoute } from './update';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 import { AlertNotifyWhenType } from '../../common';
 
 const alertsClient = alertsClientMock.create();
@@ -46,7 +47,7 @@ describe('updateAlertRoute', () => {
   };
 
   it('updates an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     updateAlertRoute(router, licenseState);
@@ -124,7 +125,7 @@ describe('updateAlertRoute', () => {
   });
 
   it('ensures the license allows updating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     updateAlertRoute(router, licenseState);
@@ -167,7 +168,7 @@ describe('updateAlertRoute', () => {
   });
 
   it('ensures the license check prevents updating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
@@ -211,5 +212,25 @@ describe('updateAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the alert type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+
+    alertsClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

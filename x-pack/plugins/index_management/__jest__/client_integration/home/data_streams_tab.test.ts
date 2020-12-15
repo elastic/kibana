@@ -19,6 +19,8 @@ import {
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
 
+const nonBreakingSpace = ' ';
+
 describe('Data Streams tab', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: DataStreamsTabTestBed;
@@ -81,6 +83,25 @@ describe('Data Streams tab', () => {
 
       // Assert against the text because the href won't be available, due to dependency upon our core mock.
       expect(findEmptyPromptIndexTemplateLink().text()).toBe('Fleet');
+    });
+
+    test('when hidden data streams are filtered by default, the table is rendered empty', async () => {
+      const hiddenDataStream = createDataStreamPayload({
+        name: 'hidden-data-stream',
+        hidden: true,
+      });
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
+
+      testBed = await setup({
+        plugins: {},
+      });
+
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+
+      testBed.component.update();
+      expect(testBed.find('dataStreamTable').text()).toContain('No data streams found');
     });
   });
 
@@ -397,7 +418,6 @@ describe('Data Streams tab', () => {
   });
 
   describe('managed data streams', () => {
-    const nonBreakingSpace = ' ';
     beforeEach(async () => {
       const managedDataStream = createDataStreamPayload({
         name: 'managed-data-stream',
@@ -429,8 +449,8 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('turning off "Include managed" switch hides managed data streams', async () => {
-      const { exists, actions, component, table } = testBed;
+    test('turning off "managed" filter hides managed data streams', async () => {
+      const { actions, table } = testBed;
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
@@ -438,15 +458,40 @@ describe('Data Streams tab', () => {
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
 
-      expect(exists('includeManagedSwitch')).toBe(true);
-
-      await act(async () => {
-        actions.clickIncludeManagedSwitch();
-      });
-      component.update();
+      actions.toggleViewFilterAt(0);
 
       ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
       expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
+    });
+  });
+
+  describe('hidden data streams', () => {
+    beforeEach(async () => {
+      const hiddenDataStream = createDataStreamPayload({
+        name: 'hidden-data-stream',
+        hidden: true,
+      });
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    test('show hidden data streams when filter is toggled', () => {
+      const { table, actions } = testBed;
+
+      actions.toggleViewFilterAt(1);
+
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', 'Delete'],
+      ]);
     });
   });
 
