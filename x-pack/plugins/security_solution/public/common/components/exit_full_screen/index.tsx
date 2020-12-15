@@ -8,7 +8,7 @@ import { EuiButton, EuiWindowEvent } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 
 import * as i18n from './translations';
 
@@ -17,7 +17,7 @@ const StyledEuiButton = styled(EuiButton)`
 `;
 
 export const ExitFullScreen: React.FC = () => {
-  const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
   const exitFullScreen = useCallback(() => {
     setGlobalFullScreen(false);

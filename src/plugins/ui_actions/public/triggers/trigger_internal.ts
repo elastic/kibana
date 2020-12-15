@@ -31,17 +31,20 @@ export class TriggerInternal<T extends TriggerId> {
 
   constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
 
-  public async execute(context: TriggerContextMapping[T]) {
+  public async execute(context: TriggerContextMapping[T], alwaysShowPopup?: boolean) {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
     await Promise.all([
       actions.map((action) =>
-        this.service.executionService.execute({
-          action,
-          context,
-          trigger: this.trigger,
-        })
+        this.service.executionService.execute(
+          {
+            action,
+            context,
+            trigger: this.trigger,
+          },
+          alwaysShowPopup
+        )
       ),
     ]);
   }

@@ -553,35 +553,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
       });
 
-      it('should show callout', async () => {
-        await testSubjects.existOrFail('endpointPackagePolicy_edit');
-      });
-
-      it('should show actions button with expected action items', async () => {
-        const actionsButton = await pageObjects.ingestManagerCreatePackagePolicy.findEndpointActionsButton();
-        await actionsButton.click();
-        const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
-        const actionItems = await menuPanel.findAllByTagName<'button'>('button');
-        const expectedItems = ['Edit Trusted Applications'];
-
-        for (const action of actionItems) {
-          const buttonText = await action.getVisibleText();
-          expect(buttonText).to.be(expectedItems.find((item) => item === buttonText));
-        }
-      });
-
-      it('should navigate to Trusted Apps', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
-        await pageObjects.trustedApps.ensureIsOnTrustedAppsListPage();
-      });
-
-      it('should show the back button on Trusted Apps Page and navigate back to fleet', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
-        const backButton = await pageObjects.trustedApps.findTrustedAppsListPageBackButton();
-        await backButton.click();
-        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
-      });
-
       it('should show the endpoint policy form', async () => {
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });

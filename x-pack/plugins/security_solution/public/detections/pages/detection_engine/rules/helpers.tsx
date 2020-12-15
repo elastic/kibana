@@ -382,6 +382,7 @@ export const getActionMessageParams = memoizeOne(
           description: 'context.results_link',
           useWithTripleBracesInTemplates: true,
         },
+        { name: 'alerts', description: 'context.alerts' },
         ...actionMessageRuleParams.map((param) => {
           const extendedParam = `rule.${param}`;
           return { name: extendedParam, description: `context.${extendedParam}` };

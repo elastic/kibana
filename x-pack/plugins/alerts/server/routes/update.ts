@@ -12,11 +12,12 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
 import { AlertNotifyWhenType, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -42,7 +43,7 @@ const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const updateAlertRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.put(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{id}`,
@@ -64,8 +65,8 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
-        return res.ok({
-          body: await alertsClient.update({
+        try {
+          const alertRes = await alertsClient.update({
             id,
             data: {
               name,
@@ -76,8 +77,16 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
               throttle,
               notifyWhen: notifyWhen as AlertNotifyWhenType,
             },
-          }),
-        });
+          });
+          return res.ok({
+            body: alertRes,
+          });
+        } catch (e) {
+          if (e instanceof AlertTypeDisabledError) {
+            return e.sendResponse(res);
+          }
+          throw e;
+        }
       })
     )
   );

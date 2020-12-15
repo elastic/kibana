@@ -14,6 +14,7 @@ const createAlertTypeRegistryMock = () => {
     register: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+    ensureAlertTypeEnabled: jest.fn(),
   };
   return mocked;
 };

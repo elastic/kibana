@@ -14,6 +14,7 @@ import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
@@ -140,7 +141,20 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor: curry(executor)({ logger }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    // most of the params need no escaping
+    ...renderMustacheObject(params, variables),
+    // message however, needs to escaped as markdown
+    message: renderMustacheString(params.message, variables, 'markdown'),
   };
 }
 
