@@ -5,13 +5,16 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract, RequestHandlerContext } from 'kibana/server';
+import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
-  CasesPatchRequest,
-  CommentRequest,
   CaseResponse,
+  CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
+  CommentRequest,
+  ConnectorMappingsAttributes,
+  GetFieldsResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -19,7 +22,7 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-
+import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 export interface CaseClientCreate {
   theCase: CasePostRequest;
 }
@@ -43,18 +46,33 @@ export interface CaseClientUpdateAlertsStatus {
 type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 export interface CaseClientFactoryArguments {
-  savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
+  connectorMappingsService: ConnectorMappingsServiceSetup;
+  request: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
   context?: PartialExceptFor<RequestHandlerContext, 'core'>;
 }
 
+export interface ConfigureFields {
+  actionsClient: ActionsClient;
+  connectorId: string;
+  connectorType: string;
+}
 export interface CaseClient {
-  create: (args: CaseClientCreate) => Promise<CaseResponse>;
-  update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
+  create: (args: CaseClientCreate) => Promise<CaseResponse>;
+  getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
+  getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
+  update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
+}
+
+export interface MappingsClient {
+  actionsClient: ActionsClient;
+  caseClient: CaseClient;
+  connectorId: string;
+  connectorType: string;
 }

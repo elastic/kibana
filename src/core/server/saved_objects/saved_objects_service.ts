@@ -30,7 +30,6 @@ import { CoreContext } from '../core_context';
 import { CoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
-  IClusterClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
@@ -53,7 +52,6 @@ import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
-import { createMigrationEsClient } from './migrations/core/';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -365,7 +363,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       kibanaConfig,
       this.config.migration,
-      elasticsearch.client,
+      elasticsearch.client.asInternalUser,
       migrationsRetryDelay
     );
 
@@ -462,7 +460,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
-    client: IClusterClient,
+    client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
     return new KibanaMigrator({
@@ -471,7 +469,8 @@ export class SavedObjectsService
       kibanaVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
       kibanaConfig,
-      client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
+      client,
+      migrationsRetryDelay,
     });
   }
 }

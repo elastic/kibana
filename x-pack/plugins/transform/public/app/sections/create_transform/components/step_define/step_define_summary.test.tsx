@@ -59,6 +59,21 @@ describe('Transform: <DefinePivotSummary />', () => {
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
+      validationStatus: {
+        isValid: true,
+      },
+      transformFunction: 'pivot',
+      previewRequest: {
+        pivot: {
+          aggregations: {
+            // @ts-ignore
+            'the-agg-name': agg,
+          },
+          group_by: {
+            'the-group-by-name': groupBy,
+          },
+        },
+      },
     };
 
     const { getByText } = render(

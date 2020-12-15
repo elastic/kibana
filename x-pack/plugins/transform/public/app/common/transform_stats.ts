@@ -7,8 +7,19 @@
 import { TRANSFORM_STATE } from '../../../common/constants';
 
 import { TransformListRow } from './transform_list';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../common/api_schemas/transforms';
 
-export function getTransformProgress(item: TransformListRow) {
+type TransformItem = Omit<TransformListRow, 'config'> & {
+  config:
+    | TransformListRow['config']
+    | PutTransformsLatestRequestSchema
+    | PutTransformsPivotRequestSchema;
+};
+
+export function getTransformProgress(item: TransformItem) {
   if (isCompletedBatchTransform(item)) {
     return 100;
   }
@@ -17,7 +28,7 @@ export function getTransformProgress(item: TransformListRow) {
   return progress !== undefined ? Math.round(progress) : undefined;
 }
 
-export function isCompletedBatchTransform(item: TransformListRow) {
+export function isCompletedBatchTransform(item: TransformItem) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (

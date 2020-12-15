@@ -312,7 +312,7 @@ function wrapWithTry(
       const failedTransform = `${type}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.warn(
-        `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
+        `Failed to transform document ${doc?.id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
       );
       throw error;
     }
