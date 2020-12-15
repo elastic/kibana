@@ -130,6 +130,9 @@ export const EventsCountComponent = ({
   serverSideEventCount: number;
   footerText: string;
 }) => {
+  const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
+    serverSideEventCount,
+  ]);
   return (
     <h5>
       <PopoverRowItems
@@ -158,10 +161,10 @@ export const EventsCountComponent = ({
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
-      <EuiToolTip content={`${serverSideEventCount} ${footerText}`}>
+      <EuiToolTip content={`${totalCount} ${footerText}`}>
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
-            {serverSideEventCount}
+            {totalCount}
           </EuiBadge>{' '}
           {documentType}
         </ServerSideEventCount>

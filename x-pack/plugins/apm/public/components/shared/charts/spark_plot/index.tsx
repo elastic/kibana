@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import {
   AreaSeries,
   Chart,
@@ -10,62 +14,81 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import React from 'react';
 import { merge } from 'lodash';
 import { useChartTheme } from '../../../../../../observability/public';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { px } from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
+import { useTheme } from '../../../../hooks/use_theme';
 
-interface Props {
-  color: string;
+type Color =
+  | 'euiColorVis0'
+  | 'euiColorVis1'
+  | 'euiColorVis2'
+  | 'euiColorVis3'
+  | 'euiColorVis4'
+  | 'euiColorVis5'
+  | 'euiColorVis6'
+  | 'euiColorVis7'
+  | 'euiColorVis8'
+  | 'euiColorVis9';
+
+export function SparkPlot({
+  color,
+  series,
+  valueLabel,
+  compact,
+}: {
+  color: Color;
   series?: Array<{ x: number; y: number | null }> | null;
-  width: string;
-}
+  valueLabel: React.ReactNode;
+  compact?: boolean;
+}) {
+  const theme = useTheme();
+  const defaultChartTheme = useChartTheme();
 
-export function SparkPlot(props: Props) {
-  const { series, color, width } = props;
-  const chartTheme = useChartTheme();
+  const sparkplotChartTheme = merge({}, defaultChartTheme, {
+    lineSeriesStyle: {
+      point: { opacity: 0 },
+    },
+    areaSeriesStyle: {
+      point: { opacity: 0 },
+    },
+  });
 
-  if (!series || series.every((point) => point.y === null)) {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="visLine" color="subdued" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {NOT_AVAILABLE_LABEL}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const colorValue = theme.eui[color];
 
   return (
-    <Chart size={{ height: px(24), width }}>
-      <Settings
-        theme={merge({}, chartTheme, {
-          lineSeriesStyle: {
-            point: { opacity: 0 },
-          },
-          areaSeriesStyle: {
-            point: { opacity: 0 },
-          },
-        })}
-        showLegend={false}
-        tooltip="none"
-      />
-      <AreaSeries
-        id="area"
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor={'x'}
-        yAccessors={['y']}
-        data={series}
-        color={color}
-        curve={CurveType.CURVE_MONOTONE_X}
-      />
-    </Chart>
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false}>
+        {!series || series.every((point) => point.y === null) ? (
+          <EuiIcon type="visLine" color="subdued" />
+        ) : (
+          <Chart
+            size={{
+              height: px(24),
+              width: compact ? px(unit * 3) : px(unit * 4),
+            }}
+          >
+            <Settings
+              theme={sparkplotChartTheme}
+              showLegend={false}
+              tooltip="none"
+            />
+            <AreaSeries
+              id="area"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={series}
+              color={colorValue}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+          </Chart>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
+        {valueLabel}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
