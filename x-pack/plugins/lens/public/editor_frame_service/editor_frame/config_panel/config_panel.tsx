@@ -24,45 +24,17 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
-const getFirstFocusable = (el: HTMLElement | null) => {
-  if (!el) {
-    return null;
-  }
-  const firstFocusable = el.querySelector(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  );
-  if (!firstFocusable) {
-    return null;
-  }
-  return (firstFocusable as unknown) as { focus: () => void };
-};
-
 function useFocusUpdate(layerIds: string[]) {
-  const [lastUpdated, setLastUpdated] = useState<{
-    type: 'ADD_LAYER' | 'REMOVE_OR_CLEAR_LAYER';
-    id: string;
-  } | null>(null);
+  const [nextFocusedLayerId, setNextFocusedLayerId] = useState<string | null>(null);
   const [layerRefs, setLayersRefs] = useState<Record<string, HTMLElement | null>>({});
+
   useEffect(() => {
-    if (!lastUpdated) {
-      return;
-    }
-    let focusable;
-
-    const { type, id } = lastUpdated;
-
-    if (type === 'ADD_LAYER') {
-      focusable = getFirstFocusable(layerRefs[id]);
-    } else if (type === 'REMOVE_OR_CLEAR_LAYER') {
-      const firstLayer = layerIds.length === 1 ? layerIds[0] : layerIds.filter((l) => l !== id)[0];
-      focusable = firstLayer && getFirstFocusable(layerRefs[firstLayer]);
-    }
-
+    const focusable = nextFocusedLayerId && layerRefs[nextFocusedLayerId];
     if (focusable) {
       focusable.focus();
-      setLastUpdated(null);
+      setNextFocusedLayerId(null);
     }
-  }, [layerIds, layerRefs, lastUpdated]);
+  }, [layerIds, layerRefs, nextFocusedLayerId]);
 
   const setLayerRef = useCallback((layerId, el) => {
     if (el) {
@@ -75,22 +47,25 @@ function useFocusUpdate(layerIds: string[]) {
 
   const removeLayerRef = useCallback(
     (layerId) => {
-      if (layerIds.length > 1) {
-        setLayersRefs((refs) => {
-          const newLayerRefs = { ...refs };
-          delete newLayerRefs[layerId];
-          return newLayerRefs;
-        });
+      if (layerIds.length <= 1) {
+        return setNextFocusedLayerId(layerId);
       }
-      setLastUpdated({
-        type: 'REMOVE_OR_CLEAR_LAYER',
-        id: layerId,
+
+      const removedLayerIndex = layerIds.findIndex((l) => l === layerId);
+      const nextFocusedLayerIdId =
+        removedLayerIndex === 0 ? layerIds[1] : layerIds[removedLayerIndex - 1];
+
+      setLayersRefs((refs) => {
+        const newLayerRefs = { ...refs };
+        delete newLayerRefs[layerId];
+        return newLayerRefs;
       });
+      return setNextFocusedLayerId(nextFocusedLayerIdId);
     },
     [layerIds]
   );
 
-  return { setLastUpdated, removeLayerRef, setLayerRef };
+  return { setNextFocusedLayerId, removeLayerRef, setLayerRef };
 }
 
 export function LayerPanels(
@@ -108,7 +83,7 @@ export function LayerPanels(
   } = props;
 
   const layerIds = activeVisualization.getLayerIds(visualizationState);
-  const { setLastUpdated, removeLayerRef, setLayerRef } = useFocusUpdate(layerIds);
+  const { setNextFocusedLayerId, removeLayerRef, setLayerRef } = useFocusUpdate(layerIds);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -225,10 +200,7 @@ export function LayerPanels(
                       state,
                     }),
                 });
-                setLastUpdated({
-                  type: 'ADD_LAYER',
-                  id,
-                });
+                setNextFocusedLayerId(id);
               }}
               iconType="plusInCircleFilled"
             />

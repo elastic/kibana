@@ -98,7 +98,7 @@ describe('ConfigPanel', () => {
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
-        .find('button')
+        .find('section')
         .first()
         .instance();
       act(() => {
@@ -119,7 +119,7 @@ describe('ConfigPanel', () => {
       const secondLayerFocusable = component
         .find(LayerPanel)
         .at(1)
-        .find('button')
+        .find('section')
         .first()
         .instance();
       act(() => {
@@ -127,9 +127,6 @@ describe('ConfigPanel', () => {
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
-      expect(focusedEl?.closest('.lnsLayerPanel')?.getAttribute('data-test-subj')).toEqual(
-        'lns-layerPanel-1'
-      );
     });
 
     it('should focus the first layer when removing the second layer', () => {
@@ -143,7 +140,7 @@ describe('ConfigPanel', () => {
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
-        .find('button')
+        .find('section')
         .first()
         .instance();
       act(() => {
@@ -151,14 +148,10 @@ describe('ConfigPanel', () => {
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
-      expect(focusedEl?.closest('.lnsLayerPanel')?.getAttribute('data-test-subj')).toEqual(
-        'lns-layerPanel-0'
-      );
     });
 
     it('should focus the added layer', () => {
       (generateId as jest.Mock).mockReturnValue(`second`);
-      jest.useFakeTimers();
       const dispatch = jest.fn((x) => {
         if (x.subType === 'ADD_LAYER') {
           frame.datasourceLayers.second = mockDatasource.publicAPIMock;
@@ -170,9 +163,7 @@ describe('ConfigPanel', () => {
         component.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
-      expect(focusedEl?.closest('.lnsLayerPanel')?.getAttribute('data-test-subj')).toEqual(
-        'lns-layerPanel-1'
-      );
+      expect(focusedEl?.children[0].getAttribute('data-test-subj')).toEqual('lns-layerPanel-1');
     });
   });
 });
