@@ -40,6 +40,7 @@ interface Props {
   thresholds: Thresholds;
   isCls?: boolean;
   helpLabel: string;
+  hasVitals?: boolean;
 }
 
 export function getCoreVitalTooltipMessage(
@@ -81,6 +82,7 @@ export function CoreVitalItem({
   ranks = [100, 0, 0],
   isCls,
   helpLabel,
+  hasVitals = false,
 }: Props) {
   const palette = euiPaletteForStatus(3);
 
@@ -88,9 +90,10 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if ((value === null || value !== undefined) && ranks[0] === 100 && !loading) {
+  if ((value === null || value !== undefined) && !hasVitals && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
+
   return (
     <>
       <EuiStat

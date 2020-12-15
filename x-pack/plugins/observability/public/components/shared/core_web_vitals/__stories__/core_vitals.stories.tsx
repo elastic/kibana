@@ -33,7 +33,7 @@ export default {
   ],
 };
 
-export function Basic() {
+export function NoDataAvailable() {
   return (
     <CoreVitalItem
       thresholds={{ good: '0.1', bad: '0.25' }}
@@ -41,6 +41,20 @@ export function Basic() {
       value={'0.00s'}
       loading={false}
       helpLabel={LCP_HELP_LABEL}
+    />
+  );
+}
+
+export function OneHundredPercentGood() {
+  return (
+    <CoreVitalItem
+      thresholds={{ good: '0.1', bad: '0.25' }}
+      title={LCP_LABEL}
+      value={'0.00s'}
+      loading={false}
+      ranks={[100, 0, 0]}
+      helpLabel={LCP_HELP_LABEL}
+      hasVitals={true}
     />
   );
 }
@@ -54,6 +68,7 @@ export function FiftyPercentGood() {
       loading={false}
       ranks={[50, 25, 25]}
       helpLabel={LCP_HELP_LABEL}
+      hasVitals={true}
     />
   );
 }
@@ -67,6 +82,7 @@ export function OneHundredPercentBad() {
       loading={false}
       ranks={[0, 0, 100]}
       helpLabel={LCP_HELP_LABEL}
+      hasVitals={true}
     />
   );
 }
@@ -80,6 +96,7 @@ export function OneHundredPercentAverage() {
       loading={false}
       ranks={[0, 100, 0]}
       helpLabel={LCP_HELP_LABEL}
+      hasVitals={true}
     />
   );
 }
