@@ -157,7 +157,9 @@ export function Discover({
                   data-test-subj="collapseSideBarButton"
                   aria-controls="discover-sidebar"
                   aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label="Toggle sidebar"
+                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                    defaultMessage: 'Toggle sidebar',
+                  })}
                   buttonRef={collapseIcon}
                 />
               </EuiFlexItem>
