@@ -40,6 +40,7 @@ import {
   updateAndPickupMappings,
   UpdateAndPickupMappingsResponse,
   verifyReindex,
+  removeWriteBlock,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -174,8 +175,35 @@ describe('migration actions', () => {
   });
 
   describe('removeWriteBlock', () => {
-    it.todo('resolves right if successful');
-    it.todo('rejects if there is a non-retryable error');
+    beforeAll(async () => {
+      await createIndex(client, 'existing_index_without_write_block_2', { properties: {} })();
+      await createIndex(client, 'existing_index_with_write_block_2', { properties: {} })();
+      await setWriteBlock(client, 'existing_index_with_write_block_2')();
+    });
+    it('resolves right if successful when an index already has a write block', () => {
+      const task = removeWriteBlock(client, 'existing_index_with_write_block_2');
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Right",
+                  "right": "remove_write_block_succeeded",
+                }
+              `);
+    });
+    it('resolves right if successful when an index does not have a write block', () => {
+      const task = removeWriteBlock(client, 'existing_index_without_write_block_2');
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Right",
+                  "right": "remove_write_block_succeeded",
+                }
+              `);
+    });
+    it('rejects if there is a non-retryable error', () => {
+      const task = removeWriteBlock(client, 'no_such_index');
+      return expect(task()).rejects.toMatchInlineSnapshot(
+        `[ResponseError: index_not_found_exception]`
+      );
+    });
   });
 
   describe('cloneIndex', () => {
@@ -510,7 +538,27 @@ describe('migration actions', () => {
                           }
                     `);
     });
-    it.todo('resolves left if requireAlias=true and the target is not an alias');
+    it('resolves left if requireAlias=true and the target is not an alias', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'existing_index_with_write_block',
+        Option.none,
+        true
+      )()) as Either.Right<ReindexResponse>;
+
+      const task = waitForReindexTask(client, res.right.taskId, '10s');
+
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Left",
+                  "left": Object {
+                    "index": "existing_index_with_write_block",
+                    "type": "index_not_found_exception",
+                  },
+                }
+              `);
+    });
   });
 
   describe('verifyReindex', () => {
