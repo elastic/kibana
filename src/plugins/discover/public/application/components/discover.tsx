@@ -176,7 +176,7 @@ export function Discover({
                 {resultState === 'none' && (
                   <DiscoverNoResults
                     timeFieldName={opts.timefield}
-                    queryLanguage={state.query ? state.query.language : ''}
+                    queryLanguage={state.query?.language || ''}
                     data={opts.data}
                     error={fetchError}
                   />

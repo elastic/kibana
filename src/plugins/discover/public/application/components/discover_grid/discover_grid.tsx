@@ -159,9 +159,11 @@ export const DiscoverGrid = ({
    * Pagination
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
-
-  const rowsLength = rows ? rows.length : 0;
-  const pageCount = Math.ceil(rowsLength / pagination.pageSize);
+  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
+    rowCount,
+    pagination,
+  ]);
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {
@@ -203,10 +205,9 @@ export const DiscoverGrid = ({
   /**
    * Render variables
    */
-  const showDisclaimer = rowsLength === sampleSize && isOnLastPage;
+  const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
 
-  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const euiGridColumns = useMemo(
     () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, defaultColumns),
     [columns, indexPattern, showTimeCol, settings, defaultColumns]
@@ -228,7 +229,7 @@ export const DiscoverGrid = ({
   ]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
-  if (!rowCount || !rows) {
+  if (!rowCount) {
     return (
       <div className="euiDataGrid__noResults">
         <EuiText size="xs" color="subdued">
@@ -245,7 +246,7 @@ export const DiscoverGrid = ({
       value={{
         expanded,
         setExpanded,
-        rows,
+        rows: rows || [],
         onFilter,
         indexPattern,
       }}
