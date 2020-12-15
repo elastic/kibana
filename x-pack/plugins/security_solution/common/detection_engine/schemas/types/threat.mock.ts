@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Threat } from '../common/schemas';
+import { Threats } from '../common/schemas';
 
-export const getThreatMock = (): Threat => [
+export const getThreatMock = (): Threats => [
   {
     framework: 'MITRE ATT&CK',
     tactic: {
