@@ -221,18 +221,11 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   onQueryChange = ({ query }: { query: Query }) => {
-    this.setState({
-      query,
-      filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
-    });
+    this.setUrlQuery(query.text);
   };
 
   clearQuery = () => {
-    this.setState({
-      query: Query.parse(''),
-      footerQueryMatched: false,
-      filteredSettings: this.groupedSettings,
-    });
+    this.setUrlQuery('');
   };
 
   onFooterQueryMatchChange = (matched: boolean) => {
