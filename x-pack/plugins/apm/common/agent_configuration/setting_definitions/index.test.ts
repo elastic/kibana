@@ -120,6 +120,7 @@ describe('filterByAgent', () => {
         'recording',
         'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -134,6 +135,7 @@ describe('filterByAgent', () => {
         'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -148,6 +150,7 @@ describe('filterByAgent', () => {
         'log_level',
         'recording',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);

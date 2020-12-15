@@ -6,6 +6,7 @@
 
 import { fold, Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { fromEither, TaskEither } from 'fp-ts/lib/TaskEither';
 import * as t from 'io-ts';
 import { exactCheck } from './exact_check';
 import { formatErrors } from './format_errors';
@@ -33,3 +34,8 @@ export const validateEither = <T extends t.Mixed, A extends unknown>(
     (a) => schema.validate(a, t.getDefaultContext(schema.asDecoder())),
     mapLeft((errors) => new Error(formatErrors(errors).join(',')))
   );
+
+export const validateTaskEither = <T extends t.Mixed, A extends unknown>(
+  schema: T,
+  obj: A
+): TaskEither<Error, A> => fromEither(validateEither(schema, obj));

@@ -42,6 +42,7 @@ export const alertType: AlertType = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
+  minimumLicenseRequired: 'basic',
   defaultActionGroupId: 'default',
   recoveryActionGroup: {
     id: 'hasLandedBackOnEarth',

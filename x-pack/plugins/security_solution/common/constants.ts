@@ -42,6 +42,7 @@ export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
+export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
 export enum SecurityPageName {
   detections = 'detections',

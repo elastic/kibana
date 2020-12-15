@@ -21,6 +21,8 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
 import { RenderMode } from 'src/plugins/expressions';
+import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import isEqual from 'fast-deep-equal';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -38,7 +40,11 @@ import {
 import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { isLensBrushEvent, isLensFilterEvent } from '../../types';
+import {
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensTableRowContextMenuClickEvent,
+} from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE } from '../../../common';
@@ -71,6 +77,7 @@ export interface LensEmbeddableDeps {
   timefilter: TimefilterContract;
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
+  getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
 }
 
 export class Embeddable
@@ -117,6 +124,36 @@ export class Embeddable
     this.autoRefreshFetchSubscription = deps.timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.reload.bind(this));
+
+    const input$ = this.getInput$();
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
+    input$
+      .pipe(
+        map((input) => input.enhancements?.dynamicActions),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when dashboard view mode switches between "view/edit". This is
+    // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
+    // dashboard's mode is toggled.
+    input$
+      .pipe(
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
   }
 
   public supportedTriggers() {
@@ -127,6 +164,7 @@ export class Embeddable
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
       case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick];
       case 'lnsPie':
         return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
@@ -217,10 +255,30 @@ export class Embeddable
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
+        hasCompatibleActions={this.hasCompatibleActions}
       />,
       domNode
     );
   }
+
+  private readonly hasCompatibleActions = async (
+    event: ExpressionRendererEvent
+  ): Promise<boolean> => {
+    if (isLensTableRowContextMenuClickEvent(event)) {
+      const { getTriggerCompatibleActions } = this.deps;
+      if (!getTriggerCompatibleActions) {
+        return false;
+      }
+      const actions = await getTriggerCompatibleActions(VIS_EVENT_TO_TRIGGER[event.name], {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    }
+
+    return false;
+  };
 
   /**
    * Combines the embeddable context with the saved object context, and replaces
@@ -263,6 +321,16 @@ export class Embeddable
         data: event.data,
         embeddable: this,
       });
+    }
+
+    if (isLensTableRowContextMenuClickEvent(event)) {
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        {
+          data: event.data,
+          embeddable: this,
+        },
+        true
+      );
     }
   };
 

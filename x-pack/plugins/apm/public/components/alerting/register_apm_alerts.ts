@@ -25,7 +25,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
     },
-    alertParamsExpression: lazy(() => import('./ErrorCountAlertTrigger')),
+    alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -60,7 +60,7 @@ export function registerApmAlerts(
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
     },
     alertParamsExpression: lazy(
-      () => import('./TransactionDurationAlertTrigger')
+      () => import('./transaction_duration_alert_trigger')
     ),
     validate: () => ({
       errors: [],
@@ -97,7 +97,7 @@ export function registerApmAlerts(
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
     },
     alertParamsExpression: lazy(
-      () => import('./TransactionErrorRateAlertTrigger')
+      () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
       errors: [],
@@ -134,7 +134,7 @@ export function registerApmAlerts(
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
     },
     alertParamsExpression: lazy(
-      () => import('./TransactionDurationAnomalyAlertTrigger')
+      () => import('./transaction_duration_anomaly_alert_trigger')
     ),
     validate: () => ({
       errors: [],

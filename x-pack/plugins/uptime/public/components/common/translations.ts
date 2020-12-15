@@ -10,6 +10,10 @@ export const URL_LABEL = i18n.translate('xpack.uptime.monitorList.table.url.name
   defaultMessage: 'Url',
 });
 
+export const TAGS_LABEL = i18n.translate('xpack.uptime.monitorList.table.tags.name', {
+  defaultMessage: 'Tags',
+});
+
 export const STATUS_UP_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
   defaultMessage: 'Up',
 });

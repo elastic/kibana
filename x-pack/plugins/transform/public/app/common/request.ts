@@ -30,6 +30,7 @@ import {
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
+  GroupByConfigWithUiSupport,
   PivotGroupByConfig,
 } from '../common';
 
@@ -71,6 +72,12 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
+  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
+};
+
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
@@ -95,6 +102,7 @@ export function getPreviewTransformRequestBody(
       const termsAgg: TermsAgg = {
         terms: {
           field: g.field,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = termsAgg;
@@ -103,6 +111,7 @@ export function getPreviewTransformRequestBody(
         histogram: {
           field: g.field,
           interval: g.interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = histogramAgg;
@@ -111,6 +120,7 @@ export function getPreviewTransformRequestBody(
         date_histogram: {
           field: g.field,
           calendar_interval: g.calendar_interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = dateHistogramAgg;

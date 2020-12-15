@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T>;
+export declare type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T> | RowClickContext;
 ```

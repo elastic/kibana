@@ -34,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_packetbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_winlogbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_logs-endpoint.events.*');
 
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
@@ -45,6 +46,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/module_nginx');
       await esArchiver.unload('ml/module_sample_ecommerce');
       await esArchiver.unload('ml/module_sample_logs');
+      await esArchiver.unload('ml/module_security_endpoint');
       await esArchiver.unload('ml/module_siem_auditbeat');
       await esArchiver.unload('ml/module_siem_packetbeat');
       await esArchiver.unload('ml/module_siem_winlogbeat');

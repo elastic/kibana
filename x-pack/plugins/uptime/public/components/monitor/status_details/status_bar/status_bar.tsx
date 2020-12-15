@@ -19,10 +19,11 @@ import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
 import { useStatusBar } from './use_status_bar';
 import { MonitorIDLabel, OverallAvailability } from '../translations';
-import { URL_LABEL } from '../../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../../common/translations';
 import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
+import { MonitorTags } from '../../../common/monitor_tags';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
@@ -79,6 +80,10 @@ export const MonitorStatusBar: React.FC = () => {
             </MonListDescription>
           </>
         )}
+        <MonListTitle>{TAGS_LABEL}</MonListTitle>
+        <MonListDescription>
+          <MonitorTags ping={monitorStatus} />
+        </MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
         <MonitorRedirects monitorStatus={monitorStatus} />
       </EuiDescriptionList>

@@ -7,10 +7,9 @@
 import {
   Axis,
   Chart,
-  ElementClickListener,
-  GeometryValue,
   HistogramBarSeries,
   Position,
+  ProjectionClickListener,
   RectAnnotation,
   ScaleType,
   Settings,
@@ -24,11 +23,11 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -145,10 +144,9 @@ export function TransactionDistribution({
     },
   };
 
-  const onBarClick: ElementClickListener = (elements) => {
-    const chartPoint = elements[0][0] as GeometryValue;
+  const onBarClick: ProjectionClickListener = ({ x }) => {
     const clickedBucket = distribution?.buckets.find((bucket) => {
-      return bucket.key === chartPoint.x;
+      return bucket.key === x;
     });
     if (clickedBucket) {
       onBucketClick(clickedBucket);
@@ -194,10 +192,11 @@ export function TransactionDistribution({
           <Settings
             xDomain={{ min: xMin, max: xMax }}
             tooltip={tooltipProps}
-            onElementClick={onBarClick}
+            onProjectionClick={onBarClick}
           />
           {selectedBucket && (
             <RectAnnotation
+              zIndex={-1}
               id="highlighted_bucket"
               dataValues={[
                 {
@@ -207,7 +206,7 @@ export function TransactionDistribution({
               style={{
                 fill: 'transparent',
                 strokeWidth: 1,
-                stroke: theme.eui.euiColorVis1,
+                stroke: theme.eui.euiColorPrimary,
                 opacity: 1,
               }}
             />

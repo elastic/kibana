@@ -6,6 +6,8 @@
 
 export const useRolloverPath = '_meta.hot.useRollover';
 
+export const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
+
 /**
  * These strings describe the path to their respective values in the serialized
  * ILM form.

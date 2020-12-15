@@ -52,7 +52,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 'WzgsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My second favorite vis',
               },

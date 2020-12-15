@@ -23,6 +23,7 @@ import { UiActionsService } from './service';
 import {
   selectRangeTrigger,
   valueClickTrigger,
+  rowClickTrigger,
   applyFilterTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
@@ -48,6 +49,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   public setup(core: CoreSetup): UiActionsSetup {
     this.service.registerTrigger(selectRangeTrigger);
     this.service.registerTrigger(valueClickTrigger);
+    this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(applyFilterTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);

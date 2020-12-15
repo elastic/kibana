@@ -59,6 +59,7 @@ export const createThreatSignals = async ({
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    createdSignals: [],
     errors: [],
   };
 

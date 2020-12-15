@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -13,6 +13,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from '../case_view/translations';
@@ -22,6 +23,8 @@ import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
+import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
+import { OnUpdateFields } from '../case_view';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -38,7 +41,7 @@ interface CaseActionBarProps {
   disabled?: boolean;
   isLoading: boolean;
   onRefresh: () => void;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
@@ -46,10 +49,27 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   disabled = false,
   isLoading,
   onRefresh,
-  onStatusChanged,
+  onUpdateField,
 }) => {
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
+  const onStatusChanged = useCallback(
+    (status: CaseStatuses) =>
+      onUpdateField({
+        key: 'status',
+        value: status,
+      }),
+    [onUpdateField]
+  );
+
+  const onSyncAlertsChanged = useCallback(
+    (syncAlerts: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, syncAlerts },
+      }),
+    [caseData.settings, onUpdateField]
+  );
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
@@ -78,20 +98,41 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         </MyDescriptionList>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem>
-            <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
-              {i18n.CASE_REFRESH}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CaseViewActions
-              caseData={caseData}
-              currentExternalIncident={currentExternalIncident}
-              disabled={disabled}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiDescriptionList compressed>
+          <EuiFlexGroup gutterSize="l" alignItems="center">
+            <EuiFlexItem>
+              <EuiDescriptionListDescription>
+                <EuiDescriptionListTitle>
+                  <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <span>{i18n.STATUS}</span>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiDescriptionListTitle>
+                <SyncAlertsSwitch
+                  disabled={disabled || isLoading}
+                  isSynced={caseData.settings.syncAlerts}
+                  onSwitchChange={onSyncAlertsChanged}
+                />
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
+                {i18n.CASE_REFRESH}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CaseViewActions
+                caseData={caseData}
+                currentExternalIncident={currentExternalIncident}
+                disabled={disabled}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiDescriptionList>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

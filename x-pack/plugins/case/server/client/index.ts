@@ -8,6 +8,7 @@ import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
+import { updateAlertsStatus } from './alerts/update_status';
 
 export { CaseClient } from './types';
 
@@ -17,6 +18,8 @@ export const createCaseClient = ({
   caseConfigureService,
   caseService,
   userActionService,
+  alertsService,
+  context,
 }: CaseClientFactoryArguments): CaseClient => {
   return {
     create: create({
@@ -25,6 +28,8 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      alertsService,
+      context,
     }),
     update: update({
       savedObjectsClient,
@@ -32,6 +37,8 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      alertsService,
+      context,
     }),
     addComment: addComment({
       savedObjectsClient,
@@ -39,6 +46,17 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      alertsService,
+      context,
+    }),
+    updateAlertsStatus: updateAlertsStatus({
+      savedObjectsClient,
+      request,
+      caseConfigureService,
+      caseService,
+      userActionService,
+      alertsService,
+      context,
     }),
   };
 };

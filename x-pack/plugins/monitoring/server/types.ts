@@ -121,9 +121,9 @@ export interface ElasticsearchResponse {
 
 export interface ElasticsearchResponseHit {
   _source: ElasticsearchSource;
-  inner_hits: {
+  inner_hits?: {
     [field: string]: {
-      hits: {
+      hits?: {
         hits: ElasticsearchResponseHit[];
         total: {
           value: number;

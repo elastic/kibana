@@ -55,8 +55,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${corsTestPlugin}`,
         `--test.cors.port=${pluginPort}`,
         '--server.cors.enabled=true',
-        '--server.cors.credentials=true',
-        `--server.cors.origin=["${originUrl}"]`,
+        '--server.cors.allowCredentials=true',
+        `--server.cors.allowOrigin=["${originUrl}"]`,
       ],
     },
   };

@@ -10,38 +10,20 @@ exports[`OverviewPageFooter render 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <div />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
       <div>
-        <mockConstructor
-          application={
-            Object {
-              "capabilities": Object {
-                "advancedSettings": Object {
-                  "show": true,
-                },
-              },
-            }
-          }
+        <EuiButtonEmpty
+          className="kbnOverviewPageFooter__button"
+          flush="both"
+          iconType="home"
+          onClick={[Function]}
+          size="xs"
         >
-          <EuiButtonEmpty
-            className="kbnOverviewPageFooter__button"
-            data-test-subj="allPlugins"
-            flush="both"
-            href="/app/home#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="kibana-react.pageFooter.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </mockConstructor>
+          <FormattedMessage
+            defaultMessage="Make this my landing page"
+            id="kibana-react.pageFooter.makeDefaultRouteLink"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
       </div>
     </EuiFlexItem>
   </EuiFlexGroup>

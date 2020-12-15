@@ -9,8 +9,8 @@ import { DEFAULT_TIMEOUT } from './csm_dashboard';
 import { getDataTestSubj } from './utils';
 
 Then(`it displays list of relevant js errors`, () => {
-  cy.get('.euiBasicTable-loading').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiBasicTable-loading').should('not.exist');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   getDataTestSubj('uxJsErrorsTotal').should('have.text', 'Total errors112');
 

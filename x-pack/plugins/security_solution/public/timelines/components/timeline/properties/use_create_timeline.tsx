@@ -9,7 +9,7 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
-import { useFullScreen } from '../../../../common/containers/use_full_screen';
+import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import {
   TimelineId,
   TimelineType,
@@ -34,7 +34,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
     []
   );
   const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
-  const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {

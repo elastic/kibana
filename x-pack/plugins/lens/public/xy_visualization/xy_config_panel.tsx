@@ -154,6 +154,28 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+function getValueLabelDisableReason({
+  isAreaPercentage,
+  isHistogramSeries,
+}: {
+  isAreaPercentage: boolean;
+  isHistogramSeries: boolean;
+}): string {
+  if (isHistogramSeries) {
+    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on histograms.',
+    });
+  }
+  if (isAreaPercentage) {
+    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on percentage area charts.',
+    });
+  }
+  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+  });
+}
+
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
@@ -246,20 +268,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
 
+  const valueLabelsDisabledReason = getValueLabelDisableReason({
+    isAreaPercentage,
+    isHistogramSeries,
+  });
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={
-              isAreaPercentage
-                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
-                  })
-                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on histograms.',
-                  })
-            }
+            tooltipContent={valueLabelsDisabledReason}
             condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
             <ToolbarPopover

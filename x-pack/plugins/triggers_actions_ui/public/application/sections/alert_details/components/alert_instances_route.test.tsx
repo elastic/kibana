@@ -151,6 +151,8 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: 'alerts',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
     ...overloads,
   };
 }

@@ -5,19 +5,19 @@
  */
 
 import { Location } from 'history';
-import { IUrlParams } from './types';
+import { pickKeys } from '../../../common/utils/pick_keys';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { toQuery } from '../../components/shared/Links/url_helpers';
 import {
-  removeUndefinedProps,
-  getStart,
   getEnd,
+  getStart,
+  removeUndefinedProps,
   toBoolean,
   toNumber,
   toString,
 } from './helpers';
-import { toQuery } from '../../components/shared/Links/url_helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
-import { pickKeys } from '../../../common/utils/pick_keys';
+import { IUrlParams } from './types';
 
 type TimeUrlParams = Pick<
   IUrlParams,
@@ -48,6 +48,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment,
     searchTerm,
     percentile,
+    latencyAggregationType,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -77,6 +78,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
+    latencyAggregationType,
 
     // ui filters
     environment,

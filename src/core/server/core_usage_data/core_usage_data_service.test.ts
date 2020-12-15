@@ -29,6 +29,7 @@ import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
 import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
+import { httpServiceMock } from '../http/http_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
@@ -68,11 +69,12 @@ describe('CoreUsageDataService', () => {
 
   describe('setup', () => {
     it('creates internal repository', async () => {
+      const http = httpServiceMock.createInternalSetupContract();
       const metrics = metricsServiceMock.createInternalSetupContract();
       const savedObjectsStartPromise = Promise.resolve(
         savedObjectsServiceMock.createStartContract()
       );
-      service.setup({ metrics, savedObjectsStartPromise });
+      service.setup({ http, metrics, savedObjectsStartPromise });
 
       const savedObjects = await savedObjectsStartPromise;
       expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
@@ -81,14 +83,12 @@ describe('CoreUsageDataService', () => {
 
     describe('#registerType', () => {
       it('registers core usage stats type', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const coreUsageData = service.setup({
-          metrics,
-          savedObjectsStartPromise,
-        });
+        const coreUsageData = service.setup({ http, metrics, savedObjectsStartPromise });
         const typeRegistry = typeRegistryMock.create();
 
         coreUsageData.registerType(typeRegistry);
@@ -104,14 +104,12 @@ describe('CoreUsageDataService', () => {
 
     describe('#getClient', () => {
       it('returns client', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const coreUsageData = service.setup({
-          metrics,
-          savedObjectsStartPromise,
-        });
+        const coreUsageData = service.setup({ http, metrics, savedObjectsStartPromise });
 
         const usageStatsClient = coreUsageData.getClient();
         expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
@@ -122,11 +120,12 @@ describe('CoreUsageDataService', () => {
   describe('start', () => {
     describe('getCoreUsageData', () => {
       it('returns core metrics for default config', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        service.setup({ metrics, savedObjectsStartPromise });
+        service.setup({ http, metrics, savedObjectsStartPromise });
         const elasticsearch = elasticsearchServiceMock.createStart();
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
@@ -296,6 +295,7 @@ describe('CoreUsageDataService', () => {
           observables.push(newObservable);
           return newObservable;
         });
+        const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         metrics.getOpsMetrics$.mockImplementation(() => {
           const newObservable = hot('-a-------');
@@ -306,7 +306,7 @@ describe('CoreUsageDataService', () => {
           savedObjectsServiceMock.createStartContract()
         );
 
-        service.setup({ metrics, savedObjectsStartPromise });
+        service.setup({ http, metrics, savedObjectsStartPromise });
 
         // Use the stopTimer$ to delay calling stop() until the third frame
         const stopTimer$ = cold('---a|');

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { rangeFilter } from '../../../../common/utils/range_filter';
@@ -21,6 +22,7 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getLatencyAggregation } from '../../helpers/latency_aggregation_type';
 
 export type TransactionGroupTimeseriesData = PromiseReturnType<
   typeof getTimeseriesDataForTransactionGroups
@@ -36,6 +38,7 @@ export async function getTimeseriesDataForTransactionGroups({
   searchAggregatedTransactions,
   size,
   numBuckets,
+  latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -46,8 +49,13 @@ export async function getTimeseriesDataForTransactionGroups({
   searchAggregatedTransactions: boolean;
   size: number;
   numBuckets: number;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   const { intervalString } = getBucketSize({ start, end, numBuckets });
+
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
   const timeseriesResponse = await apmEventClient.search({
     apm: {
@@ -92,35 +100,11 @@ export async function getTimeseriesDataForTransactionGroups({
                 },
               },
               aggs: {
-                avg_latency: {
-                  avg: {
-                    field: getTransactionDurationFieldForAggregatedTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
-                transaction_count: {
-                  value_count: {
-                    field: getTransactionDurationFieldForAggregatedTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
+                ...getLatencyAggregation(latencyAggregationType, field),
+                transaction_count: { value_count: { field } },
                 [EVENT_OUTCOME]: {
-                  filter: {
-                    term: {
-                      [EVENT_OUTCOME]: EventOutcome.failure,
-                    },
-                  },
-                  aggs: {
-                    transaction_count: {
-                      value_count: {
-                        field: getTransactionDurationFieldForAggregatedTransactions(
-                          searchAggregatedTransactions
-                        ),
-                      },
-                    },
-                  },
+                  filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+                  aggs: { transaction_count: { value_count: { field } } },
                 },
               },
             },

@@ -18,8 +18,18 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
     return {};
   }
 
-  const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
-  const stats = response.hits.hits[0]._source.beats_stats;
+  const firstHit = response.hits.hits[0];
+
+  let firstStats = null;
+  if (
+    firstHit.inner_hits?.first_hit?.hits?.hits &&
+    firstHit.inner_hits?.first_hit?.hits?.hits.length > 0 &&
+    firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats
+  ) {
+    firstStats = firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats;
+  }
+
+  const stats = firstHit._source.beats_stats ?? {};
 
   const eventsTotalFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.total ?? null;
   const eventsEmittedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.published ?? null;

@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
-import { datatable, DatatableComponent } from './expression';
+import { getDatatable, DatatableComponent } from './expression';
 import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
@@ -15,6 +15,7 @@ import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { EuiBasicTable } from '@elastic/eui';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -67,6 +68,8 @@ function sampleArgs() {
     title: 'My fanci metric chart',
     columns: {
       columnIds: ['a', 'b', 'c'],
+      sortBy: '',
+      sortDirection: 'none',
       type: 'lens_datatable_columns',
     },
   };
@@ -76,14 +79,21 @@ function sampleArgs() {
 
 describe('datatable_expression', () => {
   let onClickValue: jest.Mock;
+  let onEditAction: jest.Mock;
+
   beforeEach(() => {
     onClickValue = jest.fn();
+    onEditAction = jest.fn();
   });
 
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
-      const result = datatable.fn(data, args, createMockExecutionContext());
+      const result = getDatatable({ formatFactory: (x) => x as IFieldFormat }).fn(
+        data,
+        args,
+        createMockExecutionContext()
+      );
 
       expect(result).toEqual({
         type: 'render',
@@ -105,6 +115,26 @@ describe('datatable_expression', () => {
             formatFactory={(x) => x as IFieldFormat}
             onClickValue={onClickValue}
             getType={jest.fn()}
+            renderMode="edit"
+          />
+        )
+      ).toMatchSnapshot();
+    });
+
+    test('it renders actions column when there are row actions', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(
+          <DatatableComponent
+            data={data}
+            args={args}
+            formatFactory={(x) => x as IFieldFormat}
+            onClickValue={onClickValue}
+            getType={jest.fn()}
+            onRowContextMenuClick={() => undefined}
+            rowHasRowClickTriggerActions={[true, true, true]}
+            renderMode="edit"
           />
         )
       ).toMatchSnapshot();
@@ -126,6 +156,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -161,6 +192,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -214,7 +246,12 @@ describe('datatable_expression', () => {
 
       const args: DatatableProps['args'] = {
         title: '',
-        columns: { columnIds: ['a', 'b'], type: 'lens_datatable_columns' },
+        columns: {
+          columnIds: ['a', 'b'],
+          sortBy: '',
+          sortDirection: 'none',
+          type: 'lens_datatable_columns',
+        },
       };
 
       const wrapper = mountWithIntl(
@@ -230,6 +267,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -270,9 +308,90 @@ describe('datatable_expression', () => {
           getType={jest.fn((type) =>
             type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
           )}
+          renderMode="edit"
         />
       );
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
+    });
+
+    test('it renders the table with the given sorting', () => {
+      const { data, args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={data}
+          args={{
+            ...args,
+            columns: {
+              ...args.columns,
+              sortBy: 'b',
+              sortDirection: 'desc',
+            },
+          }}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          onEditAction={onEditAction}
+          getType={jest.fn()}
+          renderMode="edit"
+        />
+      );
+
+      // there's currently no way to detect the sorting column via DOM
+      expect(
+        wrapper.exists('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
+      ).toBe(true);
+      // check that the sorting is passing the right next state for the same column
+      wrapper
+        .find('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
+        .first()
+        .simulate('click');
+
+      expect(onEditAction).toHaveBeenCalledWith({
+        action: 'sort',
+        columnId: undefined,
+        direction: 'none',
+      });
+
+      // check that the sorting is passing the right next state for another column
+      wrapper
+        .find('[data-test-subj="tableHeaderSortButton"]')
+        .not('[className*="isSorted"]')
+        .first()
+        .simulate('click');
+
+      expect(onEditAction).toHaveBeenCalledWith({
+        action: 'sort',
+        columnId: 'a',
+        direction: 'asc',
+      });
+    });
+
+    test('it renders the table with the given sorting in readOnly mode', () => {
+      const { data, args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={data}
+          args={{
+            ...args,
+            columns: {
+              ...args.columns,
+              sortBy: 'b',
+              sortDirection: 'desc',
+            },
+          }}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          onEditAction={onEditAction}
+          getType={jest.fn()}
+          renderMode="display"
+        />
+      );
+
+      expect(wrapper.find(EuiBasicTable).prop('sorting')).toMatchObject({
+        sort: undefined,
+        allowNeutralSort: true,
+      });
     });
   });
 });

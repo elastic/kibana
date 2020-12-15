@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { useActions } from 'kea';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
@@ -47,7 +47,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const engineLinkProps = (name: string) => ({
-    to: getEngineRoute(name),
+    href: getAppSearchUrl(getEngineRoute(name)),
+    target: '_blank',
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',
@@ -62,9 +63,9 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
-        </EuiLinkTo>
+        </EuiLink>
       ),
       width: '30%',
       truncateText: true,
@@ -137,12 +138,12 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (name: string) => (
-        <EuiLinkTo {...engineLinkProps(name)}>
+        <EuiLink {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
             defaultMessage="Manage"
           />
-        </EuiLinkTo>
+        </EuiLink>
       ),
       align: 'right',
       width: '100px',
