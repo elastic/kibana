@@ -9517,7 +9517,6 @@
     "xpack.infra.logsPage.noLoggingIndicesDescription": "追加しましょう！",
     "xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel": "セットアップの手順を表示",
     "xpack.infra.logsPage.noLoggingIndicesTitle": "ログインデックスがないようです。",
-    "xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel": "ログエントリーを検索",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder": "ログエントリーを検索中… (例: host.name:host-1)",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.percentSeriesLabel": "パーセント",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.sectionLabel": "CPU 使用状況",
