@@ -4,40 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useServiceDetailsFetcher } from './use_service_details_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export function CloudDetails() {
-  const { details } = useServiceDetailsFetcher();
+type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 
-  if (!details?.cloud) {
+interface Props {
+  cloud: ServiceDetailsReturnType['cloud'];
+}
+
+export function CloudDetails({ cloud }: Props) {
+  if (!cloud) {
     return null;
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
-  if (details.cloud.provider) {
+  if (cloud.provider) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.cloud.provider', {
         defaultMessage: 'Cloud provider',
       }),
-      description: details.cloud.provider,
+      description: cloud.provider,
     });
   }
 
-  if (!!details.cloud.availabilityZones?.length) {
+  if (!!cloud.availabilityZones?.length) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.cloud.zone', {
         defaultMessage:
           '{zones, plural, =0 {Availability zone} one {Availability zone} other {Availability zones}} ',
-        values: { zones: details.cloud.availabilityZones.length },
+        values: { zones: cloud.availabilityZones.length },
       }),
       description: (
         <ul>
-          {details.cloud.availabilityZones.map((zone, index) => (
+          {cloud.availabilityZones.map((zone, index) => (
             <li key={index}>
               <EuiBadge color="hollow">{zone}</EuiBadge>
             </li>
@@ -47,16 +50,16 @@ export function CloudDetails() {
     });
   }
 
-  if (details.cloud.machineTypes) {
+  if (cloud.machineTypes) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.cloud.machine', {
         defaultMessage:
           '{machineTypes, plural, =0{Machine type} one {Machine type} other {Machine types}} ',
-        values: { machineTypes: details.cloud.machineTypes.length },
+        values: { machineTypes: cloud.machineTypes.length },
       }),
       description: (
         <ul>
-          {details.cloud.machineTypes.map((type, index) => (
+          {cloud.machineTypes.map((type, index) => (
             <li key={index}>
               <EuiBadge color="hollow">{type}</EuiBadge>
             </li>
@@ -66,12 +69,12 @@ export function CloudDetails() {
     });
   }
 
-  if (details.cloud.projectName) {
+  if (cloud.projectName) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.cloud.project', {
         defaultMessage: 'Project ID',
       }),
-      description: details.cloud.projectName,
+      description: cloud.projectName,
     });
   }
 

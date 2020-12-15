@@ -8,24 +8,28 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useServiceDetailsFetcher } from './use_service_details_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export function ServiceDetails() {
-  const { details } = useServiceDetailsFetcher();
+type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 
-  if (!details?.service) {
+interface Props {
+  service: ServiceDetailsReturnType['service'];
+}
+
+export function ServiceDetails({ service }: Props) {
+  if (!service) {
     return null;
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
-  if (!!details.service.versions?.length) {
+  if (!!service.versions?.length) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.service.version', {
         defaultMessage: 'Service version',
       }),
       description: (
         <ul>
-          {details.service.versions.map((version, index) => (
+          {service.versions.map((version, index) => (
             <li key={index}>{version}</li>
           ))}
         </ul>
@@ -33,36 +37,36 @@ export function ServiceDetails() {
     });
   }
 
-  if (details.service.runtime) {
+  if (service.runtime) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.service.runtime', {
         defaultMessage: 'Runtime name & version',
       }),
       description: (
         <>
-          {details.service.runtime.name} {details.service.runtime.version}
+          {service.runtime.name} {service.runtime.version}
         </>
       ),
     });
   }
 
-  if (details.service.framework) {
+  if (service.framework) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.service.framework', {
         defaultMessage: 'Framework name',
       }),
-      description: details.service.framework,
+      description: service.framework,
     });
   }
 
-  if (details.service.agent) {
+  if (service.agent) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.service.agent', {
         defaultMessage: 'Agent name & version',
       }),
       description: (
         <>
-          {details.service.agent.name} {details.service.agent.version}
+          {service.agent.name} {service.agent.version}
         </>
       ),
     });

@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/icons?start=${start}&end=${end}&uiFilters=%7B%7`
+          `/api/apm/services/opbeans-java/metadata/icons?start=${start}&end=${end}&uiFilters=%7B%7`
         );
 
         expect(response.status).to.be(200);
@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns java service icons', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/icons?start=${start}&end=${end}&uiFilters=%7B%7`
+          `/api/apm/services/opbeans-java/metadata/icons?start=${start}&end=${end}&uiFilters=%7B%7`
         );
 
         expect(response.status).to.be(200);
@@ -50,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns python service icons', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-python/icons?start=${start}&end=${end}&uiFilters=%7B%7`
+          `/api/apm/services/opbeans-python/metadata/icons?start=${start}&end=${end}&uiFilters=%7B%7`
         );
 
         expect(response.status).to.be(200);

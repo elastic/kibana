@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 // import { renderWithTheme } from '../../../../utils/testHelpers';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -33,7 +34,16 @@ function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper value={mockPluginContext}>
-        {children}
+        <MockUrlParamsContextProvider
+          params={{
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+            start: 'mystart',
+            end: 'myend',
+          }}
+        >
+          {children}
+        </MockUrlParamsContextProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
@@ -42,6 +52,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceIcons', () => {
   describe('icons', () => {
     it('Shows loading spinner while fetching data', () => {
+      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+        data: undefined,
+        status: fetcherHook.FETCH_STATUS.LOADING,
+        refetch: jest.fn(),
+      });
       const { getByTestId, queryAllByTestId } = render(
         <Wrapper>
           <ServiceIcons serviceName="foo" />
@@ -132,10 +147,16 @@ describe('ServiceIcons', () => {
   });
 
   describe('details', () => {
+    const callApmApi = (apisMockData: Record<string, object>) => ({
+      endpoint,
+    }: {
+      endpoint: string;
+    }) => {
+      return apisMockData[endpoint];
+    };
     it('Shows loading spinner while fetching data', () => {
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockReturnValueOnce({
+      const apisMockData = {
+        'GET /api/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
             container: 'kubernetes',
@@ -143,11 +164,17 @@ describe('ServiceIcons', () => {
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
-        })
-        .mockReturnValue({
+        },
+        'GET /api/apm/services/{serviceName}/metadata/details': {
           data: undefined,
           status: fetcherHook.FETCH_STATUS.LOADING,
           refetch: jest.fn(),
+        },
+      };
+      jest
+        .spyOn(fetcherHook, 'useFetcher')
+        .mockImplementation((func: Function, deps: string[]) => {
+          return func(callApmApi(apisMockData)) || {};
         });
 
       const { queryAllByTestId, getByTestId } = render(
@@ -159,14 +186,13 @@ describe('ServiceIcons', () => {
       expect(getByTestId('java')).toBeInTheDocument();
       expect(getByTestId('kubernetes')).toBeInTheDocument();
       expect(getByTestId('gcp')).toBeInTheDocument();
-
       fireEvent.click(getByTestId('popover_Service'));
       expect(getByTestId('loading-content')).toBeInTheDocument();
     });
+
     it('shows service content', () => {
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockReturnValueOnce({
+      const apisMockData = {
+        'GET /api/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
             container: 'kubernetes',
@@ -174,11 +200,17 @@ describe('ServiceIcons', () => {
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
-        })
-        .mockReturnValue({
+        },
+        'GET /api/apm/services/{serviceName}/metadata/details': {
           data: { service: { versions: ['v1.0.0'] } },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
+        },
+      };
+      jest
+        .spyOn(fetcherHook, 'useFetcher')
+        .mockImplementation((func: Function, deps: string[]) => {
+          return func(callApmApi(apisMockData)) || {};
         });
 
       const { queryAllByTestId, getByTestId, getByText } = render(

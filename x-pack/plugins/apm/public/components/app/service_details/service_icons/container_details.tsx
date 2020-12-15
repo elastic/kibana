@@ -8,32 +8,36 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useServiceDetailsFetcher } from './use_service_details_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export function ContainerDetails() {
-  const { details } = useServiceDetailsFetcher();
+type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 
-  if (!details?.container) {
+interface Props {
+  container: ServiceDetailsReturnType['container'];
+}
+
+export function ContainerDetails({ container }: Props) {
+  if (!container) {
     return null;
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
-  if (details.container.os) {
+  if (container.os) {
     listItems.push({
       title: i18n.translate('xpack.apm.serviceNameHeader.container.os', {
         defaultMessage: 'OS',
       }),
-      description: details.container.os,
+      description: container.os,
     });
   }
 
-  if (details.container.isContainerized !== undefined) {
+  if (container.isContainerized !== undefined) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceNameHeader.container.containerized',
         { defaultMessage: 'Containerized' }
       ),
-      description: details.container.isContainerized
+      description: container.isContainerized
         ? i18n.translate('xpack.apm.serviceNameHeader.container.yes', {
             defaultMessage: 'Yes',
           })
@@ -43,23 +47,23 @@ export function ContainerDetails() {
     });
   }
 
-  if (details.container.avgNumberInstances) {
+  if (container.avgNumberInstances) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceNameHeader.container.avgNumberInstances',
         { defaultMessage: 'Avg. number of instances' }
       ),
-      description: Math.round(details.container.avgNumberInstances),
+      description: Math.round(container.avgNumberInstances),
     });
   }
 
-  if (details.container.orchestration) {
+  if (container.orchestration) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceNameHeader.container.orchestration',
         { defaultMessage: 'Orchestration' }
       ),
-      description: details.container.orchestration,
+      description: container.orchestration,
     });
   }
 

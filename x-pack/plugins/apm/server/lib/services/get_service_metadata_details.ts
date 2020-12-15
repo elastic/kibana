@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,
@@ -24,12 +25,14 @@ import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw'
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-type ServiceDetails = Pick<
+type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-interface ServiceDetailsResponse {
+type Orchestration = 'Kubernetes' | 'Docker';
+
+interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
@@ -46,7 +49,7 @@ interface ServiceDetailsResponse {
     os?: string;
     isContainerized?: boolean;
     avgNumberInstances?: number;
-    orchestration?: 'Kubernetes' | 'Docker';
+    orchestration?: Orchestration;
   };
   cloud?: {
     provider?: string;
@@ -56,13 +59,13 @@ interface ServiceDetailsResponse {
   };
 }
 
-export async function getServiceDetails({
+export async function getServiceMetadataDetails({
   serviceName,
   setup,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-}): Promise<ServiceDetailsResponse> {
+}): Promise<ServiceMetadataDetails> {
   const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
@@ -74,12 +77,12 @@ export async function getServiceDetails({
   ];
 
   const should = [
-    CONTAINER,
-    KUBERNETES,
-    CLOUD,
-    HOST,
-    AGENT,
-  ].map((fieldName) => ({ exists: { field: fieldName } }));
+    { exists: { field: CONTAINER } },
+    { exists: { field: KUBERNETES } },
+    { exists: { field: CLOUD } },
+    { exists: { field: HOST } },
+    { exists: { field: AGENT } },
+  ];
 
   const params = {
     apm: {
@@ -94,7 +97,7 @@ export async function getServiceDetails({
           terms: {
             field: SERVICE_VERSION,
             size: 10,
-            order: { _key: 'desc' },
+            order: { _key: 'desc' } as SortOptions,
           },
         },
         availabilityZones: {
@@ -138,9 +141,9 @@ export async function getServiceDetails({
   }
 
   const { service, agent, host, kubernetes, container, cloud } = response.hits
-    .hits[0]._source as ServiceDetails;
+    .hits[0]._source as ServiceMetadataDetailsRaw;
 
-  const serviceDetails: ServiceDetailsResponse['service'] = {
+  const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map(
       (bucket) => bucket.key as string
     ),
@@ -151,17 +154,20 @@ export async function getServiceDetails({
 
   const avgNumberInstances =
     response.aggregations?.avgNumberInstances.value || undefined;
-  const containerDetails: ServiceDetailsResponse['container'] =
+
+  const containerDetails =
     host || container || avgNumberInstances || kubernetes
       ? {
           os: host?.os?.platform,
-          orchestration: !!kubernetes ? 'Kubernetes' : 'Docker',
+          orchestration: (!!kubernetes
+            ? 'Kubernetes'
+            : 'Docker') as Orchestration,
           isContainerized: !!container?.id,
           avgNumberInstances,
         }
       : undefined;
 
-  const cloudDetails: ServiceDetailsResponse['cloud'] = cloud
+  const cloudDetails = cloud
     ? {
         provider: cloud.provider,
         projectName: cloud.project?.name,
@@ -175,7 +181,7 @@ export async function getServiceDetails({
     : undefined;
 
   return {
-    service: serviceDetails,
+    service: serviceMetadataDetails,
     container: containerDetails,
     cloud: cloudDetails,
   };

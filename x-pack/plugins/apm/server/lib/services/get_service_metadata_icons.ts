@@ -17,24 +17,24 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-type ServiceDetails = Pick<
+type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-interface ServiceDetailsIconsResponse {
+interface ServiceMetadataIcons {
   agentName?: string;
   container?: 'Kubernetes' | 'Docker' | undefined;
   cloud?: string;
 }
 
-export async function getServiceDetailsIcons({
+export async function getServiceMetadataIcons({
   serviceName,
   setup,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-}): Promise<ServiceDetailsIconsResponse> {
+}): Promise<ServiceMetadataIcons> {
   const { start, end, apmEventClient } = setup;
 
   const filter = [
@@ -66,9 +66,9 @@ export async function getServiceDetailsIcons({
   }
 
   const { kubernetes, cloud, container, agent } = response.hits.hits[0]
-    ._source as ServiceDetails;
+    ._source as ServiceMetadataIconsRaw;
 
-  let containerType: ServiceDetailsIconsResponse['container'];
+  let containerType: ServiceMetadataIcons['container'];
   if (!!kubernetes) {
     containerType = 'Kubernetes';
   } else if (!!container) {
