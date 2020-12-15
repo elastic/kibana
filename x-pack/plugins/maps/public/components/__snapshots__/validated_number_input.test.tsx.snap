@@ -18,6 +18,7 @@ exports[`should render with error 1`] = `
 >
   <EuiFieldNumber
     aria-label="foobar number input"
+    isInvalid={true}
     max={20}
     min={0}
     onChange={[Function]}
@@ -40,6 +41,7 @@ exports[`should render without error 1`] = `
 >
   <EuiFieldNumber
     aria-label="foobar number input"
+    isInvalid={false}
     max={20}
     min={0}
     onChange={[Function]}
