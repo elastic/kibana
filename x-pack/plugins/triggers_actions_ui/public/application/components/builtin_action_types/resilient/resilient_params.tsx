@@ -108,6 +108,14 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     },
     [comments, editAction, incident, index]
   );
+  const editComment = useCallback(
+    (key, value) => {
+      if (value.length > 0) {
+        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
+      }
+    },
+    [editSubActionProperty]
+  );
 
   const incidentTypesOnChange = useCallback(
     (selectedOptions: Array<{ label: string; value?: string }>) => {
@@ -232,9 +240,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       />
       <TextAreaWithMessageVariables
         index={index}
-        editAction={(key, value) => {
-          editSubActionProperty(key, [{ commentId: 'alert-comment', comment: value }]);
-        }}
+        editAction={editComment}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
