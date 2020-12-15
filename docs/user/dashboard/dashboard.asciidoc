@@ -4,7 +4,7 @@
 [partintro]
 --
 
-Dashboards are collections of panels that you configure and arrange to visualize and analyze your data. Each panel contains data from one or more index patterns, which allows 
+A dashboard is a collection of panels that you use to analyze your data. Each panel contains data from one or more <<index-patterns, index patterns>>, which allows
 you to create a complete overview of your data on a single dashboard. {kib} supports many types of panels that enable you to see your data from multiple perspectives. 
 
 [role="screenshot"]
@@ -129,10 +129,21 @@ Share the dashboard with a larger audience.
 . From the toolbar, click *Share*. 
 
 . Choose one of the following options:
+<<<<<<< HEAD
 [[embedding-dashboards]]
 * *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, 
 
 * *Permalinks* &mdash; Share a direct link to a {kib} dashboard.
+=======
+
+* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, which can be provided by the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details, learn about <<kibana-authentication>>.
+
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
++
+TIP: When you share a link to a dashboard snapshot, select *Short URL*. Snapshot
+URLs are long and can be problematic for Internet Explorer and other
+tools. To create a short URL, you must have write access to {kib}.
+>>>>>>> 077c81ff0e49ae1fb3466b7188b3a767f227c4a0
 
 * *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
