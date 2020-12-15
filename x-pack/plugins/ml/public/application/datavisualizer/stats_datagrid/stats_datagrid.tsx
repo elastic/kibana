@@ -186,12 +186,11 @@ export const DataVisualizerDataGrid = ({
         name: (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
-            <EuiText style={{ paddingRight: 4 }}>
-              {i18n.translate('xpack.ml.datavisualizer.dataGrid.distributionsColumnName', {
-                defaultMessage: 'Distributions',
-              })}
-            </EuiText>
+            {i18n.translate('xpack.ml.datavisualizer.dataGrid.distributionsColumnName', {
+              defaultMessage: 'Distributions',
+            })}
             <EuiButtonIcon
+              style={{ marginLeft: 4 }}
               size={'s'}
               iconType={showDistributions ? 'eye' : 'eyeClosed'}
               onClick={() => toggleShowDistribution()}
