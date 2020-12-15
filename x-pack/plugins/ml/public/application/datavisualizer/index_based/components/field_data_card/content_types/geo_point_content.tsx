@@ -5,12 +5,8 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
-import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import { ExamplesList } from '../examples_list';
 
 export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
@@ -35,46 +31,11 @@ export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
   // }
 
   const { stats } = config;
-
-  const { count, sampleCount, cardinality, examples } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  if (stats?.examples === undefined) return null;
 
   return (
     <div className="mlFieldDataCard__stats">
-      <div>
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="document" />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardGeoPoint.documentsCountDescription"
-            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-            values={{
-              count,
-              docsPercent,
-            }}
-          />
-        </EuiText>
-      </div>
-
-      <EuiSpacer size="xs" />
-
-      <div>
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="database" />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardGeoPoint.distinctCountDescription"
-            defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-            values={{
-              cardinality,
-            }}
-          />
-        </EuiText>
-      </div>
-
-      <EuiSpacer size="m" />
-
-      <ExamplesList examples={examples} />
+      <ExamplesList examples={stats.examples} />
     </div>
   );
 };
