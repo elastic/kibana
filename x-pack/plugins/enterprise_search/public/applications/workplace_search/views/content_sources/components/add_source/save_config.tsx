@@ -7,6 +7,7 @@
 import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -19,6 +20,22 @@ import {
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
+
+import {
+  PUBLIC_KEY_LABEL,
+  CONSUMER_KEY_LABEL,
+  BASE_URI_LABEL,
+  BASE_URL_LABEL,
+  CLIENT_ID_LABEL,
+  CLIENT_SECRET_LABEL,
+} from '../../../../constants';
+
+import {
+  OAUTH_SAVE_CONFIG_BUTTON,
+  OAUTH_REMOVE_BUTTON,
+  OAUTH_BACK_BUTTON,
+  OAUTH_STEP_2,
+} from './constants';
 
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
@@ -76,17 +93,17 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
-      Save configuration
+      {OAUTH_SAVE_CONFIG_BUTTON}
     </EuiButton>
   );
 
   const deleteButton = (
     <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      Remove
+      {OAUTH_REMOVE_BUTTON}
     </EuiButton>
   );
 
-  const backButton = <EuiButtonEmpty onClick={goBackStep}>&nbsp;Go back</EuiButtonEmpty>;
+  const backButton = <EuiButtonEmpty onClick={goBackStep}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
   const showSaveButton = hasPlatinumLicense || !accountContextOnly;
 
   const formActions = (
@@ -112,10 +129,10 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
       <EuiSpacer />
       <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ApiKey label="Public Key" apiKey={publicKey} />
+          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ApiKey label="Consumer Key" apiKey={consumerKey} />
+          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -133,7 +150,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const publicKeyStep2 = (
     <>
-      <EuiFormRow label="Base URI">
+      <EuiFormRow label={BASE_URI_LABEL}>
         <EuiFieldText
           value={baseUrlValue}
           required
@@ -152,7 +169,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
         <EuiForm>
-          <EuiFormRow label="Client id">
+          <EuiFormRow label={CLIENT_ID_LABEL}>
             <EuiFieldText
               value={clientIdValue}
               required
@@ -162,7 +179,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
               name="client-id"
             />
           </EuiFormRow>
-          <EuiFormRow label="Client secret">
+          <EuiFormRow label={CLIENT_SECRET_LABEL}>
             <EuiFieldText
               value={clientSecretValue}
               required
@@ -173,14 +190,14 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
             />
           </EuiFormRow>
           {needsBaseUrl && (
-            <EuiFormRow label={baseUrlTitle || 'Base URL'}>
+            <EuiFormRow label={baseUrlTitle || BASE_URL_LABEL}>
               <EuiFieldText
                 value={baseUrlValue}
                 required
                 type="text"
                 autoComplete="off"
                 onChange={(e) => setBaseUrlValue(e.target.value)}
-                name="base-uri"
+                name="base-url"
               />
             </EuiFormRow>
           )}
@@ -192,8 +209,11 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   );
 
   const oauthSteps = (sourceName: string) => [
-    `Create an OAuth app in your organization's ${sourceName}\u00A0account`,
-    'Provide the appropriate configuration information',
+    i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep1', {
+      defaultMessage: "Create an OAuth app in your organization's {sourceName} account",
+      values: { sourceName },
+    }),
+    OAUTH_STEP_2,
   ];
 
   const configSteps = [

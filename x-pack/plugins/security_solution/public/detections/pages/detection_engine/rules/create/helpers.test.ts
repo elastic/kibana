@@ -20,7 +20,6 @@ import {
   ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
-  IMitreEnterpriseAttack,
 } from '../types';
 import {
   getTimeTypeValue,
@@ -40,6 +39,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
+import { Threat, Threats } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -87,14 +87,14 @@ describe('helpers', () => {
   });
 
   describe('filterEmptyThreats', () => {
-    let mockThreat: IMitreEnterpriseAttack;
+    let mockThreat: Threat;
 
     beforeEach(() => {
       mockThreat = mockAboutStepRule().threat[0];
     });
 
     test('filters out fields with empty tactics', () => {
-      const threat: IMitreEnterpriseAttack[] = [
+      const threat: Threats = [
         mockThreat,
         { ...mockThreat, tactic: { ...mockThreat.tactic, name: 'none' } },
       ];
