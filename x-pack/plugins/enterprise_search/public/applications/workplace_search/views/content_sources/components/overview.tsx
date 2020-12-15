@@ -7,11 +7,9 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import { Link } from 'react-router-dom';
 
 import {
   EuiAvatar,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,7 +46,8 @@ import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { LicenseBadge } from '../../../components/shared/license_badge';
-import { Loading } from '../../../../../applications/shared/loading';
+import { Loading } from '../../../../shared/loading';
+import { EuiButtonEmptyTo, EuiPanelTo } from '../../../../shared/react_router_helpers';
 
 import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
@@ -116,11 +115,13 @@ export const Overview: React.FC = () => {
             </EuiFlexItem>
             {totalDocuments > 0 && (
               <EuiFlexItem grow={false}>
-                <Link to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}>
-                  <EuiButtonEmpty data-test-subj="ManageSourceContentLink" size="s">
-                    Manage
-                  </EuiButtonEmpty>
-                </Link>
+                <EuiButtonEmptyTo
+                  to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}
+                  data-test-subj="ManageSourceContentLink"
+                  size="s"
+                >
+                  Manage
+                </EuiButtonEmptyTo>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -256,20 +257,22 @@ export const Overview: React.FC = () => {
         <EuiFlexGroup direction="column" gutterSize="s">
           {groups.map((group, index) => (
             <EuiFlexItem key={index}>
-              <Link to={getGroupPath(group.id)} data-test-subj="SourceGroupLink">
-                <EuiPanel className="euiPanel--inset">
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem>
-                      <EuiText size="s" className="eui-textTruncate">
-                        <strong>{group.name}</strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <GroupAvatars users={group.users} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </Link>
+              <EuiPanelTo
+                to={getGroupPath(group.id)}
+                data-test-subj="SourceGroupLink"
+                className="euiPanel--inset"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem>
+                    <EuiText size="s" className="eui-textTruncate">
+                      <strong>{group.name}</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <GroupAvatars users={group.users} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanelTo>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
