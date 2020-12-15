@@ -5368,6 +5368,7 @@ exports[`Header renders 1`] = `
                 >
                   <button
                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
