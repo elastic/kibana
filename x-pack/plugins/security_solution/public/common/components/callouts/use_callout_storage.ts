@@ -8,7 +8,7 @@ import { difference, fromPairs, identity } from 'lodash/fp';
 import { useCallback, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import useMap from 'react-use/lib/useMap';
-import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
+import { useMessagesStorage } from '../../containers/local_storage/use_messages_storage';
 import { CallOutMessage } from './callout_types';
 
 export interface CallOutStorage {

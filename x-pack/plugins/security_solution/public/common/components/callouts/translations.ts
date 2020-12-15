@@ -6,9 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DISMISS_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.dismissButton',
-  {
-    defaultMessage: 'Dismiss',
-  }
-);
+export const DISMISS_BUTTON = i18n.translate('xpack.securitySolution.callouts.dismissButton', {
+  defaultMessage: 'Dismiss',
+});

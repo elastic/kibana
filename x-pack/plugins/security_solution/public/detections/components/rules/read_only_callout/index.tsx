@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { CallOutMessage, CallOutSwitcher } from '../../callouts';
+import { CallOutMessage, CallOutSwitcher } from '../../../../common/components/callouts';
 import { useUserData } from '../../user_info';
 
 import * as i18n from './translations';
