@@ -416,6 +416,10 @@ describe('execute()', () => {
         "cc": Array [
           "*bold*",
         ],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Kibana",
+        },
         "message": "\\\\*bold\\\\*",
         "subject": "*bold*",
         "to": Array [],
