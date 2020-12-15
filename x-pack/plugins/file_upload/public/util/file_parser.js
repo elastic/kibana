@@ -51,7 +51,7 @@ export const fileHandler = async ({
                 // Handle single feature geoJson
                 const cleanedSingleFeature = cleanAndValidate(batch.container);
                 if (cleanedSingleFeature.geometry && cleanedSingleFeature.geometry.type) {
-                  features.push(cleanedSingleFeature);
+                  parsedGeojson = cleanedSingleFeature;
                   featuresProcessed++;
                 }
               }
@@ -63,15 +63,17 @@ export const fileHandler = async ({
           default:
             for (const feature of batch.data) {
               // TODO: Give feedback on which features failed
-              if ((!feature.geometry || !feature.geometry.type) && !boolGeometryErrs) {
-                boolGeometryErrs = true;
-                errors.push(
-                  new Error(
-                    i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
-                      defaultMessage: 'Some features without geometry omitted',
-                    })
-                  )
-                );
+              if (!feature.geometry || !feature.geometry.type) {
+                if (!boolGeometryErrs) {
+                  boolGeometryErrs = true;
+                  errors.push(
+                    new Error(
+                      i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
+                        defaultMessage: 'Some features without geometry omitted',
+                      })
+                    )
+                  );
+                }
               } else {
                 const cleanFeature = cleanAndValidate(feature);
                 features.push(cleanFeature);
