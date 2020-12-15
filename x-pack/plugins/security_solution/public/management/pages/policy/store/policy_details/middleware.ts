@@ -27,17 +27,17 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   depsStart
 ) => {
   const http = coreStart.http;
-  const licensing = depsStart.licensing;
+  // const licensing = depsStart.licensing;
   let didGetLicense = false;
 
   return ({ getState, dispatch }) => (next) => async (action) => {
     if (!didGetLicense) {
       didGetLicense = true;
-      const license = await licensing.refresh();
-      dispatch({
-        type: 'licenseChanged',
-        payload: license,
-      });
+      // const license = await licensing.refresh();
+      // dispatch({
+      //  type: 'licenseChanged',
+      //  payload: license,
+      // });
     }
 
     next(action);
