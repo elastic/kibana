@@ -19,6 +19,7 @@
 
 import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
+import { ApplicationUsageTracker } from './application_usage_tracker';
 import { Metric, UiCounterMetricType, METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 3;
 
@@ -95,7 +96,7 @@ export class ReportManager {
       }
       case METRIC_TYPE.APPLICATION_USAGE: {
         const { appId, viewId } = metric;
-        return `${appId}-${viewId}`;
+        return ApplicationUsageTracker.serializeKey({ appId, viewId });
       }
       default:
         throw new UnreachableCaseError(metric);
