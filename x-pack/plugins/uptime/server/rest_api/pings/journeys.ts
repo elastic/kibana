@@ -24,9 +24,15 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       checkGroup,
     });
 
+    const details = await libs.requests.getJourneyDetails({
+      uptimeEsClient,
+      checkGroup,
+    });
+
     return {
       checkGroup,
       steps: result,
+      details,
     };
   },
 });
