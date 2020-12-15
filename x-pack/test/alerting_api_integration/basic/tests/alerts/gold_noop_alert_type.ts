@@ -21,7 +21,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           statusCode: 403,
           error: 'Forbidden',
           message:
-            'Alert type test.gold.noop is disabled because your basic license does not support it. Please upgrade your license.',
+            'Alert test.gold.noop is disabled because it requires a Gold license. Contact your administrator to upgrade your license.',
         });
     });
   });

@@ -80,7 +80,7 @@ export const ALERT_ERROR_EXECUTION_REASON = i18n.translate(
 export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonLicense',
   {
-    defaultMessage: 'Cannot run alert.',
+    defaultMessage: 'Cannot run alert',
   }
 );
 
