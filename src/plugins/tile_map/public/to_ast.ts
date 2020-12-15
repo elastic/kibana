@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TileMapExpressionFunctionDefinition } from './tile_map_fn';
@@ -25,11 +28,14 @@ import { TileMapVisConfig, TileMapVisParams } from './types';
 
 export const toExpressionAst = (vis: Vis<TileMapVisParams>, params: BuildPipelineParams) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: false,
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);
