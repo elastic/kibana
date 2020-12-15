@@ -125,6 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('embeddableErrorLabel');
         const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
         expect(data.length).to.be(5);
+
+        // switching dashboard to edit mode (or any other non-fetch required) state change
+        // should leave session state untouched
+        await PageObjects.dashboard.switchToEditMode();
+        await sendToBackground.expectState('restored');
       });
     });
   });

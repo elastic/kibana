@@ -1,0 +1,16 @@
+.appSearchResultHeaderItem {
+  display: flex;
+
+  &__key,
+  &__value {
+    line-height: $euiLineHeight;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__key {
+    text-transform: uppercase;
+    font-weight: $euiFontWeightLight;
+    color: $euiColorDarkShade;
+    margin-right: $euiSizeXS;
+  }
+}

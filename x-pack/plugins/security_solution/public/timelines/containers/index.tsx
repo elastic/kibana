@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -56,7 +56,7 @@ export interface UseTimelineEventsProps {
   fields: string[];
   indexNames: string[];
   limit: number;
-  sort: SortField;
+  sort: SortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
 }
@@ -65,18 +65,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = {
-  field: '@timestamp',
-  direction: Direction.asc,
-};
-
-function usePreviousRequest(value: TimelineEventsAllRequestOptions | null) {
-  const ref = useRef<TimelineEventsAllRequestOptions | null>(value);
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
+export const initSortDefault = [
+  {
+    field: '@timestamp',
+    direction: Direction.asc,
+  },
+];
 
 export const useTimelineEvents = ({
   docValueFields,
@@ -103,7 +97,7 @@ export const useTimelineEvents = ({
   const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
     null
   );
-  const prevTimelineRequest = usePreviousRequest(timelineRequest);
+  const prevTimelineRequest = useRef<TimelineEventsAllRequestOptions | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -157,6 +151,7 @@ export const useTimelineEvents = ({
       }
       let didCancel = false;
       const asyncSearch = async () => {
+        prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
@@ -218,9 +213,9 @@ export const useTimelineEvents = ({
         pageName !== activeTimeline.getPageName()
       ) {
         activeTimeline.setPageName(pageName);
-
         abortCtrl.current.abort();
         setLoading(false);
+        prevTimelineRequest.current = activeTimeline.getRequest();
         refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
         setTimelineResponse((prevResp) => {
           const resp = activeTimeline.getResponse();
@@ -329,9 +324,35 @@ export const useTimelineEvents = ({
       id !== TimelineId.active ||
       timerangeKind === 'absolute' ||
       !deepEqual(prevTimelineRequest, timelineRequest)
-    )
+    ) {
       timelineSearch(timelineRequest);
+    }
   }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
+
+  /*
+    cleanup timeline events response when the filters were removed completely
+    to avoid displaying previous query results
+  */
+  useEffect(() => {
+    if (isEmpty(filterQuery)) {
+      setTimelineResponse({
+        id,
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: refetchGrid,
+        totalCount: -1,
+        pageInfo: {
+          activePage: 0,
+          querySize: 0,
+        },
+        events: [],
+        loadPage: wrappedLoadPage,
+        updatedAt: 0,
+      });
+    }
+  }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
 
   return [loading, timelineResponse];
 };

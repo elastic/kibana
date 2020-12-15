@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Filter } from '../../../../data/public';
+import { Filter } from '../../services/data';
 
 /**
  * @typedef {Object} QueryFilter
