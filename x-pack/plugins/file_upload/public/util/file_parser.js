@@ -44,25 +44,23 @@ export const fileHandler = async ({
       if (getFileParseActive()) {
         switch (batch.batchType) {
           case 'root-object-batch-complete':
-            if (getFileParseActive()) {
-              if (featuresProcessed) {
-                parsedGeojson = { ...batch.container, features };
-              } else {
-                // Handle single feature geoJson
-                const cleanedSingleFeature = cleanAndValidate(batch.container);
-                if (cleanedSingleFeature.geometry && cleanedSingleFeature.geometry.type) {
-                  parsedGeojson = cleanedSingleFeature;
-                  featuresProcessed++;
-                }
-              }
-            } else {
+            if (!getFileParseActive()) {
               resolve(null);
               return;
+            }
+            if (featuresProcessed) {
+              parsedGeojson = { ...batch.container, features };
+            } else {
+              // Handle single feature geoJson
+              const cleanedSingleFeature = cleanAndValidate(batch.container);
+              if (cleanedSingleFeature.geometry && cleanedSingleFeature.geometry.type) {
+                parsedGeojson = cleanedSingleFeature;
+                featuresProcessed++;
+              }
             }
             break;
           default:
             for (const feature of batch.data) {
-              // TODO: Give feedback on which features failed
               if (!feature.geometry || !feature.geometry.type) {
                 if (!boolGeometryErrs) {
                   boolGeometryErrs = true;
