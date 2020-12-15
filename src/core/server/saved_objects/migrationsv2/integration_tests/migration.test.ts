@@ -53,16 +53,39 @@ describe('migration v2', () => {
           skip: false,
           enableV2: true,
         },
+        logging: {
+          appenders: {
+            file: {
+              kind: 'file',
+              path: join(__dirname, 'migration_test_kibana.log'),
+              layout: {
+                kind: 'json',
+              },
+            },
+          },
+          loggers: [
+            {
+              context: 'root',
+              appenders: ['file'],
+            },
+          ],
+        },
       },
       {
         oss,
       }
     );
 
-    esServer = await startES();
-    await root.setup();
-    coreStart = await root.start();
-    esClient = coreStart.elasticsearch.client.asInternalUser;
+    const startEsPromise = startES().then((es) => (esServer = es));
+    const startKibanaPromise = root
+      .setup()
+      .then(() => root.start())
+      .then((start) => {
+        coreStart = start;
+        esClient = coreStart.elasticsearch.client.asInternalUser;
+      });
+
+    await Promise.all([startEsPromise, startKibanaPromise]);
   };
 
   const getExpectedVersionPerType = () =>
@@ -100,35 +123,9 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   };
-
-  describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
-    const migratedIndex = `.kibana_${kibanaVersion}_001`;
-
-    beforeAll(async () => {
-      await startServers({
-        oss: false,
-        dataArchive: join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
-      });
-    });
-
-    afterAll(async () => {
-      await stopServers();
-    });
-
-    it('copies all the document of the previous index to the new one', async () => {
-      const migratedIndexResponse = await esClient.count({
-        index: migratedIndex,
-      });
-      const oldIndexResponse = await esClient.count({
-        index: '.kibana_1',
-      });
-
-      // Use a >= comparison since once Kibana has started it might create new
-      // documents like telemetry tasks
-      expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
-    });
-  });
 
   describe('migrating from 7.3.0-xpack version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
