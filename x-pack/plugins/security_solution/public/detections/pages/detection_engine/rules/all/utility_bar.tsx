@@ -86,7 +86,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 {i18n.SHOWING_RULES(paginationTotal)}
               </UtilityBarText>
             ) : (
-              <UtilityBarText dataTestSubj="showingRules">
+              <UtilityBarText dataTestSubj="showingExceptionLists">
                 {i18n.SHOWING_EXCEPTION_LISTS(paginationTotal)}
               </UtilityBarText>
             )}
@@ -94,7 +94,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
           {showBulkActions ? (
             <>
-              <UtilityBarGroup>
+              <UtilityBarGroup data-test-subj="tableBulkActions">
                 <UtilityBarText dataTestSubj="selectedRules">
                   {i18n.SELECTED_RULES(numberSelectedItems)}
                 </UtilityBarText>

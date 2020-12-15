@@ -311,7 +311,7 @@ describe('Exceptions Lists API', () => {
         method: 'GET',
         query: {
           filter: 'exception-list.attributes.name: Sample Endpoint',
-          namespace_type: ['single', 'agnostic'],
+          namespace_type: 'single,agnostic',
           page: '1',
           per_page: '20',
           sort_field: 'exception-list.created_at',

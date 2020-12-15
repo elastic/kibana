@@ -225,7 +225,7 @@ export const fetchExceptionLists = async ({
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
   const query = {
     filter: filters,
-    namespace_type: namespaceTypes.split(','),
+    namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
     sort_field: 'exception-list.created_at',
