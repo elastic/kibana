@@ -37,8 +37,6 @@ export function registerLayerWizards() {
 
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
-  registerLayerWizard(ObservabilityLayerWizardConfig);
-  registerLayerWizard(SecurityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
@@ -62,5 +60,7 @@ export function registerLayerWizards() {
   registerLayerWizard(wmsLayerWizardConfig);
 
   registerLayerWizard(mvtVectorSourceWizardConfig);
+  registerLayerWizard(ObservabilityLayerWizardConfig);
+  registerLayerWizard(SecurityLayerWizardConfig);
   registered = true;
 }
