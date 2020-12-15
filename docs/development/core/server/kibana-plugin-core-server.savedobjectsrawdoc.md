@@ -20,5 +20,4 @@ export interface SavedObjectsRawDoc
 |  [\_primary\_term](./kibana-plugin-core-server.savedobjectsrawdoc._primary_term.md) | <code>number</code> |  |
 |  [\_seq\_no](./kibana-plugin-core-server.savedobjectsrawdoc._seq_no.md) | <code>number</code> |  |
 |  [\_source](./kibana-plugin-core-server.savedobjectsrawdoc._source.md) | <code>SavedObjectsRawDocSource</code> |  |
-|  [\_type](./kibana-plugin-core-server.savedobjectsrawdoc._type.md) | <code>string</code> |  |
 
