@@ -90,7 +90,7 @@ export function CoreVitals({
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
             helpLabel={LCP_HELP_LABEL}
-            hasVitals={Boolean(coreVitalPages)} // can coreVitalPages ever been negative? Should I use coreVitalPages > 0 instead?
+            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
