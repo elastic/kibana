@@ -40,6 +40,7 @@ export function updatedWith(
       events: [...first.events, ...second.events],
       cursor: second.cursor,
       lastCursorRequested: null,
+      dataRequestID: second.dataRequestID,
     };
   } else {
     return undefined;
