@@ -19,13 +19,6 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-function yTickFormat(y?: number | null) {
-  return i18n.translate('xpack.apm.chart.averagePercentLabel', {
-    defaultMessage: '{y} (avg.)',
-    values: { y: yLabelFormat(y) },
-  });
-}
-
 interface Props {
   height?: number;
   showAnnotations?: boolean;
@@ -85,12 +78,11 @@ export function TransactionErrorRateChart({
             color: theme.eui.euiColorVis7,
             hideLegend: true,
             title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-              defaultMessage: 'Error rate',
+              defaultMessage: 'Error rate (avg.)',
             }),
           },
         ]}
         yLabelFormat={yLabelFormat}
-        yTickFormat={yTickFormat}
         yDomain={{ min: 0, max: 1 }}
       />
     </EuiPanel>
