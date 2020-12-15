@@ -81,11 +81,11 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
 
   return (
     <>
-      <Visible show={show}>
-        <EuiFocusTrap disabled={!show}>
+      <EuiFocusTrap disabled={!show}>
+        <Visible show={show}>
           <Pane timelineId={timelineId} />
-        </EuiFocusTrap>
-      </Visible>
+        </Visible>
+      </EuiFocusTrap>
       <Visible show={!show}>
         <FlyoutBottomBar timelineId={timelineId} />
       </Visible>
