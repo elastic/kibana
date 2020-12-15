@@ -7,6 +7,7 @@
 import { ROLES } from '../../common/test';
 import { DETECTIONS_RULE_MANAGEMENT_URL, DETECTIONS_URL } from '../urls/navigation';
 import { newRule } from '../objects/rule';
+import { PAGE_TITLE } from '../screens/common/page';
 
 import {
   login,
@@ -17,7 +18,21 @@ import {
 import { waitForAlertsIndexToBeCreated } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
-import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../tasks/detections/callouts';
+import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../tasks/common/callouts';
+
+const loadPageAsReadOnlyUser = (url: string) => {
+  waitForPageWithoutDateRange(url, ROLES.reader);
+  waitForPageTitleToBeShown();
+};
+
+const reloadPage = () => {
+  cy.reload();
+  waitForPageTitleToBeShown();
+};
+
+const waitForPageTitleToBeShown = () => {
+  cy.get(PAGE_TITLE).should('be.visible');
+};
 
 describe('Detections > Callouts indicating read-only access to resources', () => {
   const ALERTS_CALLOUT = 'read-only-access-to-alerts';
@@ -115,17 +130,3 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
     });
   });
 });
-
-const loadPageAsReadOnlyUser = (url: string) => {
-  waitForPageWithoutDateRange(url, ROLES.reader);
-  waitForPageTitleToBeShown();
-};
-
-const reloadPage = () => {
-  cy.reload();
-  waitForPageTitleToBeShown();
-};
-
-const waitForPageTitleToBeShown = () => {
-  cy.get('[data-test-subj="header-page-title"]').should('be.visible');
-};
