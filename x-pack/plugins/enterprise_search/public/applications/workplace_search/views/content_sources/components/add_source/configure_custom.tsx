@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CUSTOM_SOURCE_DOCS_URL } from '../../../../routes';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { CONFIG_CUSTOM_BUTTON } from './constants';
 
 interface ConfigureCustomProps {
@@ -35,8 +35,8 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
   advanceStep,
   header,
 }) => {
-  const { setCustomSourceNameValue } = useActions(SourceLogic);
-  const { customSourceNameValue, buttonLoading } = useValues(SourceLogic);
+  const { setCustomSourceNameValue } = useActions(AddSourceLogic);
+  const { customSourceNameValue, buttonLoading } = useValues(AddSourceLogic);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
