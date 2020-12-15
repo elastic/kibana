@@ -31,6 +31,7 @@ import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 const MAX_TRACKS = 250;
 
@@ -356,6 +357,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       )
     );
     return tooltipProperties;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [LICENSED_FEATURES.GEO_LINE_AGG];
   }
 }
 
