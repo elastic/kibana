@@ -132,7 +132,7 @@ Share the dashboard with a larger audience.
 
 * *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, which can be provided by the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details, learn about <<kibana-authentication>>.
 
-* *Permalinks* &mdash; Share a direct link to a {kib} dashboard.
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
 +
 TIP: When you share a link to a dashboard snapshot, select *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
