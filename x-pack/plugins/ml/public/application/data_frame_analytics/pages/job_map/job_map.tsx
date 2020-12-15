@@ -127,6 +127,8 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
 
   const { ref, width, height } = useRefDimensions();
 
+  const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -147,7 +149,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
-                onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
+                onClick={refreshCallback}
                 isLoading={isLoading}
               >
                 <FormattedMessage
@@ -184,9 +186,9 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
           <Controls
             details={nodeDetails}
             getNodeData={fetchAndSetElementsWrapper}
-            analyticsId={analyticsId}
             modelId={modelId}
             updateElements={updateElements}
+            refreshJobsCallback={refreshCallback}
           />
         </Cytoscape>
       </div>
