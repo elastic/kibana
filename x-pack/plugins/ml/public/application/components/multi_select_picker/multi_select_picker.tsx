@@ -21,9 +21,6 @@ export interface Option {
   name?: string | ReactNode;
   value: string;
   checked?: 'on' | 'off';
-  disabled?: boolean;
-  type?: string;
-  onChange?: (items: any[]) => void;
 }
 
 const NoFilterItems = () => {
@@ -45,7 +42,7 @@ const NoFilterItems = () => {
 
 export const MultiSelectPicker: FC<{
   options: Option[];
-  onChange: Function;
+  onChange?: (items: string[]) => void;
   title?: string;
   checkedOptions: string[];
   dataTestSubj: string;

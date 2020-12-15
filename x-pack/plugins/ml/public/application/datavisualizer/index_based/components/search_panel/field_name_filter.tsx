@@ -10,7 +10,7 @@ import type { OverallStats } from '../../../../../../common/types/datavisualizer
 
 interface Props {
   overallStats: OverallStats;
-  setVisibleFieldNames(q: any): void;
+  setVisibleFieldNames(q: string[]): void;
   visibleFieldNames: string[];
   showEmptyFields: boolean;
 }
@@ -21,9 +21,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
   visibleFieldNames,
   showEmptyFields,
 }) => {
-  const [items, setItems] = useState<Option[]>([]);
-
-  useEffect(() => {
+  const items: Option[] = useMemo(() => {
     const options: Option[] = [];
     if (overallStats) {
       Object.keys(overallStats).forEach((key) => {
@@ -40,8 +38,9 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
         }
       });
     }
-    setItems(options);
+    return options;
   }, [overallStats]);
+
   const fieldNameTitle = useMemo(
     () =>
       i18n.translate('xpack.ml.dataVisualizer.indexBased.fieldNameSelect', {

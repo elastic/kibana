@@ -20,7 +20,6 @@ import {
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_card/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
-import { VerticalSpacer } from '../vertical_spacer';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -97,7 +96,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     }
   );
   return (
-    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'}>
+    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
       <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
@@ -108,7 +107,6 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           tableCaption={summaryTableTitle}
         />
       </EuiFlexItem>
-      <VerticalSpacer />
       {stats && (
         <EuiFlexItem>
           <EuiFlexGroup direction={'column'} data-test-subj={'mlTopValues'}>
@@ -131,8 +129,6 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
-      <VerticalSpacer />
-
       {distribution && (
         <EuiFlexItem>
           <EuiFlexGroup direction={'column'} data-test-subj={'mlMetricDistribution'}>

@@ -30,7 +30,7 @@ export const FieldCountPanel: FC<Props> = ({
     <EuiFlexGroup
       alignItems="center"
       gutterSize="xs"
-      style={{ marginLeft: 5 }}
+      style={{ marginLeft: 4 }}
       data-test-subj="mlDataVisualizerFieldCountPanel"
     >
       {fieldsCountStats && (

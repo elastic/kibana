@@ -58,7 +58,7 @@ export const DataVisualizerDataGrid = ({
   updatePageState,
 }: DataVisualizerDataGrid) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
-  const [expandAll, toggleExpandAll] = useState<boolean | undefined>();
+  const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
   const { onTableChange, pagination, sorting } = useTableSettings<FieldVisConfig>(
     items,
@@ -78,7 +78,6 @@ export const DataVisualizerDataGrid = ({
     const index = expandedRowItemIds.indexOf(item.fieldName);
     if (index !== -1) {
       expandedRowItemIds.splice(index, 1);
-      setExpandedRowItemIds([...expandedRowItemIds]);
     } else {
       expandedRowItemIds.push(item.fieldName);
     }

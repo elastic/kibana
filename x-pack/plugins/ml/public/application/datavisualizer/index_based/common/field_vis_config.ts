@@ -24,16 +24,20 @@ export interface MetricFieldVisStats {
   min?: number;
 }
 
+interface DocumentCountBuckets {
+  [key: string]: number;
+}
+
 export interface FieldVisStats {
   cardinality?: number;
   count?: number;
   sampleCount?: number;
   trueCount?: number;
   falseCount?: number;
-  earliest?: any;
-  latest?: any;
+  earliest?: number;
+  latest?: number;
   documentCounts?: {
-    buckets?: any;
+    buckets?: DocumentCountBuckets;
   };
   avg?: number;
   distribution?: {

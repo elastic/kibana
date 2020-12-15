@@ -25,7 +25,7 @@ export const ML_JOB_FIELD_TYPES_OPTIONS = {
 
 export const DatavisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: MlJobFieldType[];
-  setVisibleFieldTypes(q: any): void;
+  setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
   const options: Option[] = useMemo(() => {

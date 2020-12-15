@@ -38,9 +38,9 @@ interface Props {
   setSamplerShardSize(s: number): void;
   overallStats: any;
   indexedFieldTypes: MlJobFieldType[];
-  setVisibleFieldTypes(q: any): void;
+  setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
-  setVisibleFieldNames(q: any): void;
+  setVisibleFieldNames(q: string[]): void;
   visibleFieldNames: string[];
   setSearchParams({
     searchQuery,
