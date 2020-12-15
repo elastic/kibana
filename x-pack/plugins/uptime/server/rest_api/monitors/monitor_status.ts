@@ -12,26 +12,22 @@ import { API_URLS } from '../../../common/constants';
 export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.MONITOR_STATUS,
-
   validate: {
     query: schema.object({
       monitorId: schema.string(),
       dateStart: schema.string(),
       dateEnd: schema.string(),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
-    const result = await libs.requests.getLatestMonitor({
+
+    return await libs.requests.getLatestMonitor({
       uptimeEsClient,
       monitorId,
       dateStart,
       dateEnd,
-    });
-    return response.ok({
-      body: {
-        ...result,
-      },
     });
   },
 });

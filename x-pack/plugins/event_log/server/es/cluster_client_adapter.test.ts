@@ -394,7 +394,7 @@ describe('queryEventsBySavedObject', () => {
           },
         },
         "index": "index-name",
-        "rest_total_hits_as_int": true,
+        "track_total_hits": true,
       }
     `);
   });
@@ -475,7 +475,7 @@ describe('queryEventsBySavedObject', () => {
           },
         },
         "index": "index-name",
-        "rest_total_hits_as_int": true,
+        "track_total_hits": true,
       }
     `);
   });
@@ -589,7 +589,7 @@ describe('queryEventsBySavedObject', () => {
           },
         },
         "index": "index-name",
-        "rest_total_hits_as_int": true,
+        "track_total_hits": true,
       }
     `);
   });
@@ -686,7 +686,7 @@ describe('queryEventsBySavedObject', () => {
           },
         },
         "index": "index-name",
-        "rest_total_hits_as_int": true,
+        "track_total_hits": true,
       }
     `);
   });

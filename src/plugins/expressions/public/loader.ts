@@ -64,6 +64,7 @@ export class ExpressionLoader {
     this.renderHandler = new ExpressionRenderHandler(element, {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
+      hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
