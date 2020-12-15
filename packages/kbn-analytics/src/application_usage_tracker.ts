@@ -35,7 +35,6 @@ export class ApplicationUsageTracker {
 
   private beforeUnloadListener?: EventListener;
   private onVisiblityChangeListener?: EventListener;
-  private onClickListener?: EventListener;
 
   constructor(reporter: Reporter) {
     this.reporter = reporter;
@@ -71,14 +70,10 @@ export class ApplicationUsageTracker {
 
     this.onVisiblityChangeListener = () => {
       if (document.visibilityState === 'visible') {
-        this.resumeTracking();
+        this.resumeTrackingAll();
       } else if (document.visibilityState === 'hidden') {
-        this.pauseTracking();
+        this.pauseTrackingAll();
       }
-    };
-
-    this.onClickListener = () => {
-      this.updateActiveViewsClickCounters();
     };
 
     // Before leaving the page, make sure we store the current usage
@@ -87,9 +82,6 @@ export class ApplicationUsageTracker {
     // Monitoring dashboards might be open in background and we are fine with that
     // but we don't want to report hours if the user goes to another tab and Kibana is not shown
     document.addEventListener('visibilitychange', this.onVisiblityChangeListener);
-
-    // Count any clicks and assign it to the current app
-    window.addEventListener('click', this.onClickListener);
   }
 
   private detachListeners() {
@@ -103,9 +95,6 @@ export class ApplicationUsageTracker {
     if (this.onVisiblityChangeListener) {
       document.removeEventListener('visibilitychange', this.onVisiblityChangeListener);
     }
-    if (this.onClickListener) {
-      window.removeEventListener('click', this.onClickListener);
-    }
   }
 
   private sendMetricsToReporter(metrics: ApplicationUsageMetric[]) {
@@ -114,10 +103,13 @@ export class ApplicationUsageTracker {
     });
   }
 
-  private updateActiveViewsClickCounters() {
-    const keys = Object.keys(this.trackedApplicationViews);
-    for (const key of keys) {
-      this.trackedApplicationViews[key].numberOfClicks++;
+  public updateViewClickCounter(viewId: string) {
+    if (!this.currentAppId) {
+      return;
+    }
+    const appKey = ApplicationUsageTracker.serializeKey({ appId: this.currentAppId, viewId });
+    if (this.trackedApplicationViews[appKey]) {
+      this.trackedApplicationViews[appKey].numberOfClicks++;
     }
   }
 
@@ -150,7 +142,7 @@ export class ApplicationUsageTracker {
     this.trackApplications([appKey]);
   }
 
-  public pauseTracking() {
+  public pauseTrackingAll() {
     this.currentApplicationKeys = Object.values(
       this.trackedApplicationViews
     ).map(({ appId, viewId }) => this.createKey(appId, viewId));
@@ -158,7 +150,7 @@ export class ApplicationUsageTracker {
     this.flushTrackedViews();
   }
 
-  public resumeTracking() {
+  public resumeTrackingAll() {
     this.trackApplications(this.currentApplicationKeys);
     this.currentApplicationKeys = [];
 

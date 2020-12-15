@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { ApplicationUsageTracker } from '@kbn/analytics';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../common/constants';
@@ -31,7 +31,11 @@ export function trackApplicationUsageChange(
   currentAppId$: Observable<string | undefined>,
   applicationUsageTracker: ApplicationUsageTracker
 ) {
-  return currentAppId$
+  const windowClickSubscrition = fromEvent(window, 'click').subscribe(() => {
+    applicationUsageTracker.updateViewClickCounter(MAIN_APP_DEFAULT_VIEW_ID);
+  });
+
+  const appIdSubscription = currentAppId$
     .pipe(
       filter((appId) => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
       distinctUntilChanged()
@@ -40,8 +44,9 @@ export function trackApplicationUsageChange(
       if (!appId) {
         return;
       }
-
       applicationUsageTracker.setCurrentAppId(appId);
       applicationUsageTracker.trackApplicationViewUsage(MAIN_APP_DEFAULT_VIEW_ID);
     });
+
+  return [windowClickSubscrition, appIdSubscription];
 }

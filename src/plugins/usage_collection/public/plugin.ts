@@ -18,7 +18,7 @@
  */
 
 import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
-import { Subject, merge } from 'rxjs';
+import { Subject, merge, Subscription } from 'rxjs';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter, trackApplicationUsageChange } from './services';
 import {
@@ -40,7 +40,7 @@ export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
   applicationUsageTracker: Pick<
     ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView'
+    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
   >;
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
@@ -60,7 +60,7 @@ export interface UsageCollectionStart {
   METRIC_TYPE: typeof METRIC_TYPE;
   applicationUsageTracker: Pick<
     ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView'
+    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
   >;
 }
 
@@ -73,6 +73,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   private readonly legacyAppId$ = new Subject<string>();
   private applicationUsageTracker?: ApplicationUsageTracker;
   private trackUserAgent: boolean = true;
+  private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
   constructor(initializerContext: PluginInitializerContext) {
@@ -99,6 +100,9 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
         flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
           this.applicationUsageTracker
         ),
+        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
+          this.applicationUsageTracker
+        ),
       },
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
@@ -119,7 +123,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
       this.applicationUsageTracker.start();
-      trackApplicationUsageChange(
+      this.subscriptions = trackApplicationUsageChange(
         merge(application.currentAppId$, this.legacyAppId$),
         this.applicationUsageTracker
       );
@@ -137,6 +141,9 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
         flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
           this.applicationUsageTracker
         ),
+        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
+          this.applicationUsageTracker
+        ),
       },
       reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
@@ -146,6 +153,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   public stop() {
     if (this.applicationUsageTracker) {
       this.applicationUsageTracker.stop();
+      this.subscriptions.forEach((subscription) => subscription.unsubscribe());
     }
   }
 }

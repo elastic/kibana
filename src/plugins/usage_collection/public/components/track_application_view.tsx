@@ -18,6 +18,7 @@
  */
 
 import { Component, ReactNode } from 'react';
+import ReactDOM from 'react-dom';
 import { UsageCollectionSetup } from '../plugin';
 
 interface Props {
@@ -27,15 +28,25 @@ interface Props {
 }
 
 export class TrackApplicationView extends Component<Props> {
+  onClick = () => {
+    const { applicationUsageTracker, viewId } = this.props;
+    applicationUsageTracker?.updateViewClickCounter(viewId);
+  };
+
   componentDidMount() {
     const { applicationUsageTracker, viewId } = this.props;
-
-    applicationUsageTracker?.trackApplicationViewUsage(viewId);
+    if (applicationUsageTracker) {
+      applicationUsageTracker.trackApplicationViewUsage(viewId);
+      ReactDOM.findDOMNode(this)?.parentNode?.addEventListener('click', this.onClick);
+    }
   }
+
   componentWillUnmount() {
     const { applicationUsageTracker, viewId } = this.props;
-
-    applicationUsageTracker?.flushTrackedView(viewId);
+    if (applicationUsageTracker) {
+      applicationUsageTracker.flushTrackedView(viewId);
+      ReactDOM.findDOMNode(this)?.parentNode?.removeEventListener('click', this.onClick);
+    }
   }
 
   render() {
