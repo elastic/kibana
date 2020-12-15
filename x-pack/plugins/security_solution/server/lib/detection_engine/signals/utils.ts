@@ -18,10 +18,10 @@ import {
   BulkResponseErrorAggregation,
   isValidUnit,
   SignalHit,
-  BaseSignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
   Signal,
+  WrappedSignalHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -247,7 +247,10 @@ export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] 
   );
 };
 
-export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+export const wrapBuildingBlocks = (
+  buildingBlocks: SignalHit[],
+  index: string
+): WrappedSignalHit[] => {
   const blockIds = generateBuildingBlockIds(buildingBlocks);
   return buildingBlocks.map((block, idx) => {
     return {
@@ -260,7 +263,7 @@ export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): 
   });
 };
 
-export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit => {
   return {
     _id: generateSignalId(signal.signal),
     _index: index,
@@ -589,6 +592,7 @@ export const createSearchAfterReturnType = ({
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
+  createdSignals,
   errors,
 }: {
   success?: boolean | undefined;
@@ -596,6 +600,7 @@ export const createSearchAfterReturnType = ({
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
+  createdSignals?: SignalHit[] | undefined;
   errors?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
@@ -604,6 +609,7 @@ export const createSearchAfterReturnType = ({
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
+    createdSignals: createdSignals ?? [],
     errors: errors ?? [],
   };
 };
@@ -618,6 +624,7 @@ export const mergeReturns = (
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
+      createdSignals: existingCreatedSignals,
       errors: existingErrors,
     } = prev;
 
@@ -627,6 +634,7 @@ export const mergeReturns = (
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
+      createdSignals: newCreatedSignals,
       errors: newErrors,
     } = next;
 
@@ -636,6 +644,7 @@ export const mergeReturns = (
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
     };
   });
