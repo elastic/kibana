@@ -262,6 +262,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
               defaultMessage: 'Events',
             }
           ),
+          'data-test-subj': 'resolver:node-events-in-category:breadcrumbs:node-list-link',
           ...nodesLinkNavProps,
         },
         {

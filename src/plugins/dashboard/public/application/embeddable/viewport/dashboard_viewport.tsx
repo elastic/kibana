@@ -19,15 +19,21 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
+import {
+  PanelState,
+  ViewMode,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
+  EmbeddableFactoryNotFoundError,
+} from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../../../kibana_react/public';
+import { context } from '../../../services/kibana_react';
+import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
+  switchViewMode?: (newViewMode: ViewMode) => void;
   container: DashboardContainer;
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
@@ -37,7 +43,6 @@ interface State {
   description?: string;
   panels: { [key: string]: PanelState };
   isEmbeddedExternally?: boolean;
-  isEmptyState?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -54,7 +59,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     } = this.props.container.getInput();
 
     this.state = {
@@ -63,7 +67,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     };
   }
 
@@ -76,7 +79,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         title,
         description,
         isEmbeddedExternally,
-        isEmptyState,
       } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
@@ -85,7 +87,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           useMargins,
           title,
           isEmbeddedExternally,
-          isEmptyState,
         });
       }
     });
@@ -104,24 +105,32 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
-  private renderEmptyScreen() {
-    const { renderEmpty } = this.props;
-    const { isEmbeddedExternally, isFullScreenMode } = this.state;
-    return (
-      <div className="dshDashboardEmptyScreen">
-        {isFullScreenMode && (
-          <this.context.services.ExitFullScreenButton
-            onExitFullScreenMode={this.onExitFullScreenMode}
-            toggleChrome={!isEmbeddedExternally}
-          />
-        )}
-        {renderEmpty && renderEmpty()}
-      </div>
-    );
-  }
+  private createNewEmbeddable = async () => {
+    const type = 'visualization';
+    const factory = this.context.services.embeddable.getEmbeddableFactory(type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+    const explicitInput = await factory.getExplicitInput();
+    await this.props.container.addNewEmbeddable(type, explicitInput);
+  };
 
-  private renderContainerScreen() {
-    const { container, PanelComponent } = this.props;
+  private addFromLibrary = () => {
+    if (!isErrorEmbeddable(this.props.container)) {
+      openAddPanelFlyout({
+        embeddable: this.props.container,
+        getAllFactories: this.context.services.embeddable.getEmbeddableFactories,
+        getFactory: this.context.services.embeddable.getEmbeddableFactory,
+        notifications: this.context.services.notifications,
+        overlays: this.context.services.overlays,
+        SavedObjectFinder: this.context.services.SavedObjectFinder,
+      });
+    }
+  };
+
+  public render() {
+    const { container } = this.props;
+    const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const {
       isEmbeddedExternally,
       isFullScreenMode,
@@ -131,29 +140,40 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
     } = this.state;
     return (
-      <div
-        data-shared-items-count={Object.values(panels).length}
-        data-shared-items-container
-        data-title={title}
-        data-description={description}
-        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
-      >
-        {isFullScreenMode && (
-          <this.context.services.ExitFullScreenButton
-            onExitFullScreenMode={this.onExitFullScreenMode}
-            toggleChrome={!isEmbeddedExternally}
-          />
-        )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
-      </div>
-    );
-  }
-
-  public render() {
-    return (
       <React.Fragment>
-        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
-        {this.renderContainerScreen()}
+        <div
+          data-shared-items-count={Object.values(panels).length}
+          data-shared-items-container
+          data-title={title}
+          data-description={description}
+          className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
+        >
+          {isFullScreenMode && (
+            <this.context.services.ExitFullScreenButton
+              onExitFullScreenMode={this.onExitFullScreenMode}
+              toggleChrome={!isEmbeddedExternally}
+            />
+          )}
+          {this.props.container.getPanelCount() === 0 && (
+            <div className="dshDashboardEmptyScreen">
+              <DashboardEmptyScreen
+                isReadonlyMode={
+                  this.props.container.getInput().dashboardCapabilities?.hideWriteControls
+                }
+                onLinkClick={
+                  isEditMode
+                    ? this.addFromLibrary
+                    : () => this.props.switchViewMode?.(ViewMode.EDIT)
+                }
+                showLinkToVisualize={isEditMode}
+                onVisualizeClick={this.createNewEmbeddable}
+                uiSettings={this.context.services.uiSettings}
+                http={this.context.services.http}
+              />
+            </div>
+          )}
+          <DashboardGrid container={container} />
+        </div>
       </React.Fragment>
     );
   }

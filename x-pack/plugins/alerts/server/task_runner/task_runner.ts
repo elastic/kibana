@@ -30,6 +30,7 @@ import {
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
+  AlertTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -59,6 +60,7 @@ export class TaskRunner {
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType;
+  private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
     alertType: NormalizedAlertType,
@@ -69,6 +71,7 @@ export class TaskRunner {
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.alertTypeRegistry = context.alertTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -171,7 +174,16 @@ export class TaskRunner {
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
-    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
+    const {
+      throttle,
+      notifyWhen,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
@@ -257,24 +269,39 @@ export class TaskRunner {
         alertLabel,
       });
 
+      const instancesToExecute =
+        notifyWhen === 'onActionGroupChange'
+          ? Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            )
+          : Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+                const throttled = alertInstance.isThrottled(throttle);
+                const muted = mutedInstanceIdsSet.has(alertInstanceName);
+                const shouldExecuteAction = !throttled && !muted;
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                      muted ? 'muted' : 'throttled'
+                    }`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            );
+
       await Promise.all(
-        Object.entries(instancesWithScheduledActions)
-          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
-            const throttled = alertInstance.isThrottled(throttle);
-            const muted = mutedInstanceIdsSet.has(alertInstanceName);
-            const shouldExecuteAction = !throttled && !muted;
-            if (!shouldExecuteAction) {
-              this.logger.debug(
-                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                  muted ? 'muted' : 'throttled'
-                }`
-              );
-            }
-            return shouldExecuteAction;
-          })
-          .map(([id, alertInstance]: [string, AlertInstance]) =>
-            this.executeAlertInstance(id, alertInstance, executionHandler)
-          )
+        instancesToExecute.map(([id, alertInstance]: [string, AlertInstance]) =>
+          this.executeAlertInstance(id, alertInstance, executionHandler)
+        )
       );
     } else {
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
@@ -341,6 +368,11 @@ export class TaskRunner {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
+    try {
+      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+    } catch (err) {
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+    }
     return {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert, event)
