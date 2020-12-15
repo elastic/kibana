@@ -19,7 +19,6 @@ export const DRAG_SELECT_ACTION = {
 export const EXPLORER_ACTION = {
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_JOBS: 'clearJobs',
-  CLEAR_CHARTS: 'clearCharts',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   SET_BOUNDS: 'setBounds',
   SET_CHARTS: 'setCharts',

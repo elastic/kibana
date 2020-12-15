@@ -221,6 +221,9 @@ export class AnomalyTimelineService {
       viewBySwimlaneFieldName,
       swimlaneBucketInterval.asSeconds()
     );
+    // eslint-disable-next-line no-console
+    console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
+
     return viewBySwimlaneData;
   }
 
