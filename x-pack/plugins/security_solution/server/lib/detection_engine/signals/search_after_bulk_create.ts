@@ -59,14 +59,18 @@ export const searchAfterAndBulkCreate = async ({
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
   const timestamps = !isEmpty(timestampsAndIndices)
-    ? Object.keys(timestampsAndIndices)
+    ? Object.keys(timestampsAndIndices).filter((key) => !isEmpty(timestampsAndIndices[key]))
     : timestampsToSort;
 
   if (timestamps == null || timestamps.length === 0) {
     logger.error(
-      buildRuleMessage(`No indices contained timestamp fields: ${JSON.stringify(timestamps)}`)
+      buildRuleMessage(
+        `No indices contained timestamp fields: ${JSON.stringify(timestampsToSort, null, 2)}`
+      )
     );
-    throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestamps)}`);
+    throw Error(
+      `No indices contained timestamp fields: ${JSON.stringify(timestampsToSort, null, 2)}`
+    );
   }
 
   for (const timestamp of timestamps) {
@@ -96,13 +100,15 @@ export const searchAfterAndBulkCreate = async ({
         try {
           logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
+          const indexPatternsToSearch = !isEmpty(timestampsAndIndices)
+            ? timestampsAndIndices[timestamp]
+            : inputIndexPattern;
+
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
-            index: !isEmpty(timestampsAndIndices[timestamp])
-              ? timestampsAndIndices[timestamp]
-              : inputIndexPattern,
+            index: indexPatternsToSearch,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,

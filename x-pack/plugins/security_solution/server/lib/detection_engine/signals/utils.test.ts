@@ -1541,7 +1541,7 @@ describe('utils', () => {
         result: 'partial failure',
         resultMessages: [
           'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"], defaulting to sorting events using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"], defaulting to sorting events in ["auditbeat-7.9.0-2020.11.22-999999"] using @timestamp field',
         ],
         failingIndexes: ['auditbeat-*', 'auditbeat-7.9.0-2020.11.22-999999'],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
@@ -1661,7 +1661,7 @@ describe('utils', () => {
       expect(res).toMatchObject({
         result: 'partial failure',
         resultMessages: [
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["myfakeindex-000001"], defaulting to sorting events using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["myfakeindex-000001"], defaulting to sorting events in ["myfakeindex-000001"] using @timestamp field',
         ],
         failingIndexes: ['myfakeindex-000001'],
         successIndexes: ['myfakeindex-000001', 'auditbeat-7.8.0-2020.10.22-000002'],
@@ -1705,7 +1705,7 @@ describe('utils', () => {
         result: 'partial failure',
         resultMessages: [
           'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-*"], defaulting to sorting events using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-*"], defaulting to sorting events in ["auditbeat-*"] using @timestamp field',
         ],
         failingIndexes: [
           'auditbeat-*',

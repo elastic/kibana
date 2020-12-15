@@ -926,31 +926,32 @@ export const timestampFieldCheck = async (
           )
       );
 
+      const calculatedMissingIndexPatterns =
+        tempFailedIdxs.length > 5 && !isEmpty(indexPatternIndices)
+          ? JSON.stringify([
+              ...new Set(
+                tempFailedIdxs.reduce((failedIndexesAcc, item) => {
+                  const foundIndexPattern = Object.keys(indexPatternRegEx).find((indexPattern) =>
+                    indexPatternRegEx[indexPattern].test(item)
+                  );
+                  if (foundIndexPattern == null) {
+                    return [...failedIndexesAcc];
+                  }
+                  return [...failedIndexesAcc, foundIndexPattern];
+                }, [] as string[])
+              ),
+            ])
+          : JSON.stringify(tempFailedIdxs);
+
       const resultMessages =
         tempFailedIdxs.length > 0
           ? [
               ...acc.resultMessages,
               `The ${
                 timestamp !== '@timestamp' ? 'timestamp override' : ''
-              } field ${timestamp} was not found in any of the following index patterns ${
-                tempFailedIdxs.length > 5 && !isEmpty(indexPatternIndices)
-                  ? JSON.stringify([
-                      ...new Set(
-                        tempFailedIdxs.reduce((failedIndexesAcc, item) => {
-                          const foundIndexPattern = Object.keys(
-                            indexPatternRegEx
-                          ).find((indexPattern) => indexPatternRegEx[indexPattern].test(item));
-                          if (foundIndexPattern == null) {
-                            return [...failedIndexesAcc];
-                          }
-                          return [...failedIndexesAcc, foundIndexPattern];
-                        }, [] as string[])
-                      ),
-                    ])
-                  : JSON.stringify(tempFailedIdxs)
-              }${
+              } field ${timestamp} was not found in any of the following index patterns ${calculatedMissingIndexPatterns}${
                 timestamp !== '@timestamp'
-                  ? ', defaulting to sorting events using @timestamp field'
+                  ? `, defaulting to sorting events in ${calculatedMissingIndexPatterns} using @timestamp field`
                   : ''
               }`,
             ]

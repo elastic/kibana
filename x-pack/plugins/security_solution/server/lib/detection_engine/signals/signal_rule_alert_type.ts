@@ -193,7 +193,9 @@ export const signalRulesAlertType = ({
           // write the partial failure here
           // but continue with the execution, ensuring no further statuses are written.
           await ruleStatusService.partialFailure(
-            `There was a partial failure: ${preCheckResult.resultMessages.join(' | ')}`
+            `There ${preCheckResult.resultMessages.length > 1 ? 'were' : 'was a'} partial failure${
+              preCheckResult.resultMessages.length > 1 ? 's' : ''
+            }: ${preCheckResult.resultMessages.join(' | ')}`
           );
           wroteStatus = true;
         } else {
@@ -528,7 +530,7 @@ export const signalRulesAlertType = ({
             id: alertId,
             timestampsAndIndices: preCheckResult.timestampsAndIndices,
             timestampsToSort,
-            inputIndexPattern,
+            inputIndexPattern: filteredIndexPattern,
             signalsIndex: outputIndex,
             filter: esFilter,
             actions,
