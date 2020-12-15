@@ -124,8 +124,11 @@ export const JobBucketSpan: React.FC<Props> = ({
                   onClick={() => {
                     setLoading(true);
                   }}
+                  data-test-subj={'uptimeAnomalyJobEstimateBS'}
                 >
-                  Estimate bucket span
+                  {i18n.translate('xpack.uptime.ml.job.bucketSpan.estimate', {
+                    defaultMessage: 'Estimate bucket span',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

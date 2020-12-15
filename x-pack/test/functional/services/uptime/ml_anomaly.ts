@@ -75,5 +75,9 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('anomalySeveritySelect');
       await testSubjects.click(`alertAnomaly${level}`);
     },
+
+    async toggleUseFullData() {
+      await testSubjects.click('uptimeAnomalyJobSwitchFullData');
+    },
   };
 }

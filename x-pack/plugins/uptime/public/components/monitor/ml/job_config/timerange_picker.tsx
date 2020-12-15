@@ -17,6 +17,7 @@ import moment, { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import * as rt from 'io-ts';
 import { TimeRange } from './job_config';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const timeRangeValidationErrorRT = rt.strict({
   error: rt.literal('INVALID_TIME_RANGE'),
@@ -60,6 +61,8 @@ export const TimerangePicker: React.FunctionComponent<{
   timeRange: { start: startTime, end: endTime },
   validationErrors = [],
 }) => {
+  const dateFormat = useUiSetting<string>('dateFormat');
+
   const [now] = useState(() => moment());
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
 
@@ -122,7 +125,8 @@ export const TimerangePicker: React.FunctionComponent<{
                   defaultMessage: 'Start date',
                 }
               )}
-              // dateFormat={dateFormat}
+              data-test-subj={'uptimeAnomalyJobStartTime'}
+              dateFormat={dateFormat}
             />
           </EuiFormControlLayout>
         </EuiFlexGroup>
@@ -150,6 +154,8 @@ export const TimerangePicker: React.FunctionComponent<{
               minDate={startTimeValue}
               minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
               maxTime={moment().hour(23).minutes(59)}
+              data-test-subj={'uptimeAnomalyJobEndTime'}
+              dateFormat={dateFormat}
             />
           </EuiFormControlLayout>
         </EuiFlexGroup>

@@ -52,10 +52,12 @@ export const JobConfig = ({ bucketSpan, timeRange, setTimeRange, setBucketSpan }
       children: (
         <>
           <EuiSwitch
+            data-test-subj={'uptimeAnomalyJobSwitchFullData'}
             label={
               <FormattedMessage
                 id="xpack.uptime.ml.enableAnomalyDetectionPanel.useFullData.label"
-                defaultMessage="Use full heartbeat-* data"
+                defaultMessage="Use full {index} data"
+                values={{ index: dss?.settings?.heartbeatIndices }}
               />
             }
             checked={useFullData}

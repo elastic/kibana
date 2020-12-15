@@ -38,6 +38,10 @@ export default ({ getService }: FtrProviderContext) => {
       expect(uptime.ml.hasNoLicenseInfo()).to.eql(false);
     });
 
+    it('can toggle between using full heartbeat data', async () => {
+      await uptime.ml.toggleUseFullData();
+    });
+
     it('can create job successfully', async () => {
       await uptime.ml.createMLJob();
     });

@@ -49,7 +49,7 @@ exports[`ML Flyout component renders without errors 1`] = `
       setTimeRange={[Function]}
       timeRange={
         Object {
-          "start": 1606406439504,
+          "start": 1606822703582,
         }
       }
     />
@@ -223,6 +223,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                   </span>
                   <span
                     aria-hidden="true"
+                    class="euiStepNumber__number"
                   >
                     1
                   </span>
@@ -271,7 +272,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                     class="euiSwitch__label"
                     id="generated-id"
                   >
-                    Use full heartbeat-* data
+                    Use full  data
                   </span>
                 </div>
                 <div
@@ -597,6 +598,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                   </span>
                   <span
                     aria-hidden="true"
+                    class="euiStepNumber__number"
                   >
                     2
                   </span>
