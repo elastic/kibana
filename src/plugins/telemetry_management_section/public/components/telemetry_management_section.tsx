@@ -48,7 +48,7 @@ interface Props {
   isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: any;
+  query?: { text: string };
   toasts: ToastsStart;
 }
 
@@ -56,7 +56,7 @@ interface State {
   processing: boolean;
   showExample: boolean;
   showSecurityExample: boolean;
-  queryMatches: boolean;
+  queryMatches: boolean | null;
   enabled: boolean;
 }
 
@@ -68,7 +68,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
       processing: false,
       showExample: false,
       showSecurityExample: false,
-      queryMatches: this.checkQueryMatch(props.query),
+      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
       enabled: this.props.telemetryService.getIsOptedIn() || false,
     };
   }
@@ -89,8 +89,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
     }
   }
 
-  checkQueryMatch(query: any): boolean {
-    const searchTerm = (query.text || '').toLowerCase();
+  checkQueryMatch(query?: { text: string }): boolean {
+    const searchTerm = (query?.text ?? '').toLowerCase();
     return (
       this.props.telemetryService.getCanChangeOptInStatus() &&
       SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
@@ -102,7 +102,11 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
     const securityExampleEnabled = isSecurityExampleEnabled();
 
-    if (!telemetryService.getCanChangeOptInStatus() || !queryMatches) {
+    if (!telemetryService.getCanChangeOptInStatus()) {
+      return null;
+    }
+
+    if (queryMatches !== null && !queryMatches) {
       return null;
     }
 

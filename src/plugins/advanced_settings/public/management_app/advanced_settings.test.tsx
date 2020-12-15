@@ -28,9 +28,10 @@ import {
   UiSettingsType,
 } from '../../../../core/public';
 import { FieldSetting } from './types';
-import { AdvancedSettingsComponent } from './advanced_settings';
+import { AdvancedSettings } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
+import { RouteChildrenProps } from 'react-router-dom';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -233,14 +234,28 @@ function mockConfig() {
 }
 
 describe('AdvancedSettings', () => {
-  const setUrlQuery = jest.fn();
+  const query = 'test:string:setting';
+  const getMockRouteParams = (): RouteChildrenProps<{ query: string }> =>
+    ({
+      match: {
+        params: {
+          query,
+        },
+      },
+      location: {
+        search: `?query=${query}`,
+      },
+      history: {
+        push: jest.fn(),
+        listen: jest.fn(),
+      },
+    } as any);
 
   it('should render specific setting if given setting key', async () => {
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        {...getMockRouteParams()}
         enableSaving={true}
-        setUrlQuery={setUrlQuery}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
@@ -252,18 +267,16 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === query
         )
     ).toHaveLength(1);
   });
 
   it('should render read-only when saving is disabled', async () => {
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        {...getMockRouteParams()}
         enableSaving={false}
-        setUrlQuery={setUrlQuery}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
@@ -275,8 +288,7 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === query
         )
         .prop('enableSaving')
     ).toBe(false);
