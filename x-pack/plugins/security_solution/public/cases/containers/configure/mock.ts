@@ -10,9 +10,9 @@ import {
   CasesConfigureRequest,
   ConnectorTypes,
 } from '../../../../../case/common/api';
-import { CaseConfigure, CasesConfigurationMapping } from './types';
+import { CaseConfigure, CaseConnectorMapping } from './types';
 
-export const mapping: CasesConfigurationMapping[] = [
+export const mappings: CaseConnectorMapping[] = [
   {
     source: 'title',
     target: 'short_description',
@@ -21,7 +21,7 @@ export const mapping: CasesConfigurationMapping[] = [
   {
     source: 'description',
     target: 'description',
-    actionType: 'append',
+    actionType: 'overwrite',
   },
   {
     source: 'comments',
@@ -36,10 +36,6 @@ export const connectorsMock: ActionConnector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      incidentConfiguration: {
-        mapping,
-      },
-      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
@@ -50,25 +46,6 @@ export const connectorsMock: ActionConnector[] = [
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'name',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },
@@ -78,25 +55,6 @@ export const connectorsMock: ActionConnector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'summary',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },
@@ -112,6 +70,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
+  mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
@@ -137,6 +96,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
+  mappings: [],
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
