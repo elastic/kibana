@@ -29,6 +29,7 @@ import {
 import {
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionFindOptions,
+  BackgroundSessionSearchInfo,
   BackgroundSessionStatus,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
@@ -48,7 +49,7 @@ export interface BackgroundSessionDependencies {
 export interface SessionInfo {
   insertTime: Moment;
   retryCount: number;
-  ids: Map<string, string>;
+  ids: Map<string, BackgroundSessionSearchInfo>;
 }
 
 export class BackgroundSessionService implements ISessionService {
@@ -296,25 +297,31 @@ export class BackgroundSessionService implements ISessionService {
   public trackId = async (
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, isStored }: ISearchOptions,
+    { sessionId, isStored, strategy }: ISearchOptions,
     deps: BackgroundSessionDependencies
   ) => {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
     const requestHash = createRequestHash(searchRequest.params);
+    const searchInfo = {
+      id: searchId,
+      strategy: strategy!,
+    };
 
     // If there is already a saved object for this session, update it to include this request/ID.
     // Otherwise, just update the in-memory mapping for this session for when the session is saved.
     if (isStored) {
-      const attributes = { idMapping: { [requestHash]: searchId } };
+      const attributes = {
+        idMapping: { [requestHash]: searchInfo },
+      };
       await this.update(sessionId, attributes, deps);
     } else {
       const map = this.sessionSearchMap.get(sessionId) ?? {
         insertTime: moment(),
         retryCount: 0,
-        ids: new Map<string, string>(),
+        ids: new Map<string, BackgroundSessionSearchInfo>(),
       };
-      map.ids.set(requestHash, searchId);
+      map.ids.set(requestHash, searchInfo);
       this.sessionSearchMap.set(sessionId, map);
     }
   };
@@ -343,7 +350,7 @@ export class BackgroundSessionService implements ISessionService {
       throw new Error('No search ID in this session matching the given search request');
     }
 
-    return session.attributes.idMapping[requestHash];
+    return session.attributes.idMapping[requestHash].id;
   };
 
   public asScopedProvider = ({ savedObjects }: CoreStart) => {
