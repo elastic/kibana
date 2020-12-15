@@ -62,3 +62,5 @@ export * from './functional_test_runner';
 export { getUrl } from './jest/utils/get_url';
 
 export { runCheckJestConfigsCli } from './jest/run_check_jest_configs_cli';
+
+export { runJest } from './jest/run';

@@ -8,8 +8,9 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { TestProviders } from '../../../common/mock';
 
+import { CasePostRequest } from '../../../../../case/common/api';
+import { TestProviders } from '../../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -41,7 +42,7 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const postCase = jest.fn();
 
 const sampleTags = ['coke', 'pepsi'];
-const sampleData = {
+const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
@@ -50,6 +51,9 @@ const sampleData = {
     id: 'none',
     name: 'none',
     type: ConnectorTypes.none,
+  },
+  settings: {
+    syncAlerts: true,
   },
 };
 
