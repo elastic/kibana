@@ -41,7 +41,7 @@ export function getAppInfo(app: App): PublicAppInfo {
     appRoute: app.appRoute!,
     searchDeepLinks: getSearchDeepLinkInfos(app, app.searchDeepLinks),
     meta: {
-      keywords: app.meta?.keywords || [],
+      keywords: app.meta?.keywords ?? [],
     },
   };
 }
@@ -62,7 +62,7 @@ function getSearchDeepLinkInfos(
         path: rawDeepLink.path,
         searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
         meta: {
-          keywords: rawDeepLink.meta?.keywords || [],
+          keywords: rawDeepLink.meta?.keywords ?? [],
         },
       };
     }

@@ -282,7 +282,7 @@ export interface App<HistoryLocationState = unknown> {
    *   id: 'my_app',
    *   title: 'Translated title',
    *   meta: {
-   *     keywords: ['tracing', 'distributed tracing']
+   *     keywords: ['translated keyword1', 'translated keyword2']
    *   },
    *   mount: () => { ... }
    * })
@@ -296,6 +296,7 @@ export interface App<HistoryLocationState = unknown> {
  *
  * Meta fields include at least `keywords`, an array of strings with which to associate the app.
  * Keywords must include at least one unique string as an array.
+ *
  * @public
  */
 export interface AppMeta {

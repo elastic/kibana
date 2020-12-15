@@ -18,6 +18,9 @@ export interface AppLink {
   subLinkKeywords: string[];
 }
 
+/** weighting factor for scoring keywords */
+export const keywordScoreWeighting = 0.8;
+
 export const getAppResults = (
   term: string,
   apps: PublicAppInfo[]
@@ -56,7 +59,7 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   const appSubLinkKeywords = appLink.subLinkKeywords.map((keyword) => keyword.toLowerCase());
   const keywords = [...appKeywords, ...appSubLinkKeywords];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
-  return Math.max(appScoreByTerms, appScoreByKeywords);
+  return Math.max(appScoreByTerms, appScoreByKeywords * keywordScoreWeighting);
 };
 
 const scoreAppByTerms = (term: string, title: string): number => {
