@@ -105,6 +105,7 @@ async function update(success: boolean) {
         tags: ['bar'],
         params: { bar: true },
         throttle: '10s',
+        notifyWhen: null,
         actions: [],
       },
     });
@@ -332,6 +333,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
@@ -342,6 +344,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',

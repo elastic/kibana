@@ -112,9 +112,6 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   min-width: 0;
   padding-left: ${({ isEventViewer }) =>
     !isEventViewer ? '4px;' : '0;'}; // match timeline event border
-  button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -243,7 +240,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
     padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
@@ -390,3 +387,11 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
 export const EventsLoading = styled(EuiLoadingSpinner)`
   vertical-align: middle;
 `;
+
+export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
+  ({ $isVisible = false }) => ({
+    style: {
+      display: $isVisible ? 'block' : 'none',
+    },
+  })
+)<{ $isVisible: boolean }>``;

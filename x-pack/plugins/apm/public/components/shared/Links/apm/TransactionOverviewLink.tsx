@@ -15,6 +15,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'containerId',
   'podName',
   'serviceVersion',
+  'latencyAggregationType',
 ];
 
 export function useTransactionOverviewHref(serviceName: string) {
@@ -30,7 +31,7 @@ export function TransactionOverviewLink({ serviceName, ...rest }: Props) {
 
   return (
     <APMLink
-      path={`/services/${serviceName}/transactions`}
+      path={`/services/${serviceName}`}
       query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
       {...rest}
     />
