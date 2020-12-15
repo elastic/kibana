@@ -90,6 +90,7 @@ export function CoreVitals({
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
             helpLabel={LCP_HELP_LABEL}
+            hasVitals={Boolean(coreVitalPages)} // can coreVitalPages ever been negative? Should I use coreVitalPages > 0 instead?
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
@@ -100,6 +101,7 @@ export function CoreVitals({
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
             helpLabel={FID_HELP_LABEL}
+            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
@@ -111,6 +113,7 @@ export function CoreVitals({
             thresholds={CoreVitalsThresholds.CLS}
             isCls={true}
             helpLabel={CLS_HELP_LABEL}
+            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
