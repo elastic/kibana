@@ -232,8 +232,13 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
-            "reindexAlias": ".my-so-index_7.11.0_reindex",
-            "reindexTargetMappings": Object {
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetIndexMappings": Object {
+              "properties": Object {},
+            },
+            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+            "tempIndexMappings": Object {
               "dynamic": false,
               "properties": Object {
                 "migrationVersion": Object {
@@ -244,11 +249,6 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
-            },
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetMappings": Object {
-              "properties": Object {},
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -291,8 +291,13 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
-            "reindexAlias": ".my-so-index_7.11.0_reindex",
-            "reindexTargetMappings": Object {
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetIndexMappings": Object {
+              "properties": Object {},
+            },
+            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+            "tempIndexMappings": Object {
               "dynamic": false,
               "properties": Object {
                 "migrationVersion": Object {
@@ -303,11 +308,6 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
-            },
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetMappings": Object {
-              "properties": Object {},
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -430,8 +430,13 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
-            "reindexAlias": ".my-so-index_7.11.0_reindex",
-            "reindexTargetMappings": Object {
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetIndexMappings": Object {
+              "properties": Object {},
+            },
+            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+            "tempIndexMappings": Object {
               "dynamic": false,
               "properties": Object {
                 "migrationVersion": Object {
@@ -442,11 +447,6 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
-            },
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetMappings": Object {
-              "properties": Object {},
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -484,8 +484,13 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
-            "reindexAlias": ".my-so-index_7.11.0_reindex",
-            "reindexTargetMappings": Object {
+            "retryCount": 0,
+            "retryDelay": 0,
+            "targetIndexMappings": Object {
+              "properties": Object {},
+            },
+            "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+            "tempIndexMappings": Object {
               "dynamic": false,
               "properties": Object {
                 "migrationVersion": Object {
@@ -496,11 +501,6 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
-            },
-            "retryCount": 0,
-            "retryDelay": 0,
-            "targetMappings": Object {
-              "properties": Object {},
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",

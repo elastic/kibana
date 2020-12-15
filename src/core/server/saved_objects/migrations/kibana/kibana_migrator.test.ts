@@ -180,7 +180,9 @@ describe('KibanaMigrator', () => {
             // LEGACY_CREATE_REINDEX_TARGET
             expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
             // CREATE_REINDEX_TEMP
-            expect.arrayContaining([expect.objectContaining({ index: '.my-index_8.2.3_001' })]),
+            expect.arrayContaining([
+              expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
+            ]),
             // CREATE_NEW_TARGET
             expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
           ])
@@ -199,7 +201,7 @@ describe('KibanaMigrator', () => {
           expect.objectContaining({
             body: expect.objectContaining({
               source: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
-              dest: expect.objectContaining({ index: '.my-index_8.2.3_001' }),
+              dest: expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
             }),
           })
         );
@@ -262,9 +264,10 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
 
-        await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
-          `[Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster and try again.]`
-        );
+        await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
+                [Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster and try again. Error: Reindex failed with the following error:
+                {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+              `);
         expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
           [Error: Reindex failed with the following error:
           {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]

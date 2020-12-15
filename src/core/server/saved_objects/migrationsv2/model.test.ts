@@ -76,7 +76,7 @@ describe('migrations v2 model', () => {
     currentAlias: '.kibana',
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
-    tempIndex: '.kibana_7.11.0_reindex',
+    tempIndex: '.kibana_7.11.0_reindex_temp',
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -684,6 +684,25 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is left target_index_had_write_block', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+          type: 'target_index_had_write_block',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> SET_TEMP_WRITE_BLOCK when response is left index_not_found_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+          type: 'index_not_found_exception',
+          index: '.kibana_7.11.0_reindex_temp',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
     });
     describe('SET_TEMP_WRITE_BLOCK', () => {
       const state: SetTempWriteBlock = {
@@ -1013,7 +1032,7 @@ describe('migrations v2 model', () => {
               },
             },
           },
-          "tempIndex": ".kibana_task_manager_8.1.0_temp",
+          "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
           "tempIndexMappings": Object {
             "dynamic": false,
             "properties": Object {

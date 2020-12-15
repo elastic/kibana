@@ -486,10 +486,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       const left = res.left;
-      if (left.type === 'index_not_found_exception' && left.index === stateP.tempIndex) {
+      if (
+        left.type === 'target_index_had_write_block' ||
+        (left.type === 'index_not_found_exception' && left.index === stateP.tempIndex)
+      ) {
         // index_not_found_exception:
         //   another instance completed the MARK_VERSION_INDEX_READY and
         //   removed the temp index.
+        // target_index_had_write_block
+        //   another instance completed the SET_TEMP_WRITE_BLOCK step adding a
+        //   write block to the temp index.
         //
         // For simplicity we continue linearly through the next steps even if
         // we know another instance already completed these.
@@ -498,8 +504,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'SET_TEMP_WRITE_BLOCK',
         };
       } else {
-        // Don't handle target_index_had_write_block and
-        // incompatible_mapping_exception as we will never add a write
+        // Don't handle incompatible_mapping_exception as we will never add a write
         // block to the temp index or change the mappings.
         throwBadResponse(stateP, left as never);
       }
@@ -743,7 +748,7 @@ export const createInitialState = ({
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_temp`,
+    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings: targetMappings,
