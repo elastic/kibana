@@ -54,19 +54,21 @@ export const TrustedAppItemsSummary = memo(() => {
   }, [trustedAppsApi]);
 
   return (
-    <div>
+    <EuiFlexGroup responsive={false}>
       {SUMMARY_KEYS.map((stat) => {
         return (
-          <SummaryStat
-            value={stats?.[stat] ?? 0}
-            color={stat === 'total' ? 'primary' : 'default'}
-            key={stat}
-          >
-            {SUMMARY_LABELS[stat]}
-          </SummaryStat>
+          <EuiFlexItem>
+            <SummaryStat
+              value={stats?.[stat] ?? 0}
+              color={stat === 'total' ? 'primary' : 'default'}
+              key={stat}
+            >
+              {SUMMARY_LABELS[stat]}
+            </SummaryStat>
+          </EuiFlexItem>
         );
       })}
-    </div>
+    </EuiFlexGroup>
   );
 });
 
