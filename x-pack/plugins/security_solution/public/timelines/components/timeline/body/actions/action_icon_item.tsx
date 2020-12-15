@@ -12,7 +12,6 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 interface ActionIconItemProps {
   ariaLabel?: string;
-  id: string;
   width?: number;
   dataTestSubj?: string;
   content?: string;
@@ -23,7 +22,6 @@ interface ActionIconItemProps {
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
-  id,
   width = DEFAULT_ICON_BUTTON_WIDTH,
   dataTestSubj,
   content,
@@ -33,7 +31,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   onClick,
   children,
 }) => (
-  <EventsTd key={id}>
+  <EventsTd>
     <EventsTdContent textAlign="center" width={width}>
       {children ?? (
         <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>

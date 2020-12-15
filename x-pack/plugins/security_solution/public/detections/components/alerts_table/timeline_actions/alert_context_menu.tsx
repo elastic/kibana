@@ -19,8 +19,7 @@ import { getOr } from 'lodash/fp';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -323,12 +322,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('detection');
   }, [closePopover]);
 
-  const areExceptionsAllowed = useMemo((): boolean => {
-    const ruleTypes = getOr([], 'signal.rule.type', ecsRowData);
-    const [ruleType] = ruleTypes as Type[];
-    return !isThresholdRule(ruleType);
-  }, [ecsRowData]);
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
@@ -337,7 +330,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="add-exception-menu-item"
       id="addException"
       onClick={handleAddExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
+      disabled={!canUserCRUD || !hasIndexWrite}
     >
       <EuiText data-test-subj="addExceptionButton" size="m">
         {i18n.ACTION_ADD_EXCEPTION}

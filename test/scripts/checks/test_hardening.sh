@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:test_hardening
+checks-reporter-with-killswitch "Test Hardening" \
+  node scripts/test_hardening

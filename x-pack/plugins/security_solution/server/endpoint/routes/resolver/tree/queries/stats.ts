@@ -8,7 +8,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, Timerange } from '../utils/index';
+import { NodeID, TimeRange } from '../utils/index';
 
 interface AggBucket {
   key: string;
@@ -28,7 +28,7 @@ interface CategoriesAgg extends AggBucket {
 interface StatsParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
-  timerange: Timerange;
+  timeRange: TimeRange;
 }
 
 /**
@@ -37,11 +37,11 @@ interface StatsParams {
 export class StatsQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
-  private readonly timerange: Timerange;
-  constructor({ schema, indexPatterns, timerange }: StatsParams) {
+  private readonly timeRange: TimeRange;
+  constructor({ schema, indexPatterns, timeRange }: StatsParams) {
     this.schema = schema;
     this.indexPatterns = indexPatterns;
-    this.timerange = timerange;
+    this.timeRange = timeRange;
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -53,8 +53,8 @@ export class StatsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.from,
-                  lte: this.timerange.to,
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
                   format: 'strict_date_optional_time',
                 },
               },

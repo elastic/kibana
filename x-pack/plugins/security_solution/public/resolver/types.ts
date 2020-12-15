@@ -12,12 +12,15 @@ import { BBox } from 'rbush';
 import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
+  ResolverNode,
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverPaginatedEvents,
+  NewResolverTree,
+  ResolverSchema,
 } from '../../common/endpoint/types';
+import { Tree } from '../../common/endpoint/generate_data';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -152,7 +155,7 @@ export type CameraState = {
 /**
  * Wrappers around our internal types that make them compatible with `rbush`.
  */
-export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedTreeNode;
 
 /**
  * The entity stored in `rbush` for resolver edge lines.
@@ -165,9 +168,9 @@ export interface IndexedEdgeLineSegment extends BBox {
 /**
  * The entity store in `rbush` for resolver process nodes.
  */
-export interface IndexedProcessNode extends BBox {
-  type: 'processNode';
-  entity: SafeResolverEvent;
+export interface IndexedTreeNode extends BBox {
+  type: 'treeNode';
+  entity: ResolverNode;
   position: Vector2;
 }
 
@@ -191,7 +194,7 @@ export interface CrumbInfo {
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
-  processNodePositions: ProcessPositions;
+  processNodePositions: NodePositions;
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
@@ -238,6 +241,57 @@ export interface NodeEventsInCategoryState {
    * Flag for showing an error message when fetching additional related events.
    */
   error?: boolean;
+}
+
+/**
+ * Return structure for the mock DAL returned by this file.
+ */
+export interface GeneratedTreeMetadata {
+  /**
+   * The `_id` of the document being analyzed.
+   */
+  databaseDocumentID: string;
+  /**
+   * This field holds the nodes created by the resolver generator that make up a resolver graph.
+   */
+  generatedTree: Tree;
+  /**
+   * The nodes in this tree are equivalent to those in the generatedTree field. This nodes
+   * are just structured in a way that they match the NewResolverTree type. This helps with the
+   * Data Access Layer that is expecting to return a NewResolverTree type.
+   */
+  formattedTree: NewResolverTree;
+}
+
+/**
+ * The state of the process cubes in the graph.
+ *
+ * 'running' if the process represented by the node is still running.
+ * 'loading' if we don't have the data yet to determine if the node is running or terminated.
+ * 'terminated' if the process represented by the node is terminated.
+ * 'error' if we were unable to retrieve data associated with the node.
+ */
+export type NodeDataStatus = 'running' | 'loading' | 'terminated' | 'error';
+
+/**
+ * Defines the data structure used by the node data middleware. The middleware creates a map of node IDs to this
+ * structure before dispatching the action to the reducer.
+ */
+export interface FetchedNodeData {
+  events: SafeResolverEvent[];
+  terminated: boolean;
+}
+
+/**
+ * NodeData contains information about a node in the resolver graph. For Endpoint
+ * graphs, the events will be process lifecycle events.
+ */
+export interface NodeData {
+  events: SafeResolverEvent[];
+  /**
+   * An indication of the current state for retrieving the data.
+   */
+  status: NodeDataStatus;
 }
 
 /**
@@ -290,9 +344,17 @@ export interface DataState {
            */
           readonly successful: true;
           /**
-           * The ResolverTree parsed from the response.
+           * The NewResolverTree parsed from the response.
            */
-          readonly result: ResolverTree;
+          readonly result: NewResolverTree;
+          /**
+           * The current data source (i.e. endpoint, winlogbeat, etc...)
+           */
+          readonly dataSource: string;
+          /**
+           * The Resolver Schema for the current data source
+           */
+          readonly schema: ResolverSchema;
         }
       | {
           /**
@@ -313,6 +375,14 @@ export interface DataState {
    * The `search` part of the URL.
    */
   readonly locationSearch?: string;
+
+  /**
+   * The additional data for each node in the graph. For an Endpoint graph the data will be
+   * process lifecycle events.
+   *
+   * If a node ID exists in the map it means that node came into view in the graph.
+   */
+  readonly nodeData?: Map<string, NodeData>;
 }
 
 /**
@@ -384,21 +454,46 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
+  idToChildren: Map<string | undefined, ResolverNode[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, SafeResolverEvent>;
+  idToNode: Map<string, ResolverNode>;
+  /**
+   * The id of the origin or root node provided by the backend
+   */
+  originID: string | undefined;
+  /**
+   * The number of generations from the origin in the tree. If the origin has no descendants, then this value will be
+   * zero. The origin of the graph is the analyzed event, not necessarily the root node of the tree.
+   *
+   * If the originID is not defined then the generations will be undefined.
+   */
+  generations: number | undefined;
+  /**
+   * The number of descendants from the origin of the graph. The origin of the graph is the analyzed event, not
+   * necessarily the root node of the tree.
+   *
+   * If the originID is not defined then the descendants will be undefined.
+   */
+  descendants: number | undefined;
+  /**
+   * The number of ancestors from the origin of the graph. The amount includes the origin. The origin of the graph is
+   * analyzed event.
+   *
+   * If the originID is not defined the ancestors will be undefined.
+   */
+  ancestors: number | undefined;
 }
 
 /**
- * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `calculateSubgraphWidths`
  */
-export type ProcessWidths = Map<SafeResolverEvent, number>;
+export type ProcessWidths = Map<ResolverNode, number>;
 /**
- * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
+ * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `calculateNodePositions`
  */
-export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
+export type NodePositions = Map<ResolverNode, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -449,14 +544,14 @@ export interface EdgeLineSegment {
 }
 
 /**
- * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ * Used to provide pre-calculated info from `calculateSubgraphWidths`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: SafeResolverEvent;
+  node: ResolverNode;
   width: number;
 } & (
   | {
-      parent: SafeResolverEvent;
+      parent: ResolverNode;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -555,6 +650,8 @@ export type ResolverProcessType =
   | 'processTerminated'
   | 'unknownProcessEvent'
   | 'processCausedAlert'
+  | 'processLoading'
+  | 'processError'
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
@@ -566,7 +663,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  processNodePositions: Map<SafeResolverEvent, Vector2>;
+  processNodePositions: Map<ResolverNode, Vector2>;
 
   /**
    * A map of edge-line segments, which graphically connect nodes.
@@ -576,7 +673,15 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  ariaLevels: Map<SafeResolverEvent, number>;
+  ariaLevels: Map<ResolverNode, number>;
+}
+
+/**
+ * Defines the type for bounding a search by a time box.
+ */
+export interface TimeRange {
+  from: Date;
+  to: Date;
 }
 
 /**
@@ -589,27 +694,89 @@ export interface DataAccessLayer {
   /**
    * Fetch related events for an entity ID
    */
-  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+  relatedEvents: ({
+    entityID,
+    timeRange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    timeRange: TimeRange;
+    indexPatterns: string[];
+  }) => Promise<ResolverRelatedEvents>;
 
   /**
    * Return events that have `process.entity_id` that includes `entityID` and that have
    * a `event.category` that includes `category`.
    */
-  eventsWithEntityIDAndCategory: (
-    entityID: string,
-    category: string,
-    after?: string
-  ) => Promise<ResolverPaginatedEvents>;
+  eventsWithEntityIDAndCategory: ({
+    entityID,
+    category,
+    after,
+    timeRange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    category: string;
+    after?: string;
+    timeRange: TimeRange;
+    indexPatterns: string[];
+  }) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * Retrieves the node data for a set of node IDs. This is specifically for Endpoint graphs. It
+   * only returns process lifecycle events.
+   */
+  nodeData({
+    ids,
+    timeRange,
+    indexPatterns,
+    limit,
+  }: {
+    ids: string[];
+    timeRange: TimeRange;
+    indexPatterns: string[];
+    limit: number;
+  }): Promise<SafeResolverEvent[]>;
 
   /**
    * Return up to one event that has an `event.id` that includes `eventID`.
    */
-  event: (eventID: string) => Promise<SafeResolverEvent | null>;
+  event: ({
+    nodeID,
+    eventCategory,
+    eventTimestamp,
+    eventID,
+    timeRange,
+    indexPatterns,
+    winlogRecordID,
+  }: {
+    nodeID: string;
+    eventCategory: string[];
+    eventTimestamp: string;
+    eventID?: string | number;
+    winlogRecordID: string;
+    timeRange: TimeRange;
+    indexPatterns: string[];
+  }) => Promise<SafeResolverEvent | null>;
 
   /**
-   * Fetch a ResolverTree for a entityID
+   * Fetch a resolver graph for a given id.
    */
-  resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
+  resolverTree({
+    dataId,
+    schema,
+    timeRange,
+    indices,
+    ancestors,
+    descendants,
+  }: {
+    dataId: string;
+    schema: ResolverSchema;
+    timeRange: TimeRange;
+    indices: string[];
+    ancestors: number;
+    descendants: number;
+  }): Promise<ResolverNode[]>;
 
   /**
    * Get entities matching a document.
@@ -797,6 +964,18 @@ export type PanelViewAndParameters =
         /**
          * `event.id` that uniquely identifies the event to show.
          */
-        eventID: string;
+        eventID?: string | number;
+
+        /**
+         * `event['@timestamp']` that identifies the given timestamp for an event
+         */
+        eventTimestamp: string;
+
+        /**
+         * `winlog.record_id` an ID that unique identifies a winlogbeat sysmon event. This is not a globally unique field
+         * and must be coupled with nodeID, category, and timestamp. Once we have runtime fields support we should remove
+         * this.
+         */
+        winlogRecordID: string;
       };
     };

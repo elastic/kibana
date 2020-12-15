@@ -251,12 +251,13 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const comboBox = useMemo(
     () => (
       <EuiComboBox
-        placeholder={i18n.PICK_INDEX_PATTERNS}
+        data-test-subj="timeline-sourcerer"
         fullWidth
-        options={indexesPatternOptions}
-        selectedOptions={selectedOptions}
         onChange={onChangeCombo}
+        options={indexesPatternOptions}
+        placeholder={i18n.PICK_INDEX_PATTERNS}
         renderOption={renderOption}
+        selectedOptions={selectedOptions}
       />
     ),
     [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
@@ -269,6 +270,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const filter = useMemo(
     () => (
       <Filter
+        data-test-subj="timeline-sourcerer-radio"
         options={filterOptions}
         idSelected={filterEventType}
         onChange={onChangeFilter}
@@ -282,6 +284,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     const options = getEventTypeOptions();
     return (
       <MyEuiButton
+        data-test-subj="sourcerer-timeline-trigger"
         iconType="arrowDown"
         iconSide="right"
         isLoading={sourcererScope.loading}
@@ -299,7 +302,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const ButtonContent = useMemo(
     () => (
-      <AdvancedSettings>
+      <AdvancedSettings data-test-subj="advanced-settings">
         {showAdvanceSettings
           ? i18n.HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS
           : i18n.SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS}
@@ -330,11 +333,11 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     <PickEventContainer>
       <EuiToolTip position="top" content={tooltipContent}>
         <EuiPopover
-          id="popover"
-          ownFocus
           button={button}
-          isOpen={isPopoverOpen}
           closePopover={closePopover}
+          id="popover"
+          isOpen={isPopoverOpen}
+          ownFocus
           repositionOnScroll
         >
           <PopoverContent>

@@ -27,6 +27,7 @@ import { BaseAggParams } from '../types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggHistogramFnName } from './histogram_fn';
 import { ExtendedBounds } from './lib/extended_bounds';
 import { isAutoInterval, autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
@@ -48,7 +49,7 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 
 export interface AggParamsHistogram extends BaseAggParams {
   field: string;
-  interval: string;
+  interval: number | string;
   maxBars?: number;
   intervalBase?: number;
   min_doc_count?: boolean;
@@ -62,6 +63,7 @@ export const getHistogramBucketAgg = ({
 }: HistogramBucketAggDependencies) =>
   new BucketAggType<IBucketHistogramAggConfig>({
     name: BUCKET_TYPES.HISTOGRAM,
+    expressionName: aggHistogramFnName,
     title: i18n.translate('data.search.aggs.buckets.histogramTitle', {
       defaultMessage: 'Histogram',
     }),

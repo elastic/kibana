@@ -15,6 +15,7 @@ export * from './get_search_after_with_tie_breaker';
 export * from './get_sort_with_tie_breaker';
 export * from './get_source_with_tie_breaker';
 export * from './scroll_to_start_page';
+export * from './transform_elastic_named_search_to_list_item';
 export * from './transform_elastic_to_list';
 export * from './transform_elastic_to_list_item';
 export * from './transform_list_item_to_elastic_query';

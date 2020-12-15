@@ -89,7 +89,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
-      id="sendAlertToTimeline"
       onClick={investigateInTimelineAlertClick}
       isDisabled={false}
     />

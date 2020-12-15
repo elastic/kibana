@@ -44,7 +44,7 @@ module.exports = {
     'filter',
     'ip_script_field_script_field',
     'long_script_field_script_field',
-    'painless_test',
+    'common',
     'processor_conditional',
     'score',
     'string_script_field_script_field',

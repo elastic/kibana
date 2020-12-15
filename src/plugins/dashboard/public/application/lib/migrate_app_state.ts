@@ -21,7 +21,7 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '../../services/usage_collection';
 import { DashboardAppState, SavedDashboardPanel } from '../../types';
 import {
   migratePanelsTo730,
@@ -65,7 +65,11 @@ export function migrateAppState(
 
     if (usageCollection) {
       // This will help us figure out when to remove support for older style URLs.
-      usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
+      usageCollection.reportUiCounter(
+        'DashboardPanelVersionInUrl',
+        METRIC_TYPE.LOADED,
+        `${version}`
+      );
     }
 
     return semverSatisfies(version, '<7.3');

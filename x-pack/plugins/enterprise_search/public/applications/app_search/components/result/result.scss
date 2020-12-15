@@ -1,0 +1,30 @@
+.appSearchResult {
+  display: flex;
+
+  &__content {
+    width: 100%;
+    padding: $euiSize;
+    overflow: hidden;
+  }
+
+  &__hiddenFieldsIndicator {
+    font-size: $euiFontSizeXS;
+    color: $euiColorDarkShade;
+    margin-top: $euiSizeS;
+  }
+
+  &__actionButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: $euiSizeL * 2;
+    border-left: $euiBorderThin;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: $euiPageBackgroundColor;
+      cursor: pointer;
+    }
+  }
+}

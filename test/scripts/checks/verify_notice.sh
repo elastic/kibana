@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:verifyNotice
+checks-reporter-with-killswitch "Verify NOTICE" \
+  node scripts/notice --validate

@@ -7,6 +7,7 @@
 import { CursorPagination } from '../types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { QueryContext } from '../query_context';
+import { getUptimeESMockClient } from '../../__tests__/helper';
 
 export const nextPagination = (key: any): CursorPagination => {
   return {
@@ -16,5 +17,13 @@ export const nextPagination = (key: any): CursorPagination => {
   };
 };
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(undefined, '', '', nextPagination('something'), undefined, 0, '');
+  return new QueryContext(
+    getUptimeESMockClient().uptimeEsClient,
+    '',
+    '',
+    nextPagination('something'),
+    undefined,
+    0,
+    ''
+  );
 };

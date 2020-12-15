@@ -61,7 +61,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/85105
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -70,6 +71,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
       await defineAlert(alertName);
+
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
@@ -89,14 +94,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-0');
+      await testSubjects.click('variableMenuButton-alertActionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         'test message {{alertActionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-1');
+      await testSubjects.click('variableMenuButton-alertId');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
         'test message {{alertActionGroup}} some additional text {{alertId}}'

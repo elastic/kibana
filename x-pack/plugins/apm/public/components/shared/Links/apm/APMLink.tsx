@@ -37,7 +37,7 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
  */
 export function useAPMHref(
   path: string,
-  persistentFilters: Array<keyof APMQueryParams> = PERSISTENT_APM_PARAMS
+  persistentFilters: Array<keyof APMQueryParams> = []
 ) {
   const { urlParams } = useUrlParams();
   const { basePath } = useApmPluginContext().core.http;

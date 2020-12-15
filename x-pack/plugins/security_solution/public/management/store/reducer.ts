@@ -26,10 +26,8 @@ import {
   endpointListReducer,
   initialEndpointListState,
 } from '../pages/endpoint_hosts/store/reducer';
-import {
-  initialTrustedAppsPageState,
-  trustedAppsPageReducer,
-} from '../pages/trusted_apps/store/reducer';
+import { initialTrustedAppsPageState } from '../pages/trusted_apps/store/builders';
+import { trustedAppsPageReducer } from '../pages/trusted_apps/store/reducer';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 

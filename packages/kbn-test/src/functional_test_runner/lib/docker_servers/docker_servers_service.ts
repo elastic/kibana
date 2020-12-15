@@ -124,7 +124,11 @@ export class DockerServersService {
     lifecycle.cleanup.add(() => {
       try {
         execa.sync('docker', ['kill', containerId]);
-        execa.sync('docker', ['rm', containerId]);
+        // we don't remove the containers on CI because removing them causes the
+        // network list to be updated and aborts all in-flight requests in Chrome
+        if (!process.env.CI) {
+          execa.sync('docker', ['rm', containerId]);
+        }
       } catch (error) {
         if (
           error.message.includes(`Container ${containerId} is not running`) ||

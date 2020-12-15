@@ -33,6 +33,8 @@ export interface HttpSetup {
    */
   anonymousPaths: IAnonymousPaths;
 
+  externalUrl: IExternalUrl;
+
   /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
    * @param interceptor a {@link HttpInterceptor}
@@ -102,6 +104,32 @@ export interface IBasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   readonly serverBasePath: string;
+
+  /**
+   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
+   * {@link IBasePath.serverBasePath}.
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  readonly publicBaseUrl?: string;
+}
+/**
+ * APIs for working with external URLs.
+ *
+ * @public
+ */
+export interface IExternalUrl {
+  /**
+   * Determines if the provided URL is a valid location to send users.
+   * Validation is based on the configured allow list in kibana.yml.
+   *
+   * If the URL is valid, then a URL will be returned.
+   * Otherwise, this will return null.
+   *
+   * @param relativeOrAbsoluteUrl
+   */
+  validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
 /**

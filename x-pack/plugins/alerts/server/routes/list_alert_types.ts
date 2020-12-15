@@ -11,11 +11,11 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 
-export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState) => {
+export const listAlertTypesRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ALERT_API_PATH}/list_alert_types`,

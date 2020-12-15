@@ -9,34 +9,42 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import {
-  defaultHeaders,
-  mockDetailItemData,
-  mockDetailItemDataId,
-  TestProviders,
-} from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, View } from './event_details';
+import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { mockAlertDetailsData } from './__mocks__';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
   const mount = useMountAppended();
   const defaultProps = {
     browserFields: mockBrowserFields,
-    columnHeaders: defaultHeaders,
     data: mockDetailItemData,
     id: mockDetailItemDataId,
-    view: 'table-view' as View,
-    onUpdateColumns: jest.fn(),
+    isAlert: false,
     onViewSelected: jest.fn(),
     timelineId: 'test',
-    toggleColumn: jest.fn(),
+    view: EventsViewType.summaryView,
   };
+
+  const alertsProps = {
+    ...defaultProps,
+    data: mockAlertDetailsData as TimelineEventsDetailsItem[],
+    isAlert: true,
+  };
+
   const wrapper = mount(
     <TestProviders>
       <EventDetails {...defaultProps} />
+    </TestProviders>
+  );
+
+  const alertsWrapper = mount(
+    <TestProviders>
+      <EventDetails {...alertsProps} />
     </TestProviders>
   );
 
@@ -63,6 +71,29 @@ describe('EventDetails', () => {
       expect(
         wrapper.find('[data-test-subj="eventDetails"]').find('.euiTab-isSelected').first().text()
       ).toEqual('Table');
+    });
+  });
+
+  describe('alerts tabs', () => {
+    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+      test(`it renders the ${tab} tab`, () => {
+        expect(
+          alertsWrapper
+            .find('[data-test-subj="eventDetails"]')
+            .find('[role="tablist"]')
+            .containsMatchingElement(<span>{tab}</span>)
+        ).toBeTruthy();
+      });
+    });
+
+    test('the Summary tab is selected by default', () => {
+      expect(
+        alertsWrapper
+          .find('[data-test-subj="eventDetails"]')
+          .find('.euiTab-isSelected')
+          .first()
+          .text()
+      ).toEqual('Summary');
     });
   });
 });

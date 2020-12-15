@@ -46,10 +46,6 @@ class TimeseriesVisualization extends Component {
   dateFormat = this.props.getConfig('dateFormat');
 
   xAxisFormatter = (interval) => (val) => {
-    if (!this.scaledDataFormat || !this.dateFormat) {
-      return val;
-    }
-
     const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };
@@ -197,7 +193,6 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
         });
 
       if (isCustomDomain) {

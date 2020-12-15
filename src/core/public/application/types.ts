@@ -578,7 +578,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  */
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (
+  factory: AppLeaveActionFactory,
+  nextAppId?: string
+) => AppLeaveAction;
 
 /**
  * Possible type of actions on application leave.
@@ -614,6 +617,7 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  callback?: () => void;
 }
 
 /**
@@ -636,8 +640,10 @@ export interface AppLeaveActionFactory {
    *
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
+   * @param callback (optional) to know that the user want to stay on the page
+   * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string): AppLeaveConfirmAction;
+  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
   /**
    * Returns a default action, resulting on executing the default behavior when
    * the user tries to leave an application

@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:checkFileCasing
+checks-reporter-with-killswitch "Check File Casing" \
+  node scripts/check_file_casing --quiet

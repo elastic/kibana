@@ -14,6 +14,11 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import { TelemetryDiagTask } from './task';
 
 export type SearchTypes =
   | string
@@ -56,20 +61,34 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
+  private diagTask?: TelemetryDiagTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
+
+    if (taskManager) {
+      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
+    }
   }
 
-  public start(core?: CoreStart, telemetryStart?: TelemetryPluginStart) {
+  public start(
+    core?: CoreStart,
+    telemetryStart?: TelemetryPluginStart,
+    taskManager?: TaskManagerStartContract
+  ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
 
-    this.logger.debug(`Starting task`);
+    if (taskManager && this.diagTask) {
+      this.logger.debug(`Starting diag task`);
+      this.diagTask.start(taskManager);
+    }
+
+    this.logger.debug(`Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
@@ -80,6 +99,38 @@ export class TelemetryEventsSender {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+  }
+
+  public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: 'logs-endpoint.diagnostic.collection-*',
+      ignore_unavailable: true,
+      size: this.maxQueueSize,
+      body: {
+        query: {
+          range: {
+            'event.ingested': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
+        sort: [
+          {
+            'event.ingested': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    };
+
+    if (!this.core) {
+      throw Error('could not fetch diagnostic alerts. core is not available');
+    }
+    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+    return callCluster('search', query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -109,6 +160,11 @@ export class TelemetryEventsSender {
     });
   }
 
+  public async isTelemetryOptedIn() {
+    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+    return this.isOptedIn === true;
+  }
+
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -121,9 +177,7 @@ export class TelemetryEventsSender {
     try {
       this.isSending = true;
 
-      // Checking opt-in status is relatively expensive (calls a saved-object), so
-      // we only check it when we have things to send.
-      this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+      this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
@@ -245,9 +299,14 @@ const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  Ransomware: true,
+  data_stream: true,
   ecs: true,
   elastic: true,
   event: true,
+  rule: {
+    ruleset: true,
+  },
   file: {
     name: true,
     path: true,
@@ -270,6 +329,8 @@ const allowlistEventFields: AllowlistFields = {
     executable: true,
     command_line: true,
     hash: true,
+    pid: true,
+    uptime: true,
     Ext: {
       code_signature: true,
     },
@@ -281,6 +342,12 @@ const allowlistEventFields: AllowlistFields = {
       Ext: {
         code_signature: true,
       },
+      uptime: true,
+      pid: true,
+      ppid: true,
+    },
+    token: {
+      integrity_level_name: true,
     },
   },
 };

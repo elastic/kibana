@@ -73,10 +73,12 @@ const timelineData = {
     end: 1591084965409,
   },
   savedQueryId: null,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: 'desc',
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      sortDirection: 'desc',
+    },
+  ],
   status: TimelineStatus.active,
 };
 const mockPatchTimelineResponse = {

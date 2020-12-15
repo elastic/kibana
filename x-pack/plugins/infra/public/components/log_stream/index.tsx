@@ -11,17 +11,45 @@ import { euiStyled } from '../../../../observability/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { LogSourceConfigurationProperties, useLogSource } from '../../containers/logs/log_source';
+import { useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
+import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import { JsonValue } from '../../../common/typed_json';
 
 const PAGE_THRESHOLD = 2;
 
+interface CommonColumnDefinition {
+  /** width of the column, in CSS units */
+  width?: number | string;
+  /** Content for the header. `true` renders the field name. `false` renders nothing. A string renders a custom value */
+  header?: boolean | string;
+}
+
+interface TimestampColumnDefinition extends CommonColumnDefinition {
+  type: 'timestamp';
+  /** Timestamp renderer. Takes a epoch_millis and returns a valid `ReactNode` */
+  render?: (timestamp: number) => React.ReactNode;
+}
+
+interface MessageColumnDefinition extends CommonColumnDefinition {
+  type: 'message';
+  /** Message renderer. Takes the processed message and returns a valid `ReactNode` */
+  render?: (message: string) => React.ReactNode;
+}
+
+interface FieldColumnDefinition extends CommonColumnDefinition {
+  type: 'field';
+  field: string;
+  /** Field renderer. Takes the value of the field and returns a valid `ReactNode` */
+  render?: (value: JsonValue) => React.ReactNode;
+}
+
 type LogColumnDefinition =
-  | { type: 'timestamp' }
-  | { type: 'message' }
-  | { type: 'field'; field: string };
+  | TimestampColumnDefinition
+  | MessageColumnDefinition
+  | FieldColumnDefinition;
 
 export interface LogStreamProps {
   sourceId?: string;
@@ -178,15 +206,24 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(
   columns: LogColumnDefinition[]
-): LogSourceConfigurationProperties['logColumns'] {
+): LogColumnRenderConfiguration[] {
   return columns.map((column) => {
+    // We extract the { width, header, render } inside each block so the TS compiler uses the right type for `render`
     switch (column.type) {
-      case 'timestamp':
-        return { timestampColumn: { id: '___#timestamp' } };
-      case 'message':
-        return { messageColumn: { id: '___#message' } };
-      case 'field':
-        return { fieldColumn: { id: `___#${column.field}`, field: column.field } };
+      case 'timestamp': {
+        const { width, header, render } = column;
+        return { timestampColumn: { id: '___#timestamp', width, header, render } };
+      }
+      case 'message': {
+        const { width, header, render } = column;
+        return { messageColumn: { id: '___#message', width, header, render } };
+      }
+      case 'field': {
+        const { width, header, render } = column;
+        return {
+          fieldColumn: { id: `___#${column.field}`, field: column.field, width, header, render },
+        };
+      }
     }
   });
 }

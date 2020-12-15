@@ -81,7 +81,9 @@ describe('IBM Resilient service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://resilient.elastic.co/', orgId: '201' },
         secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
       },
       logger

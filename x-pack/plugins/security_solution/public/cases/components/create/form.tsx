@@ -15,6 +15,7 @@ import { Description } from './description';
 import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
+import { SyncAlertsToggle } from './sync_alerts_toggle';
 
 interface ContainerProps {
   big?: boolean;
@@ -63,6 +64,18 @@ export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true })
       title: i18n.STEP_TWO_TITLE,
       children: (
         <Container>
+          <SyncAlertsToggle isLoading={isSubmitting} />
+        </Container>
+      ),
+    }),
+    [isSubmitting]
+  );
+
+  const thirdStep = useMemo(
+    () => ({
+      title: i18n.STEP_THREE_TITLE,
+      children: (
+        <Container>
           <Connector isLoading={isSubmitting} />
         </Container>
       ),
@@ -70,7 +83,11 @@ export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true })
     [isSubmitting]
   );
 
-  const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);
+  const allSteps = useMemo(() => [firstStep, secondStep, thirdStep], [
+    firstStep,
+    secondStep,
+    thirdStep,
+  ]);
 
   return (
     <>
@@ -85,6 +102,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true })
         <>
           {firstStep.children}
           {secondStep.children}
+          {thirdStep.children}
         </>
       )}
     </>

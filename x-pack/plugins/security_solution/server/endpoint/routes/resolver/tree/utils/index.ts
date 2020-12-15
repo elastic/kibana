@@ -9,7 +9,7 @@ import { ResolverSchema } from '../../../../../../common/endpoint/types';
 /**
  * Represents a time range filter
  */
-export interface Timerange {
+export interface TimeRange {
   from: string;
   to: string;
 }

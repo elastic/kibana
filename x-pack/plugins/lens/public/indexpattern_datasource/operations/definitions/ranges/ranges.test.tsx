@@ -145,21 +145,63 @@ describe('ranges', () => {
     state = getDefaultState();
   });
 
-  describe('toEsAggConfig', () => {
+  describe('toEsAggsFn', () => {
     afterAll(() => setToHistogramMode());
 
     it('should reflect params correctly', () => {
-      const esAggsConfig = rangeOperation.toEsAggsConfig(
+      const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "extended_bounds": Array [
+              "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+            ],
+            "field": Array [
+              "MyField",
+            ],
+            "has_extended_bounds": Array [
+              false,
+            ],
+            "id": Array [
+              "col1",
+            ],
+            "interval": Array [
+              "auto",
+            ],
+            "min_doc_count": Array [
+              false,
+            ],
+            "schema": Array [
+              "segment",
+            ],
+          },
+          "function": "aggHistogram",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('should set maxBars param if provided', () => {
+      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern
+      );
+
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          type: MODES.Histogram,
-          params: expect.objectContaining({
-            field: sourceField,
-            maxBars: null,
+          function: 'aggHistogram',
+          arguments: expect.objectContaining({
+            maxBars: [10],
           }),
         })
       );
@@ -168,15 +210,15 @@ describe('ranges', () => {
     it('should reflect the type correctly', () => {
       setToRangeMode();
 
-      const esAggsConfig = rangeOperation.toEsAggsConfig(
+      const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
 
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          type: MODES.Range,
+          function: 'aggRange',
         })
       );
     });
@@ -187,15 +229,15 @@ describe('ranges', () => {
         { from: 0, to: 100, label: 'customlabel' },
       ];
 
-      const esAggsConfig = rangeOperation.toEsAggsConfig(
+      const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
 
-      expect((esAggsConfig as { params: unknown }).params).toEqual(
+      expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
         expect.objectContaining({
-          ranges: [{ from: 0, to: 100, label: 'customlabel' }],
+          ranges: [JSON.stringify([{ from: 0, to: 100, label: 'customlabel' }])],
         })
       );
     });

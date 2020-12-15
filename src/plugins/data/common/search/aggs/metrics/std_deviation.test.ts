@@ -82,4 +82,34 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
     expect(lowerStdDevLabel).toBe('Lower Standard Deviation of memory');
     expect(upperStdDevLabel).toBe('Upper Standard Deviation of memory');
   });
+
+  it('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs();
+
+    const responseAggs: any = getStdDeviationMetricAgg().getResponseAggs(
+      aggConfigs.aggs[0] as IStdDevAggConfig
+    );
+    expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "id": Array [
+                "std_dev.std_lower",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+            },
+            "function": "aggStdDeviation",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
+  });
 });

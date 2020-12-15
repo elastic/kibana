@@ -235,7 +235,6 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 } from './index_patterns';
@@ -252,7 +251,6 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 };
@@ -275,6 +273,7 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
+  IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
 } from '../common';
 
@@ -333,6 +332,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,

@@ -79,12 +79,14 @@ export function alertInstanceSummaryFromEventLog(
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
         status.actionGroupId = event?.kibana?.alerting?.action_group_id;
+        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
         break;
       case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
       case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
+        status.actionSubgroup = undefined;
     }
   }
 
@@ -122,6 +124,7 @@ function getAlertInstanceStatus(
     status: 'OK',
     muted: false,
     actionGroupId: undefined,
+    actionSubgroup: undefined,
     activeStartDate: undefined,
   };
   instances.set(instanceId, status);

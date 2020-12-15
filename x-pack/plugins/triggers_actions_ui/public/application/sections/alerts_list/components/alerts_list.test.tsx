@@ -56,9 +56,11 @@ const alertTypeFromApi = {
   id: 'test_alert_type',
   name: 'some alert type',
   actionGroups: [{ id: 'default', name: 'Default' }],
+  recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
   producer: ALERTS_FEATURE_ID,
+  minimumLicenseRequired: 'basic',
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },

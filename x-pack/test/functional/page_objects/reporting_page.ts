@@ -119,6 +119,10 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('generateReportButton');
     }
 
+    async toggleReportMode() {
+      await testSubjects.click('reportModeToggle');
+    }
+
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
       const isToastPresent = await testSubjects.exists('completeReportSuccess', {

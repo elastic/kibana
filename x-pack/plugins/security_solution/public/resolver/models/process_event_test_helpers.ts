@@ -30,7 +30,7 @@ export function mockProcessEvent(parts: DeepPartial<LegacyEndpointEvent>): Legac
         timestamp_utc: '',
         serial_event_id: 1,
       },
-      '@timestamp': 1582233383000,
+      '@timestamp': 0,
       agent: {
         type: '',
         id: '',

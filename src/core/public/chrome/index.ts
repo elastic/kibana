@@ -27,6 +27,7 @@ export {
   ChromeHelpExtension,
 } from './chrome_service';
 export {
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,

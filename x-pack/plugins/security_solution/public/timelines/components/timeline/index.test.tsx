@@ -18,8 +18,9 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
+import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -40,7 +41,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../flyout/header_with_close_button');
 jest.mock('../../../common/containers/sourcerer', () => {
   const originalModule = jest.requireActual('../../../common/containers/sourcerer');
 
@@ -57,9 +57,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    id: 'id',
-    onClose: jest.fn(),
-    usersViewing: [],
+    timelineId: 'timeline-test',
   };
 
   beforeEach(() => {
@@ -73,5 +71,19 @@ describe('StatefulTimeline', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
+  });
+
+  test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulTimeline {...props} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .first()
+        .exists()
+    ).toEqual(true);
   });
 });

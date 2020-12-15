@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:test_projects
+checks-reporter-with-killswitch "Test Projects" \
+  yarn kbn run test --exclude kibana --oss --skip-kibana-plugins

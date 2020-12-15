@@ -36,7 +36,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
     name: i18n.translate('xpack.apm.enableServiceOverviewExperimentName', {
       defaultMessage: 'APM Service overview',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.apm.enableServiceOverviewExperimentDescription',
       {

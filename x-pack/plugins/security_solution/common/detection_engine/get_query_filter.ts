@@ -7,7 +7,6 @@
 import {
   Filter,
   IIndexPattern,
-  isFilterDisabled,
   buildEsQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
@@ -16,7 +15,7 @@ import {
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionListQueries } from './build_exceptions_query';
+import { buildExceptionFilter } from './build_exceptions_filter';
 import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
@@ -38,32 +37,27 @@ export const getQueryFilter = (
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
-
-  const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
-  /*
-   * Pinning exceptions to 'kuery' because lucene
-   * does not support nested queries, while our exceptions
-   * UI does, since we can pass both lucene and kql into
-   * buildEsQuery, this allows us to offer nested queries
-   * regardless
-   */
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const exceptionFilter = buildExceptionFilter({
     lists,
-    config,
     excludeExceptions,
     chunkSize: 1024,
-    indexPattern,
   });
-  if (exceptionFilter !== undefined) {
-    enabledFilters.push(exceptionFilter);
-  }
   const initialQuery = { query, language };
+  const allFilters = getAllFilters((filters as unknown) as Filter[], exceptionFilter);
 
-  return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
+  return buildEsQuery(indexPattern, initialQuery, allFilters, config);
+};
+
+export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undefined): Filter[] => {
+  if (exceptionFilter != null) {
+    return [...filters, exceptionFilter];
+  } else {
+    return [...filters];
+  }
 };
 
 interface EqlSearchRequest {
@@ -84,26 +78,14 @@ export const buildEqlSearchRequest = (
   eventCategoryOverride: string | undefined
 ): EqlSearchRequest => {
   const timestamp = timestampOverride ?? '@timestamp';
-  const indexPattern: IIndexPattern = {
-    fields: [],
-    title: index.join(),
-  };
-  const config: EsQueryConfig = {
-    allowLeadingWildcards: true,
-    queryStringOptions: { analyze_wildcard: true },
-    ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: 'Zulu',
-  };
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const exceptionFilter = buildExceptionFilter({
     lists: exceptionLists,
-    config,
     excludeExceptions: true,
     chunkSize: 1024,
-    indexPattern,
   });
   const indexString = index.join();
   const requestFilter: unknown[] = [
@@ -147,70 +129,4 @@ export const buildEqlSearchRequest = (
   } else {
     return baseRequest;
   }
-};
-
-export const buildExceptionFilter = ({
-  lists,
-  config,
-  excludeExceptions,
-  chunkSize,
-  indexPattern,
-}: {
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-  config: EsQueryConfig;
-  excludeExceptions: boolean;
-  chunkSize: number;
-  indexPattern?: IIndexPattern;
-}) => {
-  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists });
-  if (exceptionQueries.length === 0) {
-    return undefined;
-  }
-  const exceptionFilter: Filter = {
-    meta: {
-      alias: null,
-      negate: excludeExceptions,
-      disabled: false,
-    },
-    query: {
-      bool: {
-        should: undefined,
-      },
-    },
-  };
-  if (exceptionQueries.length <= chunkSize) {
-    const query = buildEsQuery(indexPattern, exceptionQueries, [], config);
-    exceptionFilter.query.bool.should = query.bool.filter;
-  } else {
-    const chunkedFilters: Filter[] = [];
-    for (let index = 0; index < exceptionQueries.length; index += chunkSize) {
-      const exceptionQueriesChunk = exceptionQueries.slice(index, index + chunkSize);
-      const esQueryChunk = buildEsQuery(indexPattern, exceptionQueriesChunk, [], config);
-      const filterChunk: Filter = {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            should: esQueryChunk.bool.filter,
-          },
-        },
-      };
-      chunkedFilters.push(filterChunk);
-    }
-    // Here we build a query with only the exceptions: it will put them all in the `filter` array
-    // of the resulting object, which would AND the exceptions together. When creating exceptionFilter,
-    // we move the `filter` array to `should` so they are OR'd together instead.
-    // This gets around the problem with buildEsQuery not allowing callers to specify whether queries passed in
-    // should be ANDed or ORed together.
-    exceptionFilter.query.bool.should = buildEsQuery(
-      indexPattern,
-      [],
-      chunkedFilters,
-      config
-    ).bool.filter;
-  }
-  return exceptionFilter;
 };

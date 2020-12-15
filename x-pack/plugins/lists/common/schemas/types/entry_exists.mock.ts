@@ -13,3 +13,8 @@ export const getEntryExistsMock = (): EntryExists => ({
   operator: OPERATOR,
   type: EXISTS,
 });
+
+export const getEntryExistsExcludedMock = (): EntryExists => ({
+  ...getEntryExistsMock(),
+  operator: 'excluded',
+});

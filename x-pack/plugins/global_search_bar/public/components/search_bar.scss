@@ -1,0 +1,43 @@
+.kbnSearchOption__tagsList {
+  display: inline-block; // Horizontally aligns the tag list to the 'Go to' badge when row is focused
+  line-height: $euiFontSizeM !important;
+
+  .kbnSearchOption__tagsListItem {
+    display: inline-block;
+    max-width: 80px;
+    margin-right: $euiSizeS;
+  }
+}
+
+.euiSelectableListItem-isFocused .kbnSearchOption__tagsList {
+  margin-right: $euiSizeXS;
+  border-right: $euiBorderThin; // Adds divider between the tag list and 'Go to' badge
+}
+
+//TODO add these overrides to EUI so that search behaves the same globally (eui/issues/4363)
+.kbnSearchBar {
+  width: 400px;
+  max-width: 100%;
+  will-change: width;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .kbnSearchOption__tagsList {
+    display: none;
+  }
+}
+
+@include euiBreakpoint('l', 'xl') {
+  .kbnSearchBar:focus {
+    animation: kbnAnimateSearchBar $euiAnimSpeedFast forwards;
+  }
+}
+
+@keyframes kbnAnimateSearchBar {
+  from {
+    width: 400px;
+  }
+  to {
+    width: 600px;
+  }
+}

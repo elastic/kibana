@@ -73,6 +73,13 @@ export const EXPAND = i18n.translate(
   }
 );
 
+export const EXPAND_EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.expandEventTooltip',
+  {
+    defaultMessage: 'Expand event',
+  }
+);
+
 export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
   {
@@ -80,16 +87,16 @@ export const COLLAPSE = i18n.translate(
   }
 );
 
-export const COLLAPSE_EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.collapseEventTooltip',
-  {
-    defaultMessage: 'Collapse event',
-  }
-);
-
 export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.investigateInResolverTooltip',
   {
     defaultMessage: 'Analyze event',
+  }
+);
+
+export const INVESTIGATE_IN_RESOLVER_DISABLED = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.investigateInResolverDisabledTooltip',
+  {
+    defaultMessage: 'This event cannot be analyzed since it has incompatible field mappings',
   }
 );

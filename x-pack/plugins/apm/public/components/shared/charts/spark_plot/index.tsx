@@ -3,25 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import {
-  ScaleType,
-  Chart,
-  Settings,
   AreaSeries,
+  Chart,
   CurveType,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { px } from '../../../../style/variables';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import React from 'react';
+import { merge } from 'lodash';
 import { useChartTheme } from '../../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { px } from '../../../../style/variables';
 
 interface Props {
   color: string;
-  series?: Array<{ x: number; y: number | null }>;
+  series?: Array<{ x: number; y: number | null }> | null;
   width: string;
 }
 
@@ -46,7 +44,18 @@ export function SparkPlot(props: Props) {
 
   return (
     <Chart size={{ height: px(24), width }}>
-      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
+      <Settings
+        theme={merge({}, chartTheme, {
+          lineSeriesStyle: {
+            point: { opacity: 0 },
+          },
+          areaSeriesStyle: {
+            point: { opacity: 0 },
+          },
+        })}
+        showLegend={false}
+        tooltip="none"
+      />
       <AreaSeries
         id="area"
         xScaleType={ScaleType.Time}

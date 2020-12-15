@@ -28,6 +28,10 @@ import type { ConnectorAddFlyoutProps } from './application/sections/action_conn
 import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
+import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { AlertAddProps } from './application/sections/alert_form/alert_add';
+import { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -39,10 +43,16 @@ export interface TriggersAndActionsUIPublicPluginStart {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorAddFlyoutProps> | null;
+  ) => ReactElement<ConnectorAddFlyoutProps>;
   getEditConnectorFlyout: (
     props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorEditFlyoutProps> | null;
+  ) => ReactElement<ConnectorEditFlyoutProps>;
+  getAddAlertFlyout: (
+    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertAddProps>;
+  getEditAlertFlyout: (
+    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertEditProps>;
 }
 
 interface PluginsSetup {
@@ -150,6 +160,24 @@ export class Plugin
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
+        });
+      },
+      getAddAlertFlyout: (
+        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getAddAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
+        });
+      },
+      getEditAlertFlyout: (
+        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getEditAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
         });
       },
     };

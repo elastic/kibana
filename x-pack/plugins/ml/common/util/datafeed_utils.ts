@@ -6,12 +6,16 @@
 
 import { Aggregation, Datafeed } from '../types/anomaly_detection_jobs';
 
+export function getAggregations<T>(obj: any): T | undefined {
+  if (obj?.aggregations !== undefined) return obj.aggregations;
+  if (obj?.aggs !== undefined) return obj.aggs;
+  return undefined;
+}
+
 export const getDatafeedAggregations = (
   datafeedConfig: Partial<Datafeed> | undefined
 ): Aggregation | undefined => {
-  if (datafeedConfig?.aggregations !== undefined) return datafeedConfig.aggregations;
-  if (datafeedConfig?.aggs !== undefined) return datafeedConfig.aggs;
-  return undefined;
+  return getAggregations<Aggregation>(datafeedConfig);
 };
 
 export const getAggregationBucketsName = (aggregations: any): string | undefined => {

@@ -10,7 +10,7 @@ import {
   getMaxY,
 } from './helper';
 
-import { TimeSeries } from '../../../../../typings/timeseries';
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import {
   getDurationFormatter,
   toMicroseconds,
@@ -51,7 +51,7 @@ describe('transaction chart helper', () => {
     it('returns zero for invalid y coordinate', () => {
       const timeSeries = ([
         { data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] },
-      ] as unknown) as TimeSeries[];
+      ] as unknown) as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(0);
     });
     it('returns the max y coordinate', () => {
@@ -63,7 +63,7 @@ describe('transaction chart helper', () => {
             { x: 3, y: 1 },
           ],
         },
-      ] as unknown) as TimeSeries[];
+      ] as unknown) as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(10);
     });
   });

@@ -38,6 +38,7 @@ interface Props {
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
+  fullWidth?: boolean;
 }
 
 function RangeValueInputUI(props: Props) {
@@ -71,6 +72,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
           id: 'data.filter.filterEditor.rangeInputLabel',
           defaultMessage: 'Range',

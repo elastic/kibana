@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
-import { TimeFormatter } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { TimeFormatter } from '../../../../../common/utils/formatters';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
   return (t: number) => {
@@ -24,12 +23,11 @@ export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
   };
 }
 
-export function getMaxY(timeSeries: TimeSeries[]) {
-  const coordinates = flatten(
-    timeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-  );
-
-  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
-
-  return Math.max(...numbers, 0);
+export function getMaxY(timeSeries?: Array<TimeSeries<Coordinate>>) {
+  if (timeSeries) {
+    const coordinates = timeSeries.flatMap((serie) => serie.data);
+    const numbers = coordinates.map((c) => (c.y ? c.y : 0));
+    return Math.max(...numbers, 0);
+  }
+  return 0;
 }

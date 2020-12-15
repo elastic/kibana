@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:verifyNotice
+checks-reporter-with-killswitch "Verify NOTICE" \
+  node scripts/notice --validate

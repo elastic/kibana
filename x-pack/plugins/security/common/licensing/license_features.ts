@@ -44,6 +44,12 @@ export interface SecurityLicenseFeatures {
   readonly allowAuditLogging: boolean;
 
   /**
+   * Indicates whether we allow logging of legacy audit events.
+   * @deprecated
+   */
+  readonly allowLegacyAuditLogging: boolean;
+
+  /**
    * Indicates whether we allow users to define document level security in roles.
    */
   readonly allowRoleDocumentLevelSecurity: boolean;

@@ -110,6 +110,24 @@ describe('datatable_expression', () => {
       ).toMatchSnapshot();
     });
 
+    test('it renders actions column when there are row actions', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(
+          <DatatableComponent
+            data={data}
+            args={args}
+            formatFactory={(x) => x as IFieldFormat}
+            onClickValue={onClickValue}
+            getType={jest.fn()}
+            onRowContextMenuClick={() => undefined}
+            rowHasRowClickTriggerActions={[true, true, true]}
+          />
+        )
+      ).toMatchSnapshot();
+    });
+
     test('it invokes executeTriggerActions with correct context on click on top value', () => {
       const { args, data } = sampleArgs();
 

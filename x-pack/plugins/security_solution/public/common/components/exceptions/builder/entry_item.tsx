@@ -7,7 +7,7 @@ import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { isEqlRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
@@ -149,7 +149,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !isEqlRule(ruleType)
+          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType)
         );
     const comboBox = (
       <OperatorComponent

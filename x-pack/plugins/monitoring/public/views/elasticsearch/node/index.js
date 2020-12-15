@@ -14,6 +14,7 @@ import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { SetupModeRenderer } from '../../../components/renderers';
 import { Node } from '../../../components/elasticsearch/node/node';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
@@ -26,7 +27,9 @@ import {
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -122,14 +125,26 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           $scope.labels = labels.node;
 
           this.renderReact(
-            <Node
+            <SetupModeRenderer
               scope={$scope}
-              alerts={this.alerts}
-              nodeId={this.nodeName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              onBrush={this.onBrush}
-              zoomInfo={this.zoomInfo}
-              {...data}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Node
+                    scope={$scope}
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    nodeId={this.nodeName}
+                    clusterUuid={$scope.cluster.cluster_uuid}
+                    onBrush={this.onBrush}
+                    zoomInfo={this.zoomInfo}
+                    {...data}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
           );
         }

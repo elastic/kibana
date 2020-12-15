@@ -30,6 +30,7 @@ import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
+import { ExternalUrlConfig } from '../external_url';
 import { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
@@ -280,6 +281,7 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
+  externalUrl: ExternalUrlConfig;
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
@@ -316,7 +318,12 @@ export interface InternalHttpServiceStart extends HttpServiceStart {
   isListening: () => boolean;
 }
 
-/** @public */
+/**
+ * Information about what hostname, port, and protocol the server process is
+ * running on. Note that this may not match the URL that end-users access
+ * Kibana at. For the public URL, see {@link BasePath.publicBaseUrl}.
+ * @public
+ */
 export interface HttpServerInfo {
   /** The name of the Kibana server */
   name: string;

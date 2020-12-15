@@ -6,7 +6,6 @@
 
 import { createSelector } from 'reselect';
 
-import { isFromKueryExpressionValid } from '../../../common/lib/keury';
 import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';
@@ -42,8 +41,6 @@ export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 
-export const getEventsByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
-
 export const getKqlFilterQuerySelector = () =>
   createSelector(selectTimeline, (timeline) =>
     timeline &&
@@ -54,11 +51,6 @@ export const getKqlFilterQuerySelector = () =>
       : null
   );
 
-export const getKqlFilterQueryDraftSelector = () =>
-  createSelector(selectTimeline, (timeline) =>
-    timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null
-  );
-
 export const getKqlFilterKuerySelector = () =>
   createSelector(selectTimeline, (timeline) =>
     timeline &&
@@ -67,13 +59,4 @@ export const getKqlFilterKuerySelector = () =>
     timeline.kqlQuery.filterQuery.kuery
       ? timeline.kqlQuery.filterQuery.kuery
       : null
-  );
-
-export const isFilterQueryDraftValidSelector = () =>
-  createSelector(
-    selectTimeline,
-    (timeline) =>
-      timeline &&
-      timeline.kqlQuery &&
-      isFromKueryExpressionValid(timeline.kqlQuery.filterQueryDraft)
   );

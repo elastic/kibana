@@ -422,14 +422,6 @@ export class Authenticator {
   }
 
   /**
-   * Checks whether specified provider type is currently enabled.
-   * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
-   */
-  isProviderTypeEnabled(providerType: string) {
-    return [...this.providers.values()].some((provider) => provider.type === providerType);
-  }
-
-  /**
    * Acknowledges access agreement on behalf of the currently authenticated user.
    * @param request Request instance.
    */

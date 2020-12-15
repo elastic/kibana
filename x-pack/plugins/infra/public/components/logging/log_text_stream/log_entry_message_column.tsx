@@ -28,10 +28,11 @@ interface LogEntryMessageColumnProps {
   highlights: LogColumn[];
   isActiveHighlight: boolean;
   wrapMode: WrapMode;
+  render?: (message: string) => React.ReactNode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, wrapMode }) => {
+  ({ columnValue, highlights, isActiveHighlight, wrapMode, render }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -40,7 +41,16 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
       [columnValue, highlights, isActiveHighlight]
     );
 
-    return <MessageColumnContent wrapMode={wrapMode}>{message}</MessageColumnContent>;
+    const messageAsString = useMemo(
+      () => (isMessageColumn(columnValue) ? renderMessageSegments(columnValue.message) : ''),
+      [columnValue]
+    );
+
+    return (
+      <MessageColumnContent wrapMode={wrapMode}>
+        {render ? render(messageAsString) : message}
+      </MessageColumnContent>
+    );
   }
 );
 
@@ -90,3 +100,16 @@ const formatMessageSegments = (
 
     return 'failed to format message';
   });
+
+const renderMessageSegments = (messageSegments: LogMessagePart[]): string => {
+  return messageSegments
+    .map((messageSegment) => {
+      if (isConstantSegment(messageSegment)) {
+        return messageSegment.constant;
+      }
+      if (isFieldSegment(messageSegment)) {
+        return messageSegment.value.toString();
+      }
+    })
+    .join(' ');
+};

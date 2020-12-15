@@ -23,7 +23,8 @@ export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
-  agentPolicyId?: string
+  agentPolicyId?: string,
+  filterKuery?: string
 ) {
   const [all, online, error, offline] = await Promise.all(
     [
@@ -36,14 +37,28 @@ export async function getAgentStatusForAgentPolicy(
         showInactive: false,
         perPage: 0,
         page: 1,
-        kuery: agentPolicyId
-          ? kuery
-            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}")`
-            : `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"`
-          : kuery,
+        kuery: joinKuerys(
+          ...[
+            kuery,
+            filterKuery,
+            agentPolicyId ? `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"` : undefined,
+          ]
+        ),
       })
     )
   );
+
+  function joinKuerys(...kuerys: Array<string | undefined>) {
+    return kuerys
+      .filter((kuery) => kuery !== undefined)
+      .reduce((acc, kuery) => {
+        if (acc === '') {
+          return `(${kuery})`;
+        }
+
+        return `${acc} and (${kuery})`;
+      }, '');
+  }
 
   return {
     events: await getEventsCount(soClient, agentPolicyId),

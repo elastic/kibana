@@ -177,7 +177,6 @@ export const TimeSeries = ({
             color,
             stack,
             points,
-            useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
             tickFormat,
@@ -211,7 +210,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
@@ -238,7 +236,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}

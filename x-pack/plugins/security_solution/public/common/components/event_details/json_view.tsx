@@ -6,7 +6,7 @@
 
 import { EuiCodeEditor } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -16,29 +16,49 @@ interface Props {
   data: TimelineEventsDetailsItem[];
 }
 
-const JsonEditor = styled.div`
-  width: 100%;
+const EuiCodeEditorContainer = styled.div`
+  .euiCodeEditorWrapper {
+    position: absolute;
+  }
 `;
 
-JsonEditor.displayName = 'JsonEditor';
+const EDITOR_SET_OPTIONS = { fontSize: '12px' };
 
-export const JsonView = React.memo<Props>(({ data }) => (
-  <JsonEditor data-test-subj="jsonView">
-    <EuiCodeEditor
-      isReadOnly
-      mode="javascript"
-      setOptions={{ fontSize: '12px' }}
-      value={JSON.stringify(
+export const JsonView = React.memo<Props>(({ data }) => {
+  const value = useMemo(
+    () =>
+      JSON.stringify(
         buildJsonView(data),
         omitTypenameAndEmpty,
         2 // indent level
-      )}
-      width="100%"
-    />
-  </JsonEditor>
-));
+      ),
+    [data]
+  );
+
+  return (
+    <EuiCodeEditorContainer>
+      <EuiCodeEditor
+        data-test-subj="jsonView"
+        isReadOnly
+        mode="javascript"
+        setOptions={EDITOR_SET_OPTIONS}
+        value={value}
+        width="100%"
+        height="100%"
+      />
+    </EuiCodeEditorContainer>
+  );
+});
 
 JsonView.displayName = 'JsonView';
 
 export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
-  data.reduce((accumulator, item) => set(item.field, item.originalValue, accumulator), {});
+  data.reduce(
+    (accumulator, item) =>
+      set(
+        item.field,
+        Array.isArray(item.originalValue) ? item.originalValue.join() : item.originalValue,
+        accumulator
+      ),
+    {}
+  );

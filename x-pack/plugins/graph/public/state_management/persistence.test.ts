@@ -11,14 +11,15 @@ import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';
-import { lookupIndexPattern, appStateToSavedWorkspace } from '../services/persistence';
+import { migrateLegacyIndexPatternRef, appStateToSavedWorkspace } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 
 jest.mock('../services/persistence', () => ({
-  lookupIndexPattern: jest.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
+  lookupIndexPatternId: jest.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
+  migrateLegacyIndexPatternRef: jest.fn(() => ({ success: true })),
   savedWorkspaceToAppState: jest.fn(() => ({
     urlTemplates: [
       {
@@ -67,7 +68,7 @@ describe('persistence sagas', () => {
     });
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
-      (lookupIndexPattern as jest.Mock).mockReturnValueOnce(undefined);
+      (migrateLegacyIndexPatternRef as jest.Mock).mockReturnValueOnce({ success: false });
       env.store.dispatch(loadSavedWorkspace({} as GraphWorkspaceSavedObject));
       await waitForPromise();
       expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();

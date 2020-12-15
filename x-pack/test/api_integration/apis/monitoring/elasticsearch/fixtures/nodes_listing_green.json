@@ -97,6 +97,7 @@
         }
       },
       "resolver": "ENVgDIKRSdCVJo-YqY4kUQ",
+      "uuid": "ENVgDIKRSdCVJo-YqY4kUQ",
       "shardCount": 54,
       "transport_address": "127.0.0.1:9300",
       "type": "master"
@@ -185,6 +186,7 @@
         }
       },
       "resolver": "t9J9jvHpQ2yDw9c1LJ0tHA",
+      "uuid": "t9J9jvHpQ2yDw9c1LJ0tHA",
       "shardCount": 54,
       "transport_address": "127.0.0.1:9301",
       "type": "node"

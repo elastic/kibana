@@ -1,0 +1,63 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects execution via the Apple script interpreter (osascript) followed by a network connection from the same process within a short time period. Adversaries may use malicious scripts for execution and command and control.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Apple Script Execution followed by Network Connection",
+  "query": "sequence by host.id, process.entity_id with maxspan=30s\n [process where event.type == \"start\" and process.name == \"osascript\"]\n [network where event.type != \"end\" and process.name == \"osascript\" and destination.ip != \"::1\" and\n  not cidrmatch(destination.ip, \"10.0.0.0/8\",  \n                                \"172.16.0.0/12\", \n                                \"192.168.0.0/16\", \n                                \"127.0.0.0/8\", \n                                \"169.254.0.0/16\", \n                                \"224.0.0.0/4\", \n                                \"FE80::/10\", \n                                \"FF00::/8\")\n ]\n",
+  "references": [
+    "https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/index.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "47f76567-d58a-4fed-b32b-21f571e28910",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Command and Control",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

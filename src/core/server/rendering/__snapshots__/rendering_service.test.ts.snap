@@ -23,6 +23,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -36,6 +43,7 @@ Object {
       "user": Object {},
     },
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -66,6 +74,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -79,6 +94,7 @@ Object {
       "user": Object {},
     },
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -109,6 +125,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -126,6 +149,7 @@ Object {
       },
     },
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -156,6 +180,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
@@ -169,6 +200,7 @@ Object {
       "user": Object {},
     },
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -199,6 +231,13 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
@@ -212,6 +251,7 @@ Object {
       "user": Object {},
     },
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},

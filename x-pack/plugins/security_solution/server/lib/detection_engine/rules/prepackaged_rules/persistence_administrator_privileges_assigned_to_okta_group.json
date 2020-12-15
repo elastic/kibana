@@ -2,9 +2,9 @@
   "author": [
     "Elastic"
   ],
-  "description": "An adversary may attempt to assign administrator privileges to an Okta group in order to assign additional permissions to compromised user accounts.",
+  "description": "Detects when an administrator role is assigned to an Okta group. An adversary may attempt to assign administrator privileges to an Okta group in order to assign additional permissions to compromised user accounts and maintain access to their target organization.",
   "false_positives": [
-    "Consider adding exceptions to this rule to filter false positives if administrator privileges are regularly assigned to Okta groups in your organization."
+    "Administrator roles may be assigned to Okta users by a Super Admin user. Verify that the behavior was expected. Exceptions can be added to this rule to filter expected behavior."
   ],
   "index": [
     "filebeat-*",
@@ -12,16 +12,17 @@
   ],
   "language": "kuery",
   "license": "Elastic License",
-  "name": "Administrator Privileges Assigned to Okta Group",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
+  "name": "Administrator Privileges Assigned to an Okta Group",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:group.privilege.grant",
   "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/administrators-admin-comparison.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
   ],
-  "risk_score": 21,
+  "risk_score": 47,
   "rule_id": "b8075894-0b62-46e5-977c-31275da34419",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
     "Elastic",
     "Identity",
@@ -48,5 +49,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

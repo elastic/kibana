@@ -36,6 +36,7 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
+import { init as initStatsReporter } from './lib/ui_metric';
 
 export class KibanaOverviewPlugin
   implements
@@ -47,8 +48,12 @@ export class KibanaOverviewPlugin
     > {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
-    { home }: AppPluginSetupDependencies
+    { home, usageCollection }: AppPluginSetupDependencies
   ): KibanaOverviewPluginSetup {
+    if (usageCollection) {
+      initStatsReporter(usageCollection.reportUiCounter);
+    }
+
     const appUpdater$ = from(core.getStartServices()).pipe(
       switchMap(([coreDeps]) => coreDeps.chrome.navLinks.getNavLinks$()),
       map((navLinks) => {

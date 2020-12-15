@@ -16,6 +16,7 @@ import {
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 export const StepSelectPackage: React.FunctionComponent<{
   agentPolicyId: string;
@@ -32,7 +33,7 @@ export const StepSelectPackage: React.FunctionComponent<{
 }) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
-    packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
+    packageInfo ? pkgKeyFromPackageInfo(packageInfo) : undefined
   );
   const [selectedPkgError, setSelectedPkgError] = useState<Error>();
 
@@ -92,7 +93,7 @@ export const StepSelectPackage: React.FunctionComponent<{
         updatePackageInfo(undefined);
       }
     };
-    if (!packageInfo || selectedPkgKey !== `${packageInfo.name}-${packageInfo.version}`) {
+    if (!packageInfo || selectedPkgKey !== pkgKeyFromPackageInfo(packageInfo)) {
       fetchPackageInfo();
     }
   }, [selectedPkgKey, packageInfo, updatePackageInfo, setIsLoadingSecondStep]);

@@ -18,11 +18,11 @@
  */
 
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import { DashboardSavedObject } from '../../saved_dashboards';
 
 export function getSavedDashboardMock(
-  config?: Partial<SavedObjectDashboard>
-): SavedObjectDashboard {
+  config?: Partial<DashboardSavedObject>
+): DashboardSavedObject {
   const searchSource = dataPluginMock.createStartContract();
 
   return {
@@ -43,5 +43,5 @@ export function getSavedDashboardMock(
     getQuery: () => ({ query: '', language: 'kuery' }),
     getFilters: () => [],
     ...config,
-  } as SavedObjectDashboard;
+  } as DashboardSavedObject;
 }

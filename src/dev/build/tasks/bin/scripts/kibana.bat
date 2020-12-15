@@ -16,11 +16,11 @@ If Not Exist "%NODE%" (
 
 set CONFIG_DIR=%KBN_PATH_CONF%
 If [%KBN_PATH_CONF%] == [] (
-  set CONFIG_DIR=%DIR%\config
+  set "CONFIG_DIR=%DIR%\config"
 )
 
 IF EXIST "%CONFIG_DIR%\node.options" (
-  for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
+  for /F "usebackq eol=# tokens=*" %%i in ("%CONFIG_DIR%\node.options") do (
     If [!NODE_OPTIONS!] == [] (
       set "NODE_OPTIONS=%%i"
     )	Else (

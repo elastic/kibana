@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SerializedPhase, DeletePhase, SerializedPolicy } from '../../../common/types';
+import {
+  SerializedPhase,
+  DeletePhase,
+  SerializedPolicy,
+  RolloverAction,
+} from '../../../common/types';
 
 export const defaultSetPriority: string = '100';
 
 export const defaultPhaseIndexPriority: string = '50';
+
+export const defaultRolloverAction: RolloverAction = {
+  max_age: '30d',
+  max_size: '50gb',
+};
 
 export const defaultPolicy: SerializedPolicy = {
   name: '',
   phases: {
     hot: {
       actions: {
-        rollover: {
-          max_age: '30d',
-          max_size: '50gb',
-        },
+        rollover: defaultRolloverAction,
       },
     },
   },

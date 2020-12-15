@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, SchemaConfig, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TagcloudExpressionFunctionDefinition } from './tag_cloud_fn';
@@ -36,11 +39,14 @@ const prepareDimension = (params: SchemaConfig) => {
 
 export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipelineParams) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);

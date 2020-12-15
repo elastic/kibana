@@ -50,38 +50,6 @@ const getDisplayName = (name, imported) => {
 };
 
 /**
- * Filters the context data by primitives and returns an array of primitive names
- * The current data structure from ES does not indicate if a field is
- * a primitive or class, so we infer this by checking
- * that no methods or fields are defined
- * @param {string} contextData
- * @returns {Array<String>}
- */
-const getPrimitives = (contextData) => {
-  return contextData
-    .filter(
-      ({
-        static_fields: staticFields,
-        fields,
-        static_methods: staticMethods,
-        methods,
-        constructors,
-      }) => {
-        if (
-          staticMethods.length === 0 &&
-          methods.length === 0 &&
-          staticFields.length === 0 &&
-          fields.length === 0 &&
-          constructors.length === 0
-        ) {
-          return true;
-        }
-      }
-    )
-    .map((type) => type.name);
-};
-
-/**
  * Given the method name, array of parameters, and return value,
  * we create a description of the method that will be
  * used to display the help tooltip for the autocomplete suggestion
@@ -286,7 +254,6 @@ const createAutocompleteDefinitions = (painlessClasses) => {
     }) => {
       // The name is often prefixed by the Java package (e.g., Java.lang.Math) and needs to be removed
       const displayName = getDisplayName(name, imported);
-      const isType = getPrimitives(painlessClasses).includes(name);
 
       const properties = getPainlessClassToAutocomplete({
         staticFields,
@@ -299,8 +266,8 @@ const createAutocompleteDefinitions = (painlessClasses) => {
 
       return {
         label: displayName,
-        kind: isType ? 'type' : 'class',
-        documentation: isType ? `Primitive: ${displayName}` : `Class: ${displayName}`,
+        kind: 'class',
+        documentation: `Class: ${displayName}`,
         insertText: displayName,
         properties: properties.length ? properties : undefined,
         constructorDefinition,
@@ -313,7 +280,6 @@ const createAutocompleteDefinitions = (painlessClasses) => {
 
 module.exports = {
   getMethodDescription,
-  getPrimitives,
   getPainlessClassToAutocomplete,
   createAutocompleteDefinitions,
 };

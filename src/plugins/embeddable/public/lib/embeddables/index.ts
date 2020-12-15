@@ -17,6 +17,7 @@
  * under the License.
  */
 export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
+export { isEmbeddable } from './is_embeddable';
 export { Embeddable } from './embeddable';
 export * from './embeddable_factory';
 export * from './embeddable_factory_definition';

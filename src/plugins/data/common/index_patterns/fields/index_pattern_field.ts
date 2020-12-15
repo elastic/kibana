@@ -42,7 +42,7 @@ export class IndexPatternField implements IFieldType {
     return this.spec.count || 0;
   }
 
-  public set count(count) {
+  public set count(count: number) {
     this.spec.count = count;
   }
 
@@ -147,6 +147,10 @@ export class IndexPatternField implements IFieldType {
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
+  }
+
+  public deleteCount() {
+    delete this.spec.count;
   }
 
   public toJSON() {

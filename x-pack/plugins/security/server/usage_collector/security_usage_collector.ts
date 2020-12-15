@@ -75,7 +75,12 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       },
     },
     fetch: () => {
-      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
+      const {
+        allowRbac,
+        allowAccessAgreement,
+        allowAuditLogging,
+        allowLegacyAuditLogging,
+      } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -87,7 +92,10 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         };
       }
 
-      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
+      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
+      const auditLoggingEnabled =
+        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
+
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -107,7 +115,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       );
 
       return {
-        auditLoggingEnabled,
+        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,

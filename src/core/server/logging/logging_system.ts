@@ -30,6 +30,7 @@ import {
   LoggerContextConfigType,
   LoggerContextConfigInput,
   loggerContextConfigSchema,
+  config as loggingConfig,
 } from './logging_config';
 
 export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;
@@ -48,6 +49,8 @@ export class LoggingSystem implements LoggerFactory {
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
 
+  constructor() {}
+
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
     if (!this.loggers.has(context)) {
@@ -65,11 +68,13 @@ export class LoggingSystem implements LoggerFactory {
 
   /**
    * Updates all current active loggers with the new config values.
-   * @param rawConfig New config instance.
+   * @param rawConfig New config instance. if unspecified, the default logging configuration
+   *                  will be used.
    */
-  public upgrade(rawConfig: LoggingConfigType) {
-    const config = new LoggingConfig(rawConfig)!;
-    this.applyBaseConfig(config);
+  public async upgrade(rawConfig?: LoggingConfigType) {
+    const usedConfig = rawConfig ?? loggingConfig.schema.validate({});
+    const config = new LoggingConfig(usedConfig);
+    await this.applyBaseConfig(config);
   }
 
   /**
@@ -93,7 +98,7 @@ export class LoggingSystem implements LoggerFactory {
    * @param baseContextParts
    * @param rawConfig
    */
-  public setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
+  public async setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
     const context = LoggingConfig.getLoggerContext(baseContextParts);
     const contextConfig = loggerContextConfigSchema.validate(rawConfig);
     this.contextConfigs.set(context, {
@@ -110,7 +115,7 @@ export class LoggingSystem implements LoggerFactory {
     // If we already have a base config, apply the config. If not, custom context configs
     // will be picked up on next call to `upgrade`.
     if (this.baseConfig) {
-      this.applyBaseConfig(this.baseConfig);
+      await this.applyBaseConfig(this.baseConfig);
     }
   }
 
@@ -154,17 +159,21 @@ export class LoggingSystem implements LoggerFactory {
     return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 
-  private applyBaseConfig(newBaseConfig: LoggingConfig) {
+  private async applyBaseConfig(newBaseConfig: LoggingConfig) {
     const computedConfig = [...this.contextConfigs.values()].reduce(
       (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
       newBaseConfig
     );
 
+    // reconfigure all the loggers without configuration to have them use the buffer
+    // appender while we are awaiting for the appenders to be disposed.
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, undefined));
+    }
+
     // Appenders must be reset, so we first dispose of the current ones, then
     // build up a new set of appenders.
-    for (const appender of this.appenders.values()) {
-      appender.dispose();
-    }
+    await Promise.all([...this.appenders.values()].map((a) => a.dispose()));
     this.appenders.clear();
 
     for (const [appenderKey, appenderConfig] of computedConfig.appenders) {

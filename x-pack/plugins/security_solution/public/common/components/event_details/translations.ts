@@ -6,6 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summary', {
+  defaultMessage: 'Summary',
+});
+
+export const INVESTIGATION_GUIDE = i18n.translate(
+  'xpack.securitySolution.alertDetails.summary.investigationGuide',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);
+
 export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
   defaultMessage: 'Table',
 });

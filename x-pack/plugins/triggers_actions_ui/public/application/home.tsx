@@ -46,7 +46,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     application: { capabilities },
     setBreadcrumbs,
     docLinks,
-    http,
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
@@ -144,7 +143,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               path={routeToConnectors}
               component={() => (
                 <HealthContextProvider>
-                  <HealthCheck docLinks={docLinks} http={http} waitForCheck={true}>
+                  <HealthCheck waitForCheck={true}>
                     <ActionsConnectorsList />
                   </HealthCheck>
                 </HealthContextProvider>
@@ -156,7 +155,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             path={routeToAlerts}
             component={() => (
               <HealthContextProvider>
-                <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+                <HealthCheck inFlyout={true} waitForCheck={true}>
                   <AlertsList />
                 </HealthCheck>
               </HealthContextProvider>

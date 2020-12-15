@@ -9,7 +9,7 @@ object JestIntegration : BuildType({
   description = "Executes Jest Integration Tests"
 
   steps {
-    runbld("Jest Integration", "yarn run grunt run:test_jest_integration")
+    runbld("Jest Integration", "./.ci/teamcity/oss/jest_integration.sh")
   }
 
   addTestSettings()

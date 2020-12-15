@@ -129,6 +129,7 @@ describe('data generator', () => {
     const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event?.action).not.toBeNull();
+    expect(alert.event?.code).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
@@ -321,6 +322,30 @@ describe('data generator', () => {
       for (const level of tree.childrenLevels) {
         for (const node of level.values()) {
           expect(tree.children.get(node.id)).toEqual(node);
+        }
+      }
+    });
+
+    it('groups the children by their parent ID correctly', () => {
+      expect(tree.childrenByParent.size).toBe(13);
+      expect(tree.childrenByParent.get(tree.origin.id)?.size).toBe(3);
+
+      for (const value of tree.childrenByParent.values()) {
+        expect(value.size).toBe(3);
+      }
+
+      // loop over everything but the last level because those nodes won't be parents
+      for (let i = 0; i < tree.childrenLevels.length - 1; i++) {
+        const level = tree.childrenLevels[i];
+        // loop over all the nodes in a level
+        for (const id of level.keys()) {
+          // each node in the level should have 3 children
+          expect(tree.childrenByParent.get(id)?.size).toBe(3);
+
+          // let's make sure the children of this ID are actually in the next level and that they are the same reference
+          for (const [childID, childNode] of tree.childrenByParent.get(id)!.entries()) {
+            expect(tree.childrenLevels[i + 1].get(childID)).toBe(childNode);
+          }
         }
       }
     });

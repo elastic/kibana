@@ -24,7 +24,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
@@ -34,10 +34,10 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { AnomalySeries } from '../../../selectors/chart_selectors';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd } from './helper/helper';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 
 interface Props {
   id: string;
@@ -55,7 +55,9 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalySeries?: AnomalySeries;
+  anomalySeries?: ReturnType<
+    typeof getLatencyChartSelector
+  >['anomalyTimeseries'];
 }
 
 export function TimeseriesChart({
@@ -71,20 +73,13 @@ export function TimeseriesChart({
   anomalySeries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
   const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEventContext();
+  const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
   const { start, end } = urlParams;
-
-  useEffect(() => {
-    if (pointerEvent && pointerEvent?.chartId !== id && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [pointerEvent, chartRef, id]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();

@@ -1516,6 +1516,261 @@
               }
             }
           }
+        },
+        "apiCalls.savedObjectsBulkCreate.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.createNewCopiesEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.overwriteEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsImport.overwriteEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.allTypesSelected.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsExport.allTypesSelected.no": {
+          "type": "long"
         }
       }
     },
@@ -1866,6 +2121,35 @@
         },
         "dateFormat": {
           "type": "keyword"
+        }
+      }
+    },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword"
+              },
+              "eventName": {
+                "type": "keyword"
+              },
+              "lastUpdatedAt": {
+                "type": "date"
+              },
+              "fromTimestamp": {
+                "type": "date"
+              },
+              "counterType": {
+                "type": "keyword"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
         }
       }
     },

@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggDerivativeFnName } from './derivative_fn';
 import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
@@ -25,7 +26,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 export interface AggParamsDerivative extends BaseAggParams {
-  buckets_path: string;
+  buckets_path?: string;
   customMetric?: AggConfigSerialized;
   metricAgg?: string;
 }
@@ -43,6 +44,7 @@ export const getDerivativeMetricAgg = () => {
 
   return new MetricAggType({
     name: METRIC_TYPES.DERIVATIVE,
+    expressionName: aggDerivativeFnName,
     title: derivativeTitle,
     makeLabel(agg) {
       return makeNestedLabel(agg, derivativeLabel);

@@ -4,414 +4,555 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getQueryFilter, buildExceptionFilter, buildEqlSearchRequest } from './get_query_filter';
-import { Filter, EsQueryConfig } from 'src/plugins/data/public';
+import { getQueryFilter, getAllFilters, buildEqlSearchRequest } from './get_query_filter';
+import { Filter } from 'src/plugins/data/public';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { ExceptionListItemSchema } from '../shared_imports';
 
 describe('get_filter', () => {
   describe('getQueryFilter', () => {
-    test('it should work with an empty filter as kuery', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'linux',
+    describe('kuery', () => {
+      test('it should work with an empty filter as kuery', () => {
+        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'linux',
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
-      });
-    });
-
-    test('it should work with an empty filter as lucene', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
-      expect(esQuery).toEqual({
-        bool: {
-          must: [
-            {
-              query_string: {
-                query: 'host.name: linux',
-                analyze_wildcard: true,
-                time_zone: 'Zulu',
-              },
-            },
-          ],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      });
-    });
-
-    test('it should work with a simple filter as a kuery', () => {
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'kuery',
-        [
-          {
-            meta: {
-              alias: 'custom label here',
-              disabled: false,
-              key: 'host.name',
-              negate: false,
-              params: {
-                query: 'siem-windows',
-              },
-              type: 'phrase',
-            },
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
-              },
-            },
+            ],
+            should: [],
+            must_not: [],
           },
-        ],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
+        });
+      });
+
+      test('it should work with a simple filter as a kuery', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'kuery',
+          [
             {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'windows',
+              meta: {
+                alias: 'custom label here',
+                disabled: false,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            },
+          ],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'windows',
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should ignore disabled filters as a kuery', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'kuery',
+          [
+            {
+              meta: {
+                alias: 'custom label here',
+                disabled: false,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
             },
             {
-              match_phrase: {
-                'host.name': 'siem-windows',
+              meta: {
+                alias: 'custom label here',
+                disabled: true,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
             },
           ],
-          should: [],
-          must_not: [],
-        },
-      });
-    });
-
-    test('it should work with a simple filter as a kuery without meta information', () => {
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'kuery',
-        [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
-              },
-            },
-          },
-        ],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'windows',
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'windows',
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should work with a simple filter as a kuery without meta information', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'kuery',
+          [
             {
-              match_phrase: {
-                'host.name': 'siem-windows',
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
             },
           ],
-          should: [],
-          must_not: [],
-        },
-      });
-    });
-
-    test('it should work with a simple filter as a kuery without meta information with an exists', () => {
-      const query: Partial<Filter> = {
-        query: {
-          match_phrase: {
-            'host.name': 'siem-windows',
-          },
-        },
-      };
-
-      const exists: Partial<Filter> = {
-        exists: {
-          field: 'host.hostname',
-        },
-      } as Partial<Filter>;
-
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'kuery',
-        [query, exists],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'windows',
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'windows',
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-            {
-              match_phrase: {
-                'host.name': 'siem-windows',
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
-            },
-            {
-              exists: {
-                field: 'host.hostname',
-              },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
       });
-    });
 
-    test('it should work with a simple filter that is disabled as a kuery', () => {
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'kuery',
-        [
-          {
-            meta: {
-              alias: 'custom label here',
-              disabled: true,
-              key: 'host.name',
-              negate: false,
-              params: {
-                query: 'siem-windows',
-              },
-              type: 'phrase',
-            },
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
-              },
+      test('it should work with a simple filter as a kuery without meta information with an exists', () => {
+        const query: Partial<Filter> = {
+          query: {
+            match_phrase: {
+              'host.name': 'siem-windows',
             },
           },
-        ],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'windows',
+        };
+
+        const exists: Partial<Filter> = {
+          exists: {
+            field: 'host.hostname',
+          },
+        } as Partial<Filter>;
+
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'kuery',
+          [query, exists],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'windows',
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
-      });
-    });
-
-    test('it should work with a simple filter as a lucene', () => {
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'lucene',
-        [
-          {
-            meta: {
-              alias: 'custom label here',
-              disabled: false,
-              key: 'host.name',
-              negate: false,
-              params: {
-                query: 'siem-windows',
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
-              type: 'phrase',
-            },
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
+              {
+                exists: {
+                  field: 'host.hostname',
+                },
               },
-            },
+            ],
+            should: [],
+            must_not: [],
           },
-        ],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [
-            {
-              query_string: {
-                query: 'host.name: windows',
-                analyze_wildcard: true,
-                time_zone: 'Zulu',
-              },
-            },
-          ],
-          filter: [
-            {
-              match_phrase: {
-                'host.name': 'siem-windows',
-              },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
+        });
       });
-    });
 
-    test('it should work with a simple filter that is disabled as a lucene', () => {
-      const esQuery = getQueryFilter(
-        'host.name: windows',
-        'lucene',
-        [
-          {
-            meta: {
-              alias: 'custom label here',
-              disabled: true,
-              key: 'host.name',
-              negate: false,
-              params: {
-                query: 'siem-windows',
+      test('it should work with a simple filter that is disabled as a kuery', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'kuery',
+          [
+            {
+              meta: {
+                alias: 'custom label here',
+                disabled: true,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
               },
             },
+          ],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'host.name': 'windows',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
           },
-        ],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [
-            {
-              query_string: {
-                query: 'host.name: windows',
-                analyze_wildcard: true,
-                time_zone: 'Zulu',
-              },
-            },
-          ],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
+        });
       });
     });
 
-    test('it should work with a list', () => {
-      const esQuery = getQueryFilter(
-        'host.name: linux',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        [getExceptionListItemSchemaMock()]
-      );
-      expect(esQuery).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
-          must: [],
-          must_not: [
+    describe('lucene', () => {
+      test('it should work with an empty filter as lucene', () => {
+        const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
+        expect(esQuery).toEqual({
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'host.name: linux',
+                  analyze_wildcard: true,
+                  time_zone: 'Zulu',
+                },
+              },
+            ],
+            filter: [],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should work with a simple filter as a lucene', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'lucene',
+          [
             {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match_phrase: {
-                                      'some.parentField.nested.field': 'some value',
+              meta: {
+                alias: 'custom label here',
+                disabled: false,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            },
+          ],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'host.name: windows',
+                  analyze_wildcard: true,
+                  time_zone: 'Zulu',
+                },
+              },
+            ],
+            filter: [
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should ignore disabled lucene filters', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'lucene',
+          [
+            {
+              meta: {
+                alias: 'custom label here',
+                disabled: false,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            },
+            {
+              meta: {
+                alias: 'custom label here',
+                disabled: true,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            },
+          ],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'host.name: windows',
+                  analyze_wildcard: true,
+                  time_zone: 'Zulu',
+                },
+              },
+            ],
+            filter: [
+              {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should work with a simple filter that is disabled as a lucene', () => {
+        const esQuery = getQueryFilter(
+          'host.name: windows',
+          'lucene',
+          [
+            {
+              meta: {
+                alias: 'custom label here',
+                disabled: true,
+                key: 'host.name',
+                negate: false,
+                params: {
+                  query: 'siem-windows',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'host.name': 'siem-windows',
+                },
+              },
+            },
+          ],
+          ['auditbeat-*'],
+          []
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'host.name: windows',
+                  analyze_wildcard: true,
+                  time_zone: 'Zulu',
+                },
+              },
+            ],
+            filter: [],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('it should work with a list', () => {
+        const esQuery = getQueryFilter(
+          'host.name: linux',
+          'kuery',
+          [],
+          ['auditbeat-*'],
+          [getExceptionListItemSchemaMock()]
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            filter: [
+              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+            ],
+            must: [],
+            must_not: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            nested: {
+                              path: 'some.parentField',
+                              query: {
+                                bool: {
+                                  minimum_should_match: 1,
+                                  should: [
+                                    {
+                                      match_phrase: {
+                                        'some.parentField.nested.field': 'some value',
+                                      },
                                     },
-                                  },
-                                ],
-                              },
-                            },
-                            score_mode: 'none',
-                          },
-                        },
-                        {
-                          bool: {
-                            minimum_should_match: 1,
-                            should: [
-                              {
-                                match_phrase: {
-                                  'some.not.nested.field': 'some value',
+                                  ],
                                 },
                               },
-                            ],
+                              score_mode: 'none',
+                            },
                           },
-                        },
-                      ],
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.not.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-          should: [],
-        },
+            ],
+            should: [],
+          },
+        });
       });
     });
 
@@ -510,6 +651,62 @@ describe('get_filter', () => {
             },
           ],
           should: [],
+        },
+      });
+    });
+
+    test('it should work with an exception list that includes a nested typ', () => {
+      const esQuery = getQueryFilter(
+        'host.name: linux',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        [getExceptionListItemSchemaMock()]
+      );
+
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            { bool: { should: [{ match: { 'host.name': 'linux' } }], minimum_should_match: 1 } },
+          ],
+          should: [],
+          must_not: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                should: [
+                                  {
+                                    match_phrase: { 'some.parentField.nested.field': 'some value' },
+                                  },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         },
       });
     });
@@ -912,200 +1109,6 @@ describe('get_filter', () => {
     });
   });
 
-  describe('buildExceptionFilter', () => {
-    const config: EsQueryConfig = {
-      allowLeadingWildcards: true,
-      queryStringOptions: { analyze_wildcard: true },
-      ignoreFilterIfFieldNotInIndex: false,
-      dateFormatTZ: 'Zulu',
-    };
-    test('it should build a filter without chunking exception items', () => {
-      const exceptionItem1: ExceptionListItemSchema = {
-        ...getExceptionListItemSchemaMock(),
-        entries: [
-          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
-          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
-        ],
-      };
-      const exceptionItem2: ExceptionListItemSchema = {
-        ...getExceptionListItemSchemaMock(),
-        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
-      };
-      const exceptionFilter = buildExceptionFilter({
-        lists: [exceptionItem1, exceptionItem2],
-        config,
-        excludeExceptions: true,
-        chunkSize: 2,
-        indexPattern: {
-          fields: [],
-          title: 'auditbeat-*',
-        },
-      });
-      expect(exceptionFilter).toEqual({
-        meta: {
-          alias: null,
-          negate: true,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match_phrase: {
-                              'host.name': 'linux',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match_phrase: {
-                              'some.field': 'value',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      match_phrase: {
-                        'user.name': 'name',
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      });
-    });
-
-    test('it should properly chunk exception items', () => {
-      const exceptionItem1: ExceptionListItemSchema = {
-        ...getExceptionListItemSchemaMock(),
-        entries: [
-          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
-          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
-        ],
-      };
-      const exceptionItem2: ExceptionListItemSchema = {
-        ...getExceptionListItemSchemaMock(),
-        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
-      };
-      const exceptionItem3: ExceptionListItemSchema = {
-        ...getExceptionListItemSchemaMock(),
-        entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
-      };
-      const exceptionFilter = buildExceptionFilter({
-        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
-        config,
-        excludeExceptions: true,
-        chunkSize: 2,
-        indexPattern: {
-          fields: [],
-          title: 'auditbeat-*',
-        },
-      });
-      expect(exceptionFilter).toEqual({
-        meta: {
-          alias: null,
-          negate: true,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'host.name': 'linux',
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.field': 'value',
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match_phrase: {
-                              'user.name': 'name',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match_phrase: {
-                              'file.path': '/safe/path',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      });
-    });
-  });
-
   describe('buildEqlSearchRequest', () => {
     test('should build a basic request with time range', () => {
       const request = buildEqlSearchRequest(
@@ -1260,6 +1263,87 @@ describe('get_filter', () => {
           },
         },
       });
+    });
+  });
+
+  describe('getAllFilters', () => {
+    const exceptionsFilter = {
+      meta: { alias: null, negate: false, disabled: false },
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [
+                  {
+                    nested: {
+                      path: 'some.parentField',
+                      query: {
+                        bool: {
+                          should: [
+                            { match_phrase: { 'some.parentField.nested.field': 'some value' } },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      score_mode: 'none',
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    };
+    const simpleFilter = {
+      meta: {
+        alias: 'custom label here',
+        disabled: false,
+        key: 'host.name',
+        negate: false,
+        params: {
+          query: 'siem-windows',
+        },
+        type: 'phrase',
+      },
+      query: {
+        match_phrase: {
+          'host.name': 'siem-windows',
+        },
+      },
+    };
+
+    test('it returns array with exceptions filter if exceptions filter if no other filters passed in', () => {
+      const filters = getAllFilters([], exceptionsFilter);
+
+      expect(filters).toEqual([exceptionsFilter]);
+    });
+
+    test('it returns empty array if no filters', () => {
+      const filters = getAllFilters([], undefined);
+
+      expect(filters).toEqual([]);
+    });
+
+    test('it returns array with exceptions filter if exceptions filter is not undefined', () => {
+      const filters = getAllFilters([simpleFilter], exceptionsFilter);
+
+      expect(filters[0]).toEqual(simpleFilter);
+      expect(filters[1]).toEqual(exceptionsFilter);
+    });
+
+    test('it returns array without exceptions filter if exceptions filter is undefined', () => {
+      const filters = getAllFilters([simpleFilter], undefined);
+
+      expect(filters[0]).toEqual(simpleFilter);
+      expect(filters[1]).toBeUndefined();
     });
   });
 });

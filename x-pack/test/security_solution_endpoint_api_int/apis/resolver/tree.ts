@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 9,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 9,
             schema: schemaWithAncestry,
             nodes: ['bogus id'],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 3,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -183,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from,
               to: from,
             },
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id, bottomMostDescendant],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -246,7 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [leftNode, rightNode],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -277,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -299,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -329,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -358,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithAncestry,
             nodes: ['bogus id'],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -381,7 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithoutAncestry,
             nodes: [childID],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -414,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithAncestry,
             nodes: [leftNodeID, rightNodeID],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -447,7 +447,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id, originGrandparent],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -484,7 +484,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id, originGrandparent],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -520,7 +520,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: end,
             },
@@ -549,7 +549,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithName,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -587,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithoutAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -625,7 +625,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 50,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
@@ -663,7 +663,7 @@ export default function ({ getService }: FtrProviderContext) {
             ancestors: 0,
             schema: schemaWithAncestry,
             nodes: [tree.origin.id],
-            timerange: {
+            timeRange: {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },

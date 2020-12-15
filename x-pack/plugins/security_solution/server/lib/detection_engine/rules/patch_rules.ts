@@ -172,6 +172,7 @@ export const patchRules = async ({
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
     throttle: null,
+    notifyWhen: null,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
