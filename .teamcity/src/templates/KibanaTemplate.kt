@@ -40,7 +40,7 @@ object KibanaTemplate : Template({
   }
 
   failureConditions {
-    executionTimeoutMin = 120
+    executionTimeoutMin = 160
     testFailure = false
   }
 
