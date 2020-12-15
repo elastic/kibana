@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   EuiHealth,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -57,6 +58,8 @@ import {
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
+import './alerts_list.scss';
 
 const ENTER_KEY = 13;
 
@@ -255,7 +258,10 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: true,
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
-        return (
+        const checkEnabledResult = checkAlertTypeEnabled(
+          alertTypesState.data.get(alert.alertTypeId)
+        );
+        const link = (
           <EuiLink
             title={name}
             onClick={() => {
@@ -264,6 +270,17 @@ export const AlertsList: React.FunctionComponent = () => {
           >
             {name}
           </EuiLink>
+        );
+        return checkEnabledResult.isEnabled ? (
+          link
+        ) : (
+          <EuiToolTip
+            position="top"
+            data-test-subj={`${alert.id}-disabledTooltip`}
+            content={checkEnabledResult.message}
+          >
+            {link}
+          </EuiToolTip>
         );
       },
     },
@@ -572,11 +589,17 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
-        rowProps={() => ({
+        rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableRowDisabled'
+            : '',
         })}
-        cellProps={() => ({
+        cellProps={(item: AlertTableItem) => ({
           'data-test-subj': 'cell',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableCellDisabled'
+            : '',
         })}
         data-test-subj="alertsList"
         pagination={{
@@ -704,5 +727,6 @@ function convertAlertsToTableItems(
     isEditable:
       hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
+    enabledInLicense: !!alertTypesIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }
