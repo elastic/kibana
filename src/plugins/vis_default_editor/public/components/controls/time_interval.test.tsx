@@ -34,7 +34,6 @@ jest.mock('../../../../data/public', () => ({
 }));
 
 import { search } from '../../../../data/public';
-const { parseEsInterval } = search.aggs;
 
 describe('TimeIntervalParamEditor', () => {
   let props: AggParamEditorProps<string>;
@@ -121,6 +120,7 @@ describe('TimeIntervalParamEditor', () => {
   describe('custom interval value', () => {
     test('should have valid "2h" interval selected', () => {
       props.value = '2h';
+      // @ts-ignore
       props.agg.buckets = {
         getInterval: jest.fn().mockReturnValue({
           expression: '2h',
@@ -136,6 +136,7 @@ describe('TimeIntervalParamEditor', () => {
 
     test('should have invalid calendar interval "3w"', () => {
       props.value = '3w';
+      // @ts-ignore
       props.agg.buckets = {
         getInterval: jest.fn().mockReturnValue({
           expression: '3w',
