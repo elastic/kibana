@@ -108,60 +108,56 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         />
       </EuiFlexItem>
       {stats && (
-        <EuiFlexItem>
-          <EuiFlexGroup direction={'column'} data-test-subj={'mlTopValues'}>
-            <EuiFlexItem grow={false}>
-              <ExpandedRowFieldHeader>
-                <FormattedMessage
-                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
-                  defaultMessage="Top values"
-                />
-              </ExpandedRowFieldHeader>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <TopValues
-                stats={stats}
-                fieldFormat={fieldFormat}
-                barColor="secondary"
-                compressed={true}
+        <EuiFlexItem data-test-subj={'mlTopValues'}>
+          <EuiFlexItem grow={false}>
+            <ExpandedRowFieldHeader>
+              <FormattedMessage
+                id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
+                defaultMessage="Top values"
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </ExpandedRowFieldHeader>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TopValues
+              stats={stats}
+              fieldFormat={fieldFormat}
+              barColor="secondary"
+              compressed={true}
+            />
+          </EuiFlexItem>
         </EuiFlexItem>
       )}
       {distribution && (
-        <EuiFlexItem>
-          <EuiFlexGroup direction={'column'} data-test-subj={'mlMetricDistribution'}>
-            <EuiFlexItem>
-              <ExpandedRowFieldHeader>
-                <FormattedMessage
-                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
-                  defaultMessage="Distribution"
-                />
-              </ExpandedRowFieldHeader>
-            </EuiFlexItem>
-
-            <EuiFlexItem style={{ width: '100%' }}>
-              <MetricDistributionChart
-                width={METRIC_DISTRIBUTION_CHART_WIDTH}
-                height={METRIC_DISTRIBUTION_CHART_HEIGHT}
-                chartData={distributionChartData}
-                fieldFormat={fieldFormat}
+        <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
+          <EuiFlexItem>
+            <ExpandedRowFieldHeader>
+              <FormattedMessage
+                id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
+                defaultMessage="Distribution"
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
-                  defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
-                  values={{
-                    minPercent: numberAsOrdinal(distribution.minPercentile),
-                    maxPercent: numberAsOrdinal(distribution.maxPercentile),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </ExpandedRowFieldHeader>
+          </EuiFlexItem>
+
+          <EuiFlexItem style={{ width: '100%' }}>
+            <MetricDistributionChart
+              width={METRIC_DISTRIBUTION_CHART_WIDTH}
+              height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+              chartData={distributionChartData}
+              fieldFormat={fieldFormat}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
+                defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
+                values={{
+                  minPercent: numberAsOrdinal(distribution.minPercentile),
+                  maxPercent: numberAsOrdinal(distribution.maxPercentile),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

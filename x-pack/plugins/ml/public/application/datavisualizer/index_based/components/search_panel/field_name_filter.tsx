@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Option, MultiSelectPicker } from '../../../../components/multi_select_picker';
 import type { OverallStats } from '../../../../../../common/types/datavisualizer';
