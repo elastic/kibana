@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-import { mountWithIntl } from '@kbn/test/jest';
 import JiraParamsFields from './jira_params';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
@@ -94,7 +93,7 @@ describe('JiraParamsFields renders', () => {
   });
 
   test('all params fields are rendered', () => {
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
     expect(wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('value')).toStrictEqual(
       '10006'
     );
@@ -109,7 +108,7 @@ describe('JiraParamsFields renders', () => {
 
   test('it shows loading when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
 
     expect(
       wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('isLoading')
@@ -122,7 +121,7 @@ describe('JiraParamsFields renders', () => {
       isLoading: true,
     });
 
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
 
     expect(
       wrapper.find('[data-test-subj="prioritySelect"]').first().prop('isLoading')
@@ -135,7 +134,7 @@ describe('JiraParamsFields renders', () => {
   test('it disabled the fields when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
 
     expect(
       wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
@@ -152,7 +151,7 @@ describe('JiraParamsFields renders', () => {
       isLoading: true,
     });
 
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
 
     expect(
       wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
@@ -169,7 +168,7 @@ describe('JiraParamsFields renders', () => {
       ...useGetFieldsByIssueTypeResponse,
       fields: {},
     });
-    const wrapper = mountWithIntl(<JiraParamsFields {...defaultProps} />);
+    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
 
     expect(wrapper.find('[data-test-subj="issueTypeSelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="summaryInput"]').exists()).toBeTruthy();
@@ -182,19 +181,18 @@ describe('JiraParamsFields renders', () => {
   });
 
   test('If issue type is undefined, set to first item in issueTypes', () => {
-    const newParams = {
-      ...actionParams,
-      subActionParams: {
-        ...actionParams.subActionParams,
-        incident: {
-          ...actionParams.subActionParams.incident,
-          issueType: null,
-        },
-      },
-    };
     const newProps = {
       ...defaultProps,
-      actionParams: newParams,
+      actionParams: {
+        ...actionParams,
+        subActionParams: {
+          ...actionParams.subActionParams,
+          incident: {
+            ...actionParams.subActionParams.incident,
+            issueType: null,
+          },
+        },
+      },
     };
     mount(<JiraParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1].incident.issueType).toEqual(
@@ -203,19 +201,18 @@ describe('JiraParamsFields renders', () => {
   });
 
   test('If issue type is not an option in issueTypes, set to first item in issueTypes', () => {
-    const newParams = {
-      ...actionParams,
-      subActionParams: {
-        ...actionParams.subActionParams,
-        incident: {
-          ...actionParams.subActionParams.incident,
-          issueType: '999',
-        },
-      },
-    };
     const newProps = {
       ...defaultProps,
-      actionParams: newParams,
+      actionParams: {
+        ...actionParams,
+        subActionParams: {
+          ...actionParams.subActionParams,
+          incident: {
+            ...actionParams.subActionParams.incident,
+            issueType: '999',
+          },
+        },
+      },
     };
     mount(<JiraParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1].incident.issueType).toEqual(
@@ -228,19 +225,18 @@ describe('JiraParamsFields renders', () => {
       ...useGetFieldsByIssueTypeResponse,
       fields: null,
     });
-    const newParams = {
-      ...actionParams,
-      subActionParams: {
-        ...actionParams.subActionParams,
-        incident: {
-          ...actionParams.subActionParams.incident,
-          issueType: null,
-        },
-      },
-    };
     const newProps = {
       ...defaultProps,
-      actionParams: newParams,
+      actionParams: {
+        ...actionParams,
+        subActionParams: {
+          ...actionParams.subActionParams,
+          incident: {
+            ...actionParams.subActionParams.incident,
+            issueType: null,
+          },
+        },
+      },
     };
     const wrapper = mount(<JiraParamsFields {...newProps} />);
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toEqual(false);
@@ -291,15 +287,9 @@ describe('JiraParamsFields renders', () => {
   });
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    beforeEach(() => {
-      jest.clearAllMocks();
-      useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
-      useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    });
     test('issueTypeSelect update triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const issueTypeSelect = wrapper.find('[data-test-subj="issueTypeSelect"]').first();
-      expect(editAction.mock.calls.length).toEqual(1);
       issueTypeSelect.prop('onChange')!(changeEvent);
       expect(editAction.mock.calls.length).toEqual(2);
       expect(editAction.mock.calls[1][1].incident.issueType).toEqual(changeEvent.target.value);
@@ -307,22 +297,20 @@ describe('JiraParamsFields renders', () => {
     test('prioritySelect update triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const prioritySelect = wrapper.find('[data-test-subj="prioritySelect"]').first();
-      expect(editAction.mock.calls.length).toEqual(1);
       prioritySelect.prop('onChange')!(changeEvent);
       expect(editAction.mock.calls.length).toEqual(2);
       expect(editAction.mock.calls[1][1].incident.priority).toEqual(changeEvent.target.value);
     });
     test('A comment triggers editAction', () => {
-      const newParams = {
-        ...actionParams,
-        subActionParams: {
-          ...actionParams.subActionParams,
-          comments: [],
-        },
-      };
       const newProps = {
         ...defaultProps,
-        actionParams: newParams,
+        actionParams: {
+          ...actionParams,
+          subActionParams: {
+            ...actionParams.subActionParams,
+            comments: [],
+          },
+        },
       };
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const fullComment = { target: { value: 'sometext' } };
@@ -332,16 +320,15 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
     });
     test('An empty comment does not trigger editAction', () => {
-      const newParams = {
-        ...actionParams,
-        subActionParams: {
-          ...actionParams.subActionParams,
-          comments: [],
-        },
-      };
       const newProps = {
         ...defaultProps,
-        actionParams: newParams,
+        actionParams: {
+          ...actionParams,
+          subActionParams: {
+            ...actionParams.subActionParams,
+            comments: [],
+          },
+        },
       };
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const emptyComment = { target: { value: '' } };
@@ -378,19 +365,18 @@ describe('JiraParamsFields renders', () => {
           parent: {},
         },
       });
-      const newParams = {
-        ...actionParams,
-        subActionParams: {
-          ...actionParams.subActionParams,
-          incident: {
-            ...actionParams.subActionParams.incident,
-            parent: '10002',
-          },
-        },
-      };
       const newProps = {
         ...defaultProps,
-        actionParams: newParams,
+        actionParams: {
+          ...actionParams,
+          subActionParams: {
+            ...actionParams.subActionParams,
+            incident: {
+              ...actionParams.subActionParams.incident,
+              parent: '10002',
+            },
+          },
+        },
       };
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const parent = wrapper.find('[data-test-subj="parent-search"]');
@@ -409,19 +395,18 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['Cool']);
     });
     test('Label undefined update triggers editAction', () => {
-      const newParams = {
-        ...actionParams,
-        subActionParams: {
-          ...actionParams.subActionParams,
-          incident: {
-            ...actionParams.subActionParams.incident,
-            labels: null,
-          },
-        },
-      };
       const newProps = {
         ...defaultProps,
-        actionParams: newParams,
+        actionParams: {
+          ...actionParams,
+          subActionParams: {
+            ...actionParams.subActionParams,
+            incident: {
+              ...actionParams.subActionParams.incident,
+              labels: null,
+            },
+          },
+        },
       };
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
