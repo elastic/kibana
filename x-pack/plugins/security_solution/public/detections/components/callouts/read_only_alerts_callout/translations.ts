@@ -6,24 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_WRITE_ALERTS_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutTitle',
+export const READ_ONLY_ALERTS_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.readOnlyAlertsCallOutTitle',
   {
     defaultMessage: 'You cannot change alert states',
   }
 );
 
-export const NO_WRITE_ALERTS_CALLOUT_MSG = i18n.translate(
-  'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutMsg',
+export const READ_ONLY_ALERTS_CALLOUT_MSG = i18n.translate(
+  'xpack.securitySolution.detectionEngine.readOnlyAlertsCallOutMsg',
   {
     defaultMessage:
       'You only have permissions to view alerts. If you need to update alert states (open or close alerts), contact your Kibana administrator.',
-  }
-);
-
-export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.dismissNoWriteAlertButton',
-  {
-    defaultMessage: 'Dismiss',
   }
 );
