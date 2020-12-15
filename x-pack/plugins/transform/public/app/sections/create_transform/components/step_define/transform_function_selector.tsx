@@ -22,7 +22,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.PIVOT,
       helpText: i18n.translate('xpack.transform.stepDefineForm.pivotHelperText', {
-        defaultMessage: 'Pivot function',
+        defaultMessage: 'Aggregate and group your data',
       }),
       icon: 'aggregate',
       title: i18n.translate('xpack.transform.stepDefineForm.pivotLabel', {
@@ -32,7 +32,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.LATEST,
       helpText: i18n.translate('xpack.transform.stepDefineForm.latestHelperText', {
-        defaultMessage: 'Latest function',
+        defaultMessage: 'Keep track of your most recent data',
       }),
       icon: 'clock',
       title: i18n.translate('xpack.transform.stepDefineForm.latestLabel', {
@@ -45,7 +45,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     <>
       <EuiFlexGroup gutterSize="m" data-test-subj="transformFunctionSelection">
         {transformFunctions.map(({ helpText, icon, name, title }) => (
-          <EuiFlexItem key={name} grow={1}>
+          <EuiFlexItem key={name} style={{ width: 320 }} grow={false}>
             <EuiCard
               icon={<EuiIcon size="xl" type={icon} />}
               title={title}
