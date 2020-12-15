@@ -178,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
