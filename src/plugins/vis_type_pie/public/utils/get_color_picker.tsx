@@ -82,7 +82,7 @@ export const getColorPicker = (
 
   const handleOutsideClick = useCallback(
     (e: MouseEvent) => {
-      if (!(ref.current! as any).contains(e.target)) {
+      if (ref.current && !(ref.current! as any).contains(e.target)) {
         onClose?.();
       }
     },
