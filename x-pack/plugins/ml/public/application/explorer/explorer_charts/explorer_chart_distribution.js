@@ -131,8 +131,11 @@ export class ExplorerChartDistribution extends React.Component {
         })
         .map((d) => d.key);
 
+      // using set for faster look up
+      const scaleCategoriesSet = new Set(scaleCategories);
+
       chartData = chartData.filter((d) => {
-        return scaleCategories.includes(d.entity);
+        return scaleCategoriesSet.has(d.entity);
       });
 
       if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {

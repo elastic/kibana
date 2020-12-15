@@ -118,6 +118,9 @@ export const explorerService = {
   setBounds: (payload: TimeRangeBounds) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });
   },
+  clearCharts: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_CHARTS });
+  },
   setCharts: (payload: ExplorerChartsData) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS, payload });
   },

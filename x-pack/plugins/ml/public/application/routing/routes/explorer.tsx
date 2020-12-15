@@ -216,6 +216,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 
+  useEffect(() => {
+    return () => {
+      // clean up chart data or else it will carry to the next job
+      // and try to render the charts
+      explorerService.clearCharts();
+    };
+  }, []);
+
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {

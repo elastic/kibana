@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -177,18 +177,18 @@ export const ExplorerChartsContainerUI = ({
       },
     },
   } = kibana;
-  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
-  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
-  return (
-    <>
-      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
-      <EuiFlexGrid columns={chartsColumns}>
+  const content = useMemo(() => {
+    const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+
+    return (
+      <>
         {seriesToPlot.length > 0 &&
           seriesToPlot.map((series) => (
             <EuiFlexItem
@@ -206,7 +206,13 @@ export const ExplorerChartsContainerUI = ({
               />
             </EuiFlexItem>
           ))}
-      </EuiFlexGrid>
+      </>
+    );
+  }, [seriesToPlot, mlUrlGenerator]);
+  return (
+    <>
+      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
+      <EuiFlexGrid columns={chartsColumns}>{content}</EuiFlexGrid>
     </>
   );
 };

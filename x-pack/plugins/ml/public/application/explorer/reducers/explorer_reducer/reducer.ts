@@ -52,6 +52,13 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = { ...state, bounds: payload };
       break;
 
+    case EXPLORER_ACTION.CLEAR_CHARTS:
+      nextState = {
+        ...state,
+        chartsData: getDefaultChartsData(),
+      };
+      break;
+
     case EXPLORER_ACTION.SET_CHARTS:
       nextState = {
         ...state,
