@@ -98,7 +98,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         }
         const linkFieldData = (data ?? []).find((d) => d.field === linkField);
         const linkFieldValue = getOr(null, 'originalValue', linkFieldData);
-        return linkFieldValue;
+        return Array.isArray(linkFieldValue) ? linkFieldValue[0] : linkFieldValue;
       },
       [data, columnHeaders]
     );

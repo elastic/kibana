@@ -81,7 +81,9 @@ export const ExpandableEvent = React.memo<Props>(
           | undefined;
 
         if (messageField?.originalValue) {
-          return messageField?.originalValue;
+          return Array.isArray(messageField?.originalValue)
+            ? messageField?.originalValue.join()
+            : messageField?.originalValue;
         }
       }
       return null;

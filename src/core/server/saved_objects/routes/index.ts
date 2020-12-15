@@ -52,15 +52,15 @@ export function registerRoutes({
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
-  registerGetRoute(router);
+  registerGetRoute(router, { coreUsageData });
   registerResolveRoute(router);
-  registerCreateRoute(router);
-  registerDeleteRoute(router);
-  registerFindRoute(router);
-  registerUpdateRoute(router);
-  registerBulkGetRoute(router);
-  registerBulkCreateRoute(router);
-  registerBulkUpdateRoute(router);
+  registerCreateRoute(router, { coreUsageData });
+  registerDeleteRoute(router, { coreUsageData });
+  registerFindRoute(router, { coreUsageData });
+  registerUpdateRoute(router, { coreUsageData });
+  registerBulkGetRoute(router, { coreUsageData });
+  registerBulkCreateRoute(router, { coreUsageData });
+  registerBulkUpdateRoute(router, { coreUsageData });
   registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });

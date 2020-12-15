@@ -45,6 +45,7 @@ import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -55,14 +56,11 @@ import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
 } from '../../../../components/alerts_table/default_config';
-import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
-import * as detectionI18n from '../../translations';
-import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
+import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
+import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
-import * as ruleI18n from '../translations';
-import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
@@ -79,10 +77,9 @@ import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
-import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
 import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
@@ -95,7 +92,9 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import * as detectionI18n from '../../translations';
+import * as ruleI18n from '../translations';
+import * as i18n from './translations';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -104,7 +103,6 @@ enum RuleDetailTabs {
 }
 
 const getRuleDetailsTabs = (rule: Rule | null) => {
-  const canUseExceptions = rule && !isThresholdRule(rule.type);
   return [
     {
       id: RuleDetailTabs.alerts,
@@ -115,7 +113,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
-      disabled: !canUseExceptions,
+      disabled: false,
       dataTestSubj: 'exceptionsTab',
     },
     {
@@ -180,7 +178,7 @@ const RuleDetailsPageComponent = () => {
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -429,8 +427,8 @@ const RuleDetailsPageComponent = () => {
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ReadOnlyAlertsCallOut />
+      <ReadOnlyRulesCallOut />
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
