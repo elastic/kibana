@@ -12,8 +12,6 @@ import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
 } from '../../../connected_components/mb_map/utils';
-import { getEMSSettings } from '../../../kibana_services';
-import { LICENSED_FEATURES } from '../../../licensed_features'; //todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   fill: ['fill-opacity'],
@@ -289,7 +287,6 @@ export class VectorTileLayer extends TileLayer {
   }
 
   async getLicensedFeatures() {
-    const emsSettings = getEMSSettings();
-    return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
+    return this._source.getLicensedFeatures();
   }
 }
