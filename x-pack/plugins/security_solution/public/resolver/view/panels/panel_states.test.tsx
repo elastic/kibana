@@ -12,6 +12,8 @@ import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../../data_acce
 import { firstRelatedEventID } from '../../mocks/resolver_tree';
 import { urlSearch } from '../../test_utilities/url_search';
 import '../../test_utilities/extend_jest';
+import { TimeRange } from '../../types';
+import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
 describe('Resolver: panel loading and resolution states', () => {
   let simulator: Simulator;
@@ -135,6 +137,107 @@ describe('Resolver: panel loading and resolution states', () => {
     });
 
     describe('when navigating to the event categories panel', () => {
+      beforeEach(() => {
+        const {
+          metadata: { databaseDocumentID },
+          dataAccessLayer,
+        } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+        memoryHistory = createMemoryHistory();
+
+        simulator = new Simulator({
+          dataAccessLayer,
+          databaseDocumentID,
+          history: memoryHistory,
+          resolverComponentInstanceID,
+          indices: [],
+          shouldUpdate: false,
+          filters: {},
+        });
+
+        memoryHistory.push({
+          search: queryStringWithEventsInCategorySelected,
+        });
+      });
+      it('should successfully load the events in category after a refresh', async () => {
+        simulator.shouldUpdate = true;
+        await expect(
+          simulator.map(() => ({
+            resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
+            resolverPanelEventsInCategory: simulator.testSubject(
+              'resolver:panel:events-in-category'
+            ).length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelLoading: 0,
+          resolverPanelEventsInCategory: 1,
+        });
+      });
+    });
+
+    describe('when navigating to the event categories panel and using a data access layer that throws an error', () => {
+      let throwError: boolean;
+
+      beforeEach(() => {
+        throwError = false;
+        const {
+          metadata: { databaseDocumentID },
+          dataAccessLayer,
+        } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+        memoryHistory = createMemoryHistory();
+
+        const induceError = async ({
+          entityID,
+          category,
+          after,
+          timeRange,
+          indexPatterns,
+        }: {
+          entityID: string;
+          category: string;
+          after?: string;
+          timeRange: TimeRange;
+          indexPatterns: string[];
+        }): Promise<ResolverPaginatedEvents> => {
+          if (throwError) {
+            throw new Error('simulated error when retrieving the node events in a category');
+          }
+          return dataAccessLayer.eventsWithEntityIDAndCategory({
+            entityID,
+            category,
+            after,
+            timeRange,
+            indexPatterns,
+          });
+        };
+
+        simulator = new Simulator({
+          dataAccessLayer: { ...dataAccessLayer, eventsWithEntityIDAndCategory: induceError },
+          databaseDocumentID,
+          history: memoryHistory,
+          resolverComponentInstanceID,
+          indices: [],
+          shouldUpdate: false,
+          filters: {},
+        });
+
+        memoryHistory.push({
+          search: queryStringWithEventsInCategorySelected,
+        });
+      });
+      it('should show an error in panel after a refresh', async () => {
+        throwError = true;
+        simulator.shouldUpdate = true;
+        await expect(
+          simulator.map(() => ({
+            resolverPanelError: simulator.testSubject('resolver:nodeEventsInCategory:error').length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelError: 1,
+        });
+      });
+    });
+
+    describe('when navigating to the event categories panel after pausing the data access layer', () => {
       let resumeRequest: (pausableRequest: ['eventsWithEntityIDAndCategory']) => void;
       beforeEach(() => {
         const {

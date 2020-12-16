@@ -72,6 +72,7 @@ export function RelatedEventsFetcher(
             nodeID,
             eventCategory,
             cursor,
+            dataRequestID: newID,
           },
         });
       }

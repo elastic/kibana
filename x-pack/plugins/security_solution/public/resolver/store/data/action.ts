@@ -68,6 +68,7 @@ interface ServerFailedToReturnNodeEventsInCategory {
      * The category that `events` have in common.
      */
     eventCategory: string;
+    dataRequestID: number;
   };
 }
 

@@ -194,6 +194,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         ...state,
         nodeEventsInCategory: {
           ...state.nodeEventsInCategory,
+          dataRequestID: action.payload.dataRequestID,
           error: true,
         },
       };
