@@ -113,7 +113,7 @@ export const getMessages = once(() => {
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityFieldNotExistsMessage',
         {
-          defaultMessage: `Cardinality checks could not be run for field {fieldName}. The query to validate field didn't return any documents.`,
+          defaultMessage: `Cardinality checks could not be run for field {fieldName}. The query to validate the field didn't return any documents.`,
           values: {
             fieldName: '"{{fieldName}}"',
           },
