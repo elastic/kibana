@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable complexity */
 
 import { isEmpty } from 'lodash/fp';
 
@@ -103,6 +104,12 @@ export const searchAfterAndBulkCreate = async ({
                 .map((indexPattern) => timestampsAndIndices[timestamp][indexPattern])
                 .flat()
             : inputIndexPattern;
+          if (isEmpty(indexPatternsToSearch)) {
+            logger.debug(
+              buildRuleMessage(`no index patterns found for timestamp field ${timestamp}`)
+            );
+            break;
+          }
 
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
