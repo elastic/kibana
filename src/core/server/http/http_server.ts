@@ -332,7 +332,7 @@ export class HttpServer {
     const keepAliveTimeout = `timeout=${String(config.keepaliveTimeout / 1000)}`;
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const response = request.response;
-      if (response && request.headers.connection.includes('keep-alive')) {
+      if (response && request.headers.connection?.includes('keep-alive')) {
         if (isBoom(response)) {
           response.output.headers = {
             ...response.output.headers,
