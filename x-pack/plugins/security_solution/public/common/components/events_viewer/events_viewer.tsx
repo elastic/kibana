@@ -23,7 +23,11 @@ import { Sort } from '../../../timelines/components/timeline/body/sort';
 import { StatefulBody } from '../../../timelines/components/timeline/body';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
-import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
+import {
+  calculateTotalPages,
+  combineQueries,
+  resolverIsShowing,
+} from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
@@ -322,6 +326,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
+                    activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={id}
@@ -329,6 +334,10 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onRuleChange={onRuleChange}
                     refetch={refetch}
                     sort={sort}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCountMinusDeleted,
+                      itemsPerPage,
+                    })}
                   />
                   <Footer
                     activePage={pageInfo.activePage}

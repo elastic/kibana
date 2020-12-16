@@ -62,6 +62,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const props: StatefulBodyProps = {
+    activePage: 0,
     browserFields: mockBrowserFields,
     clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
@@ -78,6 +79,7 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     activeTab: TimelineTabs.query,
+    totalPages: 1,
   };
 
   describe('rendering', () => {

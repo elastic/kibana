@@ -27,6 +27,7 @@ import { TimelineModel } from '../../../store/timeline/model';
 import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
+import { calculateTotalPages } from '../helpers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -173,11 +174,16 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
               <StatefulBody
+                activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={events}
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                totalPages={calculateTotalPages({
+                  itemsCount: totalCount,
+                  itemsPerPage,
+                })}
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter
