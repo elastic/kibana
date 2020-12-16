@@ -78,7 +78,8 @@ export function registerSessionRoutes(router: IRouter): void {
         return res.ok({
           body: response,
         });
-      } catch (err) {
+      } catch (e) {
+        const err = e.output?.payload || e;
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {
@@ -148,7 +149,8 @@ export function registerSessionRoutes(router: IRouter): void {
         await context.search!.session.delete(id);
 
         return res.ok();
-      } catch (err) {
+      } catch (e) {
+        const err = e.output?.payload || e;
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {
