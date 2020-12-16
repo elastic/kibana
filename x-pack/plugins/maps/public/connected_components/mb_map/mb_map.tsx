@@ -5,39 +5,93 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
-import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
-import { syncLayerOrder } from './sort_layers';
-import { getGlyphUrl, isRetina } from '../../meta';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
-  ZOOM_PRECISION,
-} from '../../../common/constants';
+import React, { Component } from 'react';
+import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
+// @ts-expect-error
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
-import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
+// @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
+import { Adapters } from 'src/plugins/inspector/public';
+import { Filter } from 'src/plugins/data/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+// @ts-expect-error
 import { DrawControl } from './draw_control';
+// @ts-expect-error
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
+import { ILayer } from '../../classes/layers/layer';
+import { MapSettings } from '../../reducers/map';
+import { Goto } from '../../../common/descriptor_types';
+import {
+  DECIMAL_DEGREES_PRECISION,
+  KBN_TOO_MANY_FEATURES_IMAGE_ID,
+  RawValue,
+  ZOOM_PRECISION,
+} from '../../../common/constants';
+import { getGlyphUrl, isRetina } from '../../meta';
+import { syncLayerOrder } from './sort_layers';
+// @ts-expect-error
+import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { MapExtentState } from '../../actions';
+// @ts-expect-error
+import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
+// @ts-expect-error
+import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-export class MBMap extends React.Component {
-  state = {
+interface Props {
+  isMapReady: boolean;
+  settings: MapSettings;
+  layerList: ILayer[];
+  spatialFiltersLayer: ILayer;
+  goto?: Goto | null;
+  inspectorAdapters: Adapters;
+  scrollZoom: boolean;
+  disableInteractive: boolean;
+  disableTooltipControl: boolean;
+  hideViewControl: boolean;
+  extentChanged: (mapExtentState: MapExtentState) => void;
+  onMapReady: (mapExtentState: MapExtentState) => void;
+  onMapDestroyed: () => void;
+  setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => void;
+  clearMouseCoordinates: () => void;
+  clearGoto: () => void;
+  setMapInitError: (errorMessage: string) => void;
+  addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  geoFields: GeoFieldWithIndex[];
+  renderTooltipContent?: RenderToolTipContent;
+}
+
+interface State {
+  prevLayerList: ILayer[] | undefined;
+  hasSyncedLayerList: boolean;
+  mbMap: MapboxMap | undefined;
+}
+
+export class MBMap extends Component<Props, State> {
+  private _checker?: ResizeChecker;
+  private _isMounted: boolean = false;
+  private _containerRef: HTMLDivElement | null = null;
+
+  state: State = {
     prevLayerList: undefined,
     hasSyncedLayerList: false,
     mbMap: undefined,
   };
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const nextLayerList = nextProps.layerList;
     if (nextLayerList !== prevState.prevLayerList) {
       return {
@@ -69,13 +123,13 @@ export class MBMap extends React.Component {
     }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
-      this.state.mbMap = null;
+      this.state.mbMap = undefined;
     }
     this.props.onMapDestroyed();
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted && this.props.isMapReady) {
+    if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
       if (!this.state.hasSyncedLayerList) {
         this.setState(
           {
@@ -93,9 +147,9 @@ export class MBMap extends React.Component {
   }, 256);
 
   _getMapState() {
-    const zoom = this.state.mbMap.getZoom();
-    const mbCenter = this.state.mbMap.getCenter();
-    const mbBounds = this.state.mbMap.getBounds();
+    const zoom = this.state.mbMap!.getZoom();
+    const mbCenter = this.state.mbMap!.getCenter();
+    const mbBounds = this.state.mbMap!.getBounds();
     return {
       zoom: _.round(zoom, ZOOM_PRECISION),
       center: {
@@ -111,7 +165,7 @@ export class MBMap extends React.Component {
     };
   }
 
-  async _createMbMapInstance() {
+  async _createMbMapInstance(): Promise<MapboxMap> {
     const initialView = await getInitialView(this.props.goto, this.props.settings);
     return new Promise((resolve) => {
       const mbStyle = {
@@ -121,9 +175,9 @@ export class MBMap extends React.Component {
         glyphs: getGlyphUrl(),
       };
 
-      const options = {
+      const options: MapboxOptions = {
         attributionControl: false,
-        container: this.refs.mapContainer,
+        container: this._containerRef!,
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
@@ -155,9 +209,10 @@ export class MBMap extends React.Component {
       };
       tooManyFeaturesImage.src = tooManyFeaturesImageSrc;
 
-      let emptyImage;
-      mbMap.on('styleimagemissing', (e) => {
+      let emptyImage: HTMLImageElement;
+      mbMap.on('styleimagemissing', (e: unknown) => {
         if (emptyImage) {
+          // @ts-expect-error
           mbMap.addImage(e.id, emptyImage);
         }
       });
@@ -173,7 +228,7 @@ export class MBMap extends React.Component {
   }
 
   async _initializeMap() {
-    let mbMap;
+    let mbMap: MapboxMap;
     try {
       mbMap = await this._createMbMapInstance();
     } catch (error) {
@@ -186,19 +241,19 @@ export class MBMap extends React.Component {
     }
 
     this.setState({ mbMap }, () => {
-      this._loadMakiSprites();
+      this._loadMakiSprites(mbMap);
       this._initResizerChecker();
-      this._registerMapEventListeners();
+      this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapState());
     });
   }
 
-  _registerMapEventListeners() {
+  _registerMapEventListeners(mbMap: MapboxMap) {
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
     // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
     // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
-    this.state.mbMap.on(
+    mbMap.on(
       'moveend',
       _.debounce(() => {
         this.props.extentChanged(this._getMapState());
@@ -206,14 +261,14 @@ export class MBMap extends React.Component {
     );
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.hideViewControl) {
-      const throttledSetMouseCoordinates = _.throttle((e) => {
+      const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
           lon: e.lngLat.lng,
         });
       }, 100);
-      this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
-      this.state.mbMap.on('mouseout', () => {
+      mbMap.on('mousemove', throttledSetMouseCoordinates);
+      mbMap.on('mouseout', () => {
         throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
         this.props.clearMouseCoordinates();
       });
@@ -221,29 +276,31 @@ export class MBMap extends React.Component {
   }
 
   _initResizerChecker() {
-    this._checker = new ResizeChecker(this.refs.mapContainer);
+    this._checker = new ResizeChecker(this._containerRef!);
     this._checker.on('resize', () => {
-      this.state.mbMap.resize();
+      if (this.state.mbMap) {
+        this.state.mbMap.resize();
+      }
     });
   }
 
-  _loadMakiSprites() {
+  _loadMakiSprites(mbMap: MapboxMap) {
     const sprites = isRetina() ? sprites2 : sprites1;
     const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    addSpritesheetToMap(json, sprites, this.state.mbMap);
+    addSpritesheetToMap(json, sprites, mbMap);
   }
 
   _syncMbMapWithMapState = () => {
     const { isMapReady, goto, clearGoto } = this.props;
 
-    if (!isMapReady || !goto) {
+    if (!isMapReady || !goto || !this.state.mbMap) {
       return;
     }
 
     clearGoto();
 
     if (goto.bounds) {
-      //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
+      // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(
           clampToLonBounds(goto.bounds.minLon),
@@ -254,8 +311,8 @@ export class MBMap extends React.Component {
           clampToLatBounds(goto.bounds.maxLat)
         )
       );
-      //maxZoom ensure we're not zooming in too far on single points or small shapes
-      //the padding is to avoid too tight of a fit around edges
+      // maxZoom ensure we're not zooming in too far on single points or small shapes
+      // the padding is to avoid too tight of a fit around edges
       this.state.mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
     } else if (goto.center) {
       this.state.mbMap.setZoom(goto.center.zoom);
@@ -267,6 +324,10 @@ export class MBMap extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
+    if (!this.state.mbMap) {
+      return;
+    }
+
     removeOrphanedSourcesAndLayers(
       this.state.mbMap,
       this.props.layerList,
@@ -277,7 +338,7 @@ export class MBMap extends React.Component {
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.inspectorAdapters.map) {
+    if (!this.props.inspectorAdapters.map || !this.state.mbMap) {
       return;
     }
 
@@ -292,6 +353,10 @@ export class MBMap extends React.Component {
   };
 
   _syncSettings() {
+    if (!this.state.mbMap) {
+      return;
+    }
+
     let zoomRangeChanged = false;
     if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
       this.state.mbMap.setMinZoom(this.props.settings.minZoom);
@@ -311,6 +376,10 @@ export class MBMap extends React.Component {
       }, 300);
     }
   }
+
+  _setContainerRef = (element: HTMLDivElement) => {
+    this._containerRef = element;
+  };
 
   render() {
     let drawControl;
@@ -333,7 +402,7 @@ export class MBMap extends React.Component {
       <div
         id="mapContainer"
         className="mapContainer"
-        ref="mapContainer"
+        ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
         {drawControl}
