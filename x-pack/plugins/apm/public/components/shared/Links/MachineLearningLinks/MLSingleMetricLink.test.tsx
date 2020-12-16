@@ -7,13 +7,13 @@
 import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
-import { MLJobLink } from './MLJobLink';
+import { MLSingleMetricLink } from './MLSingleMetricLink';
 
-describe('MLJobLink', () => {
+describe('MLSingleMetricLink', () => {
   it('should produce the correct URL with jobId', async () => {
     const href = await getRenderedHref(
       () => (
-        <MLJobLink jobId="myservicename-mytransactiontype-high_mean_response_time" />
+        <MLSingleMetricLink jobId="myservicename-mytransactiontype-high_mean_response_time" />
       ),
       {
         search:
@@ -28,7 +28,7 @@ describe('MLJobLink', () => {
   it('should produce the correct URL with jobId, serviceName, and transactionType', async () => {
     const href = await getRenderedHref(
       () => (
-        <MLJobLink
+        <MLSingleMetricLink
           jobId="myservicename-mytransactiontype-high_mean_response_time"
           serviceName="opbeans-test"
           transactionType="request"
@@ -48,7 +48,7 @@ describe('MLJobLink', () => {
   it('correctly encodes time range values', async () => {
     const href = await getRenderedHref(
       () => (
-        <MLJobLink
+        <MLSingleMetricLink
           jobId="apm-production-485b-high_mean_transaction_duration"
           serviceName="opbeans-java"
           transactionType="request"
