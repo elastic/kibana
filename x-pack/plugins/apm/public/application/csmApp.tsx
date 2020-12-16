@@ -69,7 +69,7 @@ export function CsmAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable },
+  corePlugins: { embeddable, maps },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -79,7 +79,7 @@ export function CsmAppRoot({
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
+  const plugins = { ...deps, maps };
   const apmPluginContextValue = {
     appMountParameters,
     config,
