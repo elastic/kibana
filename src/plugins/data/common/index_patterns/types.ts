@@ -49,6 +49,9 @@ export interface IndexPatternAttributes {
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
+  /**
+   * prevents errors when index pattern exists before indices
+   */
   allowNoIndex?: boolean;
 }
 

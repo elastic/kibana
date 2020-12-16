@@ -74,6 +74,9 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   // make private once manual field refresh is removed
   public fieldAttrs: FieldAttrs;
+  /**
+   * prevents errors when index pattern exists before indices
+   */
   public readonly allowNoIndex: boolean = false;
 
   constructor({

@@ -4,6 +4,8 @@
 
 ## IndexPatternAttributes.allowNoIndex property
 
+prevents errors when index pattern exists before indices
+
 <b>Signature:</b>
 
 ```typescript
