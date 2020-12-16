@@ -44,14 +44,14 @@ export const fieldsConfig: FieldsConfig = {
     deserializer: to.booleanOrUndef,
     serializer: from.undefinedIfValue(false),
     label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.commonFields.removeIfUnsuccessfulFieldLabel',
+      'xpack.ingestPipelines.pipelineEditor.commonFields.removeIfSuccessfulFieldLabel',
       {
-        defaultMessage: 'Remove if unsuccessful',
+        defaultMessage: 'Remove if successful',
       }
     ),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.commonFields.removeIfUnsuccessfulFieldHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.commonFields.removeIfSuccessfulFieldHelpText"
         defaultMessage="Remove the field after parsing the URI string."
       />
     ),
