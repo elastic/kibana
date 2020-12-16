@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -85,24 +86,22 @@ export async function mountApp(
     })
   );
 
-  const getInitialInput = (
-    routeProps: RouteComponentProps<{ id?: string }>
-  ): LensEmbeddableInput | undefined => {
-    if (routeProps.match.params.id) {
-      return { savedObjectId: routeProps.match.params.id } as LensByReferenceInput;
+  const getInitialInput = (id?: string): LensEmbeddableInput | undefined => {
+    if (id) {
+      return { savedObjectId: id } as LensByReferenceInput;
     }
     if (embeddableEditorIncomingState?.valueInput) {
       return embeddableEditorIncomingState?.valueInput as LensByValueInput;
     }
   };
 
-  const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
+  const redirectTo = (history: History<unknown>, savedObjectId?: string) => {
     if (!savedObjectId) {
-      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
+      history.push({ pathname: '/', search: history.location.search });
     } else {
-      routeProps.history.push({
+      history.push({
         pathname: `/edit/${savedObjectId}`,
-        search: routeProps.history.location.search,
+        search: history.location.search,
       });
     }
   };
@@ -143,19 +142,25 @@ export async function mountApp(
   };
 
   // const featureFlagConfig = await getByValueFeatureFlag();
-  const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+  const EditorRenderer = React.memo((props: { id?: string; history: History<unknown> }) => {
+    const redirectCallback = useCallback(
+      (id?: string) => {
+        redirectTo(props.history, id);
+      },
+      [props.history]
+    );
     trackUiEvent('loaded');
     return (
       <App
         incomingState={embeddableEditorIncomingState}
         editorFrame={instance}
-        initialInput={getInitialInput(routeProps)}
-        redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
+        initialInput={getInitialInput(props.id)}
+        redirectTo={redirectCallback}
         redirectToOrigin={redirectToOrigin}
         redirectToDashboard={redirectToDashboard}
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
-        history={routeProps.history}
+        history={props.history}
         initialContext={
           historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
             ? historyLocationState.payload
@@ -163,6 +168,10 @@ export async function mountApp(
         }
       />
     );
+  });
+
+  const EditorRoute = (routeProps: RouteComponentProps<{ id?: string }>) => {
+    return <EditorRenderer id={routeProps.match.params.id} history={routeProps.history} />;
   };
 
   function NotFound() {
@@ -181,9 +190,9 @@ export async function mountApp(
       <KibanaContextProvider services={lensServices}>
         <HashRouter>
           <Switch>
-            <Route exact path="/edit/:id" render={renderEditor} />
-            <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
-            <Route exact path="/" render={renderEditor} />
+            <Route exact path="/edit/:id" component={EditorRoute} />
+            <Route exact path={`/${LENS_EDIT_BY_VALUE}`} component={EditorRoute} />
+            <Route exact path="/" component={EditorRoute} />
             <Route path="/" component={NotFound} />
           </Switch>
         </HashRouter>
