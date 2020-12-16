@@ -28,6 +28,7 @@ import {
   LAYER_STYLE_TYPE,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -522,7 +523,13 @@ export class VectorLayer extends AbstractLayer {
         }
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
-      layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
+      const supportedShapes = await source.getSupportedShapeTypes();
+      if (
+        supportedShapes.includes(VECTOR_SHAPE_TYPE.LINE) ||
+        supportedShapes.includes(VECTOR_SHAPE_TYPE.POLYGON)
+      ) {
+        layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
+      }
       stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
