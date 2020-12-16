@@ -46,7 +46,6 @@ import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
 import { DataGridProvider } from './data_grid';
 import {
@@ -82,7 +81,6 @@ export const services = {
   dataGrid: DataGridProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
-  table: TableProvider,
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,

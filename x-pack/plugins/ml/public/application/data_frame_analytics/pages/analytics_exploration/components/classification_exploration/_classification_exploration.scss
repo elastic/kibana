@@ -22,7 +22,7 @@
 
 .mlDataFrameAnalyticsClassification__actualLabel {
   float: left;
-  width: 80px;
+  width: 8%;
   padding-top: $euiSize * 4;
 }
 
@@ -30,8 +30,9 @@
   Gives EuiDataGrid a min-width of 480px, otherwise the columns options will disappear if you hide all columns.
 */
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
+  float: left;
   min-width: 480px;
-  width: 100%;
+  width: 92%;
 
   .euiDataGridRowCell--boolean {
     text-transform: none;

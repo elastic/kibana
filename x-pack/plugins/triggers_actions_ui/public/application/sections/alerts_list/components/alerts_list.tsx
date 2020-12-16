@@ -14,10 +14,9 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
@@ -444,10 +443,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiFieldSearch
             fullWidth
+            isClearable
             data-test-subj="alertSearchField"
-            prepend={<EuiIcon type="search" />}
             onChange={(e) => setInputText(e.target.value)}
             onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
@@ -676,14 +675,17 @@ export const AlertsList: React.FunctionComponent = () => {
       ) : (
         noPermissionPrompt
       )}
-      <AlertAdd
-        consumer={ALERTS_FEATURE_ID}
-        addFlyoutVisible={alertFlyoutVisible}
-        setAddFlyoutVisibility={setAlertFlyoutVisibility}
-        actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
-        reloadAlerts={loadAlertsData}
-      />
+      {alertFlyoutVisible && (
+        <AlertAdd
+          consumer={ALERTS_FEATURE_ID}
+          onClose={() => {
+            setAlertFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          reloadAlerts={loadAlertsData}
+        />
+      )}
     </section>
   );
 };
