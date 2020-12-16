@@ -613,3 +613,13 @@ export const formatFieldsTestData: FormatFieldsTestData[] = [
     type: ConnectorTypes.servicenow,
   },
 ];
+export const mockGetFieldsResponse = {
+  status: 'ok',
+  data: jiraFields,
+  actionId: '123',
+};
+
+export const actionsErrResponse = {
+  status: 'error',
+  serviceMessage: 'this is an actions error',
+};

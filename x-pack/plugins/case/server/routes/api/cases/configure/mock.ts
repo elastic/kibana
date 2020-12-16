@@ -7,7 +7,9 @@ import {
   ServiceConnectorCaseParams,
   ServiceConnectorCommentParams,
   ConnectorMappingsAttributes,
+  ConnectorTypes,
 } from '../../../../../common/api/connectors';
+import { mappings as mappingsMock } from '../../../../client/configure/mock';
 export const updateUser = {
   updatedAt: '2020-03-13T08:34:53.450Z',
   updatedBy: { fullName: 'Another User', username: 'another' },
