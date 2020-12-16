@@ -16,7 +16,7 @@ export interface Props {
 export const ResultView: React.FC<Props> = ({ result }) => {
   return (
     <li>
-      <Result result={result} />
+      <Result result={result} shouldLinkToDetailPage={true} />
     </li>
   );
 };

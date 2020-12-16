@@ -170,6 +170,13 @@ export const Library: React.FC = () => {
               },
             }}
           />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With a link</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} shouldLinkToDetailPage={true} />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>
