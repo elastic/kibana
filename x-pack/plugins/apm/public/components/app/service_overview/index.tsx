@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPanel,
+  isWithinMaxBreakpoint,
+} from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
@@ -19,12 +26,13 @@ import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
+import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
  */
-export const chartHeight = 322;
+export const chartHeight = 288;
 
 interface ServiceOverviewProps {
   agentName?: string;
@@ -38,6 +46,11 @@ export function ServiceOverview({
   useTrackPageview({ app: 'apm', path: 'service_overview' });
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
+  // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
+  // observe the window width and set the flex directions of rows accordingly
+  const shouldUseMobileLayout = useShouldUseMobileLayout();
+  const rowDirection = shouldUseMobileLayout ? 'column' : 'row';
+
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
@@ -50,11 +63,15 @@ export function ServiceOverview({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={4}>
+              <EuiFlexGroup
+                direction={rowDirection}
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem grow={3}>
                   <ServiceOverviewThroughputChart height={chartHeight} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={6}>
+                <EuiFlexItem grow={7}>
                   <EuiPanel>
                     <ServiceOverviewTransactionsTable
                       serviceName={serviceName}
@@ -64,16 +81,20 @@ export function ServiceOverview({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup
+                direction={rowDirection}
+                gutterSize="s"
+                responsive={false}
+              >
                 {!isRumAgentName(agentName) && (
-                  <EuiFlexItem grow={4}>
+                  <EuiFlexItem grow={3}>
                     <TransactionErrorRateChart
                       height={chartHeight}
                       showAnnotations={false}
                     />
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={6}>
+                <EuiFlexItem grow={7}>
                   <EuiPanel>
                     <ServiceOverviewErrorsTable serviceName={serviceName} />
                   </EuiPanel>
@@ -81,11 +102,15 @@ export function ServiceOverview({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={4}>
+              <EuiFlexGroup
+                direction={rowDirection}
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem grow={3}>
                   <TransactionBreakdownChart showAnnotations={false} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={6}>
+                <EuiFlexItem grow={7}>
                   <EuiPanel>
                     <ServiceOverviewDependenciesTable
                       serviceName={serviceName}
