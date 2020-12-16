@@ -139,6 +139,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
+    const runtimeMappings: any = {};
     const aggs = fieldsToAgg.reduce(
       (obj, field) => {
         if (
@@ -150,7 +151,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
           typeof datafeedConfig?.runtime_mappings === 'object' &&
           datafeedConfig.runtime_mappings.hasOwnProperty(field)
         ) {
-          obj[field] = { cardinality: { script: datafeedConfig.runtime_mappings[field].script } };
+          obj[field] = { cardinality: { field } };
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
         } else {
           obj[field] = { cardinality: { field } };
         }
@@ -172,6 +174,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         excludes: [],
       },
       aggs,
+      ...runtimeMappings,
     };
 
     const {
