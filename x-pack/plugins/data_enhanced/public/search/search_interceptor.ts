@@ -14,7 +14,6 @@ import {
   IKibanaSearchRequest,
   SessionState,
 } from '../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {

@@ -29,6 +29,14 @@ describe('pollSearch', () => {
     });
   }
 
+  test('Defers execution', async () => {
+    const searchFn = getMockedSearch$(1);
+    const cancelFn = jest.fn();
+    pollSearch(searchFn, cancelFn);
+    expect(searchFn).toBeCalledTimes(0);
+    expect(cancelFn).toBeCalledTimes(0);
+  });
+
   test('Resolves immediatelly', async () => {
     const searchFn = getMockedSearch$(1);
     const cancelFn = jest.fn();
@@ -45,12 +53,21 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(0);
   });
 
-  test('Throws AbortError on error', async () => {
+  test('Throws Error on ES error response', async () => {
     const searchFn = getMockedSearch$(2, true);
     const cancelFn = jest.fn();
     const poll = pollSearch(searchFn, cancelFn).toPromise();
-    await expect(poll).rejects.toThrow(AbortError);
+    await expect(poll).rejects.toThrow(Error);
     expect(searchFn).toBeCalledTimes(2);
+    expect(cancelFn).toBeCalledTimes(0);
+  });
+
+  test('Throws AbortError on empty response', async () => {
+    const searchFn = jest.fn().mockResolvedValue(undefined);
+    const cancelFn = jest.fn();
+    const poll = pollSearch(searchFn, cancelFn).toPromise();
+    await expect(poll).rejects.toThrow(AbortError);
+    expect(searchFn).toBeCalledTimes(1);
     expect(cancelFn).toBeCalledTimes(0);
   });
 

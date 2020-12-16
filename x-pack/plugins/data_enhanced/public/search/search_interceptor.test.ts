@@ -192,7 +192,7 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
     });
 
     test('should abort on user abort', async () => {
@@ -343,8 +343,6 @@ describe('EnhancedSearchInterceptor', () => {
           time: 10,
           value: {
             error: 'oh no',
-            isPartial: true,
-            isRunning: false,
             id: 1,
           },
           isError: true,
@@ -370,47 +368,6 @@ describe('EnhancedSearchInterceptor', () => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
 
-      expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
-    });
-
-    test('should DELETE a running async search on async timeout on failed ES result', async () => {
-      const responses = [
-        {
-          time: 10,
-          value: {
-            isPartial: true,
-            isRunning: true,
-            id: 1,
-          },
-        },
-        {
-          time: 10,
-          value: {
-            error: 'oh no',
-            isPartial: true,
-            isRunning: false,
-            id: 1,
-          },
-        },
-      ];
-      mockFetchImplementation(responses);
-
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
-      response.subscribe({ next, error });
-
-      await timeTravel(10);
-
-      expect(next).toHaveBeenCalled();
-      expect(error).not.toHaveBeenCalled();
-      expect(fetchMock).toHaveBeenCalled();
-      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
-
-      // Long enough to reach the timeout but not long enough to reach the next response
-      await timeTravel(10);
-
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
