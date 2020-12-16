@@ -95,7 +95,7 @@ describe('CoreVitalItem', () => {
     expect(getByText('--')).toBeInTheDocument();
   });
 
-  it('renders if value is falsey, hasVitals is falsey, and loading is falsey', () => {
+  it('renders no data if value is falsey, hasVitals is falsey, and loading is falsey', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
