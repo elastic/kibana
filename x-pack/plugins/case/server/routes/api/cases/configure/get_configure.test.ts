@@ -11,11 +11,13 @@ import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
+  mockCaseConfigure,
+  mockCaseMappings,
 } from '../../__fixtures__';
 
-import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initGetCaseConfigure } from './get_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { mappings } from './mock';
 
 describe('GET configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -32,6 +34,7 @@ describe('GET configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -39,6 +42,7 @@ describe('GET configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
       ...mockCaseConfigure[0].attributes,
+      mappings,
       version: mockCaseConfigure[0].version,
     });
   });
@@ -52,6 +56,7 @@ describe('GET configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], version: undefined }],
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -71,6 +76,7 @@ describe('GET configuration', () => {
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      mappings,
       updated_at: '2020-04-09T09:43:51.778Z',
       updated_by: {
         full_name: 'elastic',

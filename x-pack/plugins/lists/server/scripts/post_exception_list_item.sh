@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one

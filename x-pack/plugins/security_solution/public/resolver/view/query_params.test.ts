@@ -34,6 +34,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 

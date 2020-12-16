@@ -5,13 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import {
-  InstallablePackage,
-  InstallSource,
-  PackageAssetReference,
-  MAX_TIME_COMPLETE_INSTALL,
-  ASSETS_SAVED_OBJECT_TYPE,
-} from '../../../../common';
+import { InstallablePackage, InstallSource, MAX_TIME_COMPLETE_INSTALL } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -29,7 +23,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
-import { saveArchiveEntries } from '../archive/storage';
+import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { ConcurrentInstallOperationError } from '../../../errors';
 
 // this is only exported for testing
@@ -134,6 +128,13 @@ export async function _installPackage({
     // per data stream and we should then save them
     await installILMPolicy(paths, callCluster);
 
+    const installedDataStreamIlm = await installIlmForDataStream(
+      packageInfo,
+      paths,
+      callCluster,
+      savedObjectsClient
+    );
+
     // installs versionized pipelines without removing currently installed ones
     const installedPipelines = await installPipelines(
       packageInfo,
@@ -187,31 +188,17 @@ export async function _installPackage({
     if (installKibanaAssetsError) throw installKibanaAssetsError;
     await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
-    const packageAssetResults = await saveArchiveEntries({
-      savedObjectsClient,
-      paths,
-      packageInfo,
-      installSource,
-    });
-    const packageAssetRefs: PackageAssetReference[] = packageAssetResults.saved_objects.map(
-      (result) => ({
-        id: result.id,
-        type: ASSETS_SAVED_OBJECT_TYPE,
-      })
-    );
-
     // update to newly installed version when all assets are successfully installed
     if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
-
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_version: pkgVersion,
       install_status: 'installed',
-      package_assets: packageAssetRefs,
     });
 
     return [
       ...installedKibanaAssetsRefs,
       ...installedPipelines,
+      ...installedDataStreamIlm,
       ...installedTemplateRefs,
       ...installedTransforms,
     ];

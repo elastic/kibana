@@ -19,6 +19,7 @@ import {
   IsometricTaxiLayout,
   NodeData,
   NodeDataStatus,
+  TimeRange,
 } from '../../types';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
@@ -33,6 +34,7 @@ import {
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as timeRangeModel from '../../models/time_range';
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 
@@ -93,6 +95,40 @@ export const originID: (state: DataState) => string | undefined = createSelector
   }
 );
 
+function currentRelatedEventRequestID(state: DataState): number | undefined {
+  if (state.currentRelatedEvent) {
+    return state.currentRelatedEvent?.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
+
+function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
+  if (state.nodeEventsInCategory?.pendingRequest) {
+    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
+  } else if (state.nodeEventsInCategory) {
+    return state.nodeEventsInCategory?.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
+
+export const eventsInCategoryResultIsStale = createSelector(
+  currentNodeEventsInCategoryRequestID,
+  refreshCount,
+  function eventsInCategoryResultIsStale(oldID, newID) {
+    return oldID !== undefined && oldID !== newID;
+  }
+);
+
+export const currentRelatedEventIsStale = createSelector(
+  currentRelatedEventRequestID,
+  refreshCount,
+  function currentRelatedEventIsStale(oldID, newID) {
+    return oldID !== undefined && oldID !== newID;
+  }
+);
+
 /**
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
@@ -113,15 +149,42 @@ export const nodeDataForID: (
   };
 });
 
+const nodeDataRequestID: (state: DataState) => (id: string) => number | undefined = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      return nodeInfo(id)?.dataRequestID;
+    };
+  }
+);
+
+/**
+ * Returns true if a specific node's data is outdated. It will be outdated if a user clicked the refresh/update button
+ * after the node data was retrieved.
+ */
+export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataRequestID,
+  refreshCount,
+  (nodeRequestID, newID) => {
+    return (id: string) => {
+      const oldID = nodeRequestID(id);
+      // if we don't have the node in the map then it's data must be stale or if the refreshCount is greater than the
+      // node's requestID then it is also stale
+      return oldID === undefined || newID > oldID;
+    };
+  }
+);
+
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
 export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
-  (nodeInfo) => {
+  nodeDataIsStale,
+  (nodeInfo, isStale) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info) {
+      if (!info || isStale(id)) {
         return 'loading';
       }
 
@@ -225,6 +288,13 @@ export const relatedEventCountByCategory: (
 );
 
 /**
+ * Retrieves the number of times the update/refresh button was clicked to be compared against various dataRequestIDs
+ */
+export function refreshCount(state: DataState) {
+  return state.refreshCount;
+}
+
+/**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
  * the requested generations limit.
  *
@@ -304,6 +374,31 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
     return null;
   }
 }
+
+/**
+ * Retrieve the time range filters if they exist, otherwise default to start of epoch to the largest future date.
+ */
+export const timeRangeFilters = createSelector(
+  (state: DataState) => state.tree?.currentParameters,
+  function timeRangeFilters(treeParameters): TimeRange {
+    // Should always be provided from date picker, but provide valid defaults in any case.
+    const from = new Date(0);
+    const to = new Date(timeRangeModel.maxDate);
+    const timeRange = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+    };
+    if (treeParameters !== undefined) {
+      if (treeParameters.filters.from) {
+        timeRange.from = treeParameters.filters.from;
+      }
+      if (treeParameters.filters.to) {
+        timeRange.to = treeParameters.filters.to;
+      }
+    }
+    return timeRange;
+  }
+);
 
 /**
  * The indices to use for the requests with the backend.
@@ -682,7 +777,7 @@ export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function (nodeEventsInCategory, panelViewAndParameters) {
+  function (nodeEventsInCategory, panelViewAndParameters): boolean {
     const { panelView } = panelViewAndParameters;
     return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
   }
