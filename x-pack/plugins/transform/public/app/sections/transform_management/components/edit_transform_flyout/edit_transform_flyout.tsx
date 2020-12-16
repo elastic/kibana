@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
@@ -42,7 +42,7 @@ import {
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
-  config: TransformPivotConfig;
+  config: TransformConfigUnion;
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {

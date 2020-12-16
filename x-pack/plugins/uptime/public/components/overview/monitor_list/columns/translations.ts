@@ -13,3 +13,7 @@ export const ENABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.enab
 export const DISABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.disableDownAlert', {
   defaultMessage: 'Disable status alert',
 });
+
+export const EXPAND_TAGS_LABEL = i18n.translate('xpack.uptime.monitorList.tags.expand', {
+  defaultMessage: 'Click to view remaining tags',
+});

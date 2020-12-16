@@ -120,6 +120,8 @@ export class ActionExecutor {
     }
 
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
+    logger.debug(`executing action ${actionLabel}`);
+
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {

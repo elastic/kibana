@@ -14,10 +14,9 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
@@ -26,11 +25,11 @@ import {
   EuiButtonEmpty,
   EuiHealth,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import { AlertsContextProvider } from '../../../context/alerts_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -58,6 +57,8 @@ import {
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
+import './alerts_list.scss';
 
 const ENTER_KEY = 13;
 
@@ -80,10 +81,6 @@ export const AlertsList: React.FunctionComponent = () => {
     application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
-    uiSettings,
-    docLinks,
-    charts,
-    data,
     kibanaFeatures,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -260,7 +257,10 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: true,
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
-        return (
+        const checkEnabledResult = checkAlertTypeEnabled(
+          alertTypesState.data.get(alert.alertTypeId)
+        );
+        const link = (
           <EuiLink
             title={name}
             onClick={() => {
@@ -269,6 +269,17 @@ export const AlertsList: React.FunctionComponent = () => {
           >
             {name}
           </EuiLink>
+        );
+        return checkEnabledResult.isEnabled ? (
+          link
+        ) : (
+          <EuiToolTip
+            position="top"
+            data-test-subj={`${alert.id}-disabledTooltip`}
+            content={checkEnabledResult.message}
+          >
+            {link}
+          </EuiToolTip>
         );
       },
     },
@@ -432,10 +443,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiFieldSearch
             fullWidth
+            isClearable
             data-test-subj="alertSearchField"
-            prepend={<EuiIcon type="search" />}
             onChange={(e) => setInputText(e.target.value)}
             onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
@@ -577,11 +588,17 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
-        rowProps={() => ({
+        rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableRowDisabled'
+            : '',
         })}
-        cellProps={() => ({
+        cellProps={(item: AlertTableItem) => ({
           'data-test-subj': 'cell',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableCellDisabled'
+            : '',
         })}
         data-test-subj="alertsList"
         pagination={{
@@ -619,7 +636,7 @@ export const AlertsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
-        onDeleted={async (deleted: string[]) => {
+        onDeleted={async () => {
           setAlertsToDelete([]);
           setSelectedIds([]);
           await loadAlertsData();
@@ -658,29 +675,17 @@ export const AlertsList: React.FunctionComponent = () => {
       ) : (
         noPermissionPrompt
       )}
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: loadAlertsData,
-          http,
-          actionTypeRegistry,
-          alertTypeRegistry,
-          toastNotifications: toasts,
-          uiSettings,
-          docLinks,
-          charts,
-          dataFieldsFormats: data.fieldFormats,
-          capabilities,
-          dataUi: data.ui,
-          dataIndexPatterns: data.indexPatterns,
-          kibanaFeatures,
-        }}
-      >
+      {alertFlyoutVisible && (
         <AlertAdd
           consumer={ALERTS_FEATURE_ID}
-          addFlyoutVisible={alertFlyoutVisible}
-          setAddFlyoutVisibility={setAlertFlyoutVisibility}
+          onClose={() => {
+            setAlertFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          reloadAlerts={loadAlertsData}
         />
-      </AlertsContextProvider>
+      )}
     </section>
   );
 };
@@ -724,5 +729,6 @@ function convertAlertsToTableItems(
     isEditable:
       hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
+    enabledInLicense: !!alertTypesIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }

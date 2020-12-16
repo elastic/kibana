@@ -150,6 +150,7 @@ export enum AGG_TYPE {
   MIN = 'min',
   SUM = 'sum',
   TERMS = 'terms',
+  PERCENTILE = 'percentile',
   UNIQUE_COUNT = 'cardinality',
 }
 
@@ -171,6 +172,7 @@ export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+export const DEFAULT_PERCENTILE = 50;
 
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
@@ -269,6 +271,12 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export enum DATA_MAPPING_FUNCTION {
+  INTERPOLATE = 'INTERPOLATE',
+  PERCENTILES = 'PERCENTILES',
+}
+export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | number | boolean | undefined | null;
 

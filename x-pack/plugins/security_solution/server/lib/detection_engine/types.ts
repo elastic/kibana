@@ -8,7 +8,7 @@ import {
   AnomalyThresholdOrUndefined,
   Description,
   NoteOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   FalsePositives,
   From,
@@ -82,7 +82,7 @@ export interface RuleTypeParams {
   ruleNameOverride: RuleNameOverrideOrUndefined;
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   threshold: ThresholdOrUndefined;
   threatFilters: PartialFilter[] | undefined;
   threatIndex: ThreatIndexOrUndefined;

@@ -7,11 +7,9 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import { Link } from 'react-router-dom';
 
 import {
   EuiAvatar,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,7 +46,8 @@ import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { LicenseBadge } from '../../../components/shared/license_badge';
-import { Loading } from '../../../../../applications/shared/loading';
+import { Loading } from '../../../../shared/loading';
+import { EuiButtonEmptyTo, EuiPanelTo } from '../../../../shared/react_router_helpers';
 
 import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
@@ -116,11 +115,13 @@ export const Overview: React.FC = () => {
             </EuiFlexItem>
             {totalDocuments > 0 && (
               <EuiFlexItem grow={false}>
-                <Link to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}>
-                  <EuiButtonEmpty data-test-subj="ManageSourceContentLink" size="s">
-                    Manage
-                  </EuiButtonEmpty>
-                </Link>
+                <EuiButtonEmptyTo
+                  to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}
+                  data-test-subj="ManageSourceContentLink"
+                  size="s"
+                >
+                  Manage
+                </EuiButtonEmptyTo>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -248,62 +249,63 @@ export const Overview: React.FC = () => {
     };
 
     return !groups.length ? null : (
-      <EuiPanel>
-        <EuiText size="s">
-          <h6>
-            <EuiTextColor color="subdued">Group Access</EuiTextColor>
-          </h6>
+      <>
+        <EuiText>
+          <h4>Group Access</h4>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="column" gutterSize="s">
           {groups.map((group, index) => (
             <EuiFlexItem key={index}>
-              <Link to={getGroupPath(group.id)} data-test-subj="SourceGroupLink">
-                <EuiPanel className="euiPanel--inset">
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem>
-                      <EuiText size="s" className="eui-textTruncate">
-                        <strong>{group.name}</strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <GroupAvatars users={group.users} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </Link>
+              <EuiPanelTo
+                to={getGroupPath(group.id)}
+                data-test-subj="SourceGroupLink"
+                className="euiPanel--inset"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem>
+                    <EuiText size="s" className="eui-textTruncate">
+                      <strong>{group.name}</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <GroupAvatars users={group.users} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanelTo>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      </EuiPanel>
+      </>
     );
   };
 
   const detailsSummary = (
-    <EuiPanel>
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">Configuration</EuiTextColor>
-        </h6>
+    <>
+      <EuiSpacer size="l" />
+      <EuiText>
+        <h4>Configuration</h4>
       </EuiText>
-      <EuiSpacer />
-      <EuiText size="s">
-        {details.map((detail, index) => (
-          <EuiFlexGroup
-            wrap
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            key={index}
-          >
-            <EuiFlexItem grow={false}>
-              <strong>{detail.title}</strong>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{detail.description}</EuiFlexItem>
-          </EuiFlexGroup>
-        ))}
-      </EuiText>
-    </EuiPanel>
+      <EuiSpacer size="s" />
+      <EuiPanel>
+        <EuiText size="s">
+          {details.map((detail, index) => (
+            <EuiFlexGroup
+              wrap
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              key={index}
+            >
+              <EuiFlexItem grow={false}>
+                <strong>{detail.title}</strong>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{detail.description}</EuiFlexItem>
+            </EuiFlexGroup>
+          ))}
+        </EuiText>
+      </EuiPanel>
+    </>
   );
 
   const documentPermissions = (
@@ -472,10 +474,9 @@ export const Overview: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source overview" />
-      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xl" direction="column">
+          <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem>
               <DocumentSummary />
             </EuiFlexItem>
@@ -525,7 +526,6 @@ export const Overview: React.FC = () => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiEmptyPrompt />
       </EuiFlexGroup>
     </>
   );

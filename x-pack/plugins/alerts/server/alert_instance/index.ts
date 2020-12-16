@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AlertInstance } from './alert_instance';
+export { AlertInstance, PublicAlertInstance } from './alert_instance';
 export { createAlertInstanceFactory } from './create_alert_instance_factory';

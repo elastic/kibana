@@ -10,6 +10,7 @@ import {
   ServiceConnectorCaseResponse,
   ServiceConnectorCaseParams,
   CaseConnector,
+  CommentType,
 } from '../../../../case/common/api';
 import {
   errorToToaster,
@@ -101,6 +102,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connector.id,
+          connector.type,
           formatServiceRequestData(casePushData, connector, caseServices),
           abortCtrl.signal
         );
@@ -177,7 +179,7 @@ export const formatServiceRequestData = (
       )
       .map((c) => ({
         commentId: c.id,
-        comment: c.comment,
+        comment: c.type === CommentType.user ? c.comment : '',
         createdAt: c.createdAt,
         createdBy: {
           fullName: c.createdBy.fullName ?? null,

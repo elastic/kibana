@@ -28,21 +28,20 @@ import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../screens/case_details
 
 describe('Cases connector incident fields', () => {
   before(() => {
-    cy.server();
-    cy.route('GET', '**/api/cases/configure/connectors/_find', mockConnectorsResponse);
-    cy.route2('POST', `**/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
+    cy.intercept('GET', '/api/cases/configure/connectors/_find', mockConnectorsResponse);
+    cy.intercept('POST', `/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
       const response =
-        JSON.parse(req.body).params.subAction === 'issueTypes'
+        req.body.params.subAction === 'issueTypes'
           ? executeResponses.jira.issueTypes
           : executeResponses.jira.fieldsByIssueType;
-      req.reply(JSON.stringify(response));
+      req.reply(response);
     });
-    cy.route2('POST', `**/api/actions/action/${connectorIds.resilient}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/action/${connectorIds.resilient}/_execute`, (req) => {
       const response =
-        JSON.parse(req.body).params.subAction === 'incidentTypes'
+        req.body.params.subAction === 'incidentTypes'
           ? executeResponses.resilient.incidentTypes
           : executeResponses.resilient.severity;
-      req.reply(JSON.stringify(response));
+      req.reply(response);
     });
   });
 

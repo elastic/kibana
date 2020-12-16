@@ -7,6 +7,7 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -14,12 +15,10 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -93,6 +92,8 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    callback?: () => void;
+    // (undocumented)
     text: string;
     // (undocumented)
     title?: string;
@@ -111,7 +112,7 @@ export interface AppLeaveDefaultAction {
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
 export interface ApplicationSetup {
@@ -250,32 +251,36 @@ export interface ChromeHelpExtension {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
-    linkType: 'custom';
+export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' | 'target' | 'rel' | 'data-test-subj'>;
+
+// @public (undocumented)
+export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
     content: React.ReactNode;
-};
+    href: string;
+    linkType: 'custom';
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'discuss';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'documentation';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
-    linkType: 'github';
+export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
     labels: string[];
+    linkType: 'github';
     title?: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
+export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -568,6 +573,8 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
     };
 }
@@ -721,6 +728,8 @@ export interface HttpSetup {
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
+    // (undocumented)
+    externalUrl: IExternalUrl;
     fetch: HttpHandler;
     get: HttpHandler;
     getLoadingCount$(): Observable<number>;
@@ -754,6 +763,7 @@ export interface IAnonymousPaths {
 export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (url: string) => string;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
     readonly serverBasePath: string;
@@ -769,6 +779,18 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 //
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public
+export interface IExternalUrl {
+    validateUrl(relativeOrAbsoluteUrl: string): URL | null;
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
+}
 
 // @public (undocumented)
 export interface IHttpFetchError extends Error {

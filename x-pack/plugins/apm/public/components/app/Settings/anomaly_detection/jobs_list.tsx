@@ -19,8 +19,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
-import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
+import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
+import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
 import { AnomalyDetectionApiResponse } from './index';
@@ -44,14 +44,14 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
       { defaultMessage: 'Action' }
     ),
     render: (jobId: string) => (
-      <MLJobLink jobId={jobId}>
+      <MLSingleMetricLink jobId={jobId}>
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
           {
             defaultMessage: 'View job in ML',
           }
         )}
-      </MLJobLink>
+      </MLSingleMetricLink>
     ),
   },
 ];
@@ -97,14 +97,14 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
-              <MLLink path="/jobs">
+              <MLManageJobsLink>
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
                     defaultMessage: 'Machine Learning',
                   }
                 )}
-              </MLLink>
+              </MLManageJobsLink>
             ),
           }}
         />

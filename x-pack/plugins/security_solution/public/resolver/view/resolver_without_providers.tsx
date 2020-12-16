@@ -19,7 +19,7 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
@@ -33,7 +33,14 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
+    {
+      className,
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -41,7 +48,13 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
+    useStateSyncingActions({
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    });
 
     const { timestamp } = useContext(SideEffectContext);
 
@@ -54,7 +67,7 @@ export const ResolverWithoutProviders = React.memo(
     } = useSelector((state: ResolverState) =>
       selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -113,15 +126,18 @@ export const ResolverWithoutProviders = React.memo(
                 />
               )
             )}
-            {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityIDSafeVersion(processEvent);
+            {[...processNodePositions].map(([treeNode, position]) => {
+              const nodeID = nodeModel.nodeID(treeNode);
+              if (nodeID === undefined) {
+                throw new Error('Tried to render a node without an ID');
+              }
               return (
                 <ProcessEventDot
-                  key={processEntityId}
+                  key={nodeID}
+                  nodeID={nodeID}
                   position={position}
                   projectionMatrix={projectionMatrix}
-                  event={processEvent}
-                  isProcessTerminated={terminatedProcesses.has(processEntityId)}
+                  node={treeNode}
                   timeAtRender={timeAtRender}
                 />
               );

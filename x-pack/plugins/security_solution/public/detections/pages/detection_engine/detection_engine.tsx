@@ -24,8 +24,8 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
-import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_callout';
-import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
+import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
+import { ReadOnlyAlertsCallOut } from '../../components/callouts/read_only_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
 import { useUserData } from '../../components/user_info';
@@ -37,7 +37,7 @@ import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unau
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -61,7 +61,7 @@ const DetectionEnginePageComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   const [
     {
       loading: userInfoLoading,
@@ -152,7 +152,7 @@ const DetectionEnginePageComponent = () => {
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
+      <ReadOnlyAlertsCallOut />
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />

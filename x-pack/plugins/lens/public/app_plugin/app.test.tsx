@@ -37,9 +37,13 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
+import {
+  mockAttributeService,
+  createEmbeddableStateTransferMock,
+} from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -181,6 +185,7 @@ describe('Lens App', () => {
       attributeService: makeAttributeService(),
       savedObjectsClient: core.savedObjects.client,
       dashboardFeatureFlag: { allowByValueEmbeddables: false },
+      stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
       getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
       application: {
         ...core.application,
@@ -630,7 +635,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in create by value mode', async () => {
+      it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServices();
         services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
