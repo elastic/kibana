@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { createReporter } from './create_reporter';
-export { trackApplicationUsageChange } from './application_usage';
+export { TrackApplicationView } from './track_application_view';
