@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 with a bad body', async () => {
-        const resp = await supertest
+        await supertest
           .post(`/internal/search/es`)
           .send({
             params: {
@@ -105,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('delete', () => {
       it('should return 404 when no search id provided', async () => {
-        const resp = await supertest.delete(`/internal/search/es`).send().expect(404);
+        await supertest.delete(`/internal/search/es`).send().expect(404);
       });
 
       it('should return 500 when trying a delete on a non supporting strategy', async () => {
