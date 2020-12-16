@@ -13,7 +13,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
@@ -91,7 +91,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data } = usePackagePoliciesWithAgentPolicy({
+  const { data, isLoading } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
@@ -190,6 +190,24 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
     []
   );
 
+  const noItemsMessage = useMemo(() => {
+    return isLoading ? (
+      <FormattedMessage
+        id="xpack.fleet.epm.packageDetails.integrationList.loadingPoliciesMessage"
+        defaultMessage="Loading integration policies…"
+      />
+    ) : undefined;
+  }, [isLoading]);
+
+  const tablePagination = useMemo(() => {
+    return {
+      pageIndex: pagination.currentPage - 1,
+      pageSize: pagination.pageSize,
+      totalItemCount: data?.total ?? 0,
+      pageSizeOptions,
+    };
+  }, [data?.total, pageSizeOptions, pagination.currentPage, pagination.pageSize]);
+
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
@@ -200,15 +218,11 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
     <EuiBasicTable
       items={data?.items || []}
       columns={columns}
-      loading={false}
+      loading={isLoading}
       data-test-subj="integrationPolicyTable"
-      pagination={{
-        pageIndex: pagination.currentPage - 1,
-        pageSize: pagination.pageSize,
-        totalItemCount: data?.total ?? 0,
-        pageSizeOptions,
-      }}
+      pagination={tablePagination}
       onChange={handleTableOnChange}
+      noItemsMessage={noItemsMessage}
     />
   );
 };
