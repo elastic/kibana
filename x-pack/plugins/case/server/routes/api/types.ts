@@ -9,13 +9,15 @@ import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
+  ConnectorMappingsServiceSetup,
 } from '../../services';
 
 export interface RouteDeps {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  connectorMappingsService: ConnectorMappingsServiceSetup;
   router: IRouter;
+  userActionService: CaseUserActionServiceSetup;
 }
 
 export enum SortFieldCase {

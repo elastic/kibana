@@ -14,6 +14,15 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { SystemGenericDetails, SystemGenericLine } from './generic_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../../../../common/components/link_to');
 
 describe('SystemGenericDetails', () => {

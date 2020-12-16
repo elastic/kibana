@@ -26,6 +26,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -66,6 +67,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     actionTypeRegistry,
     setBreadcrumbs,
     chrome,
+    http,
   } = useKibana().services;
   const [{}, dispatch] = useReducer(alertReducer, { alert });
   const setInitialAlert = (value: Alert) => {
@@ -139,6 +141,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         iconType="pencil"
                         onClick={() => setEditFlyoutVisibility(true)}
                         name="edit"
+                        disabled={!alertType.enabledInLicense}
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
@@ -210,7 +213,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       name="disable"
-                      disabled={!canSaveAlert}
+                      disabled={!canSaveAlert || !alertType.enabledInLicense}
                       checked={!isEnabled}
                       data-test-subj="disableSwitch"
                       onChange={async () => {
@@ -235,7 +238,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSwitch
                       name="mute"
                       checked={isMuted}
-                      disabled={!canSaveAlert || !isEnabled}
+                      disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
                       data-test-subj="muteSwitch"
                       onChange={async () => {
                         if (isMuted) {
@@ -272,12 +275,31 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       {alert.executionStatus.error?.message}
                     </EuiText>
                     <EuiSpacer size="s" />
-                    <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
-                        defaultMessage="Dismiss"
-                      />
-                    </EuiButton>
+                    <EuiFlexGroup gutterSize="s" wrap={true}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
+                            defaultMessage="Dismiss"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {alert.executionStatus.error?.reason ===
+                        AlertExecutionStatusErrorReasons.License && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            href={`${http.basePath.get()}/app/management/stack/license_management`}
+                            color="danger"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              id="xpack.triggersActionsUI.sections.alertDetails.manageLicensePlanBannerLinkTitle"
+                              defaultMessage="Manage license"
+                            />
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
                   </EuiCallOut>
                 </EuiFlexItem>
               </EuiFlexGroup>
