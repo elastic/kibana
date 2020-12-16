@@ -1505,7 +1505,6 @@
     "discover.fieldNameIcons.stringFieldAriaLabel": "字符串字段",
     "discover.fieldNameIcons.unknownFieldAriaLabel": "未知字段",
     "discover.helpMenu.appName": "Discover",
-    "charts.partialData.bucketTooltipText": "选定的时间范围不包括此整个存储桶，其可能包含部分数据。",
     "discover.histogramOfFoundDocumentsAriaLabel": "已找到文档的直方图",
     "discover.hitsPluralTitle": "{hits, plural, one {次命中} other {次命中}}",
     "discover.howToChangeTheTimeTooltip": "要更改时间，请使用上面的全局时间筛选",
