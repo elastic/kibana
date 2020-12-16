@@ -35,7 +35,7 @@ export const LIST_DATE_CREATED_TITLE = i18n.translate(
 );
 
 export const LIST_DATE_UPDATED_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.dateUPdatedTitle',
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.dateUpdatedTitle',
   {
     defaultMessage: 'Last edited',
   }

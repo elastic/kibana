@@ -61,7 +61,7 @@ export const useAllExceptionLists = ({
         const { data: rules } = await fetchRules({
           pagination: {
             page: 1,
-            perPage: 100,
+            perPage: 10000,
             total: 0,
           },
           signal: abortCtrl.signal,
