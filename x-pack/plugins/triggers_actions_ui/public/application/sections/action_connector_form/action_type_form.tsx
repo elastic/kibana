@@ -44,6 +44,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -280,15 +281,7 @@ export const ActionTypeForm = ({
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
+          <Suspense fallback={<CenterJustifiedSpinner />}>
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}

@@ -12,9 +12,6 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,6 +26,7 @@ import {
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -179,15 +177,7 @@ export const ActionConnectorForm = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiErrorBoundary>
-            <Suspense
-              fallback={
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
+            <Suspense fallback={<CenterJustifiedSpinner />}>
               <FieldsComponent
                 action={connector}
                 errors={errors}

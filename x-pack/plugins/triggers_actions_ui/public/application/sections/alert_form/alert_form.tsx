@@ -23,7 +23,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiListGroupItem,
   EuiListGroup,
@@ -71,6 +70,7 @@ import { AlertNotifyWhen } from './alert_notify_when';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 const ENTER_KEY = 13;
 
@@ -810,14 +810,6 @@ export const AlertForm = ({
     </EuiForm>
   );
 };
-
-const CenterJustifiedSpinner = () => (
-  <EuiFlexGroup justifyContent="center">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="m" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
   <EuiEmptyPrompt
