@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const expectNoDataRenders = async () => {
     await pieChart.expectPieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
-    await dashboardExpect.dataTableRowCount(0);
+    await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchRowCount(0);
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.metricValuesExist(['0']);

@@ -85,12 +85,11 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
 
   visConfig.dimensions = dimensions;
 
-  const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
       type: vis.type.name as Exclude<VislibChartType, 'pie'>,
-      visConfig: configStr,
+      visConfig: JSON.stringify(visConfig),
     }
   );
 

@@ -16,13 +16,14 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../styles';
 import { timelineActions } from '../../../store/timeline';
 
-const mockSort: Sort = {
-  columnId: '@timestamp',
-  sortDirection: Direction.desc,
-};
+const mockSort: Sort[] = [
+  {
+    columnId: '@timestamp',
+    sortDirection: Direction.desc,
+  },
+];
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -60,6 +61,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const props: StatefulBodyProps = {
+    activePage: 0,
     browserFields: mockBrowserFields,
     clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
@@ -75,6 +77,7 @@ describe('Body', () => {
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
+    totalPages: 1,
   };
 
   describe('rendering', () => {
@@ -130,20 +133,6 @@ describe('Body', () => {
         });
       });
     }, 20000);
-
-    test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_BODY_CLASS_NAME}`, () => {
-      const wrapper = mount(
-        <TestProviders>
-          <BodyComponent {...props} />
-        </TestProviders>
-      );
-      expect(
-        wrapper
-          .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_BODY_CLASS_NAME}`)
-          .first()
-          .exists()
-      ).toEqual(true);
-    });
   });
 
   describe('action on event', () => {

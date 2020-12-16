@@ -83,10 +83,9 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   visConfig.dimensions = dimensions;
 
-  const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,
-    visConfig: configStr,
+    visConfig: JSON.stringify(visConfig),
   });
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);

@@ -29,9 +29,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
-  const table = getService('table');
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
+  const dataGrid = getService('dataGrid');
   const defaultFindTimeout = config.get('timeouts.find');
   const { common } = getPageObjects(['common']);
 
@@ -425,14 +425,14 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    public async filterOnTableCell(column: string | number, row: string | number) {
+    public async filterOnTableCell(columnIndex: number, rowIndex: number) {
       await retry.try(async () => {
-        const tableVis = await testSubjects.find('tableVis');
-        const cell = await tableVis.findByCssSelector(
-          `tbody tr:nth-child(${row}) td:nth-child(${column})`
-        );
+        const cell = await dataGrid.getCellElement(rowIndex, columnIndex);
         await cell.moveMouseTo();
-        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+        const filterBtn = await testSubjects.findDescendant(
+          'tbvChartCell__filterForCellValue',
+          cell
+        );
         await filterBtn.click();
       });
     }
@@ -448,44 +448,33 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return element.getVisibleText();
     }
 
-    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-      const tableVis = await testSubjects.find('tableVis');
-      const $ = await tableVis.parseDomContent();
-      const headers = $('span[ng-bind="::col.title"]')
-        .toArray()
-        .map((header: any) => $(header).text());
-      const fieldColumnIndex = headers.indexOf(fieldName);
-      return await find.byCssSelector(
-        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
-          fieldColumnIndex + 1
-        }) a`
-      );
-    }
+    // Table visualization
 
-    /**
-     * If you are writing new tests, you should rather look into getTableVisContent method instead.
-     * @deprecated Use getTableVisContent instead.
-     */
-    public async getTableVisData() {
-      return await testSubjects.getVisibleText('paginated-table-body');
+    public async getTableVisNoResult() {
+      return await testSubjects.find('tbvChartContainer>visNoResult');
     }
 
     /**
      * This function returns the text displayed in the Table Vis header
      */
     public async getTableVisHeader() {
-      return await testSubjects.getVisibleText('paginated-table-header');
+      return await testSubjects.getVisibleText('dataGridHeader');
+    }
+
+    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
+      const headers = await dataGrid.getHeaders();
+      const fieldColumnIndex = headers.indexOf(fieldName);
+      const cell = await dataGrid.getCellElement(rowIndex, fieldColumnIndex + 1);
+      return await cell.findByTagName('a');
     }
 
     /**
-     * This function is the newer function to retrieve data from within a table visualization.
-     * It uses a better return format, than the old getTableVisData, by properly splitting
-     * cell values into arrays. Please use this function for newer tests.
+     * Function to retrieve data from within a table visualization.
      */
     public async getTableVisContent({ stripEmptyRows = true } = {}) {
       return await retry.try(async () => {
-        const container = await testSubjects.find('tableVis');
-        const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+        const container = await testSubjects.find('tbvChart');
+        const allTables = await testSubjects.findAllDescendant('dataGridWrapper', container);
 
         if (allTables.length === 0) {
           return [];
@@ -493,7 +482,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
         const allData = await Promise.all(
           allTables.map(async (t) => {
-            let data = await table.getDataFromElement(t);
+            let data = await dataGrid.getDataFromElement(t, 'tbvChartCellContent');
             if (stripEmptyRows) {
               data = data.filter(
                 (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
@@ -547,9 +536,19 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         const yAxes = (await this.getDebugState())?.axes?.y ?? [];
         return yAxes.filter(({ position }) => position === Position.Right).length;
       }
-
       const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
       return axes.length;
+    }
+
+    public async clickOnGaugeByLabel(label: string) {
+      const gauge = await testSubjects.find(`visGauge__meter--${label}`);
+      const gaugeSize = await gauge.getSize();
+      const gaugeHeight = gaugeSize.height;
+      // To click at Gauge arc instead of the center of SVG element
+      // the offset for a click is calculated as half arc height without 1 pixel
+      const yOffset = 1 - Math.floor(gaugeHeight / 2);
+
+      await gauge.clickMouseButton({ xOffset: 0, yOffset });
     }
 
     public async getHistogramSeriesCount() {

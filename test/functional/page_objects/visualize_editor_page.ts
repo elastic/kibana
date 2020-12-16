@@ -393,7 +393,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       }
     }
 
-    public async setSize(newValue: string | number, aggId?: string | number) {
+    public async setSize(newValue: number, aggId?: number) {
       const dataTestSubj = aggId
         ? `visEditorAggAccordion${aggId} > sizeParamEditor`
         : 'sizeParamEditor';

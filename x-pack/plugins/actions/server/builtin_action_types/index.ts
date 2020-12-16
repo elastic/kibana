@@ -23,12 +23,16 @@ export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
   actionTypeRegistry,
   logger,
+  publicBaseUrl,
 }: {
   actionsConfigUtils: ActionsConfigurationUtilities;
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
+  publicBaseUrl?: string;
 }) {
-  actionTypeRegistry.register(getEmailActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(
+    getEmailActionType({ logger, configurationUtilities, publicBaseUrl })
+  );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServerLogActionType({ logger }));

@@ -68,6 +68,9 @@ configService.atPath.mockImplementation((path) => {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      cors: {
+        enabled: false,
+      },
     } as any);
   }
   if (path === 'externalUrl') {
