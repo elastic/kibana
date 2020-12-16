@@ -49,6 +49,7 @@ const inspectorTitle = i18n.translate('inspector.title', {
 interface InspectorPanelProps {
   adapters: Adapters;
   title?: string;
+  options?: unknown;
   views: InspectorViewDescription[];
   dependencies: {
     uiSettings: IUiSettingsClient;
@@ -76,6 +77,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
       }
     },
     title: PropTypes.string,
+    options: PropTypes.object,
   };
 
   state: InspectorPanelState = {
@@ -111,6 +113,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
         <this.state.selectedView.component
           adapters={this.props.adapters}
           title={this.props.title || ''}
+          options={this.props.options}
         />
       </Suspense>
     );

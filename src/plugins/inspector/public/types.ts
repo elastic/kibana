@@ -33,6 +33,10 @@ export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
    * The title that the inspector is currently using e.g. a visualization name.
    */
   title: string;
+  /**
+   * A set of specific options for each view.
+   */
+  options?: unknown;
 }
 
 /**
@@ -61,9 +65,11 @@ export interface InspectorViewDescription {
  * Options that can be specified when opening the inspector.
  * @property {string} title - An optional title, that will be shown in the header
  *    of the inspector. Can be used to give more context about what is being inspected.
+ * @property {unknown} options - A set of specific payload to be passed to inspector views
  */
 export interface InspectorOptions {
   title?: string;
+  options?: unknown;
 }
 
 export type InspectorSession = OverlayRef;

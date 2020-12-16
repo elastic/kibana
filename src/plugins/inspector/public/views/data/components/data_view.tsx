@@ -49,6 +49,7 @@ interface DataViewComponentState {
 
 interface DataViewComponentProps extends InspectorViewProps {
   kibana: KibanaReactContextValue<{ uiSettings: IUiSettingsClient }>;
+  options?: { fileName?: string };
 }
 
 class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
@@ -175,7 +176,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       <DataTableFormat
         data={this.state.tabularData}
         isFormatted={this.state.tabularOptions.returnsFormattedValues}
-        exportTitle={this.props.title}
+        exportTitle={this.props.options?.fileName || this.props.title}
         uiSettings={this.props.kibana.services.uiSettings}
       />
     );
