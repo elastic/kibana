@@ -31,6 +31,7 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
         <button
           aria-describedby=" generated-idDescription"
           className="euiCard__titleButton"
+          disabled={false}
           onClick={[Function]}
         >
           Element 1
@@ -132,6 +133,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         <button
           aria-describedby=" generated-idDescription"
           className="euiCard__titleButton"
+          disabled={false}
           onClick={[Function]}
         >
           Element 1

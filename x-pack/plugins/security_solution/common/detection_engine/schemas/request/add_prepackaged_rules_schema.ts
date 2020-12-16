@@ -23,7 +23,7 @@ import {
   Tags,
   To,
   type,
-  Threat,
+  Threats,
   threshold,
   ThrottleOrNull,
   note,
@@ -171,7 +171,7 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   severity_mapping: SeverityMapping;
   tags: Tags;
   to: To;
-  threat: Threat;
+  threat: Threats;
   throttle: ThrottleOrNull;
   exceptions_list: ListArray;
 };

@@ -42,6 +42,9 @@ describe('POST cases', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
@@ -78,6 +81,9 @@ describe('POST cases', () => {
           type: '.jira',
           fields: { issueType: 'Task', priority: 'High', parent: null },
         },
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
@@ -108,6 +114,9 @@ describe('POST cases', () => {
         status: CaseStatuses.open,
         tags: ['defacement'],
         connector: null,
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
@@ -130,6 +139,9 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         tags: ['error'],
         connector: null,
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
@@ -159,6 +171,9 @@ describe('POST cases', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       },
     });
@@ -199,6 +214,9 @@ describe('POST cases', () => {
       updated_at: null,
       updated_by: null,
       version: 'WzksMV0=',
+      settings: {
+        syncAlerts: true,
+      },
     });
   });
 });

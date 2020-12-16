@@ -24,6 +24,7 @@ import { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
  */
 export interface ApplicationUsageTotal extends SavedObjectAttributes {
   appId: string;
+  viewId: string;
   minutesOnScreen: number;
   numberOfClicks: number;
 }
