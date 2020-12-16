@@ -91,21 +91,22 @@ export class PolicyWatcher {
         return;
       }
       response.items.forEach(async (policy) => {
-        const policyConfig = policy.inputs[0].config?.policy.value;
+        const { id, ...updatePolicy } = policy;
+        const policyConfig = updatePolicy.inputs[0].config?.policy.value;
         if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-          policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
+          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
             policyConfig,
             license
           );
           try {
-            await this.policyService.update(this.soClient, policy.id, policy);
+            await this.policyService.update(this.soClient, id, updatePolicy);
           } catch (e) {
             // try again for transient issues
             try {
-              await this.policyService.update(this.soClient, policy.id, policy);
+              await this.policyService.update(this.soClient, id, updatePolicy);
             } catch (ee) {
               this.logger.warn(
-                `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`
+                `Unable to remove platinum features from policy ${id}: ${ee.message}`
               );
             }
           }
