@@ -82,7 +82,7 @@ function mockNodeDataWithAllProcessesTerminated({
 }
 
 describe('data state', () => {
-  let actions: ResolverAction[] = [];
+  let actions: ResolverAction[];
 
   /**
    * Get state, given an ordered collection of actions.
@@ -114,6 +114,10 @@ describe('data state', () => {
       .map(([message, value]) => `${message}: ${JSON.stringify(value)}`)
       .join('\n');
   };
+
+  beforeEach(() => {
+    actions = [];
+  });
 
   it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a request to make, or have a pending request that needs to be aborted.`, () => {
     expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -603,20 +607,22 @@ describe('data state', () => {
     const secondAncestorID = 'a';
     beforeEach(() => {
       const { schema, dataSource } = endpointSourceSchema();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWith2AncestorsAndNoChildren({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
-          dataSource,
-          schema,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: mockTreeWith2AncestorsAndNoChildren({
+              originID,
+              firstAncestorID,
+              secondAncestorID,
+            }),
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -638,17 +644,19 @@ describe('data state', () => {
       secondAncestorID,
     });
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedNodeData',
-        payload: {
-          nodeData,
-          requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
-          // mock the requested size being larger than the returned number of events so we
-          // avoid the case where the limit was reached
-          numberOfRequestedEvents: nodeData.length + 1,
-          dataRequestID: 0,
+      actions = [
+        {
+          type: 'serverReturnedNodeData',
+          payload: {
+            nodeData,
+            requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
+            // mock the requested size being larger than the returned number of events so we
+            // avoid the case where the limit was reached
+            numberOfRequestedEvents: nodeData.length + 1,
+            dataRequestID: 0,
+          },
         },
-      });
+      ];
     });
     it('should have origin as terminated', () => {
       expect(selectors.nodeDataStatus(state())(originID)).toBe('terminated');
@@ -671,16 +679,18 @@ describe('data state', () => {
         secondChildID,
       });
       const { schema, dataSource } = endpointSourceSchema();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: resolverTree,
-          dataSource,
-          schema,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -703,16 +713,18 @@ describe('data state', () => {
         secondChildID,
       });
       const { schema, dataSource } = endpointSourceSchema();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: resolverTree,
-          dataSource,
-          schema,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
       const graphables = selectors.graphableNodes(state());
@@ -737,16 +749,18 @@ describe('data state', () => {
         secondChildID,
       });
       const { schema, dataSource } = endpointSourceSchema();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          dataSource,
-          schema,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have 4 graphable processes', () => {
       expect(selectors.graphableNodes(state()).length).toBe(4);
@@ -756,16 +770,18 @@ describe('data state', () => {
     beforeEach(() => {
       const { schema, dataSource } = endpointSourceSchema();
       const tree = mockTreeWithNoProcessEvents();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          dataSource,
-          schema,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should return an empty layout', () => {
       expect(selectors.layout(state())).toMatchInlineSnapshot(`
