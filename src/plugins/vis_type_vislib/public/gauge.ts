@@ -25,7 +25,7 @@ import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';
 import { ColorModes, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
 import { toExpressionAst } from './to_ast';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 import { BasicVislibParams } from './types';
 
 export interface Gauge extends ColorSchemaParams {
@@ -63,6 +63,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
     defaultMessage: 'Show the status of a metric.',
   }),
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   toExpressionAst,
   visConfig: {
     defaults: {

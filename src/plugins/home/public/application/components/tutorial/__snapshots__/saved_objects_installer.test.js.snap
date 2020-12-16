@@ -192,6 +192,12 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                     Step 1 is incomplete
                   </span>
                 </EuiScreenReaderOnly>
+                <span
+                  aria-hidden="true"
+                  className="euiStepNumber__number"
+                >
+                  1
+                </span>
               </span>
             </EuiStepNumber>
             <EuiTitle
@@ -244,7 +250,9 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                       <EuiButtonDisplay
                         baseClassName="euiButton"
                         data-test-subj="loadSavedObjects"
+                        disabled={false}
                         element="button"
+                        isDisabled={false}
                         isLoading={false}
                         onClick={[Function]}
                         type="button"
@@ -252,6 +260,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                         <button
                           className="euiButton euiButton--primary"
                           data-test-subj="loadSavedObjects"
+                          disabled={false}
                           onClick={[Function]}
                           style={
                             Object {
@@ -572,7 +581,9 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       <EuiButtonDisplay
                         baseClassName="euiButton"
                         data-test-subj="loadSavedObjects"
+                        disabled={false}
                         element="button"
+                        isDisabled={false}
                         isLoading={false}
                         onClick={[Function]}
                         type="button"
@@ -580,6 +591,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                         <button
                           className="euiButton euiButton--primary"
                           data-test-subj="loadSavedObjects"
+                          disabled={false}
                           onClick={[Function]}
                           style={
                             Object {

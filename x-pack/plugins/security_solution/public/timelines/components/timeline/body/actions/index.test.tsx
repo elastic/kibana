@@ -25,7 +25,9 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
+          columnValues={'abc def'}
           expanded={false}
           eventId="abc"
           loadingEventIds={[]}
@@ -44,7 +46,9 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
+          columnValues={'abc def'}
           eventId="abc"
           expanded={false}
           loadingEventIds={[]}

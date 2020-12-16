@@ -12,16 +12,19 @@ exports[`datatable_expression DatatableComponent it renders actions column when 
           "field": "a",
           "name": "a",
           "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "b",
           "name": "b",
           "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "c",
           "name": "c",
           "render": [Function],
+          "sortable": true,
         },
         Object {
           "actions": Array [
@@ -49,7 +52,14 @@ exports[`datatable_expression DatatableComponent it renders actions column when 
       ]
     }
     noItemsMessage="No items found"
+    onChange={[Function]}
     responsive={true}
+    sorting={
+      Object {
+        "allowNeutralSort": true,
+        "sort": undefined,
+      }
+    }
     tableLayout="auto"
   />
 </VisualizationContainer>
@@ -67,16 +77,19 @@ exports[`datatable_expression DatatableComponent it renders the title and value 
           "field": "a",
           "name": "a",
           "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "b",
           "name": "b",
           "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "c",
           "name": "c",
           "render": [Function],
+          "sortable": true,
         },
       ]
     }
@@ -92,7 +105,14 @@ exports[`datatable_expression DatatableComponent it renders the title and value 
       ]
     }
     noItemsMessage="No items found"
+    onChange={[Function]}
     responsive={true}
+    sorting={
+      Object {
+        "allowNeutralSort": true,
+        "sort": undefined,
+      }
+    }
     tableLayout="auto"
   />
 </VisualizationContainer>
