@@ -154,8 +154,10 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async selectSummaryCountField(identifier: string) {
-      await comboBox.set('mlSummaryCountFieldNameSelect > comboBoxInput', identifier);
-      await this.assertSummaryCountFieldSelection([identifier]);
+      await retry.tryForTime(15 * 1000, async () => {
+        await comboBox.set('mlSummaryCountFieldNameSelect > comboBoxInput', identifier);
+        await this.assertSummaryCountFieldSelection([identifier]);
+      });
     },
 
     async assertAddDetectorButtonExists() {

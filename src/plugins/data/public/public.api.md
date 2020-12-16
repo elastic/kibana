@@ -10,10 +10,12 @@ import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
+import { ApplicationUsageTracker } from '@kbn/analytics';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
@@ -31,7 +33,6 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import { ExclusiveUnion } from '@elastic/eui';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -49,7 +50,6 @@ import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -851,6 +851,8 @@ export const extractSearchSourceReferences: (state: SearchSourceFields) => [Sear
 export abstract class FieldFormat {
     // Warning: (ae-forgotten-export) The symbol "IFieldFormatMetaParams" needs to be exported by the entry point index.d.ts
     constructor(_params?: IFieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn);
+    // (undocumented)
+    allowsNumericalAggregations?: boolean;
     // Warning: (ae-forgotten-export) The symbol "HtmlContextTypeOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "TextContextTypeOptions" needs to be exported by the entry point index.d.ts
     convert(value: any, contentType?: FieldFormatsContentType, options?: HtmlContextTypeOptions | TextContextTypeOptions): string;
@@ -1092,7 +1094,7 @@ export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchRespon
 // Warning: (ae-missing-release-tag) "IFieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+export type IFieldFormat = FieldFormat;
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -757,6 +757,35 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+// [Data table visualization] Enable toolbar by default
+const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
+  let visState;
+
+  try {
+    visState = JSON.parse(doc.attributes.visState);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  if (visState?.type === 'table') {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify({
+          ...visState,
+          params: {
+            ...visState.params,
+            showToolbar: true,
+          },
+        }),
+      },
+    };
+  }
+
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -790,4 +819,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.11.0': flow(enableDataTableVisToolbar),
 };

@@ -28,7 +28,9 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
+  AlertNotifyWhenType,
 } from '../common';
+import { LicenseType } from '../../licensing/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -83,6 +85,16 @@ export interface ActionVariable {
   description: string;
 }
 
+// signature of the alert type executor function
+export type ExecutorType<
+  Params,
+  State,
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> = (
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
+) => Promise<State | void>;
+
 export interface AlertType<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
@@ -97,17 +109,14 @@ export interface AlertType<
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
   recoveryActionGroup?: ActionGroup;
-  executor: ({
-    services,
-    params,
-    state,
-  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
+  executor: ExecutorType<Params, State, InstanceState, InstanceContext>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
     params?: ActionVariable[];
   };
+  minimumLicenseRequired: LicenseType;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {
@@ -152,6 +161,7 @@ export interface RawAlert extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -162,6 +172,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
+  | 'notifyWhen'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'

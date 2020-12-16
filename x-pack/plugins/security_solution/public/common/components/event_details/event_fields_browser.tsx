@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 
+import {
+  arrayIndexToAriaIndex,
+  DATA_COLINDEX_ATTRIBUTE,
+  DATA_ROWINDEX_ATTRIBUTE,
+  isTab,
+  onKeyDownFocusHandler,
+} from '../accessibility/helpers';
+import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
@@ -19,7 +27,7 @@ import { getColumnHeaders } from '../../../timelines/components/timeline/body/co
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import { getColumns } from './columns';
-import { search } from './helpers';
+import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 interface Props {
@@ -68,18 +76,29 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   }
 `;
 
+/**
+ * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
+ * attributes to every `<tr>`.
+ */
+const getAriaRowindex = (timelineEventsDetailsItem: TimelineEventsDetailsItem) =>
+  timelineEventsDetailsItem.ariaRowindex != null
+    ? { 'data-rowindex': timelineEventsDetailsItem.ariaRowindex }
+    : {};
+
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, data, eventId, timelineId }) => {
+    const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
-        sortBy(data, ['field']).map((item) => ({
+        sortBy(['field'], data).map((item, i) => ({
           ...item,
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',
+          ariaRowindex: arrayIndexToAriaIndex(i),
         })),
       [data, fieldsByName]
     );
@@ -89,6 +108,19 @@ export const EventFieldsBrowser = React.memo<Props>(
 
       return getColumnHeaders(columns, browserFields);
     });
+
+    const getLinkValue = useCallback(
+      (field: string) => {
+        const linkField = (columnHeaders.find((col) => col.id === field) ?? {}).linkField;
+        if (!linkField) {
+          return null;
+        }
+        const linkFieldData = (data ?? []).find((d) => d.field === linkField);
+        const linkFieldValue = getOr(null, 'originalValue', linkFieldData);
+        return Array.isArray(linkFieldValue) ? linkFieldValue[0] : linkFieldValue;
+      },
+      [data, columnHeaders]
+    );
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
@@ -124,20 +156,70 @@ export const EventFieldsBrowser = React.memo<Props>(
           columnHeaders,
           eventId,
           onUpdateColumns,
-          contextId: timelineId,
+          contextId: `event-fields-browser-for-${timelineId}`,
+          timelineId,
           toggleColumn,
+          getLinkValue,
         }),
-      [browserFields, columnHeaders, eventId, onUpdateColumns, timelineId, toggleColumn]
+      [
+        browserFields,
+        columnHeaders,
+        eventId,
+        onUpdateColumns,
+        timelineId,
+        toggleColumn,
+        getLinkValue,
+      ]
     );
 
+    const focusSearchInput = useCallback(() => {
+      // the selector below is used to focus the input because EuiInMemoryTable does not expose a ref to its built-in search input
+      containerElement.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
+    }, []);
+
+    const focusAddTimelineButton = useCallback(() => {
+      // the document selector below is required because we may be in a flyout or full screen timeline context
+      document.querySelector<HTMLButtonElement>(`.${ADD_TIMELINE_BUTTON_CLASS_NAME}`)?.focus();
+    }, []);
+
+    const onKeyDown = useCallback(
+      (keyboardEvent: React.KeyboardEvent) => {
+        if (isTab(keyboardEvent)) {
+          onEventDetailsTabKeyPressed({
+            containerElement: containerElement.current,
+            keyboardEvent,
+            onSkipFocusBeforeEventsTable: focusSearchInput,
+            onSkipFocusAfterEventsTable: focusAddTimelineButton,
+          });
+        } else {
+          onKeyDownFocusHandler({
+            colindexAttribute: DATA_COLINDEX_ATTRIBUTE,
+            containerElement: containerElement?.current,
+            event: keyboardEvent,
+            maxAriaColindex: 3,
+            maxAriaRowindex: data.length,
+            onColumnFocused: noop,
+            rowindexAttribute: DATA_ROWINDEX_ATTRIBUTE,
+          });
+        }
+      },
+      [data, focusAddTimelineButton, focusSearchInput]
+    );
+
+    useEffect(() => {
+      focusSearchInput();
+    }, [focusSearchInput]);
+
     return (
-      <TableWrapper>
+      <TableWrapper onKeyDown={onKeyDown} ref={containerElement}>
         <StyledEuiInMemoryTable
+          className={EVENT_FIELDS_TABLE_CLASS_NAME}
           items={items}
           columns={columns}
           pagination={false}
+          rowProps={getAriaRowindex}
           search={search}
-          sorting={true}
+          sorting={false}
         />
       </TableWrapper>
     );

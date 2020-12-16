@@ -17,7 +17,6 @@ import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
-  ASSETS_SAVED_OBJECT_TYPE,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -42,13 +41,12 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
-  getInstallation,
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { PackageAsset, assetPathToObjectId } from '../../services/epm/archive/save_to_es';
+import { bufferToStream } from '../../services/epm/streams';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -109,49 +107,35 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const useLocalFile = pkgVersion === installation?.version;
-
-    if (useLocalFile) {
-      const archiveKey = `${pkgName}-${pkgVersion}/${filePath}`;
-      const archiveEntry = getArchiveEntry(archiveKey);
-      const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
-        ASSETS_SAVED_OBJECT_TYPE,
-        assetPathToObjectId(archiveKey)
-      );
-
-      if (!archiveEntry && !assetSavedObject) {
-        return response.custom({
-          body: `installed package file not found: ${filePath}`,
-          statusCode: 404,
-        });
-      }
-
-      const headerContentType =
-        assetSavedObject.attributes.media_type || mime.contentType(path.extname(archiveKey));
+    const savedObject = await getInstallationObject({ savedObjectsClient, pkgName });
+    const pkgInstallSource = savedObject?.attributes.install_source;
+    // TODO: when package storage is available, remove installSource check and check cache and storage, remove registry call
+    if (pkgInstallSource === 'upload' && pkgVersion === savedObject?.attributes.version) {
+      const headerContentType = mime.contentType(path.extname(filePath));
       if (!headerContentType) {
         return response.custom({
           body: `unknown content type for file: ${filePath}`,
           statusCode: 400,
         });
       }
-
-      const { data_base64: base64, data_utf8: utf8 } = assetSavedObject.attributes;
-      // if we have a local Buffer, use that
-      // else, create one from the saved object (try utf8 first)
-      const responseBody =
-        archiveEntry || utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
-
+      const archiveFile = getArchiveEntry(`${pkgName}-${pkgVersion}/${filePath}`);
+      if (!archiveFile) {
+        return response.custom({
+          body: `uploaded package file not found: ${filePath}`,
+          statusCode: 404,
+        });
+      }
+      const headers: ResponseHeaders = {
+        'cache-control': 'max-age=10, public',
+        'content-type': headerContentType,
+      };
       return response.custom({
-        body: responseBody,
+        body: bufferToStream(archiveFile),
         statusCode: 200,
-        headers: {
-          'cache-control': 'max-age=10, public',
-          'content-type': headerContentType,
-        },
+        headers,
       });
     } else {
-      const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
       const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
       const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
         const value = registryResponse.headers.get(knownHeader);

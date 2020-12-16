@@ -97,6 +97,7 @@
         }
       },
       "resolver": "_WmX0plYQwm2z6tfCPyCQw",
+      "uuid": "_WmX0plYQwm2z6tfCPyCQw",
       "shardCount": 23,
       "transport_address": "127.0.0.1:9300",
       "type": "master"
@@ -107,6 +108,7 @@
       "nodeTypeClass": "storage",
       "nodeTypeLabel": "Node",
       "resolver": "1jxg5T33TWub-jJL4qP0Wg",
+      "uuid": "1jxg5T33TWub-jJL4qP0Wg",
       "shardCount": 0,
       "transport_address": "127.0.0.1:9302",
       "type": "node"

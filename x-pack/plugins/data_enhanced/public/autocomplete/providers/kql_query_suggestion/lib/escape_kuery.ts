@@ -6,8 +6,12 @@
 
 import { flow } from 'lodash';
 
+/**
+ * Escapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value
+ * in a KQL expression. See the QuotedCharacter rule in kuery.peg.)
+ */
 export function escapeQuotes(str: string) {
-  return str.replace(/"/g, '\\"');
+  return str.replace(/[\\"]/g, '\\$&');
 }
 
 export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
