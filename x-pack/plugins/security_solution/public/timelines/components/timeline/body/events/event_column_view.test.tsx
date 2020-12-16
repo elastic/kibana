@@ -20,6 +20,7 @@ describe('EventColumnView', () => {
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
 
   const props = {
+    ariaRowindex: 2,
     id: 'event-id',
     actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
     associateNote: jest.fn(),
