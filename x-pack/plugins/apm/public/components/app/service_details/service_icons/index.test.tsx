@@ -63,9 +63,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(getByTestId('loading')).toBeInTheDocument();
-      expect(queryAllByTestId('java')).toHaveLength(0);
-      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
-      expect(queryAllByTestId('gcp')).toHaveLength(0);
+      expect(queryAllByTestId('service')).toHaveLength(0);
+      expect(queryAllByTestId('container')).toHaveLength(0);
+      expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it("doesn't show any icons", () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -80,9 +80,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(queryAllByTestId('java')).toHaveLength(0);
-      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
-      expect(queryAllByTestId('gcp')).toHaveLength(0);
+      expect(queryAllByTestId('service')).toHaveLength(0);
+      expect(queryAllByTestId('container')).toHaveLength(0);
+      expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it('shows service icon', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -99,9 +99,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(getByTestId('java')).toBeInTheDocument();
-      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
-      expect(queryAllByTestId('gcp')).toHaveLength(0);
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(queryAllByTestId('container')).toHaveLength(0);
+      expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it('shows service and container icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -119,9 +119,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(queryAllByTestId('gcp')).toHaveLength(0);
-      expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('Kubernetes')).toBeInTheDocument();
+      expect(queryAllByTestId('cloud')).toHaveLength(0);
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
     });
     it('shows service, container and cloud icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -140,9 +140,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('Kubernetes')).toBeInTheDocument();
-      expect(getByTestId('gcp')).toBeInTheDocument();
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('cloud')).toBeInTheDocument();
     });
   });
 
@@ -183,9 +183,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('Kubernetes')).toBeInTheDocument();
-      expect(getByTestId('gcp')).toBeInTheDocument();
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('cloud')).toBeInTheDocument();
       fireEvent.click(getByTestId('popover_Service'));
       expect(getByTestId('loading-content')).toBeInTheDocument();
     });
@@ -219,9 +219,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
-      expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('Kubernetes')).toBeInTheDocument();
-      expect(getByTestId('gcp')).toBeInTheDocument();
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('cloud')).toBeInTheDocument();
 
       fireEvent.click(getByTestId('popover_Service'));
       expect(queryAllByTestId('loading-content')).toHaveLength(0);
