@@ -8,8 +8,12 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 
-export const HelpMenu = React.memo(() => {
-  const { chrome, docLinks } = useMlKibana().services;
+interface HelpMenuProps {
+  docLink: string;
+}
+
+export const HelpMenu: FC<HelpMemuProps> = React.memo(({ docLink }) => {
+  const { chrome } = useMlKibana().services;
 
   useEffect(() => {
     chrome.setHelpExtension({
@@ -21,7 +25,7 @@ export const HelpMenu = React.memo(() => {
           content: i18n.translate('xpack.ml.chrome.helpMenu.documentation', {
             defaultMessage: 'Documentation',
           }),
-          href: docLinks.links.ml.guide,
+          href: docLink,
           iconType: 'documents',
           linkType: 'custom',
           target: '_blank',
