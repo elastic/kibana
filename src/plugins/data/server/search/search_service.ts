@@ -305,7 +305,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
     const strategy = this.getSearchStrategy(options.strategy);
-    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
+    if (!strategy.cancel) {
+      throw new Error(`Search strategy doesn't support cancellations`);
+    }
+    return strategy.cancel(id, options, deps);
   };
 
   private getSearchStrategy = <

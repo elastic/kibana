@@ -17,72 +17,101 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('msearch', () => {
+  describe('search', () => {
     describe('post', () => {
-      it('should return 200 when correctly formatted searches are provided', async () =>
-        await supertest
-          .post(`/internal/_msearch`)
+      it('should return 200 when correctly formatted searches are provided', async () => {
+        const resp = await supertest
+          .post(`/internal/search/es`)
           .send({
-            searches: [
-              {
-                header: { index: 'foo' },
-                body: {
-                  query: {
-                    match_all: {},
-                  },
+            params: {
+              body: {
+                query: {
+                  match_all: {},
                 },
               },
-            ],
+            },
           })
-          .expect(200));
+          .expect(200);
 
-      it('should return 400 if you provide malformed content', async () =>
-        await supertest
-          .post(`/internal/_msearch`)
-          .send({
-            foo: false,
-          })
-          .expect(400));
+        expect(resp.body.isPartial).to.be(false);
+        expect(resp.body.isRunning).to.be(false);
+        expect(resp.body).to.have.property('rawResponse');
+      });
 
-      it('should require you to provide an index for each request', async () =>
+      it('should return 404 when if no strategy is provided', async () =>
         await supertest
-          .post(`/internal/_msearch`)
+          .post(`/internal/search`)
           .send({
-            searches: [
-              { header: { index: 'foo' }, body: {} },
-              { header: {}, body: {} },
-            ],
+            body: {
+              query: {
+                match_all: {},
+              },
+            },
           })
-          .expect(400));
+          .expect(404));
 
-      it('should not require optional params', async () =>
-        await supertest
-          .post(`/internal/_msearch`)
+      it('should return 500 when if no strategy is provided', async () => {
+        const resp = await supertest
+          .post(`/internal/search/banana`)
           .send({
-            searches: [{ header: { index: 'foo' }, body: {} }],
+            body: {
+              query: {
+                match_all: {},
+              },
+            },
           })
-          .expect(200));
+          .expect(500);
+        expect(resp.body.message).to.contain('banana not found');
+      });
 
-      it('should allow passing preference as a string', async () =>
-        await supertest
-          .post(`/internal/_msearch`)
+      it('should return 500 when index type is provided in OSS', async () => {
+        const resp = await supertest
+          .post(`/internal/search/es`)
           .send({
-            searches: [{ header: { index: 'foo', preference: '_custom' }, body: {} }],
+            indexType: 'baad',
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+              },
+            },
           })
-          .expect(200));
+          .expect(500);
 
-      it('should allow passing preference as a number', async () =>
-        await supertest
-          .post(`/internal/_msearch`)
+        expect(resp.body.message).to.contain('Unsupported index pattern');
+      });
+
+      it('should return 400 with a bad body', async () => {
+        const resp = await supertest
+          .post(`/internal/search/es`)
           .send({
-            searches: [{ header: { index: 'foo', preference: 123 }, body: {} }],
+            params: {
+              body: {
+                index: 'nope nope',
+                bad_query: [],
+              },
+            },
           })
-          .expect(200));
+          .expect(400);
+      });
+    });
+
+    describe('delete', () => {
+      it('should return 404 when no search id provided', async () => {
+        const resp = await supertest.delete(`/internal/search/es`).send().expect(404);
+      });
+
+      it('should return 500 when trying a delete on a non supporting strategy', async () => {
+        const resp = await supertest.delete(`/internal/search/es/123`).send().expect(500);
+        expect(resp.body.message).to.contain("Search strategy doesn't support cancellations");
+      });
     });
   });
 }
