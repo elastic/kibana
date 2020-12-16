@@ -1,12 +1,18 @@
 [[vega]]
 === Add custom panels with Vega
 
-To create custom visualization panels of your data, use the tutorials to create area charts by changing the specs that appear in the *Vega* editor.
+With *Vega*, you configure the visualization panels by editing the *Vega* and *Vega-Lite* specs.
 
 [float]
-=== Add the data and create the dashboard
+==== Tutorial: Create a stacked area chart with Vega-lite
 
-Add the eCommerce sample data you'll use to create the visualizations, then create the dashboard.
+You collected sales data for your store, and you want to visualize and analyze the data on a dashboard. To create custom panels of the data, use *Vega* and *Vega-Lite* to 
+create a stacked area chart and an area chart.
+
+[float]
+===== Add the data and create the dashboard
+
+Add the eCommerce sample data that you'll use to create the stacked area chart, then create the dashboard.
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
@@ -17,11 +23,22 @@ Add the eCommerce sample data you'll use to create the visualizations, then crea
 . Click *Create dashboard*.
 
 [float]
-=== Tutorial: Create a stacked area chart with Vega-lite
+===== Open Vega
 
-To create a stacked area chart from an {es} search query, edit the Vega-Lite spec.
+Open *Vega* and change the time range. 
 
-The Vega-Lite spec uses https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Vega*.
++
+A pre-populated line chart displays the total number of documents. 
+
+. Change the <<set-time-filter,time range>> to *Last 7 days*.
+
+[float]
+===== Create a stacked area chart
+
+To create the stacked area chart, edit the Vega-Lite spec. The Vega-Lite spec uses https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
 
 HJSON supports the following:
 
@@ -32,96 +49,41 @@ HJSON supports the following:
 * Double or single quotes
 * Multiline strings
 
+When you are finished with the tutorial, you'll have a stacked area chart that displays the sales data.
+
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_1.png[Vega-Lite tutorial stacked area chart]
 
-To begin, click *Create panel*, then click *Vega* on the *New visualization* window.
-
-A pre-populated line chart displays the total number of documents in your indices within the specified time range.
-
-[role="screenshot"]
-image::visualize/images/vega_lite_default.png[Vega-Lite tutorial default visualization]
-
 [float]
-==== Change the index
+===== Change the index
 
 Change the index to the *eCommerce sample data*. 
 
-. In the editor, replace `index: _all` with the following:
+In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
 
 ```yaml
 index: kibana_sample_data_ecommerce
 ```
 
-. Click *Update*. 
-+
 A flat line appears with zero results.
 
 [float]
-==== Change the data fields
+===== Change the data fields
 
-Edit the spec to query fields that appear in the *kibana_sample_data_ecommerce* index. 
+Add a data field from the *kibana_sample_data_ecommerce* index. 
 
-In the editor, replace `@timestamp` with `order_date`. 
+. In the *Vega-Lite* spec, replace the following:
 
-The spec appears as the following:
+* `%timefield%: @timestamp` with `%timefield%: order_date`
 
-.Expand Vega-Lite spec
-[%collapsible%closed]
-====
-[source,yaml]
-----
-{
-  $schema: https://vega.github.io/schema/vega-lite/v4.json
-  title: Event counts from ecommerce
-  data: {
-    url: {
-      %context%: true
-      %timefield%: order_date
-      index: kibana_sample_data_ecommerce
-      body: {
-        aggs: {
-          time_buckets: {
-            date_histogram: {
-              field: order_date
-              interval: {%autointerval%: true}
-              extended_bounds: {
-                min: {%timefilter%: "min"}
-                max: {%timefilter%: "max"}
-              }
-              min_doc_count: 0
-            }
-          }
-        }
-        size: 0
-      }
-    }
-    format: {property: "aggregations.time_buckets.buckets" }
-  }
+* `field: @timestamp` with `field: order_date`
 
-  mark: line
-
-  encoding: {
-    x: {
-      field: key
-      type: temporal
-      axis: { title: null }
-    }
-    y: {
-      field: doc_count
-      type: quantitative
-      axis: { title: "Document count" }
-    }
-  }
-}
-----
-
-====
+. Click *Update*.
 
 [float]
-==== Add an aggregation
+===== Add the aggregations
 
-To create a stacked area chart, add an aggregation. 
+To create the stacked area chart, add the aggregations. 
 
 . To check your work, open and use the <<console-kibana,*Console*>> on a separate browser tab.
 
@@ -129,7 +91,7 @@ To create a stacked area chart, add an aggregation.
 
 .. Open the main menu, then click *Dev Tools*.
 
-.. On the *Console* editor, enter the following, then click *Click to send request*:
+.. On the *Console* editor, enter the aggregation, then click *Click to send request*:
 
 ```js
 POST kibana_sample_data_ecommerce/_search
@@ -157,9 +119,7 @@ POST kibana_sample_data_ecommerce/_search
 }
 ```
 
-You need more data to create a stacked bar from the original query. 
-
-. To get more data, add the {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]:
+Add the {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation], then click *Click to send request*:
 
 ```js
 POST kibana_sample_data_ecommerce/_search
@@ -192,7 +152,7 @@ POST kibana_sample_data_ecommerce/_search
 }
 ```
 
-The response format is different from the previous query:
+The response format is different from the first aggregation query:
 
 ```json
 {
@@ -219,12 +179,8 @@ The response format is different from the previous query:
   }
 }
 ```
-[float]
-==== Convert the query
 
-Convert the isolated {es} query to a query with {kib} integration. 
-
-In the *Vega* spec editor, enter the following, then click *Update*:
+In the *Vega-Lite* spec, enter the aggregations, then click *Update*:
 
 ```yaml
   data: {
@@ -258,26 +214,20 @@ In the *Vega* spec editor, enter the following, then click *Update*:
   }
 ```
 
-The query replaces `"fixed_interval": "1d"` with `interval: {%autointerval%: true}`.
-
-For information about the tokens used in the query, such
-as `%context: true`, refer to <<vega-queries, reference for writing {es} queries in Vega>>. 
+For information about the queries, refer to <<vega-queries, reference for writing {es} queries in Vega>>. 
 
 [float]
-==== Debug the warning
+===== Debug the warning
 
-To generate data, Vega-Lite uses the `source_0` and `data_0`. `source_0` contains
-the results from the {es} query, and `data_0` contains the visually encoded results,
-which are shown in the chart. A warning saying . To debug the *Infinite extent for field "key": [Infinity, -Infinity]* warning, compare `source_0` and `data_0`.
+To generate the data, *Vega-Lite* uses the `source_0` and `data_0`. `source_0` contains
+the results from the {es} query, and `data_0` contains the visually encoded results that are shown on the chart.
+To debug the warning, compare `source_0` and `data_0`.
 
-. To inspect, *Inspect* in the toolbar. 
+. In the toolbar, click *Inspect*. 
 
 . From the *View* dropdown, select *Vega debug*.
-+
-[role="screenshot"]
-image::visualize/images/vega_lite_tutorial_3.png[Data set selector showing root, source_0, data_0, and marks]
 
-. To view the underlying data, select *source_0* from the dropdown.
+. From the dropdown, select *source_0*.
 +
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
@@ -286,10 +236,13 @@ image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns k
 +
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
++
+*key* is unable to convert because the property is category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
 
-The `key` property is unable to convert because the property is category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
+[float]
+===== Add the encoding block
 
-. Update `encoding`:
+In the *Vega-Lite* spec, add an `encoding` block:
 
 ```yaml
   encoding: {
@@ -313,16 +266,16 @@ The `key` property is unable to convert because the property is category (`Men's
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
 
-Vega is unable to extract the `time_buckets.buckets` inner array.
+*Vega-Lite* is unable to extract the `time_buckets.buckets` inner array.
 
 [float]
-==== Use the flatten transformation
+===== Extract the `time_buckets.buckets` inner array
 
-In {kib} 7.9 and later, use the Vega-lite https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation] to extract the `time_buckets.buckets` inner array.
+In {kib} 7.9 and later, use the *Vega-Lite* https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation] to extract the `time_buckets.buckets` inner array.
 
-If you are using {kib} 7.8 and earlier, the flatten transformation is available only in Vega.
+If you are using {kib} 7.8 and earlier, the flatten transformation is available only in *Vega*.
 
-. In the editor, add the following between the `data` and `encoding` sections:
+In the *Vega-Lite* spec, add a `transform` block, then click *Update*:
 
 ```yaml
   transform: [{
@@ -337,9 +290,9 @@ If you are using {kib} 7.8 and earlier, the flatten transformation is available 
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
 +
-Vega-Lite displays `undefined` values because there are duplicate names. 
+Vega-Lite displays *undefined* values because there are duplicate names. 
 
-. To resolve the duplicate names, enter the following in the `transform` and `encoding` blocks:
+. To resolve the duplicate names, add the `transform` and `encoding` blocks, then click *Update*:
 
 ```yaml
   transform: [{
@@ -367,22 +320,14 @@ Vega-Lite displays `undefined` values because there are duplicate names.
   }
 ```
 
-The *Vega* visualization builder displays the stacked area chart of the top categories. 
+The stacked area chart appears. 
 
 [float]
-==== Add hover states and tooltips
+===== Add hover states and tooltips
 
-In Vega-Lite, you add hover states and tooltips with `selection`.
+With the *Vega-Lite* spec, you can add hover states and tooltips with a `selection` block.
 
-With the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin], you can create the following tooltips:
-
-* Automatic tooltip based on the data, via `{ content: "data" }`
-
-* Array of fields, like `[{ field: "key", type: "nominal" }]`
-
-* Defining a custom Javascript object using the `calculate` transform
-
-. In the editor, add the following, then click *Update*:
+In the *Vega-Lite* spec, add the `encoding` block, then click *Update*:
 
 ```yaml
   encoding: {
@@ -406,9 +351,7 @@ When you hover over the area series on the stacked area chart, a multi-line tool
 appears, but is unable to indicate the nearest point. To
 indicate the nearest point, add a second layer.
 
-. Remove `mark: area` from the stacked area chart.
-
-. At the end of the Vega-Lite spec, add a composite mark:
+Add composite marks, then click *Update*:
 
 ```yaml
   layer: [{
@@ -420,7 +363,7 @@ indicate the nearest point, add a second layer.
 
 The points are unable to stack and align with the stacked area chart.
 
-. Change the Y encoding:
+Change the y `encoding`:
 
 ```yaml
     y: {
@@ -431,7 +374,7 @@ The points are unable to stack and align with the stacked area chart.
     }
 ```
 
-Add a `selection` block inside the point mark:
+Add a `selection` block inside `mark: point`:
 
 ```yaml
   layer: [{
@@ -468,15 +411,13 @@ Add a `selection` block inside the point mark:
   }]
 ```
 
-. Move your cursor around the stacked area chart. The points are able to
+Move your cursor around the stacked area chart. The points are able to
 indicate the nearest point.
-+
+
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
 
-. The selection is controlled by a Vega signal. To view the signal, click *Inspect* in the toolbar.
-
-That's it! The final Vega-Lite spec appears as the following:
+The selection is controlled by a signal. To view the signal, click *Inspect* in the toolbar.
 
 .Expand final Vega-Lite spec
 [%collapsible%closed]
@@ -591,13 +532,28 @@ That's it! The final Vega-Lite spec appears as the following:
 ====
 
 [float]
-[[vega-tutorial-update-kibana-filters-from-vega]]
-=== Tutorial: Update {kib} filters from Vega
+==== Save the panel
 
-Use *Vega* to build an area chart using an {es} search query,
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and an optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[float]
+[[vega-tutorial-update-kibana-filters-from-vega]]
+=== Create an area chart
+
+To build an area chart using an {es} search query, edit the *Vega* spec, 
 then add click and drag handlers to update the {kib} filters.
 
-In the editor, enter the following:
+In the *Vega* spec, enter the following, then click *Update*:
 
 ```yaml
 {
@@ -639,14 +595,7 @@ In the editor, enter the following:
 }
 ```
 
-The Vega spec contains the following minimum requirements:
-
-* Data
-* Scales
-* Marks
-* (optional) Axes
-
-. To add a valid {es} search query in the `data` block, enter the following, then click *Update*:
+Add a valid {es} search query with the `data` block, then click *Update*:
 
 ```yaml
   data: [
@@ -679,11 +628,11 @@ The Vega spec contains the following minimum requirements:
 ```
 
 [float]
-==== Change the X- and Y-axes
+===== Change the X- and Y-axes
 
 Display labels for the X- and Y-axes. 
 
-. In the editor, enter the following, then click *Update*:
+In the *Vega* spec, add the `scales` block, then click *Update*:
 
 ```yaml
   scales: [{
@@ -705,9 +654,7 @@ Display labels for the X- and Y-axes.
   }]
 ```
 
-The X and Y axes display labels based on the real data.
-
-. Encode the `key` and `doc_count` fields as the X and Y values, then click *Update*:
+Add the `key` and `doc_count` fields as the X- and Y-axis values, then click *Update*:
 
 ```yaml
   marks: [
@@ -742,12 +689,11 @@ An area chart appears in the *Vega* visualization buider.
 image::visualize/images/vega_tutorial_3.png[]
 
 [float]
-==== Add a block to the `marks` section
+===== Add a block to the `marks` section
 
-To show the clickable points to filter for a specific
-date, add a block to the `marks` section.
+Show the clickable points to filter for a specific date.
 
-. In the editor, enter the following, then click *Update*.
+In the *Vega* spec, add to the `marks` block, then click *Update*.
 
 ```yaml
   {
@@ -779,11 +725,11 @@ date, add a block to the `marks` section.
 ```
 
 [float]
-==== Create a Vega signal 
+===== Create a signal 
 
 To make the points clickable, create a *Vega* signal. You can access the clicked `datum` in the expression used to update. 
 
-. Specify that cursor clicks add a time filter with the three hour interval:
+In the *Vega* spec, add a `signals` block to specify that the cursor clicks add a time filter with the three hour interval, then click *Update*:
 
 ```yaml
   signals: [
@@ -804,9 +750,9 @@ To make the points clickable, create a *Vega* signal. You can access the clicked
 The event uses the `kibanaSetTimeFilter` custom function to generate a filter that
 applies to the entire dashboard on a click.
 
-. TO make the area chart interactive, locate the `marks` section,
+To make the area chart interactive, locate the `marks` block,
 then update the `point` and add `cursor: { value: "pointer" }` to
-the `encoding` section:
+`encoding`:
 
 ```yaml
   {
@@ -826,14 +772,14 @@ the `encoding` section:
 ```
 
 [float]
-==== Add a drag interaction 
+===== Add a drag interaction 
 
 To allow users to filter based on a time range, add a drag interaction, which requires additional signals and a rectangle overlay.
 
 [role="screenshot"]
 image::visualize/images/vega_tutorial_4.png[]
 
-. Add a new `signal` to track the X position of the cursor:
+In the *Vega* spec, add a `signal` to track the X position of the cursor:
 
 ```yaml
     {
@@ -855,9 +801,7 @@ image::visualize/images/vega_tutorial_4.png[]
     }
 ```
 
-To learn more about inspecting signals, refer to <<vega-inspector, Vega Inspector>>.
-
-. To indicate the current cursor position, add a `mark`:
+To indicate the current cursor position, add a `mark` block:
 
 ```yaml
     {
@@ -878,7 +822,7 @@ To learn more about inspecting signals, refer to <<vega-inspector, Vega Inspecto
     }
 ```
 
-. To track the selected time range, add a signal that updates
+To track the selected time range, add a signal that updates
 until the user releases their cursor or presses Return:
 
 
@@ -925,7 +869,7 @@ until the user releases their cursor or presses Return:
 
 There is a signal that tracks the time range from the user.
 
-. To indicate the range visually, add a mark that only appears conditionally:
+To indicate the range visually, add a mark that only appears conditionally:
 
 ```yaml
     {
@@ -944,7 +888,7 @@ There is a signal that tracks the time range from the user.
     }
 ```
 
-. Add a signal that updates the {kib} time filter when the curor is released while
+Add a signal that updates the {kib} time filter when the cursor is released while
 dragging:
 
 ```yaml
@@ -962,8 +906,6 @@ dragging:
       }]
     }
 ```
-
-That's it! Your final *Vega* spec looks like the following:
 
 .Expand final Vega spec
 [%collapsible%closed]
@@ -1193,3 +1135,18 @@ That's it! Your final *Vega* spec looks like the following:
 
 ----
 ====
+
+[float]
+===== Save the panel
+
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and an optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.

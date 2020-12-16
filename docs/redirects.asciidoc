@@ -198,3 +198,8 @@ This page has moved. Refer to <<url_templating-language>>.
 === Variables
 
 This page has moved. Refer to <<url-template-variables>>.
+
+[role="exclude",id="visualize"]
+== Visualize
+
+This content has moved. See <<dashboard, **Dashboard**>>.

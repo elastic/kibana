@@ -52,10 +52,10 @@ To configure *Controls* for your dashboard:
 . Click *Update*.
 
 [float]
-[[add-markdown]]
-=== Add Markdown
+[[add-text]]
+=== Add text
 
-Add markdown panels when you want to provide context to the other panels on your dashboard, such as important information, instructions, and images.
+Add text panels with *Markdown* when you want to provide context to the other panels on your dashboard, such as important information, instructions, and images.
 
 *Markdown* is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard. 
 

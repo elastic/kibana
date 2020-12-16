@@ -4,7 +4,7 @@
 [partintro]
 --
 
-Use dashboards to analyze and monitor your data. A dashboard is a collection of panels that display the data from one or more <<index-patterns, index patterns>>. 
+Use dashboards to visualize and analyze your data. A dashboard is a collection of panels that display the data from one or more <<index-patterns, index patterns>>. 
 Each panel displays your data in a supported panel type, such as charts, tables, maps, and more. 
 
 Dashboards are helpful for when you want to:
@@ -21,9 +21,9 @@ image:images/Dashboard_example.png[Example dashboard]
 [[tsvb]]
 
 [float]
-== Prerequisites
+== Minimum requirements
 
-To build dashboards, you must meet the minimum criteria. 
+To build dashboards, you must meet the minimum requirements. 
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
@@ -39,11 +39,9 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 [[create-the-dashboard]]
 == Create dashboards
 
-To create dashboards, use the *Lens* visualization builder to create panels, or add existing panels. 
+Open an empty dashboard, then create panels of your data using the *Lens* visualization builder, or add panels you're already created. 
 
-. Open the main menu, click *Dashboard*.
-
-. To create a dashboard, click *Create dashboard*.
+. Open the main menu, then click *Dashboard*, then click *Create dashboard*.
 +
 To open an existing dashboard, click the dashboard you want to view.
 
@@ -55,11 +53,10 @@ To open an existing dashboard, click the dashboard you want to view.
 
 [float]
 [[create-panels-with-lens]]
-== Tutorial: Create a dashboard of panels with website data
+== Tutorial: Create a dashboard of panels with web server data
 
-You've collected data from your web server, and you're ready to create a dashboard and visualize your data in one place. In this tutorial, you'll learn how to 
-create a variety of panels using the *Lens* visualization builder. With *Lens*, you drag and drop your data fields, 
-then *Lens* uses heuristics to apply each field and create a visualization for you.
+You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
+create the visualization panels that best display the data.
 
 [discrete]
 [[add-the-sample-web-logs-data]]
@@ -75,18 +72,31 @@ To create visualizations of the data from the web server, add the data set, then
 
 . Click *Create dashboard*.
 
+[float]
+[[open-and-set-up-lens]]
+=== Open and set up Lens
+
+With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as
+*Lens* uses heuristics to apply the fields and create a visualization for you.
+
+. From the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Lens*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_1.png[New visualization popover]
+
+. Make sure the *kibana_sample_data_logs* index appears.
++
+The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
+
 [discrete]
 [[metric-vis]]
 === View the number of website visitors
 
 To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
-. Click *Create panel*, then click *Lens* on the *New visualization* window.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_1.png[New visualization popover]
-
-. Make sure the *kibana_sample_data_logs* index appears, then <<set-time-filter,set the time filter>> to *Last 90 days*.
+. Set the <<set-time-filter,time filter>> to *Last 90 days*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
@@ -130,11 +140,9 @@ Save and add the visualization panel to the dashboard.
 === View the distribution of visitors by operating system
 
 To determine the operating systems you should continue to support, and the importance of mobile traffic from iOS devices, 
-create a donut chart that displays the top operating systems that your visitors use to access your website.
+create a donut chart that displays the top operating systems that your visitors used to access your website within the last 90 days.
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears, and the <<set-time-filter,time filter>> is set to *Last 90 days*.
+. Open *Lens*, then set the <<set-time-filter,time filter>> to *Last 90 days*.
 
 . From the *Chart Type* dropdown, select *Donut*.
 
@@ -180,9 +188,7 @@ Save and add the visualization panel to the dashboard.
 To prevent potential server failures and optimize the cost of website maintenance, create an area chart that displays the average of bytes transfer, 
 then add a line chart layer to compare the data to the number of visitors to your website.  
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears.
+. Open *Lens*.
 
 . From the *Available fields* list, drag and drop *bytes* to the visualization builder.
 
@@ -304,9 +310,7 @@ Save and add the visualization panel to the dashboard.
 
 To detect unusual traffic, bad website links, and server errors, create a percentage stacked area chart that displays the associated response codes.
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears.
+. Open *Lens*.
 
 . From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
 
@@ -393,9 +397,7 @@ Save and add the visualization panel to the dashboard.
 
 To find the best time to shut down your website for maintenance, create a histogram that displays the traffic for your website by the hour.
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears.
+. Open *Lens*.
 
 . From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
 
@@ -439,9 +441,7 @@ Save and add the visualization panel to the dashboard.
  
 To determine if your users transfer more small files versus large files, create a pie chart that displays the percentage of each size. 
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears.
+. Open *Lens*.
 
 . From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
 
@@ -501,9 +501,7 @@ Save and add the visualization panel to the dashboard.
 To determine how users find out about your website and where your users are located, create a treemap that displays the percentage of users that 
 enter your website from specific social media websites, and the top countries where users are located.  
 
-. From the dashboard, click *Create panel*, then click *Lens* on the *New visualization* window.
-
-. Make sure the *kibana_sample_data_logs* index appears.
+. Open *Lens*.
 
 . From the *Chart Type* dropdown, select *Treemap*.
 
@@ -590,14 +588,16 @@ When you have finished adding and arranging panels, save the dashboard.
 
 . Click *Save*.
 
-That's it! You've created a dashboard that provides you with a complete picture of the data from your web server.
+[float]
+== What's next?
+
+That's it! You've created a dashboard that gives you a complete picture of the data from your web server.
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
 
 [float]
-[[lens-tutorial-next-steps]]
-== What's next?
+=== Add more panels
 
 To add other types of panels to your dashboard:
 
@@ -605,14 +605,17 @@ To add other types of panels to your dashboard:
 
 * Manually create panels with the <<add-panels-with-advanced-editors,advanced editors>> or <<add-aggregation-based-visualization-panels,aggregation-based visualization panels>>.
 
+* Add context to your dashboard panels with <<add-text,text>>, or filter the dashboard data in real-time with a <<add-controls,*Controls*>> panel. 
+
 * Add a <<save-your-search,saved search>> from *Discover*.
 
 * Create a panel with your <<xpack-ml-anomalies,machine learning anomaly detection>> data.
 
+[float]
 [[share-the-dashboard]]
-To share the dashboard with a larger audience:
+=== Share the dashboard
 
-From the toolbar, click *Share*, then choose one of the following options:
+To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
 
 * *Embed code* &mdash; Embed the dashboard as an iframe in a web page. User authentication is required, which can be provided by the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details, learn about <<kibana-authentication>>.
 
@@ -622,7 +625,10 @@ From the toolbar, click *Share*, then choose one of the following options:
 
 * *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
+[float]
 [[import-dashboards]]
+=== Create a back up
+
 To create a back up of the dashboard:
 
 . Open the main menu, then click *Stack Management > Saved Objects*. 
