@@ -84,15 +84,19 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [editSubActionProperty]
   );
 
-  const hasLabels = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'labels'), [fields]);
-  const hasDescription = useMemo(
-    () => Object.prototype.hasOwnProperty.call(fields, 'description'),
+  const { hasLabels, hasDescription, hasPriority, hasParent } = useMemo(
+    () =>
+      fields != null
+        ? {
+            hasLabels: Object.prototype.hasOwnProperty.call(fields, 'labels'),
+            hasDescription: Object.prototype.hasOwnProperty.call(fields, 'description'),
+            hasPriority: Object.prototype.hasOwnProperty.call(fields, 'priority'),
+            hasParent: Object.prototype.hasOwnProperty.call(fields, 'parent'),
+          }
+        : { hasLabels: false, hasDescription: false, hasPriority: false, hasParent: false },
     [fields]
   );
-  const hasPriority = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'priority'), [
-    fields,
-  ]);
-  const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
+
   const issueTypesSelectOptions: EuiSelectOption[] = useMemo(() => {
     const doesIssueTypeExist =
       incident.issueType != null && issueTypes.length
@@ -158,6 +162,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
+
   return (
     <Fragment>
       <>
@@ -195,6 +200,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   )}
                 >
                   <SearchIssues
+                    data-test-subj="parent-search"
                     selectedValue={incident.parent}
                     http={http}
                     toastNotifications={toasts}
@@ -241,6 +247,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             </>
           )}
           <EuiFormRow
+            data-test-subj="summary-row"
             fullWidth
             error={errors.summary}
             isInvalid={errors.summary.length > 0 && incident.summary !== undefined}

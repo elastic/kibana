@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 
@@ -51,6 +52,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
       docValueFields: mockDocValueFields,
       loading: false,
       indexPattern: mockIndexPattern,
+      pageInfo: { activePage: 0, querySize: 0 },
       selectedPatterns: mockIndexNames,
     }),
   };
@@ -61,7 +63,16 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: mockTimelineData,
+        pageInfo: {
+          activePage: 0,
+          querySize: 0,
+        },
+      },
+    ]);
   });
 
   test('renders ', () => {
@@ -76,7 +87,9 @@ describe('StatefulTimeline', () => {
   test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
     const wrapper = mount(
       <TestProviders>
-        <StatefulTimeline {...props} />
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <StatefulTimeline {...props} />
+        </DragDropContextWrapper>
       </TestProviders>
     );
     expect(
