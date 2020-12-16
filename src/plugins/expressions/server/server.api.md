@@ -736,6 +736,8 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     getRenderMode: () => RenderMode;
     // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
