@@ -44,6 +44,7 @@ export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<
     },
     stored_fields: computedFields.storedFields,
     _source: true,
+    fields: ['*'],
     script_fields: computedFields.scriptFields,
     docvalue_fields: computedFields.docvalueFields,
   };
