@@ -60,6 +60,31 @@ test('adds empty composed_of correctly', () => {
   expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
 
+test('adds hidden field correctly', () => {
+  const templateWithHiddenName = 'logs-nginx-access-abcd';
+
+  const templateWithHidden = getTemplate({
+    type: 'logs',
+    templateName: templateWithHiddenName,
+    packageName: 'nginx',
+    mappings: { properties: {} },
+    composedOfTemplates: [],
+    hidden: true,
+  });
+  expect(templateWithHidden.data_stream.hidden).toEqual(true);
+
+  const templateWithoutHiddenName = 'logs-nginx-access-efgh';
+
+  const templateWithoutHidden = getTemplate({
+    type: 'logs',
+    templateName: templateWithoutHiddenName,
+    packageName: 'nginx',
+    mappings: { properties: {} },
+    composedOfTemplates: [],
+  });
+  expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
+});
+
 test('tests loading base.yml', () => {
   const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
   const fieldsYML = readFileSync(ymlPath, 'utf-8');
