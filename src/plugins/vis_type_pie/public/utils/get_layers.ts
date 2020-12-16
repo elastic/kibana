@@ -18,10 +18,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
-import { SeriesLayer } from '../../../charts/public';
+import { SeriesLayer, PaletteRegistry } from '../../../charts/public';
+import { DataPublicPluginStart } from '../../../data/public';
 import { BucketColumns, PieVisParams } from '../types';
 import { lightenColor } from '../temp';
-import { getFormatService, getColorsService } from '../services';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -30,7 +30,8 @@ export const getLayers = (
   visParams: PieVisParams,
   overwriteColors: { [key: string]: string },
   totalSeries: number,
-  palette: string
+  palettes: PaletteRegistry,
+  formatter: DataPublicPluginStart['fieldFormats']
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {
     textInvertible: true,
@@ -38,7 +39,6 @@ export const getLayers = (
       fontWeight: 700,
     },
   };
-  const defaultPalette = getColorsService().get(palette);
 
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
@@ -56,7 +56,7 @@ export const getLayers = (
           });
         }
         if (col?.meta?.params) {
-          return getFormatService().deserialize(col.format).convert(d) ?? '';
+          return formatter.deserialize(col.format).convert(d) ?? '';
         }
         return String(d);
       },
@@ -88,7 +88,7 @@ export const getLayers = (
             return lightenColor(overwriteColor, seriesLayers.length, columns.length);
           }
 
-          const outputColor = defaultPalette.getColor(seriesLayers, {
+          const outputColor = palettes.get(visParams.palette.name).getColor(seriesLayers, {
             behindText: visParams.labels.show,
             maxDepth: columns.length,
             totalSeries,

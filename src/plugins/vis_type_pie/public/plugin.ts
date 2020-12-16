@@ -19,21 +19,29 @@
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { createPieVisFn } from './pie_fn';
-import { pieVisRenderer } from './pie_renderer';
+import { getPieVisRenderer } from './pie_renderer';
 import { pieVisType } from './vis_type';
-import { setThemeService, setColorsService, setFormatService, setDataActions } from './services';
 
+/** @internal */
 export interface VisTypePieSetupDependencies {
   visualizations: VisualizationsSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
 }
 
+/** @internal */
 export interface VisTypePiePluginStartDependencies {
   data: DataPublicPluginStart;
+}
+
+/** @internal */
+export interface VisTypePieDependencies {
+  theme: ChartsPluginSetup['theme'];
+  palettes: PaletteRegistry;
+  getStartDeps: () => Promise<DataPublicPluginStart>;
 }
 
 export class VisTypePiePlugin {
@@ -41,23 +49,19 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { expressions, visualizations, charts }: VisTypePieSetupDependencies
   ) {
-    // temporary, add it as arg to pieVisRenderer
-    setThemeService(charts.theme);
-    // setColorsService(charts.palettes);
-    charts.palettes.getPalettes().then((palettes) => {
-      setColorsService(palettes);
-    });
+    const getStartDeps = async () => {
+      const [, deps] = await core.getStartServices();
+      return deps.data;
+    };
 
     [createPieVisFn].forEach(expressions.registerFunction);
-    expressions.registerRenderer(pieVisRenderer);
-    visualizations.createBaseVisualization(pieVisType(true));
-    // core.getStartServices().then(([coreStart]) => {
-    //   visualizations.registerAlias(getLensAliasConfig(coreStart.docLinks));
-    // });
+    charts.palettes.getPalettes().then((palettes) => {
+      expressions.registerRenderer(
+        getPieVisRenderer({ theme: charts.theme, palettes, getStartDeps })
+      );
+      visualizations.createBaseVisualization(pieVisType(true, palettes));
+    });
   }
 
-  start(core: CoreStart, { data }: VisTypePiePluginStartDependencies) {
-    setFormatService(data.fieldFormats);
-    setDataActions(data.actions);
-  }
+  start(core: CoreStart, { data }: VisTypePiePluginStartDependencies) {}
 }

@@ -46,10 +46,11 @@ import {
   // LegendToggle,
   // ClickTriggerEvent,
   ChartsPluginSetup,
+  PaletteRegistry,
 } from '../../charts/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { PieVisParams, BucketColumns, ValueFormats } from './types';
-import { getFormatService } from './services';
 import {
   getColorPicker,
   getLayers,
@@ -72,6 +73,8 @@ export interface PieComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
+  palettes: PaletteRegistry;
+  services: DataPublicPluginStart;
 }
 
 const PieComponent = (props: PieComponentProps) => {
@@ -160,7 +163,7 @@ const PieComponent = (props: PieComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams } = props;
+  const { visData, visParams, palettes, services } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
     if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
@@ -170,8 +173,10 @@ const PieComponent = (props: PieComponentProps) => {
   }
 
   // formatters
-  const metricFieldFormatter = getFormatService().deserialize(visParams.dimensions.metric.format);
-  const percentFormatter = getFormatService().deserialize({
+  const metricFieldFormatter = services.fieldFormats.deserialize(
+    visParams.dimensions.metric.format
+  );
+  const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
     params: {
       pattern: '0.[00]%',
@@ -190,9 +195,10 @@ const PieComponent = (props: PieComponentProps) => {
         visParams,
         props.uiState?.get('vis.colors', {}),
         visData.rows.length,
-        visParams.palette.name
+        palettes,
+        services.fieldFormats
       ),
-    [bucketColumns, props.uiState, visData.rows.length, visParams]
+    [bucketColumns, palettes, props.uiState, services.fieldFormats, visData.rows.length, visParams]
   );
   const config = useMemo(() => getConfig(visParams, chartTheme), [chartTheme, visParams]);
   const tooltip: TooltipProps = {
@@ -230,7 +236,9 @@ const PieComponent = (props: PieComponentProps) => {
               canFilter,
               getLegendActionEventData(visData),
               handleLegendAction,
-              visParams
+              visParams,
+              services.actions,
+              services.fieldFormats
             )}
             theme={chartTheme}
             baseTheme={chartBaseTheme}

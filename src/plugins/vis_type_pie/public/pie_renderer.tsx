@@ -22,10 +22,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
+import { VisTypePieDependencies } from './plugin';
 // import { SplitChartWarning } from './components';
 
 import { RenderValue, vislibPieName } from './pie_fn';
-import { getThemeService } from './services';
 
 const PieComponent = lazy(() => import('./pie_component'));
 
@@ -36,30 +36,39 @@ function shouldShowNoResultsMessage(visData: any): boolean {
   return Boolean(isZeroHits);
 }
 
-export const pieVisRenderer: ExpressionRenderDefinition<RenderValue> = {
+export const getPieVisRenderer: (
+  deps: VisTypePieDependencies
+) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
   name: vislibPieName,
   displayName: 'Pie visualization',
   reuseDomNode: true,
-  render: (domNode, { visConfig, visData }, handlers) => {
+  render: async (domNode, { visConfig, visData }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
     const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
-    handlers.onDestroy(() => unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
+
+    const services = await getStartDeps();
+
     render(
       <>
         {/* {isSplitChart && <SplitChartWarning />} */}
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
           <PieComponent
-            chartsThemeService={getThemeService()}
+            chartsThemeService={theme}
+            palettes={palettes}
             visParams={visConfig}
             visData={visData}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
             uiState={handlers.uiState}
+            services={services}
           />
         </VisualizationContainer>
       </>,
       domNode
     );
   },
-};
+});

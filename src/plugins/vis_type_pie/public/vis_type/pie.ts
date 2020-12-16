@@ -24,15 +24,17 @@ import { Position } from '@elastic/charts';
 
 import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
+import { PaletteRegistry } from '../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
 
 import { PieVisParams, LabelPositions, ValueFormats } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getLegendPositions } from '../editor';
-import { PieOptions } from '../editor/components';
+import { getPieOptions } from '../editor/components';
 
 export const getPieVisTypeDefinition = (
-  showElasticChartsOptions = false
+  showElasticChartsOptions = false,
+  palettes: PaletteRegistry | undefined
 ): BaseVisTypeOptions<PieVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
@@ -67,7 +69,7 @@ export const getPieVisTypeDefinition = (
     collections: {
       legendPositions: getLegendPositions(),
     },
-    optionsTemplate: PieOptions,
+    optionsTemplate: getPieOptions(palettes),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,

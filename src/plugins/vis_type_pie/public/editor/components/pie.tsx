@@ -25,12 +25,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PalettePicker } from './palette_picker';
-import { BasicOptions, SwitchOption, SelectOption } from '../../../../charts/public';
+import {
+  BasicOptions,
+  SwitchOption,
+  SelectOption,
+  PaletteRegistry,
+} from '../../../../charts/public';
 import { PieVisParams } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
-import { getColorsService } from '../../services';
 
-function PieOptions(props: VisOptionsProps<PieVisParams>) {
+interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
+  palettes: PaletteRegistry | undefined;
+}
+
+const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue } = props;
   const setLabels = <T extends keyof PieVisParams['labels']>(
     paramName: T,
@@ -66,12 +74,14 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           value={stateParams.nestedLegend}
           setValue={setValue}
         />
-        <PalettePicker
-          palettes={getColorsService()}
-          activePalette={stateParams.palette}
-          paramName="palette"
-          setPalette={setValue}
-        />
+        {props.palettes && (
+          <PalettePicker
+            palettes={props.palettes}
+            activePalette={stateParams.palette}
+            paramName="palette"
+            setPalette={setValue}
+          />
+        )}
       </EuiPanel>
 
       <EuiSpacer size="s" />
@@ -126,7 +136,7 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
       </EuiPanel>
     </>
   );
-}
+};
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export

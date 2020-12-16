@@ -23,9 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { ValueClickContext } from '../../../embeddable/public';
+import { DataPublicPluginStart } from '../../../data/public';
 import { PieVisParams } from '../types';
-import { getFormatService } from '../services';
-
 // import { ClickTriggerEvent } from '../../../charts/public';
 
 // this is temporary
@@ -35,17 +34,22 @@ export interface ClickTriggerEvent {
 }
 
 export const getLegendActions = (
-  canFilter: (data: ClickTriggerEvent | null) => Promise<boolean>,
+  canFilter: (
+    data: ClickTriggerEvent | null,
+    actions: DataPublicPluginStart['actions']
+  ) => Promise<boolean>,
   getFilterEventData: (series: SeriesIdentifier) => ClickTriggerEvent | null,
   onFilter: (data: ClickTriggerEvent, negate?: any) => void,
-  visParams: PieVisParams
+  visParams: PieVisParams,
+  actions: DataPublicPluginStart['actions'],
+  formatter: DataPublicPluginStart['fieldFormats']
 ): LegendAction => {
   return ({ series }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
     const filterData = getFilterEventData(series);
 
-    (async () => setIsfilterable(await canFilter(filterData)))();
+    (async () => setIsfilterable(await canFilter(filterData, actions)))();
 
     if (!isfilterable || !filterData) {
       return null;
@@ -56,7 +60,7 @@ export const getLegendActions = (
       const column = visParams.dimensions.buckets.find(
         (bucket) => bucket.accessor === filterData.data.data[0].column
       );
-      formattedTitle = getFormatService().deserialize(column?.format).convert(series.key) ?? '';
+      formattedTitle = formatter.deserialize(column?.format).convert(series.key) ?? '';
     }
 
     const title = formattedTitle || series.key;

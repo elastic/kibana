@@ -18,16 +18,19 @@
  */
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable } from '../../../expressions/public';
+import { DataPublicPluginStart } from '../../../data/public';
 import { ValueClickContext } from '../../../embeddable/public';
 import { ClickTriggerEvent } from './get_legend_actions';
-import { getDataActions } from '../services';
 import { BucketColumns } from '../types';
 
-export const canFilter = async (event: ClickTriggerEvent | null): Promise<boolean> => {
+export const canFilter = async (
+  event: ClickTriggerEvent | null,
+  actions: DataPublicPluginStart['actions']
+): Promise<boolean> => {
   if (!event) {
     return false;
   }
-  const filters = await getDataActions().createFiltersFromValueClickAction(event.data);
+  const filters = await actions.createFiltersFromValueClickAction(event.data);
   return Boolean(filters.length);
 };
 

@@ -19,21 +19,11 @@
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
 import { chartPluginMock } from '../../charts/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import PieComponent, { PieComponentProps } from './pie_component';
 import { createMockPieParams, createMockVisData } from './mocks';
-
-jest.mock('./services', () => ({
-  getColorsService: jest.fn().mockReturnValue({
-    get: jest.fn(),
-    getAll: jest.fn(),
-  }),
-  getFormatService: jest.fn().mockReturnValue({
-    deserialize: jest.fn(),
-    getAll: jest.fn(),
-  }),
-}));
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -45,6 +35,7 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const palettes = chartPluginMock.createPaletteRegistry();
 const visParams = createMockPieParams();
 const visData = createMockVisData();
 
@@ -64,11 +55,13 @@ describe('PieComponent', function () {
   beforeAll(() => {
     wrapperProps = {
       chartsThemeService,
+      palettes,
       visParams,
       visData,
       uiState,
       fireEvent: jest.fn(),
       renderComplete: jest.fn(),
+      services: dataPluginMock.createStartContract(),
     };
   });
 
@@ -84,8 +77,7 @@ describe('PieComponent', function () {
 
   it('hides the legend if the legend toggle is clicked', () => {
     const component = mount(<PieComponent {...wrapperProps} />);
-    const toggle = findTestSubject(component, 'vislibToggleLegend');
-    toggle.simulate('click');
+    findTestSubject(component, 'vislibToggleLegend').simulate('click');
     expect(component.find(Settings).prop('showLegend')).toEqual(false);
   });
 

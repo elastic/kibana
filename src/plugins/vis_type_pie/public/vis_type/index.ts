@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { PaletteRegistry } from '../../../charts/public';
 import { getPieVisTypeDefinition } from './pie';
 
-export const pieVisType = (showElasticChartsOptions?: boolean) => {
-  return getPieVisTypeDefinition(showElasticChartsOptions);
+export const pieVisType = (showElasticChartsOptions?: boolean, palettes?: PaletteRegistry) => {
+  return getPieVisTypeDefinition(showElasticChartsOptions, palettes);
 };
