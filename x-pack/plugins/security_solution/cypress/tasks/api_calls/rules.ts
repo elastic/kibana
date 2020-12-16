@@ -27,6 +27,27 @@ export const createCustomRule = (rule: CustomRule) =>
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
+export const createCustomRuleActivated = (rule: CustomRule) =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: 'rule_testing',
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: '10s',
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'query',
+      from: 'now-17520h',
+      index: ['auditbeat-*'],
+      query: rule.customQuery,
+      language: 'kuery',
+      enabled: true,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
 export const deleteCustomRule = () => {
   cy.request({
     method: 'DELETE',

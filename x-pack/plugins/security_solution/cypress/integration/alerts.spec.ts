@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { newRule } from '../objects/rule';
 import {
   ALERTS,
   ALERTS_COUNT,
@@ -24,11 +25,17 @@ import {
   waitForAlertsToBeLoaded,
   markInProgressFirstAlert,
   goToInProgressAlerts,
+  waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import {
+  createCustomRuleActivated,
+  deleteCustomRule,
+  removeSignalsIndex,
+} from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -37,25 +44,26 @@ describe('Alerts', () => {
     beforeEach(() => {
       cleanKibana();
       removeSignalsIndex();
-      esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
     });
 
     afterEach(() => {
-      esArchiverUnload('alerts');
+      deleteCustomRule();
       removeSignalsIndex();
     });
 
     it('Closes and opens alerts', () => {
-      waitForAlertsPanelToBeLoaded();
-      waitForAlertsToBeLoaded();
-
+      const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           cy.get(SHOWING_ALERTS).should('have.text', `Showing ${numberOfAlerts} alerts`);
 
-          const numberOfAlertsToBeClosed = 3;
           selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
           cy.get(SELECTED_ALERTS).should(
@@ -64,8 +72,6 @@ describe('Alerts', () => {
           );
 
           closeAlerts();
-          waitForAlerts();
-          cy.reload();
           waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
@@ -92,11 +98,6 @@ describe('Alerts', () => {
           cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeOpened} alert`);
 
           openAlerts();
-          waitForAlerts();
-          cy.reload();
-          waitForAlertsToBeLoaded();
-          waitForAlerts();
-          goToClosedAlerts();
           waitForAlerts();
 
           const expectedNumberOfClosedAlertsAfterOpened = 2;
@@ -128,8 +129,6 @@ describe('Alerts', () => {
     });
 
     it('Closes one alert when more than one opened alerts are selected', () => {
-      waitForAlertsToBeLoaded();
-
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
@@ -141,8 +140,6 @@ describe('Alerts', () => {
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           closeFirstAlert();
-          cy.reload();
-          waitForAlertsToBeLoaded();
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
@@ -169,52 +166,71 @@ describe('Alerts', () => {
     beforeEach(() => {
       cleanKibana();
       removeSignalsIndex();
-      esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
+      selectNumberOfAlerts(5);
+
+      cy.get(SELECTED_ALERTS).should('have.text', `Selected 5 alerts`);
+
+      closeAlerts();
+      waitForAlerts();
+      refreshPage();
     });
 
     afterEach(() => {
-      esArchiverUnload('closed_alerts');
+      deleteCustomRule();
       removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
-      waitForAlerts();
-      goToClosedAlerts();
-      waitForAlertsToBeLoaded();
+      waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT)
         .invoke('text')
-        .then((numberOfAlerts) => {
-          const numberOfAlertsToBeOpened = 1;
-          const numberOfAlertsToBeSelected = 3;
-
-          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
-          selectNumberOfAlerts(numberOfAlertsToBeSelected);
-          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
-
-          openFirstAlert();
-          cy.reload();
+        .then((numberOfOpenedAlertsText) => {
+          const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
           goToClosedAlerts();
-          waitForAlertsToBeLoaded();
-          waitForAlerts();
+          cy.get(ALERTS_COUNT)
+            .invoke('text')
+            .then((numberOfAlerts) => {
+              const numberOfAlertsToBeOpened = 1;
+              const numberOfAlertsToBeSelected = 3;
 
-          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS).should(
-            'have.text',
-            `Showing ${expectedNumberOfAlerts.toString()} alerts`
-          );
+              cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
+              selectNumberOfAlerts(numberOfAlertsToBeSelected);
+              cy.get(SELECTED_ALERTS).should(
+                'have.text',
+                `Selected ${numberOfAlertsToBeSelected} alerts`
+              );
 
-          goToOpenedAlerts();
-          waitForAlerts();
+              cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
-          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeOpened.toString());
-          cy.get(SHOWING_ALERTS).should(
-            'have.text',
-            `Showing ${numberOfAlertsToBeOpened.toString()} alert`
-          );
-          cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
+              openFirstAlert();
+              waitForAlerts();
+
+              const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
+              cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
+              cy.get(SHOWING_ALERTS).should(
+                'have.text',
+                `Showing ${expectedNumberOfAlerts.toString()} alerts`
+              );
+
+              goToOpenedAlerts();
+              waitForAlerts();
+
+              cy.get(ALERTS_COUNT).should(
+                'have.text',
+                (numberOfOpenedAlerts + numberOfAlertsToBeOpened).toString()
+              );
+              cy.get(SHOWING_ALERTS).should(
+                'have.text',
+                `Showing ${(numberOfOpenedAlerts + numberOfAlertsToBeOpened).toString()} alerts`
+              );
+            });
         });
     });
   });
@@ -223,19 +239,20 @@ describe('Alerts', () => {
     beforeEach(() => {
       cleanKibana();
       removeSignalsIndex();
-      esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
     });
 
     afterEach(() => {
-      esArchiverUnload('alerts');
+      deleteCustomRule();
       removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {
-      waitForAlerts();
-      waitForAlertsToBeLoaded();
-
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
@@ -247,8 +264,6 @@ describe('Alerts', () => {
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           markInProgressFirstAlert();
-          cy.reload();
-          goToOpenedAlerts();
           waitForAlertsToBeLoaded();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
