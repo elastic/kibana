@@ -90,6 +90,12 @@ export interface ApiCallMemoProps {
   onSuccess: () => void;
 }
 
+export interface ApiListExportProps {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+}
+
 export interface ApiCallFindListsItemsMemoProps {
   lists: ExceptionListIdentifiers[];
   filterOptions: FilterExceptionsOptions[];

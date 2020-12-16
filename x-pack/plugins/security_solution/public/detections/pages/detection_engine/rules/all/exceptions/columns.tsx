@@ -96,9 +96,13 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     isExpander: false,
     width: '25px',
-    render: (list: ExceptionListInfo) => (
+    render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
       <EuiButtonIcon
-        onClick={onExport(list.id)}
+        onClick={onExport({
+          id,
+          listId,
+          namespaceType,
+        })}
         aria-label="Export exception list"
         iconType="exportAction"
       />

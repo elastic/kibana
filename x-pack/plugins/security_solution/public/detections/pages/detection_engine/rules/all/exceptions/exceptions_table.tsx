@@ -16,8 +16,12 @@ import styled from 'styled-components';
 import { History } from 'history';
 import { set } from 'lodash/fp';
 
+import AbortController from 'abort-controller';
+import { AutoDownload } from '../../../../../components/value_lists_management_modal/auto_download';
+import { GenericDownloader } from '../../../../../../common/components/generic_downloader';
+import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useExceptionLists } from '../../../../../../shared_imports';
+import { useApi, useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
@@ -51,6 +55,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const {
       services: { http, notifications },
     } = useKibana();
+    const { exportExceptionList } = useApi(http);
     const [filters, setFilters] = useState<ExceptionListFilter>({
       name: null,
       list_id: null,
@@ -69,10 +74,38 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     });
     const [initLoading, setInitLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(Date.now());
+    const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
+    const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+    const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
 
     const handleDelete = useCallback((id: string) => () => {}, []);
 
-    const handleExport = useCallback((id: string) => () => {}, []);
+    const handleExport = useCallback(
+      async ({
+        id,
+        listId,
+        namespaceType,
+      }: {
+        id: string;
+        listId: string;
+        namespaceType: NamespaceType;
+      }) => {
+        try {
+          setExportingListIds((ids) => [...ids, id]);
+          const blob = await exportExceptionList({
+            id,
+            listId,
+            namespaceType,
+          });
+          setExportDownload({ name: id, blob });
+        } catch (error) {
+          notifications.toasts.addError(error, { title: i18n.EXCEPTION_EXPORT_ERROR });
+        } finally {
+          setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+        }
+      },
+      [exportExceptionList, notifications.toasts]
+    );
 
     const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
       return getAllExceptionListsColumns(handleExport, handleDelete, history, formatUrl);
@@ -140,8 +173,23 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       [pagination]
     );
 
+    const handleOnDownload = useCallback(() => {
+      setExportDownload({});
+    }, []);
+
+    const tableItems = (data ?? []).map((item) => ({
+      ...item,
+      isDeleting: deletingListIds.includes(item.id),
+      isExporting: exportingListIds.includes(item.id),
+    }));
+
     return (
       <>
+        <AutoDownload
+          blob={exportDownload.blob}
+          name={exportDownload.name}
+          onDownload={handleOnDownload}
+        />
         <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
           <>
             {loadingTableInfo && (
@@ -188,7 +236,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                   columns={exceptionsColumns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"
-                  items={data ?? []}
+                  items={tableItems}
                   noItemsMessage={emptyPrompt}
                   onChange={() => {}}
                   pagination={paginationMemo}

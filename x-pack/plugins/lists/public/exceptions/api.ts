@@ -23,6 +23,7 @@ import {
   deleteExceptionListSchema,
   exceptionListItemSchema,
   exceptionListSchema,
+  exportExceptionListQuerySchema,
   findExceptionListItemSchema,
   findExceptionListSchema,
   foundExceptionListItemSchema,
@@ -535,5 +536,44 @@ export const addEndpointExceptionList = async ({
     }
   } catch (error) {
     return Promise.reject(error);
+  }
+};
+
+/**
+ * Fetch an ExceptionList by providing a ExceptionList ID
+ *
+ * @param http Kibana http service
+ * @param id ExceptionList ID (not list_id)
+ * @param namespaceType ExceptionList namespace_type
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const exportExceptionList = async ({
+  http,
+  id,
+  listId,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
+  const [validatedRequest, errorsRequest] = validate(
+    { id, list_id: listId, namespace_type: namespaceType },
+    exportExceptionListQuerySchema
+  );
+
+  if (validatedRequest != null) {
+    try {
+      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_export`, {
+        method: 'POST',
+        query: { id, list_id: listId, namespace_type: namespaceType },
+        signal,
+      });
+
+      return Promise.resolve(response);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  } else {
+    return Promise.reject(errorsRequest);
   }
 };

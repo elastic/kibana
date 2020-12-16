@@ -75,3 +75,17 @@ export const NO_LISTS_BODY = i18n.translate(
     defaultMessage: "We weren't able to find any exception lists.",
   }
 );
+
+export const EXCEPTION_EXPORT_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportSuccess',
+  {
+    defaultMessage: 'Exception list export success',
+  }
+);
+
+export const EXCEPTION_EXPORT_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportError',
+  {
+    defaultMessage: 'Exception list export error',
+  }
+);
