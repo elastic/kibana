@@ -266,4 +266,22 @@ describe('ExpressionRenderer', () => {
     expect(onEvent).toHaveBeenCalledTimes(1);
     expect(onEvent.mock.calls[0][0]).toBe(event);
   });
+
+  it('should correctly assign classes to the wrapper node', () => {
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: jest.fn(),
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(<ReactExpressionRenderer className="myClassName" expression="" />);
+
+    expect(instance.exists('.myClassName')).toBe(true);
+
+    instance.unmount();
+  });
 });

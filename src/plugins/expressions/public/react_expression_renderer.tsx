@@ -200,10 +200,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};
