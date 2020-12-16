@@ -263,7 +263,7 @@ export const ColumnHeadersComponent = ({
           isEventViewer={isEventViewer}
         >
           {showSelectAllCheckbox && (
-            <EventsTh>
+            <EventsTh role="checkbox">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
@@ -275,7 +275,7 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulFieldsBrowser
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -286,14 +286,14 @@ export const ColumnHeadersComponent = ({
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
                 <EuiButtonIcon
@@ -304,14 +304,18 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={i18n.SORT_FIELDS}>
                 <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
@@ -320,7 +324,7 @@ export const ColumnHeadersComponent = ({
           </EventsTh>
 
           {showEventsSelect && (
-            <EventsTh>
+            <EventsTh role="button">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>

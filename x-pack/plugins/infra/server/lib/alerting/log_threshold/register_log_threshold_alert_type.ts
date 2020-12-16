@@ -89,6 +89,7 @@ export async function registerLogThresholdAlertType(
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
+    minimumLicenseRequired: 'basic',
     executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [

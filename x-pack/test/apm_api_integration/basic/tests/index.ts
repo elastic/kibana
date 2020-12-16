@@ -27,10 +27,10 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 
-    // TODO: we should not have a service overview.
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
       loadTestFile(require.resolve('./service_overview/dependencies'));
+      loadTestFile(require.resolve('./service_overview/instances'));
     });
 
     describe('Settings', function () {
