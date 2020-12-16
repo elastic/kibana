@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
+
 import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 
@@ -54,27 +56,29 @@ export const getThresholdBucketFilters = async ({
 
   const filters = searchResult.aggregations.threshold.buckets.reduce(
     (acc: ESFilter[], bucket: ThresholdQueryBucket): ESFilter[] => {
-      return [
-        ...acc,
-        {
-          bool: {
-            filter: [
-              {
-                term: {
-                  [bucketByField || 'signal.rule.rule_id']: bucket.key,
+      const filter = {
+        bool: {
+          filter: [
+            {
+              range: {
+                [timestampOverride ?? '@timestamp']: {
+                  lte: bucket.lastSignalTimestamp.value_as_string,
                 },
               },
-              {
-                range: {
-                  [timestampOverride ?? '@timestamp']: {
-                    lte: bucket.lastSignalTimestamp.value_as_string,
-                  },
-                },
-              },
-            ],
+            },
+          ],
+        },
+      } as ESFilter;
+
+      if (!isEmpty(bucketByField)) {
+        (filter.bool.filter as ESFilter[]).push({
+          term: {
+            [bucketByField]: bucket.key,
           },
-        } as ESFilter,
-      ];
+        });
+      }
+
+      return [...acc, filter];
     },
     [] as ESFilter[]
   );
