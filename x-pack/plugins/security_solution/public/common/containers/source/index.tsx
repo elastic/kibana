@@ -122,7 +122,7 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  filters?: { aggregatable: boolean }
+  filters?: { aggregatable?: boolean }
 ): [boolean, FetchIndexReturn] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
