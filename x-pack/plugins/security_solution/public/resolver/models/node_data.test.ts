@@ -72,7 +72,7 @@ describe('node data model', () => {
       ],
     ]);
 
-    expect(setErrorNodes(state, new Set(['1', '2']), 0)).toEqual(
+    expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
       new Map<string, NodeData>([
         ['1', { events: [], status: 'error' }],
         ['2', { events: [], status: 'error' }],

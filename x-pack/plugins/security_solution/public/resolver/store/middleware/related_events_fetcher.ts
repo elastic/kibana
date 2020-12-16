@@ -104,7 +104,7 @@ export function RelatedEventsFetcher(
     } else if (isLoadingMoreEvents) {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
-        fetchEvents(nodeEventsInCategory);
+        await fetchEvents(nodeEventsInCategory);
       }
     }
   };
