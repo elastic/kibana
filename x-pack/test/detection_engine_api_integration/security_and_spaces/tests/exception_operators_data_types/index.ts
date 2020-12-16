@@ -21,16 +21,16 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       this.tags('ciGroup12');
 
+      loadTestFile(require.resolve('./ip'));
       loadTestFile(require.resolve('./ip_array'));
       loadTestFile(require.resolve('./keyword'));
       loadTestFile(require.resolve('./keyword_array'));
+      loadTestFile(require.resolve('./long'));
     });
 
     describe('', function () {
       this.tags('ciGroup13');
 
-      loadTestFile(require.resolve('./ip'));
-      loadTestFile(require.resolve('./long'));
       loadTestFile(require.resolve('./text'));
       loadTestFile(require.resolve('./text_array'));
     });
