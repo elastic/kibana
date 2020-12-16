@@ -8,6 +8,7 @@ import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createCaseClient } from '.';
 import {
+  connectorMappingsServiceMock,
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
@@ -24,12 +25,13 @@ jest.mock('./cases/update');
 jest.mock('./comments/add');
 jest.mock('./alerts/update_status');
 
-const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();
-const userActionService = createUserActionServiceMock();
 const alertsService = createAlertServiceMock();
-const savedObjectsClient = savedObjectsClientMock.create();
+const caseService = createCaseServiceMock();
+const connectorMappingsService = connectorMappingsServiceMock();
 const request = {} as KibanaRequest;
+const savedObjectsClient = savedObjectsClientMock.create();
+const userActionService = createUserActionServiceMock();
 const context = {} as RequestHandlerContext;
 
 const createMock = create as jest.Mock;
@@ -40,53 +42,58 @@ const updateAlertsStatusMock = updateAlertsStatus as jest.Mock;
 describe('createCaseClient()', () => {
   test('it creates the client correctly', async () => {
     createCaseClient({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
 
     expect(createMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
 
     expect(updateMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
 
     expect(addCommentMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
 
     expect(updateAlertsStatusMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-      alertsService,
+      connectorMappingsService,
       context,
+      request,
+      savedObjectsClient,
+      userActionService,
     });
   });
 });

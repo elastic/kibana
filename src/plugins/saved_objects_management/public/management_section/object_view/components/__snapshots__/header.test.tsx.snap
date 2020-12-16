@@ -64,6 +64,7 @@ exports[`Intro component renders correctly 1`] = `
                       element="a"
                       href="/some-url"
                       iconType="eye"
+                      isDisabled={false}
                       rel="noreferrer"
                       size="s"
                     >
@@ -142,8 +143,10 @@ exports[`Intro component renders correctly 1`] = `
                       baseClassName="euiButton"
                       color="danger"
                       data-test-subj="savedObjectEditDelete"
+                      disabled={false}
                       element="button"
                       iconType="trash"
+                      isDisabled={false}
                       onClick={[Function]}
                       size="s"
                       type="button"
@@ -151,6 +154,7 @@ exports[`Intro component renders correctly 1`] = `
                       <button
                         className="euiButton euiButton--danger euiButton--small"
                         data-test-subj="savedObjectEditDelete"
+                        disabled={false}
                         onClick={[Function]}
                         style={
                           Object {

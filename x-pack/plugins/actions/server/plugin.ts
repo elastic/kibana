@@ -75,6 +75,7 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { renderMustacheObject } from './lib/mustache_renderer';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -103,6 +104,11 @@ export interface PluginStartContract {
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
   preconfiguredActions: PreConfiguredAction[];
+  renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    params: Params,
+    variables: Record<string, unknown>
+  ): Params;
 }
 
 export interface ActionsPluginsSetup {
@@ -209,6 +215,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 
     const usageCollection = plugins.usageCollection;
@@ -389,6 +396,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       preconfiguredActions,
+      renderActionParameterTemplates: (...args) =>
+        renderActionParameterTemplates(actionTypeRegistry, ...args),
     };
   }
 
@@ -482,5 +491,19 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     if (this.licenseState) {
       this.licenseState.clean();
     }
+  }
+}
+
+export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+  actionTypeRegistry: ActionTypeRegistry | undefined,
+  actionTypeId: string,
+  params: Params,
+  variables: Record<string, unknown>
+): Params {
+  const actionType = actionTypeRegistry?.get(actionTypeId);
+  if (actionType?.renderParameterTemplates) {
+    return actionType.renderParameterTemplates(params, variables) as Params;
+  } else {
+    return renderMustacheObject(params, variables);
   }
 }

@@ -12,6 +12,13 @@ jest.mock('../../../kibana_services', () => {
     getIndexPatternSelectComponent: () => {
       return MockIndexPatternSelect;
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
