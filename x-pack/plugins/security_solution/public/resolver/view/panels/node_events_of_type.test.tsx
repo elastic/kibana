@@ -15,7 +15,7 @@ import { urlSearch } from '../../test_utilities/url_search';
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
 // FLAKY: https://github.com/elastic/kibana/issues/85714
-describe.skip(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
