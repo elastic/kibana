@@ -205,7 +205,7 @@ export interface FindValueListExceptionListsItems {
 }
 
 export interface FindExceptionListOptions {
-  namespaceType?: NamespaceType;
+  namespaceType: NamespaceTypeArray;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;

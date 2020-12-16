@@ -6,26 +6,22 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { SavedObjectType } from '../../../common/types';
 import {
   ExceptionListSoSchema,
   FilterOrUndefined,
   FoundExceptionListSchema,
-  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../saved_objects';
 
-import { getSavedObjectType, transformSavedObjectsToFoundExceptionList } from './utils';
+import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
-  namespaceType?: NamespaceType;
+  namespaceType: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
@@ -43,37 +39,31 @@ export const findExceptionList = async ({
   sortField,
   sortOrder,
 }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
-  const savedObjectType: SavedObjectType[] = namespaceType
-    ? [getSavedObjectType({ namespaceType })]
-    : [exceptionListSavedObjectType, exceptionListAgnosticSavedObjectType];
+  const savedObjectTypes = getSavedObjectTypes({ namespaceType });
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: getExceptionListFilter({ filter, savedObjectType }),
+    filter: getExceptionListFilter({ filter, savedObjectTypes }),
     page,
     perPage,
     sortField,
     sortOrder,
-    type: savedObjectType,
+    type: savedObjectTypes,
   });
+
   return transformSavedObjectsToFoundExceptionList({ savedObjectsFindResponse });
 };
 
 export const getExceptionListFilter = ({
   filter,
-  savedObjectType,
+  savedObjectTypes,
 }: {
   filter: FilterOrUndefined;
-  savedObjectType: SavedObjectType[];
+  savedObjectTypes: SavedObjectType[];
 }): string => {
-  const savedObjectTypeFilter = `(${savedObjectType
-    .map((sot) => `${sot}.attributes.list_type: list`)
-    .join(' OR ')})`;
-  if (filter == null) {
-    return savedObjectTypeFilter;
-  } else {
-    if (Array.isArray(savedObjectType)) {
-      return `${savedObjectTypeFilter} AND ${filter}`;
-    } else {
-      return `${savedObjectType}.attributes.list_type: list AND ${filter}`;
-    }
-  }
+  const listTypesFilter = savedObjectTypes
+    .map((type) => `${type}.attributes.list_type: list`)
+    .join(' OR ');
+
+  if (filter != null) {
+    return `(${listTypesFilter}) AND ${filter}`;
+  } else return `(${listTypesFilter})`;
 };
