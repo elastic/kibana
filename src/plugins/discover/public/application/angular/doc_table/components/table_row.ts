@@ -156,7 +156,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
             })
           );
         } else {
-          $scope.columns.forEach(function (column: any) {
+          $scope.columns.forEach(function (column: string) {
             const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
 
             newHtmls.push(
