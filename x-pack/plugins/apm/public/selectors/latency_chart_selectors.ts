@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { asDuration } from '../../common/utils/formatters';
 import {

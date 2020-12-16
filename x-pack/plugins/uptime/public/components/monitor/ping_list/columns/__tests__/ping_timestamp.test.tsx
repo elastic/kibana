@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { shallowWithIntl, renderWithIntl } from '@kbn/test/jest';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { PingTimestamp } from '../ping_timestamp';
 import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
 import { Ping } from '../../../../../../common/runtime_types/ping';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 mockReduxHooks();
 

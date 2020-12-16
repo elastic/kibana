@@ -19,6 +19,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
+import { EuiTheme, withTheme } from 'src/plugins/kibana_react/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,7 +28,6 @@ import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../xpack_legacy/common';
 
 interface SelectedOption {
   label: string;

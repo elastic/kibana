@@ -10,10 +10,8 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { KibanaContextProvider, RedirectAppLinks } from 'src/plugins/kibana_react/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {
@@ -29,7 +27,6 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { EuiThemeProvider } from '../../../observability/public';
 
 export interface UptimeAppColors {
   danger: string;

@@ -7,10 +7,10 @@
 import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { Ping } from '../../../../../../common/runtime_types';
 import { STATUS } from '../../../../../../common/constants';
 import { getLocationStatus, MonitorListStatusColumn } from '../monitor_status_column';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {

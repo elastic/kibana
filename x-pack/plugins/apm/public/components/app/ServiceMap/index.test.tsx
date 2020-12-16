@@ -9,7 +9,7 @@ import { CoreStart } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
-import { EuiThemeProvider } from '../../../../../observability/public';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { FETCH_STATUS } from '../../../../../observability/public/hooks/use_fetcher';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';

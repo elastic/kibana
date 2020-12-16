@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import {
   ConfigContext,
   FleetStatusProvider,
@@ -36,7 +37,6 @@ import { ProtectedRoute } from './index';
 import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { UIExtensionsStorage } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
