@@ -6,12 +6,12 @@
 
 import { CustomRule } from '../../objects/rule';
 
-export const createCustomRule = (rule: CustomRule) =>
+export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing') =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: 'rule_testing',
+      rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
       interval: '10s',
@@ -27,12 +27,12 @@ export const createCustomRule = (rule: CustomRule) =>
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
-export const createCustomRuleActivated = (rule: CustomRule) =>
+export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testing') =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: 'rule_testing',
+      rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
       interval: '10s',
@@ -48,11 +48,12 @@ export const createCustomRuleActivated = (rule: CustomRule) =>
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
-export const deleteCustomRule = () => {
+export const deleteCustomRule = (ruleId = 'rule_testing') => {
   cy.request({
     method: 'DELETE',
-    url: 'api/detection_engine/rules?rule_id=rule_testing',
+    url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 };
 

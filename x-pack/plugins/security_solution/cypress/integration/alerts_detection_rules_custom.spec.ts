@@ -5,7 +5,7 @@
  */
 
 import { formatMitreAttackDescription } from '../helpers/rules';
-import { newRule, existingRule, indexPatterns, editedRule } from '../objects/rule';
+import { newRule, existingRule, indexPatterns, editedRule, newOverrideRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
@@ -85,7 +85,11 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import {
+  createCustomRuleActivated,
+  deleteCustomRule,
+  removeSignalsIndex,
+} from '../tasks/api_calls/rules';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import {
@@ -101,8 +105,8 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -220,20 +224,24 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-describe.skip('Custom detection rules deletion and edition', () => {
+describe('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     cleanKibana();
     removeSignalsIndex();
-    esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
+    waitForAlertsIndexToBeCreated();
+    createCustomRuleActivated(newRule, 'rule1');
+    createCustomRuleActivated(newOverrideRule, 'rule2');
+    createCustomRuleActivated(existingRule, 'rule3');
+    refreshPage();
   });
 
   afterEach(() => {
     removeSignalsIndex();
-    esArchiverUnload('custom_rules');
+    deleteCustomRule('rule1');
+    deleteCustomRule('rule2');
+    deleteCustomRule('rule3');
   });
 
   context('Deletion', () => {
@@ -271,7 +279,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
         .find(RULES_ROW)
         .then((rules) => {
           const initialNumberOfRules = rules.length;
-          const numberOfRulesToBeDeleted = 3;
+          const numberOfRulesToBeDeleted = 2;
           const expectedNumberOfRulesAfterDeletion =
             initialNumberOfRules - numberOfRulesToBeDeleted;
 
@@ -297,7 +305,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
     });
   });
 
-  context('Edition', () => {
+  context.only('Edition', () => {
     const expectedEditedtags = editedRule.tags.join('');
     const expectedEditedIndexPatterns =
       editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;

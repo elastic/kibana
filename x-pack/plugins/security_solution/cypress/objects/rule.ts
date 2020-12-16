@@ -176,17 +176,10 @@ export const newRule: CustomRule = {
 };
 
 export const existingRule: CustomRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
-  index: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
+  index: ['auditbeat-*'],
   interval: '4m',
   severity: 'High',
   riskScore: '19',
