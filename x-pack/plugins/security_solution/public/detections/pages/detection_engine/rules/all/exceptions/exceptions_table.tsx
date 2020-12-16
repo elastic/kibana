@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import { History } from 'history';
 import { set } from 'lodash/fp';
 
-import { AutoDownload } from '../../../../../components/value_lists_management_modal/auto_download';
+import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useApi, useExceptionLists } from '../../../../../../shared_imports';
@@ -76,7 +76,27 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
 
-    const handleDelete = useCallback((id: string) => () => {}, []);
+    const handleDelete = useCallback(
+      ({
+        id,
+        listId,
+        namespaceType,
+      }: {
+        id: string;
+        listId: string;
+        namespaceType: NamespaceType;
+      }) => async () => {
+        try {
+          setDeletingListIds((ids) => [...ids, id]);
+          // route to patch rules with associated exception list
+        } catch (error) {
+          notifications.toasts.addError(error, { title: i18n.EXCEPTION_DELETE_ERROR });
+        } finally {
+          setDeletingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+        }
+      },
+      [notifications.toasts]
+    );
 
     const handleExport = useCallback(
       ({

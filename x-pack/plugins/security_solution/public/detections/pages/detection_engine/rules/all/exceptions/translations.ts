@@ -89,3 +89,10 @@ export const EXCEPTION_EXPORT_ERROR = i18n.translate(
     defaultMessage: 'Exception list export error',
   }
 );
+
+export const EXCEPTION_DELETE_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.deleteError',
+  {
+    defaultMessage: 'Error occurred deleting exception list',
+  }
+);
