@@ -23,6 +23,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   deleteTargetIndex,
   deleteIndexPattern,
   indexPatternExists,
+  isLoading,
   item,
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
@@ -58,6 +59,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         )}
         defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         buttonColor="danger"
+        confirmButtonDisabled={isLoading}
       >
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>

@@ -14,7 +14,7 @@ import { AppLogic } from '../../../../app_logic';
 import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
@@ -58,7 +58,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
     saveSourceConfig,
     createContentSource,
     resetSourceState,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
   const {
     sourceConfigData: {
       name,
@@ -69,7 +69,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
     },
     dataLoading,
     newCustomSource,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const {
     serviceType,

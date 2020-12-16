@@ -5,7 +5,6 @@
  */
 
 import { Map as MbMap } from 'mapbox-gl';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { DynamicStyleProperty } from './dynamic_style_property';
@@ -25,34 +24,10 @@ import {
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
+import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
-
-function getOrdinalSuffix(value: number) {
-  const lastDigit = value % 10;
-  if (lastDigit === 1 && value !== 11) {
-    return i18n.translate('xpack.maps.styles.firstOrdinalSuffix', {
-      defaultMessage: 'st',
-    });
-  }
-
-  if (lastDigit === 2 && value !== 12) {
-    return i18n.translate('xpack.maps.styles.secondOrdinalSuffix', {
-      defaultMessage: 'nd',
-    });
-  }
-
-  if (lastDigit === 3 && value !== 13) {
-    return i18n.translate('xpack.maps.styles.thirdOrdinalSuffix', {
-      defaultMessage: 'rd',
-    });
-  }
-
-  return i18n.translate('xpack.maps.styles.ordinalSuffix', {
-    defaultMessage: 'th',
-  });
-}
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
