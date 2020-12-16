@@ -51,7 +51,7 @@ import { closeTimeline } from '../tasks/timeline';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe('Cases', () => {
+describe.skip('Cases', () => {
   const mycase = { ...case1 };
 
   before(() => {
@@ -66,7 +66,7 @@ describe('Cases', () => {
     deleteCase();
   });
 
-  it.skip('Creates a new case with timeline and opens the timeline', () => {
+  it('Creates a new case with timeline and opens the timeline', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(mycase);
