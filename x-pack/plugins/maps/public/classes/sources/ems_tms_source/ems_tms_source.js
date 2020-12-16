@@ -14,6 +14,7 @@ import { SOURCE_TYPES } from '../../../../common/constants';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 function getErrorInfo(emsTileLayerId) {
   return i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
@@ -146,6 +147,11 @@ export class EMSTMSSource extends AbstractTMSSource {
 
     const emsTileLayerId = getEmsTileLayerId();
     return getIsDarkMode() ? emsTileLayerId.dark : emsTileLayerId.bright;
+  }
+
+  async getLicensedFeatures() {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
 

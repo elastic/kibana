@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
@@ -16,15 +16,18 @@ export const CreateAlert = ({
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
+  const onCloseAlertFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
+    setAlertFlyoutVisibility,
+  ]);
+
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getAddAlertFlyout({
         consumer: ALERTING_EXAMPLE_APP_ID,
-        addFlyoutVisible: alertFlyoutVisible,
-        setAddFlyoutVisibility: setAlertFlyoutVisibility,
+        onClose: onCloseAlertFlyout,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [alertFlyoutVisible]
+    [onCloseAlertFlyout]
   );
 
   return (
@@ -37,7 +40,7 @@ export const CreateAlert = ({
           onClick={() => setAlertFlyoutVisibility(true)}
         />
       </EuiFlexItem>
-      <EuiFlexItem>{AddAlertFlyout}</EuiFlexItem>
+      <EuiFlexItem>{alertFlyoutVisible && AddAlertFlyout}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
