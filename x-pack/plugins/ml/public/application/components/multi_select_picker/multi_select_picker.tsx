@@ -84,6 +84,7 @@ export const MultiSelectPicker: FC<{
 
   const button = (
     <EuiFilterButton
+      data-test-subj={`${dataTestSubj}-mlDataVisualizerMultiSelectButton`}
       iconType="arrowDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -98,6 +99,7 @@ export const MultiSelectPicker: FC<{
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
+        data-test-subj={`${dataTestSubj}-mlDataVisualizerMultiSelectPopover`}
         id="popoverExampleMultiSelect"
         button={button}
         isOpen={isPopoverOpen}
@@ -105,7 +107,11 @@ export const MultiSelectPicker: FC<{
         panelPaddingSize="none"
       >
         <EuiPopoverTitle paddingSize="s">
-          <EuiFieldSearch compressed onChange={(e) => setSearchTerm(e.target.value)} />
+          <EuiFieldSearch
+            compressed
+            onChange={(e) => setSearchTerm(e.target.value)}
+            data-test-subj={`${dataTestSubj}-mlDataVisualizerMultiSelectButtonSearchInput`}
+          />
         </EuiPopoverTitle>
         <div style={{ maxHeight: 250, overflow: 'auto' }}>
           {Array.isArray(items) && items.length > 0 ? (
@@ -120,6 +126,7 @@ export const MultiSelectPicker: FC<{
                 key={index}
                 onClick={() => handleOnChange(index)}
                 style={{ flexDirection: 'row' }}
+                data-test-subj={`${dataTestSubj}-mlDataVisualizerMultiSelectOption-${item.value}`}
               >
                 {item.name ?? item.value}
               </EuiFilterSelectItem>

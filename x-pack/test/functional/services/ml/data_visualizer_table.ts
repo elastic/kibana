@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
+export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -50,6 +51,16 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
       }
 
       return rows;
+    }
+
+    public async assertTableRowCount(expectedRowCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const filteredRows = await this.parseDataVisualizerTable();
+        expect(filteredRows).to.have.length(
+          expectedRowCount,
+          `Filtered Data Visualizer table should have ${expectedRowCount} row(s) (got '${filteredRows.length}')`
+        );
+      });
     }
 
     public rowSelector(fieldName: string, subSelector?: string) {
@@ -119,76 +130,18 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
       const docCount = await testSubjects.getVisibleText(docCountFormattedSelector);
       expect(docCount).to.eql(
         docCountFormatted,
-        `Expected total document count to be '${docCountFormatted}' (got '${docCount}')`
+        `Expected field document count to be '${docCountFormatted}' (got '${docCount}')`
       );
     }
 
-    public async assertNumberFieldContents(fieldName: string, docCountFormatted: string) {
-      const fieldType = ML_JOB_FIELD_TYPES.NUMBER;
-      await this.assertRowExists(fieldName);
-      await this.assertFieldDocCount(fieldName, docCountFormatted);
-
-      await this.openDetails(fieldName, fieldType);
-
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlNumberSummaryTable`
-      );
-
-      await testSubjects.existOrFail(`mlDataVisualizerFieldExpandedRow-${fieldName} > mlTopValues`);
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlMetricDistribution`
-      );
+    public async assertFieldDistinctValuesExist(fieldName: string) {
+      const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistinctValues');
+      await testSubjects.existOrFail(selector);
     }
 
-    public async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
-      const fieldType = ML_JOB_FIELD_TYPES.DATE;
-      await this.assertRowExists(fieldName);
-      await this.assertFieldDocCount(fieldName, docCountFormatted);
-
-      await this.openDetails(fieldName, fieldType);
-
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlDateSummaryTable`
-      );
-    }
-
-    public async assertKeywordFieldContents(fieldName: string, docCountFormatted: string) {
-      const fieldType = ML_JOB_FIELD_TYPES.KEYWORD;
-      await this.assertRowExists(fieldName);
-      await this.assertFieldDocCount(fieldName, docCountFormatted);
-
-      await this.openDetails(fieldName, fieldType);
-
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlFieldDataTopValues`
-      );
-    }
-
-    public async assertTextFieldContents(fieldName: string, docCountFormatted: string) {
-      const fieldType = ML_JOB_FIELD_TYPES.TEXT;
-      await this.assertRowExists(fieldName);
-      await this.assertFieldDocCount(fieldName, docCountFormatted);
-
-      await this.openDetails(fieldName, fieldType);
-
-      await testSubjects.existOrFail(
-        `mlDataVisualizerFieldExpandedRow-${fieldName} > mlFieldDataExamplesList`
-      );
-    }
-
-    async assertNonMetricFieldContents(
-      cardType: string,
-      fieldName: string,
-      docCountFormatted: string
-    ) {
-      // Currently the data used in the data visualizer tests only contains these field types.
-      if (cardType === ML_JOB_FIELD_TYPES.DATE) {
-        await this.assertDateFieldContents(fieldName, docCountFormatted);
-      } else if (cardType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordFieldContents(fieldName, docCountFormatted!);
-      } else if (cardType === ML_JOB_FIELD_TYPES.TEXT) {
-        await this.assertTextFieldContents(fieldName, docCountFormatted!);
-      }
+    public async assertFieldDistributionExist(fieldName: string) {
+      const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistribution');
+      await testSubjects.existOrFail(selector);
     }
   })();
 }

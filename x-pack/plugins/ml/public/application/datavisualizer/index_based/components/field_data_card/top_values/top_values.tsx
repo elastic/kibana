@@ -64,7 +64,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                 </EuiText>
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem data-test-subj="mlFieldDataCardTopValueBar">
+            <EuiFlexItem data-test-subj="mlFieldDataTopValueBar">
               <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
             </EuiFlexItem>
             <EuiFlexItem
