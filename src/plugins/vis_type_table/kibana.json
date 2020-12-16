@@ -11,7 +11,9 @@
   ],
   "requiredBundles": [
     "kibanaUtils",
+    "kibanaReact",
     "share",
     "visDefaultEditor"
-  ]
+  ],
+  "optionalPlugins": ["usageCollection"]
 }

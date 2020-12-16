@@ -23,8 +23,13 @@ const defaultProps = {
     browserFields: mockBrowserFields,
     category: categoryId,
   }),
+  closePopOverTrigger: false,
   fieldId: timestampFieldId,
+  handleClosePopOverTrigger: jest.fn(),
+  hoverActionsOwnFocus: false,
+  onCloseRequested: jest.fn(),
   onUpdateColumns: jest.fn(),
+  setClosePopOverTrigger: jest.fn(),
 };
 
 describe('FieldName', () => {

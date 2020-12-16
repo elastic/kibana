@@ -75,10 +75,9 @@ export const registerImportRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
 
-      const { headers } = req;
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsImport({ headers, createNewCopies, overwrite })
+        .incrementSavedObjectsImport({ request: req, createNewCopies, overwrite })
         .catch(() => {});
 
       const file = req.body.file as FileStream;

@@ -94,6 +94,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         editable: await this.isEditable(),
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
+        getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
       },
       input,
