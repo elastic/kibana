@@ -40,8 +40,9 @@ export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
-export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__'; // Identifies vector tile "too many features" feature
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__'; // Identifies line/polygon centroid feature used for label placement
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {

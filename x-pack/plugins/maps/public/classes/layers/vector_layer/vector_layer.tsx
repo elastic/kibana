@@ -12,8 +12,10 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
+import { getCentroidFeatures } from '../../../../common/get_centroid_features';
 import {
   FEATURE_ID_PROPERTY_NAME,
+  KBN_IS_CENTROID_FEATURE,
   SOURCE_DATA_REQUEST_ID,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -26,6 +28,7 @@ import {
   LAYER_STYLE_TYPE,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -37,6 +40,7 @@ import {
 import { assignFeatureIds } from '../../util/assign_feature_ids';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
+  getCentroidFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
@@ -518,6 +522,7 @@ export class VectorLayer extends AbstractLayer {
         }
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
+      layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
       stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
@@ -994,9 +999,42 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
+  // Centroids are a single point for lines, multiLines, polygons, and multiPolygons
+  _setMbCentroidProperties(mbMap: MbMap, mvtSourceLayer?: string) {
+    const centroidLayerId = this._getMbCentroidLayerId();
+    const centroidLayer = mbMap.getLayer(centroidLayerId);
+    if (!centroidLayer) {
+      const mbLayer: MbLayer = {
+        id: centroidLayerId,
+        type: 'symbol',
+        source: this.getId(),
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
+    }
+
+    const filterExpr = getCentroidFilterExpression(this.hasJoins());
+    if (filterExpr !== mbMap.getFilter(centroidLayerId)) {
+      mbMap.setFilter(centroidLayerId, filterExpr);
+    }
+
+    this.getCurrentStyle().setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId: centroidLayerId,
+    });
+
+    this.syncVisibilityWithMb(mbMap, centroidLayerId);
+    mbMap.setLayerZoomRange(centroidLayerId, this.getMinZoom(), this.getMaxZoom());
+  }
+
   _syncStylePropertiesWithMb(mbMap: MbMap) {
     this._setMbPointsProperties(mbMap);
     this._setMbLinePolygonProperties(mbMap);
+    // centroid layers added after polygon layers to ensure they are on top of polygon layers
+    this._setMbCentroidProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
@@ -1036,6 +1074,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('text');
   }
 
+  _getMbCentroidLayerId() {
+    return this.makeMbLayerId('centroid');
+  }
+
   _getMbSymbolLayerId() {
     return this.makeMbLayerId('symbol');
   }
@@ -1056,6 +1098,7 @@ export class VectorLayer extends AbstractLayer {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
+      this._getMbCentroidLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),

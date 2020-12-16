@@ -14,6 +14,7 @@ import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -493,6 +494,12 @@ export class VectorStyle implements IVectorStyle {
     if (supportedFeatures.length > 1) {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
+
+        // ignore centroid features as they are added for styling and not part of the real data set
+        if (feature.properties[KBN_IS_CENTROID_FEATURE]) {
+          continue;
+        }
+
         if (!hasFeatureType[VECTOR_SHAPE_TYPE.POINT] && POINTS.includes(feature.geometry.type)) {
           hasFeatureType[VECTOR_SHAPE_TYPE.POINT] = true;
         }
