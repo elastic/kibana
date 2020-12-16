@@ -228,7 +228,12 @@ export type FilterEditUrlState = MLPageState<
   }
 >;
 
-export type ExpandablePanels = 'analysis' | 'evaluation' | 'feature_importance' | 'results';
+export type ExpandablePanels =
+  | 'analysis'
+  | 'evaluation'
+  | 'feature_importance'
+  | 'results'
+  | 'splom';
 
 export type ExplorationPageUrlState = {
   queryText: string;
