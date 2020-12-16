@@ -21,7 +21,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import 'cypress-promise/register';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 
 Cypress.Cookies.defaults({
   preserve: 'sid',
@@ -31,6 +31,14 @@ Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('ResizeObserver loop limit exceeded')) {
     return false;
   }
+});
+
+before(() => {
+  removeSignalsIndex();
+});
+
+after(() => {
+  removeSignalsIndex();
 });
 
 // Alternatively you can use CommonJS syntax:
