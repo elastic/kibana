@@ -16,7 +16,7 @@ import {
   goToOpenedAlerts,
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';

@@ -10,8 +10,8 @@ import { HOSTS_URL } from '../urls/navigation';
 import { openEvents } from '../tasks/hosts/main';
 import { DRAGGABLE_HEADER } from '../screens/timeline';
 import { TABLE_COLUMN_EVENTS_MESSAGE } from '../screens/hosts/external_events';
-import { waitsForEventsToBeLoaded, openEventsViewerFieldsBrowser } from '../tasks/hosts/events';
-import { removeColumn, resetFields } from '../tasks/timeline';
+import { waitsForEventsToBeLoaded } from '../tasks/hosts/events';
+import { removeColumn } from '../tasks/timeline';
 
 // Failing: See https://github.com/elastic/kibana/issues/75794
 describe.skip('persistent timeline', () => {

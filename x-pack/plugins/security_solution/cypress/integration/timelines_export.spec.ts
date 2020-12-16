@@ -8,7 +8,7 @@ import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timeli
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { TIMELINES_URL } from '../urls/navigation';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
 import { expectedExportedTimeline, timeline } from '../objects/timeline';
 import { cleanKibana } from '../tasks/common';
 

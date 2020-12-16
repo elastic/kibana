@@ -22,7 +22,6 @@ import {
   fillServiceNowConnectorOptions,
 } from '../tasks/create_new_case';
 import { goToCreateNewCase } from '../tasks/all_cases';
-import { deleteCase } from '../tasks/case_details';
 import { CASES_URL } from '../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../screens/case_details';
 import { cleanKibana } from '../tasks/common';

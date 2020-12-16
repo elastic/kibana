@@ -75,7 +75,6 @@ import {
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
-  deleteRule,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -86,7 +85,7 @@ import {
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,

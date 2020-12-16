@@ -11,7 +11,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 

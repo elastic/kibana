@@ -13,7 +13,6 @@ import {
   login,
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
-  deleteRoleAndUser,
 } from '../tasks/login';
 import { waitForAlertsIndexToBeCreated } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';

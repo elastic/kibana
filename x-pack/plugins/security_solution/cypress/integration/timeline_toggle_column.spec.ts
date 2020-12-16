@@ -11,7 +11,7 @@ import {
   TIMESTAMP_HEADER_FIELD,
   TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
@@ -29,12 +29,10 @@ import {
 import { HOSTS_URL } from '../urls/navigation';
 
 describe('toggle column in timeline', () => {
-  let timelineId: string;
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimeline(timeline).then((response) => {
-      timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
       loginAndWaitForPage(HOSTS_URL);
     });
   });
