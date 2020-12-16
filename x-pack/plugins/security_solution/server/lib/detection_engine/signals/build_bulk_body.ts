@@ -12,6 +12,7 @@ import {
   RuleAlertAttributes,
   BaseSignalHit,
   SignalSource,
+  WrappedSignalHit,
 } from './types';
 import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
@@ -94,7 +95,7 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<RuleAlertAttributes>,
   outputIndex: string
-): BaseSignalHit[] => {
+): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
       const signal = buildSignalFromEvent(event, ruleSO, false);
@@ -132,7 +133,7 @@ export const buildSignalGroupFromSequence = (
 };
 
 export const buildSignalFromSequence = (
-  events: BaseSignalHit[],
+  events: WrappedSignalHit[],
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
