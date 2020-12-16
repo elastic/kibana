@@ -44,10 +44,6 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   );
 }
 
-export function hasInvalidColumns(state: IndexPatternPrivateState) {
-  return getInvalidLayers(state).length > 0;
-}
-
 export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
     return layer.columnOrder.some((columnId) =>

@@ -20,7 +20,7 @@ import {
   getExistingColumnGroups,
   isReferenced,
 } from './operations';
-import { hasField, hasInvalidColumns } from './utils';
+import { hasField, getInvalidLayers } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -95,7 +95,7 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): IndexPatternSuggestion[] {
-  if (hasInvalidColumns(state)) return [];
+  if (getInvalidLayers(state)?.length) return [];
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
@@ -337,7 +337,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  if (hasInvalidColumns(state)) return [];
+  if (getInvalidLayers(state)?.length) return [];
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually

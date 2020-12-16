@@ -158,6 +158,7 @@ function MovingAverageParamEditor({
         compressed
         value={inputValue}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+        min={1}
       />
     </EuiFormRow>
   );

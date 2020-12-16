@@ -1066,7 +1066,7 @@ describe('state_helpers', () => {
         isTransferable: jest.fn(),
         toExpression: jest.fn().mockReturnValue([]),
         getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
-        getDefaultLabel: () => 'Test reference',
+        getDefaultLabel: jest.fn().mockReturnValue('Test reference'),
       };
 
       const layer: IndexPatternLayer = {
@@ -1184,6 +1184,7 @@ describe('state_helpers', () => {
             },
           },
           columnId: 'col1',
+          indexPattern,
         })
       ).toEqual({
         indexPatternId: '1',
@@ -1229,6 +1230,7 @@ describe('state_helpers', () => {
             },
           },
           columnId: 'col2',
+          indexPattern,
         })
       ).toEqual({
         indexPatternId: '1',
@@ -1279,6 +1281,7 @@ describe('state_helpers', () => {
           },
         },
         columnId: 'col2',
+        indexPattern,
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
@@ -1312,8 +1315,54 @@ describe('state_helpers', () => {
           },
         },
       };
-      expect(deleteColumn({ layer, columnId: 'col2' })).toEqual(
+      expect(deleteColumn({ layer, columnId: 'col2', indexPattern })).toEqual(
         expect.objectContaining({ columnOrder: [], columns: {} })
+      );
+    });
+
+    it('should update the labels when deleting columns', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+          col2: {
+            label: 'Changed label',
+            dataType: 'number',
+            isBucketed: false,
+
+            // @ts-expect-error not a valid type
+            operationType: 'testReference',
+            references: ['col1'],
+          },
+        },
+      };
+      deleteColumn({ layer, columnId: 'col1', indexPattern });
+      expect(operationDefinitionMap.testReference.getDefaultLabel).toHaveBeenCalledWith(
+        {
+          label: 'Changed label',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'testReference',
+          references: ['col1'],
+        },
+        indexPattern,
+        {
+          col2: {
+            label: 'Default label',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'testReference',
+            references: ['col1'],
+          },
+        }
       );
     });
 
@@ -1350,7 +1399,7 @@ describe('state_helpers', () => {
           },
         },
       };
-      expect(deleteColumn({ layer, columnId: 'col3' })).toEqual(
+      expect(deleteColumn({ layer, columnId: 'col3', indexPattern })).toEqual(
         expect.objectContaining({ columnOrder: [], columns: {} })
       );
     });
@@ -1809,6 +1858,21 @@ describe('state_helpers', () => {
   });
 
   describe('getErrorMessages', () => {
+    it('should collect errors from all types of operation definitions', () => {
+      const mock = jest.fn().mockReturnValue(['error 1']);
+      operationDefinitionMap.avg.getErrorMessage = mock;
+      const errors = getErrorMessages({
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          // @ts-expect-error invalid column
+          col1: { operationType: 'avg' },
+        },
+      });
+      expect(mock).toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
+    });
+
     it('should collect errors from the operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = mock;
@@ -1825,7 +1889,7 @@ describe('state_helpers', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('should identify missing references', () => {
+    it('should identify missing references on reference-based calculation', () => {
       const errors = getErrorMessages({
         indexPatternId: '1',
         columnOrder: [],

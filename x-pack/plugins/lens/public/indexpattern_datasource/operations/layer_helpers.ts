@@ -259,7 +259,7 @@ export function replaceColumn({
 
     if (previousDefinition.input === 'fullReference') {
       (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
+        tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
       });
     }
 
@@ -481,9 +481,11 @@ function adjustColumnReferencesForChangedColumn(layer: IndexPatternLayer, change
 export function deleteColumn({
   layer,
   columnId,
+  indexPattern,
 }: {
   layer: IndexPatternLayer;
   columnId: string;
+  indexPattern: IndexPattern;
 }): IndexPatternLayer {
   const column = layer.columns[columnId];
   if (!column) {
@@ -510,15 +512,20 @@ export function deleteColumn({
   };
 
   extraDeletions.forEach((id) => {
-    newLayer = deleteColumn({ layer: newLayer, columnId: id });
+    newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern });
   });
 
   const newIncomplete = { ...(newLayer.incompleteColumns || {}) };
   delete newIncomplete[columnId];
 
-  // TODO: Deleting should also update labels, but it's not actually required for now because of the
-  // reference UI not supporting inner deletion
-  return { ...newLayer, columnOrder: getColumnOrder(newLayer), incompleteColumns: newIncomplete };
+  return updateDefaultLabels(
+    {
+      ...newLayer,
+      columnOrder: getColumnOrder(newLayer),
+      incompleteColumns: newIncomplete,
+    },
+    indexPattern
+  );
 }
 
 // Derives column order from column object, respects existing columnOrder
@@ -610,7 +617,7 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
 
   Object.entries(layer.columns).forEach(([columnId, column]) => {
     const def = operationDefinitionMap[column.operationType];
-    if (def.input === 'fullReference' && def.getErrorMessage) {
+    if (def.getErrorMessage) {
       errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
     }
 
