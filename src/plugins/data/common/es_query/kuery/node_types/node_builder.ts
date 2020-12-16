@@ -27,12 +27,10 @@ export const nodeBuilder = {
       nodeTypes.literal.buildNode(false),
     ]);
   },
-  or: ([first, ...args]: KueryNode[]): KueryNode => {
-    return args.length ? nodeTypes.function.buildNode('or', [first, nodeBuilder.or(args)]) : first;
+  or: (args: KueryNode[]): KueryNode => {
+    return nodeTypes.function.buildNode('or', args);
   },
-  and: ([first, ...args]: KueryNode[]): KueryNode => {
-    return args.length
-      ? nodeTypes.function.buildNode('and', [first, nodeBuilder.and(args)])
-      : first;
+  and: (args: KueryNode[]): KueryNode => {
+    return nodeTypes.function.buildNode('and', args);
   },
 };
