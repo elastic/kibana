@@ -20,6 +20,7 @@ import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
   getTrustedAppsListRouteHandler,
+  getTrustedAppsSummaryRouteHandler,
 } from './handlers';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
@@ -223,6 +224,72 @@ describe('handlers', () => {
       await getTrustedAppsListHandler(
         createHandlerContextMock(),
         httpServerMock.createKibanaRequest({ body: NEW_TRUSTED_APP }),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'internalError', error);
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('getTrustedAppsSummaryHandler', () => {
+    const getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+
+    it('should return ok with list when no errors', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.findExceptionListItem.mockResolvedValue({
+        data: [
+          // Linux === 5
+          ...Array.from({ length: 5 }, () => {
+            return {
+              ...EXCEPTION_LIST_ITEM,
+            };
+          }),
+          // macos === 3
+          ...Array.from({ length: 3 }, () => {
+            return {
+              ...EXCEPTION_LIST_ITEM,
+              os_types: ['macos'] as ExceptionListItemSchema['os_types'],
+            };
+          }),
+
+          // windows === 15
+          ...Array.from({ length: 15 }, () => {
+            return {
+              ...EXCEPTION_LIST_ITEM,
+              os_types: ['windows'] as ExceptionListItemSchema['os_types'],
+            };
+          }),
+        ],
+        page: 1,
+        per_page: 100,
+        total: 23,
+      });
+
+      await getTrustedAppsSummaryHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'ok', {
+        linux: 5,
+        macos: 3,
+        windows: 15,
+        total: 23,
+      });
+    });
+
+    it('should return internalError when errors happen', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      const error = new Error('Something went wrong');
+
+      exceptionsListClient.findExceptionListItem.mockRejectedValue(error);
+
+      await getTrustedAppsSummaryHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest(),
         mockResponse
       );
 
