@@ -30,7 +30,7 @@ export function IconPopover({
 }: IconPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const tooglePopover = () => {
+  const togglePopover = () => {
     setIsOpen((prevState) => {
       const nextState = !prevState;
       onClick(nextState);
@@ -44,17 +44,18 @@ export function IconPopover({
 
   return (
     <EuiPopover
+      anchorPosition="downCenter"
       ownFocus={false}
       button={
         <EuiButtonEmpty
-          onClick={tooglePopover}
+          onClick={togglePopover}
           data-test-subj={`popover_${title}`}
         >
           <EuiIcon type={icon} size="l" color="black" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
-      closePopover={tooglePopover}
+      closePopover={togglePopover}
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: px(300) }}>

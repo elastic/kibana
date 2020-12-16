@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import url from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
 
@@ -13,15 +14,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const archiveName = 'apm_8.0.0';
-  const range = archives[archiveName];
-  const start = encodeURIComponent(range.start);
-  const end = encodeURIComponent(range.end);
+  const { start, end } = archives[archiveName];
 
   describe('Service details', () => {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/metadata/details?start=${start}&end=${end}&uiFilters=%7B%7`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -35,7 +41,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns java service details', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/metadata/details?start=${start}&end=${end}&uiFilters=%7B%7`
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -44,9 +57,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Object {
             "container": Object {
               "isContainerized": true,
-              "orchestration": "Kubernetes",
               "os": "Linux",
               "totalNumberInstances": 1,
+              "type": "Kubernetes",
             },
             "service": Object {
               "agent": Object {
@@ -69,7 +82,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns python service details', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-python/metadata/details?start=${start}&end=${end}&uiFilters=%7B%7`
+          url.format({
+            pathname: `/api/apm/services/opbeans-python/metadata/details`,
+            query: {
+              start,
+              end,
+              uiFilters: '{}',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -88,9 +108,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "container": Object {
               "isContainerized": true,
-              "orchestration": "Kubernetes",
               "os": "linux",
               "totalNumberInstances": 1,
+              "type": "Kubernetes",
             },
             "service": Object {
               "agent": Object {

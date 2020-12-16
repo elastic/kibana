@@ -63,9 +63,9 @@ describe('ServiceIcons', () => {
         </Wrapper>
       );
       expect(getByTestId('loading')).toBeInTheDocument();
-      expect(queryAllByTestId('java').length).toEqual(0);
-      expect(queryAllByTestId('kubernetes').length).toEqual(0);
-      expect(queryAllByTestId('gcp').length).toEqual(0);
+      expect(queryAllByTestId('java')).toHaveLength(0);
+      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
+      expect(queryAllByTestId('gcp')).toHaveLength(0);
     });
     it("doesn't show any icons", () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -79,10 +79,10 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
-      expect(queryAllByTestId('java').length).toEqual(0);
-      expect(queryAllByTestId('kubernetes').length).toEqual(0);
-      expect(queryAllByTestId('gcp').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
+      expect(queryAllByTestId('java')).toHaveLength(0);
+      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
+      expect(queryAllByTestId('gcp')).toHaveLength(0);
     });
     it('shows service icon', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -98,16 +98,16 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('java')).toBeInTheDocument();
-      expect(queryAllByTestId('kubernetes').length).toEqual(0);
-      expect(queryAllByTestId('gcp').length).toEqual(0);
+      expect(queryAllByTestId('Kubernetes')).toHaveLength(0);
+      expect(queryAllByTestId('gcp')).toHaveLength(0);
     });
     it('shows service and container icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {
           agentName: 'java',
-          container: 'kubernetes',
+          containerType: 'Kubernetes',
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -118,17 +118,17 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
-      expect(queryAllByTestId('gcp').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
+      expect(queryAllByTestId('gcp')).toHaveLength(0);
       expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('kubernetes')).toBeInTheDocument();
+      expect(getByTestId('Kubernetes')).toBeInTheDocument();
     });
     it('shows service, container and cloud icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {
           agentName: 'java',
-          container: 'kubernetes',
-          cloud: 'gcp',
+          containerType: 'Kubernetes',
+          cloudProvider: 'gcp',
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -139,9 +139,9 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('kubernetes')).toBeInTheDocument();
+      expect(getByTestId('Kubernetes')).toBeInTheDocument();
       expect(getByTestId('gcp')).toBeInTheDocument();
     });
   });
@@ -159,8 +159,8 @@ describe('ServiceIcons', () => {
         'GET /api/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
-            container: 'kubernetes',
-            cloud: 'gcp',
+            containerType: 'Kubernetes',
+            cloudProvider: 'gcp',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
@@ -182,9 +182,9 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('kubernetes')).toBeInTheDocument();
+      expect(getByTestId('Kubernetes')).toBeInTheDocument();
       expect(getByTestId('gcp')).toBeInTheDocument();
       fireEvent.click(getByTestId('popover_Service'));
       expect(getByTestId('loading-content')).toBeInTheDocument();
@@ -195,8 +195,8 @@ describe('ServiceIcons', () => {
         'GET /api/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
-            container: 'kubernetes',
-            cloud: 'gcp',
+            containerType: 'Kubernetes',
+            cloudProvider: 'gcp',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
@@ -218,13 +218,13 @@ describe('ServiceIcons', () => {
           <ServiceIcons serviceName="foo" />
         </Wrapper>
       );
-      expect(queryAllByTestId('loading').length).toEqual(0);
+      expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('java')).toBeInTheDocument();
-      expect(getByTestId('kubernetes')).toBeInTheDocument();
+      expect(getByTestId('Kubernetes')).toBeInTheDocument();
       expect(getByTestId('gcp')).toBeInTheDocument();
 
       fireEvent.click(getByTestId('popover_Service'));
-      expect(queryAllByTestId('loading-content').length).toEqual(0);
+      expect(queryAllByTestId('loading-content')).toHaveLength(0);
       expect(getByText('Service')).toBeInTheDocument();
       expect(getByText('v1.0.0')).toBeInTheDocument();
     });

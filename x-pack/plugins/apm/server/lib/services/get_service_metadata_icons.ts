@@ -13,6 +13,7 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -24,8 +25,8 @@ type ServiceMetadataIconsRaw = Pick<
 
 interface ServiceMetadataIcons {
   agentName?: string;
-  container?: 'Kubernetes' | 'Docker' | undefined;
-  cloud?: string;
+  containerType?: ContainerType;
+  cloudProvider?: string;
 }
 
 export async function getServiceMetadataIcons({
@@ -60,15 +61,16 @@ export async function getServiceMetadataIcons({
 
   if (response.hits.total.value === 0) {
     return {
-      container: undefined,
-      cloud: undefined,
+      agentName: undefined,
+      containerType: undefined,
+      cloudProvider: undefined,
     };
   }
 
   const { kubernetes, cloud, container, agent } = response.hits.hits[0]
     ._source as ServiceMetadataIconsRaw;
 
-  let containerType: ServiceMetadataIcons['container'];
+  let containerType: ContainerType;
   if (!!kubernetes) {
     containerType = 'Kubernetes';
   } else if (!!container) {
@@ -77,7 +79,7 @@ export async function getServiceMetadataIcons({
 
   return {
     agentName: agent?.name,
-    container: containerType,
-    cloud: cloud?.provider,
+    containerType,
+    cloudProvider: cloud?.provider,
   };
 }

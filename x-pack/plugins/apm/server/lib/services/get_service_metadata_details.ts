@@ -20,6 +20,7 @@ import {
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -28,8 +29,6 @@ type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
-
-type Orchestration = 'Kubernetes' | 'Docker';
 
 interface ServiceMetadataDetails {
   service?: {
@@ -48,7 +47,7 @@ interface ServiceMetadataDetails {
     os?: string;
     isContainerized?: boolean;
     totalNumberInstances?: number;
-    orchestration?: Orchestration;
+    type?: ContainerType;
   };
   cloud?: {
     provider?: string;
@@ -144,9 +143,7 @@ export async function getServiceMetadataDetails({
     host || container || totalNumberInstances || kubernetes
       ? {
           os: host?.os?.platform,
-          orchestration: (!!kubernetes
-            ? 'Kubernetes'
-            : 'Docker') as Orchestration,
+          type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
           isContainerized: !!container?.id,
           totalNumberInstances,
         }

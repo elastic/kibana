@@ -24,20 +24,26 @@ export function CloudDetails({ cloud }: Props) {
   const listItems: EuiDescriptionListProps['listItems'] = [];
   if (cloud.provider) {
     listItems.push({
-      title: i18n.translate('xpack.apm.serviceNameHeader.cloud.provider', {
-        defaultMessage: 'Cloud provider',
-      }),
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.providerLabel',
+        {
+          defaultMessage: 'Cloud provider',
+        }
+      ),
       description: cloud.provider,
     });
   }
 
   if (!!cloud.availabilityZones?.length) {
     listItems.push({
-      title: i18n.translate('xpack.apm.serviceNameHeader.cloud.zone', {
-        defaultMessage:
-          '{zones, plural, =0 {Availability zone} one {Availability zone} other {Availability zones}} ',
-        values: { zones: cloud.availabilityZones.length },
-      }),
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.availabilityZoneLabel',
+        {
+          defaultMessage:
+            '{zones, plural, =0 {Availability zone} one {Availability zone} other {Availability zones}} ',
+          values: { zones: cloud.availabilityZones.length },
+        }
+      ),
       description: (
         <ul>
           {cloud.availabilityZones.map((zone, index) => (
@@ -52,11 +58,14 @@ export function CloudDetails({ cloud }: Props) {
 
   if (cloud.machineTypes) {
     listItems.push({
-      title: i18n.translate('xpack.apm.serviceNameHeader.cloud.machine', {
-        defaultMessage:
-          '{machineTypes, plural, =0{Machine type} one {Machine type} other {Machine types}} ',
-        values: { machineTypes: cloud.machineTypes.length },
-      }),
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.machineTypesLabel',
+        {
+          defaultMessage:
+            '{machineTypes, plural, =0{Machine type} one {Machine type} other {Machine types}} ',
+          values: { machineTypes: cloud.machineTypes.length },
+        }
+      ),
       description: (
         <ul>
           {cloud.machineTypes.map((type, index) => (
@@ -71,9 +80,12 @@ export function CloudDetails({ cloud }: Props) {
 
   if (cloud.projectName) {
     listItems.push({
-      title: i18n.translate('xpack.apm.serviceNameHeader.cloud.project', {
-        defaultMessage: 'Project ID',
-      }),
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.projectIdLabel',
+        {
+          defaultMessage: 'Project ID',
+        }
+      ),
       description: cloud.projectName,
     });
   }
