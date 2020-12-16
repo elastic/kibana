@@ -140,7 +140,7 @@ a| <<index-patterns, Index Patterns>>
 These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
 
 | <<managing-tags, Tags>>
-|Create, manage and assign tags to your saved objects.
+|Create, manage, and assign tags to your saved objects.
 
 | <<xpack-spaces, Spaces>>
 | Create spaces to organize your dashboards and other saved objects into categories.
