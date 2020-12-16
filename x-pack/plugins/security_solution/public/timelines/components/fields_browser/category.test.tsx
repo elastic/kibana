@@ -40,6 +40,7 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
@@ -69,12 +70,13 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('.euiTableCellContent__text').at(0).text()).toEqual(i18n.FIELD);
+    expect(wrapper.find('.euiTableCellContent__text').at(1).text()).toEqual(i18n.FIELD);
   });
 
   test('it renders the Description column header', () => {
@@ -96,11 +98,12 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('.euiTableCellContent__text').at(1).text()).toEqual(i18n.DESCRIPTION);
+    expect(wrapper.find('.euiTableCellContent__text').at(2).text()).toEqual(i18n.DESCRIPTION);
   });
 });

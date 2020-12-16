@@ -240,6 +240,10 @@ describe('TelemetryManagementSectionComponent', () => {
   it('shows the OptInSecurityExampleFlyout', () => {
     const onQueryMatchChange = jest.fn();
     const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
+    const applicationUsageTrackerMock = {
+      trackApplicationViewUsage: jest.fn(),
+      flushTrackedView: jest.fn(),
+    } as any;
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -258,6 +262,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
     const component = mountWithIntl(
       <TelemetryManagementSection
+        applicationUsageTracker={applicationUsageTrackerMock}
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
@@ -270,15 +275,22 @@ describe('TelemetryManagementSectionComponent', () => {
       const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(1);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInSecurityExampleFlyout');
+      expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalled();
+      expect(applicationUsageTrackerMock.flushTrackedView).not.toHaveBeenCalled();
       updatedView.simulate('close');
     } finally {
       component.unmount();
+      expect(applicationUsageTrackerMock.flushTrackedView).toHaveBeenCalled();
     }
   });
 
   it('does not show the endpoint link when isSecurityExampleEnabled returns false', () => {
     const onQueryMatchChange = jest.fn();
     const isSecurityExampleEnabled = jest.fn().mockReturnValue(false);
+    const applicationUsageTrackerMock = {
+      trackApplicationViewUsage: jest.fn(),
+      flushTrackedView: jest.fn(),
+    } as any;
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -310,8 +322,11 @@ describe('TelemetryManagementSectionComponent', () => {
       const description = (component.instance() as TelemetryManagementSection).renderDescription();
       expect(isSecurityExampleEnabled).toBeCalled();
       expect(description).toMatchSnapshot();
+      expect(applicationUsageTrackerMock.trackApplicationViewUsage).not.toHaveBeenCalled();
+      expect(applicationUsageTrackerMock.flushTrackedView).not.toHaveBeenCalled();
     } finally {
       component.unmount();
+      expect(applicationUsageTrackerMock.flushTrackedView).not.toHaveBeenCalled();
     }
   });
 
