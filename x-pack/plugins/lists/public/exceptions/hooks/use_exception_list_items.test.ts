@@ -10,13 +10,13 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../common/schemas';
-import { UseExceptionListProps, UseExceptionListSuccess } from '../types';
+import { UseExceptionListItemsSuccess, UseExceptionListProps } from '../types';
 
-import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
+import { ReturnExceptionListAndItems, useExceptionListItems } from './use_exception_list_items';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
-describe('useExceptionList', () => {
+describe('useExceptionListItems', () => {
   const onErrorMock = jest.fn();
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(() =>
-        useExceptionList({
+        useExceptionListItems({
           filterOptions: [],
           http: mockKibanaHttpService,
           lists: [
@@ -75,7 +75,7 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(() =>
-        useExceptionList({
+        useExceptionListItems({
           filterOptions: [],
           http: mockKibanaHttpService,
           lists: [
@@ -100,7 +100,7 @@ describe('useExceptionList', () => {
 
       const expectedListItemsResult: ExceptionListItemSchema[] = getFoundExceptionListItemSchemaMock()
         .data;
-      const expectedResult: UseExceptionListSuccess = {
+      const expectedResult: UseExceptionListItemsSuccess = {
         exceptions: expectedListItemsResult,
         pagination: { page: 1, perPage: 1, total: 1 },
       };
@@ -129,7 +129,7 @@ describe('useExceptionList', () => {
       const onSuccessMock = jest.fn();
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
-          useExceptionList({
+          useExceptionListItems({
             filterOptions: [],
             http: mockKibanaHttpService,
             lists: [
@@ -179,7 +179,7 @@ describe('useExceptionList', () => {
       const onSuccessMock = jest.fn();
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
-          useExceptionList({
+          useExceptionListItems({
             filterOptions: [],
             http: mockKibanaHttpService,
             lists: [
@@ -231,7 +231,7 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(() =>
-        useExceptionList({
+        useExceptionListItems({
           filterOptions: [],
           http: mockKibanaHttpService,
           lists: [
@@ -278,7 +278,7 @@ describe('useExceptionList', () => {
       const onSuccessMock = jest.fn();
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
-          useExceptionList({
+          useExceptionListItems({
             filterOptions: [{ filter: 'host.name', tags: [] }],
             http: mockKibanaHttpService,
             lists: [
@@ -343,7 +343,7 @@ describe('useExceptionList', () => {
           showDetectionsListsOnly,
           showEndpointListsOnly,
         }) =>
-          useExceptionList({
+          useExceptionListItems({
             filterOptions,
             http,
             lists,
@@ -413,7 +413,7 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(() =>
-        useExceptionList({
+        useExceptionListItems({
           filterOptions: [],
           http: mockKibanaHttpService,
           lists: [
@@ -455,7 +455,7 @@ describe('useExceptionList', () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
-          useExceptionList({
+          useExceptionListItems({
             filterOptions: [],
             http: mockKibanaHttpService,
             lists: [

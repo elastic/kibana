@@ -147,6 +147,7 @@ const getReferencedExceptionLists = async (
     .join(' OR ');
   return exceptionLists.findExceptionList({
     filter: `(${filter})`,
+    namespaceType: ['agnostic', 'single'],
     page: 1,
     perPage: 10000,
     sortField: undefined,
