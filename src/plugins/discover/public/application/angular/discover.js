@@ -746,15 +746,29 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     history.push('/');
   };
 
+  const hasUnmappedFields = (indexPattern, columns) => {
+    let hasUnmappedFields = false;
+    const fieldNames = new Set(indexPattern.fields.map((field) => field.displayName));
+    columns.forEach((column) => {
+      if (column !== 'Document' && column !== '_source' && !fieldNames.has(column)) {
+        hasUnmappedFields = true;
+      }
+    });
+    return hasUnmappedFields;
+  };
+
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { indexPattern, searchSource, useNewFieldsApi, opts } = $scope;
     const { columns, sort } = $scope.state;
+    const showUnmappedFields =
+      useNewFieldsApi && hasUnmappedFields(indexPattern, opts.savedSearch.columns);
     updateSearchSource(searchSource, {
       indexPattern,
       services,
       sort,
       columns,
       useNewFieldsApi,
+      showUnmappedFields,
     });
     return Promise.resolve();
   };
