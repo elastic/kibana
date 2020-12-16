@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('logstash', function () {
-    this.tags('ciGroup2');
+    this.tags('ciGroup13');
 
     loadTestFile(require.resolve('./grok_debugger'));
   });

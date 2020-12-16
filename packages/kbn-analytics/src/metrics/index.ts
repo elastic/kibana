@@ -19,13 +19,13 @@
 
 import { UiCounterMetric } from './ui_counter';
 import { UserAgentMetric } from './user_agent';
-import { ApplicationUsageCurrent } from './application_usage';
+import { ApplicationUsageMetric } from './application_usage';
 
 export { UiCounterMetric, createUiCounterMetric, UiCounterMetricType } from './ui_counter';
 export { trackUsageAgent } from './user_agent';
-export { ApplicationUsage, ApplicationUsageCurrent } from './application_usage';
+export { createApplicationUsageMetric, ApplicationUsageMetric } from './application_usage';
 
-export type Metric = UiCounterMetric | UserAgentMetric | ApplicationUsageCurrent;
+export type Metric = UiCounterMetric | UserAgentMetric | ApplicationUsageMetric;
 export enum METRIC_TYPE {
   COUNT = 'count',
   LOADED = 'loaded',
