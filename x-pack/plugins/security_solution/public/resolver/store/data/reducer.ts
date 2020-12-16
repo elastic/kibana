@@ -194,6 +194,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       receivedEvents: action.payload.nodeData,
       requestedNodes: action.payload.requestedIDs,
       numberOfRequestedEvents: action.payload.numberOfRequestedEvents,
+      dataRequestID: action.payload.dataRequestID,
     });
 
     return {
@@ -209,7 +210,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   } else if (action.type === 'appRequestingNodeData') {
     const updatedNodeData = nodeDataModel.setRequestedNodes(
       state.nodeData,
-      action.payload.requestedIDs
+      action.payload.requestedIDs,
+      action.payload.dataRequestID
     );
 
     return {
@@ -217,7 +219,11 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       nodeData: updatedNodeData,
     };
   } else if (action.type === 'serverFailedToReturnNodeData') {
-    const updatedData = nodeDataModel.setErrorNodes(state.nodeData, action.payload.requestedIDs);
+    const updatedData = nodeDataModel.setErrorNodes(
+      state.nodeData,
+      action.payload.requestedIDs,
+      action.payload.dataRequestID
+    );
 
     return {
       ...state,
