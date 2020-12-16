@@ -17,16 +17,14 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/storybook',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
-  dashboard: 'src/plugins/dashboard/.storybook',
-  dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
-  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
-  security_solution: 'x-pack/plugins/security_solution/.storybook',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
-  observability: 'x-pack/plugins/observability/.storybook',
-};
+import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import React from 'react';
+import { PanelToolbar } from './panel_toolbar';
+
+storiesOf('components/PanelToolbar', module).add('default', () => (
+  <PanelToolbar
+    onAddPanelClick={action('onAddPanelClick')}
+    onLibraryClick={action('onLibraryClick')}
+  />
+));
