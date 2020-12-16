@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["dashboard", "savedObjects"],
-  "optionalPlugins": []
+  "requiredPlugins": ["dashboard", "savedObjects", "embeddable"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
 }

@@ -24,6 +24,8 @@ export {
   DashboardSaveModalProps,
 } from './components/saved_object_save_modal_dashboard';
 
+export { PanelToolbar } from './components/panel_toolbar';
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }

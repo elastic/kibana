@@ -21,17 +21,21 @@ import './panel_toolbar.scss';
 import React, { FC, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { Container, openAddPanelFlyout } from 'src/plugins/embeddable/public';
-import { getSavedObjectFinder } from 'src/plugins/saved_objects/public';
-import { useKibana } from 'src/plugins/kibana_react/public';
-import { DashboardAppServices } from '../../types';
+import { CoreStart } from 'kibana/public';
+import { useKibana } from '../../../../kibana_react/public';
+import { EmbeddableStart, IContainer, openAddPanelFlyout } from '../../../../embeddable/public';
+import { getSavedObjectFinder } from '../../../../saved_objects/public';
 
 interface Props {
   /** The label for the primary action button */
   primaryActionButton: JSX.Element;
-  /** The click handler for the Add Panel button for creating new panels */
-  onPrimaryActionClick: () => void;
-  container: Container;
+  /** The Embeddable Container where embeddables should be added */
+  container: IContainer;
+}
+
+interface Services {
+  core: CoreStart;
+  embeddable: EmbeddableStart;
 }
 
 export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
@@ -39,10 +43,11 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
   const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
   const closeEditorMenu = () => setEditorMenuOpen(false);
 
-  const { core, embeddable, uiSettings } = useKibana<DashboardAppServices>().services;
+  const { core, embeddable } = useKibana<Services>().services;
+  const { uiSettings } = core;
 
   const factories = Array.from(embeddable.getEmbeddableFactories()).filter(
-    ({ type, isEditable, canCreateNew, isContainerType }) =>
+    ({ isEditable, canCreateNew, isContainerType }) =>
       isEditable() && !isContainerType && canCreateNew()
   );
 

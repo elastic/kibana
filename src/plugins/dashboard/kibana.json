@@ -15,5 +15,5 @@
   "optionalPlugins": ["home", "usageCollection", "savedObjectsTaggingOss"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home", "presentationUtil"]
 }

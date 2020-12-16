@@ -56,8 +56,8 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
-import { PanelToolbar } from './panel_toolbar';
 import { OverlayRef } from '../../../../../core/public';
+import { PanelToolbar } from '../../../../presentation_util/public';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -483,7 +483,7 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {!isErrorEmbeddable(dashboardContainer) && !dashboardStateManager.getIsViewMode() ? (
+      {!isErrorEmbeddable(dashboardContainer) && dashboardStateManager.getIsEditMode() ? (
         <PanelToolbar primaryActionButton={createPanelButton} container={dashboardContainer} />
       ) : null}
     </>
