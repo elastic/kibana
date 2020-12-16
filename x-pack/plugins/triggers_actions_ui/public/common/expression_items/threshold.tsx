@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -59,6 +59,9 @@ export const ThresholdExpression = ({
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
+  const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
+    comparators[thresholdComparator].requiredValues
+  );
 
   const andThresholdText = i18n.translate(
     'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
@@ -67,16 +70,15 @@ export const ThresholdExpression = ({
     }
   );
 
-  const updateThresholdComparator = (newComparator: string) => {
-    const updateThresholdValue =
-      comparators[comparator].requiredValues !== comparators[newComparator].requiredValues;
-    onChangeSelectedThresholdComparator(newComparator);
+  useEffect(() => {
+    const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
     if (updateThresholdValue) {
-      const thresholdValues = threshold.slice(0, comparators[newComparator].requiredValues);
+      const thresholdValues = threshold.slice(0, comparators[comparator].requiredValues);
       onChangeSelectedThreshold(thresholdValues);
+      setNumRequiredThresholds(comparators[comparator].requiredValues);
     }
-    setComparator(newComparator);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comparator]);
 
   return (
     <EuiPopover
@@ -84,9 +86,7 @@ export const ThresholdExpression = ({
         <EuiExpression
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
-          value={(threshold || [])
-            .slice(0, comparators[comparator].requiredValues)
-            .join(` ${andThresholdText} `)}
+          value={(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `)}
           isActive={Boolean(
             alertThresholdPopoverOpen ||
               (errors.threshold0 && errors.threshold0.length) ||
@@ -122,14 +122,15 @@ export const ThresholdExpression = ({
               data-test-subj="comparatorOptionsComboBox"
               value={comparator}
               onChange={(e) => {
-                updateThresholdComparator(e.target.value);
+                setComparator(e.target.value);
+                onChangeSelectedThresholdComparator(e.target.value);
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
               })}
             />
           </EuiFlexItem>
-          {Array.from(Array(comparators[comparator].requiredValues)).map((_notUsed, i) => {
+          {Array.from(Array(numRequiredThresholds)).map((_notUsed, i) => {
             return (
               <Fragment key={`threshold${i}`}>
                 {i > 0 ? (
