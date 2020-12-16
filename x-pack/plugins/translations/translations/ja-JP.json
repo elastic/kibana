@@ -12499,7 +12499,6 @@
     "xpack.ml.jobsList.deletedActionStatusText": "削除されました",
     "xpack.ml.jobsList.deleteJobErrorMessage": "ジョブの削除に失敗しました",
     "xpack.ml.jobsList.deleteJobModal.cancelButtonLabel": "キャンセル",
-    "xpack.ml.jobsList.deleteJobModal.closeButtonLabel": "閉じる",
     "xpack.ml.jobsList.deleteJobModal.deleteButtonLabel": "削除",
     "xpack.ml.jobsList.deleteJobModal.deleteJobsTitle": "{jobsCount, plural, one {{jobId}} other {# 件のジョブ}}を削除しますか？",
     "xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription": "{jobsCount, plural, one {ジョブ} other {複数ジョブ}}の削除には時間がかかる場合があります。{jobsCount, plural, one {} other {}}バックグラウンドで削除され、ジョブリストからすぐに消えない場合があります。",
