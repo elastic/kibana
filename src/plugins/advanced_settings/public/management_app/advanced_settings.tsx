@@ -79,7 +79,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
-    this.state = this.getQueryState();
+    this.state = this.getQueryState(undefined, true);
     this.unregister = this.props.history.listen(({ search }) => {
       this.setState(this.getQueryState(search));
     });
@@ -153,9 +153,10 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     this.unregister?.();
   }
 
-  private getQuery(queryString: string): Query {
+  private getQuery(queryString: string, intialQuery = false): Query {
     try {
-      return Query.parse(queryString ? getAriaName(queryString) : '');
+      const query = intialQuery ? getAriaName(queryString) : queryString ?? '';
+      return Query.parse(query);
     } catch ({ message }) {
       this.props.toasts.addWarning({
         title: parseErrorMsg,
@@ -170,9 +171,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     return (queryParams[QUERY] as string) ?? '';
   }
 
-  private getQueryState(search?: string): AdvancedSettingsState {
+  private getQueryState(search?: string, intialQuery = false): AdvancedSettingsState {
     const queryString = this.getQueryText(search);
-    const query = this.getQuery(queryString);
+    const query = this.getQuery(queryString, intialQuery);
     const filteredSettings = this.mapSettings(Query.execute(query, this.settings));
     const footerQueryMatched = Object.keys(filteredSettings).length > 0;
 
