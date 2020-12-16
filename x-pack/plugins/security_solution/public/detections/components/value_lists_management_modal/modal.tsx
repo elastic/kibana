@@ -108,15 +108,17 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   useEffect(() => {
     if (!isEmpty(deleteError)) {
-      // @ts-ignore-next-line deleteError response unknown message.error.references
-      const exceptionListReferences = deleteError?.body?.message?.error?.references?.map(
-        // @ts-ignore-next-line response not typed
-        (ref) => ref?.exception_list.name
-      );
+      const references: string[] =
+        // @ts-ignore-next-line deleteError response unknown message.error.references
+        deleteError?.body?.message?.error?.references?.map(
+          // @ts-ignore-next-line response not typed
+          (ref) => ref?.exception_list.name
+        ) ?? [];
+      const uniqueExceptionListReferences = Array.from(new Set(references));
       setShowReferenceErrorModal(true);
       setReferenceModalState({
-        contentText: i18n.referenceErrorMessage(exceptionListReferences.length),
-        exceptionListReferences,
+        contentText: i18n.referenceErrorMessage(uniqueExceptionListReferences.length),
+        exceptionListReferences: uniqueExceptionListReferences,
         isLoading: false,
         // @ts-ignore-next-line deleteError response unknown
         valueListId: deleteError?.body?.message?.error?.value_list_id,

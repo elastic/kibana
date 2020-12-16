@@ -20,6 +20,7 @@ import {
 } from '../../../../plugins/lists/common/schemas/request/create_list_schema.mock';
 import {
   createListsIndex,
+  deleteAllExceptions,
   deleteListsIndex,
   removeListServerGeneratedProperties,
 } from '../../utils';
@@ -31,6 +32,7 @@ import { DETECTION_TYPE, LIST_ID } from '../../../../plugins/lists/common/consta
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('delete_lists', () => {
     describe('deleting lists', () => {
@@ -91,6 +93,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('deleting lists referenced in exceptions', () => {
+        afterEach(async () => {
+          await deleteAllExceptions(es);
+        });
+
         it('should return an error when deleting a list referenced within an exception list item', async () => {
           // create a list
           const { body: valueListBody } = await supertest
@@ -124,11 +130,17 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          // delete that list by its auto-generated id
+          // try to delete that list by its auto-generated id
           await supertest
             .delete(`${LIST_URL}?id=${valueListBody.id}`)
             .set('kbn-xsrf', 'true')
             .expect(409);
+
+          // really delete that list by its auto-generated id
+          await supertest
+            .delete(`${LIST_URL}?id=${valueListBody.id}&ignoreReferences=true`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
         });
 
         // Tests in development

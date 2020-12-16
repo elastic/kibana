@@ -56,7 +56,8 @@ export const deleteListRoute = (router: IRouter): void => {
           if (referencedExceptionListItems?.data?.length) {
             // deleteReferences=false to perform dry run and identify referenced exception lists/items
             if (deleteReferences) {
-              // Delete referenced exception list items //TODO: Create deleteListItems to delete in batch
+              // Delete referenced exception list items
+              // TODO: Create deleteListItems to delete in batch
               deleteExceptionItemResponses = await Promise.all(
                 referencedExceptionListItems.data.map(async (listItem) => {
                   // Ensure only the single entry is deleted as there could be a separate value list referenced that is okay to keep // TODO: Add API to delete single entry
