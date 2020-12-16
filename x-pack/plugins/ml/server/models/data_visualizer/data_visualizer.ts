@@ -605,6 +605,7 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
+    const runtimeMappings: any = {};
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
@@ -618,9 +619,10 @@ export class DataVisualizer {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
       } else if (datafeedConfig?.runtime_mappings?.hasOwnProperty(field)) {
-        cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-          cardinality: { script: datafeedConfig?.runtime_mappings[field].script },
+        cardinalityField = {
+          cardinality: { field },
         };
+        runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
       } else {
         cardinalityField = {
           cardinality: { field },
@@ -636,6 +638,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...runtimeMappings,
     };
 
     const { body } = await this._asCurrentUser.search({
