@@ -40,5 +40,5 @@ Run unit tests
 
 [source,sh]
 --
-node scripts/jest embeddable
+yarn test:jest src/plugins/embeddable
 --

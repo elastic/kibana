@@ -17,6 +17,7 @@ import {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '../../common/schemas';
+import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
 
 import {
   addEndpointExceptionList,
@@ -26,11 +27,12 @@ import {
   deleteExceptionListItemById,
   fetchExceptionListById,
   fetchExceptionListItemById,
+  fetchExceptionLists,
   fetchExceptionListsItemsByListIds,
   updateExceptionList,
   updateExceptionListItem,
 } from './api';
-import { ApiCallByIdProps, ApiCallByListIdProps } from './types';
+import { ApiCallByIdProps, ApiCallByListIdProps, ApiCallFetchExceptionListsProps } from './types';
 
 const abortCtrl = new AbortController();
 
@@ -286,6 +288,87 @@ describe('Exceptions Lists API', () => {
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
+  });
+
+  describe('#fetchExceptionLists', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getFoundExceptionListSchemaMock());
+    });
+
+    test('it invokes "fetchExceptionLists" with expected url and body values', async () => {
+      await fetchExceptionLists({
+        filters: 'exception-list.attributes.name: Sample Endpoint',
+        http: httpMock,
+        namespaceTypes: 'single,agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_find', {
+        method: 'GET',
+        query: {
+          filter: 'exception-list.attributes.name: Sample Endpoint',
+          namespace_type: 'single,agnostic',
+          page: '1',
+          per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
+      const exceptionResponse = await fetchExceptionLists({
+        filters: 'exception-list.attributes.name: Sample Endpoint',
+        http: httpMock,
+        namespaceTypes: 'single,agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        filters: 'exception-list.attributes.name: Sample Endpoint',
+        http: httpMock,
+        namespaceTypes: 'notANamespaceType',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallFetchExceptionListsProps & { namespaceTypes: string[] };
+      await expect(fetchExceptionLists(payload)).rejects.toEqual(
+        'Invalid value "notANamespaceType" supplied to "namespace_type"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListSchemaMock();
+      // @ts-expect-error
+      delete badPayload.id;
+      httpMock.fetch.mockResolvedValue({ data: [badPayload], page: 1, per_page: 20, total: 1 });
+
+      await expect(
+        fetchExceptionLists({
+          filters: 'exception-list.attributes.name: Sample Endpoint',
+          http: httpMock,
+          namespaceTypes: 'single,agnostic',
+          pagination: {
+            page: 1,
+            perPage: 20,
+          },
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "data,id"');
     });
   });
 

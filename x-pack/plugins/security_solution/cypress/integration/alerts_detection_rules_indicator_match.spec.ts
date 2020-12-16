@@ -101,7 +101,7 @@ describe('Detection rules, Indicator Match', () => {
     removeSignalsIndex();
   });
 
-  it('Creates and activates a new Indicator Match rule', () => {
+  it.skip('Creates and activates a new Indicator Match rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

@@ -215,7 +215,6 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
 
   const results = await callCluster('search', {
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -289,7 +288,6 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
 export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaInex: string) {
   const searchResult: SearchResponse<unknown> = await callCluster('search', {
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {

@@ -26,7 +26,9 @@ export interface ImportListParams extends ApiParams {
 }
 
 export interface DeleteListParams extends ApiParams {
+  deleteReferences?: boolean;
   id: string;
+  ignoreReferences?: boolean;
 }
 
 export interface ExportListParams extends ApiParams {
