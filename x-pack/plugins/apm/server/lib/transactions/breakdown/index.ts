@@ -80,6 +80,7 @@ export async function getTransactionBreakdown({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { range: rangeFilter(start, end) },
+    { range: { [SPAN_SELF_TIME_SUM]: { gte: 0 } } },
     ...esFilter,
   ];
 
@@ -126,17 +127,11 @@ export async function getTransactionBreakdown({
         const type = bucket.key as string;
 
         return bucket.subtypes.buckets.map((subBucket) => {
-          const totalSelfTimePerSubtype =
-            subBucket.total_self_time_per_subtype.value || 0;
-
-          const percentage =
-            sumAllSelfTimes < 0 || totalSelfTimePerSubtype < 0
-              ? 0
-              : totalSelfTimePerSubtype / sumAllSelfTimes;
-
           return {
             name: (subBucket.key as string) || type,
-            percentage,
+            percentage:
+              (subBucket.total_self_time_per_subtype.value || 0) /
+              sumAllSelfTimes,
           };
         });
       })
