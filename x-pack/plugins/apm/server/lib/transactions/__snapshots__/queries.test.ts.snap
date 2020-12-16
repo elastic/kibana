@@ -160,6 +160,13 @@ Object {
             },
           },
           Object {
+            "range": Object {
+              "span.self_time.sum.us": Object {
+                "gte": 0,
+              },
+            },
+          },
+          Object {
             "term": Object {
               "service.environment": "test",
             },
@@ -290,6 +297,13 @@ Object {
                 "format": "epoch_millis",
                 "gte": 1528113600000,
                 "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "range": Object {
+              "span.self_time.sum.us": Object {
+                "gte": 0,
               },
             },
           },
