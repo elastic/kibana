@@ -365,7 +365,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
-        await this.assertDateFieldContents(fieldName, docCountFormatted, exampleCount);
+        await this.assertDateFieldContents(fieldName, docCountFormatted);
       } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
         await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
