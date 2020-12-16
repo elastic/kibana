@@ -41,6 +41,7 @@ export function updatedWith(
       cursor: second.cursor,
       lastCursorRequested: null,
       dataRequestID: second.dataRequestID,
+      pendingRequest: undefined,
     };
   } else {
     return undefined;

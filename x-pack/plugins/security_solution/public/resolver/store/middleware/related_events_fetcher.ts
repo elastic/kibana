@@ -101,7 +101,7 @@ export function RelatedEventsFetcher(
             dataRequestID: newID,
           },
         });
-        fetchEvents({
+        await fetchEvents({
           nodeID,
           eventCategory: newParams.panelParameters.eventCategory,
           cursor: null,
@@ -112,7 +112,7 @@ export function RelatedEventsFetcher(
     } else if (isLoadingMoreEvents) {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
-        fetchEvents(nodeEventsInCategory);
+        await fetchEvents(nodeEventsInCategory);
       }
     }
   };

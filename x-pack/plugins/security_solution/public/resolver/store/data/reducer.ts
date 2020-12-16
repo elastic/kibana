@@ -175,6 +175,19 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
+  } else if (action.type === 'appRequestedNodeEventsInCategory') {
+    if (state.nodeEventsInCategory) {
+      const nextState: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          pendingRequest: action.payload,
+        },
+      };
+      return nextState;
+    } else {
+      return state;
+    }
   } else if (action.type === 'serverFailedToReturnNodeEventsInCategory') {
     if (state.nodeEventsInCategory) {
       const nextState: DataState = {
