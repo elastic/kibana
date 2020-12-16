@@ -25,7 +25,7 @@ export const HelpMenu: FC<HelpMemuProps> = React.memo(({ docLink }) => {
           content: i18n.translate('xpack.ml.chrome.helpMenu.documentation', {
             defaultMessage: 'Documentation',
           }),
-          href: { docLink },
+          href: docLink,
           iconType: 'documents',
           linkType: 'custom',
           target: '_blank',
