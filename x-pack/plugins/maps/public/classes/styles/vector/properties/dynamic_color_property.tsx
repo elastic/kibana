@@ -5,9 +5,9 @@
  */
 
 import { Map as MbMap } from 'mapbox-gl';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
@@ -16,7 +16,6 @@ import {
   getColorPalette,
 } from '../../color_palettes';
 import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
-import { GREAT_THAN, UPTO } from '../../../../../common/i18n_getters';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -25,34 +24,13 @@ import {
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
+import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
 
+const UP_TO = i18n.translate('xpack.maps.legend.upto', {
+  defaultMessage: 'up to',
+});
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
-
-function getOrdinalSuffix(value: number) {
-  const lastDigit = value % 10;
-  if (lastDigit === 1 && value !== 11) {
-    return i18n.translate('xpack.maps.styles.firstOrdinalSuffix', {
-      defaultMessage: 'st',
-    });
-  }
-
-  if (lastDigit === 2 && value !== 12) {
-    return i18n.translate('xpack.maps.styles.secondOrdinalSuffix', {
-      defaultMessage: 'nd',
-    });
-  }
-
-  if (lastDigit === 3 && value !== 13) {
-    return i18n.translate('xpack.maps.styles.thirdOrdinalSuffix', {
-      defaultMessage: 'rd',
-    });
-  }
-
-  return i18n.translate('xpack.maps.styles.ordinalSuffix', {
-    defaultMessage: 'th',
-  });
-}
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
@@ -158,11 +136,15 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         },
         []
       );
-      const firstStopValue = colorStops[0] as number;
-      const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
+        makeMbClampedNumberExpression({
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
+          lookupFunction: this.getMbLookupFunction(),
+          fallback: (colorStops[0] as number) - 1,
+          fieldName: targetName,
+        }),
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
@@ -182,10 +164,15 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         return null;
       }
 
-      const lessThanFirstStopValue = percentilesFieldMeta[0].value - 1;
       return [
         'step',
-        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
+        makeMbClampedNumberExpression({
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
+          lookupFunction: this.getMbLookupFunction(),
+          fallback: (colorStops[0] as number) - 1,
+          fieldName: targetName,
+        }),
         RGBA_0000,
         ...colorStops,
       ];
@@ -220,6 +207,17 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       RGBA_0000,
       ...colorStops,
     ];
+  }
+
+  _getCustomRampColorStops(): Array<number | string> {
+    return this._options.customColorRamp
+      ? this._options.customColorRamp.reduce(
+          (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
+            return [...accumulatedStops, nextStop.stop, nextStop.color];
+          },
+          []
+        )
+      : [];
   }
 
   _getColorPaletteStops() {
@@ -301,96 +299,89 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalBreaks(symbolId?: string): Break[] {
-    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
-      return this._options.customColorRamp.map((ordinalColorStop) => {
-        return {
-          color: ordinalColorStop.color,
-          symbolId,
-          label: this.formatField(ordinalColorStop.stop),
-        };
-      });
-    }
-
-    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
+    let colorStops: Array<number | string> | null = null;
+    let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
+    if (this._options.useCustomColorRamp) {
+      if (!this._options.customColorRamp) {
+        return [];
+      }
+      colorStops = this._getCustomRampColorStops();
+    } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta) {
         return [];
       }
-      const colorStops = getPercentilesMbColorRampStops(
+      colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
         percentilesFieldMeta
       );
-      if (!colorStops || colorStops.length <= 2) {
+      getValuePrefix = function (i: number, isNext: boolean) {
+        const percentile = isNext
+          ? parseFloat(percentilesFieldMeta[i / 2 + 1].percentile)
+          : parseFloat(percentilesFieldMeta[i / 2].percentile);
+
+        return `${percentile}${getOrdinalSuffix(percentile)}: `;
+      };
+    } else {
+      const rangeFieldMeta = this.getRangeFieldMeta();
+      if (!rangeFieldMeta || !this._options.color) {
         return [];
       }
-
-      const breaks = [];
-      const lastStopIndex = colorStops.length - 2;
-      for (let i = 0; i < colorStops.length; i += 2) {
-        const hasNext = i < lastStopIndex;
-        const stopValue = colorStops[i];
-        const formattedStopValue = this.formatField(dynamicRound(stopValue));
-        const color = colorStops[i + 1] as string;
-        const percentile = parseFloat(percentilesFieldMeta[i / 2].percentile);
-        const percentileLabel = `${percentile}${getOrdinalSuffix(percentile)}`;
-
-        let label = '';
-        if (!hasNext) {
-          label = `${GREAT_THAN} ${percentileLabel}: ${formattedStopValue}`;
-        } else {
-          const nextStopValue = colorStops[i + 2];
-          const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
-          const nextPercentile = parseFloat(percentilesFieldMeta[i / 2 + 1].percentile);
-          const nextPercentileLabel = `${nextPercentile}${getOrdinalSuffix(nextPercentile)}`;
-
-          if (i === 0) {
-            label = `${UPTO} ${nextPercentileLabel}: ${formattedNextStopValue}`;
-          } else {
-            const begin = `${percentileLabel}: ${formattedStopValue}`;
-            const end = `${nextPercentileLabel}: ${formattedNextStopValue}`;
-            label = `${begin} ${UPTO} ${end}`;
-          }
-        }
-
-        breaks.push({
-          color,
-          label,
-          symbolId,
-        });
+      if (rangeFieldMeta.delta === 0) {
+        const colors = getColorPalette(this._options.color);
+        // map to last color.
+        return [
+          {
+            color: colors[colors.length - 1],
+            label: this.formatField(dynamicRound(rangeFieldMeta.max)),
+            symbolId,
+          },
+        ];
       }
-      return breaks;
+      colorStops = getOrdinalMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        rangeFieldMeta.min,
+        rangeFieldMeta.max
+      );
     }
 
-    if (!this._options.color) {
+    if (!colorStops || colorStops.length <= 2) {
       return [];
     }
 
-    const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!rangeFieldMeta) {
-      return [];
-    }
+    const breaks = [];
+    const lastStopIndex = colorStops.length - 2;
+    for (let i = 0; i < colorStops.length; i += 2) {
+      const hasNext = i < lastStopIndex;
+      const stopValue = colorStops[i];
+      const formattedStopValue = this.formatField(dynamicRound(stopValue));
+      const color = colorStops[i + 1] as string;
+      const valuePrefix = getValuePrefix ? getValuePrefix(i, false) : '';
 
-    const colors = getColorPalette(this._options.color);
+      let label = '';
+      if (!hasNext) {
+        label = `>= ${valuePrefix}${formattedStopValue}`;
+      } else {
+        const nextStopValue = colorStops[i + 2];
+        const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
+        const nextValuePrefix = getValuePrefix ? getValuePrefix(i, true) : '';
 
-    if (rangeFieldMeta.delta === 0) {
-      // map to last color.
-      return [
-        {
-          color: colors[colors.length - 1],
-          label: this.formatField(dynamicRound(rangeFieldMeta.max)),
-          symbolId,
-        },
-      ];
-    }
+        if (i === 0) {
+          label = `< ${nextValuePrefix}${formattedNextStopValue}`;
+        } else {
+          const begin = `${valuePrefix}${formattedStopValue}`;
+          const end = `${nextValuePrefix}${formattedNextStopValue}`;
+          label = `${begin} ${UP_TO} ${end}`;
+        }
+      }
 
-    return colors.map((color, index) => {
-      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
-      return {
+      breaks.push({
         color,
-        label: this.formatField(dynamicRound(rawStopValue)),
+        label,
         symbolId,
-      };
-    });
+      });
+    }
+    return breaks;
   }
 
   _getCategoricalBreaks(symbolId?: string): Break[] {

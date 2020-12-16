@@ -2,9 +2,11 @@
 [[maps-search]]
 == Search geographic data
 
-Maps embeds the search bar for real-time search.
-Only layers requesting data from {es} are filtered when you submit a search request.
-Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+Use the filters, query bar, and time filter to focus in on just the data you want.
+Only layers requesting data from {es} are narrowed when you submit a search request.
+Layers narrowed by the filters and query bar contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+Only layers requesting data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the time filter.
+Layers narrowed by the time filter contain the clock icon image:maps/images/clock_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
@@ -14,7 +16,11 @@ You can create a layer that requests data from {es} from the following:
 
 ** Clusters and grid
 
+** Point to point
+
 ** <<terms-join>>
+
+** Tracks
 
 * <<heatmap-layer>>
 

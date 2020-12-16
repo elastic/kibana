@@ -420,7 +420,7 @@ export default function ({ getService }) {
           }));
     });
 
-    describe('without kibana index', () => {
+    describe.skip('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it

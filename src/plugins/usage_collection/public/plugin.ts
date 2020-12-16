@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Reporter, METRIC_TYPE } from '@kbn/analytics';
-import { Subject, merge } from 'rxjs';
+import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
+import { Subject, merge, Subscription } from 'rxjs';
 import { Storage } from '../../kibana_utils/public';
-import { createReporter } from './services';
+import { createReporter, trackApplicationUsageChange } from './services';
 import {
   PluginInitializerContext,
   Plugin,
@@ -28,7 +28,6 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
-import { reportApplicationUsage } from './services/application_usage';
 
 export interface PublicConfigType {
   uiCounters: {
@@ -39,6 +38,10 @@ export interface PublicConfigType {
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
+  >;
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
@@ -55,6 +58,10 @@ export interface UsageCollectionSetup {
 export interface UsageCollectionStart {
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
+  >;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -64,7 +71,9 @@ export function isUnauthenticated(http: HttpSetup) {
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly legacyAppId$ = new Subject<string>();
+  private applicationUsageTracker?: ApplicationUsageTracker;
   private trackUserAgent: boolean = true;
+  private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
   constructor(initializerContext: PluginInitializerContext) {
@@ -81,7 +90,20 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       fetch: http,
     });
 
+    this.applicationUsageTracker = new ApplicationUsageTracker(this.reporter);
+
     return {
+      applicationUsageTracker: {
+        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
+          this.applicationUsageTracker
+        ),
+        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
+          this.applicationUsageTracker
+        ),
+        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
+          this.applicationUsageTracker
+        ),
+      },
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
@@ -94,25 +116,44 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   }
 
   public start({ http, application }: CoreStart) {
-    if (!this.reporter) {
+    if (!this.reporter || !this.applicationUsageTracker) {
       throw new Error('Usage collection reporter not set up correctly');
     }
 
     if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
+      this.applicationUsageTracker.start();
+      this.subscriptions = trackApplicationUsageChange(
+        merge(application.currentAppId$, this.legacyAppId$),
+        this.applicationUsageTracker
+      );
     }
 
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
 
-    reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
-
     return {
+      applicationUsageTracker: {
+        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
+          this.applicationUsageTracker
+        ),
+        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
+          this.applicationUsageTracker
+        ),
+        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
+          this.applicationUsageTracker
+        ),
+      },
       reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.applicationUsageTracker) {
+      this.applicationUsageTracker.stop();
+      this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+    }
+  }
 }
