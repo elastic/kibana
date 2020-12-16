@@ -37,6 +37,7 @@ const IntegrationDetailsLink = memo<{
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
+      title={packagePolicy.name}
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
@@ -123,6 +124,13 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Description',
         }),
         truncateText: true,
+        render(description) {
+          return (
+            <span className="eui-textTruncate" title={description}>
+              {description}
+            </span>
+          );
+        },
       },
       {
         field: 'packagePolicy.policy_id',
@@ -172,7 +180,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         truncateText: true,
         render(updatedAt: PackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
           return (
-            <span className="eui-textTruncate">
+            <span className="eui-textTruncate" title={updatedAt}>
               <FormattedRelative value={updatedAt} />
             </span>
           );
