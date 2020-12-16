@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -55,13 +55,25 @@ function getChartId(series) {
 
 // Wrapper for a single explorer chart
 function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, mlUrlGenerator }) {
-  const redirectToSingleMetricViewer = useCallback(async () => {
-    const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+  const [explorerSeriesLink, setExplorerSeriesLink] = useState();
 
-    window.open(singleMetricViewerLink, '_blank');
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
+      if (!isCancelled) {
+        setExplorerSeriesLink(singleMetricViewerLink);
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
   }, [mlUrlGenerator]);
 
+  const addToRecentlyAccessed = useCallback(() => {
+    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
+  }, [explorerSeriesLink]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -112,11 +124,15 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, m
               </span>
             )}
             <EuiToolTip position="top" content={textViewButton}>
+              {/* disabling because we need button to behave as link and to have a callback */}
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 iconSide="right"
                 iconType="visLine"
                 size="xs"
-                onClick={redirectToSingleMetricViewer}
+                href={explorerSeriesLink}
+                target={'_blank'}
+                onClick={addToRecentlyAccessed}
               >
                 <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
               </EuiButtonEmpty>
