@@ -55,6 +55,7 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
+import { PanelToolbar } from './panel_toolbar';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -442,5 +443,12 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
-  return <TopNavMenu {...getNavBarProps()} />;
+  return (
+    <>
+      <TopNavMenu {...getNavBarProps()} />
+      {!dashboardStateManager.getIsViewMode() ? (
+        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+      ) : null}
+    </>
+  );
 }
