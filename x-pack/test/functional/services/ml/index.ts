@@ -41,6 +41,7 @@ import { MachineLearningSettingsFilterListProvider } from './settings_filter_lis
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
+import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -66,6 +67,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     context,
     commonUI
   );
+  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context);
+
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -103,6 +106,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerTable,
     jobManagement,
     jobSelection,
     jobSourceSelection,
