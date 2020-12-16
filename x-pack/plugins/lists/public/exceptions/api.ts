@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { HttpStart } from 'kibana/public';
+
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
@@ -42,6 +44,7 @@ import {
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
+  ApiListExportProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -555,7 +558,7 @@ export const exportExceptionList = async ({
   listId,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
+}: ApiListExportProps & { http: HttpStart; signal: AbortSignal }): Promise<Blob> => {
   const [validatedRequest, errorsRequest] = validate(
     { id, list_id: listId, namespace_type: namespaceType },
     exportExceptionListQuerySchema
@@ -563,9 +566,9 @@ export const exportExceptionList = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_export`, {
+      const response = await http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+        body: JSON.stringify({ id, list_id: listId, namespace_type: namespaceType }),
         method: 'POST',
-        query: { id, list_id: listId, namespace_type: namespaceType },
         signal,
       });
 

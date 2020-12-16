@@ -22,7 +22,7 @@ export interface ExceptionsApi {
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
-  exportExceptionList: (arg: ApiListExportProps) => Promise<string>;
+  exportExceptionList: (arg: ApiListExportProps) => Promise<Blob>;
 }
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
@@ -68,11 +68,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
           onError(error);
         }
       },
-      async exportExceptionList({
-        id,
-        listId,
-        namespaceType,
-      }: ApiListExportProps): Promise<string> {
+      async exportExceptionList({ id, listId, namespaceType }: ApiListExportProps): Promise<Blob> {
         const abortCtrl = new AbortController();
 
         try {

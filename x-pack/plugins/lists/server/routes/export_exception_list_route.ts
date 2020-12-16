@@ -35,7 +35,7 @@ export const exportExceptionListRoute = (router: IRouter): void => {
           listId,
           namespaceType,
         });
-        console.log('--->', JSON.stringify(exceptionList, null, 2));
+
         if (exceptionList == null) {
           return siemResponse.error({
             body: `list_id: ${listId} does not exist`,
@@ -57,7 +57,7 @@ export const exportExceptionListRoute = (router: IRouter): void => {
 
           const { exportData: exportListItems, exportDetails } = getExport(listItems?.data ?? []);
 
-          const response = JSON.stringify({
+          const resp = JSON.stringify({
             exception_list: exportList,
             exception_list_details: exportListDetails,
             exception_list_items: exportListItems,
@@ -108,26 +108,4 @@ export const getExport = (
     exported_count: data.length,
   });
   return { exportData: ndjson, exportDetails: `${exportDetails}\n` };
-};
-
-export const writeResponseHitsToStream = ({
-  response,
-  stream,
-  stringToAppend,
-}: WriteResponseHitsToStreamOptions): void => {
-  const stringToAppendOrEmpty = stringToAppend ?? '';
-
-  response.hits.hits.forEach((hit) => {
-    const value = findSourceValue(hit._source);
-    if (value != null) {
-      stream.push(`${value}${stringToAppendOrEmpty}`);
-    } else {
-      throw new ErrorWithStatusCode(
-        `Encountered an error where hit._source was an unexpected type: ${JSON.stringify(
-          hit._source
-        )}`,
-        400
-      );
-    }
-  });
 };

@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { HttpStart } from 'kibana/public';
+
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
@@ -25,6 +27,7 @@ import {
   addExceptionListItem,
   deleteExceptionListById,
   deleteExceptionListItemById,
+  exportExceptionList,
   fetchExceptionListById,
   fetchExceptionListItemById,
   fetchExceptionLists,
@@ -32,7 +35,12 @@ import {
   updateExceptionList,
   updateExceptionListItem,
 } from './api';
-import { ApiCallByIdProps, ApiCallByListIdProps, ApiCallFetchExceptionListsProps } from './types';
+import {
+  ApiCallByIdProps,
+  ApiCallByListIdProps,
+  ApiCallFetchExceptionListsProps,
+  ApiListExportProps,
+} from './types';
 
 const abortCtrl = new AbortController();
 
@@ -868,6 +876,70 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual({});
+    });
+  });
+
+  describe('#exportExceptionList', () => {
+    const blob: Blob = {
+      size: 89,
+      type: 'json',
+      arrayBuffer: jest.fn(),
+      slice: jest.fn(),
+      stream: jest.fn(),
+      text: jest.fn(),
+    } as Blob;
+
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(blob);
+    });
+
+    test('it invokes "exportExceptionList" with expected url and body values', async () => {
+      await exportExceptionList({
+        http: httpMock,
+        id: 'some-id',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
+        body: JSON.stringify({
+          id: 'some-id',
+          list_id: 'list-id',
+          namespace_type: 'single',
+        }),
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected list to export on success', async () => {
+      const exceptionResponse = await exportExceptionList({
+        http: httpMock,
+        id: 'some-id',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(blob);
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const badRequest = {
+        http: httpMock,
+        id: 'some-id',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      };
+      // @ts-expect-error
+      delete badRequest.id;
+
+      await expect(
+        exportExceptionList(
+          badRequest as ApiListExportProps & { http: HttpStart; signal: AbortSignal }
+        )
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 });
