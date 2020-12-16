@@ -676,6 +676,7 @@ exports[`discover sidebar field details footer renders properly 1`] = `
                 <button
                   className="euiLink euiLink--primary"
                   data-test-subj="onAddFilterButton"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
