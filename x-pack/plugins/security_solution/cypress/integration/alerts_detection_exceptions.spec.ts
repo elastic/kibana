@@ -61,7 +61,7 @@ describe('Exceptions', () => {
     deleteCustomRule();
     removeSignalsIndex();
   });
-  context('From rule', () => {
+  context.skip('From rule', () => {
     it('Creates an exception and deletes it', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
@@ -99,7 +99,7 @@ describe('Exceptions', () => {
     });
   });
 
-  context('From alert', () => {
+  context.skip('From alert', () => {
     it('Creates an exception and deletes it', () => {
       addExceptionFromFirstAlert();
       addsException(exception);

@@ -26,7 +26,7 @@ describe('Pagination', () => {
     goToFirstPage();
   });
 
-  it('pagination updates results and page number', () => {
+  it.skip('pagination updates results and page number', () => {
     cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
 
     cy.get(PROCESS_NAME_FIELD)
@@ -47,7 +47,7 @@ describe('Pagination', () => {
     cy.get(THIRD_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
   });
 
-  it('pagination keeps track of page results when tabs change', () => {
+  it.skip('pagination keeps track of page results when tabs change', () => {
     cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
     goToThirdPage();
     waitForUncommonProcessesToBeLoaded();
@@ -71,7 +71,7 @@ describe('Pagination', () => {
       });
   });
 
-  it('pagination resets results and page number to first page when refresh is clicked', () => {
+  it.skip('pagination resets results and page number to first page when refresh is clicked', () => {
     cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
     goToThirdPage();
     waitForUncommonProcessesToBeLoaded();

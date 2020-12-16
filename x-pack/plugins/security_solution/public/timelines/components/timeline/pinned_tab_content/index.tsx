@@ -97,7 +97,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const filterQuery = useMemo(() => {
     const filterObj = Object.entries(pinnedEventIds).reduce<PinnedFilter>(
       (acc, [pinnedId, isPinned]) => {
-        if (isPinned) {
+        if (!isEmpty(isPinned)) {
           return {
             ...acc,
             bool: {

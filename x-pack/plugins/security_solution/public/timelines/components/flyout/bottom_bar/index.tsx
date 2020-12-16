@@ -21,14 +21,14 @@ export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
   flattenIntoAndGroups(dataProviders).reduce((total, group) => total + group.length, 0);
 
-const SHOW_HIDE_GLOBAL_TRANSLATE_X = 50; // px
-const SHOW_HIDE_TIMELINE_TRANSLATE_X = 0; // px
+const SHOW_HIDE_GLOBAL_TRANSLATE_Y = 50; // px
+const SHOW_HIDE_TIMELINE_TRANSLATE_Y = 0; // px
 
 const Container = styled.div.attrs<{ $isGlobal: boolean }>(({ $isGlobal = true }) => ({
   style: {
     transform: $isGlobal
-      ? `translateY(calc(100% - ${SHOW_HIDE_GLOBAL_TRANSLATE_X}px))`
-      : `translateY(calc(100% - ${SHOW_HIDE_TIMELINE_TRANSLATE_X}px))`,
+      ? `translateY(calc(100% - ${SHOW_HIDE_GLOBAL_TRANSLATE_Y}px))`
+      : `translateY(calc(100% - ${SHOW_HIDE_TIMELINE_TRANSLATE_Y}px))`,
   },
 }))<{ $isGlobal: boolean }>`
   position: fixed;

@@ -6,7 +6,7 @@
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="addExceptionButton"]';
 
-export const ALERTS = '[data-test-subj="event"]';
+export const ALERTS = '[data-test-subj="events-viewer-panel"] [data-test-subj="event"]';
 
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
