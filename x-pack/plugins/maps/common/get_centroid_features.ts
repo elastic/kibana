@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureCollection, Geometry } from 'geojson';
+import { Feature, FeatureCollection, Geometry, Position } from 'geojson';
 import turfArea from '@turf/area';
+// @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
 import turfLength from '@turf/length';
 import { lineString, polygon } from '@turf/helpers';
@@ -17,12 +18,15 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
     const feature = featureCollection.features[i];
     let centroidGeometry: Geometry | null = null;
     if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING) {
-      centroidGeometry = getLineCentroid(feature.geometry.coordinates);
+      // @ts-expect-error
+      centroidGeometry = getLineCentroid(feature.geometry.coordinates as Position[]);
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
-      let longestLine = feature.geometry.coordinates[0];
+      // @ts-expect-error
+      const coordinates = feature.geometry.coordinates as Position[][];
+      let longestLine = coordinates[0];
       let longestLength = turfLength(lineString(longestLine));
-      for (let j = 1; j < feature.geometry.coordinates.length; j++) {
-        const nextLine = feature.geometry.coordinates[j];
+      for (let j = 1; j < coordinates.length; j++) {
+        const nextLine = coordinates[j];
         const nextLength = turfLength(lineString(nextLine));
         if (nextLength > longestLength) {
           longestLine = nextLine;
@@ -33,10 +37,12 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
     } else if (feature.geometry.type === GEO_JSON_TYPE.POLYGON) {
       centroidGeometry = turfCenterOfMass(feature).geometry;
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
-      let largestPolygon = feature.geometry.coordinates[0];
+      // @ts-expect-error
+      const coordinates = feature.geometry.coordinates as Position[][][];
+      let largestPolygon = coordinates[0];
       let largestArea = turfArea(polygon(largestPolygon));
-      for (let j = 1; j < feature.geometry.coordinates.length; j++) {
-        const nextPolygon = feature.geometry.coordinates[j];
+      for (let j = 1; j < coordinates.length; j++) {
+        const nextPolygon = coordinates[j];
         const nextArea = turfArea(polygon(nextPolygon));
         if (nextArea > largestArea) {
           largestPolygon = nextPolygon;
@@ -64,7 +70,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
 function getLineCentroid(lineCoordinates: Position[]): Geometry {
   const centerPointIndex = Math.ceil(lineCoordinates.length / 2) - 1;
   return {
-    type: GEO_JSON_TYPE.POINT,
+    type: GEO_JSON_TYPE.POINT as 'Point',
     coordinates: lineCoordinates[centerPointIndex],
   };
 }

@@ -15,7 +15,6 @@ import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { getCentroidFeatures } from '../../../../common/get_centroid_features';
 import {
   FEATURE_ID_PROPERTY_NAME,
-  KBN_IS_CENTROID_FEATURE,
   SOURCE_DATA_REQUEST_ID,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -29,7 +28,6 @@ import {
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   VECTOR_SHAPE_TYPE,
-  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
