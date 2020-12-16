@@ -53,7 +53,7 @@ export function registerRoutes({
   const router = http.createRouter('/api/saved_objects/');
 
   registerGetRoute(router, { coreUsageData });
-  registerResolveRoute(router);
+  registerResolveRoute(router, { coreUsageData });
   registerCreateRoute(router, { coreUsageData });
   registerDeleteRoute(router, { coreUsageData });
   registerFindRoute(router, { coreUsageData });

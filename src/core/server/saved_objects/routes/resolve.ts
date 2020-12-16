@@ -19,8 +19,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 
-export const registerResolveRoute = (router: IRouter) => {
+interface RouteDependencies {
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerResolveRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
   router.get(
     {
       path: '/resolve/{type}/{id}',
@@ -33,6 +38,10 @@ export const registerResolveRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
+
       const result = await context.core.savedObjects.client.resolve(type, id);
       return res.ok({ body: result });
     })

@@ -77,6 +77,13 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsGet.namespace.custom.total'?: number;
   'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'?: number;
   'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolve.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsUpdate.total'?: number;
   'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
   'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'?: number;

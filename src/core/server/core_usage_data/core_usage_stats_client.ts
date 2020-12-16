@@ -50,6 +50,7 @@ export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
 export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
 export const FIND_STATS_PREFIX = 'apiCalls.savedObjectsFind';
 export const GET_STATS_PREFIX = 'apiCalls.savedObjectsGet';
+export const RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsResolve';
 export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
@@ -63,6 +64,7 @@ const ALL_COUNTER_FIELDS = [
   ...getFieldsForCounter(DELETE_STATS_PREFIX),
   ...getFieldsForCounter(FIND_STATS_PREFIX),
   ...getFieldsForCounter(GET_STATS_PREFIX),
+  ...getFieldsForCounter(RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(UPDATE_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getFieldsForCounter(IMPORT_STATS_PREFIX),
@@ -131,6 +133,10 @@ export class CoreUsageStatsClient {
 
   public async incrementSavedObjectsGet(options: BaseIncrementOptions) {
     await this.updateUsageStats([], GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsResolve(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], RESOLVE_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsUpdate(options: BaseIncrementOptions) {

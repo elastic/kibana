@@ -3580,6 +3580,27 @@
         "apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no": {
           "type": "long"
         },
+        "apiCalls.savedObjectsResolve.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.default.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.custom.total": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no": {
+          "type": "long"
+        },
         "apiCalls.savedObjectsUpdate.total": {
           "type": "long"
         },
