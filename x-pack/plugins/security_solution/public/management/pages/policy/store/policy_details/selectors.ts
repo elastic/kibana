@@ -25,6 +25,22 @@ export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.pol
 /** Returns current active license */
 export const licenseState = (state: Immutable<PolicyDetailsState>) => state.license;
 
+export const licensedPolicy: (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<PolicyData> | undefined = createSelector(
+  policyDetails,
+  licenseState,
+  (policyData, license) => {
+    if (policyData) {
+      unsetPolicyFeaturesAboveLicenseLevel(
+        policyData?.inputs[0]?.config.policy.value,
+        license as ILicense
+      );
+    }
+    return policyData;
+  }
+);
+
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
  * needed for an Update/Create API action
@@ -79,7 +95,7 @@ export const getPolicyDataForUpdate = (
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
-) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
+) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
     return getPolicyDataForUpdate(policy);
   }
@@ -115,38 +131,23 @@ const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
  * Note: this will return a default full policy if the `policyItem` is `undefined`
  */
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
-  policyDetails,
+  licensedPolicy,
   (policyData) => {
     return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
 );
 
-/**
- * Returns the full Endpoint Policy, with any paid/licensed features that are not
- * currently allowed for the current license level reset to defaults.
- */
-const policyStrippedUnlicensedFeatures: (s: PolicyDetailsState) => PolicyConfig = createSelector(
-  fullPolicy,
-  licenseState,
-  (policyData, license) => {
-    return unsetPolicyFeaturesAboveLicenseLevel(policyData, license as ILicense);
-  }
-);
-
 const fullWindowsPolicySettings: (
   s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(
-  policyStrippedUnlicensedFeatures,
-  (policy) => policy?.windows
-);
+) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
-  policyStrippedUnlicensedFeatures,
+  fullPolicy,
   (policy) => policy?.mac
 );
 
 const fullLinuxPolicySettings: (s: PolicyDetailsState) => PolicyConfig['linux'] = createSelector(
-  policyStrippedUnlicensedFeatures,
+  fullPolicy,
   (policy) => policy?.linux
 );
 
