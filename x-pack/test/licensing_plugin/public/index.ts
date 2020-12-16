@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../services';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Licensing plugin public client', function () {
-    this.tags('ciGroup2');
+    this.tags('ciGroup5');
     loadTestFile(require.resolve('./feature_usage'));
     // MUST BE LAST! CHANGES LICENSE TYPE!
     loadTestFile(require.resolve('./updates'));

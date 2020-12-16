@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 import { getOr } from 'lodash/fp';
 
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
+import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
+import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
 
+import * as i18n from './translations';
+
 interface Props {
   _id: string;
+  ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
@@ -23,24 +29,79 @@ interface Props {
   timelineId: string;
 }
 
+const SPACE = ' ';
+
+export const shouldForwardKeyDownEvent = (key: string): boolean => {
+  switch (key) {
+    case SPACE: // fall through
+    case 'Enter':
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const onKeyDown = (keyboardEvent: React.KeyboardEvent) => {
+  const { altKey, ctrlKey, key, metaKey, shiftKey, target, type } = keyboardEvent;
+
+  const targetElement = target as Element;
+
+  // we *only* forward the event to the (child) draggable keyboard wrapper
+  // if the keyboard event originated from the container (TD) element
+  if (shouldForwardKeyDownEvent(key) && targetElement.className?.includes(EVENTS_TD_CLASS_NAME)) {
+    const draggableKeyboardWrapper = targetElement.querySelector<HTMLDivElement>(
+      `.${DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}`
+    );
+
+    const newEvent = new KeyboardEvent(type, {
+      altKey,
+      bubbles: true,
+      cancelable: true,
+      ctrlKey,
+      key,
+      metaKey,
+      shiftKey,
+    });
+
+    if (key === ' ') {
+      // prevent the default behavior of scrolling the table when space is pressed
+      keyboardEvent.preventDefault();
+    }
+
+    draggableKeyboardWrapper?.dispatchEvent(newEvent);
+  }
+};
+
 export const DataDrivenColumns = React.memo<Props>(
-  ({ _id, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
+  ({ _id, ariaRowindex, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
-      {columnHeaders.map((header) => (
-        <EventsTd key={header.id} width={header.width}>
+      {columnHeaders.map((header, i) => (
+        <EventsTd
+          $ariaColumnIndex={i + ARIA_COLUMN_INDEX_OFFSET}
+          key={header.id}
+          onKeyDown={onKeyDown}
+          role="button"
+          tabIndex={0}
+          width={header.width}
+        >
           <EventsTdContent data-test-subj="cell-container">
-            {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-              columnName: header.id,
-              eventId: _id,
-              field: header,
-              linkValues: getOr([], header.linkField ?? '', ecsData),
-              timelineId,
-              truncate: true,
-              values: getMappedNonEcsValue({
-                data,
-                fieldName: header.id,
-              }),
-            })}
+            <>
+              <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+                <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: i + 2 })}</p>
+              </EuiScreenReaderOnly>
+              {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+                columnName: header.id,
+                eventId: _id,
+                field: header,
+                linkValues: getOr([], header.linkField ?? '', ecsData),
+                timelineId,
+                truncate: true,
+                values: getMappedNonEcsValue({
+                  data,
+                  fieldName: header.id,
+                }),
+              })}
+            </>
           </EventsTdContent>
         </EventsTd>
       ))}
@@ -50,7 +111,7 @@ export const DataDrivenColumns = React.memo<Props>(
 
 DataDrivenColumns.displayName = 'DataDrivenColumns';
 
-const getMappedNonEcsValue = ({
+export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
