@@ -4,52 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { FieldDataCardProps } from '../field_data_card';
+import type { FieldDataCardProps } from '../field_data_card';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
+import { TotalCountHeader } from '../../total_count_header';
 
-const CHART_WIDTH = 325;
-const CHART_HEIGHT = 350;
+export interface Props extends FieldDataCardProps {
+  totalCount: number;
+}
 
-export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
+export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
   const { stats } = config;
+  if (stats === undefined) return null;
 
   const { documentCounts, timeRangeEarliest, timeRangeLatest } = stats;
+  if (
+    documentCounts === undefined ||
+    timeRangeEarliest === undefined ||
+    timeRangeLatest === undefined
+  )
+    return null;
 
   let chartPoints: DocumentCountChartPoint[] = [];
-  if (documentCounts !== undefined && documentCounts.buckets !== undefined) {
-    const buckets: Record<string, number> = stats.documentCounts.buckets;
+  if (documentCounts.buckets !== undefined) {
+    const buckets: Record<string, number> = documentCounts?.buckets;
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
   }
 
   return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="spaceAround" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DocumentCountChart
-            width={CHART_WIDTH}
-            height={CHART_HEIGHT}
-            chartPoints={chartPoints}
-            timeRangeEarliest={timeRangeEarliest}
-            timeRangeLatest={timeRangeLatest}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.ml.fieldDataCard.cardDocumentCount.calculatedOverAllDocumentsLabel"
-              defaultMessage="Calculated over all documents"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Fragment>
+    <>
+      <TotalCountHeader totalCount={totalCount} />
+      <DocumentCountChart
+        chartPoints={chartPoints}
+        timeRangeEarliest={timeRangeEarliest}
+        timeRangeLatest={timeRangeLatest}
+      />
+    </>
   );
 };
