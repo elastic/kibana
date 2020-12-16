@@ -299,7 +299,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     ) {
       await mlDataVisualizerTable.assertRowExists(fieldName);
       await mlDataVisualizerTable.assertFieldDocCount(fieldName, docCountFormatted);
-      await mlDataVisualizerTable.openDetails(fieldName);
+      await mlDataVisualizerTable.ensureDetailsOpen(fieldName);
 
       await testSubjects.existOrFail(
         mlDataVisualizerTable.detailsSelector(fieldName, 'mlNumberSummaryTable')
@@ -311,16 +311,19 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
       await this.assertTopValuesContents(fieldName, topValuesCount);
 
       await this.assertDistributionPreviewExist(fieldName);
+
+      await mlDataVisualizerTable.ensureDetailsClosed(fieldName);
     },
 
     async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
       await mlDataVisualizerTable.assertRowExists(fieldName);
       await mlDataVisualizerTable.assertFieldDocCount(fieldName, docCountFormatted);
-      await mlDataVisualizerTable.openDetails(fieldName);
+      await mlDataVisualizerTable.ensureDetailsOpen(fieldName);
 
       await testSubjects.existOrFail(
         mlDataVisualizerTable.detailsSelector(fieldName, 'mlDateSummaryTable')
       );
+      await mlDataVisualizerTable.ensureDetailsClosed(fieldName);
     },
 
     async assertKeywordFieldContents(
@@ -330,12 +333,13 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     ) {
       await mlDataVisualizerTable.assertRowExists(fieldName);
       await mlDataVisualizerTable.assertFieldDocCount(fieldName, docCountFormatted);
-      await mlDataVisualizerTable.openDetails(fieldName);
+      await mlDataVisualizerTable.ensureDetailsOpen(fieldName);
 
       await testSubjects.existOrFail(
         mlDataVisualizerTable.detailsSelector(fieldName, 'mlFieldDataTopValues')
       );
       await this.assertTopValuesContents(fieldName, topValuesCount);
+      await mlDataVisualizerTable.ensureDetailsClosed(fieldName);
     },
 
     async assertTextFieldContents(
@@ -345,7 +349,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
     ) {
       await mlDataVisualizerTable.assertRowExists(fieldName);
       await mlDataVisualizerTable.assertFieldDocCount(fieldName, docCountFormatted);
-      await mlDataVisualizerTable.openDetails(fieldName);
+      await mlDataVisualizerTable.ensureDetailsOpen(fieldName);
 
       const examplesList = await testSubjects.find(
         mlDataVisualizerTable.detailsSelector(fieldName, 'mlFieldDataExamplesList')
@@ -355,6 +359,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
         expectedExamplesCount,
         `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
       );
+      await mlDataVisualizerTable.ensureDetailsClosed(fieldName);
     },
 
     async assertNonMetricFieldContents(

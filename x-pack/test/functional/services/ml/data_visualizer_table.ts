@@ -80,7 +80,11 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
     public async ensureDetailsOpen(fieldName: string) {
       await retry.tryForTime(10000, async () => {
         if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
-          await testSubjects.click(this.rowSelector(fieldName, 'mlDataVisualizerDetailsToggle'));
+          const selector = this.rowSelector(
+            fieldName,
+            `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`
+          );
+          await testSubjects.click(selector);
           await testSubjects.existOrFail(
             this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowUp`),
             {
@@ -95,7 +99,9 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
     public async ensureDetailsClosed(fieldName: string) {
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(fieldName))) {
-          await testSubjects.click(this.rowSelector(fieldName, 'mlDataVisualizerDetailsToggle'));
+          await testSubjects.click(
+            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowUp`)
+          );
           await testSubjects.existOrFail(
             this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`),
             {
@@ -105,20 +111,6 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
           await testSubjects.missingOrFail(this.detailsSelector(fieldName), { timeout: 1000 });
         }
       });
-    }
-
-    public async openDetails(fieldName: string) {
-      await this.ensureDetailsClosed(fieldName);
-
-      const selector = this.rowSelector(
-        fieldName,
-        `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`
-      );
-      await testSubjects.existOrFail(selector);
-      await testSubjects.click(selector);
-      await this.ensureDetailsOpen(fieldName);
-
-      await retry.tryForTime(5000, async () => {});
     }
 
     public async assertFieldDocCount(fieldName: string, docCountFormatted: string) {
