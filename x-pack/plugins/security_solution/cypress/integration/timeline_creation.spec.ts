@@ -11,7 +11,7 @@ import {
   NOTES_TAB_BUTTON,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
-  NOTE_BY_NOTE_ID,
+  NOTE_CONTENT,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
@@ -104,7 +104,7 @@ describe.skip('Timelines', () => {
       getTimelineById(timelineId).then((singleTimeline) => {
         const noteId = singleTimeline!.body.data.getOneTimeline.notes[0].noteId;
 
-        cy.get(`${NOTE_BY_NOTE_ID(noteId)} p`).should('have.text', timeline.notes);
+        cy.get(NOTE_CONTENT(noteId)).should('have.text', timeline.notes);
       });
     });
   });

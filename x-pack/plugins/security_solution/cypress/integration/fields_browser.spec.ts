@@ -45,7 +45,7 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context('Fields Browser rendering', () => {
+  context.skip('Fields Browser rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
@@ -108,7 +108,7 @@ describe('Fields Browser', () => {
     });
   });
 
-  context('Editing the timeline', () => {
+  context.skip('Editing the timeline', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
