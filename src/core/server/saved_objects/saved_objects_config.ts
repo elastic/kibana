@@ -28,6 +28,8 @@ export const savedObjectsMigrationConfig = {
     scrollDuration: schema.string({ defaultValue: '15m' }),
     pollInterval: schema.number({ defaultValue: 1500 }),
     skip: schema.boolean({ defaultValue: false }),
+    // TODO migrationsV2: remove/deprecate once we release migrations v2
+    enableV2: schema.boolean({ defaultValue: false }),
   }),
 };
 
