@@ -23,11 +23,6 @@ You do not need to configure any additional settings to use the
   screens, and authorization using <<kibana-privileges>>. To disable
   {security-features} entirely, see
   {ref}/security-settings.html[{es} security settings].
-
-| `xpack.security.audit.enabled`
-  | Set to `true` to enable audit logging for security events. By default, it is set
-  to `false`. For more details see <<xpack-security-audit-logging>>.
-
 |===
 
 [float]
@@ -341,7 +336,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 
 [cols="2*<"]
 |======
-| `xpack.security.audit.enabled`
+| `xpack.security.audit.enabled` {ess-icon}
 | Set to `true` to enable audit logging for security events. *Default:* `false`
 |======
 
@@ -489,7 +484,7 @@ The `pattern` layout outputs a string, formatted using a pattern with special pl
 
 [cols="2*<"]
 |======
-| `xpack.security.audit.ignore_filters[]`
+| `xpack.security.audit.ignore_filters[]` {ess-icon}
 | List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
 
 2+a| For example:
@@ -504,15 +499,15 @@ xpack.security.audit.ignore_filters:
 <1> Filters out HTTP request events
 <2> Filters out any data write events
 
-| `xpack.security.audit.ignore_filters[].actions[]`
+| `xpack.security.audit.ignore_filters[].actions[]` {ess-icon}
 | List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
 
-| `xpack.security.audit.ignore_filters[].categories[]`
+| `xpack.security.audit.ignore_filters[].categories[]` {ess-icon}
 | List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].types[]`
+| `xpack.security.audit.ignore_filters[].types[]` {ess-icon}
 | List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].outcomes[]`
+| `xpack.security.audit.ignore_filters[].outcomes[]` {ess-icon}
 | List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 |======
