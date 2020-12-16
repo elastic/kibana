@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiFocusTrap } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -79,9 +80,11 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
   return (
     <>
-      <Visible show={show}>
-        <Pane timelineId={timelineId} />
-      </Visible>
+      <EuiFocusTrap disabled={!show}>
+        <Visible show={show}>
+          <Pane timelineId={timelineId} />
+        </Visible>
+      </EuiFocusTrap>
       <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );

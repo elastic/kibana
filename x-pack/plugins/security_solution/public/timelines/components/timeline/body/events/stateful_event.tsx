@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -19,7 +19,7 @@ import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
-import { getRowRenderer } from '../renderers/get_row_renderer';
+
 import { RowRenderer } from '../renderers/row_renderer';
 import { isEventBuildingBlockType, getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
@@ -28,21 +28,26 @@ import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { StatefulRowRenderer } from './stateful_row_renderer';
+import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 interface Props {
   actionsColumnWidth: number;
   activeTab?: TimelineTabs;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
+  lastFocusedAriaColindex: number;
   loadingEventIds: Readonly<string[]>;
   onRowSelected: OnRowSelected;
   isEventPinned: boolean;
   refetch: inputsModel.Refetch;
+  ariaRowindex: number;
   onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
@@ -63,28 +68,31 @@ const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
   activeTab,
   browserFields,
+  containerRef,
   columnHeaders,
   columnRenderers,
   event,
   eventIdToNoteIds,
   isEventViewer = false,
   isEventPinned = false,
+  lastFocusedAriaColindex,
   loadingEventIds,
   onRowSelected,
   refetch,
   onRuleChange,
   rowRenderers,
+  ariaRowindex,
   selectedEventIds,
   showCheckboxes,
   timelineId,
 }) => {
+  const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent
   );
-  const divElement = useRef<HTMLDivElement | null>(null);
 
   const isExpanded = useMemo(() => expandedEvent && expandedEvent.eventId === event._id, [
     event._id,
@@ -93,7 +101,20 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
-    setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
+
+    setShowNotes((prevShowNotes) => {
+      if (prevShowNotes[eventId]) {
+        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+        setTimeout(() => {
+          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+            `.${NOTES_BUTTON_CLASS_NAME}`
+          );
+          notesButtonElement?.focus();
+        }, 0);
+      }
+
+      return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
+    });
   }, [event]);
 
   const onPinEvent: OnPinEvent = useCallback(
@@ -136,29 +157,46 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   const RowRendererContent = useMemo(
-    () =>
-      getRowRenderer(event.ecs, rowRenderers).renderRow({
-        browserFields,
-        data: event.ecs,
-        timelineId,
-      }),
-    [browserFields, event.ecs, rowRenderers, timelineId]
+    () => (
+      <EventsTrSupplement>
+        <StatefulRowRenderer
+          ariaRowindex={ariaRowindex}
+          browserFields={browserFields}
+          containerRef={containerRef}
+          event={event}
+          lastFocusedAriaColindex={lastFocusedAriaColindex}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+        />
+      </EventsTrSupplement>
+    ),
+    [
+      ariaRowindex,
+      browserFields,
+      containerRef,
+      event,
+      lastFocusedAriaColindex,
+      rowRenderers,
+      timelineId,
+    ]
   );
 
   return (
     <EventsTrGroup
+      $ariaRowindex={ariaRowindex}
       className={STATEFUL_EVENT_CSS_CLASS_NAME}
       data-test-subj="event"
       eventType={getEventType(event.ecs)}
       isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
       isExpanded={isExpanded}
+      ref={trGroupRef}
       showLeftBorder={!isEventViewer}
-      ref={divElement}
     >
       <EventColumnView
         id={event._id}
         actionsColumnWidth={actionsColumnWidth}
         activeTab={activeTab}
+        ariaRowindex={ariaRowindex}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         data={event.data}
@@ -187,6 +225,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           data-test-subj="event-notes-flex-item"
         >
           <NoteCards
+            ariaRowindex={ariaRowindex}
             associateNote={associateNote}
             data-test-subj="note-cards"
             noteIds={eventIdToNoteIds[event._id] || emptyNotes}

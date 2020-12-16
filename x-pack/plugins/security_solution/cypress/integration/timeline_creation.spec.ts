@@ -46,7 +46,8 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-describe('Timelines', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/79389
+describe.skip('Timelines', () => {
   let timelineId: string;
 
   after(() => {
@@ -62,7 +63,9 @@ describe('Timelines', () => {
     addFilter(timeline.filter);
     pinFirstEvent();
 
-    cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+    cy.get(PIN_EVENT)
+      .should('have.attr', 'aria-label')
+      .and('match', /Unpin the event in row 2/);
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
@@ -91,7 +94,10 @@ describe('Timelines', () => {
       cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
       cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+      cy.get(LOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 

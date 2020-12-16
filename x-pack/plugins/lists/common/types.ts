@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const exceptionListSavedObjectType = 'exception-list';
+export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
+export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
+
 /**
  * This makes any optional property the same as Required<T> would but also has the
  * added benefit of keeping your undefined.

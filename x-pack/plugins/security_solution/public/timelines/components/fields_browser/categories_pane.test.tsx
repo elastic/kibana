@@ -23,11 +23,9 @@ describe('CategoriesPane', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
         />
@@ -43,11 +41,9 @@ describe('CategoriesPane', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={{}}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
         />

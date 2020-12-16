@@ -13,7 +13,7 @@ import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/stor
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
-import { DataDrivenColumns } from '../data_driven_columns';
+import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 import {
   eventHasNotes,
   getEventType,
@@ -30,11 +30,13 @@ import { TimelineId } from '../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
+import * as i18n from '../translations';
 
 interface Props {
   id: string;
   actionsColumnWidth: number;
   activeTab?: TimelineTabs;
+  ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
@@ -64,6 +66,7 @@ export const EventColumnView = React.memo<Props>(
     id,
     actionsColumnWidth,
     activeTab,
+    ariaRowindex,
     columnHeaders,
     columnRenderers,
     data,
@@ -90,6 +93,24 @@ export const EventColumnView = React.memo<Props>(
       (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
     );
 
+    // Each action button shall announce itself to screen readers via an `aria-label`
+    // in the following format:
+    // "button description, for the event in row {ariaRowindex}, with columns {columnValues}",
+    // so we combine the column values here:
+    const columnValues = useMemo(
+      () =>
+        columnHeaders
+          .map(
+            (header) =>
+              getMappedNonEcsValue({
+                data,
+                fieldName: header.id,
+              }) ?? []
+          )
+          .join(' '),
+      [columnHeaders, data]
+    );
+
     const handlePinClicked = useCallback(
       () =>
         getPinOnClick({
@@ -107,6 +128,7 @@ export const EventColumnView = React.memo<Props>(
     const additionalActions = useMemo<JSX.Element[]>(
       () => [
         <InvestigateInResolverAction
+          ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({ ariaRowindex, columnValues })}
           key="investigate-in-resolver"
           timelineId={timelineId}
           ecsData={ecsData}
@@ -114,6 +136,7 @@ export const EventColumnView = React.memo<Props>(
         ...(timelineId !== TimelineId.active && eventType === 'signal'
           ? [
               <InvestigateInTimelineAction
+                ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
                 key="investigate-in-timeline"
                 ecsRowData={ecsData}
                 nonEcsRowData={data}
@@ -123,12 +146,14 @@ export const EventColumnView = React.memo<Props>(
         ...(!isEventViewer
           ? [
               <AddEventNoteAction
+                ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
                 key="add-event-note"
                 showNotes={showNotes}
                 toggleShowNotes={toggleShowNotes}
                 timelineType={timelineType}
               />,
               <PinEventAction
+                ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
                 key="pin-event"
                 onPinClicked={handlePinClicked}
                 noteIds={eventIdToNoteIds[id] || emptyNotes}
@@ -144,6 +169,7 @@ export const EventColumnView = React.memo<Props>(
         ].includes(timelineId as TimelineId)
           ? [
               <AddToCaseAction
+                ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
                 key="attach-to-case"
                 ecsRowData={ecsData}
                 disabled={eventType !== 'signal'}
@@ -151,6 +177,7 @@ export const EventColumnView = React.memo<Props>(
             ]
           : []),
         <AlertContextMenu
+          ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
@@ -160,6 +187,8 @@ export const EventColumnView = React.memo<Props>(
         />,
       ],
       [
+        ariaRowindex,
+        columnValues,
         data,
         ecsData,
         eventIdToNoteIds,
@@ -182,7 +211,9 @@ export const EventColumnView = React.memo<Props>(
         <Actions
           actionsColumnWidth={actionsColumnWidth}
           additionalActions={additionalActions}
+          ariaRowindex={ariaRowindex}
           checked={Object.keys(selectedEventIds).includes(id)}
+          columnValues={columnValues}
           onRowSelected={onRowSelected}
           expanded={expanded}
           data-test-subj="actions"
@@ -195,6 +226,7 @@ export const EventColumnView = React.memo<Props>(
         <DataDrivenColumns
           _id={id}
           activeTab={activeTab}
+          ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
