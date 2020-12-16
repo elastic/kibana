@@ -209,13 +209,17 @@ describe('migration actions', () => {
   describe('cloneIndex', () => {
     afterEach(async () => {
       try {
-        await client.indices.delete({ index: 'yellow_then_green_index' });
+        await client.indices.delete({ index: 'clone_*' });
       } catch (e) {
         /** ignore */
       }
     });
     it('resolves right if cloning into a new target index', () => {
-      const task = cloneIndex(client, 'existing_index_with_write_block', 'yellow_then_green_index');
+      const task = cloneIndex(
+        client,
+        'existing_index_with_write_block',
+        'clone_yellow_then_green_index_1'
+      );
       expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -229,7 +233,7 @@ describe('migration actions', () => {
     it('resolves right after waiting for index status to be green if clone target already existed', async () => {
       // Create a yellow index
       await client.indices.create({
-        index: 'yellow_then_green_index',
+        index: 'clone_yellow_then_green_index_2',
         body: {
           mappings: { properties: {} },
           settings: {
@@ -243,7 +247,7 @@ describe('migration actions', () => {
       const cloneIndexPromise = cloneIndex(
         client,
         'existing_index_with_write_block',
-        'yellow_then_green_index'
+        'clone_yellow_then_green_index_2'
       )();
       let indexGreen = false;
 
@@ -273,7 +277,7 @@ describe('migration actions', () => {
       });
     });
     it('resolves left index_not_found_exception if the source index does not exist', () => {
-      const task = cloneIndex(client, 'no_such_index', 'yellow_then_green_index');
+      const task = cloneIndex(client, 'no_such_index', 'clone_yellow_then_green_index_3');
       expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
