@@ -28,6 +28,7 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
+import { setApplicationUsageTracker } from './components/track_application_view';
 
 export interface PublicConfigType {
   uiCounters: {
@@ -35,13 +36,14 @@ export interface PublicConfigType {
     debug: boolean;
   };
 }
+export type IApplicationUsageTracker = Pick<
+  ApplicationUsageTracker,
+  'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
+>;
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
-  applicationUsageTracker: Pick<
-    ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
-  >;
+  applicationUsageTracker: IApplicationUsageTracker;
   reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
@@ -92,18 +94,11 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
 
     this.applicationUsageTracker = new ApplicationUsageTracker(this.reporter);
 
+    const applicationUsageTracker = this.getPublicApplicationUsageTracker();
+    setApplicationUsageTracker(applicationUsageTracker);
+
     return {
-      applicationUsageTracker: {
-        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
-          this.applicationUsageTracker
-        ),
-        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
-          this.applicationUsageTracker
-        ),
-        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
-          this.applicationUsageTracker
-        ),
-      },
+      applicationUsageTracker,
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
@@ -134,17 +129,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     }
 
     return {
-      applicationUsageTracker: {
-        trackApplicationViewUsage: this.applicationUsageTracker.trackApplicationViewUsage.bind(
-          this.applicationUsageTracker
-        ),
-        flushTrackedView: this.applicationUsageTracker.flushTrackedView.bind(
-          this.applicationUsageTracker
-        ),
-        updateViewClickCounter: this.applicationUsageTracker.updateViewClickCounter.bind(
-          this.applicationUsageTracker
-        ),
-      },
+      applicationUsageTracker: this.getPublicApplicationUsageTracker(),
       reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
     };
@@ -155,5 +140,20 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       this.applicationUsageTracker.stop();
       this.subscriptions.forEach((subscription) => subscription.unsubscribe());
     }
+  }
+
+  private getPublicApplicationUsageTracker(): IApplicationUsageTracker {
+    // Using this.applicationUsageTracker! because this private method is only called once it's initialised
+    return {
+      trackApplicationViewUsage: this.applicationUsageTracker!.trackApplicationViewUsage.bind(
+        this.applicationUsageTracker
+      ),
+      flushTrackedView: this.applicationUsageTracker!.flushTrackedView.bind(
+        this.applicationUsageTracker
+      ),
+      updateViewClickCounter: this.applicationUsageTracker!.updateViewClickCounter.bind(
+        this.applicationUsageTracker
+      ),
+    };
   }
 }

@@ -231,6 +231,7 @@ export class DashboardPlugin implements Plugin {
     );
   }
 }
+```
 
 ## Schema Field
 
@@ -390,7 +391,7 @@ To track multiple metrics within a single request, provide an array of events
 usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, [`<EventName1>`, `<EventName2>`]);
 ```
 
-### Increamenting counter by more than 1
+### Incrementing counter by more than 1
 
 To track an event occurance more than once in the same call, provide a 4th argument to the `reportUiCounter` function:
 

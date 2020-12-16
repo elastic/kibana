@@ -17,34 +17,43 @@
  * under the License.
  */
 
-import { Component, ReactNode } from 'react';
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { UsageCollectionSetup } from '../plugin';
+import { Observable } from 'rxjs';
+import { IApplicationUsageTracker } from '../../plugin';
+import { TrackApplicationViewProps } from './types';
 
-interface Props {
-  viewId: string;
-  applicationUsageTracker?: UsageCollectionSetup['applicationUsageTracker'];
-  children: ReactNode;
+interface Props extends TrackApplicationViewProps {
+  applicationUsageTracker$: Observable<IApplicationUsageTracker>;
 }
 
-export class TrackApplicationView extends Component<Props> {
+export class TrackApplicationViewComponent extends Component<Props> {
+  private applicationUsageTracker: IApplicationUsageTracker | undefined;
+
+  constructor(props: Props) {
+    super(props);
+    props.applicationUsageTracker$.subscribe((applicationUsageTracker) => {
+      this.applicationUsageTracker = applicationUsageTracker;
+    });
+  }
+
   onClick = () => {
-    const { applicationUsageTracker, viewId } = this.props;
-    applicationUsageTracker?.updateViewClickCounter(viewId);
+    const { viewId } = this.props;
+    this.applicationUsageTracker?.updateViewClickCounter(viewId);
   };
 
   componentDidMount() {
-    const { applicationUsageTracker, viewId } = this.props;
-    if (applicationUsageTracker) {
-      applicationUsageTracker.trackApplicationViewUsage(viewId);
+    const { viewId } = this.props;
+    if (this.applicationUsageTracker) {
+      this.applicationUsageTracker.trackApplicationViewUsage(viewId);
       ReactDOM.findDOMNode(this)?.parentNode?.addEventListener('click', this.onClick);
     }
   }
 
   componentWillUnmount() {
-    const { applicationUsageTracker, viewId } = this.props;
-    if (applicationUsageTracker) {
-      applicationUsageTracker.flushTrackedView(viewId);
+    const { viewId } = this.props;
+    if (this.applicationUsageTracker) {
+      this.applicationUsageTracker.flushTrackedView(viewId);
       ReactDOM.findDOMNode(this)?.parentNode?.removeEventListener('click', this.onClick);
     }
   }

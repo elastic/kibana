@@ -37,7 +37,7 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
-import { TrackApplicationView, UsageCollectionSetup } from '../../../usage_collection/public';
+import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -51,7 +51,6 @@ interface Props {
   enableSaving: boolean;
   query?: any;
   toasts: ToastsStart;
-  applicationUsageTracker?: UsageCollectionSetup['applicationUsageTracker'];
 }
 
 interface State {
@@ -92,7 +91,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
   }
 
   render() {
-    const { telemetryService, isSecurityExampleEnabled, applicationUsageTracker } = this.props;
+    const { telemetryService, isSecurityExampleEnabled } = this.props;
     const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
     const securityExampleEnabled = isSecurityExampleEnabled();
 
@@ -107,10 +106,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     return (
       <Fragment>
         {showExample && (
-          <TrackApplicationView
-            viewId="optInExampleFlyout"
-            applicationUsageTracker={applicationUsageTracker}
-          >
+          <TrackApplicationView viewId="optInExampleFlyout">
             <OptInExampleFlyout
               fetchExample={telemetryService.fetchExample}
               onClose={this.toggleExample}
@@ -118,10 +114,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
           </TrackApplicationView>
         )}
         {showSecurityExample && securityExampleEnabled && (
-          <TrackApplicationView
-            viewId="optInSecurityExampleFlyout"
-            applicationUsageTracker={applicationUsageTracker}
-          >
+          <TrackApplicationView viewId="optInSecurityExampleFlyout">
             <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
           </TrackApplicationView>
         )}

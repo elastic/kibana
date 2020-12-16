@@ -19,7 +19,6 @@ kibana.json
   "version": "kibana",
   "server": false,
   "ui": true,
-  "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["usageCollection"]
 }
 ```
@@ -32,10 +31,7 @@ import { TrackApplicationView } from 'src/plugins/usage_collection/public';
 
 render() {
   return (
-    <TrackApplicationView
-      viewId="myFlyout"
-      applicationUsageTracker={usageCollection?.applicationUsageTracker}
-    >
+    <TrackApplicationView viewId="myFlyout">
       <MyFlyout />
     </TrackApplicationView>
   )
@@ -44,7 +40,7 @@ render() {
 
 Application Usage will automatically track the active minutes on screen and clicks for both the application and the `MyFlyout` component whenever the component is mounted on the screen. Application Usage pauses counting screen minutes whenever the user is tabbed to another browser window.
 
-The prop `viewId` is used as a unique identifier for your plugin. `applicationUsageTracker` can be passed directly from `usageCollection` setup or start contracts of the plugin. The Application Id is automatically attached to the tracked usage.
+The prop `viewId` is used as a unique identifier for your plugin. The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via `core.application.register`.
 
 #### Advanced Usage
 
