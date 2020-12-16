@@ -439,7 +439,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: "Extracts values from a browser's user agent string.",
     }),
   },
-  url_parts: {
+  uri_parts: {
     FieldsComponent: UriParts,
     docLinkPath: '/uri-parts-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.uriPartsLabel', {

@@ -21,7 +21,7 @@ export const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
     deserializer: to.booleanOrUndef,
-    serializer: from.undefinedIfValue(false),
+    serializer: from.undefinedIfValue(true),
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.keepOriginalFieldLabel',
       {
@@ -74,12 +74,14 @@ export const UriParts: FunctionComponent = () => {
         config={fieldsConfig.keep_original}
         component={ToggleField}
         path="fields.keep_original"
+        data-test-subj="keepOriginalField"
       />
 
       <UseField
         config={fieldsConfig.remove_if_successful}
         component={ToggleField}
         path="fields.remove_if_successful"
+        data-test-subj="removeIfSuccessfulField"
       />
     </>
   );
