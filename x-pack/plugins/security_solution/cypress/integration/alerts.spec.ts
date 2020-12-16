@@ -43,7 +43,7 @@ describe('Alerts', () => {
       removeSignalsIndex();
     });
 
-    it('Closes and opens alerts', () => {
+    it.skip('Closes and opens alerts', () => {
       waitForAlertsPanelToBeLoaded();
       waitForAlertsToBeLoaded();
 

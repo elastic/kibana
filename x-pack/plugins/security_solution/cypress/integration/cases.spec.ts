@@ -66,7 +66,7 @@ describe('Cases', () => {
     deleteCase();
   });
 
-  it('Creates a new case with timeline and opens the timeline', () => {
+  it.skip('Creates a new case with timeline and opens the timeline', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(mycase);
