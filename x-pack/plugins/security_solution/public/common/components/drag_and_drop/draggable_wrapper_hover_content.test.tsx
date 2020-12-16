@@ -68,6 +68,7 @@ const goGetTimelineId = jest.fn();
 const defaultProps = {
   field,
   goGetTimelineId,
+  ownFocus: false,
   showTopN: false,
   timelineId,
   toggleTopN,
@@ -77,7 +78,7 @@ const defaultProps = {
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
     // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
-    (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
+    (useAddToTimeline as jest.Mock).mockReturnValue({ startDragToTimeline: jest.fn() });
     (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
       selectedPatterns: [],
@@ -390,7 +391,7 @@ describe('DraggableWrapperHoverContent', () => {
       // The following "startDragToTimeline" function returned by our mock
       // useAddToTimeline hook is called when the user clicks the
       // Add to timeline investigation action:
-      const startDragToTimeline = useAddToTimeline({
+      const { startDragToTimeline } = useAddToTimeline({
         draggableId,
         fieldName: aggregatableStringField,
       });
