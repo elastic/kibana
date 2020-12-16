@@ -8,10 +8,11 @@ import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {
-  CaseService,
-  CaseConfigureService,
-  CaseUserActionServiceSetup,
   AlertService,
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionServiceSetup,
+  ConnectorMappingsService,
 } from '../services';
 import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
@@ -20,9 +21,11 @@ import { getActions } from '../routes/api/__mocks__/request_responses';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
-  create: jest.fn(),
-  update: jest.fn(),
   addComment: jest.fn(),
+  create: jest.fn(),
+  getFields: jest.fn(),
+  getMappings: jest.fn(),
+  update: jest.fn(),
   updateAlertsStatus: jest.fn(),
 });
 
@@ -41,11 +44,14 @@ export const createCaseClientWithMockSavedObjectsClient = async (
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
+  const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
 
   const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+
+  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const userActionService = {
     postUserActions: jest.fn(),
     getUserActions: jest.fn(),
@@ -75,11 +81,11 @@ export const createCaseClientWithMockSavedObjectsClient = async (
     request,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
     alertsService,
     context,
   });
-
   return {
     client: caseClient,
     services: { userActionService },
