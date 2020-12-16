@@ -440,6 +440,9 @@ export const ReorderableDragDrop = ({
                   }));
                   dropTo(itemsInGroup[currentIndex - 1]);
                 }
+              } else if (keys.ARROW_RIGHT === e.key) {
+                // setActiveDrop as a new field, focus the element and display extra drops
+                dropTo('new');
               }
             }
           }}

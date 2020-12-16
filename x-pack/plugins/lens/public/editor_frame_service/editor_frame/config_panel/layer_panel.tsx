@@ -280,8 +280,38 @@ export function LayerPanel(
                         label={columnLabelMap[accessor]}
                         droppable={dragging && isDroppable}
                         dropTo={(dropTargetId: string) => {
+                          if (dropTargetId === 'new') {
+                            const dropResult = layerDatasource.onDrop({
+                              ...layerDatasourceDropProps,
+                              droppedItem: {
+                                columnId: accessor,
+                                groupId: group.groupId,
+                                layerId,
+                                id: accessor,
+                              },
+                              dropTarget: {
+                                groupId: group.groupId,
+                                columnId: newId,
+                                layerId,
+                                isNew: true,
+                              },
+                              filterOperations: group.filterOperations,
+                            });
+
+                            if (dropResult) {
+                              props.updateVisualization(
+                                activeVisualization.setDimension({
+                                  layerId,
+                                  groupId: group.groupId,
+                                  columnId: newId,
+                                  prevState: props.visualizationState,
+                                })
+                              );
+                            }
+                            return;
+                          }
+
                           layerDatasource.onDrop({
-                            isReorder: true,
                             ...layerDatasourceDropProps,
                             droppedItem: {
                               columnId: accessor,
@@ -289,21 +319,23 @@ export function LayerPanel(
                               layerId,
                               id: accessor,
                             },
-                            columnId: dropTargetId,
+                            dropTarget: {
+                              groupId: group.groupId,
+                              columnId: dropTargetId,
+                              layerId,
+                            },
                             filterOperations: group.filterOperations,
                           });
                         }}
                         onDrop={(droppedItem) => {
-                          const isReorder =
-                            isDraggedOperation(droppedItem) &&
-                            droppedItem.groupId === group.groupId &&
-                            droppedItem.columnId !== accessor;
-
                           const dropResult = layerDatasource.onDrop({
-                            isReorder,
                             ...layerDatasourceDropProps,
                             droppedItem,
-                            columnId: accessor,
+                            dropTarget: {
+                              layerId,
+                              groupId: group.groupId,
+                              columnId: accessor,
+                            },
                             filterOperations: group.filterOperations,
                           });
                           if (typeof dropResult === 'object') {
@@ -393,24 +425,47 @@ export function LayerPanel(
                     <DragDrop
                       data-test-subj={group.dataTestSubj}
                       droppable={
-                        Boolean(dragDropContext.dragging) &&
-                        // Verify that the dragged item is not coming from the same group
-                        // since this would be a reorder
-                        (!isDraggedOperation(dragDropContext.dragging) ||
-                          dragDropContext.dragging.groupId !== group.groupId) &&
-                        layerDatasource.canHandleDrop({
-                          ...layerDatasourceDropProps,
-                          columnId: newId,
-                          filterOperations: group.filterOperations,
-                        })
+                        (Boolean(dragDropContext.dragging) &&
+                          // Verify that the dragged item is not coming from the same group
+                          // since this would be a duplicate
+                          (!isDraggedOperation(dragDropContext.dragging) ||
+                            dragDropContext.dragging.groupId !== group.groupId) &&
+                          layerDatasource.canHandleDrop({
+                            ...layerDatasourceDropProps,
+                            columnId: newId,
+                            filterOperations: group.filterOperations,
+                          })) ||
+                        // isFromTheSameGroup
+                        (isDraggedOperation(dragDropContext.dragging) &&
+                          dragDropContext.dragging.groupId === group.groupId)
+
+                        // const isFromCompatibleGroup =
+                        // dragging?.groupId !== group.groupId &&
+                        // layerDatasource.canHandleDrop({
+                        //   ...layerDatasourceDropProps,
+                        //   columnId: accessor,
+                        //   filterOperations: group.filterOperations,
+                        // });
                       }
                       onDrop={(droppedItem) => {
                         const dropResult = layerDatasource.onDrop({
                           ...layerDatasourceDropProps,
                           droppedItem,
+                          dropTarget: {
+                            columnId: newId,
+                            groupId: group.groupId,
+                            layerId,
+                            isNew: true,
+                          },
+                          filterOperations: group.filterOperations,
+                        });
+                        console.log('duplicating', {
+                          ...layerDatasourceDropProps,
+                          droppedItem,
                           columnId: newId,
                           filterOperations: group.filterOperations,
                         });
+
                         if (dropResult) {
                           props.updateVisualization(
                             activeVisualization.setDimension({
