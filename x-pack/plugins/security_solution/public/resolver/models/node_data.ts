@@ -17,14 +17,15 @@ import { isTerminatedProcess } from './process_event';
  */
 export function setRequestedNodes(
   storedNodeInfo = new Map<string, NodeData>(),
-  requestedNodes: Set<string>
+  requestedNodes: Set<string>,
+  dataRequestID: number
 ): Map<string, NodeData> {
   const requestedNodesArray = Array.from(requestedNodes);
   return new Map<string, NodeData>([
     ...storedNodeInfo,
     ...requestedNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'loading' },
+      { events: [], status: 'loading', dataRequestID },
     ]),
   ]);
 }
@@ -37,14 +38,15 @@ export function setRequestedNodes(
  */
 export function setErrorNodes(
   storedNodeInfo = new Map<string, NodeData>(),
-  errorNodes: Set<string>
+  errorNodes: Set<string>,
+  dataRequestID: number
 ): Map<string, NodeData> {
   const errorNodesArray = Array.from(errorNodes);
   return new Map<string, NodeData>([
     ...storedNodeInfo,
     ...errorNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'error' },
+      { events: [], status: 'error', dataRequestID },
     ]),
   ]);
 }
@@ -103,11 +105,13 @@ export function updateWithReceivedNodes({
   receivedEvents,
   requestedNodes,
   numberOfRequestedEvents,
+  dataRequestID,
 }: {
   storedNodeInfo: Map<string, NodeData> | undefined;
   receivedEvents: SafeResolverEvent[];
   requestedNodes: Set<string>;
   numberOfRequestedEvents: number;
+  dataRequestID: number;
 }): Map<string, NodeData> {
   const copiedMap = new Map<string, NodeData>([...storedNodeInfo]);
   const reachedLimit = receivedEvents.length >= numberOfRequestedEvents;
@@ -123,7 +127,7 @@ export function updateWithReceivedNodes({
       } else {
         // if we didn't reach the limit but we didn't receive any node data for a particular ID
         // then that means Elasticsearch does not have any node data for that ID.
-        copiedMap.set(id, { events: [], status: 'running' });
+        copiedMap.set(id, { events: [], status: 'running', dataRequestID });
       }
     }
   }
@@ -133,6 +137,7 @@ export function updateWithReceivedNodes({
     copiedMap.set(id, {
       events: [...info.events],
       status: info.terminated ? 'terminated' : 'running',
+      dataRequestID,
     });
   }
 
@@ -142,6 +147,9 @@ export function updateWithReceivedNodes({
 /**
  * This is used for displaying information in the node panel mainly and we should be able to remove it eventually in
  * favor of showing all the node data associated with a node in the tree.
+ *
+ * NOTE: The events are actually in descending order by the timestamp field because of the `/events` api. So this
+ * returns the "newest" event.
  *
  * @param data node data for a specific node ID
  * @returns the first event or undefined if the node data passed in was undefined
