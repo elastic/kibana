@@ -63,18 +63,19 @@ export function BaseMapsVisualizationProvider() {
      * @return {Promise}
      */
     async render(esResponse, visParams) {
+      await this._mapIsLoaded;
+
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
       }
 
-      await this._mapIsLoaded;
       this._kibanaMap.resize();
       this._params = visParams;
-      this._esResponse = esResponse;
       await this._updateParams();
 
       if (this._hasESResponseChanged(esResponse)) {
+        this._esResponse = esResponse;
         await this._updateData(esResponse);
       }
       this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
@@ -214,7 +215,7 @@ export function BaseMapsVisualizationProvider() {
     }
 
     _hasESResponseChanged(data) {
-      return this._chartData !== data;
+      return this._esResponse !== data;
     }
 
     /**

@@ -97,6 +97,10 @@ export const createTileMapVisualization = (dependencies) => {
       await super.render(esResponse, visParams);
     }
 
+    resize() {
+      this._kibanaMap.resize();
+    }
+
     async _makeKibanaMap() {
       await super._makeKibanaMap(this._params);
 

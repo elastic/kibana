@@ -60,9 +60,7 @@ const TileMapVisualization = ({
   }, [deps, handlers, visConfig]);
 
   useEffect(() => {
-    if (visController.current) {
-      visController.current.render(visData, visConfig).then(handlers.done);
-    }
+    visController.current?.render(visData, visConfig).then(handlers.done);
   }, [visData, visConfig, handlers.done]);
 
   useEffect(() => {
@@ -84,18 +82,10 @@ const TileMapVisualization = ({
     };
   }, []);
 
-  const updateChartSize = useMemo(
-    () =>
-      throttle(() => {
-        if (visController.current) {
-          visController.current.render().then(handlers.done);
-        }
-      }, 300),
-    [handlers.done]
-  );
+  const updateChartSize = useMemo(() => throttle(() => visController.current?.render(), 300), []);
 
   return (
-    <EuiResizeObserver onResize={() => {}}>
+    <EuiResizeObserver onResize={updateChartSize}>
       {(resizeRef) => (
         <div className="tlmChart__wrapper" ref={resizeRef}>
           <div className="tlmChart" ref={chartDiv} />
