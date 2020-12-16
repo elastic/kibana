@@ -33,10 +33,10 @@ jest.useFakeTimers();
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
   fetchMock.mockImplementation(() => {
-    const { time = 0, value = {}, isFetchError = false } = responses[i++];
+    const { time = 0, value = {}, isError = false } = responses[i++];
     return new Promise((resolve, reject) =>
       setTimeout(() => {
-        return (isFetchError ? reject : resolve)(value);
+        return (isError ? reject : resolve)(value);
       }, time)
     );
   });
@@ -347,7 +347,7 @@ describe('EnhancedSearchInterceptor', () => {
             isRunning: false,
             id: 1,
           },
-          isFetchError: true,
+          isError: true,
         },
       ];
       mockFetchImplementation(responses);
@@ -366,7 +366,10 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(error.mock.calls[0][0]).toBe(responses[1].value);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });

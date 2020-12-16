@@ -45,13 +45,13 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(0);
   });
 
-  test('Throws AbortError and cancels on error', async () => {
+  test('Throws AbortError on error', async () => {
     const searchFn = getMockedSearch$(2, true);
     const cancelFn = jest.fn();
     const poll = pollSearch(searchFn, cancelFn).toPromise();
     await expect(poll).rejects.toThrow(AbortError);
     expect(searchFn).toBeCalledTimes(2);
-    expect(cancelFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(0);
   });
 
   test('Throws AbortError and cancels on abort', async () => {
