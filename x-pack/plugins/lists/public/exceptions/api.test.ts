@@ -881,12 +881,12 @@ describe('Exceptions Lists API', () => {
 
   describe('#exportExceptionList', () => {
     const blob: Blob = {
-      size: 89,
-      type: 'json',
       arrayBuffer: jest.fn(),
+      size: 89,
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
+      type: 'json',
     } as Blob;
 
     beforeEach(() => {

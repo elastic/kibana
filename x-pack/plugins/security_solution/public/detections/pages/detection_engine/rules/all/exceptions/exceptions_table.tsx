@@ -16,9 +16,7 @@ import styled from 'styled-components';
 import { History } from 'history';
 import { set } from 'lodash/fp';
 
-import AbortController from 'abort-controller';
 import { AutoDownload } from '../../../../../components/value_lists_management_modal/auto_download';
-import { GenericDownloader } from '../../../../../../common/components/generic_downloader';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useApi, useExceptionLists } from '../../../../../../shared_imports';
@@ -81,7 +79,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const handleDelete = useCallback((id: string) => () => {}, []);
 
     const handleExport = useCallback(
-      async ({
+      ({
         id,
         listId,
         namespaceType,
@@ -89,7 +87,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         id: string;
         listId: string;
         namespaceType: NamespaceType;
-      }) => {
+      }) => async () => {
         try {
           setExportingListIds((ids) => [...ids, id]);
           const blob = await exportExceptionList({

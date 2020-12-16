@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Stream } from 'stream';
-
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
@@ -57,20 +55,21 @@ export const exportExceptionListRoute = (router: IRouter): void => {
 
           const { exportData: exportListItems, exportDetails } = getExport(listItems?.data ?? []);
 
-          const resp = JSON.stringify({
-            exception_list: exportList,
-            exception_list_details: exportListDetails,
-            exception_list_items: exportListItems,
-            exception_list_items_details: exportDetails,
-          });
-          console.log('-BLOB-->', response);
+          const resp = JSON.stringify(
+            {
+              exception_list: exportList,
+              exception_list_details: exportListDetails,
+              exception_list_items: exportListItems,
+              exception_list_items_details: exportDetails,
+            },
+            null,
+            2
+          );
 
           // TODO: Allow the API to override the name of the file to export
           const fileName = exceptionList.name;
-          const stream = new Stream.PassThrough();
-          writeResponseHitsToStream({ response, stream, stringToAppend: '\n' });
           return response.ok({
-            body: stream,
+            body: resp,
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,
               'Content-Type': 'application/ndjson',
