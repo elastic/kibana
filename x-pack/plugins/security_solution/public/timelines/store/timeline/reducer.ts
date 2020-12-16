@@ -58,6 +58,7 @@ import {
   updateTimelineGraphEventId,
   updateTitle,
   upsertColumn,
+  toggleModalSaveTimeline,
 } from './actions';
 import {
   addNewTimeline,
@@ -517,6 +518,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         activeTab,
+      },
+    },
+  }))
+  .case(toggleModalSaveTimeline, (state, { id, showModalSaveTimeline }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        showSaveModal: showModalSaveTimeline,
       },
     },
   }))

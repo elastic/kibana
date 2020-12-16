@@ -43,6 +43,8 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 
@@ -96,6 +98,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 
@@ -299,6 +303,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
 
       await findAndClickFirstLoadingNodeInPanel(simulator);
@@ -354,6 +360,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         dataAccessLayer: generatorDAL,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
 
       await findAndClickFirstLoadingNodeInPanel(simulator);
@@ -432,6 +440,8 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 

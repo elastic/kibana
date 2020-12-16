@@ -19,6 +19,7 @@ import {
   IsometricTaxiLayout,
   NodeData,
   NodeDataStatus,
+  TimeRange,
 } from '../../types';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
@@ -33,6 +34,7 @@ import {
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as timeRangeModel from '../../models/time_range';
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 
@@ -90,6 +92,40 @@ export const originID: (state: DataState) => string | undefined = createSelector
   resolverTreeResponse,
   function (resolverTree) {
     return resolverTree?.originID;
+  }
+);
+
+function currentRelatedEventRequestID(state: DataState): number | undefined {
+  if (state.currentRelatedEvent) {
+    return state.currentRelatedEvent?.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
+
+function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
+  if (state.nodeEventsInCategory?.pendingRequest) {
+    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
+  } else if (state.nodeEventsInCategory) {
+    return state.nodeEventsInCategory?.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
+
+export const eventsInCategoryResultIsStale = createSelector(
+  currentNodeEventsInCategoryRequestID,
+  refreshCount,
+  function eventsInCategoryResultIsStale(oldID, newID) {
+    return oldID !== undefined && oldID !== newID;
+  }
+);
+
+export const currentRelatedEventIsStale = createSelector(
+  currentRelatedEventRequestID,
+  refreshCount,
+  function currentRelatedEventIsStale(oldID, newID) {
+    return oldID !== undefined && oldID !== newID;
   }
 );
 
@@ -224,6 +260,10 @@ export const relatedEventCountByCategory: (
   }
 );
 
+export function refreshCount(state: DataState) {
+  return state.refreshCount;
+}
+
 /**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
  * the requested generations limit.
@@ -304,6 +344,30 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
     return null;
   }
 }
+
+export const timeRangeFilters = createSelector(
+  treeParametersToFetch,
+  function timeRangeFilters(treeParameters): TimeRange {
+    // Should always be provided from date picker, but provide valid defaults in any case.
+    const from = new Date(0);
+    const to = new Date(timeRangeModel.maxDate);
+    const timeRange = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+    };
+    if (treeParameters !== null) {
+      if (treeParameters.filters.from) {
+        timeRange.from = treeParameters.filters.from;
+      }
+      if (treeParameters.filters.to) {
+        timeRange.to = treeParameters.filters.to;
+      }
+      return timeRange;
+    } else {
+      return timeRange;
+    }
+  }
+);
 
 /**
  * The indices to use for the requests with the backend.
@@ -682,7 +746,7 @@ export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function (nodeEventsInCategory, panelViewAndParameters) {
+  function (nodeEventsInCategory, panelViewAndParameters): boolean {
     const { panelView } = panelViewAndParameters;
     return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
   }
