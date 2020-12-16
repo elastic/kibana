@@ -149,6 +149,7 @@
     "InitializeJobSavedObjects",
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
+    "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
     "DeleteJobCheck",
 

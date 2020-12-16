@@ -20,15 +20,20 @@ import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
 
+/** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
+const ARIA_ROW_INDEX_OFFSET = 2;
+
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
   data: TimelineItem[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   id: string;
   isEventViewer?: boolean;
+  lastFocusedAriaColindex: number;
   loadingEventIds: Readonly<string[]>;
   onRowSelected: OnRowSelected;
   pinnedEventIds: Readonly<Record<string, boolean>>;
@@ -44,10 +49,12 @@ const EventsComponent: React.FC<Props> = ({
   browserFields,
   columnHeaders,
   columnRenderers,
+  containerRef,
   data,
   eventIdToNoteIds,
   id,
   isEventViewer = false,
+  lastFocusedAriaColindex,
   loadingEventIds,
   onRowSelected,
   pinnedEventIds,
@@ -58,17 +65,20 @@ const EventsComponent: React.FC<Props> = ({
   showCheckboxes,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event) => (
+    {data.map((event, i) => (
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
+        ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
+        containerRef={containerRef}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
+        lastFocusedAriaColindex={lastFocusedAriaColindex}
         loadingEventIds={loadingEventIds}
         onRowSelected={onRowSelected}
         refetch={refetch}

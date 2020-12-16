@@ -676,14 +676,17 @@ export const AlertsList: React.FunctionComponent = () => {
       ) : (
         noPermissionPrompt
       )}
-      <AlertAdd
-        consumer={ALERTS_FEATURE_ID}
-        addFlyoutVisible={alertFlyoutVisible}
-        setAddFlyoutVisibility={setAlertFlyoutVisibility}
-        actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
-        reloadAlerts={loadAlertsData}
-      />
+      {alertFlyoutVisible && (
+        <AlertAdd
+          consumer={ALERTS_FEATURE_ID}
+          onClose={() => {
+            setAlertFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          reloadAlerts={loadAlertsData}
+        />
+      )}
     </section>
   );
 };
