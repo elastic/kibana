@@ -115,22 +115,25 @@ export const MultiSelectPicker: FC<{
         </EuiPopoverTitle>
         <div style={{ maxHeight: 250, overflow: 'auto' }}>
           {Array.isArray(items) && items.length > 0 ? (
-            items.map((item, index) => (
-              <EuiFilterSelectItem
-                checked={
-                  checkedOptions &&
-                  checkedOptions.findIndex((fieldValue) => fieldValue === item.value) > -1
-                    ? 'on'
-                    : undefined
-                }
-                key={index}
-                onClick={() => handleOnChange(index)}
-                style={{ flexDirection: 'row' }}
-                data-test-subj={`${dataTestSubj}-option-${item.value}`}
-              >
-                {item.name ?? item.value}
-              </EuiFilterSelectItem>
-            ))
+            items.map((item, index) => {
+              const checked =
+                checkedOptions &&
+                checkedOptions.findIndex((fieldValue) => fieldValue === item.value) > -1;
+
+              return (
+                <EuiFilterSelectItem
+                  checked={checked ? 'on' : undefined}
+                  key={index}
+                  onClick={() => handleOnChange(index)}
+                  style={{ flexDirection: 'row' }}
+                  data-test-subj={`${dataTestSubj}-option-${item.value}${
+                    checked ? '-checked' : ''
+                  }`}
+                >
+                  {item.name ?? item.value}
+                </EuiFilterSelectItem>
+              );
+            })
           ) : (
             <NoFilterItems />
           )}
