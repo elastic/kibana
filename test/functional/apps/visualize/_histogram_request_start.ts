@@ -18,10 +18,12 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
+
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -48,33 +50,32 @@ export default function ({ getService, getPageObjects }) {
 
     describe('interval parameter uses autoBounds', function () {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
-        const providedInterval = 2400000000;
+        const providedInterval = '2400000000';
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
         await PageObjects.visEditor.clickGo();
+
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          const dataArray = data.replace(/,/g, '').split('\n');
-          expect(dataArray.length).to.eql(20);
-          const bucketStart = parseInt(dataArray[0], 10);
-          const bucketEnd = parseInt(dataArray[2], 10);
+          const data = await PageObjects.visChart.getTableVisContent();
+          expect(data.length).to.eql(10);
+          const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
+          const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
           const actualInterval = bucketEnd - bucketStart;
           expect(actualInterval).to.eql(providedInterval);
         });
       });
 
       it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function () {
-        const providedInterval = 100;
+        const providedInterval = '100';
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
         await PageObjects.visEditor.clickGo();
-        await PageObjects.common.sleep(1000); //fix this
+        await PageObjects.common.sleep(1000); // fix this
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          const dataArray = data.replace(/,/g, '').split('\n');
-          expect(dataArray.length).to.eql(20);
-          const bucketStart = parseInt(dataArray[0], 10);
-          const bucketEnd = parseInt(dataArray[2], 10);
+          const data = await PageObjects.visChart.getTableVisContent();
+          expect(data.length).to.eql(10);
+          const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
+          const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
           const actualInterval = bucketEnd - bucketStart;
           expect(actualInterval).to.eql(1200000000);
         });

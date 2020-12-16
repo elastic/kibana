@@ -18,8 +18,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -104,12 +105,11 @@ export default function ({ getService, getPageObjects }) {
       );
       await PageObjects.visEditor.clickBucket('Metric', 'metrics');
       await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', 'buckets');
-      await PageObjects.visEditor.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
+      await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      log.debug(data.split('\n'));
-      expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([['14,004', '1,412.6']]);
     });
 
     describe('data table with date histogram', async () => {
@@ -127,15 +127,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', async () => {
-        const data = await PageObjects.visChart.getTableVisData();
-        log.debug(data.split('\n'));
-        expect(data.trim().split('\n')).to.be.eql([
-          '2015-09-20',
-          '4,757',
-          '2015-09-21',
-          '4,614',
-          '2015-09-22',
-          '4,633',
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([
+          ['2015-09-20', '4,757'],
+          ['2015-09-21', '4,614'],
+          ['2015-09-22', '4,633'],
         ]);
       });
 
@@ -143,16 +139,16 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const data = await PageObjects.visChart.getTableVisData();
-        expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([['2015-09-20', '4,757']]);
       });
 
       it('should correctly filter for pinned filters', async () => {
         await filterBar.toggleFilterPinned('@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const data = await PageObjects.visChart.getTableVisData();
-        expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([['2015-09-20', '4,757']]);
       });
     });
   });
