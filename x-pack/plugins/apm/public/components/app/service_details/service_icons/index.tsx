@@ -143,7 +143,7 @@ export function ServiceIcons({ serviceName }: Props) {
                 icon={item.icon}
                 detailsFetchStatus={detailsFetchStatus}
                 title={item.title}
-                onClick={() => {
+                onOpen={() => {
                   setSelectedIconPopover(item.key);
                 }}
                 onClose={() => {
