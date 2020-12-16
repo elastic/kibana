@@ -79,9 +79,7 @@ export const useDashboardContainer = (
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage();
+    const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
 
     (async function createContainer() {
       const newContainer = await dashboardFactory.create(

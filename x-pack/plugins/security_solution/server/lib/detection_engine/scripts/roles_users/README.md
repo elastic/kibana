@@ -4,6 +4,7 @@
 
 |                     Role                     | Data Sources | Security Solution ML Jobs/Results |    Lists    | Rules/Exceptions | Action Connectors |          Signals/Alerts          |
 | :------------------------------------------: | :----------: | :-------------------------------: | :---------: | :--------------: | :---------------: | :------------------------------: |
+|           Reader (read-only user)            |     read     |               read                |    read     |       read       |       read        |               read               |
 |                  T1 Analyst                  |     read     |               read                |    none     |       read       |       read        |           read, write            |
 |                  T2 Analyst                  |     read     |               read                |    read     |       read       |       read        |           read, write            |
 |             Hunter / T3 Analyst              | read, write  |               read                |    read     |   read, write    |       read        |           read, write            |

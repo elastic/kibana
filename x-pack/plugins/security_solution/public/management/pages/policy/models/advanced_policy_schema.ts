@@ -283,6 +283,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.malware.threshold',
+    first_supported_version: '7.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.threshold',
+      {
+        defaultMessage:
+          'The threshold that should be used for evaluating malware. Allowed values are normal, conservative, and aggressive. Default: normal.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -471,6 +482,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.malware.threshold',
+    first_supported_version: '7.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.threshold',
+      {
+        defaultMessage:
+          'The threshold that should be used for evaluating malware. Allowed values are normal, conservative, and aggressive. Default: normal.',
       }
     ),
   },
