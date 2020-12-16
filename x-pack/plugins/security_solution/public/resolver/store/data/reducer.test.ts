@@ -36,6 +36,7 @@ describe('Resolver Data Middleware', () => {
           parameters: {
             databaseDocumentID: '',
             indices: [],
+            filters: {},
           },
         },
       };

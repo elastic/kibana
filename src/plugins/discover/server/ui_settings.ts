@@ -172,7 +172,9 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
-      defaultMessage: 'Prefer the legacy version of the documents table in Discover.',
+      defaultMessage:
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
+        'view. Enable this option if you prefer to fall back to the legacy table.',
     }),
     category: ['discover'],
     schema: schema.boolean(),

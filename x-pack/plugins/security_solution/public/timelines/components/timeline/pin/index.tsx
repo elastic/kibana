@@ -17,6 +17,7 @@ export type PinIcon = 'pin' | 'pinFilled';
 export const getPinIcon = (pinned: boolean): PinIcon => (pinned ? 'pinFilled' : 'pin');
 
 interface Props {
+  ariaLabel?: string;
   allowUnpinning: boolean;
   iconSize?: IconSize;
   timelineType?: TimelineTypeLiteral;
@@ -25,11 +26,14 @@ interface Props {
 }
 
 export const Pin = React.memo<Props>(
-  ({ allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
+  ({ ariaLabel, allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
+    const defaultAriaLabel = isTemplate ? i18n.DISABLE_PIN : pinned ? i18n.PINNED : i18n.UNPINNED;
+    const pinAriaLabel = ariaLabel != null ? ariaLabel : defaultAriaLabel;
+
     return (
       <EuiButtonIcon
-        aria-label={isTemplate ? i18n.DISABLE_PIN : pinned ? i18n.PINNED : i18n.UNPINNED}
+        aria-label={pinAriaLabel}
         data-test-subj="pin"
         iconSize={iconSize}
         iconType={getPinIcon(pinned)}

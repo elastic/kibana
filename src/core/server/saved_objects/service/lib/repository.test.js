@@ -25,6 +25,7 @@ import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
+import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
 const { nodeTypes } = esKuery;
@@ -215,10 +216,9 @@ describe('SavedObjectsRepository', () => {
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = {
-      migrateDocument: jest.fn().mockImplementation(documentMigrator.migrate),
-      runMigrations: async () => ({ status: 'skipped' }),
-    };
+    migrator = mockKibanaMigrator.create();
+    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = async () => ({ status: 'skipped' });
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = {

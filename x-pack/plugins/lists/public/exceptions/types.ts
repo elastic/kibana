@@ -17,7 +17,7 @@ import {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;
@@ -43,7 +43,7 @@ export interface ExceptionList extends ExceptionListSchema {
   totalItems: number;
 }
 
-export interface UseExceptionListSuccess {
+export interface UseExceptionListItemsSuccess {
   exceptions: ExceptionListItemSchema[];
   pagination: Pagination;
 }
@@ -57,7 +57,7 @@ export interface UseExceptionListProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   matchFilters: boolean;
-  onSuccess?: (arg: UseExceptionListSuccess) => void;
+  onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
 }
 
 export interface ExceptionListIdentifiers {
@@ -97,7 +97,35 @@ export interface ApiCallFindListsItemsMemoProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   onError: (arg: string[]) => void;
-  onSuccess: (arg: UseExceptionListSuccess) => void;
+  onSuccess: (arg: UseExceptionListItemsSuccess) => void;
+}
+export interface ApiCallFetchExceptionListsProps {
+  http: HttpStart;
+  namespaceTypes: string;
+  pagination: Partial<Pagination>;
+  filters: string;
+  signal: AbortSignal;
+}
+
+export interface UseExceptionListsSuccess {
+  exceptions: ExceptionListSchema[];
+  pagination: Pagination;
+}
+
+export interface ExceptionListFilter {
+  name?: string | null;
+  list_id?: string | null;
+  created_by?: string | null;
+}
+
+export interface UseExceptionListsProps {
+  errorMessage: string;
+  filterOptions?: ExceptionListFilter;
+  http: HttpStart;
+  namespaceTypes: NamespaceType[];
+  notifications: NotificationsStart;
+  pagination?: Pagination;
+  showTrustedApps: boolean;
 }
 
 export interface AddExceptionListProps {
