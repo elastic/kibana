@@ -29,10 +29,22 @@ export type ISearchGeneric = <
 ) => Observable<SearchStrategyResponse>;
 
 export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
+export type ISearchExtendGeneric = (
+  id: string,
+  keepAlive: string,
+  options?: ISearchOptions
+) => Promise<void>;
 
 export interface ISearchClient {
   search: ISearchGeneric;
+  /**
+   * Used to cancel an in-progress search request.
+   */
   cancel: ISearchCancelGeneric;
+  /**
+   * Used to extend the TTL of an in-progress search request.
+   */
+  extend: ISearchExtendGeneric;
 }
 
 export interface IKibanaSearchResponse<RawResponse = any> {

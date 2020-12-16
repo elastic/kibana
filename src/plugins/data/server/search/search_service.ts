@@ -308,6 +308,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
   };
 
+  private extend = (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    const strategy = this.getSearchStrategy(options.strategy);
+    if (!strategy.extend) {
+      throw new Error(`Search strategy ${options.strategy} does not support extend`);
+    }
+    return strategy.extend(id, keepAlive, options, deps);
+  };
+
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
@@ -337,6 +350,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         search: (searchRequest, options = {}) =>
           this.search(scopedSession, searchRequest, options, deps),
         cancel: (id, options = {}) => this.cancel(id, options, deps),
+        extend: (id, keepAlive, options = {}) => this.extend(id, keepAlive, options, deps),
       };
     };
   };

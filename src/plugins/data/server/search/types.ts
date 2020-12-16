@@ -86,6 +86,12 @@ export interface ISearchStrategy<
     deps: SearchStrategyDependencies
   ) => Observable<SearchStrategyResponse>;
   cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
+  extend?: (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Promise<void>;
 }
 
 export interface ISearchStart<

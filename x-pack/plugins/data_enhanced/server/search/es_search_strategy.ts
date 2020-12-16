@@ -106,5 +106,9 @@ export const enhancedEsSearchStrategyProvider = (
       logger.debug(`cancel ${id}`);
       await esClient.asCurrentUser.asyncSearch.delete({ id });
     },
+    extend: async (id, keepAlive, options, { esClient }) => {
+      logger.debug(`extend ${id} by ${keepAlive}`);
+      await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+    },
   };
 };
