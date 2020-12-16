@@ -62,6 +62,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             instance_id: ecsString(),
             action_group_id: ecsString(),
+            action_subgroup: ecsString(),
             status: ecsString(),
           })
         ),

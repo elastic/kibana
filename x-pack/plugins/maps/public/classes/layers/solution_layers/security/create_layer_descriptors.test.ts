@@ -9,6 +9,13 @@ jest.mock('../../../../kibana_services', () => {
     getIsDarkMode() {
       return false;
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
