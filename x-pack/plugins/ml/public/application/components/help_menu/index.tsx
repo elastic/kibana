@@ -12,7 +12,7 @@ interface HelpMenuProps {
   docLink: string;
 }
 
-export const HelpMenu: FC<HelpMemuProps> = React.memo(({ docLink }) => {
+export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
   const { chrome } = useMlKibana().services;
 
   useEffect(() => {
