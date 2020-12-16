@@ -45,6 +45,7 @@ import {
   UrlDecode,
   UserAgent,
   FormFieldsComponent,
+  UriParts,
 } from '../processor_form/processors';
 
 interface FieldDescriptor {
@@ -436,6 +437,17 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
       defaultMessage: "Extracts values from a browser's user agent string.",
+    }),
+  },
+  url_parts: {
+    FieldsComponent: UriParts,
+    docLinkPath: '/uri-parts-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.uriPartsLabel', {
+      defaultMessage: 'URI parts',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.uriPartsDescription', {
+      defaultMessage:
+        'Parses a Uniform Resource Identifier (URI) string and extracts its components as an object.',
     }),
   },
 };
