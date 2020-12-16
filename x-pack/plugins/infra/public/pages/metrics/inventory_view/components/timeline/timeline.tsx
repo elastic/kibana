@@ -315,9 +315,11 @@ const TimelineContainer = euiStyled.div`
 const TimelineHeader = euiStyled.div`
   display: flex;
   width: 100%;
-  margin-top: 30px;
   padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
   props.theme.eui.paddingSizes.m};
+  @media only screen and (max-width: 767px) {
+      margin-top: 30px;
+  }
 `;
 
 const TimelineChartContainer = euiStyled.div`
