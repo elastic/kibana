@@ -330,10 +330,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the search panel correctly`
       );
-      await ml.dataVisualizerIndexBased.assertSearchPanelExist();
-      await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
-      await ml.dataVisualizerIndexBased.assertFieldTypeInputExists();
-      await ml.dataVisualizerIndexBased.assertFieldNameInputExists();
+      await ml.dataVisualizerTable.assertSearchPanelExist();
+      await ml.dataVisualizerTable.assertSampleSizeInputExists();
+      await ml.dataVisualizerTable.assertFieldTypeInputExists();
+      await ml.dataVisualizerTable.assertFieldNameInputExists();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the field count panel correctly`
@@ -341,7 +341,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
       await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
-      await ml.dataVisualizerIndexBased.assertShowEmptyFieldsSwitchExists();
       await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
         testData.expected.visibleMetricFieldsCount
       );
@@ -364,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const fieldRow of testData.expected.metricFields as Array<
         Required<MetricFieldVisConfig>
       >) {
-        await ml.dataVisualizerIndexBased.assertNumberFieldContents(
+        await ml.dataVisualizerTable.assertNumberFieldContents(
           fieldRow.fieldName,
           fieldRow.docCountFormatted,
           fieldRow.topValuesCount
@@ -372,7 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       for (const fieldRow of testData.expected.nonMetricFields!) {
-        await ml.dataVisualizerIndexBased.assertNonMetricFieldContents(
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
           fieldRow.type,
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
@@ -383,34 +382,34 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} sample size control changes non-metric fields`
       );
-      await ml.dataVisualizerIndexBased.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
-      await ml.dataVisualizerIndexBased.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');
+      await ml.dataVisualizerTable.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
+      await ml.dataVisualizerTable.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');
 
       await ml.testExecution.logTestStep('sets and resets field type filter correctly');
-      await ml.dataVisualizerIndexBased.setFieldTypeFilter(
+      await ml.dataVisualizerTable.setFieldTypeFilter(
         testData.fieldTypeFilters,
         testData.expected.fieldTypeFiltersResultCount
       );
-      await ml.dataVisualizerIndexBased.removeFieldTypeFilter(
+      await ml.dataVisualizerTable.removeFieldTypeFilter(
         testData.fieldTypeFilters,
         testData.expected.populatedFieldsCount
       );
 
       await ml.testExecution.logTestStep('sets and resets field name filter correctly');
-      await ml.dataVisualizerIndexBased.setFieldNameFilter(
+      await ml.dataVisualizerTable.setFieldNameFilter(
         testData.fieldNameFilters,
         testData.expected.fieldNameFiltersResultCount
       );
-      await ml.dataVisualizerIndexBased.removeFieldNameFilter(
+      await ml.dataVisualizerTable.removeFieldNameFilter(
         testData.fieldNameFilters,
         testData.expected.populatedFieldsCount
       );
 
       await ml.testExecution.logTestStep('displays unpopulated fields correctly');
-      await ml.dataVisualizerIndexBased.setShowEmptyFieldsSwitchState(true);
-      for (const field of testData.expected.emptyFields) {
-        await ml.dataVisualizerTable.assertRowExists(field);
-      }
+      await ml.dataVisualizerTable.setShowEmptyFieldsSwitchState(
+        true,
+        testData.expected.emptyFields
+      );
     });
   }
 

@@ -6,11 +6,14 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { asyncForEach } from '../../apps/ml/settings/common';
+import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
@@ -134,6 +137,210 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
     public async assertFieldDistributionExist(fieldName: string) {
       const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistribution');
       await testSubjects.existOrFail(selector);
+    }
+
+    public async assertSearchPanelExist() {
+      await testSubjects.existOrFail(`mlDataVisualizerSearchPanel`);
+    }
+
+    public async assertFieldNameInputExists() {
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect');
+    }
+
+    public async assertFieldTypeInputExists() {
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect');
+    }
+
+    public async assertSampleSizeInputExists() {
+      await testSubjects.existOrFail('mlDataVisualizerShardSizeSelect');
+    }
+
+    public async setSampleSizeInputValue(
+      sampleSize: number,
+      fieldName: string,
+      docCountFormatted: string
+    ) {
+      await this.assertSampleSizeInputExists();
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerShardSizeSelect');
+      await testSubjects.existOrFail(`mlDataVisualizerShardSizeOption ${sampleSize}`);
+      await testSubjects.click(`mlDataVisualizerShardSizeOption ${sampleSize}`);
+
+      await retry.tryForTime(5000, async () => {
+        await this.assertFieldDocCount(fieldName, docCountFormatted);
+      });
+    }
+
+    public async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
+      await this.assertFieldNameInputExists();
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerFieldTypeSelect-button');
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect-popover');
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect-searchInput');
+      const searchBarInput = await testSubjects.find(`mlDataVisualizerFieldTypeSelect-searchInput`);
+
+      await asyncForEach(fieldTypes, async (fieldType) => {
+        await retry.tryForTime(5000, async () => {
+          await searchBarInput.clearValueWithKeyboard();
+          await searchBarInput.type(fieldType);
+          await testSubjects.existOrFail(`mlDataVisualizerFieldTypeSelect-option-${fieldType}`);
+          await testSubjects.click(`mlDataVisualizerFieldTypeSelect-option-${fieldType}`);
+        });
+      });
+
+      // escape popover
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertTableRowCount(expectedRowCount);
+    }
+
+    async removeFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
+      await this.setFieldTypeFilter(fieldTypes, expectedRowCount);
+    }
+
+    public async setFieldNameFilter(fieldNames: string[], expectedRowCount = 1) {
+      await this.assertFieldNameInputExists();
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerFieldNameSelect-button');
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect-popover');
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect-searchInput');
+      const searchBarInput = await testSubjects.find(`mlDataVisualizerFieldNameSelect-searchInput`);
+
+      await asyncForEach(fieldNames, async (filterString) => {
+        await retry.tryForTime(5000, async () => {
+          await searchBarInput.clearValueWithKeyboard();
+          await searchBarInput.type(filterString);
+          await testSubjects.existOrFail(`mlDataVisualizerFieldNameSelect-option-${filterString}`);
+          await testSubjects.click(`mlDataVisualizerFieldNameSelect-option-${filterString}`);
+        });
+      });
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertTableRowCount(expectedRowCount);
+    }
+
+    public async removeFieldNameFilter(fieldNames: string[], expectedRowCount: number) {
+      await this.setFieldNameFilter(fieldNames, expectedRowCount);
+    }
+
+    public async assertShowEmptyFieldsSwitchExists() {
+      await testSubjects.existOrFail('mlDataVisualizerShowEmptyFieldsSwitch');
+    }
+
+    public async assertShowEmptyFieldsCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlDataVisualizerShowEmptyFieldsSwitch',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Show empty fields check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+      return actualCheckState === expectedCheckState;
+    }
+
+    public async setShowEmptyFieldsSwitchState(checkState: boolean, expectedEmptyFields: string[]) {
+      await this.assertShowEmptyFieldsSwitchExists();
+      await retry.tryForTime(5000, async () => {
+        if (await this.assertShowEmptyFieldsCheckState(!checkState)) {
+          await testSubjects.click('mlDataVisualizerShowEmptyFieldsSwitch');
+        }
+        await this.assertShowEmptyFieldsCheckState(checkState);
+        for (const field of expectedEmptyFields) {
+          await this.assertRowExists(field);
+        }
+      });
+    }
+
+    public async assertTopValuesContents(fieldName: string, expectedTopValuesCount: number) {
+      const selector = this.detailsSelector(fieldName, 'mlFieldDataTopValues');
+      const topValuesElement = await testSubjects.find(selector);
+      const topValuesBars = await topValuesElement.findAllByTestSubject('mlFieldDataTopValueBar');
+      expect(topValuesBars).to.have.length(
+        expectedTopValuesCount,
+        `Expected top values count for field '${fieldName}' to be '${expectedTopValuesCount}' (got '${topValuesBars.length}')`
+      );
+    }
+
+    public async assertDistributionPreviewExist(fieldName: string) {
+      await testSubjects.existOrFail(this.rowSelector(fieldName, `mlDataGridChart-${fieldName}`));
+      await testSubjects.existOrFail(
+        this.rowSelector(fieldName, `mlDataGridChart-${fieldName}-histogram`)
+      );
+    }
+
+    public async assertNumberFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      topValuesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlNumberSummaryTable'));
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlTopValues'));
+      await this.assertTopValuesContents(fieldName, topValuesCount);
+
+      await this.assertDistributionPreviewExist(fieldName);
+
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDateSummaryTable'));
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertKeywordFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      topValuesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlFieldDataTopValues'));
+      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertTextFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      expectedExamplesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      const examplesList = await testSubjects.find(
+        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
+      );
+      const examplesListItems = await examplesList.findAllByTagName('li');
+      expect(examplesListItems).to.have.length(
+        expectedExamplesCount,
+        `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
+      );
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertNonMetricFieldContents(
+      fieldType: string,
+      fieldName: string,
+      docCountFormatted: string,
+      exampleCount: number
+    ) {
+      // Currently the data used in the data visualizer tests only contains these field types.
+      if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
+        await this.assertDateFieldContents(fieldName, docCountFormatted);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
+        await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
+        await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
+      }
     }
   })();
 }
