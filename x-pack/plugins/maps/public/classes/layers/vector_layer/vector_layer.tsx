@@ -999,7 +999,6 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
-  // Centroids are a single point for lines, multiLines, polygons, and multiPolygons
   _setMbCentroidProperties(mbMap: MbMap, mvtSourceLayer?: string) {
     const centroidLayerId = this._getMbCentroidLayerId();
     const centroidLayer = mbMap.getLayer(centroidLayerId);

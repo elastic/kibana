@@ -42,7 +42,8 @@ export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__'; // Identifies vector tile "too many features" feature
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
-export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__'; // Identifies line/polygon centroid feature used for label placement
+// Identifies centroid feature. Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {

@@ -86,6 +86,16 @@ function createChoroplethLayerDescriptor({
           color: '#3d3d3d',
         },
       },
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: STYLE_TYPE.DYNAMIC,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
+            name: joinKey,
+            origin: FIELD_ORIGIN.JOIN,
+          },
+        },
+      },
     }),
   });
 }
