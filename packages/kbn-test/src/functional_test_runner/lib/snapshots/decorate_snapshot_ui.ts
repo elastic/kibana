@@ -96,7 +96,15 @@ const modifyStackTracePrepareOnce = once(() => {
   };
 });
 
-export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolean, isCi: boolean) {
+export function decorateSnapshotUi({
+  lifecycle,
+  updateSnapshots,
+  isCi,
+}: {
+  lifecycle: Lifecycle;
+  updateSnapshots: boolean;
+  isCi: boolean;
+}) {
   let snapshotStatesByFilePath: Record<
     string,
     { snapshotState: ISnapshotState; testsInFile: Test[] }
