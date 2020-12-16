@@ -55,10 +55,10 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
 
     public async assertTableRowCount(expectedRowCount: number) {
       await retry.tryForTime(5000, async () => {
-        const filteredRows = await this.parseDataVisualizerTable();
-        expect(filteredRows).to.have.length(
+        const tableRows = await this.parseDataVisualizerTable();
+        expect(tableRows).to.have.length(
           expectedRowCount,
-          `Filtered Data Visualizer table should have ${expectedRowCount} row(s) (got '${filteredRows.length}')`
+          `Filtered Data Visualizer table should have ${expectedRowCount} row(s) (got '${tableRows.length}')`
         );
       });
     }

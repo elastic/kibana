@@ -361,32 +361,27 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'displays details for metric fields and non-metric fields correctly'
       );
-      for (const fieldCard of testData.expected.metricFields as Array<
+      for (const fieldRow of testData.expected.metricFields as Array<
         Required<MetricFieldVisConfig>
       >) {
         await ml.dataVisualizerIndexBased.assertNumberFieldContents(
-          fieldCard.fieldName,
-          fieldCard.docCountFormatted,
-          fieldCard.topValuesCount
+          fieldRow.fieldName,
+          fieldRow.docCountFormatted,
+          fieldRow.topValuesCount
         );
       }
 
-      for (const fieldCard of testData.expected.nonMetricFields as Array<
-        Required<NonMetricFieldVisConfig>
-      >) {
-        await ml.dataVisualizerTable.assertRowExists(fieldCard.fieldName);
-      }
-      for (const fieldCard of testData.expected.nonMetricFields!) {
+      for (const fieldRow of testData.expected.nonMetricFields!) {
         await ml.dataVisualizerIndexBased.assertNonMetricFieldContents(
-          fieldCard.type,
-          fieldCard.fieldName!,
-          fieldCard.docCountFormatted,
-          fieldCard.exampleCount
+          fieldRow.type,
+          fieldRow.fieldName!,
+          fieldRow.docCountFormatted,
+          fieldRow.exampleCount
         );
       }
 
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} sample size control changes non-metric field cards`
+        `${testData.suiteTitle} sample size control changes non-metric fields`
       );
       await ml.dataVisualizerIndexBased.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
       await ml.dataVisualizerIndexBased.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');

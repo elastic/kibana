@@ -175,29 +175,17 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
 
     async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldNameInputExists();
-      await testSubjects.clickWhenNotDisabled(
-        'mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectButton'
-      );
-      await testSubjects.existOrFail(
-        'mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectPopover'
-      );
-      await testSubjects.existOrFail(
-        'mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectButtonSearchInput'
-      );
-      const searchBarInput = await testSubjects.find(
-        `mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectButtonSearchInput`
-      );
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerFieldTypeSelect-button');
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect-popover');
+      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect-searchInput');
+      const searchBarInput = await testSubjects.find(`mlDataVisualizerFieldTypeSelect-searchInput`);
 
       await asyncForEach(fieldTypes, async (fieldType) => {
         await retry.tryForTime(5000, async () => {
           await searchBarInput.clearValueWithKeyboard();
           await searchBarInput.type(fieldType);
-          await testSubjects.existOrFail(
-            `mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectOption-${fieldType}`
-          );
-          await testSubjects.click(
-            `mlDataVisualizerFieldTypeSelect-mlDataVisualizerMultiSelectOption-${fieldType}`
-          );
+          await testSubjects.existOrFail(`mlDataVisualizerFieldTypeSelect-option-${fieldType}`);
+          await testSubjects.click(`mlDataVisualizerFieldTypeSelect-option-${fieldType}`);
         });
       });
 
@@ -212,29 +200,17 @@ export function MachineLearningDataVisualizerIndexBasedProvider(
 
     async setFieldNameFilter(fieldNames: string[], expectedRowCount = 1) {
       await this.assertFieldNameInputExists();
-      await testSubjects.clickWhenNotDisabled(
-        'mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectButton'
-      );
-      await testSubjects.existOrFail(
-        'mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectPopover'
-      );
-      await testSubjects.existOrFail(
-        'mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectButtonSearchInput'
-      );
-      const searchBarInput = await testSubjects.find(
-        `mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectButtonSearchInput`
-      );
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerFieldNameSelect-button');
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect-popover');
+      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect-searchInput');
+      const searchBarInput = await testSubjects.find(`mlDataVisualizerFieldNameSelect-searchInput`);
 
       await asyncForEach(fieldNames, async (filterString) => {
         await retry.tryForTime(5000, async () => {
           await searchBarInput.clearValueWithKeyboard();
           await searchBarInput.type(filterString);
-          await testSubjects.existOrFail(
-            `mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectOption-${filterString}`
-          );
-          await testSubjects.click(
-            `mlDataVisualizerFieldNameSelect-mlDataVisualizerMultiSelectOption-${filterString}`
-          );
+          await testSubjects.existOrFail(`mlDataVisualizerFieldNameSelect-option-${filterString}`);
+          await testSubjects.click(`mlDataVisualizerFieldNameSelect-option-${filterString}`);
         });
       });
       await browser.pressKeys(browser.keys.ESCAPE);
