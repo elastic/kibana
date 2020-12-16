@@ -24,6 +24,25 @@ export const EscapableStrings = {
   escapableLineFeed: 'line\x0afeed',
 };
 
+export const DeepContextVariables = {
+  objectA: {
+    stringB: 'B',
+    arrayC: [
+      { stringD: 'D1', numberE: 42 },
+      { stringD: 'D2', numberE: 43 },
+    ],
+    objectF: {
+      stringG: 'G',
+      nullG: null,
+      undefinedG: undefined,
+    },
+  },
+  stringH: 'H',
+  arrayI: [44, 45],
+  nullJ: null,
+  undefinedK: undefined,
+};
+
 function getAlwaysFiringAlertType() {
   const paramsSchema = schema.object({
     index: schema.string(),
@@ -410,7 +429,10 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default', EscapableStrings);
+          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+            ...EscapableStrings,
+            deep: DeepContextVariables,
+          });
         } else if (typeof scheduleByPattern === 'string') {
           services
             .alertInstanceFactory(instanceId)

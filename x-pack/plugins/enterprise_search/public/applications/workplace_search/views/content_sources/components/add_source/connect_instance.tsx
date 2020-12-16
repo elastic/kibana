@@ -30,7 +30,7 @@ import {
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
 import { AppLogic } from '../../../../app_logic';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
 import { SourceFeatures } from './source_features';
@@ -82,10 +82,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourcePasswordValue,
     setSourceSubdomainValue,
     setSourceIndexPermissionsValue,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
 
   const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    SourceLogic
+    AddSourceLogic
   );
 
   const { isOrganization } = useValues(AppLogic);

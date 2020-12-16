@@ -16,6 +16,15 @@ import { TestProviders } from '../../mock';
 import { MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 const allOthersDataProviderId =

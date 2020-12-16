@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -68,6 +69,7 @@ const goGetTimelineId = jest.fn();
 const defaultProps = {
   field,
   goGetTimelineId,
+  ownFocus: false,
   showTopN: false,
   timelineId,
   toggleTopN,
@@ -77,7 +79,7 @@ const defaultProps = {
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
     // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
-    (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
+    (useAddToTimeline as jest.Mock).mockReturnValue({ startDragToTimeline: jest.fn() });
     (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
       selectedPatterns: [],
@@ -390,7 +392,7 @@ describe('DraggableWrapperHoverContent', () => {
       // The following "startDragToTimeline" function returned by our mock
       // useAddToTimeline hook is called when the user clicks the
       // Add to timeline investigation action:
-      const startDragToTimeline = useAddToTimeline({
+      const { startDragToTimeline } = useAddToTimeline({
         draggableId,
         fieldName: aggregatableStringField,
       });
@@ -398,7 +400,9 @@ describe('DraggableWrapperHoverContent', () => {
       wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
       wrapper.update();
 
-      expect(startDragToTimeline).toHaveBeenCalled();
+      waitFor(() => {
+        expect(startDragToTimeline).toHaveBeenCalled();
+      });
     });
   });
 
@@ -472,7 +476,9 @@ describe('DraggableWrapperHoverContent', () => {
       );
       const button = wrapper.find(`[data-test-subj="show-top-field"]`).first();
       button.simulate('mouseenter');
-      expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      waitFor(() => {
+        expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      });
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
