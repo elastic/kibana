@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -36,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should create and delete a session', async () => {
         const sessionId = `my-session-${Math.random()}`;
-        const r = await supertest
+        await supertest
           .post(`/internal/session`)
           .set('kbn-xsrf', 'foo')
           .send({
