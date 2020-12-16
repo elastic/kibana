@@ -10,6 +10,7 @@ import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
+  TRUSTED_APPS_SUMMARY_API,
 } from '../../../../../common/endpoint/constants';
 
 import {
@@ -18,6 +19,7 @@ import {
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  GetTrustedAppsSummaryResponse,
 } from '../../../../../common/endpoint/types/trusted_apps';
 
 import { resolvePathVariables } from './utils';
@@ -45,5 +47,9 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     return this.http.post<PostTrustedAppCreateResponse>(TRUSTED_APPS_CREATE_API, {
       body: JSON.stringify(request),
     });
+  }
+
+  async getTrustedAppsSummary() {
+    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API);
   }
 }
