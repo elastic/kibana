@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { letBrowserHandleEvent } from './link_events';
-export { createHref, CreateHrefOptions } from './create_href';
-export { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
+export { DocumentCreationButtons } from './document_creation_buttons';
+export { DocumentCreationModal } from './document_creation_modal';
+export { DocumentCreationLogic } from './document_creation_logic';
