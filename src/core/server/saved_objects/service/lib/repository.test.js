@@ -966,7 +966,7 @@ describe('SavedObjectsRepository', () => {
           ...response.items[0].create,
           _source: {
             ...response.items[0].create._source,
-            referencesMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
+            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[0].create._source.namespaces,
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
@@ -975,7 +975,7 @@ describe('SavedObjectsRepository', () => {
           ...response.items[1].create,
           _source: {
             ...response.items[1].create._source,
-            referencesMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
+            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[1].create._source.namespaces,
           },
         });

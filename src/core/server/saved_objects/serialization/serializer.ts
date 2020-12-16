@@ -50,13 +50,13 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
   public isRawSavedObject(doc: SavedObjectsRawDoc, options: SavedObjectsRawDocParseOptions = {}) {
-    const { flexible = false } = options;
+    const { namespaceTreatment = 'strict' } = options;
     const { _id, _source } = doc;
     const { type, namespace } = _source;
     if (!type) {
       return false;
     }
-    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, flexible);
+    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, namespaceTreatment);
     return idMatchesPrefix && _source.hasOwnProperty(type);
   }
 
@@ -70,7 +70,7 @@ export class SavedObjectsSerializer {
     doc: SavedObjectsRawDoc,
     options: SavedObjectsRawDocParseOptions = {}
   ): SavedObjectSanitizedDoc {
-    const { flexible = false } = options;
+    const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {
       type,
@@ -78,15 +78,16 @@ export class SavedObjectsSerializer {
       originId,
       migrationVersion,
       references,
-      referencesMigrationVersion,
+      coreMigrationVersion,
     } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
         : undefined;
-    const { id, namespace } = this.trimIdPrefix(_source.namespace, type, _id, flexible);
-    const includeNamespace = namespace && (flexible || this.registry.isSingleNamespace(type));
+    const { id, namespace } = this.trimIdPrefix(_source.namespace, type, _id, namespaceTreatment);
+    const includeNamespace =
+      namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));
     const includeNamespaces = this.registry.isMultiNamespace(type);
 
     return {
@@ -98,7 +99,7 @@ export class SavedObjectsSerializer {
       attributes: _source[type],
       references: references || [],
       ...(migrationVersion && { migrationVersion }),
-      ...(referencesMigrationVersion && { referencesMigrationVersion }),
+      ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
       ...(version && { version }),
     };
@@ -122,7 +123,7 @@ export class SavedObjectsSerializer {
       updated_at,
       version,
       references,
-      referencesMigrationVersion,
+      coreMigrationVersion,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -132,7 +133,7 @@ export class SavedObjectsSerializer {
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
-      ...(referencesMigrationVersion && { referencesMigrationVersion }),
+      ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(updated_at && { updated_at }),
     };
 
@@ -176,7 +177,7 @@ export class SavedObjectsSerializer {
     sourceNamespace: string | undefined,
     type: string,
     id: string,
-    flexible: boolean
+    namespaceTreatment: 'strict' | 'lax'
   ) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
@@ -185,7 +186,7 @@ export class SavedObjectsSerializer {
       sourceNamespace,
       type,
       id,
-      flexible
+      namespaceTreatment
     );
     return {
       id: idMatchesPrefix ? id.slice(prefix.length) : id,
@@ -197,14 +198,14 @@ export class SavedObjectsSerializer {
     sourceNamespace: string | undefined,
     type: string,
     id: string,
-    flexible: boolean
+    namespaceTreatment: 'strict' | 'lax'
   ) {
     let prefix: string; // the prefix that is used to validate this raw object ID
     let namespace: string | undefined; // the namespace that is in the raw object ID (only for single-namespace objects)
-    const parseFlexibly = flexible && this.registry.isMultiNamespace(type);
+    const parseFlexibly = namespaceTreatment === 'lax' && this.registry.isMultiNamespace(type);
     if (sourceNamespace && (this.registry.isSingleNamespace(type) || parseFlexibly)) {
       prefix = `${sourceNamespace}:${type}:`;
-      if (parseFlexibly && !getIdMatchesPrefix(id, prefix)) {
+      if (parseFlexibly && !checkIdMatchesPrefix(id, prefix)) {
         prefix = `${type}:`;
       } else {
         // this is either a single-namespace object, or is being converted into a multi-namespace object
@@ -217,13 +218,13 @@ export class SavedObjectsSerializer {
 
     return {
       prefix,
-      idMatchesPrefix: getIdMatchesPrefix(id, prefix),
+      idMatchesPrefix: checkIdMatchesPrefix(id, prefix),
       namespace,
     };
   }
 }
 
-function getIdMatchesPrefix(id: string, prefix: string) {
+function checkIdMatchesPrefix(id: string, prefix: string) {
   return id.startsWith(prefix) && id.length > prefix.length;
 }
 

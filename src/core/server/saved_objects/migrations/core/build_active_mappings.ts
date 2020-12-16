@@ -164,7 +164,7 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
-      referencesMigrationVersion: {
+      coreMigrationVersion: {
         type: 'keyword',
       },
     },

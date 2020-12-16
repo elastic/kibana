@@ -727,7 +727,7 @@ describe('ElasticIndex', () => {
                   bool: {
                     must_not: {
                       term: {
-                        referencesMigrationVersion: '7.10.0',
+                        coreMigrationVersion: '7.10.0',
                       },
                     },
                   },

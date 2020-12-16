@@ -46,7 +46,7 @@ export async function migrateRawDocs(
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];
   for (const raw of rawDocs) {
-    const options = { flexible: true };
+    const options = { namespaceTreatment: 'lax' as 'lax' };
     if (serializer.isRawSavedObject(raw, options)) {
       const savedObject = serializer.rawToSavedObject(raw, options);
       savedObject.migrationVersion = savedObject.migrationVersion || {};

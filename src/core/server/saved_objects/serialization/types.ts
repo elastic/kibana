@@ -54,7 +54,7 @@ interface SavedObjectDoc<T = unknown> {
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
-  referencesMigrationVersion?: string;
+  coreMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   originId?: string;
@@ -88,9 +88,11 @@ export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referenca
  */
 export interface SavedObjectsRawDocParseOptions {
   /**
-   * Optional flag to allow for flexible handling of the raw document ID and namespace field. This is needed when a previously
+   * Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously
    * single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade
    * migrations.
+   *
+   * If not specified, the default treatment is `strict`.
    */
-  flexible?: boolean;
+  namespaceTreatment?: 'strict' | 'lax';
 }

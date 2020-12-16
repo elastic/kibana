@@ -194,7 +194,7 @@ export async function migrationsUpToDate(
                 bool: {
                   must_not: {
                     term: {
-                      referencesMigrationVersion: kibanaVersion,
+                      coreMigrationVersion: kibanaVersion,
                     },
                   },
                 },

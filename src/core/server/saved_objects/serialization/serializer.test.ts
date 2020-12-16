@@ -143,25 +143,25 @@ describe('#rawToSavedObject', () => {
     expect(expected).toEqual(actual);
   });
 
-  test('if specified it copies the _source.referencesMigrationVersion property to referencesMigrationVersion', () => {
+  test('if specified it copies the _source.coreMigrationVersion property to coreMigrationVersion', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        referencesMigrationVersion: '1.2.3',
+        coreMigrationVersion: '1.2.3',
       },
     });
-    expect(actual).toHaveProperty('referencesMigrationVersion', '1.2.3');
+    expect(actual).toHaveProperty('coreMigrationVersion', '1.2.3');
   });
 
-  test(`if _source.referencesMigrationVersion is unspecified it doesn't set referencesMigrationVersion`, () => {
+  test(`if _source.coreMigrationVersion is unspecified it doesn't set coreMigrationVersion`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
       _source: {
         type: 'foo',
       },
     });
-    expect(actual).not.toHaveProperty('referencesMigrationVersion');
+    expect(actual).not.toHaveProperty('coreMigrationVersion');
   });
 
   test(`if version is unspecified it doesn't set version`, () => {
@@ -321,7 +321,7 @@ describe('#rawToSavedObject', () => {
           foo: '1.2.3',
           bar: '9.8.7',
         },
-        referencesMigrationVersion: '4.5.6',
+        coreMigrationVersion: '4.5.6',
         namespace: 'foo-namespace',
         updated_at: String(new Date()),
         references: [],
@@ -447,8 +447,8 @@ describe('#rawToSavedObject', () => {
       expect(actual).not.toHaveProperty('namespace');
     });
 
-    describe('with "flexible" option enabled', () => {
-      const options = { flexible: true };
+    describe('with lax namespaceTreatment', () => {
+      const options = { namespaceTreatment: 'lax' as 'lax' };
 
       test(`removes type prefix from _id and, and does not copy _source.namespace to namespace`, () => {
         const _actual = multiNamespaceSerializer.rawToSavedObject(raw, options);
@@ -584,23 +584,23 @@ describe('#savedObjectToRaw', () => {
     expect(actual._source).not.toHaveProperty('migrationVersion');
   });
 
-  test('it copies the referencesMigrationVersion property to _source.referencesMigrationVersion', () => {
+  test('it copies the coreMigrationVersion property to _source.coreMigrationVersion', () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},
-      referencesMigrationVersion: '1.2.3',
+      coreMigrationVersion: '1.2.3',
     } as any);
 
-    expect(actual._source).toHaveProperty('referencesMigrationVersion', '1.2.3');
+    expect(actual._source).toHaveProperty('coreMigrationVersion', '1.2.3');
   });
 
-  test(`if unspecified it doesn't add referencesMigrationVersion property to _source`, () => {
+  test(`if unspecified it doesn't add coreMigrationVersion property to _source`, () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},
     } as any);
 
-    expect(actual._source).not.toHaveProperty('referencesMigrationVersion');
+    expect(actual._source).not.toHaveProperty('coreMigrationVersion');
   });
 
   test('it decodes the version property to _seq_no and _primary_term', () => {
@@ -969,8 +969,8 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is true if the id is prefixed with type and namespace, and the "flexible" option is enabled', () => {
-      const options = { flexible: true };
+    test('is true if the id is prefixed with type and namespace, and namespaceTreatment is lax', () => {
+      const options = { namespaceTreatment: 'lax' as 'lax' };
       expect(
         multiNamespaceSerializer.isRawSavedObject(
           {

@@ -378,10 +378,10 @@ function applyMigrations(
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
-      // regardless of whether or not any reference transform was applied, update the referencesMigrationVersion
-      // this is needed to ensure that newly created documents have an up-to-date referencesMigrationVersion field
+      // regardless of whether or not any reference transform was applied, update the coreMigrationVersion
+      // this is needed to ensure that newly created documents have an up-to-date coreMigrationVersion field
       return {
-        transformedDoc: { ...doc, referencesMigrationVersion: kibanaVersion },
+        transformedDoc: { ...doc, coreMigrationVersion: kibanaVersion },
         additionalDocs,
       };
     }
@@ -422,7 +422,7 @@ function markAsUpToDate(
       const version = propVersion(migrations, prop);
       return version ? set(acc, prop, version) : acc;
     }, {}),
-    referencesMigrationVersion: kibanaVersion,
+    coreMigrationVersion: kibanaVersion,
   };
 }
 
@@ -585,10 +585,10 @@ function getHasPendingReferenceTransform(
   }
 
   const { latestReferenceVersion } = migrations[prop];
-  const { referencesMigrationVersion } = doc;
+  const { coreMigrationVersion } = doc;
   return (
     latestReferenceVersion &&
-    (!referencesMigrationVersion || Semver.gt(latestReferenceVersion, referencesMigrationVersion))
+    (!coreMigrationVersion || Semver.gt(latestReferenceVersion, coreMigrationVersion))
   );
 }
 
@@ -648,7 +648,7 @@ function migrateProp(
     }
     if (transformType === 'reference') {
       // regardless of whether or not the reference transform was applied, increment the version
-      doc.referencesMigrationVersion = version;
+      doc.coreMigrationVersion = version;
     } else {
       migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
       doc.migrationVersion = _.clone(migrationVersion);
@@ -672,7 +672,7 @@ function applicableTransforms(
   prop: string
 ) {
   const minVersion = propVersion(doc, prop);
-  const minReferenceVersion = doc.referencesMigrationVersion || '0.0.0';
+  const minReferenceVersion = doc.coreMigrationVersion || '0.0.0';
   const { transforms } = migrations[prop];
   return minVersion
     ? transforms.filter(({ version, transformType }) =>
