@@ -903,12 +903,12 @@ describe('Exceptions Lists API', () => {
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
-        body: JSON.stringify({
+        method: 'GET',
+        query: {
           id: 'some-id',
           list_id: 'list-id',
           namespace_type: 'single',
-        }),
-        method: 'POST',
+        },
         signal: abortCtrl.signal,
       });
     });

@@ -185,7 +185,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       <>
         <AutoDownload
           blob={exportDownload.blob}
-          name={exportDownload.name}
+          name={`${exportDownload.name}.ndjson`}
           onDownload={handleOnDownload}
         />
         <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">

@@ -13,7 +13,7 @@ import { exportExceptionListQuerySchema } from '../../common/schemas';
 import { getExceptionListClient } from './utils';
 
 export const exportExceptionListRoute = (router: IRouter): void => {
-  router.post(
+  router.get(
     {
       options: {
         tags: ['access:lists-read'],

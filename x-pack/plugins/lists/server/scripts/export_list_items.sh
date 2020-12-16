@@ -11,8 +11,6 @@ set -e
 
 # Uses a defaults if no argument is specified
 LIST_ID=${1:-ips.txt}
-ID=${1:-ips.txt}
-NAMESPACE_TYPE=${1:-ips.txt}
 
 # Example to export
 # ./export_list_items.sh > /tmp/ips.txt
@@ -20,4 +18,4 @@ NAMESPACE_TYPE=${1:-ips.txt}
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/exception_lists/_export?list_id=${LIST_ID}&id=${ID}&namespace_type=${NAMESPACE_TYPE}"
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_export?list_id=${LIST_ID}"

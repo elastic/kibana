@@ -567,8 +567,8 @@ export const exportExceptionList = async ({
   if (validatedRequest != null) {
     try {
       const response = await http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
-        body: JSON.stringify({ id, list_id: listId, namespace_type: namespaceType }),
-        method: 'POST',
+        method: 'GET',
+        query: { id, list_id: listId, namespace_type: namespaceType },
         signal,
       });
 
