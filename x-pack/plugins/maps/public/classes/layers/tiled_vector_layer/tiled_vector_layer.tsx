@@ -147,6 +147,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
+    this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
