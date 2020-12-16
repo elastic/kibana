@@ -521,6 +521,13 @@ class JobService {
                 fields[job.data_description.time_field] = {};
               }
 
+              // add runtime fields
+              if (runtimeMappings) {
+                Object.keys(runtimeMappings).forEach((fieldName) => {
+                  fields[fieldName] = {};
+                });
+              }
+
               const fieldsList = Object.keys(fields);
               if (fieldsList.length) {
                 body.fields = fieldsList;
