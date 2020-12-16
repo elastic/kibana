@@ -65,9 +65,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { originatingApp: value } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+      services.embeddable.getStateTransfer().getIncomingEditorState() || {};
     setOriginatingApp(value);
   }, [services]);
 
