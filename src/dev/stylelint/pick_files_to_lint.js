@@ -24,10 +24,10 @@ import path from 'path';
 
 // load the include globs from .stylelintrc and convert them to regular expressions for filtering files
 const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');
-const sassLintConfig = safeLoad(fs.readFileSync(stylelintPath));
+const styleLintConfig = safeLoad(fs.readFileSync(stylelintPath));
 const {
   files: { include: includeGlobs },
-} = sassLintConfig;
+} = styleLintConfig;
 const includeRegex = includeGlobs.map((glob) => makeRe(glob));
 
 function matchesInclude(file) {

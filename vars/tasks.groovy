@@ -24,7 +24,7 @@ def check() {
 def lint() {
   tasks([
     kibanaPipeline.scriptTask('Lint: eslint', 'test/scripts/lint/eslint.sh'),
-    kibanaPipeline.scriptTask('Lint: sasslint', 'test/scripts/lint/sasslint.sh'),
+    kibanaPipeline.scriptTask('Lint: stylelint', 'test/scripts/lint/stylelint.sh'),
   ])
 }
 

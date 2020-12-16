@@ -12,12 +12,12 @@ object Lint : BuildType({
 
   steps {
     script {
-      name = "Sasslint"
+      name = "Stylelint"
 
       scriptContent =
         """
           #!/bin/bash
-          ./.ci/teamcity/checks/sasslint.sh
+          ./.ci/teamcity/checks/stylelint.sh
         """.trimIndent()
     }
 
