@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
@@ -52,50 +53,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Split Gauges', async function () {
-      log.debug('Bucket = Split Group');
-      await PageObjects.visEditor.clickBucket('Split group');
-      log.debug('Aggregation = Terms');
-      await PageObjects.visEditor.selectAggregation('Terms');
-      log.debug('Field = machine.os.raw');
-      await PageObjects.visEditor.selectField('machine.os.raw');
-      log.debug('Size = 4');
-      await PageObjects.visEditor.setSize('4');
-      await PageObjects.visEditor.clickGo();
-
-      await retry.try(async () => {
-        expect(await PageObjects.visChart.getGaugeValue()).to.eql([
-          '2,904',
-          'win 8',
-          '2,858',
-          'win xp',
-          '2,814',
-          'win 7',
-          '2,784',
-          'ios',
-        ]);
-      });
-    });
-
-    it('should show correct values for fields with fieldFormatters', async function () {
-      const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
-
-      await PageObjects.visEditor.selectAggregation('Terms');
-      await PageObjects.visEditor.selectField('machine.os.raw');
-      await PageObjects.visEditor.setSize('1');
-      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Min', 'metrics');
-      await PageObjects.visEditor.selectField('bytes', 'metrics');
-      await PageObjects.visEditor.clickGo();
-
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
-      });
-    });
-
     it('should format the metric correctly in percentage mode', async function () {
-      await initGaugeVis();
       await PageObjects.visEditor.clickMetricEditor();
       await PageObjects.visEditor.selectAggregation('Average', 'metrics');
       await PageObjects.visEditor.selectField('bytes', 'metrics');
@@ -110,6 +68,62 @@ export default function ({ getService, getPageObjects }) {
         const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });
+    });
+
+    describe('Split Gauges', () => {
+      before(async () => {
+        await initGaugeVis();
+        log.debug('Bucket = Split Group');
+        await PageObjects.visEditor.clickBucket('Split group');
+        log.debug('Aggregation = Terms');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        log.debug('Field = machine.os.raw');
+        await PageObjects.visEditor.selectField('machine.os.raw');
+        log.debug('Size = 4');
+        await PageObjects.visEditor.setSize('4');
+        await PageObjects.visEditor.clickGo();
+      });
+
+      it('should show Split Gauges', async () => {
+        await retry.try(async () => {
+          expect(await PageObjects.visChart.getGaugeValue()).to.eql([
+            '2,904',
+            'win 8',
+            '2,858',
+            'win xp',
+            '2,814',
+            'win 7',
+            '2,784',
+            'ios',
+          ]);
+        });
+      });
+
+      it('should add machine.os.raw:win 8 filter by click on the first Gauge', async () => {
+        await PageObjects.visChart.clickOnGaugeByLabel('win 8');
+        const hasFilter = await filterBar.hasFilter('machine.os.raw', 'win 8');
+
+        expect(hasFilter).to.eql(true);
+      });
+
+      it('should show correct values for fields with fieldFormatters', async () => {
+        const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
+
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('machine.os.raw');
+        await PageObjects.visEditor.setSize('1');
+        await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Min', 'metrics');
+        await PageObjects.visEditor.selectField('bytes', 'metrics');
+        await PageObjects.visEditor.clickGo();
+
+        await retry.try(async function tryingForTime() {
+          const metricValue = await PageObjects.visChart.getGaugeValue();
+          expect(expectedTexts).to.eql(metricValue);
+        });
+      });
+
+      afterEach(async () => await filterBar.removeAllFilters());
     });
   });
 }

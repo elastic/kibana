@@ -124,11 +124,13 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
   get(['process', 'entity_id', 0], ecsData) !== '';
 
 interface InvestigateInResolverActionProps {
+  ariaLabel?: string;
   timelineId: string;
   ecsData: Ecs;
 }
 
 const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverActionProps> = ({
+  ariaLabel = i18n.ACTION_INVESTIGATE_IN_RESOLVER,
   timelineId,
   ecsData,
 }) => {
@@ -143,11 +145,12 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 
   return (
     <ActionIconItem
-      ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
-      content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      ariaLabel={ariaLabel}
+      content={
+        isDisabled ? i18n.INVESTIGATE_IN_RESOLVER_DISABLED : i18n.ACTION_INVESTIGATE_IN_RESOLVER
+      }
       dataTestSubj="investigate-in-resolver"
-      iconType="node"
-      id="investigateInResolver"
+      iconType="analyzeEvent"
       isDisabled={isDisabled}
       onClick={handleClick}
     />

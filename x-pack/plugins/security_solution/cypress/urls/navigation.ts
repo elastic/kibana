@@ -5,6 +5,10 @@
  */
 
 export const DETECTIONS_URL = 'app/security/detections';
+export const DETECTIONS_RULE_MANAGEMENT_URL = 'app/security/detections/rules';
+export const detectionsRuleDetailsUrl = (ruleId: string) =>
+  `app/security/detections/rules/id/${ruleId}`;
+
 export const CASES_URL = '/app/security/cases';
 export const DETECTIONS = '/app/siem#/detections';
 export const HOSTS_URL = '/app/security/hosts/allHosts';

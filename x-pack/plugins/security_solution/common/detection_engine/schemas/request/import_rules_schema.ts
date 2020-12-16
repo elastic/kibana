@@ -25,7 +25,7 @@ import {
   Tags,
   To,
   type,
-  Threat,
+  Threats,
   threshold,
   ThrottleOrNull,
   note,
@@ -193,7 +193,7 @@ export type ImportRulesSchemaDecoded = Omit<
   severity_mapping: SeverityMapping;
   tags: Tags;
   to: To;
-  threat: Threat;
+  threat: Threats;
   throttle: ThrottleOrNull;
   version: Version;
   exceptions_list: ListArray;

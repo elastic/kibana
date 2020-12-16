@@ -65,6 +65,7 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
+  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -78,6 +79,7 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
+  handleCloseExpandedEvent: jest.fn(),
   start: from,
   sort: [
     {

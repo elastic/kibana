@@ -38,7 +38,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -63,6 +66,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
 
@@ -115,7 +121,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -140,6 +149,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -160,7 +172,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -185,6 +200,9 @@ describe('update', () => {
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -210,7 +228,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ cases: patchCases });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
 
       expect(res).toEqual([
         {
@@ -243,6 +264,9 @@ describe('update', () => {
             username: 'awesome',
           },
           version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -328,7 +352,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(406);
@@ -358,7 +382,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(404);
@@ -385,7 +409,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client.update({ cases: patchCases }).catch((e) => {
+      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(409);
