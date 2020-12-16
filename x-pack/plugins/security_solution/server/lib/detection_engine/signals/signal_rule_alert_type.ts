@@ -174,7 +174,7 @@ export const signalRulesAlertType = ({
 
         const preCheckResult = await preExecutionRuleCheck(
           inputIndexPattern,
-          timestampsToSort,
+          timestampOverride ?? '@timestamp',
           services,
           logger,
           buildRuleMessage

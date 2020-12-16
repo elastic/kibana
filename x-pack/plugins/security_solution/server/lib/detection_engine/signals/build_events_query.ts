@@ -34,7 +34,7 @@ export const buildEventsSearchQuery = ({
 }: BuildEventsSearchQuery) => {
   const timestamp = timestampOverride ?? '@timestamp';
   const docFields =
-    timestampOverride != null
+    timestampOverride != null && timestampOverride !== '@timestamp'
       ? [
           {
             field: '@timestamp',

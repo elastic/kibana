@@ -1336,7 +1336,81 @@ describe('utils', () => {
         (msg) => msg
       );
       expect(res).toEqual({
-        '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'],
+        '@timestamp': { 'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'] },
+      });
+    });
+    test('it should return the right object with multiple index patterns and multiple timestamps', async () => {
+      alertServices.callCluster.mockImplementation(async (_endpoint, options) => {
+        if (options?.index === 'auditbeat-*') {
+          return {
+            'auditbeat-7.8.0-2020.10.22-000002': {
+              mappings: {
+                '@timestamp': {
+                  full_name: '@timestamp',
+                  mapping: {
+                    '@timestamp': {
+                      type: 'date',
+                    },
+                  },
+                },
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+            'auditbeat-7.8.0-2020.10.22-000004': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        }
+
+        if (options?.index === 'myfakeindex-*') {
+          return {
+            'myfakeindex-000001': {
+              mappings: {
+                'event.ingested': {
+                  full_name: 'event.ingested',
+                  mapping: {
+                    ingested: {
+                      type: 'date',
+                    },
+                  },
+                },
+              },
+            },
+          };
+        }
+      });
+      const res = await checkIndexMappingsForTimestampFields(
+        ['auditbeat-*', 'myfakeindex-*'],
+        ['event.ingested', '@timestamp'],
+        alertServices,
+        mockLogger,
+        (msg) => msg
+      );
+      expect(res).toEqual({
+        'event.ingested': {
+          'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002', 'auditbeat-7.8.0-2020.10.22-000004'],
+          'myfakeindex-*': ['myfakeindex-000001'],
+        },
+        '@timestamp': {
+          'myfakeindex-*': [],
+          'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'],
+        },
       });
     });
   });
@@ -1398,7 +1472,7 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['@timestamp'],
+        '@timestamp',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1408,7 +1482,9 @@ describe('utils', () => {
         resultMessages: [],
         failingIndexes: [],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
-        timestampsAndIndices: { '@timestamp': ['auditbeat-7.8.0-2020.10.22-000002'] },
+        timestampsAndIndices: {
+          '@timestamp': { 'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'] },
+        },
       });
     });
     test('it should return error when indexes in index pattern do not contain timestamp field', async () => {
@@ -1425,7 +1501,7 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['@timestamp'],
+        '@timestamp',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1437,7 +1513,7 @@ describe('utils', () => {
         ],
         failingIndexes: ['auditbeat-*'],
         successIndexes: [],
-        timestampsAndIndices: { '@timestamp': [] },
+        timestampsAndIndices: { '@timestamp': { 'auditbeat-*': [] } },
       });
     });
     test('it should return success all indexes in index pattern contain timestamp override field event.ingested', async () => {
@@ -1482,7 +1558,7 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['event.ingested', '@timestamp'],
+        'event.ingested',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1493,10 +1569,12 @@ describe('utils', () => {
         failingIndexes: [],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002', 'auditbeat-7.9.0-2020.11.22-999999'],
         timestampsAndIndices: {
-          'event.ingested': [
-            'auditbeat-7.8.0-2020.10.22-000002',
-            'auditbeat-7.9.0-2020.11.22-999999',
-          ],
+          'event.ingested': {
+            'auditbeat-*': [
+              'auditbeat-7.8.0-2020.10.22-000002',
+              'auditbeat-7.9.0-2020.11.22-999999',
+            ],
+          },
         },
       });
     });
@@ -1532,7 +1610,7 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['event.ingested', '@timestamp'],
+        'event.ingested',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1541,42 +1619,49 @@ describe('utils', () => {
         result: 'partial failure',
         resultMessages: [
           'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"], defaulting to sorting events in ["auditbeat-7.9.0-2020.11.22-999999"] using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.9.0-2020.11.22-999999"]. See server logs for full list of failing indices, defaulting to sorting events in ["auditbeat-7.9.0-2020.11.22-999999"] using @timestamp field',
         ],
         failingIndexes: ['auditbeat-*', 'auditbeat-7.9.0-2020.11.22-999999'],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
-        timestampsAndIndices: { 'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002'] },
+        timestampsAndIndices: {
+          'event.ingested': { 'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'] },
+        },
       });
     });
     test('it should return success when all indexes in index pattern contain override field even if some / all are missing @timestamp field', async () => {
       alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
         if (endpoint === 'indices.getFieldMapping') {
-          return {
-            'auditbeat-7.8.0-2020.10.22-000002': {
-              mappings: {
-                'event.ingested': {
-                  full_name: 'event.ingested',
-                  mapping: {
-                    ingested: {
-                      type: 'date',
+          if (_options?.index === 'auditbeat-*') {
+            return {
+              'auditbeat-7.8.0-2020.10.22-000002': {
+                mappings: {
+                  'event.ingested': {
+                    full_name: 'event.ingested',
+                    mapping: {
+                      ingested: {
+                        type: 'date',
+                      },
                     },
                   },
                 },
               },
-            },
-            'myfakeindex-000001': {
-              mappings: {
-                'event.ingested': {
-                  full_name: 'event.ingested',
-                  mapping: {
-                    ingested: {
-                      type: 'date',
+            };
+          } else if (_options?.index === 'myfakeindex-*') {
+            return {
+              'myfakeindex-000001': {
+                mappings: {
+                  'event.ingested': {
+                    full_name: 'event.ingested',
+                    mapping: {
+                      ingested: {
+                        type: 'date',
+                      },
                     },
                   },
                 },
               },
-            },
-          };
+            };
+          }
         } else if (endpoint === 'cat.indices') {
           return _options?.index === 'auditbeat-*'
             ? [
@@ -1592,8 +1677,8 @@ describe('utils', () => {
         }
       });
       const res = await preExecutionRuleCheck(
-        ['auditbeat-*', 'myfakeindex*'],
-        ['event.ingested', '@timestamp'],
+        ['auditbeat-*', 'myfakeindex-*'],
+        'event.ingested',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1604,39 +1689,45 @@ describe('utils', () => {
         failingIndexes: [],
         successIndexes: ['myfakeindex-000001', 'auditbeat-7.8.0-2020.10.22-000002'],
         timestampsAndIndices: {
-          'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002', 'myfakeindex-000001'],
+          'event.ingested': {
+            'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'],
+            'myfakeindex-*': ['myfakeindex-000001'],
+          },
         },
       });
     });
     test('it should return partial failure when some indexes in some index patterns do not contain override field but have the @timestamp field', async () => {
       alertServices.callCluster.mockImplementation(async (endpoint, _options) => {
         if (endpoint === 'indices.getFieldMapping') {
-          return {
-            'auditbeat-7.8.0-2020.10.22-000002': {
-              mappings: {
-                'event.ingested': {
-                  full_name: 'event.ingested',
-                  mapping: {
-                    ingested: {
-                      type: 'date',
+          return _options?.index === 'auditbeat-*'
+            ? {
+                'auditbeat-7.8.0-2020.10.22-000002': {
+                  mappings: {
+                    'event.ingested': {
+                      full_name: 'event.ingested',
+                      mapping: {
+                        ingested: {
+                          type: 'date',
+                        },
+                      },
                     },
                   },
                 },
-              },
-            },
-            'myfakeindex-000001': {
-              mappings: {
-                '@timestamp': {
-                  full_name: '@timestamp',
-                  mapping: {
+              }
+            : {
+                'myfakeindex-000001': {
+                  mappings: {
                     '@timestamp': {
-                      type: 'date',
+                      full_name: '@timestamp',
+                      mapping: {
+                        '@timestamp': {
+                          type: 'date',
+                        },
+                      },
                     },
                   },
                 },
-              },
-            },
-          };
+              };
         } else if (endpoint === 'cat.indices') {
           return _options?.index === 'auditbeat-*'
             ? [
@@ -1652,8 +1743,8 @@ describe('utils', () => {
         }
       });
       const res = await preExecutionRuleCheck(
-        ['auditbeat-*', 'myfakeindex*'],
-        ['event.ingested', '@timestamp'],
+        ['auditbeat-*', 'myfakeindex-*'],
+        'event.ingested',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1661,13 +1752,13 @@ describe('utils', () => {
       expect(res).toMatchObject({
         result: 'partial failure',
         resultMessages: [
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["myfakeindex-000001"], defaulting to sorting events in ["myfakeindex-000001"] using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["myfakeindex-000001"]. See server logs for full list of failing indices, defaulting to sorting events in ["myfakeindex-000001"] using @timestamp field',
         ],
         failingIndexes: ['myfakeindex-000001'],
         successIndexes: ['myfakeindex-000001', 'auditbeat-7.8.0-2020.10.22-000002'],
         timestampsAndIndices: {
-          'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002'],
-          '@timestamp': ['myfakeindex-000001'],
+          'event.ingested': { 'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'] },
+          '@timestamp': { 'myfakeindex-*': ['myfakeindex-000001'] },
         },
       });
     });
@@ -1696,7 +1787,7 @@ describe('utils', () => {
       });
       const res = await preExecutionRuleCheck(
         ['auditbeat-*'],
-        ['event.ingested', '@timestamp'],
+        'event.ingested',
         alertServices,
         mockLogger,
         (msg) => msg
@@ -1705,7 +1796,7 @@ describe('utils', () => {
         result: 'partial failure',
         resultMessages: [
           'The field @timestamp was not found in any of the following index patterns ["auditbeat-*"]',
-          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-*"], defaulting to sorting events in ["auditbeat-*"] using @timestamp field',
+          'The timestamp override field event.ingested was not found in any of the following index patterns ["auditbeat-7.8.0-2020.10.22-000000","auditbeat-7.8.0-2020.10.22-000001","auditbeat-7.8.0-2020.10.22-000003","auditbeat-7.8.0-2020.10.22-000004","auditbeat-7.8.0-2020.10.22-000005"]. See server logs for full list of failing indices, defaulting to sorting events in ["auditbeat-7.8.0-2020.10.22-000000","auditbeat-7.8.0-2020.10.22-000001","auditbeat-7.8.0-2020.10.22-000003","auditbeat-7.8.0-2020.10.22-000004","auditbeat-7.8.0-2020.10.22-000005"] using @timestamp field',
         ],
         failingIndexes: [
           'auditbeat-*',
@@ -1718,7 +1809,7 @@ describe('utils', () => {
         ],
         successIndexes: ['auditbeat-7.8.0-2020.10.22-000002'],
         timestampsAndIndices: {
-          'event.ingested': ['auditbeat-7.8.0-2020.10.22-000002'],
+          'event.ingested': { 'auditbeat-*': ['auditbeat-7.8.0-2020.10.22-000002'] },
         },
       });
     });

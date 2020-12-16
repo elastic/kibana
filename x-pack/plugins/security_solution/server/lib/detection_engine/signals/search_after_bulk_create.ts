@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable complexity */
 
 import { isEmpty } from 'lodash/fp';
 
@@ -52,15 +51,10 @@ export const searchAfterAndBulkCreate = async ({
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   let toReturn = createSearchAfterReturnType();
 
-  // sortId tells us where to start our next consecutive search_after query
-  let sortId: string | undefined;
-
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
-  const timestamps = !isEmpty(timestampsAndIndices)
-    ? Object.keys(timestampsAndIndices).filter((key) => !isEmpty(timestampsAndIndices[key]))
-    : timestampsToSort;
+  const timestamps = timestampsToSort;
 
   if (timestamps == null || timestamps.length === 0) {
     logger.error(
@@ -74,6 +68,8 @@ export const searchAfterAndBulkCreate = async ({
   }
 
   for (const timestamp of timestamps) {
+    // sortId tells us where to start our next consecutive search_after query
+    let sortId: string | undefined;
     const totalToFromTuples = getSignalTimeTuples({
       logger,
       ruleParamsFrom: ruleParams.from,
@@ -100,8 +96,12 @@ export const searchAfterAndBulkCreate = async ({
         try {
           logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
+          // timestampsAndIndices can be empty if the rule author doesn't have
+          // view_index_metadata privileges and we can't access field mappings api
           const indexPatternsToSearch = !isEmpty(timestampsAndIndices)
-            ? timestampsAndIndices[timestamp]
+            ? Object.keys(timestampsAndIndices[timestamp])
+                .map((indexPattern) => timestampsAndIndices[timestamp][indexPattern])
+                .flat()
             : inputIndexPattern;
 
           // perform search_after with optionally undefined sortId
