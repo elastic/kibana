@@ -41,10 +41,12 @@ describe('mustache_renderer', () => {
         expect(renderMustacheString('{{c}}', variables, escape)).toBe('false');
         expect(renderMustacheString('{{d}}', variables, escape)).toBe('');
         expect(renderMustacheString('{{e}}', variables, escape)).toBe('');
-        if (escape === 'markdown') {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe('\\[object Object\\]');
+        if (escape === 'json') {
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('{\\"g\\":3,\\"h\\":null}');
+        } else if (escape === 'markdown') {
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('\\{"g":3,"h":null\\}');
         } else {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe('[object Object]');
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('{"g":3,"h":null}');
         }
         expect(renderMustacheString('{{f.g}}', variables, escape)).toBe('3');
         expect(renderMustacheString('{{f.h}}', variables, escape)).toBe('');
@@ -179,5 +181,22 @@ describe('mustache_renderer', () => {
         }
       `);
     });
+  });
+
+  describe('augmented object variables', () => {
+    const deepVariables = {
+      a: 1,
+      b: { c: 2, d: [3, 4] },
+      e: [5, { f: 6, g: 7 }],
+    };
+    expect(renderMustacheObject({ x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
+      .toMatchInlineSnapshot(`
+      Object {
+        "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
+      }
+    `);
+
+    const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
+    expect(renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(expected);
   });
 });

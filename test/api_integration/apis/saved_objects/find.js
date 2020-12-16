@@ -78,7 +78,8 @@ export default function ({ getService }) {
             }));
       });
 
-      describe('page beyond total', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/85911
+      describe.skip('page beyond total', () => {
         it('should return 200 with empty response', async () =>
           await supertest
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
@@ -419,7 +420,7 @@ export default function ({ getService }) {
           }));
     });
 
-    describe('without kibana index', () => {
+    describe.skip('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it

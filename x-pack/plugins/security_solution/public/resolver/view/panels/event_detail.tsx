@@ -8,7 +8,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, Fragment } from 'react';
+import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
@@ -222,7 +222,7 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountByCategory(state)(nodeID, breadcrumbEventCategory)
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
     selectors.relatedEventTotalCount(state)(nodeID)
@@ -246,7 +246,12 @@ function EventDetailBreadcrumbs({
     panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
   const breadcrumbs = useMemo(() => {
-    const crumbs = [
+    const crumbs: Array<
+      {
+        text: JSX.Element | string;
+        'data-test-subj'?: string;
+      } & HTMLAttributes<HTMLAnchorElement>
+    > = [
       {
         text: i18n.translate(
           'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
@@ -254,6 +259,7 @@ function EventDetailBreadcrumbs({
             defaultMessage: 'Events',
           }
         ),
+        'data-test-subj': 'resolver:event-detail:breadcrumbs:node-list-link',
         ...nodesLinkNavProps,
       },
       {
