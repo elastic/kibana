@@ -35,7 +35,11 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (
-    <EuiFlexGroup className="mlJobMapLegend__container" alignItems="center">
+    <EuiFlexGroup
+      className="mlJobMapLegend__container"
+      alignItems="center"
+      data-test-subj="mlPageDataFrameAnalyticsMapLegend"
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>

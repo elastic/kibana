@@ -574,6 +574,7 @@ export interface DocLinksStart {
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
     };
 }
