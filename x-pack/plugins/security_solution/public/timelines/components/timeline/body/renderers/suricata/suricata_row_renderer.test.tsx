@@ -17,6 +17,15 @@ import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../../../../common/components/link_to');
 
 describe('suricata_row_renderer', () => {

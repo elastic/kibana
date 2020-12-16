@@ -28,7 +28,7 @@ export async function storeReport(
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  const appUsage = report.application_usage ? Object.entries(report.application_usage) : [];
+  const appUsage = report.application_usage ? Object.values(report.application_usage) : [];
 
   const momentTimestamp = moment();
   const timestamp = momentTimestamp.toDate();
@@ -79,9 +79,12 @@ export async function storeReport(
       (async () => {
         if (!appUsage.length) return [];
         const { saved_objects: savedObjects } = await internalRepository.bulkCreate(
-          appUsage.map(([appId, metric]) => ({
+          appUsage.map((metric) => ({
             type: 'application_usage_transactional',
-            attributes: { ...metric, appId, timestamp },
+            attributes: {
+              ...metric,
+              timestamp,
+            },
           }))
         );
 
