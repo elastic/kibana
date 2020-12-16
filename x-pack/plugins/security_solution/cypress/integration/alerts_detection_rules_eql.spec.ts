@@ -97,12 +97,6 @@ describe.skip('Detection rules, EQL', () => {
     });
   });
 
-  after(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
-    removeSignalsIndex();
-  });
-
   it('Creates and activates a new EQL rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -193,12 +187,6 @@ describe('Detection rules, sequence EQL', () => {
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    removeSignalsIndex();
-    deleteTimeline(eqlSequenceRule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new EQL rule with a sequence', () => {

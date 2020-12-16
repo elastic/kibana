@@ -22,11 +22,6 @@ describe.skip('persistent timeline', () => {
     waitsForEventsToBeLoaded();
   });
 
-  afterEach(() => {
-    openEventsViewerFieldsBrowser();
-    resetFields();
-  });
-
   it('persist the deletion of a column', () => {
     cy.get(DRAGGABLE_HEADER).then((header) => {
       const currentNumberOfTimelineColumns = header.length;

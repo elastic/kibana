@@ -67,10 +67,6 @@ describe('attach timeline to case', () => {
       esArchiverLoad('case_and_timeline');
     });
 
-    after(() => {
-      esArchiverUnload('case_and_timeline');
-    });
-
     it('attach timeline to an existing case', () => {
       loginAndWaitForTimeline(caseTimeline.id!);
       attachTimelineToExistingCase();
@@ -84,6 +80,7 @@ describe('attach timeline to case', () => {
           }](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id!}%27,isOpen:!t))`
         );
       });
+      esArchiverUnload('case_and_timeline');
     });
   });
 });

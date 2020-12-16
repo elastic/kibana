@@ -24,10 +24,6 @@ describe('Export timelines', () => {
     });
   });
 
-  after(() => {
-    deleteTimeline(timelineId);
-  });
-
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();

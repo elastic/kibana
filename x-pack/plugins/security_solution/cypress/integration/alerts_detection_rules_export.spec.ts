@@ -34,11 +34,6 @@ describe('Export rules', () => {
     });
   });
 
-  after(() => {
-    removeSignalsIndex();
-    deleteCustomRule();
-  });
-
   it('Exports a custom rule', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();

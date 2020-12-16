@@ -39,10 +39,6 @@ describe('toggle column in timeline', () => {
     });
   });
 
-  after(() => {
-    deleteTimeline(timelineId);
-  });
-
   beforeEach(() => {
     openTimelineUsingToggle();
     populateTimeline();

@@ -103,12 +103,6 @@ describe.skip('Detection rules, override', () => {
     });
   });
 
-  afterEach(() => {
-    removeSignalsIndex();
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
-  });
-
   it('Creates and activates a new custom rule with override option', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();

@@ -97,12 +97,6 @@ describe.skip('Detection rules, threshold', () => {
     });
   });
 
-  afterEach(() => {
-    removeSignalsIndex();
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
-  });
-
   it('Creates and activates a new threshold rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();

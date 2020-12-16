@@ -77,10 +77,6 @@ describe('Detection rules, machine learning', () => {
     cleanKibana();
     removeSignalsIndex();
   });
-  after(() => {
-    removeSignalsIndex();
-    deleteRule();
-  });
 
   it('Creates and activates a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

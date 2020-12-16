@@ -97,13 +97,6 @@ describe('Detection rules, Indicator Match', () => {
     esArchiverLoad('threat_data');
   });
 
-  afterEach(() => {
-    esArchiverUnload('threat_indicator');
-    esArchiverUnload('threat_data');
-    deleteRule();
-    removeSignalsIndex();
-  });
-
   it('Creates and activates a new Indicator Match rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -196,5 +189,8 @@ describe('Detection rules, Indicator Match', () => {
       .first()
       .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+
+    esArchiverUnload('threat_indicator');
+    esArchiverUnload('threat_data');
   });
 });

@@ -43,12 +43,6 @@ describe('Alerts detection rules', () => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
 
-  after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
-    cy.clock().invoke('restore');
-    removeSignalsIndex();
-  });
-
   it('Sorts by activated rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -86,6 +80,8 @@ describe('Alerts detection rules', () => {
             cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });
       });
+
+    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   // FIXME: UI hangs on loading

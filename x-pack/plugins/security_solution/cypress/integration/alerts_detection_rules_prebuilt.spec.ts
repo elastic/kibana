@@ -46,11 +46,6 @@ describe('Alerts rules, prebuilt rules', () => {
     esArchiverLoadEmptyKibana();
   });
 
-  after(() => {
-    removeSignalsIndex();
-    esArchiverUnloadEmptyKibana();
-  });
-
   it('Loads prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
@@ -102,10 +97,6 @@ describe('Deleting prebuilt rules', () => {
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
-  });
-
-  afterEach(() => {
-    esArchiverUnloadEmptyKibana();
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {

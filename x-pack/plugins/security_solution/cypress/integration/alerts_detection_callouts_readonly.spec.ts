@@ -51,12 +51,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
     login(ROLES.reader);
   });
 
-  after(() => {
-    deleteRoleAndUser(ROLES.reader);
-    deleteRoleAndUser(ROLES.platform_engineer);
-    removeSignalsIndex();
-  });
-
   context('On Detections home page', () => {
     beforeEach(() => {
       loadPageAsReadOnlyUser(DETECTIONS_URL);

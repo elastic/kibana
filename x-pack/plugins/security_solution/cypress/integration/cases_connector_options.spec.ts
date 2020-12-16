@@ -47,10 +47,6 @@ describe('Cases connector incident fields', () => {
     });
   });
 
-  after(() => {
-    deleteCase();
-  });
-
   it('Correct incident fields show when connector is changed', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
