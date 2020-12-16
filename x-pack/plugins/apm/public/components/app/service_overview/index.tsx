@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  isWithinMaxBreakpoint,
-} from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
+import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
