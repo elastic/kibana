@@ -13,6 +13,7 @@ import {
   JobType,
   CanDeleteJobResponse,
   SyncSavedObjectResponse,
+  InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
 } from '../../../../common/types/saved_objects';
@@ -55,7 +56,13 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-
+  initSavedObjects(simulate: boolean = false) {
+    return httpService.http<InitializeSavedObjectResponse>({
+      path: `${basePath()}/saved_objects/initialize`,
+      method: 'GET',
+      query: { simulate },
+    });
+  },
   canDeleteJob(jobType: JobType, jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return httpService.http<CanDeleteJobResponse>({

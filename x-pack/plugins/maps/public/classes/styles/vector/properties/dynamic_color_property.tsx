@@ -7,6 +7,7 @@
 import { Map as MbMap } from 'mapbox-gl';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
