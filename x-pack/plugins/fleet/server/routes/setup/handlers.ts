@@ -62,7 +62,7 @@ export const createFleetSetupHandler: RequestHandler<
     const soClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     await setupIngestManager(soClient, callCluster);
-    await setupFleet(soClient, callCluster, {
+    await setupFleet(soClient, context.core.elasticsearch.client.asCurrentUser, callCluster, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 

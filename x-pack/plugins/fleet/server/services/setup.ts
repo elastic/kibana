@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -127,6 +127,7 @@ async function createSetupSideEffects(
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser,
   options?: { forceRecreate?: boolean }
 ) {
@@ -182,7 +183,7 @@ export async function setupFleet(
 
   await Promise.all(
     agentPolicies.map((agentPolicy) => {
-      return generateEnrollmentAPIKey(soClient, {
+      return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
       });

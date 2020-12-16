@@ -37,6 +37,7 @@ export const config: PluginConfigDescriptor = {
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      fleetServerEnabled: schema.boolean({ defaultValue: false }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
       pollingRequestTimeout: schema.number({
         defaultValue: AGENT_POLLING_REQUEST_TIMEOUT_MS,
