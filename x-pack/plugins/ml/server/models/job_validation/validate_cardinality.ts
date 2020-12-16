@@ -26,6 +26,11 @@ function isScriptField(job: CombinedJob, fieldName: string): boolean {
   return scriptFields.includes(fieldName);
 }
 
+function isRuntimeMapping(job: CombinedJob, fieldName: string): boolean {
+  const runtimeMappings = Object.keys(job.datafeed_config.runtime_mappings ?? {});
+  return runtimeMappings.includes(fieldName);
+}
+
 // Thresholds to determine whether cardinality is
 // too high or low for certain fields analysis
 const OVER_FIELD_CARDINALITY_THRESHOLD_LOW = 10;
@@ -93,6 +98,13 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
             ) {
               return true;
             }
+            if (
+              typeof datafeedConfig?.runtime_mappings === 'object' &&
+              datafeedConfig?.runtime_mappings.hasOwnProperty(field)
+            ) {
+              return true;
+            }
+
             // if datafeed has aggregation fields, check recursively if field exist
             if (
               datafeedAggregations !== undefined &&
@@ -136,10 +148,11 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
             }
           } else {
             // only report uniqueFieldName as not aggregatable if it's not part
-            // of a valid categorization configuration and if it's not a scripted field.
+            // of a valid categorization configuration and if it's not a scripted field or runtime mapping.
             if (
               !isValidCategorizationConfig(job, uniqueFieldName) &&
-              !isScriptField(job, uniqueFieldName)
+              !isScriptField(job, uniqueFieldName) &&
+              !isRuntimeMapping(job, uniqueFieldName)
             ) {
               messages.push({
                 id: 'field_not_aggregatable',
