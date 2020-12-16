@@ -26,6 +26,7 @@ import {
   goToInProgressAlerts,
 } from '../tasks/alerts';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -34,6 +35,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
+      cleanKibana();
       removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
@@ -165,6 +167,7 @@ describe('Alerts', () => {
 
   context('Opening alerts', () => {
     beforeEach(() => {
+      cleanKibana();
       removeSignalsIndex();
       esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
@@ -218,6 +221,7 @@ describe('Alerts', () => {
 
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
+      cleanKibana();
       removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);

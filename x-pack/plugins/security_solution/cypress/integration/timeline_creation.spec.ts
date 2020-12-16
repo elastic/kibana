@@ -26,6 +26,7 @@ import {
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
 import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -49,6 +50,10 @@ import { OVERVIEW_URL } from '../urls/navigation';
 // FLAKY: https://github.com/elastic/kibana/issues/79389
 describe.skip('Timelines', () => {
   let timelineId: string;
+
+  before(() => {
+    cleanKibana();
+  });
 
   after(() => {
     if (timelineId) deleteTimeline(timelineId);

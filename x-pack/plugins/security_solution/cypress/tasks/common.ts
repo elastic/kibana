@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { esArchiverLoadEmptyKibana } from './es_archiver';
+
 const primaryButton = 0;
 
 /**
@@ -59,4 +61,9 @@ export const reload = (afterReload: () => void) => {
   cy.reload();
   cy.contains('a', 'Security');
   afterReload();
+};
+
+export const cleanKibana = () => {
+  cy.exec(`curl -XDELETE ${Cypress.env('ELASTICSEARCH_URL')}/.kibana_2 -k`);
+  esArchiverLoadEmptyKibana();
 };

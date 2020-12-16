@@ -67,6 +67,7 @@ import {
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -80,7 +81,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, threshold', () => {
+describe.skip('Detection rules, threshold', () => {
   const expectedUrls = newThresholdRule.referenceUrls.join('');
   const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
   const expectedTags = newThresholdRule.tags.join('');
@@ -89,6 +90,7 @@ describe('Detection rules, threshold', () => {
   const rule = { ...newThresholdRule };
 
   beforeEach(() => {
+    cleanKibana();
     removeSignalsIndex();
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;

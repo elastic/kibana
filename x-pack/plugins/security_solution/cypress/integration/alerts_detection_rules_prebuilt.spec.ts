@@ -37,9 +37,11 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 
 describe('Alerts rules, prebuilt rules', () => {
   before(() => {
+    cleanKibana();
     removeSignalsIndex();
     esArchiverLoadEmptyKibana();
   });
@@ -86,6 +88,7 @@ describe('Deleting prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
+    cleanKibana();
     esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();

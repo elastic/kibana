@@ -67,6 +67,7 @@ import {
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -90,6 +91,7 @@ describe('Detection rules, Indicator Match', () => {
   const expectedNumberOfAlerts = 1;
 
   beforeEach(() => {
+    cleanKibana();
     removeSignalsIndex();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');

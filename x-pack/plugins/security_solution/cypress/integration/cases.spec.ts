@@ -40,6 +40,7 @@ import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { deleteCase, openCaseTimeline } from '../tasks/case_details';
+import { cleanKibana } from '../tasks/common';
 import {
   attachTimeline,
   backToCases,
@@ -55,6 +56,7 @@ describe('Cases', () => {
   const mycase = { ...case1 };
 
   before(() => {
+    cleanKibana();
     createTimeline(case1.timeline).then((response) => {
       mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reload } from '../tasks/common';
+import { cleanKibana, reload } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
 import { HOSTS_URL } from '../urls/navigation';
 import { openEvents } from '../tasks/hosts/main';
@@ -16,6 +16,7 @@ import { removeColumn, resetFields } from '../tasks/timeline';
 // Failing: See https://github.com/elastic/kibana/issues/75794
 describe.skip('persistent timeline', () => {
   before(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     openEvents();
     waitsForEventsToBeLoaded();

@@ -33,6 +33,7 @@ import { clearSearchBar, kqlSearch } from '../tasks/security_header';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { resetFields } from '../tasks/timeline';
+import { cleanKibana } from '../tasks/common';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -47,6 +48,7 @@ const defaultHeadersInDefaultEcsCategory = [
 describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -73,6 +75,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -91,6 +94,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -122,6 +126,7 @@ describe('Events Viewer', () => {
 
   context('Events behaviour', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
@@ -144,6 +149,7 @@ describe('Events Viewer', () => {
 
   context('Events columns', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       cy.scrollTo('bottom');

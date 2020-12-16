@@ -54,6 +54,7 @@ import {
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -73,6 +74,7 @@ describe('Detection rules, machine learning', () => {
   const expectedNumberOfRules = 1;
 
   before(() => {
+    cleanKibana();
     removeSignalsIndex();
   });
   after(() => {

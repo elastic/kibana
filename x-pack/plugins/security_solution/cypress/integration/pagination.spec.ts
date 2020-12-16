@@ -6,6 +6,7 @@
 
 import { PROCESS_NAME_FIELD } from '../screens/hosts/uncommon_processes';
 import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../screens/pagination';
+import { cleanKibana } from '../tasks/common';
 
 import { waitForAuthenticationsToBeLoaded } from '../tasks/hosts/authentications';
 import { openAuthentications, openUncommonProcesses } from '../tasks/hosts/main';
@@ -18,6 +19,7 @@ import { HOSTS_PAGE_TAB_URLS } from '../urls/navigation';
 
 describe('Pagination', () => {
   before(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForUncommonProcessesToBeLoaded();
   });

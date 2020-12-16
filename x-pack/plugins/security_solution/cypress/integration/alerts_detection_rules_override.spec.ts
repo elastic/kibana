@@ -72,6 +72,7 @@ import {
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -95,6 +96,7 @@ describe.skip('Detection rules, override', () => {
   const rule = { ...newOverrideRule };
 
   beforeEach(() => {
+    cleanKibana();
     removeSignalsIndex();
     createTimeline(newOverrideRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;

@@ -10,11 +10,13 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { TIMELINES_URL } from '../urls/navigation';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { expectedExportedTimeline, timeline } from '../objects/timeline';
+import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {
   let timelineResponse: Cypress.Response;
   let timelineId: string;
   before(() => {
+    cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimeline(timeline).then((response) => {
       timelineResponse = response;

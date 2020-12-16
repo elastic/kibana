@@ -33,10 +33,12 @@ import {
 import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+import { cleanKibana } from '../tasks/common';
 
 describe('Exceptions', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
+    cleanKibana();
     removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
