@@ -316,6 +316,7 @@ export interface NodeData {
    * An indication of the current state for retrieving the data.
    */
   status: NodeDataStatus;
+  dataRequestID: number;
 }
 
 /**
