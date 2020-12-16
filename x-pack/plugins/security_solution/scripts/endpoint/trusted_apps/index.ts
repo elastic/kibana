@@ -7,6 +7,7 @@
 import minimist from 'minimist';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import bluebird from 'bluebird';
+import { basename } from 'path';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
 
@@ -14,13 +15,26 @@ const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout })
 const separator = '----------------------------------------';
 
 export const cli = async () => {
-  const options: RunOptions = minimist(process.argv.slice(2), {
+  const cliDefaults = {
     string: ['kibana'],
     default: {
       count: 10,
       kibana: 'http://elastic:changeme@localhost:5601',
     },
-  }) as RunOptions;
+  };
+  const options: RunOptions = minimist<RunOptions>(process.argv.slice(2), cliDefaults);
+
+  if ('help' in options) {
+    defaultLogger.write(`
+node ${basename(process.argv[1])} [options]
+
+Options:${Object.keys(cliDefaults.default).reduce((out, option) => {
+      // @ts-ignore
+      return `${out}\n  --${option}=${cliDefaults.default[option]}`;
+    }, '')}
+`);
+    return;
+  }
 
   const runLogger = createRunLogger();
 
