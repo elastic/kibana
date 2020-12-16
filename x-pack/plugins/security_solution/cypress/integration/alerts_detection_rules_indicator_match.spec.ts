@@ -90,6 +90,7 @@ describe('Detection rules, Indicator Match', () => {
   const expectedNumberOfAlerts = 1;
 
   beforeEach(() => {
+    removeSignalsIndex();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
   });

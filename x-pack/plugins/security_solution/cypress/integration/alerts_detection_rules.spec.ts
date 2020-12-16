@@ -33,15 +33,18 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 
 describe('Alerts detection rules', () => {
   before(() => {
+    removeSignalsIndex();
     esArchiverLoad('prebuilt_rules_loaded');
   });
 
   after(() => {
     esArchiverUnload('prebuilt_rules_loaded');
     cy.clock().invoke('restore');
+    removeSignalsIndex();
   });
 
   it('Sorts by activated rules', () => {

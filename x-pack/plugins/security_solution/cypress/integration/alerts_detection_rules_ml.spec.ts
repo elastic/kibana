@@ -53,6 +53,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -71,7 +72,11 @@ describe('Detection rules, machine learning', () => {
   const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
   const expectedNumberOfRules = 1;
 
+  before(() => {
+    removeSignalsIndex();
+  });
   after(() => {
+    removeSignalsIndex();
     deleteRule();
   });
 

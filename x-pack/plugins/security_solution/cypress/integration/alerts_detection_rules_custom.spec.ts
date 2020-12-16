@@ -115,6 +115,7 @@ describe('Custom detection rules creation', () => {
   const rule = { ...newRule };
 
   before(() => {
+    removeSignalsIndex();
     createTimeline(newRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
@@ -219,6 +220,7 @@ describe('Custom detection rules creation', () => {
 
 describe.skip('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
+    removeSignalsIndex();
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();

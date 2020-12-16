@@ -37,6 +37,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Exceptions', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
+    removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule);

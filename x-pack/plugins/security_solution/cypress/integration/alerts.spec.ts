@@ -34,6 +34,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
@@ -164,6 +165,7 @@ describe('Alerts', () => {
 
   context('Opening alerts', () => {
     beforeEach(() => {
+      removeSignalsIndex();
       esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
@@ -216,6 +218,7 @@ describe('Alerts', () => {
 
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });

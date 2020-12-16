@@ -65,6 +65,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
@@ -88,12 +89,14 @@ describe('Detection rules, threshold', () => {
   const rule = { ...newThresholdRule };
 
   beforeEach(() => {
+    removeSignalsIndex();
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
   });
 
   afterEach(() => {
+    removeSignalsIndex();
     deleteTimeline(rule.timeline.id!);
     deleteRule();
   });

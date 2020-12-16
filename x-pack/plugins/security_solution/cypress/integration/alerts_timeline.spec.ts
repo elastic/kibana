@@ -7,6 +7,7 @@
 import { PROVIDER_BADGE } from '../screens/timeline';
 
 import { investigateFirstAlertInTimeline, waitForAlertsPanelToBeLoaded } from '../tasks/alerts';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -14,11 +15,13 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Alerts timeline', () => {
   beforeEach(() => {
+    removeSignalsIndex();
     esArchiverLoad('timeline_alerts');
     loginAndWaitForPage(DETECTIONS_URL);
   });
 
   afterEach(() => {
+    removeSignalsIndex();
     esArchiverUnload('timeline_alerts');
   });
 

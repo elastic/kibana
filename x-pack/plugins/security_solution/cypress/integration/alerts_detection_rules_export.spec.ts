@@ -11,7 +11,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule } from '../tasks/api_calls/rules';
+import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -19,6 +19,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Export rules', () => {
   let ruleResponse: Cypress.Response;
   before(() => {
+    removeSignalsIndex();
     cy.intercept(
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
@@ -32,6 +33,7 @@ describe('Export rules', () => {
   });
 
   after(() => {
+    removeSignalsIndex();
     deleteCustomRule();
   });
 

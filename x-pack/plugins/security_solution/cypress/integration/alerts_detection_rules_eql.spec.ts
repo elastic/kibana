@@ -63,6 +63,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
@@ -88,6 +89,7 @@ describe('Detection rules, EQL', () => {
   const rule = { ...eqlRule };
 
   before(() => {
+    removeSignalsIndex();
     createTimeline(eqlRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
@@ -96,6 +98,7 @@ describe('Detection rules, EQL', () => {
   after(() => {
     deleteTimeline(rule.timeline.id!);
     deleteRule();
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new EQL rule', () => {
@@ -183,12 +186,14 @@ describe('Detection rules, sequence EQL', () => {
   const rule = { ...eqlSequenceRule };
 
   before(() => {
+    removeSignalsIndex();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
   });
 
   afterEach(() => {
+    removeSignalsIndex();
     deleteTimeline(eqlSequenceRule.timeline.id!);
     deleteRule();
   });
