@@ -12,6 +12,7 @@ else
   echo "NODE_ENV=$NODE_ENV"
   node ./x-pack/plugins/canvas/scripts/shareable_runtime
   echo " -> Running jest tests with coverage"
+  cd x-pack
   node --max-old-space-size=6144 scripts/jest --ci --verbose --maxWorkers=5 --coverage --config jest.config.js
   # rename file in order to be unique one
   test -f ../target/kibana-coverage/jest/coverage-final.json \
