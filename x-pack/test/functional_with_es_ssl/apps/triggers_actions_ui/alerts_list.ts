@@ -349,7 +349,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteAlerts([createdAlert.id]);
     });
 
-    it('should delete all selection', async () => {
+    it.skip('should delete all selection', async () => {
       const namePrefix = generateUniqueKey();
       let count = 0;
       const createdAlertsFirstPage = await Promise.all(

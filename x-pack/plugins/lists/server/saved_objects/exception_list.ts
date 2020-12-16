@@ -6,11 +6,12 @@
 
 import { SavedObjectsType } from 'kibana/server';
 
-import { migrations } from './migrations';
+import {
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../common/types';
 
-export const exceptionListSavedObjectType = 'exception-list';
-export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
-export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
+import { migrations } from './migrations';
 
 /**
  * This is a super set of exception list and exception list items. The switch

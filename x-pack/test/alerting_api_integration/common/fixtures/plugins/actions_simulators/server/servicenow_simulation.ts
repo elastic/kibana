@@ -89,6 +89,44 @@ export function initPlugin(router: IRouter, path: string) {
       });
     }
   );
+
+  router.get(
+    {
+      path: `${path}/api/now/v2/table/sys_dictionary`,
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return jsonResponse(res, 200, {
+        result: [
+          {
+            column_label: 'Close notes',
+            mandatory: 'false',
+            max_length: '4000',
+            element: 'close_notes',
+          },
+          {
+            column_label: 'Description',
+            mandatory: 'false',
+            max_length: '4000',
+            element: 'description',
+          },
+          {
+            column_label: 'Short description',
+            mandatory: 'false',
+            max_length: '160',
+            element: 'short_description',
+          },
+        ],
+      });
+    }
+  );
 }
 
 function jsonResponse(res: KibanaResponseFactory, code: number, object?: Record<string, unknown>) {

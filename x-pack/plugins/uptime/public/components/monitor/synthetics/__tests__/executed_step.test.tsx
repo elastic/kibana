@@ -9,7 +9,8 @@ import { ExecutedStep } from '../executed_step';
 import { Ping } from '../../../../../common/runtime_types';
 import { mountWithRouter } from '../../../../lib';
 
-describe('ExecutedStep', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/85899
+describe.skip('ExecutedStep', () => {
   let step: Ping;
 
   beforeEach(() => {
@@ -75,6 +76,7 @@ describe('ExecutedStep', () => {
         <EuiLink>
           <button
             className="euiLink euiLink--primary"
+            disabled={false}
             type="button"
           >
             <Link
