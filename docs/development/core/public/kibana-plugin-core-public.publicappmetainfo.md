@@ -9,7 +9,8 @@ Public information about a registered app's [keywords](./kibana-plugin-core-publ
 <b>Signature:</b>
 
 ```typescript
-export declare type PublicAppMetaInfo = Omit<AppMeta, 'keywords'> & {
+export declare type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
     keywords: string[];
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 ```

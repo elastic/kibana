@@ -14,8 +14,7 @@ export interface AppLink {
   app: PublicAppInfo;
   subLinkTitles: string[];
   path: string;
-  meta: PublicAppMetaInfo;
-  subLinkKeywords: string[];
+  keywords: string[];
 }
 
 /** weighting factor for scoring keywords */
@@ -37,8 +36,7 @@ export const getAppResults = (
                 app,
                 path: app.appRoute,
                 subLinkTitles: [],
-                subLinkKeywords: [],
-                meta: app.meta,
+                keywords: app.meta?.keywords ?? [],
               },
             ]
       )
@@ -55,10 +53,13 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   term = term.toLowerCase();
   const title = [appLink.app.title, ...appLink.subLinkTitles].join(' ').toLowerCase();
   const appScoreByTerms = scoreAppByTerms(term, title);
-  const appKeywords = appLink.app.meta.keywords.map((keyword) => keyword.toLowerCase());
-  const appSubLinkKeywords = appLink.subLinkKeywords.map((keyword) => keyword.toLowerCase());
-  const keywords = [...appKeywords, ...appSubLinkKeywords];
+
+  const keywords = [
+    ...appLink.app.meta.keywords.map((keyword) => keyword.toLowerCase()),
+    ...appLink.keywords.map((keyword) => keyword.toLowerCase()),
+  ];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
+
   return Math.max(appScoreByTerms, appScoreByKeywords * keywordScoreWeighting);
 };
 
@@ -124,12 +125,9 @@ const flattenDeepLinks = (
         app,
         path: app.appRoute,
         subLinkTitles: [],
-        subLinkKeywords: [],
-        meta: {
-          keywords: app.meta?.keywords || [],
-        },
+        keywords: app.meta?.keywords ?? [],
       },
-      ...app.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
+      ...app.meta.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
     ];
   }
   return [
@@ -138,10 +136,9 @@ const flattenDeepLinks = (
           {
             id: `${app.id}-${deepLink.id}`,
             app,
-            subLinkTitles: [deepLink.title],
-            subLinkKeywords: [...deepLink.meta.keywords],
             path: `${app.appRoute}${deepLink.path}`,
-            meta: { ...deepLink.meta },
+            subLinkTitles: [deepLink.title],
+            keywords: [...(deepLink.keywords ?? [])],
           },
         ]
       : []),
@@ -152,7 +149,7 @@ const flattenDeepLinks = (
         // shift current sublink title into array of sub-sublink titles
         subLinkTitles: [deepLink.title, ...deepAppLink.subLinkTitles],
         // combine current sublink keywords into array of sub-link keywords
-        subLinkKeywords: deepLink.meta.keywords.concat(deepAppLink.subLinkKeywords),
+        keywords: deepLink.keywords.concat(deepAppLink.keywords),
       })),
   ];
 };

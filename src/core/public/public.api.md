@@ -56,12 +56,11 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
     meta?: AppMeta;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
-    searchDeepLinks?: AppSearchDeepLink[];
     status?: AppStatus;
     title: string;
     tooltip?: string;
@@ -141,6 +140,7 @@ export interface ApplicationStart {
 // @public
 export interface AppMeta {
     keywords?: string[];
+    searchDeepLinks?: AppSearchDeepLink[];
 }
 
 // @public
@@ -192,11 +192,11 @@ export type AppSearchDeepLink = {
 } & ({
     path: string;
     searchDeepLinks?: AppSearchDeepLink[];
-    meta?: AppMeta;
+    keywords?: string[];
 } | {
     path?: string;
     searchDeepLinks: AppSearchDeepLink[];
-    meta?: AppMeta;
+    keywords?: string[];
 });
 
 // @public
@@ -209,7 +209,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks' | 'meta'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -1015,23 +1015,23 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks' | 'meta'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
     meta: PublicAppMetaInfo;
 };
 
 // @public
-export type PublicAppMetaInfo = Omit<AppMeta, 'keywords'> & {
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
     keywords: string[];
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 // @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'meta'> & {
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-    meta: PublicAppMetaInfo;
+    keywords: string[];
 };
 
 // @public

@@ -63,7 +63,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     }));
 
     return {
-      searchDeepLinks: deepLinks,
+      meta: { searchDeepLinks: deepLinks },
     };
   });
 

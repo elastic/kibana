@@ -43,22 +43,24 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      searchDeepLinks: [],
       meta: {
         keywords: [],
+        searchDeepLinks: [],
       },
     });
   });
 
   it('populates default values for nested searchDeepLinks', () => {
     const app = createApp({
-      searchDeepLinks: [
-        {
-          id: 'sub-id',
-          title: 'sub-title',
-          searchDeepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
-        },
-      ],
+      meta: {
+        searchDeepLinks: [
+          {
+            id: 'sub-id',
+            title: 'sub-title',
+            searchDeepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
+          },
+        ],
+      },
     });
     const info = getAppInfo(app);
 
@@ -68,28 +70,24 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      searchDeepLinks: [
-        {
-          id: 'sub-id',
-          title: 'sub-title',
-          meta: {
-            keywords: [],
-          },
-          searchDeepLinks: [
-            {
-              id: 'sub-sub-id',
-              title: 'sub-sub-title',
-              path: '/sub-sub',
-              meta: {
-                keywords: [],
-              },
-              searchDeepLinks: [], // default empty array added
-            },
-          ],
-        },
-      ],
       meta: {
         keywords: [],
+        searchDeepLinks: [
+          {
+            id: 'sub-id',
+            title: 'sub-title',
+            keywords: [],
+            searchDeepLinks: [
+              {
+                id: 'sub-sub-id',
+                title: 'sub-sub-title',
+                path: '/sub-sub',
+                keywords: [],
+                searchDeepLinks: [], // default empty array added
+              },
+            ],
+          },
+        ],
       },
     });
   });
@@ -123,20 +121,22 @@ describe('getAppInfo', () => {
 
   it('adds default meta fields to sublinks when needed', () => {
     const app = createApp({
-      searchDeepLinks: [
-        {
-          id: 'sub-id',
-          title: 'sub-title',
-          searchDeepLinks: [
-            {
-              id: 'sub-sub-id',
-              title: 'sub-sub-title',
-              path: '/sub-sub',
-              meta: { keywords: ['sub sub'] },
-            },
-          ],
-        },
-      ],
+      meta: {
+        searchDeepLinks: [
+          {
+            id: 'sub-id',
+            title: 'sub-title',
+            searchDeepLinks: [
+              {
+                id: 'sub-sub-id',
+                title: 'sub-sub-title',
+                path: '/sub-sub',
+                keywords: ['sub sub'],
+              },
+            ],
+          },
+        ],
+      },
     });
     const info = getAppInfo(app);
 
@@ -146,23 +146,25 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      meta: { keywords: [] },
-      searchDeepLinks: [
-        {
-          id: 'sub-id',
-          title: 'sub-title',
-          meta: { keywords: [] }, // default empty array
-          searchDeepLinks: [
-            {
-              id: 'sub-sub-id',
-              title: 'sub-sub-title',
-              path: '/sub-sub',
-              meta: { keywords: ['sub sub'] },
-              searchDeepLinks: [],
-            },
-          ],
-        },
-      ],
+      meta: {
+        keywords: [],
+        searchDeepLinks: [
+          {
+            id: 'sub-id',
+            title: 'sub-title',
+            keywords: [], // default empty array
+            searchDeepLinks: [
+              {
+                id: 'sub-sub-id',
+                title: 'sub-sub-title',
+                path: '/sub-sub',
+                keywords: ['sub sub'],
+                searchDeepLinks: [],
+              },
+            ],
+          },
+        ],
+      },
     });
   });
 });

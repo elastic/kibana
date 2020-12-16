@@ -6,7 +6,7 @@
 
 Input type for meta data for an application.
 
-Meta fields include at least `keywords`<!-- -->, an array of strings with which to associate the app. Keywords must include at least one unique string as an array.
+Meta fields include `keywords` and `searchDeepLinks` Keywords is an array of string with which to associate the app, must include at least one unique string as an array. `searchDeepLinks` is an array of links that represent secondary in-app locations for the app.
 
 <b>Signature:</b>
 
@@ -19,4 +19,5 @@ export interface AppMeta
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [keywords](./kibana-plugin-core-public.appmeta.keywords.md) | <code>string[]</code> | Keywords to represent this application |
+|  [searchDeepLinks](./kibana-plugin-core-public.appmeta.searchdeeplinks.md) | <code>AppSearchDeepLink[]</code> | Array of links that represent secondary in-app locations for the app. |
 

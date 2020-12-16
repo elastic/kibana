@@ -14,7 +14,7 @@ meta?: AppMeta;
 
 ## Remarks
 
-Used for global search results (where available).
+Used to populate navigational search results (where available). Can be updated using the [App.updater$](./kibana-plugin-core-public.app.updater_.md) observable. See  for more details.
 
 ## Example
 
@@ -24,7 +24,17 @@ core.application.register({
   id: 'my_app',
   title: 'Translated title',
   meta: {
-    keywords: ['tracing', 'distributed tracing']
+    keywords: ['translated keyword1', 'translated keyword2'],
+    searchDeepLinks: [
+    { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
+    {
+      id: 'sub2',
+      title: 'Sub2',
+      searchDeepLinks: [
+        { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
+      ]
+    }
+  ],
   },
   mount: () => { ... }
 })
