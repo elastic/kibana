@@ -70,8 +70,8 @@ export const NodeContextPopover = ({
   }
 
   return (
-    <EuiOutsideClickDetector onOutsideClick={onClose}>
-      <EuiPortal>
+    <EuiPortal>
+      <EuiOutsideClickDetector onOutsideClick={onClose}>
         <OverlayPanel>
           <OverlayHeader>
             <EuiFlexGroup responsive={false} gutterSize="m">
@@ -122,8 +122,8 @@ export const NodeContextPopover = ({
           </OverlayHeader>
           {tabs[selectedTab].content}
         </OverlayPanel>
-      </EuiPortal>
-    </EuiOutsideClickDetector>
+      </EuiOutsideClickDetector>
+    </EuiPortal>
   );
 };
 
