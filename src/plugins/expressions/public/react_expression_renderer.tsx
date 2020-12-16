@@ -168,7 +168,12 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler, onEvent]);
+  }, [
+    hasCustomRenderErrorHandler,
+    onEvent,
+    expressionLoaderOptions.renderMode,
+    expressionLoaderOptions.syncColors,
+  ]);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {

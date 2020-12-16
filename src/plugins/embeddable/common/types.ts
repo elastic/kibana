@@ -72,6 +72,11 @@ export type EmbeddableInput = {
    * Search session id to group searches
    */
   searchSessionId?: string;
+
+  /**
+   * Flag whether colors should be synced with other panels
+   */
+  syncColors?: boolean;
 };
 
 export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {

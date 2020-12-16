@@ -84,5 +84,6 @@ export interface IInterpreterRenderHandlers {
   event: (event: any) => void;
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
+  isSyncColorsEnabled: () => boolean;
   uiState?: PersistedState;
 }

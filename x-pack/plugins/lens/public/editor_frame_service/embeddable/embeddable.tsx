@@ -255,6 +255,7 @@ export class Embeddable
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
+        syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
       />,
       domNode
