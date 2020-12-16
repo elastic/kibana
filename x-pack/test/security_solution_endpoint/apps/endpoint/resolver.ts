@@ -26,13 +26,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
   };
 
-  describe('Endpoint Event Resolver', function () {
+  describe.skip('Endpoint Event Resolver', function () {
     before(async () => {
       await browser.setWindowSize(1800, 1200);
     });
+
     after(async () => {
       await pageObjects.hosts.deleteDataStreams();
     });
+
     describe('Endpoint Resolver Tree', function () {
       before(async () => {
         await esArchiver.load('empty_kibana');

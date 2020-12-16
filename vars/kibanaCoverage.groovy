@@ -59,7 +59,7 @@ def uploadBaseWebsiteFiles(prefix) {
 def uploadCoverageHtmls(prefix) {
   [
     'target/kibana-coverage/functional-combined',
-    // 'target/kibana-coverage/jest-combined', skipped due to failures
+    'target/kibana-coverage/jest-combined',
     'target/kibana-coverage/mocha-combined',
   ].each { uploadWithVault(prefix, it) }
 }
@@ -200,14 +200,13 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-    // skipping due to failures
-    // 'x-pack-intake-agent': {
-    //   withEnv([
-    //     'NODE_ENV=test' // Needed for jest tests only
-    //   ]) {
-    //     workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-    //   }
-    // },
+    'x-pack-intake-agent': {
+      withEnv([
+        'NODE_ENV=test' // Needed for jest tests only
+      ]) {
+        workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
+      }
+    },
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
       { kibanaPipeline.buildOss() },
@@ -251,6 +250,8 @@ def xpackProks() {
     'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
     'xpack-ciGroup11': kibanaPipeline.xpackCiGroupProcess(11),
+    'xpack-ciGroup12': kibanaPipeline.xpackCiGroupProcess(12),
+    'xpack-ciGroup13': kibanaPipeline.xpackCiGroupProcess(13),
   ]
 }
 

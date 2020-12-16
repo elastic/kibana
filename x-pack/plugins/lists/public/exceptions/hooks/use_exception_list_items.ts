@@ -34,7 +34,7 @@ export type ReturnExceptionListAndItems = [
  * @param pagination optional
  *
  */
-export const useExceptionList = ({
+export const useExceptionListItems = ({
   http,
   lists,
   pagination = {
