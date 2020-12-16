@@ -40,9 +40,7 @@ export const exportExceptionListRoute = (router: IRouter): void => {
             statusCode: 400,
           });
         } else {
-          const { exportData: exportList, exportDetails: exportListDetails } = getExport([
-            exceptionList,
-          ]);
+          const { exportData: exportList } = getExport([exceptionList]);
           const listItems = await exceptionLists.findExceptionListItem({
             filter: undefined,
             listId,
@@ -55,21 +53,16 @@ export const exportExceptionListRoute = (router: IRouter): void => {
 
           const { exportData: exportListItems, exportDetails } = getExport(listItems?.data ?? []);
 
-          const resp = JSON.stringify(
-            {
-              exception_list: exportList,
-              exception_list_details: exportListDetails,
-              exception_list_items: exportListItems,
-              exception_list_items_details: exportDetails,
-            },
-            null,
-            2
-          );
+          const responseBody = [
+            exportList,
+            exportListItems,
+            { exception_list_items_details: exportDetails },
+          ];
 
           // TODO: Allow the API to override the name of the file to export
           const fileName = exceptionList.name;
           return response.ok({
-            body: resp,
+            body: transformDataToNdjson(responseBody),
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,
               'Content-Type': 'application/ndjson',
@@ -89,7 +82,7 @@ export const exportExceptionListRoute = (router: IRouter): void => {
 
 const transformDataToNdjson = (data: unknown[]): string => {
   if (data.length !== 0) {
-    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
+    const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
     return `${dataString}\n`;
   } else {
     return '';
