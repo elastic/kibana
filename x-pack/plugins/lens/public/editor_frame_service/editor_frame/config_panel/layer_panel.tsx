@@ -137,12 +137,8 @@ export function LayerPanel(
   const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <section tabIndex={-1} ref={setLayerRefMemoized}>
-        <EuiPanel
-          data-test-subj={`lns-layerPanel-${index}`}
-          className="lnsLayerPanel"
-          paddingSize="s"
-        >
+      <section tabIndex={-1} ref={setLayerRefMemoized} className="lnsLayerPanel">
+        <EuiPanel data-test-subj={`lns-layerPanel-${index}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
               <LayerSettings
