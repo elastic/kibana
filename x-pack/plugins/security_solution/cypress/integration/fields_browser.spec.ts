@@ -46,7 +46,7 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context('Fields Browser rendering', () => {
+  context.skip('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
@@ -110,7 +110,7 @@ describe('Fields Browser', () => {
     });
   });
 
-  context('Editing the timeline', () => {
+  context.skip('Editing the timeline', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);

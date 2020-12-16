@@ -51,7 +51,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe('Cases', () => {
+describe.skip('Cases', () => {
   const mycase = { ...case1 };
 
   before(() => {
