@@ -17,52 +17,36 @@
  * under the License.
  */
 
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { VisualizationContainer } from '../../visualizations/public';
 import { TileMapVisualizationDependencies } from './plugin';
 import { TileMapVisRenderValue } from './tile_map_fn';
-import { TileMapVisConfig, TileMapVisData } from './types';
 
-interface TileMapVisController {
-  render(visData?: TileMapVisData, visConfig?: TileMapVisConfig): Promise<void>;
-  destroy(): void;
-}
-
-const tableVisRegistry = new Map<HTMLElement, TileMapVisController>();
+const TileMapVisualization = lazy(() => import('./tile_map_visualization_component'));
 
 export const getTileMapRenderer: (
   deps: TileMapVisualizationDependencies
 ) => ExpressionRenderDefinition<TileMapVisRenderValue> = (deps) => ({
   name: 'tile_map_vis',
   reuseDomNode: true,
-  render: async (domNode, config, handlers) => {
-    let registeredController = tableVisRegistry.get(domNode);
+  render: async (domNode, { visConfig, visData }, handlers) => {
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
 
-    if (!registeredController) {
-      // @ts-expect-error
-      const { createTileMapVisualization } = await import('./tile_map_visualization');
-
-      const Controller = createTileMapVisualization(deps);
-      registeredController = new Controller(
-        domNode,
-        handlers,
-        config.visConfig
-      ) as TileMapVisController;
-      tableVisRegistry.set(domNode, registeredController);
-
-      const onUiStateChange = () => {
-        registeredController?.render();
-      };
-
-      handlers.uiState?.on('change', onUiStateChange);
-
-      handlers.onDestroy(() => {
-        handlers.uiState?.off('change', onUiStateChange);
-        registeredController?.destroy();
-        tableVisRegistry.delete(domNode);
-      });
-    }
-
-    await registeredController.render(config.visData, config.visConfig);
-    handlers.done();
+    render(
+      <VisualizationContainer handlers={handlers}>
+        <TileMapVisualization
+          deps={deps}
+          handlers={handlers}
+          visData={visData}
+          visConfig={visConfig}
+        />
+      </VisualizationContainer>,
+      domNode
+    );
   },
 });
