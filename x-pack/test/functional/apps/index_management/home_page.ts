@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/data_streams`);
 
         // Verify content
-        await retry.waitFor('Wait until the app title shows up', async () => {
+        await retry.waitFor('Wait until dataStream List is visible.', async () => {
           return await testSubjects.isDisplayed('dataStreamList');
         });
       });
