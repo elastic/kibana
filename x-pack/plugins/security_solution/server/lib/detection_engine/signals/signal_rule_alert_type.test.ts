@@ -518,6 +518,7 @@ describe('rules_notification_alert_type', () => {
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: ['Error that bubbled up.'],
       };
       (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);

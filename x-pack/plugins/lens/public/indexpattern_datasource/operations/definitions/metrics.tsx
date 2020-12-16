@@ -28,6 +28,7 @@ const typeToFn: Record<string, string> = {
   max: 'aggMax',
   avg: 'aggAvg',
   sum: 'aggSum',
+  median: 'aggMedian',
 };
 
 function buildMetricOperation<T extends MetricColumn<string>>({

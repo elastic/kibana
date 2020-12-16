@@ -17,6 +17,13 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
+export const DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY = i18n.translate(
+  'xpack.securitySolution.dragAndDrop.draggableKeyboardInstructionsNotDraggingScreenReaderOnly',
+  {
+    defaultMessage: 'Press enter for options, or press space to begin dragging.',
+  }
+);
+
 export const FIELD = i18n.translate('xpack.securitySolution.dragAndDrop.fieldLabel', {
   defaultMessage: 'Field',
 });
@@ -44,3 +51,12 @@ export const SHOW_TOP = (fieldName: string) =>
     values: { fieldName },
     defaultMessage: `Show top {fieldName}`,
   });
+
+export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.dragAndDrop.youAreInADialogContainingOptionsScreenReaderOnly',
+    {
+      values: { fieldName },
+      defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
+    }
+  );
