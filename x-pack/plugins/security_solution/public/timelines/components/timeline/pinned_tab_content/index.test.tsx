@@ -13,16 +13,14 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
 import { Sort } from '../body/sort';
-import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { TimelineTabs } from '../../../store/timeline/model';
+import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -63,16 +61,14 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-describe('Timeline', () => {
-  let props = {} as QueryTabContentComponentProps;
+describe('PinnedTabContent', () => {
+  let props = {} as PinnedTabContentComponentProps;
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
     },
   ];
-  const startDate = '2018-03-23T18:49:23.132Z';
-  const endDate = '2018-03-24T03:33:52.253Z';
 
   const mount = useMountAppended();
 
@@ -93,27 +89,13 @@ describe('Timeline', () => {
 
     props = {
       columns: defaultHeaders,
-      dataProviders: mockDataProviders,
-      end: endDate,
-      expandedEvent: {},
-      eventType: 'all',
-      showEventDetails: false,
-      filters: [],
       timelineId: TimelineId.test,
-      isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
-      onEventClosed: jest.fn(),
-      showCallOutUnauthorizedMsg: false,
       sort,
-      start: startDate,
-      status: TimelineStatus.active,
-      timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
-      activeTab: TimelineTabs.query,
-      show: true,
+      pinnedEventIds: {},
+      showEventDetails: false,
+      onEventClosed: jest.fn(),
     };
   });
 
@@ -121,87 +103,27 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <PinnedTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(wrapper.find('QueryTabContentComponent')).toMatchSnapshot();
-    });
-
-    test('it renders the timeline header', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <QueryTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
+      expect(wrapper.find('PinnedTabContentComponent')).toMatchSnapshot();
     });
 
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <PinnedTabContentComponent {...props} />
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
-    });
-
-    test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererScope as jest.Mock).mockReturnValue({
-        browserFields: {},
-        docValueFields: [],
-        loading: true,
-        indexPattern: {},
-        selectedPatterns: [],
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <QueryTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    test('it does NOT render the timeline table when start is empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <QueryTabContentComponent {...props} start={''} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    test('it does NOT render the timeline table when end is empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <QueryTabContentComponent {...props} end={''} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <QueryTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
     it('it shows the timeline footer', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <PinnedTabContentComponent {...props} />
         </TestProviders>
       );
 
