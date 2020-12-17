@@ -66,9 +66,9 @@ export type AnomalyDetectionUrlState = MLPageState<
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
-    selectedType?: string;
+    selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: number[];
+    selectedTimes?: [number, number];
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;
