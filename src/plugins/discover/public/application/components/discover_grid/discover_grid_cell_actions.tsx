@@ -28,6 +28,11 @@ export const FilterInBtn = ({
   columnId,
 }: EuiDataGridColumnCellActionProps) => {
   const context = useContext(DiscoverGridContext);
+  const buttonTitle = i18n.translate('discover.grid.filterForAria', {
+    defaultMessage: 'Filter for this {value}',
+    values: { value: columnId },
+  });
+
   return (
     <Component
       onClick={() => {
@@ -39,10 +44,8 @@ export const FilterInBtn = ({
         }
       }}
       iconType="plusInCircle"
-      aria-label={i18n.translate('discover.grid.filterForAria', {
-        defaultMessage: 'Filter for {value}',
-        values: { value: columnId },
-      })}
+      aria-label={buttonTitle}
+      title={buttonTitle}
       data-test-subj="filterForButton"
     >
       {i18n.translate('discover.grid.filterFor', {
@@ -58,6 +61,11 @@ export const FilterOutBtn = ({
   columnId,
 }: EuiDataGridColumnCellActionProps) => {
   const context = useContext(DiscoverGridContext);
+  const buttonTitle = i18n.translate('discover.grid.filterOutAria', {
+    defaultMessage: 'Filter out this {value}',
+    values: { value: columnId },
+  });
+
   return (
     <Component
       onClick={() => {
@@ -69,10 +77,8 @@ export const FilterOutBtn = ({
         }
       }}
       iconType="minusInCircle"
-      aria-label={i18n.translate('discover.grid.filterOutAria', {
-        defaultMessage: 'Filter out {value}',
-        values: { value: columnId },
-      })}
+      aria-label={buttonTitle}
+      title={buttonTitle}
       data-test-subj="filterOutButton"
     >
       {i18n.translate('discover.grid.filterOut', {
