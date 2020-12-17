@@ -149,15 +149,42 @@ export const nodeDataForID: (
   };
 });
 
+const nodeDataRequestID: (state: DataState) => (id: string) => number | undefined = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      return nodeInfo(id)?.dataRequestID;
+    };
+  }
+);
+
+/**
+ * Returns true if a specific node's data is outdated. It will be outdated if a user clicked the refresh/update button
+ * after the node data was retrieved.
+ */
+export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataRequestID,
+  refreshCount,
+  (nodeRequestID, newID) => {
+    return (id: string) => {
+      const oldID = nodeRequestID(id);
+      // if we don't have the node in the map then it's data must be stale or if the refreshCount is greater than the
+      // node's requestID then it is also stale
+      return oldID === undefined || newID > oldID;
+    };
+  }
+);
+
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
 export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
-  (nodeInfo) => {
+  nodeDataIsStale,
+  (nodeInfo, isStale) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info) {
+      if (!info || isStale(id)) {
         return 'loading';
       }
 
@@ -260,6 +287,9 @@ export const relatedEventCountByCategory: (
   }
 );
 
+/**
+ * Retrieves the number of times the update/refresh button was clicked to be compared against various dataRequestIDs
+ */
 export function refreshCount(state: DataState) {
   return state.refreshCount;
 }
@@ -345,8 +375,11 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
+/**
+ * Retrieve the time range filters if they exist, otherwise default to start of epoch to the largest future date.
+ */
 export const timeRangeFilters = createSelector(
-  treeParametersToFetch,
+  (state: DataState) => state.tree?.currentParameters,
   function timeRangeFilters(treeParameters): TimeRange {
     // Should always be provided from date picker, but provide valid defaults in any case.
     const from = new Date(0);
@@ -355,17 +388,15 @@ export const timeRangeFilters = createSelector(
       from: from.toISOString(),
       to: to.toISOString(),
     };
-    if (treeParameters !== null) {
+    if (treeParameters !== undefined) {
       if (treeParameters.filters.from) {
         timeRange.from = treeParameters.filters.from;
       }
       if (treeParameters.filters.to) {
         timeRange.to = treeParameters.filters.to;
       }
-      return timeRange;
-    } else {
-      return timeRange;
     }
+    return timeRange;
   }
 );
 

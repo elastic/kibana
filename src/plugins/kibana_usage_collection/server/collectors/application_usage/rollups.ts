@@ -28,6 +28,7 @@ import {
   SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 
 /**
  * For Rolling the daily data, we only care about the stored attributes and the version (to avoid overwriting via concurrent requests)
@@ -36,6 +37,10 @@ type ApplicationUsageDailyWithVersion = Pick<
   SavedObject<ApplicationUsageDaily>,
   'version' | 'attributes'
 >;
+
+export function serializeKey(appId: string, viewId: string) {
+  return `${appId}___${viewId}`;
+}
 
 /**
  * Aggregates all the transactional events into daily aggregates
@@ -60,12 +65,18 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
 
       for (const doc of rawApplicationUsageTransactional) {
         const {
-          attributes: { appId, minutesOnScreen, numberOfClicks, timestamp },
+          attributes: { appId, viewId, minutesOnScreen, numberOfClicks, timestamp },
         } = doc;
         const dayId = moment(timestamp).format('YYYY-MM-DD');
-        const dailyId = `${appId}:${dayId}`;
+
+        const dailyId =
+          !viewId || viewId === MAIN_APP_DEFAULT_VIEW_ID
+            ? `${appId}:${dayId}`
+            : `${appId}:${dayId}:${viewId}`;
+
         const existingDoc =
-          toCreate.get(dailyId) || (await getDailyDoc(savedObjectsClient, dailyId, appId, dayId));
+          toCreate.get(dailyId) ||
+          (await getDailyDoc(savedObjectsClient, dailyId, appId, viewId, dayId));
         toCreate.set(dailyId, {
           ...existingDoc,
           attributes: {
@@ -103,12 +114,14 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
  * @param savedObjectsClient
  * @param id The ID of the document to retrieve (typically, `${appId}:${dayId}`)
  * @param appId The application ID
+ * @param viewId The application view ID
  * @param dayId The date of the document in the format YYYY-MM-DD
  */
 async function getDailyDoc(
   savedObjectsClient: ISavedObjectsRepository,
   id: string,
   appId: string,
+  viewId: string,
   dayId: string
 ): Promise<ApplicationUsageDailyWithVersion> {
   try {
@@ -118,6 +131,7 @@ async function getDailyDoc(
       return {
         attributes: {
           appId,
+          viewId,
           // Concatenating the day in YYYY-MM-DD form to T00:00:00Z to reduce the TZ effects
           timestamp: moment(`${moment(dayId).format('YYYY-MM-DD')}T00:00:00Z`).toISOString(),
           minutesOnScreen: 0,
@@ -156,25 +170,41 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
     ]);
 
     const existingTotals = rawApplicationUsageTotals.reduce(
-      (acc, { attributes: { appId, numberOfClicks, minutesOnScreen } }) => {
+      (
+        acc,
+        {
+          attributes: { appId, viewId = MAIN_APP_DEFAULT_VIEW_ID, numberOfClicks, minutesOnScreen },
+        }
+      ) => {
+        const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+
         return {
           ...acc,
           // No need to sum because there should be 1 document per appId only
-          [appId]: { appId, numberOfClicks, minutesOnScreen },
+          [key]: { appId, viewId, numberOfClicks, minutesOnScreen },
         };
       },
-      {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>
+      {} as Record<
+        string,
+        { appId: string; viewId: string; minutesOnScreen: number; numberOfClicks: number }
+      >
     );
 
     const totals = rawApplicationUsageDaily.reduce((acc, { attributes }) => {
-      const { appId, numberOfClicks, minutesOnScreen } = attributes;
-
-      const existing = acc[appId] || { minutesOnScreen: 0, numberOfClicks: 0 };
+      const {
+        appId,
+        viewId = MAIN_APP_DEFAULT_VIEW_ID,
+        numberOfClicks,
+        minutesOnScreen,
+      } = attributes;
+      const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+      const existing = acc[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
 
       return {
         ...acc,
-        [appId]: {
+        [key]: {
           appId,
+          viewId,
           numberOfClicks: numberOfClicks + existing.numberOfClicks,
           minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
         },

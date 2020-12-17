@@ -34,7 +34,7 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Exceptions', () => {
+describe.skip('Exceptions', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

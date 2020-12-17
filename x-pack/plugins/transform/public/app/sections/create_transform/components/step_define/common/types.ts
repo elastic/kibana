@@ -12,6 +12,12 @@ import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../comm
 import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
 import { QUERY_LANGUAGE } from './constants';
+import { TransformFunction } from '../../../../../../../common/constants';
+import {
+  LatestFunctionConfigUI,
+  PivotConfigDefinition,
+} from '../../../../../../../common/types/transform';
+import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
 export interface ErrorMessage {
   query: string;
@@ -24,8 +30,10 @@ export interface Field {
 }
 
 export interface StepDefineExposedState {
+  transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
+  latestConfig: LatestFunctionConfigUI;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
   searchLanguage: QUERY_LANGUAGE;
@@ -33,4 +41,17 @@ export interface StepDefineExposedState {
   searchQuery: string | SavedSearchQuery;
   sourceConfigUpdated: boolean;
   valid: boolean;
+  validationStatus: { isValid: boolean; errorMessage?: string };
+  /**
+   * Undefined when the form is incomplete or invalid
+   */
+  previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
+}
+
+export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
+  return typeof arg === 'object' && arg.hasOwnProperty('pivot');
+}
+
+export function isLatestPartialRequest(arg: any): arg is { latest: LatestFunctionConfig } {
+  return typeof arg === 'object' && arg.hasOwnProperty('latest');
 }

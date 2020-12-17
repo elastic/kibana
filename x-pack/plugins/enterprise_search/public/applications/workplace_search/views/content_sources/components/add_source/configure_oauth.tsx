@@ -23,7 +23,7 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 
 import { parseQueryParams } from '../../../../../../applications/shared/query_params';
 import { Loading } from '../../../../../../applications/shared/loading';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 
 import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
 
@@ -47,13 +47,13 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
     getPreContentSourceConfigData,
     setSelectedGithubOrganizations,
     createContentSource,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
   const {
     currentServiceType,
     githubOrganizations,
     selectedGithubOrganizationsMap,
     sectionLoading,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const checkboxOptions = githubOrganizations.map((item) => ({ id: item, label: item }));
 
@@ -64,14 +64,14 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   const handleChange = (option: string) => setSelectedGithubOrganizations(option);
   const formSubmitSuccess = () => onFormCreated(name);
   const handleFormSubmitError = () => setFormLoading(false);
-  const handleFormSubmut = (e: FormEvent) => {
+  const handleFormSubmit = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
     createContentSource(currentServiceType, formSubmitSuccess, handleFormSubmitError);
   };
 
   const configfieldsForm = (
-    <form onSubmit={handleFormSubmut}>
+    <form onSubmit={handleFormSubmit}>
       <EuiFlexGroup
         direction="row"
         alignItems="flexStart"
