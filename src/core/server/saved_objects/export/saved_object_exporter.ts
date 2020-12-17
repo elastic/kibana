@@ -30,8 +30,14 @@ import {
   SavedObjectsExportByTypeOptions,
 } from './types';
 
+/**
+ * @public
+ */
 export type ISavedObjectExporter = PublicMethodsOf<SavedObjectExporter>;
 
+/**
+ * @public
+ */
 export class SavedObjectExporter {
   private savedObjectsClient: SavedObjectsClientContract;
   private exportSizeLimit: number;
@@ -47,11 +53,21 @@ export class SavedObjectExporter {
     this.exportSizeLimit = exportSizeLimit;
   }
 
+  /**
+   * Generates an export stream for given types.
+   *
+   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
+   */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
     return this.processObjects(objects, options);
   }
 
+  /**
+   * Generates an export stream for given object references.
+   *
+   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
+   */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
     if (options.objects.length > this.exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${this.exportSizeLimit} objects`);

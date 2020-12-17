@@ -317,6 +317,7 @@ export {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectsUtils,
+  SavedObjectExporter,
   ISavedObjectExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,

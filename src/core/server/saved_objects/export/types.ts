@@ -19,6 +19,7 @@
 
 import { SavedObjectsFindOptionsReference } from '../types';
 
+/** @public */
 export interface SavedObjectExportBaseOptions {
   /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
@@ -28,6 +29,11 @@ export interface SavedObjectExportBaseOptions {
   namespace?: string;
 }
 
+/**
+ * Options for the {@link SavedObjectExporter.exportByTypes | export by type API}
+ *
+ * @public
+ */
 export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
   /** array of saved object types. */
   types: string[];
@@ -37,6 +43,11 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
   search?: string;
 }
 
+/**
+ * Options for the {@link SavedObjectExporter.exportByObjects | export by objects API}
+ *
+ * @public
+ */
 export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions {
   /** optional array of objects to export. */
   objects: Array<{

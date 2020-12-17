@@ -22,6 +22,7 @@ export * from './service';
 export * from './import';
 
 export {
+  SavedObjectExporter,
   ISavedObjectExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByTypeOptions,
