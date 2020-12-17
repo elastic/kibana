@@ -54,8 +54,6 @@ const defaultProps = {
   showIsTimeAware: true,
 };
 
-// if (!this._isMounted || (_.isEqual(styleFields, this.state.styleFields) && this.state.styleFieldsHelper !== undefined)) {
-
 test('should render', async () => {
   const component = shallow(<VectorStyleEditor {...defaultProps} />);
 
