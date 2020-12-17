@@ -55,10 +55,13 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
     const convertedData = tableVisResponseHandler(input, visConfig.dimensions);
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
     return {
       type: 'render',
       as: 'table_vis',

@@ -22,6 +22,7 @@ import { isObject } from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 
 import { DataViewColumn, DataViewRow } from '../types';
+import { FieldFormatsStart } from '../../../field_formats/field_formats_service';
 
 const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -46,17 +47,24 @@ function buildCsv(
   rows: DataViewRow[],
   csvSeparator: string,
   quoteValues: boolean,
-  valueFormatter?: Function
+  isFormatted: boolean,
+  fieldFormats: FieldFormatsStart
 ) {
   // Build the header row by its names
   const header = columns.map((col) => escape(col.name, quoteValues));
 
+  const formatters = columns.map((column) => {
+    return fieldFormats.deserialize(column.originalColumn().meta.params);
+  });
+
   // Convert the array of row objects to an array of row arrays
-  const orderedFieldNames = columns.map((col) => col.field);
   const csvRows = rows.map((row) => {
-    return orderedFieldNames.map((field) =>
-      escape(valueFormatter ? valueFormatter(row[field]) : row[field], quoteValues)
-    );
+    return columns.map((column, i) => {
+      return escape(
+        isFormatted ? formatters[i].convert(row[column.field]) : row[column.field],
+        quoteValues
+      );
+    });
   });
 
   return (
@@ -69,14 +77,18 @@ export function exportAsCsv({
   filename,
   columns,
   rows,
-  valueFormatter,
+  isFormatted,
   csvSeparator,
   quoteValues,
+  fieldFormats,
 }: any) {
   const type = 'text/plain;charset=utf-8';
 
-  const csv = new Blob([buildCsv(columns, rows, csvSeparator, quoteValues, valueFormatter)], {
-    type,
-  });
+  const csv = new Blob(
+    [buildCsv(columns, rows, csvSeparator, quoteValues, isFormatted, fieldFormats)],
+    {
+      type,
+    }
+  );
   saveAs(csv, filename);
 }
