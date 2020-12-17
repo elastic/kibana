@@ -60,10 +60,9 @@ export const getFunctionDescription = async (
       // grabbing first record because records should have already been sorted by score desc
       const highestScoringAnomaly = resp.records[0];
       return highestScoringAnomaly?.function_description;
-    } else {
-      // if there's no anomaly found, auto default to plotting the mean
-      return ES_AGGREGATION.AVG;
     }
+    // if there's no anomaly found, auto default to plotting the mean
+    return ES_AGGREGATION.AVG;
   } catch (error) {
     toastNotificationService.displayErrorToast(
       error,
