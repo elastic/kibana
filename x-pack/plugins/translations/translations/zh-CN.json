@@ -12512,7 +12512,6 @@
     "xpack.ml.jobsList.deletedActionStatusText": "已删除",
     "xpack.ml.jobsList.deleteJobErrorMessage": "作业无法删除",
     "xpack.ml.jobsList.deleteJobModal.cancelButtonLabel": "取消",
-    "xpack.ml.jobsList.deleteJobModal.closeButtonLabel": "关闭",
     "xpack.ml.jobsList.deleteJobModal.deleteButtonLabel": "删除",
     "xpack.ml.jobsList.deleteJobModal.deleteJobsTitle": "删除 {jobsCount, plural, one {{jobId}} other {# 个作业}}？",
     "xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription": "删除{jobsCount, plural, one {一个作业} other {多个作业}}可能很费时。将在后台删除{jobsCount, plural, one {该作业} other {这些作业}}，但删除的作业可能不会从作业列表中立即消失。",
