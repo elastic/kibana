@@ -67,7 +67,7 @@ interface Props {
     fieldToPreferredValueMap: FieldToValueMap;
     frequency: Frequency;
   }) => void;
-  autoFocus: boolean;
+  autoFocus?: boolean;
 }
 
 type State = FieldToValueMap;
