@@ -33,6 +33,7 @@ import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
+import { COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
@@ -75,12 +76,17 @@ const getTooltipData = (
   }
 
   valueSeries.splitAccessors.forEach((splitValue, key) => {
-    const split = (aspects.series ?? []).find(({ accessor }) => accessor === key);
+    const split = (aspects.series ?? []).find(({ accessor }, i) => {
+      return accessor === key || key === `${COMPLEX_SPLIT_ACCESSOR}::${i}`;
+    });
 
     if (split) {
       data.push({
         label: split?.title,
-        value: split?.formatter ? split?.formatter(splitValue) : `${splitValue}`,
+        value:
+          split?.formatter && !key.toString().startsWith(COMPLEX_SPLIT_ACCESSOR)
+            ? split?.formatter(splitValue)
+            : `${splitValue}`,
       });
     }
   });

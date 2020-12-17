@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { compact } from 'lodash';
 
 import {
   AreaSeries,
@@ -68,7 +67,8 @@ export const renderAllSeries = (
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   getSeriesColor: SeriesColorAccessorFn,
   timeZone: string,
-  xAccessor: Accessor | AccessorFn
+  xAccessor: Accessor | AccessorFn,
+  splitSeriesAccessors: Array<Accessor | AccessorFn>
 ) =>
   seriesParams.map(
     ({
@@ -89,10 +89,6 @@ export const renderAllSeries = (
       }
 
       const id = `${type}-${yAspect.accessor}`;
-
-      const splitSeriesAccessors = aspects.series
-        ? (compact(aspects.series.map(({ accessor }) => accessor)) as string[])
-        : [];
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;

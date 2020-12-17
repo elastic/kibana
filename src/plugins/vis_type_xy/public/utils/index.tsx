@@ -23,3 +23,4 @@ export { getLegendActions } from './get_legend_actions';
 export { getSeriesNameFn } from './get_series_name_fn';
 export { getXDomain, getAdjustedDomain } from './domain';
 export { useColorPicker } from './use_color_picker';
+export { getXAccessor } from './accessors';
