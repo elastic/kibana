@@ -387,7 +387,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         actions.setSourceConfigData(response);
       } catch (e) {
         flashAPIErrors(e);
-        if (!isUpdating) throw new Error(e);
       } finally {
         actions.setButtonNotLoading();
       }
@@ -430,7 +429,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } catch (e) {
         flashAPIErrors(e);
         if (errorCallback) errorCallback();
-        throw new Error('Auth Error');
       } finally {
         actions.setButtonNotLoading();
       }
