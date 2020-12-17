@@ -8,7 +8,7 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
+import { ResolverState, IsometricTaxiLayout } from '../types';
 import { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
@@ -397,9 +397,9 @@ export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.
 export const newIDsToRequest: (
   state: ResolverState
 ) => (time: number) => Set<string> = createSelector(
-  composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
+  composeSelectors(dataStateSelector, dataSelectors.nodeDataIsStale),
   visibleNodesAndEdgeLines,
-  function (nodeData, visibleNodesAndEdgeLinesAtTime) {
+  function (nodeDataIsStale, visibleNodesAndEdgeLinesAtTime) {
     return defaultMemoize((time: number) => {
       const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 
@@ -410,7 +410,7 @@ export const newIDsToRequest: (
         // if the node has a valid ID field, and we either don't have any node data currently, or
         // the map doesn't have info for this particular node, then add it to the set so it'll be requested
         // by the middleware
-        if (id !== undefined && (!nodeData || !nodeData.has(id))) {
+        if (id !== undefined && nodeDataIsStale(id)) {
           nodes.add(id);
         }
       }
