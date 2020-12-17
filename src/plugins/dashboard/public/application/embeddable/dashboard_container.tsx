@@ -59,7 +59,7 @@ export interface DashboardContainerInput extends ContainerInput {
   timeRange: TimeRange;
   description?: string;
   useMargins: boolean;
-  syncColors: boolean;
+  syncColors?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
