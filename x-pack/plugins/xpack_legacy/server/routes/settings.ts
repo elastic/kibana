@@ -60,7 +60,7 @@ export function registerSettingsRoute({
         settingsCollector.getEmailValueStructure(null);
 
       const { body } = await collectorFetchContext.esClient.info();
-      const clusterUuid: string = body.cluster_uuid;
+      const uuid: string = body.cluster_uuid;
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
 
@@ -78,7 +78,7 @@ export function registerSettingsRoute({
       };
       return res.ok({
         body: {
-          cluster_uuid: clusterUuid,
+          cluster_uuid: uuid,
           settings: {
             ...settings,
             kibana,

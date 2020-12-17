@@ -37,7 +37,7 @@ describe('/api/settings', () => {
   let mockApiCaller: jest.Mocked<LegacyAPICaller>;
 
   beforeEach(async () => {
-    mockApiCaller = jest.fn().mockResolvedValue({ cluster_uuid: 'yyy-yyyyy' });
+    mockApiCaller = jest.fn();
     server = createHttpServer();
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract({
