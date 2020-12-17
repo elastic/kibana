@@ -150,6 +150,7 @@ interface AppRequestingNodeData {
      * The list of IDs that will be sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
+    dataRequestID: number;
   };
 }
 
@@ -174,6 +175,7 @@ interface ServerFailedToReturnNodeData {
      * The list of IDs that were sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
+    dataRequestID: number;
   };
 }
 
