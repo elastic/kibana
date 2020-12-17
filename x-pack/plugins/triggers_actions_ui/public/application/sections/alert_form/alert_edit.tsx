@@ -6,6 +6,7 @@
 import React, { Fragment, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonIcon,
   EuiTitle,
   EuiFlyoutHeader,
   EuiFlyout,
@@ -33,7 +34,8 @@ import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-
+import { ConfirmAlertClose } from './confirm_alert_close';
+import { alertHasChanged } from './alert_has_changed';
 export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
   alertTypeRegistry: AlertTypeRegistryContract;
@@ -59,6 +61,7 @@ export const AlertEdit = ({
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
     false
   );
+  const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
 
   const {
     http,
@@ -86,6 +89,14 @@ export const AlertEdit = ({
         !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
+  const checkForChangesAndCloseFlyout = () => {
+    if (alertHasChanged(alert, initialAlert)) {
+      setIsConfirmAlertCloseModalOpen(true);
+    } else {
+      onClose();
+    }
+  };
+
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await updateAlert({ http, alert, id: alert.id });
@@ -111,9 +122,10 @@ export const AlertEdit = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={() => onClose()}
+        onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
+        hideCloseButton={true}
         maxWidth={620}
       >
         <EuiFlyoutHeader hasBorder>
@@ -125,6 +137,18 @@ export const AlertEdit = ({
               />
             </h3>
           </EuiTitle>
+          <EuiButtonIcon
+            className="euiFlyout__closeButton"
+            iconType="cross"
+            color="text"
+            onClick={onClose}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertEdit.flyoutCloseButton',
+              {
+                defaultMessage: 'Close this dialog',
+              }
+            )}
+          />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={true}>
@@ -205,6 +229,17 @@ export const AlertEdit = ({
             </EuiFlyoutFooter>
           </HealthCheck>
         </HealthContextProvider>
+        {isConfirmAlertCloseModalOpen && (
+          <ConfirmAlertClose
+            onConfirm={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+            }}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

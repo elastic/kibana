@@ -3,10 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useMemo, useState, useEffect } from 'react';
+import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiPortal,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import deepEqual from 'fast-deep-equal';
 import {
   ActionTypeRegistryContract,
   Alert,
@@ -19,10 +27,12 @@ import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
+import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { alertHasChanged } from './alert_has_changed';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -68,10 +78,7 @@ const AlertAdd = ({
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
-
-  const setAlert = (value: InitialAlert) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
-  };
+  const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
 
   const setAlertProperty = <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -89,16 +96,19 @@ const AlertAdd = ({
     setAlertProperty('alertTypeId', alertTypeId ?? null);
   }, [alertTypeId]);
 
-  const closeFlyout = useCallback(() => {
-    setAlert(initialAlert);
-    onClose();
-  }, [initialAlert, onClose]);
+  const checkForChangesAndCloseFlyout = () => {
+    if (alertHasChanged(alert, initialAlert)) {
+      setIsConfirmAlertCloseModalOpen(true);
+    } else {
+      onClose();
+    }
+  };
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      closeFlyout();
+      onClose();
       if (reloadAlerts) {
         reloadAlerts();
       }
@@ -155,9 +165,10 @@ const AlertAdd = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={closeFlyout}
+        onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
+        hideCloseButton={true}
         maxWidth={620}
       >
         <EuiFlyoutHeader hasBorder>
@@ -169,6 +180,18 @@ const AlertAdd = ({
               />
             </h3>
           </EuiTitle>
+          <EuiButtonIcon
+            className="euiFlyout__closeButton"
+            iconType="cross"
+            color="text"
+            onClick={onClose}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertAdd.flyoutCloseButton',
+              {
+                defaultMessage: 'Close this dialog',
+              }
+            )}
+          />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={false}>
@@ -200,7 +223,7 @@ const AlertAdd = ({
                   await saveAlertAndCloseFlyout();
                 }
               }}
-              onCancel={closeFlyout}
+              onCancel={onClose}
             />
           </HealthCheck>
         </HealthContextProvider>
@@ -213,6 +236,17 @@ const AlertAdd = ({
             onCancel={() => {
               setIsSaving(false);
               setIsConfirmAlertSaveModalOpen(false);
+            }}
+          />
+        )}
+        {isConfirmAlertCloseModalOpen && (
+          <ConfirmAlertClose
+            onConfirm={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsConfirmAlertCloseModalOpen(false);
             }}
           />
         )}
