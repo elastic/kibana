@@ -67,6 +67,7 @@ export function buildEuiGridColumn(
               label: i18n.translate('discover.removeColumnLabel', {
                 defaultMessage: 'Remove column',
               }),
+              iconType: 'cross',
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
