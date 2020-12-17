@@ -203,6 +203,7 @@ function createCoreRequestHandlerContextMock() {
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
+      exporter: savedObjectsServiceMock.createExporter(),
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),

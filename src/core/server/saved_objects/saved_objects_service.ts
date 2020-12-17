@@ -50,10 +50,12 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
+import { SavedObjectExporter, ISavedObjectExporter } from './export';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationEsClient } from './migrations/core/';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -214,6 +216,10 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Creates a {@link ISavedObjectExporter | exporter} bound to given client.
+   */
+  createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
@@ -453,6 +459,11 @@ export class SavedObjectsService
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      createExporter: (savedObjectsClient) =>
+        new SavedObjectExporter({
+          savedObjectsClient,
+          exportSizeLimit: this.config!.maxImportExportSize,
+        }),
       getTypeRegistry: () => this.typeRegistry,
     };
   }

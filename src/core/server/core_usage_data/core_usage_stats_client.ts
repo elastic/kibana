@@ -24,7 +24,6 @@ import {
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsExportOptions,
 } from '..';
 
 interface BaseIncrementOptions {
@@ -37,8 +36,10 @@ export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
   Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
 /** @internal */
-export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
+export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
+  types?: string[];
+  supportedTypes: string[];
+};
 
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';

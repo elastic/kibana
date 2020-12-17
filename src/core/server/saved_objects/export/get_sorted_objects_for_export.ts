@@ -24,8 +24,10 @@ import {
   SavedObject,
   SavedObjectsFindOptionsReference,
 } from '../types';
-import { fetchNestedDependencies } from './inject_nested_depdendencies';
+import { fetchNestedDependencies } from './fetch_nested_dependendencies';
 import { sortObjects } from './sort_objects';
+
+// TODO: delete file, migrate tests
 
 /**
  * Options controlling the export operation.

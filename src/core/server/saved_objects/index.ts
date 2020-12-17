@@ -22,8 +22,10 @@ export * from './service';
 export * from './import';
 
 export {
-  exportSavedObjectsToStream,
-  SavedObjectsExportOptions,
+  ISavedObjectExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
 } from './export';
 

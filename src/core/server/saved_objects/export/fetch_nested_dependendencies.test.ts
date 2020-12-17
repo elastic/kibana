@@ -19,7 +19,10 @@
 
 import { SavedObject } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
+import {
+  getObjectReferencesToFetch,
+  fetchNestedDependencies,
+} from './fetch_nested_dependendencies';
 import { SavedObjectsErrorHelpers } from '..';
 
 describe('getObjectReferencesToFetch()', () => {

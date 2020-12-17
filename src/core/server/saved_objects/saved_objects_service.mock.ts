@@ -30,6 +30,7 @@ import type {
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { savedObjectExporterMock } from './export/saved_object_exporter.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -42,6 +43,7 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
+    createExporter: jest.fn(),
     getTypeRegistry: jest.fn(),
   };
 
@@ -106,4 +108,5 @@ export const savedObjectsServiceMock = {
   createStartContract: createStartContractMock,
   createMigrationContext: migrationMocks.createContext,
   createTypeRegistryMock: typeRegistryMock.create,
+  createExporter: savedObjectExporterMock.create,
 };

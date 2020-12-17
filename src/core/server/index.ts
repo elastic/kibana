@@ -58,6 +58,7 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
+  ISavedObjectExporter,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
@@ -265,7 +266,6 @@ export {
   SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -317,7 +317,10 @@ export {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectsUtils,
-  exportSavedObjectsToStream,
+  ISavedObjectExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportByTypeOptions,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from './saved_objects';
@@ -399,6 +402,7 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
+      exporter: ISavedObjectExporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;

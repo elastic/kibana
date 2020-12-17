@@ -241,6 +241,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
+      createExporter: deps.savedObjects.createExporter,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {
