@@ -70,6 +70,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
