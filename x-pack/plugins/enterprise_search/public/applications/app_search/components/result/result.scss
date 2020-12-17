@@ -1,17 +1,42 @@
 .appSearchResult {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'content actions'
+    'toggle actions';
 
   &__content {
+    grid-area: content;
     width: 100%;
     padding: $euiSize;
     overflow: hidden;
     color: $euiTextColor;
   }
 
-  &__hiddenFieldsIndicator {
+  &__hiddenFieldsToggle {
+    grid-area: toggle;
+    display: flex;
+    justify-content: center;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
     font-size: $euiFontSizeXS;
-    color: $euiColorDarkShade;
-    margin-top: $euiSizeS;
+    color: $euiColorPrimary;
+
+    &:hover,
+    &:focus {
+      background-color: $euiPageBackgroundColor;
+    }
+
+    .euiIcon {
+      margin-left: $euiSizeXS;
+    }
+  }
+
+  &__actionButtons {
+    grid-area: actions;
+    display: flex;
+    flex-wrap: no-wrap;
   }
 
   &__actionButton {

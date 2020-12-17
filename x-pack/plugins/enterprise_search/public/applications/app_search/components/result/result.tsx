@@ -88,40 +88,28 @@ export const Result: React.FC<Props> = ({
                 />
               ))}
           </div>
-          {numResults > RESULT_CUTOFF && !isOpen && (
-            <footer className="appSearchResult__hiddenFieldsIndicator">
-              {i18n.translate('xpack.enterpriseSearch.appSearch.result.numberOfAdditionalFields', {
-                defaultMessage: '{numberOfAdditionalFields} more fields',
-                values: {
-                  numberOfAdditionalFields: numResults - RESULT_CUTOFF,
-                },
-              })}
-            </footer>
-          )}
         </>
       )}
       {numResults > RESULT_CUTOFF && (
         <button
           type="button"
-          className="appSearchResult__actionButton"
+          className="appSearchResult__hiddenFieldsToggle"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label={
-            isOpen
-              ? i18n.translate('xpack.enterpriseSearch.appSearch.result.hideAdditionalFields', {
-                  defaultMessage: 'Hide additional fields',
-                })
-              : i18n.translate('xpack.enterpriseSearch.appSearch.result.showAdditionalFields', {
-                  defaultMessage: 'Show additional fields',
-                })
-          }
         >
-          {isOpen ? (
-            <EuiIcon data-test-subj="CollapseResult" type="arrowUp" />
-          ) : (
-            <EuiIcon data-test-subj="ExpandResult" type="arrowDown" />
-          )}
+          {isOpen
+            ? i18n.translate('xpack.enterpriseSearch.appSearch.result.hideAdditionalFields', {
+                defaultMessage: 'Hide additional fields',
+              })
+            : i18n.translate('xpack.enterpriseSearch.appSearch.result.showAdditionalFields', {
+                defaultMessage: 'Show {numberOfAdditionalFields} additional fields',
+                values: {
+                  numberOfAdditionalFields: numResults - RESULT_CUTOFF,
+                },
+              })}
+          <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
         </button>
       )}
+      <div className="appSearchResult__actionButtons">TODO</div>
     </EuiPanel>
   );
 };
