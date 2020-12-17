@@ -208,7 +208,7 @@ export class ValidateJobUI extends Component {
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
 
-    if (typeof job === 'object') {
+    if (typeof job === 'object' && duration.start !== null && duration.end !== null) {
       let shouldShowLoadingIndicator = true;
 
       this.props.ml
@@ -262,6 +262,33 @@ export class ValidateJobUI extends Component {
           });
         }
       }, delay);
+    } else if (typeof job === 'object' && duration.start === null && duration.end === null) {
+      this.setState({
+        ...this.state,
+        ui: {
+          ...this.state.ui,
+          iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
+          isLoading: false,
+          isModalVisible: true,
+        },
+        data: {
+          messages: [
+            {
+              id: 'job_validation_skipped',
+              text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
+                defaultMessage:
+                  'Job validation could not be run because of insufficient sample data.',
+              }),
+              status: VALIDATION_STATUS.WARNING,
+            },
+          ],
+          success: true,
+        },
+        title: job.job_id,
+      });
+      if (typeof this.props.setIsValid === 'function') {
+        this.props.setIsValid(true);
+      }
     }
   };
 
