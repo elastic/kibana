@@ -21,7 +21,7 @@ import Boom from '@hapi/boom';
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from '../types';
-import { fetchNestedDependencies } from './fetch_nested_dependendencies';
+import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
   SavedObjectsExportResultDetails,
