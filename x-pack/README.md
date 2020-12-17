@@ -16,7 +16,7 @@ By default, this will also set the password for native realm accounts to the pas
 
 # Testing
 
-For information on testing, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
+For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html#development-functional-tests).
 
 #### Running functional tests
 
