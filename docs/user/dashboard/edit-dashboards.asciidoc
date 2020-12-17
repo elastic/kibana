@@ -82,6 +82,20 @@ Put the dashboard in *Edit* mode, then use the following options:
 visualization or saved search from the panel is still available in Kibana.
 
 [float]
+[[sync-colors]]
+=== Synchronize colors
+
+By default, Kibana attempts to keep colors for series consistent across panels, making sure the same series name always uses the same color.
+
+In some cases this can lead to lots of different colors in a single dashboard which can be undesirable. It is possible to disable this behavior:
+
+. Put the dashboard in *Edit* mode. 
+
+. Click the "Options" button in the top navigation bar.
+
+. Disable "Sync colors across panels".
+
+[float]
 [[clone-panels]]
 === Clone panels
 
