@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp2.body.isRunning).to.be(false);
       });
 
-      it('should return 500 when unknown index type is provided', async () => {
+      it('should return 400 when unknown index type is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'foo')
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           })
-          .expect(500);
+          .expect(400);
 
         expect(resp.body.message).to.contain('Unknown indexType');
       });

@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(404));
 
-      it('should return 500 when if no strategy is provided', async () => {
+      it('should return 404 when if unknown strategy is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/banana`)
           .send({
@@ -66,11 +66,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           })
-          .expect(500);
+          .expect(404);
         expect(resp.body.message).to.contain('banana not found');
       });
 
-      it('should return 500 when index type is provided in OSS', async () => {
+      it('should return 400 when index type is provided in OSS', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
           .send({
@@ -83,13 +83,13 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           })
-          .expect(500);
+          .expect(400);
 
         expect(resp.body.message).to.contain('Unsupported index pattern');
       });
 
       it('should return 400 with a bad body', async () => {
-        const resp = await supertest
+        await supertest
           .post(`/internal/search/es`)
           .send({
             params: {
@@ -105,12 +105,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('delete', () => {
       it('should return 404 when no search id provided', async () => {
-        const resp = await supertest.delete(`/internal/search/es`).send().expect(404);
+        await supertest.delete(`/internal/search/es`).send().expect(404);
       });
 
-      it('should return 500 when trying a delete on a non supporting strategy', async () => {
-        const resp = await supertest.delete(`/internal/search/es/123`).send().expect(500);
-        expect(resp.body.message).to.contain("Search strategy 123 doesn't support cancellations");
+      it('should return 400 when trying a delete on a non supporting strategy', async () => {
+        const resp = await supertest.delete(`/internal/search/es/123`).send().expect(400);
+        expect(resp.body.message).to.contain("Search strategy es doesn't support cancellations");
       });
     });
   });

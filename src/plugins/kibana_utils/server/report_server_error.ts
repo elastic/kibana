@@ -17,7 +17,16 @@
  * under the License.
  */
 
-export function reportServerError(res: any, err: any) {
+import { KibanaResponseFactory } from 'kibana/server';
+import { KbnError } from '../common';
+
+export class KbnServerError extends KbnError {
+  constructor(message: string, public readonly statusCode: number) {
+    super(message);
+  }
+}
+
+export function reportServerError(res: KibanaResponseFactory, err: any) {
   return res.customError({
     statusCode: err.statusCode ?? 500,
     body: {

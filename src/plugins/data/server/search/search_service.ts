@@ -73,6 +73,7 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
+import { KbnServerError } from '../../../kibana_utils/server';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -306,7 +307,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
-      throw new Error(`Search strategy ${strategy} doesn't support cancellations`);
+      throw new KbnServerError(
+        `Search strategy ${options.strategy} doesn't support cancellations`,
+        400
+      );
     }
     return strategy.cancel(id, options, deps);
   };
@@ -320,7 +324,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
-      throw new Error(`Search strategy ${name} not found`);
+      throw new KbnServerError(`Search strategy ${name} not found`, 404);
     }
     return strategy;
   };

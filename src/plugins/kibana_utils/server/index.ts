@@ -29,4 +29,4 @@ export {
   url,
 } from '../common';
 
-export { reportServerError } from './report_server_error';
+export { KbnServerError, reportServerError } from './report_server_error';

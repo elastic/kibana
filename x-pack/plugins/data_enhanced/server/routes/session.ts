@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { reportServerError } from '../../../../../kibana_utils/server';
+import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export function registerSessionRoutes(router: IRouter): void {
   router.post(
