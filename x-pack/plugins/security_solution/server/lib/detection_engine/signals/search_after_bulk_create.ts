@@ -18,6 +18,7 @@ import {
   mergeReturns,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import { TotalValue } from '../../../../common/detection_engine/types';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -112,7 +113,18 @@ export const searchAfterAndBulkCreate = async ({
             errors: searchErrors,
           }),
         ]);
-        if (!isEmpty(searchErrors) && ruleParams.timestampOverride != null) {
+
+        // if the result set is empty it could mean that the index
+        // has the timestamp override field mapped, but it is unused
+        // in that case we want to try to query against
+        // the @timestamp field as a backup.
+        // not only are we checking if the timestamp override field exists | not
+        // we also want to check if it is in use.
+        // we will need to figure out partial erroring later.
+        if (
+          (!isEmpty(searchErrors) || isEmpty(searchResult.hits.hits)) &&
+          ruleParams.timestampOverride != null
+        ) {
           // console.error(`SEARCH ERRORS: ${JSON.stringify(searchErrors)}`);
           const {
             searchResult: searchResultB,
@@ -140,6 +152,21 @@ export const searchAfterAndBulkCreate = async ({
           }
           // console.error(`SEARCHRESULTB: ${JSON.stringify(searchResultB)}`);
           searchResult.hits.hits.push(...searchResultB.hits.hits);
+          const totalTypeGuard = (num: number | TotalValue): num is number =>
+            typeof num === 'number';
+          if (totalTypeGuard(searchResult.hits.total)) {
+            if (totalTypeGuard(searchResultB.hits.total)) {
+              searchResult.hits.total += searchResultB.hits.total;
+            } else {
+              searchResult.hits.total += searchResultB.hits.total.value;
+            }
+          } else {
+            if (totalTypeGuard(searchResultB.hits.total)) {
+              searchResult.hits.total.value += searchResultB.hits.total;
+            } else {
+              searchResult.hits.total.value += searchResultB.hits.total.value;
+            }
+          }
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnTypeFromResponse({
