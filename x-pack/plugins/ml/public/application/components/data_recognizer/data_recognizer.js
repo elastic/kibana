@@ -30,9 +30,7 @@ export class DataRecognizer extends Component {
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
       .then((resp) => {
         // Sort results by title prior to display
-        resp.sort((res1, res2) => {
-          return res1.title.localeCompare(res2.title);
-        });
+        resp.sort((res1, res2) => res1.title.localeCompare(res2.title));
 
         const results = resp.map((r) => (
           <RecognizedResult
