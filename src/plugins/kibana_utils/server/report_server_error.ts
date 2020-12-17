@@ -17,11 +17,23 @@
  * under the License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { KibanaResponseFactory } from 'kibana/server';
+import { KbnError } from '../common';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('search', () => {
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./msearch'));
+export class KbnServerError extends KbnError {
+  constructor(message: string, public readonly statusCode: number) {
+    super(message);
+  }
+}
+
+export function reportServerError(res: KibanaResponseFactory, err: any) {
+  return res.customError({
+    statusCode: err.statusCode ?? 500,
+    body: {
+      message: err.message,
+      attributes: {
+        error: err.body?.error || err.message,
+      },
+    },
   });
 }
