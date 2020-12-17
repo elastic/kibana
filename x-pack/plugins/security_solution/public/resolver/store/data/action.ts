@@ -5,13 +5,12 @@
  */
 
 import {
-  ResolverRelatedEvents,
   NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { TreeFetcherParameters } from '../../types';
+import { TreeFetcherParameters, PanelViewAndParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -35,6 +34,13 @@ interface ServerReturnedResolverData {
   };
 }
 
+interface AppRequestedNodeEventsInCategory {
+  readonly type: 'appRequestedNodeEventsInCategory';
+  readonly payload: {
+    parameters: PanelViewAndParameters;
+    dataRequestID: number;
+  };
+}
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
   /**
@@ -81,14 +87,6 @@ interface AppAbortedResolverDataRequest {
   readonly payload: TreeFetcherParameters;
 }
 
-/**
- * When related events are returned from the server
- */
-interface ServerReturnedRelatedEventData {
-  readonly type: 'serverReturnedRelatedEventData';
-  readonly payload: ResolverRelatedEvents;
-}
-
 interface ServerReturnedNodeEventsInCategory {
   readonly type: 'serverReturnedNodeEventsInCategory';
   readonly payload: {
@@ -108,6 +106,8 @@ interface ServerReturnedNodeEventsInCategory {
      * The category that `events` have in common.
      */
     eventCategory: string;
+
+    dataRequestID: number;
   };
 }
 
@@ -135,6 +135,8 @@ interface ServerReturnedNodeData {
      * that we'll request their data in a subsequent request.
      */
     numberOfRequestedEvents: number;
+
+    dataRequestID: number;
   };
 }
 
@@ -148,6 +150,7 @@ interface AppRequestingNodeData {
      * The list of IDs that will be sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
+    dataRequestID: number;
   };
 }
 
@@ -172,6 +175,7 @@ interface ServerFailedToReturnNodeData {
      * The list of IDs that were sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
+    dataRequestID: number;
   };
 }
 
@@ -185,7 +189,7 @@ interface ServerFailedToReturnCurrentRelatedEventData {
 
 interface ServerReturnedCurrentRelatedEventData {
   readonly type: 'serverReturnedCurrentRelatedEventData';
-  readonly payload: SafeResolverEvent;
+  readonly payload: { data: SafeResolverEvent; dataRequestID: number };
 }
 
 export type DataAction =
@@ -194,7 +198,6 @@ export type DataAction =
   | AppRequestedCurrentRelatedEventData
   | ServerReturnedCurrentRelatedEventData
   | ServerFailedToReturnCurrentRelatedEventData
-  | ServerReturnedRelatedEventData
   | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
   | UserRequestedAdditionalRelatedEvents
@@ -203,4 +206,5 @@ export type DataAction =
   | ServerReturnedNodeData
   | ServerFailedToReturnNodeData
   | AppRequestingNodeData
-  | UserReloadedResolverNode;
+  | UserReloadedResolverNode
+  | AppRequestedNodeEventsInCategory;

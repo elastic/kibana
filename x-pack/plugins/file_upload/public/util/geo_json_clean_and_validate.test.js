@@ -134,18 +134,13 @@ describe('geo_json_clean_and_validate', () => {
     expect(clockwiseGeoJson).toEqual(clockwiseGeoJson2);
   });
 
-  it('error out on invalid object', () => {
+  it('return same object if not cleanable', () => {
     const invalidGeoJson = {
       type: 'notMyType',
       geometry: 'shmeometry',
     };
 
-    const notEvenCloseToGeoJson = [1, 2, 3, 4];
-
-    const badObjectPassed = () => geoJsonCleanAndValidate(invalidGeoJson);
-    expect(badObjectPassed).toThrow();
-
-    const worseObjectPassed = () => geoJsonCleanAndValidate(notEvenCloseToGeoJson);
-    expect(worseObjectPassed).toThrow();
+    const uncleanableJson = geoJsonCleanAndValidate(invalidGeoJson);
+    expect(uncleanableJson).toEqual(invalidGeoJson);
   });
 });
