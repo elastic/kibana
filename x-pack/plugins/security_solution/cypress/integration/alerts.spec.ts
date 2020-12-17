@@ -119,10 +119,7 @@ describe('Alerts', () => {
             `Showing ${expectedNumberOfOpenedAlerts.toString()} alerts`
           );
 
-          cy.get('[data-test-subj="server-side-event-count"]').should(
-            'have.text',
-            expectedNumberOfOpenedAlerts.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfOpenedAlerts.toString());
         });
     });
 
