@@ -126,10 +126,10 @@ export class SecurityNavControl extends Component<Props, State> {
         name: (
           <FormattedMessage
             id="xpack.security.navControlComponent.editProfileLinkText"
-            defaultMessage="Profile"
+            defaultMessage="Settings"
           />
         ),
-        icon: <EuiIcon type="user" size="m" />,
+        icon: <EuiIcon type="controlsHorizontal" size="m" />,
         href: editProfileUrl,
         'data-test-subj': 'profileLink',
       };

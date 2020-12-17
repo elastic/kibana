@@ -15,9 +15,9 @@ export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => 
   if (resetPasswordUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.profileLinkText', {
-        defaultMessage: 'Cloud profile',
+        defaultMessage: 'Profile',
       }),
-      iconType: 'logoCloud',
+      iconType: 'user',
       href: resetPasswordUrl,
       order: 100,
     });

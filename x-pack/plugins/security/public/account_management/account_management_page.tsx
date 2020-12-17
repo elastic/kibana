@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
@@ -35,7 +36,14 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
       <EuiPageBody restrictWidth>
         <EuiPanel>
           <EuiText data-test-subj={'userDisplayName'}>
-            <h1>{getUserDisplayName(currentUser)}</h1>
+            <h1>
+              <FormattedMessage
+                id="xpack.security.account.titleSegment"
+                defaultMessage="Settings for"
+              />
+              &nbsp;
+              <strong>{getUserDisplayName(currentUser)}</strong>
+            </h1>
           </EuiText>
 
           <EuiSpacer size="xl" />
