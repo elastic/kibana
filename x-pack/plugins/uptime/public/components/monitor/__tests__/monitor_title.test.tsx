@@ -6,7 +6,6 @@
 
 import React from 'react';
 import * as reactRouterDom from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 import { MonitorPageTitle } from '../monitor_title';
 import { renderWithRouter, MountWithReduxProvider } from '../../../lib';
 import { AppState, store } from '../../../state';
@@ -86,15 +85,10 @@ describe('MonitorTitle component', () => {
     jest.spyOn(reactRouterDom, 'useParams').mockImplementation(() => ({
       monitorId: 'YXV0by1pY21wLTBYMjQ5NDhGNDY3QzZDNEYwMQ', // resolves to auto-icmp-0X24948F467C6C4F01
     }));
-
-    const history = createMemoryHistory();
-    // navigate to monitor page
-
     const component = renderWithRouter(
       <MountWithReduxProvider store={stateWithoutMonitorName}>
         <MonitorPageTitle />
-      </MountWithReduxProvider>,
-      history
+      </MountWithReduxProvider>
     );
     expect(component.find('h1').text()).toBe(url.full);
   });
