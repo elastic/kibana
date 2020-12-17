@@ -14,11 +14,14 @@ import {
   SavedObjectsClientContract,
   Logger,
   SavedObject,
+  SavedObjectsBulkUpdateObject,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  KueryNode,
+  nodeBuilder,
   tapFirst,
 } from '../../../../../../src/plugins/data/common';
 import {
@@ -82,6 +85,18 @@ export class BackgroundSessionService implements ISessionService {
   };
 
   /**
+   * Compiles a KQL Query to fetch sessions by ID.
+   * Done as a performance optimization workaround.
+   */
+  private sessionIdsAsFilters(sessionIds: string[]): KueryNode {
+    return nodeBuilder.or(
+      sessionIds.map((id) => {
+        return nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id);
+      })
+    );
+  }
+
+  /**
    * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
    *
@@ -90,17 +105,14 @@ export class BackgroundSessionService implements ISessionService {
    * context of a user's session.
    */
   private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.sessionSearchMap.keys())
-      .map((sessionId) => `"${sessionId}"`)
-      .join(' | ');
+    const filter = this.sessionIdsAsFilters(Array.from(this.sessionSearchMap.keys()));
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
       perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
-      search: activeMappingIds,
-      searchFields: ['sessionId'],
+      filter,
       namespaces: ['*'],
     });
-    this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
+    this.logger.warn(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
     return res.saved_objects;
   }
 
@@ -135,6 +147,9 @@ export class BackgroundSessionService implements ISessionService {
         updatedSessions.forEach((updatedSavedObject) => {
           const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
           if (updatedSavedObject.error) {
+            this.logger.warn(
+              `monitorMappedIds | update error ${JSON.stringify(updatedSavedObject.error) || ''}`
+            );
             // Retry next time
             sessionInfo.retryCount++;
           } else if (updatedSavedObject.attributes.idMapping) {
@@ -164,7 +179,9 @@ export class BackgroundSessionService implements ISessionService {
     if (!activeMappingObjects.length) return [];
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
-    const updatedSessions = activeMappingObjects
+    const updatedSessions: Array<
+      SavedObjectsBulkUpdateObject<BackgroundSessionSavedObjectAttributes>
+    > = activeMappingObjects
       .filter((so) => !so.error)
       .map((sessionSavedObject) => {
         const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
@@ -173,7 +190,10 @@ export class BackgroundSessionService implements ISessionService {
           ...sessionSavedObject.attributes.idMapping,
           ...idMapping,
         };
-        return sessionSavedObject;
+        return {
+          ...sessionSavedObject,
+          namespace: sessionSavedObject.namespaces?.[0],
+        };
       });
 
     const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
