@@ -4,7 +4,7 @@
 With *Vega*, you configure the visualization panels by editing the *Vega* and *Vega-Lite* specs.
 
 [float]
-==== Tutorial: Create a stacked area chart with Vega-lite
+==== Tutorial: Create charts with Vega and Vega-lite
 
 You collected sales data for your store, and you want to visualize and analyze the data on a dashboard. To create custom panels of the data, use *Vega* and *Vega-Lite* to 
 create a stacked area chart and an area chart.
@@ -18,12 +18,12 @@ Add the eCommerce sample data that you'll use to create the stacked area chart, 
 
 . From *eCommerce sample data*, click *Add data*.
 
-. Open the main menu, click *Dashboard*.
+. Open the main menu, then click *Dashboard*.
 
 . Click *Create dashboard*.
 
 [float]
-===== Open Vega
+===== Open and set up Vega
 
 Open *Vega* and change the time range. 
 

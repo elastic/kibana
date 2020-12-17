@@ -50,8 +50,9 @@ For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resourc
 [[timelion-advanced-editor]]
 === Timelion
 
-*Timelion* displays your data along a scale that changes color according to where your data falls on the specified scale. Use the gauge to show how metric
-values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
+*Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization.
+On *Timelion* visualizations, your data is displayed along a scale that changes color according to where your data falls on the specified scale. 
+Use the gauge to show how metric values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
 
 *Timelion* is driven by a simple expression language that you use to:
 

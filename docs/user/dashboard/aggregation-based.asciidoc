@@ -87,15 +87,13 @@ create visual art for a specific topic.
 
 [float]
 [[create-aggregation-based-panel]]
-=== Create an aggregation-based visualization panel
+=== Create an aggregation-based panel
 
-Choose the type of visualization panel you want to create, then use the editor to configure the visualization. Each visualization supports different options. 
+Choose the type of panel you want to create, then use the editor to configure the options. Each panel type supports different options. 
 
-. Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+. From the dashboard, click *Create new*, then click *Aggregation based* on the *New visualization* window.
 
-. Click *Create new*, then click *Aggregation based* on the *New visualization* window.
-
-.. Click the type of visualization panel you want to create.
+.. Click the type of panel you want to create.
 
 .. Click the data source you want to visualize.
 
@@ -115,13 +113,30 @@ image:images/aggregation-based-color-picker.png[Color picker]
 [[try-it-aggregation-based-panel]]
 === Try it: Create an aggregation-based bar chart
 
-Create a bar chart that display the top five log traffic sources for every three hours.
+You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create a dashboard panel of the data, create
+a bar chart that displays the top five log traffic sources for every three hours.
 
-. Add the <<get-started,sample web logs data>>. 
+[float]
+==== Add the data and create the dashboard
 
-. Click *Create new*.
+Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-.. On the *New visualization* window, click *Aggregation based > Vertical Bar*.
+. From the {kib} *Home* page, click *Try our sample data*.
+
+. From *Sample web logs*, click *Add data*.
+
+. Open the main menu, then click *Dashboard*.
+
+. Click *Create dashboard*.
+
+[float]
+==== Open and set up the aggregation-based bar chart
+
+Open the bar chart visualization builder and change the time range. 
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Aggregation based > Vertical bar*.
 
 .. On the *Choose a source* window, click *kibana_sample_data_logs*.
 
@@ -137,14 +152,14 @@ To specify the bar chart options, use the editor.
 
 .. Click *Add*, then select *X-axis*.
 
-.. From the *Aggregation* dropdown, select *Data Histogram*.
+.. From the *Aggregation* dropdown, select *Date Histogram*.
 
 .. Click *Update*.
 +
 [role="screenshot"]
 image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
 
-. To show the top five log traffic sources, add a sub aggregation.
+. To show the top five log traffic sources, add a sub-bucket aggregation.
 
 .. Click *Add*, then select *Split series*.
 
@@ -156,6 +171,21 @@ image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
 +
 [role="screenshot"]
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
+
+[float]
+==== Save the panel
+
+Save and add the visualization panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
 
 
 
