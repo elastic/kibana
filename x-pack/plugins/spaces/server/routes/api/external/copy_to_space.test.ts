@@ -34,13 +34,11 @@ jest.mock('../../../../../../../src/core/server/saved_objects/es_query', () => {
 jest.mock('../../../../../../../src/core/server', () => {
   return {
     ...(jest.requireActual('../../../../../../../src/core/server') as Record<string, unknown>),
-    exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
   };
 });
 import {
-  exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from '../../../../../../../src/core/server';
@@ -51,7 +49,6 @@ describe('copy to space', () => {
   const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   beforeEach(() => {
-    (exportSavedObjectsToStream as jest.Mock).mockReset();
     (importSavedObjectsFromStream as jest.Mock).mockReset();
     (resolveSavedObjectsImportErrors as jest.Mock).mockReset();
   });
@@ -62,9 +59,6 @@ describe('copy to space', () => {
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    (exportSavedObjectsToStream as jest.Mock).mockImplementation(
-      createExportSavedObjectsToStreamMock()
-    );
     (importSavedObjectsFromStream as jest.Mock).mockImplementation(
       createImportSavedObjectsFromStreamMock()
     );
@@ -75,8 +69,9 @@ describe('copy to space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
-    const { savedObjects } = createMockSavedObjectsService(spaces);
+    const { savedObjects, savedObjectsExporter } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
+    savedObjectsExporter.exportByObjects.mockImplementation(createExportSavedObjectsToStreamMock());
 
     const clientService = new SpacesClientService(jest.fn());
     clientService
