@@ -74,6 +74,16 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   };
 }
 
+function createMockSearchService() {
+  let sessionIdCounter = 1;
+  return {
+    session: {
+      start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
+      clear: jest.fn(),
+    },
+  };
+}
+
 function createMockFilterManager() {
   const unsubscribe = jest.fn();
 
@@ -118,11 +128,19 @@ function createMockQueryString() {
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
+  let timeFilter = { from: 'now-7d', to: 'now' };
+  let subscriber: () => void;
   return {
-    getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
-    setTime: jest.fn(),
+    getTime: jest.fn(() => timeFilter),
+    setTime: jest.fn((newTimeFilter) => {
+      timeFilter = newTimeFilter;
+      if (subscriber) {
+        subscriber();
+      }
+    }),
     getTimeUpdate$: () => ({
       subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
         return unsubscribe;
       },
     }),
@@ -209,6 +227,7 @@ describe('Lens App', () => {
             return new Promise((resolve) => resolve({ id }));
           }),
         },
+        search: createMockSearchService(),
       } as unknown) as DataPublicPluginStart,
       storage: {
         get: jest.fn(),
@@ -295,6 +314,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "searchSessionId": "sessionId-1",
             "showNoDataPopover": [Function],
           },
         ],
@@ -1072,6 +1092,53 @@ describe('Lens App', () => {
         })
       );
     });
+
+    it('updates the searchSessionId when the user changes query or time in the search bar', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: '', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        })
+      );
+
+      // trigger again, this time changing just the query
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      act(() =>
+        services.data.query.filterManager.setFilters([
+          esFilters.buildExistsFilter(field, indexPattern),
+        ])
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-3`,
+        })
+      );
+    });
   });
 
   describe('saved query handling', () => {
@@ -1165,6 +1232,37 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the searchSessionId when the query is updated', () => {
+      const { component, frame } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSaved')!({
+          id: '1',
+          attributes: {
+            title: '',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        })
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>
@@ -1187,6 +1285,32 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           filters: [pinned],
+        })
+      );
+    });
+
+    it('updates the searchSessionId when the active saved query is cleared', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
+      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
+      component.update();
+      act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
         })
       );
     });
@@ -1315,6 +1439,14 @@ describe('Lens App', () => {
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should clear the session when leaving the app', () => {
+      const { props, services } = mountWith({});
+      const { clear } = services.data.search.session;
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(clear).toHaveBeenCalled();
     });
   });
 });

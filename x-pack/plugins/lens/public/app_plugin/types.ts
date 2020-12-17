@@ -65,6 +65,7 @@ export interface LensAppState {
   savedQuery?: SavedQuery;
   isSaveable: boolean;
   activeData?: TableInspectorAdapter;
+  searchSessionId: string;
 }
 
 export interface RedirectToOriginProps {

@@ -89,6 +89,7 @@ export function App({
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
+      searchSessionId: data.search.session.start(),
     };
   });
 
@@ -160,7 +161,11 @@ export function App({
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState((s) => ({ ...s, filters: data.query.filterManager.getFilters() }));
+        setState((s) => ({
+          ...s,
+          filters: data.query.filterManager.getFilters(),
+          searchSessionId: data.search.session.start(),
+        }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -174,6 +179,7 @@ export function App({
             fromDate: currentRange.from,
             toDate: currentRange.to,
           },
+          searchSessionId: data.search.session.start(),
         }));
       },
     });
@@ -196,6 +202,7 @@ export function App({
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    data.search.session,
     notifications.toasts,
     uiSettings,
     data.query,
@@ -205,6 +212,8 @@ export function App({
 
   useEffect(() => {
     onAppLeave((actions) => {
+      // Clear the session when leaving Lens
+      data.search.session.clear();
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
@@ -231,6 +240,7 @@ export function App({
     state.persistedDoc,
     getLastKnownDocWithoutPinnedFilters,
     application.capabilities.visualize.save,
+    data.search.session,
   ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
@@ -428,6 +438,7 @@ export function App({
       if (saveProps.returnToOrigin && redirectToOrigin) {
         // disabling the validation on app leave because the document has been saved.
         onAppLeave((actions) => {
+          data.search.session.clear();
           return actions.default();
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
@@ -435,6 +446,7 @@ export function App({
       } else if (saveProps.dashboardId && redirectToDashboard) {
         // disabling the validation on app leave because the document has been saved.
         onAppLeave((actions) => {
+          data.search.session.clear();
           return actions.default();
         });
         redirectToDashboard(newInput, saveProps.dashboardId);
@@ -541,6 +553,7 @@ export function App({
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
+            data.search.session.clear();
             return actions.default();
           });
           runSave(
@@ -601,14 +614,16 @@ export function App({
                 data.query.timefilter.timefilter.setTime(dateRange);
                 trackUiEvent('app_date_change');
               } else {
+                // Query has changed, renew the session id.
+                // Time change will be picked up by the time subscription
+                setState((s) => ({
+                  ...s,
+                  searchSessionId: data.search.session.start(),
+                }));
                 trackUiEvent('app_query_change');
               }
               setState((s) => ({
                 ...s,
-                dateRange: {
-                  fromDate: dateRange.from,
-                  toDate: dateRange.to,
-                },
                 query: query || s.query,
               }));
             }}
@@ -650,6 +665,7 @@ export function App({
             className="lnsApp__frame"
             render={editorFrame.mount}
             nativeProps={{
+              searchSessionId: state.searchSessionId,
               dateRange: state.dateRange,
               query: state.query,
               filters: state.filters,

@@ -477,6 +477,7 @@ export const InnerVisualizationWrapper = ({
         padding="m"
         expression={expression!}
         searchContext={context}
+        searchSessionId={framePublicAPI.searchSessionId}
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
         onData$={onData$}
