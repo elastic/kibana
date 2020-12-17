@@ -511,19 +511,6 @@ describe('AddSourceLogic', () => {
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
-
-        it('throws an error if the createContentSource endpoint fails', async () => {
-          mockHttpValues.http.post.mockImplementationOnce(() => Promise.reject());
-
-          // To capture thrown errors, we have to call the listener fn directly
-          // instead of using `AddSourceLogic.actions.createContentSource` - this is
-          // due to how Kea invokes/wraps action fns by design.
-          const { createContentSource } = (AddSourceLogic.inputs[0] as any).listeners({
-            actions: {},
-          });
-
-          await expect(createContentSource(serviceType, successCallback)).rejects.toThrow();
-        });
       });
     });
 
