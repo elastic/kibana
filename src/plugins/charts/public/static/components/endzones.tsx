@@ -119,25 +119,32 @@ const getIntervalInMs = (
   }
 };
 
+/**
+ * Returns the adjusted interval based on the data
+ *
+ * @param xValues sorted and unquie x values
+ * @param esValue
+ * @param esUnit
+ * @param timeZone
+ */
 export const getAdjustedInterval = (
   xValues: number[],
   esValue: number,
-  esUnit: string,
+  esUnit: unitOfTime.Base,
   timeZone: string
 ): number => {
-  return xValues.reduce((minInterval, currentXvalue, index) => {
+  const newInterval = xValues.reduce((minInterval, currentXvalue, index) => {
     let currentDiff = minInterval;
+
     if (index > 0) {
       currentDiff = Math.abs(xValues[index - 1] - currentXvalue);
     }
-    const singleUnitInterval = getIntervalInMs(
-      currentXvalue,
-      esValue,
-      esUnit as unitOfTime.Base,
-      timeZone
-    );
+
+    const singleUnitInterval = getIntervalInMs(currentXvalue, esValue, esUnit, timeZone);
     return Math.min(minInterval, singleUnitInterval, currentDiff);
   }, Number.MAX_SAFE_INTEGER);
+
+  return newInterval > 0 ? newInterval : moment.duration(esValue, esUnit).asMilliseconds();
 };
 
 const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {

@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import { uniq } from 'lodash';
+import { unitOfTime } from 'moment';
+
 import { DomainRange } from '@elastic/charts';
 
 import { getAdjustedInterval } from '../../../charts/public';
+import { Datatable } from '../../../expressions/public';
 
 import { getTimefilter } from '../services';
 import { Aspect, DateHistogramParams, HistogramParams } from '../types';
@@ -45,16 +49,22 @@ export const getXDomain = (params: Aspect['params']): DomainRange => {
 };
 
 export const getAdjustedDomain = (
-  data: any[],
+  data: Datatable['rows'],
   { accessor, params }: Aspect,
   timeZone: string,
   domain?: DomainRange,
   hasBars?: boolean
 ): DomainRange => {
-  const { interval, intervalESValue, intervalESUnit } = params as DateHistogramParams;
-
-  if (accessor && domain && 'min' in domain && 'max' in domain) {
-    const xValues = data.map((d) => d[accessor]).sort();
+  if (
+    accessor &&
+    domain &&
+    'min' in domain &&
+    'max' in domain &&
+    'intervalESValue' in params &&
+    'intervalESUnit' in params
+  ) {
+    const { interval, intervalESValue, intervalESUnit } = params;
+    const xValues = uniq(data.map((d) => d[accessor]).sort());
 
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
@@ -62,7 +72,12 @@ export const getAdjustedDomain = (
     const domainMin = Math.min(firstXValue, domain.min);
     const domainMaxValue = hasBars ? domain.max - interval : lastXValue + interval;
     const domainMax = Math.max(domainMaxValue, lastXValue);
-    const minInterval = getAdjustedInterval(xValues, intervalESValue, intervalESUnit, timeZone);
+    const minInterval = getAdjustedInterval(
+      xValues,
+      intervalESValue,
+      intervalESUnit as unitOfTime.Base,
+      timeZone
+    );
 
     return {
       min: domainMin,
@@ -71,7 +86,9 @@ export const getAdjustedDomain = (
     };
   }
 
-  return {
-    minInterval: interval,
-  };
+  return 'interval' in params
+    ? {
+        minInterval: params.interval,
+      }
+    : {};
 };

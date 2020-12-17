@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment-timezone';
+import moment, { unitOfTime } from 'moment-timezone';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -153,7 +153,12 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: getAdjustedInterval(xValues, intervalESValue, intervalESUnit, timeZone),
+      minInterval: getAdjustedInterval(
+        xValues,
+        intervalESValue,
+        intervalESUnit as unitOfTime.Base,
+        timeZone
+      ),
     };
     const tooltipProps = {
       headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, this.formatXValue),
