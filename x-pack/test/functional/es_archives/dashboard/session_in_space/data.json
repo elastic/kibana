@@ -262,7 +262,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "another-space:index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -272,6 +271,9 @@
       },
       "type": "index-pattern",
       "namespace": "another-space",
+      "migrationVersion": {
+        "index-pattern": "6.5.0"
+      },
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
   }
@@ -281,7 +283,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "another-space:visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -305,7 +307,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "another-space:dashboard:my-dashboard",
     "source": {
       "dashboard": {
