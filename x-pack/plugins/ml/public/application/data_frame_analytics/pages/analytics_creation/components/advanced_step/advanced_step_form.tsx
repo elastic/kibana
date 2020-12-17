@@ -57,11 +57,7 @@ function getZeroClassesMessage(elasaticUrl: string, version: string) {
       defaultMessage="To evaluate the {wikiLink}, select all classes or a value greater than the total number of categories."
       values={{
         wikiLink: (
-          <EuiLink
-            href={`${elasaticUrl}guide/en/machine-learning/${version}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`}
-            target="_blank"
-            external
-          >
+          <EuiLink href={docLink} target="_blank" external>
             {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
               defaultMessage: 'AUC ROC',
             })}
@@ -136,7 +132,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.outlierDetectionRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated, estimatedModelMemoryLimit } = state;
