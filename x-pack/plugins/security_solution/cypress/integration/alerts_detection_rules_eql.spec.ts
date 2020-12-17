@@ -177,7 +177,7 @@ describe('Detection rules, EQL', () => {
   });
 });
 
-describe('Detection rules, sequence EQL', () => {
+describe.skip('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = 1;
   const rule = { ...eqlSequenceRule };
