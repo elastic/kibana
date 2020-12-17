@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -15,8 +16,9 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  CommonAlertFilter,
   CommonAlertParams,
+  AlertDiskUsageNodeStats,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -24,6 +26,8 @@ import {
   ALERT_DISK_USAGE,
   ALERT_DETAILS,
 } from '../../common/constants';
+// @ts-ignore
+import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -102,13 +106,13 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertDiskUsageState;
+    const stat = item.meta as AlertDiskUsageNodeStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          diskUsage: stat.diskUsage,
+          diskUsage: numeral(stat.diskUsage).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [

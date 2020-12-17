@@ -28,15 +28,19 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
+import { NormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 const alertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
 };
+
 let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner', () => {
@@ -69,6 +73,7 @@ describe('Task Runner', () => {
   const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const alertTypeRegistry = alertTypeRegistryMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -83,6 +88,7 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry,
   };
 
   const mockedAlertTypeSavedObject: Alert = {
@@ -92,6 +98,7 @@ describe('Task Runner', () => {
     updatedAt: new Date('2019-02-12T21:01:22.479Z'),
     throttle: null,
     muteAll: false,
+    notifyWhen: 'onActiveAlert',
     enabled: true,
     alertTypeId: alertType.id,
     apiKey: '',
@@ -136,11 +143,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
+    taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
+      (actionTypeId, params) => params
+    );
   });
 
   test('successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -230,11 +240,13 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subDefault');
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -290,6 +302,7 @@ describe('Task Runner', () => {
       kibana: {
         alerting: {
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
           instance_id: '1',
         },
         saved_objects: [
@@ -311,6 +324,7 @@ describe('Task Runner', () => {
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
         },
         saved_objects: [
           {
@@ -321,7 +335,8 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      message:
+        "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
@@ -331,6 +346,7 @@ describe('Task Runner', () => {
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          action_subgroup: 'subDefault',
         },
         saved_objects: [
           {
@@ -347,7 +363,7 @@ describe('Task Runner', () => {
         ],
       },
       message:
-        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -381,7 +397,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -491,7 +507,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -527,6 +543,188 @@ describe('Task Runner', () => {
     );
   });
 
+  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType as NormalizedAlertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: { date: '1970-01-01T00:00:00.000Z', group: 'default' },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType as NormalizedAlertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: { lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() } },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
+  test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices
+          .alertInstanceFactory('1')
+          .scheduleActionsWithSubGroup('default', 'subgroup1');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType as NormalizedAlertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: {
+                  group: 'default',
+                  subgroup: 'newSubgroup',
+                  date: new Date().toISOString(),
+                },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
@@ -536,7 +734,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -647,6 +845,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -703,7 +902,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -733,6 +932,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -802,7 +1002,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertTypeWithCustomRecovery,
+      alertTypeWithCustomRecovery as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -852,6 +1052,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -893,7 +1094,7 @@ describe('Task Runner', () => {
     );
     const date = new Date().toISOString();
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -929,6 +1130,7 @@ describe('Task Runner', () => {
             "lastScheduledActions": Object {
               "date": 1970-01-01T00:00:00.000Z,
               "group": "default",
+              "subgroup": undefined,
             },
           },
           "state": Object {
@@ -1022,7 +1224,7 @@ describe('Task Runner', () => {
             param1: schema.string(),
           }),
         },
-      },
+      } as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1050,7 +1252,7 @@ describe('Task Runner', () => {
 
   test('uses API key when provided', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1083,7 +1285,7 @@ describe('Task Runner', () => {
 
   test(`doesn't use API key when not provided`, async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1113,7 +1315,7 @@ describe('Task Runner', () => {
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1154,7 +1356,7 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1221,7 +1423,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1274,13 +1476,80 @@ describe('Task Runner', () => {
     `);
   });
 
+  test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
+    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType as NormalizedAlertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "state": Object {},
+      }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "error": Object {
+              "message": "OMG",
+            },
+            "event": Object {
+              "action": "execute",
+              "outcome": "failure",
+              "reason": "license",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "error",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: execution failed",
+          },
+        ],
+      ]
+    `);
+  });
+
   test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
     taskRunnerFactoryInitializerParams.getServices.mockImplementation(() => {
       throw new Error('OMG');
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1347,7 +1616,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1417,7 +1686,7 @@ describe('Task Runner', () => {
     const legacyTaskInstance = omit(mockedTaskInstance, 'schedule');
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       legacyTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1455,7 +1724,7 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: originalAlertSate,
@@ -1486,7 +1755,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );

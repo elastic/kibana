@@ -55,7 +55,7 @@ describe('POST /api/saved_objects/_export', () => {
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
-    coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the export does not fail
+    coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerExportRoute(router, { config, coreUsageData });
 
@@ -117,7 +117,7 @@ describe('POST /api/saved_objects/_export', () => {
       })
     );
     expect(coreUsageStatsClient.incrementSavedObjectsExport).toHaveBeenCalledWith({
-      headers: expect.anything(),
+      request: expect.anything(),
       types: ['search'],
       supportedTypes: ['index-pattern', 'search'],
     });

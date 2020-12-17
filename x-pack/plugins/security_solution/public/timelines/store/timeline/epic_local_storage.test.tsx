@@ -41,6 +41,7 @@ import { Direction } from '../../../graphql/types';
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
 import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineTabs } from './model';
 
 jest.mock('../../containers/local_storage');
 
@@ -80,12 +81,14 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       end: endDate,
       eventType: 'all',
+      expandedEvent: {},
       filters: [],
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
+      onEventClosed: jest.fn(),
       showCallOutUnauthorizedMsg: false,
       showEventDetails: false,
       start: startDate,
@@ -94,6 +97,8 @@ describe('epicLocalStorage', () => {
       timelineId: 'foo',
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 

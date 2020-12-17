@@ -11,6 +11,10 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     loadTestFile(require.resolve('./feature_controls'));
 
+    describe('Alerts', function () {
+      loadTestFile(require.resolve('./alerts/chart_preview'));
+    });
+
     describe('Service Maps', function () {
       loadTestFile(require.resolve('./service_maps/service_maps'));
     });
@@ -21,12 +25,14 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/throughput'));
       loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
+      loadTestFile(require.resolve('./services/service_details'));
+      loadTestFile(require.resolve('./services/service_icons'));
     });
 
-    // TODO: we should not have a service overview.
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
       loadTestFile(require.resolve('./service_overview/dependencies'));
+      loadTestFile(require.resolve('./service_overview/instances'));
     });
 
     describe('Settings', function () {

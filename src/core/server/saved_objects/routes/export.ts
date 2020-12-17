@@ -181,10 +181,9 @@ export const registerExportRoute = (
 
       const exporter = context.core.savedObjects.exporter;
 
-      const { headers } = req;
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsExport({ headers, types: cleaned.types, supportedTypes })
+        .incrementSavedObjectsExport({ request: req, types: cleaned.types, supportedTypes })
         .catch(() => {});
 
       const exportStream = isExportByTypeOptions(options)

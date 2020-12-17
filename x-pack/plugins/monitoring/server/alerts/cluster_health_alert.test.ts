@@ -119,6 +119,7 @@ describe('ClusterHealthAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
+            nodeName: 'Elasticsearch cluster alert',
             ui: {
               isFiring: true,
               message: {
