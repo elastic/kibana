@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 
