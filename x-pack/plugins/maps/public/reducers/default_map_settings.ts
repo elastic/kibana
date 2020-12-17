@@ -12,6 +12,11 @@ export function getDefaultMapSettings(): MapSettings {
   return {
     autoFitToDataBounds: false,
     backgroundColor: euiThemeVars.euiColorEmptyShade,
+    disableInteractive: false,
+    disableTooltipControl: false,
+    hideToolbarOverlay: false,
+    hideLayerControl: false,
+    hideViewControl: false,
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
     fixedLocation: { lat: 0, lon: 0, zoom: 2 },
     browserLocation: { zoom: 2 },

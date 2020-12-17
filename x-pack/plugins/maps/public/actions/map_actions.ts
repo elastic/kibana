@@ -24,7 +24,6 @@ import {
   CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-  DISABLE_TOOLTIP_CONTROL,
   HIDE_LAYER_CONTROL,
   HIDE_TOOLBAR_OVERLAY,
   HIDE_VIEW_CONTROL,
@@ -73,7 +72,7 @@ export function setMapInitError(errorMessage: string) {
   };
 }
 
-export function setMapSettings(settings: MapSettings) {
+export function setMapSettings(settings: Partial<MapSettings>) {
   return {
     type: SET_MAP_SETTINGS,
     settings,
@@ -315,23 +314,4 @@ export function updateDrawState(drawState: DrawState | null) {
       drawState,
     });
   };
-}
-
-export function disableInteractive() {
-  return { type: SET_INTERACTIVE, disableInteractive: true };
-}
-
-export function disableTooltipControl() {
-  return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
-}
-
-export function hideToolbarOverlay() {
-  return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
-}
-
-export function hideLayerControl() {
-  return { type: HIDE_LAYER_CONTROL, hideLayerControl: true };
-}
-export function hideViewControl() {
-  return { type: HIDE_VIEW_CONTROL, hideViewControl: true };
 }

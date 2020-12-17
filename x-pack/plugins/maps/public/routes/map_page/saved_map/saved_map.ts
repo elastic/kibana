@@ -102,7 +102,9 @@ export class SavedMap {
       }
     }
 
-    if (this._attributes?.mapStateJSON) {
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettings(this._mapEmbeddableInput.mapSettings));
+    } else if (this._attributes?.mapStateJSON) {
       const mapState = JSON.parse(this._attributes.mapStateJSON);
       if (mapState.settings) {
         this._store.dispatch(setMapSettings(mapState.settings));

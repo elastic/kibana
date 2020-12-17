@@ -56,9 +56,6 @@ interface Props {
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   scrollZoom: boolean;
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideViewControl: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
   onMapDestroyed: () => void;
@@ -181,7 +178,7 @@ export class MBMap extends Component<Props, State> {
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
-        interactive: !this.props.disableInteractive,
+        interactive: !this.props.settings.disableInteractive,
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
       };
@@ -197,7 +194,7 @@ export class MBMap extends Component<Props, State> {
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-      if (!this.props.disableInteractive) {
+      if (!this.props.settings.disableInteractive) {
         mbMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
       }
 
@@ -260,7 +257,7 @@ export class MBMap extends Component<Props, State> {
       }, 100)
     );
     // Attach event only if view control is visible, which shows lat/lon
-    if (!this.props.hideViewControl) {
+    if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
@@ -386,7 +383,7 @@ export class MBMap extends Component<Props, State> {
     let tooltipControl;
     if (this.state.mbMap) {
       drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
-      tooltipControl = !this.props.disableTooltipControl ? (
+      tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
           mbMap={this.state.mbMap}
           addFilters={this.props.addFilters}
