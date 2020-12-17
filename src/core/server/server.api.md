@@ -123,6 +123,7 @@ import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
@@ -908,9 +909,6 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
-
-// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -1156,6 +1154,9 @@ export interface IRouter {
 
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+// @public (undocumented)
+export type ISavedObjectExporter = PublicMethodsOf<SavedObjectExporter>;
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -1894,6 +1895,7 @@ export interface RequestHandlerContext {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
+            exporter: ISavedObjectExporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
@@ -2048,6 +2050,23 @@ export interface SavedObjectAttributes {
 
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
+
+// @public (undocumented)
+export interface SavedObjectExportBaseOptions {
+    excludeExportDetails?: boolean;
+    includeReferencesDeep?: boolean;
+    namespace?: string;
+}
+
+// @public (undocumented)
+export class SavedObjectExporter {
+    constructor({ savedObjectsClient, exportSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        exportSizeLimit: number;
+    });
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
+    }
 
 // @public
 export interface SavedObjectMigrationContext {
@@ -2350,19 +2369,18 @@ export class SavedObjectsErrorHelpers {
 }
 
 // @public
-export interface SavedObjectsExportOptions {
-    excludeExportDetails?: boolean;
-    exportSizeLimit: number;
-    hasReference?: SavedObjectsFindOptionsReference[];
-    includeReferencesDeep?: boolean;
-    namespace?: string;
-    objects?: Array<{
+export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions {
+    objects: Array<{
         id: string;
         type: string;
     }>;
-    savedObjectsClient: SavedObjectsClientContract;
+}
+
+// @public
+export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
+    hasReference?: SavedObjectsFindOptionsReference[];
     search?: string;
-    types?: string[];
+    types: string[];
 }
 
 // @public
@@ -2683,6 +2701,7 @@ export interface SavedObjectsServiceSetup {
 
 // @public
 export interface SavedObjectsServiceStart {
+    createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
     createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;

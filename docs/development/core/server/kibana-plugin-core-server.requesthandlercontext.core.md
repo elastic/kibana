@@ -11,6 +11,7 @@ core: {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
+            exporter: ISavedObjectExporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
