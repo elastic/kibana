@@ -55,8 +55,8 @@ export function OverviewPage({ routeParams }: Props) {
     end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
   };
 
-  useTrackPageview({ app: 'observability', path: 'overview' });
-  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
+  useTrackPageview({ app: 'observability-overview', path: 'overview' });
+  useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });

@@ -70,7 +70,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      open: false,
       quiet: false,
       silent: false,
       watch: false,

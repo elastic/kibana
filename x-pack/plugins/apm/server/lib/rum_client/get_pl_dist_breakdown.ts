@@ -19,6 +19,7 @@ import {
   getPLDChartSteps,
   MICRO_TO_SEC,
   microToSec,
+  removeZeroesFromTail,
 } from './get_page_load_distribution';
 
 export const getBreakdownField = (breakdown: string) => {
@@ -95,14 +96,21 @@ export const getPageLoadDistBreakdown = async ({
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
   return pageDistBreakdowns?.map(({ key, page_dist: pageDist }) => {
-    return {
-      name: String(key),
-      data: pageDist.values?.map(({ key: pKey, value }, index: number, arr) => {
+    let seriesData = pageDist.values?.map(
+      ({ key: pKey, value }, index: number, arr) => {
         return {
           x: microToSec(pKey),
           y: index === 0 ? value : value - arr[index - 1].value,
         };
-      }),
+      }
+    );
+
+    // remove 0 values from tail
+    seriesData = removeZeroesFromTail(seriesData);
+
+    return {
+      name: String(key),
+      data: seriesData,
     };
   });
 };

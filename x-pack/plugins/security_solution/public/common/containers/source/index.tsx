@@ -126,7 +126,7 @@ export const useFetchIndex = (
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const previousIndexesName = useRef<string[]>([]);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,

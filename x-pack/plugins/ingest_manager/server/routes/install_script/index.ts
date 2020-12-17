@@ -27,7 +27,7 @@ export const registerRoutes = ({
     {
       path: INSTALL_SCRIPT_API_ROUTES,
       validate: InstallScriptRequestSchema,
-      options: { tags: [], authRequired: false },
+      options: { tags: [], authRequired: true },
     },
     async function getInstallScriptHandler(
       context,

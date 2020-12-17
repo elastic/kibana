@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Server } from 'hapi';
+import Boom from 'boom';
 import HapiStaticFiles from 'inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -68,6 +69,10 @@ export interface HttpServerSetup {
     isAuthenticated: IsAuthenticated;
   };
   getServerInfo: () => HttpServerInfo;
+}
+
+function isBoom(input: unknown): input is Boom {
+  return input instanceof Boom;
 }
 
 /** @internal */
@@ -123,6 +128,7 @@ export class HttpServer {
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupRequestStateAssignment(config);
+    this.setupKeepAliveTimeout(config);
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -318,6 +324,24 @@ export class HttpServer {
         requestId: getRequestId(request, config.requestId),
         requestUuid: uuid.v4(),
       } as KibanaRequestState;
+      return responseToolkit.continue;
+    });
+  }
+
+  private setupKeepAliveTimeout(config: HttpConfig) {
+    const keepAliveTimeout = `timeout=${String(config.keepaliveTimeout / 1000)}`;
+    this.server!.ext('onPreResponse', (request, responseToolkit) => {
+      const response = request.response;
+      if (response && request.headers.connection?.includes('keep-alive')) {
+        if (isBoom(response)) {
+          response.output.headers = {
+            ...response.output.headers,
+            'keep-alive': keepAliveTimeout,
+          };
+        } else {
+          response.header('keep-alive', keepAliveTimeout);
+        }
+      }
       return responseToolkit.continue;
     });
   }

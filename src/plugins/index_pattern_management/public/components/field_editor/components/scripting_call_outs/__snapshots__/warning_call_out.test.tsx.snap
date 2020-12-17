@@ -96,6 +96,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                 >
                   <button
                     className="euiLink euiLink--primary"
+                    disabled={false}
                     type="button"
                   >
                     <FormattedMessage
@@ -123,6 +124,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                 >
                   <button
                     className="euiLink euiLink--primary"
+                    disabled={false}
                     type="button"
                   >
                     <FormattedMessage

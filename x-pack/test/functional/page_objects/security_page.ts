@@ -17,6 +17,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
@@ -226,7 +227,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       log.debug('Redirecting to /logout to force the logout');
-      const url = PageObjects.common.getHostPort() + '/logout';
+      const url = deployment.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
       await waitForLoginPage();

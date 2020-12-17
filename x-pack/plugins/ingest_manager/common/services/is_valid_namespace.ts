@@ -23,7 +23,7 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
         defaultMessage: 'Namespace must be lowercase',
       }),
     };
-  } else if (/[\*\\/\?"<>|\s,#:]+/.test(namespace)) {
+  } else if (/[\*\\/\?"<>|\s,#:-]+/.test(namespace)) {
     return {
       valid: false,
       error: i18n.translate(

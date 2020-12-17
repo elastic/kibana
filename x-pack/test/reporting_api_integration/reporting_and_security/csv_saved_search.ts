@@ -355,7 +355,10 @@ export default function ({ getService }: FtrProviderContext) {
               timezone: 'UTC',
             },
             state: {
-              sort: [{ order_date: { order: 'desc', unmapped_type: 'boolean' } }],
+              sort: [
+                { order_date: { order: 'desc', unmapped_type: 'boolean' } },
+                { order_id: { order: 'asc', unmapped_type: 'boolean' } },
+              ],
               docvalue_fields: [
                 { field: 'customer_birth_date', format: 'date_time' },
                 { field: 'order_date', format: 'date_time' },

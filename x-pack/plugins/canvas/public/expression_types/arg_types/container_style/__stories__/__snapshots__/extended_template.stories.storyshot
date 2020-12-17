@@ -448,6 +448,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 <button
                   aria-label="Border white"
                   className="euiLink euiLink--primary"
+                  disabled={false}
                   onClick={[Function]}
                   style={
                     Object {
@@ -917,6 +918,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
               <button
                 aria-label="Border black"
                 className="euiLink euiLink--primary"
+                disabled={false}
                 onClick={[Function]}
                 style={
                   Object {
@@ -1398,6 +1400,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 <button
                   aria-label="Border white"
                   className="euiLink euiLink--primary"
+                  disabled={false}
                   onClick={[Function]}
                   style={
                     Object {

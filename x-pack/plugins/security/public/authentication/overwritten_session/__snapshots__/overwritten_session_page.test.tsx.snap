@@ -73,6 +73,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         <EuiButtonDisplay
           element="a"
           href="/mock-base-path/"
+          isDisabled={false}
           rel="noreferrer"
         >
           <a

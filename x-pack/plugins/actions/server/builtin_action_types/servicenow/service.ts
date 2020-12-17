@@ -32,13 +32,14 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${INCIDENT_URL}`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${INCIDENT_URL}`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
   const getIncidentViewURL = (id: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}${id}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}${id}`;
   };
 
   const getIncident = async (id: string) => {

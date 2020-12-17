@@ -24,7 +24,9 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ];
 
   useEffect(() => {
-    editAction('level', 'info', index);
+    if (!actionParams?.level) {
+      editAction('level', 'info', index);
+    }
     if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }

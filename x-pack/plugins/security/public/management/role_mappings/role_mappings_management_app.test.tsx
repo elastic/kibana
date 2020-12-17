@@ -83,18 +83,18 @@ describe('roleMappingsManagementApp', () => {
   });
 
   it('mount() works for the `edit role mapping` page', async () => {
-    const roleMappingName = 'someRoleMappingName';
+    const roleMappingName = 'role@mapping';
 
     const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${roleMappingName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Role Mappings' },
-      { href: `/edit/${roleMappingName}`, text: roleMappingName },
+      { href: `/edit/${encodeURIComponent(roleMappingName)}`, text: roleMappingName },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"name":"someRoleMappingName","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someRoleMappingName","search":"","hash":""}}}
+        Role Mapping Edit Page: {"name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
       </div>
     `);
 
