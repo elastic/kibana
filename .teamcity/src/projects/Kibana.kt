@@ -32,7 +32,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       param("teamcity.ui.settings.readOnly", "true")
 
       // https://github.com/JetBrains/teamcity-webhooks
-      param("teamcity.internal.webhooks.enable", "true")
+      param("teamcity.internal.webhooks.enable", "false")
       param("teamcity.internal.webhooks.events", "BUILD_STARTED;BUILD_FINISHED;BUILD_INTERRUPTED;CHANGES_LOADED;BUILD_TYPE_ADDED_TO_QUEUE;BUILD_PROBLEMS_CHANGED")
       param("teamcity.internal.webhooks.url", "https://ci-stats.kibana.dev/_teamcity_webhook")
       param("teamcity.internal.webhooks.username", "automation")
