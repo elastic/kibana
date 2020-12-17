@@ -208,6 +208,8 @@ export class ValidateJobUI extends Component {
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
 
+    // Run job validation only if a job config has been passed on and the duration makes sense to run it.
+    // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
     if (typeof job === 'object' && duration.start !== null && duration.end !== null) {
       let shouldShowLoadingIndicator = true;
 
