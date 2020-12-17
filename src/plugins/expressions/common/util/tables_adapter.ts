@@ -17,32 +17,18 @@
  * under the License.
  */
 
-export interface TabularDataValue {
-  formatted: string;
-  raw: unknown;
-}
+import { EventEmitter } from 'events';
+import { Datatable } from '../expression_types/specs';
 
-export interface TabularDataColumn {
-  name: string;
-  field: string;
-  filter?: (value: TabularDataValue) => void;
-  filterOut?: (value: TabularDataValue) => void;
-}
+export class TablesAdapter extends EventEmitter {
+  private _tables: { [key: string]: Datatable } = {};
 
-export type TabularDataRow = Record<TabularDataColumn['field'], TabularDataValue>;
+  public logDatatable(name: string, datatable: Datatable): void {
+    this._tables[name] = datatable;
+    this.emit('change', this.tables);
+  }
 
-export interface TabularData {
-  columns: TabularDataColumn[];
-  rows: TabularDataRow[];
-}
-
-export type TabularCallback = () => TabularData | Promise<TabularData>;
-
-export interface TabularHolder {
-  data: TabularData | null;
-  options: TabularLoaderOptions;
-}
-
-export interface TabularLoaderOptions {
-  returnsFormattedValues?: boolean;
+  public get tables() {
+    return this._tables;
+  }
 }

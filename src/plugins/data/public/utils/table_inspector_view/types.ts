@@ -17,6 +17,20 @@
  * under the License.
  */
 
-export class FormattedData {
-  constructor(public readonly raw: any, public readonly formatted: any) {}
+import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
+
+type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
+
+export interface DataViewColumn {
+  originalColumn: () => DatatableColumn;
+  name: string;
+  field: string;
+  sortable: (item: DatatableRow) => string | number;
+  render: DataViewColumnRender;
+}
+
+export type DataViewRow = DatatableRow;
+
+export interface TableInspectorAdapter {
+  [key: string]: Datatable;
 }
