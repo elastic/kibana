@@ -5,16 +5,8 @@
  */
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonIcon,
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiPortal,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import deepEqual from 'fast-deep-equal';
 import {
   ActionTypeRegistryContract,
   Alert,
@@ -168,7 +160,6 @@ const AlertAdd = ({
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
-        hideCloseButton={true}
         maxWidth={620}
       >
         <EuiFlyoutHeader hasBorder>
@@ -180,18 +171,6 @@ const AlertAdd = ({
               />
             </h3>
           </EuiTitle>
-          <EuiButtonIcon
-            className="euiFlyout__closeButton"
-            iconType="cross"
-            color="text"
-            onClick={onClose}
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.flyoutCloseButton',
-              {
-                defaultMessage: 'Close this dialog',
-              }
-            )}
-          />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={false}>
@@ -223,7 +202,7 @@ const AlertAdd = ({
                   await saveAlertAndCloseFlyout();
                 }
               }}
-              onCancel={onClose}
+              onCancel={checkForChangesAndCloseFlyout}
             />
           </HealthCheck>
         </HealthContextProvider>

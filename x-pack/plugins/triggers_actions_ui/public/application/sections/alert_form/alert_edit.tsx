@@ -6,7 +6,6 @@
 import React, { Fragment, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonIcon,
   EuiTitle,
   EuiFlyoutHeader,
   EuiFlyout,
@@ -125,7 +124,6 @@ export const AlertEdit = ({
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
-        hideCloseButton={true}
         maxWidth={620}
       >
         <EuiFlyoutHeader hasBorder>
@@ -137,18 +135,6 @@ export const AlertEdit = ({
               />
             </h3>
           </EuiTitle>
-          <EuiButtonIcon
-            className="euiFlyout__closeButton"
-            iconType="cross"
-            color="text"
-            onClick={onClose}
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertEdit.flyoutCloseButton',
-              {
-                defaultMessage: 'Close this dialog',
-              }
-            )}
-          />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={true}>
@@ -188,7 +174,7 @@ export const AlertEdit = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="cancelSaveEditedAlertButton"
-                    onClick={() => onClose()}
+                    onClick={() => checkForChangesAndCloseFlyout()}
                   >
                     {i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel',
