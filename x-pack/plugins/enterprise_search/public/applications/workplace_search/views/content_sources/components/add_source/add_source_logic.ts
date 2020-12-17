@@ -160,7 +160,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
@@ -182,7 +181,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       true,
       {
         getPreContentSourceConfigData: () => true,
-        setSearchResults: () => false,
         setPreContentSourceConfigData: () => false,
       },
     ],
