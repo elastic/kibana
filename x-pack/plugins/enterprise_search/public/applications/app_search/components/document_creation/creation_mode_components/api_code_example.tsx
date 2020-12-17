@@ -83,7 +83,7 @@ export const ModalBody: React.FC = () => {
           />
         </p>
         <p>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.apiExample', {
+          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.example', {
             defaultMessage:
               'To see the API in action, you can experiment with the example request below using a command line or a client library.',
           })}
