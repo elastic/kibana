@@ -29,7 +29,7 @@ export function getLeadControlColumns() {
   return [
     {
       id: 'openDetails',
-      width: 31,
+      width: 32,
       headerCellRender: () => (
         <EuiScreenReaderOnly>
           <span>

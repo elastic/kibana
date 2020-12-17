@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useContext } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 
@@ -31,15 +31,17 @@ export const ExpandButton = ({ rowIndex }: { rowIndex: number }) => {
   const isCurrentRowExpanded = current === expanded;
 
   return (
-    <button
+    <EuiButtonIcon
+      size="s"
+      iconSize="s"
       aria-label={i18n.translate('discover.grid.viewDoc', {
         defaultMessage: 'Toggle dialog with details',
       })}
-      onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
-      className="dscTable__buttonToggle"
       data-test-subj="docTableExpandToggleColumn"
-    >
-      <EuiIcon size="s" type={isCurrentRowExpanded ? 'expandMini' : 'expand'} />
-    </button>
+      onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
+      color={isCurrentRowExpanded ? 'primary' : 'subdued'}
+      iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+      isSelected={isCurrentRowExpanded ? true : false}
+    />
   );
 };
