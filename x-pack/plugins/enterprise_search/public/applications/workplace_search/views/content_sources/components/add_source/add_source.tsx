@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -13,7 +13,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { Loading } from '../../../../../shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
-import { AddSourceLogic } from './add_source_logic';
+import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
@@ -27,38 +27,16 @@ import { ReAuthenticate } from './re_authenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
-enum AddSourceSteps {
-  ConfigIntroStep = 'Config Intro',
-  SaveConfigStep = 'Save Config',
-  ConfigCompletedStep = 'Config Completed',
-  ConnectInstanceStep = 'Connect Instance',
-  ConfigureCustomStep = 'Configure Custom',
-  ConfigureOauthStep = 'Configure Oauth',
-  SaveCustomStep = 'Save Custom',
-  ReAuthenticateStep = 'ReAuthenticate',
-}
-
-interface AddSourceProps {
-  sourceIndex: number;
-  connect?: boolean;
-  configure?: boolean;
-  reAuthenticate?: boolean;
-}
-
-export const AddSource: React.FC<AddSourceProps> = ({
-  sourceIndex,
-  connect,
-  configure,
-  reAuthenticate,
-}) => {
-  const history = useHistory() as History;
+export const AddSource: React.FC<AddSourceProps> = (props) => {
   const {
-    getSourceConfigData,
+    initializeAddSource,
+    setAddSourceStep,
     saveSourceConfig,
     createContentSource,
     resetSourceState,
   } = useActions(AddSourceLogic);
   const {
+    addSourceCurrentStep,
     sourceConfigData: {
       name,
       categories,
@@ -78,26 +56,14 @@ export const AddSource: React.FC<AddSourceProps> = ({
     sourceDescription,
     connectStepDescription,
     addPath,
-  } = staticSourceData[sourceIndex] as SourceDataItem;
+  } = staticSourceData[props.sourceIndex] as SourceDataItem;
 
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    initializeAddSource(props);
     return resetSourceState;
   }, []);
-
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-
-  const getFirstStep = () => {
-    if (isCustom) return AddSourceSteps.ConfigureCustomStep;
-    if (connect) return AddSourceSteps.ConnectInstanceStep;
-    if (configure) return AddSourceSteps.ConfigureOauthStep;
-    if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
-    return AddSourceSteps.ConfigIntroStep;
-  };
-
-  const [addSourceCurrentStep, setAddSourceStep] = useState(getFirstStep());
 
   if (dataLoading) return <Loading />;
 
