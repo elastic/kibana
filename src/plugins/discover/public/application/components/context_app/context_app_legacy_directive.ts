@@ -37,5 +37,6 @@ export function createContextAppLegacy(reactDirective: any) {
     ['successorAvailable', { watchDepth: 'reference' }],
     ['successorStatus', { watchDepth: 'reference' }],
     ['onChangeSuccessorCount', { watchDepth: 'reference' }],
+    ['topNavMenu', { watchDepth: 'reference' }],
   ]);
 }

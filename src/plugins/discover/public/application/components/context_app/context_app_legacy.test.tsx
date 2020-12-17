@@ -25,6 +25,7 @@ import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { ContextErrorMessage } from '../context_error_message';
+import { TopNavMenuMock } from './__mocks__/top_nav_menu';
 
 describe('ContextAppLegacy test', () => {
   const hit = {
@@ -64,6 +65,7 @@ describe('ContextAppLegacy test', () => {
     onChangeSuccessorCount: jest.fn(),
     predecessorStatus: 'loaded',
     successorStatus: 'loaded',
+    topNavMenu: TopNavMenuMock,
   };
 
   it('renders correctly', () => {
@@ -72,6 +74,7 @@ describe('ContextAppLegacy test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
+    expect(component.find(TopNavMenuMock).length).toBe(1);
   });
 
   it('renders loading indicator', () => {
@@ -82,6 +85,7 @@ describe('ContextAppLegacy test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
     expect(component.find(ActionBar).length).toBe(2);
+    expect(component.find(TopNavMenuMock).length).toBe(1);
   });
 
   it('renders error message', () => {
@@ -90,6 +94,7 @@ describe('ContextAppLegacy test', () => {
     props.reason = 'something went wrong';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
+    expect(component.find(TopNavMenuMock).length).toBe(0);
     const errorMessage = component.find(ContextErrorMessage);
     expect(errorMessage.length).toBe(1);
   });
