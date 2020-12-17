@@ -218,6 +218,20 @@ export class ValidateJobUI extends Component {
           .validateJob({ duration, fields, job })
           .then((messages) => {
             shouldShowLoadingIndicator = false;
+
+            const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
+
+            if (messagesContainError) {
+              messages.push({
+                id: 'job_validation_includes_error',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationIncludesErrorText', {
+                  defaultMessage:
+                    'Job validation has failed, but you can still continue and create the job. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              });
+            }
+
             this.setState({
               ...this.state,
               ui: {
@@ -233,9 +247,7 @@ export class ValidateJobUI extends Component {
               title: job.job_id,
             });
             if (typeof this.props.setIsValid === 'function') {
-              this.props.setIsValid(
-                messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
-              );
+              this.props.setIsValid(!messagesContainError);
             }
           })
           .catch((error) => {
