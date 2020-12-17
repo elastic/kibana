@@ -181,7 +181,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   };
 };
 
-export const createDataStreamPayload = (name: string, storageSize: string = '1b', storageSizeBytes: number = 1): DataStream => ({
+export const createDataStreamPayload = (
+  name: string,
+  storageSize: string = '1b',
+  storageSizeBytes: number = 1
+): DataStream => ({
   name,
   timeStampField: { name: '@timestamp' },
   indices: [
