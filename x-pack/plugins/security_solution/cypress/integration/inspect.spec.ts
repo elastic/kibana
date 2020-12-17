@@ -9,6 +9,7 @@ import {
   INSPECT_MODAL,
   INSPECT_NETWORK_BUTTONS_IN_SECURITY,
 } from '../screens/inspect';
+import { cleanKibana } from '../tasks/common';
 
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -20,6 +21,7 @@ import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 describe('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
     });
     afterEach(() => {
@@ -36,6 +38,7 @@ describe('Inspect', () => {
 
   context('Network stats and tables', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(NETWORK_URL);
     });
     afterEach(() => {
