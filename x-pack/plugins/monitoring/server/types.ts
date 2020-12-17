@@ -90,7 +90,7 @@ export interface LegacyRequest {
   getActionTypeRegistry: () => any;
   getAlertsClient: () => any;
   getActionsClient: () => any;
-  server: Partial<LegacyServer>;
+  server: LegacyServer;
 }
 
 export interface LegacyServer {
