@@ -12,12 +12,7 @@ import { DragDropContextWrapper } from '../../../common/components/drag_and_drop
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 
-import {
-  mockIndexNames,
-  mockIndexPattern,
-  mockTimelineData,
-  TestProviders,
-} from '../../../common/mock';
+import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
@@ -66,9 +61,10 @@ describe('StatefulTimeline', () => {
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
       {
-        events: mockTimelineData,
+        events: [],
         pageInfo: {
           activePage: 0,
+          totalPages: 10,
           querySize: 0,
         },
       },

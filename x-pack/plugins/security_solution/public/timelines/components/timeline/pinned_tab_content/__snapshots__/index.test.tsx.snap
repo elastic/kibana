@@ -1,8 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Timeline rendering renders correctly against snapshot 1`] = `
-<QueryTabContentComponent
-  activeTab="query"
+exports[`PinnedTabContent rendering renders correctly against snapshot 1`] = `
+<PinnedTabContentComponent
   columns={
     Array [
       Object {
@@ -126,145 +125,6 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
-  dataProviders={
-    Array [
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 1",
-        "kqlQuery": "",
-        "name": "Provider 1",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 1",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 2",
-        "kqlQuery": "",
-        "name": "Provider 2",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 2",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 3",
-        "kqlQuery": "",
-        "name": "Provider 3",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 3",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 4",
-        "kqlQuery": "",
-        "name": "Provider 4",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 4",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 5",
-        "kqlQuery": "",
-        "name": "Provider 5",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 5",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 6",
-        "kqlQuery": "",
-        "name": "Provider 6",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 6",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 7",
-        "kqlQuery": "",
-        "name": "Provider 7",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 7",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 8",
-        "kqlQuery": "",
-        "name": "Provider 8",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 8",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 9",
-        "kqlQuery": "",
-        "name": "Provider 9",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 9",
-        },
-      },
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "id-Provider 10",
-        "kqlQuery": "",
-        "name": "Provider 10",
-        "queryMatch": Object {
-          "field": "name",
-          "operator": ":",
-          "value": "Provider 10",
-        },
-      },
-    ]
-  }
-  end="2018-03-24T03:33:52.253Z"
-  eventType="all"
-  expandedEvent={Object {}}
-  filters={Array []}
-  isLive={false}
   itemsPerPage={5}
   itemsPerPageOptions={
     Array [
@@ -273,11 +133,8 @@ In other use cases the message field can be used to concatenate different values
       20,
     ]
   }
-  kqlMode="search"
-  kqlQueryExpression=""
   onEventClosed={[MockFunction]}
-  show={true}
-  showCallOutUnauthorizedMsg={false}
+  pinnedEventIds={Object {}}
   showEventDetails={false}
   sort={
     Array [
@@ -287,10 +144,6 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
-  start="2018-03-23T18:49:23.132Z"
-  status="active"
   timelineId="test"
-  timerangeKind="absolute"
-  updateEventTypeAndIndexesName={[MockFunction]}
 />
 `;
