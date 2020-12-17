@@ -207,11 +207,7 @@ describe('monitor status alert type', () => {
         "documentationUrl": [Function],
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "name": <FormattedMessage
-          defaultMessage="Uptime monitor status"
-          id="xpack.uptime.alerts.monitorStatus.title.label"
-          values={Object {}}
-        />,
+        "name": "Uptime monitor status",
         "requiresAppContext": false,
         "validate": [Function],
       }

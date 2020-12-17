@@ -23,12 +23,6 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
-  name: (
-    <FormattedMessage
-      id="xpack.uptime.alerts.monitorStatus.title.label"
-      defaultMessage="Uptime monitor status"
-    />
-  ),
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {

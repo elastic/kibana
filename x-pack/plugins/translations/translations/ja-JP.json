@@ -20147,7 +20147,6 @@
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.ariaLabel": "アラートの範囲のための時間単位の数を入力してください",
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.expression": "within",
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.value": "最終{value}",
-    "xpack.uptime.alerts.monitorStatus.title.label": "稼働状況の監視ステータス",
     "xpack.uptime.alerts.settings.createConnector": "コネクターを作成",
     "xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel": "「日」の時間範囲選択項目",
     "xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel": "「時間」の時間範囲選択項目",

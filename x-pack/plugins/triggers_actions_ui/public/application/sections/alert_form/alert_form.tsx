@@ -375,10 +375,7 @@ export const AlertForm = ({
           hasDisabledByLicenseAlertTypes = true;
         }
         (result[producer] = result[producer] || []).push({
-          name:
-            alertTypeValue.alertTypeModel.name === undefined
-              ? alertTypeValue.alertType.name
-              : alertTypeValue.alertTypeModel.name.props.defaultMessage,
+          name: alertTypeValue.alertType.name,
           id: alertTypeValue.alertTypeModel.id,
           checkEnabledResult,
           alertTypeItem: alertTypeValue.alertTypeModel,
