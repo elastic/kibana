@@ -35,8 +35,10 @@ import { i18n } from '@kbn/i18n';
 
 import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
-import { TabularData } from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
+import { Datatable, DatatableColumn } from '../../../../../expressions/public';
+import { FieldFormatsStart } from '../../../field_formats';
+import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];
@@ -44,10 +46,21 @@ interface DataTableFormatState {
 }
 
 interface DataTableFormatProps {
-  data: TabularData;
+  data: Datatable;
   exportTitle: string;
   uiSettings: IUiSettingsClient;
-  isFormatted?: boolean;
+  fieldFormats: FieldFormatsStart;
+  uiActions: UiActionsStart;
+  isFilterable: (column: DatatableColumn) => boolean;
+}
+
+interface RenderCellArguments {
+  table: Datatable;
+  columnIndex: number;
+  rowIndex: number;
+  formattedValue: string;
+  uiActions: UiActionsStart;
+  isFilterable: boolean;
 }
 
 export class DataTableFormat extends Component<DataTableFormatProps, DataTableFormatState> {
@@ -55,25 +68,35 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     data: PropTypes.object.isRequired,
     exportTitle: PropTypes.string.isRequired,
     uiSettings: PropTypes.object.isRequired,
-    isFormatted: PropTypes.bool,
+    fieldFormats: PropTypes.object.isRequired,
+    uiActions: PropTypes.object.isRequired,
+    isFilterable: PropTypes.func.isRequired,
   };
 
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
 
-  static renderCell(dataColumn: any, value: any, isFormatted: boolean = false) {
+  static renderCell({
+    table,
+    columnIndex,
+    rowIndex,
+    formattedValue,
+    uiActions,
+    isFilterable,
+  }: RenderCellArguments) {
+    const column = table.columns[columnIndex];
     return (
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>{isFormatted ? value.formatted : value}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-            {dataColumn.filter && (
+            {isFilterable && (
               <EuiToolTip
                 position="bottom"
                 content={
                   <FormattedMessage
-                    id="inspector.data.filterForValueButtonTooltip"
+                    id="data.inspector.table.filterForValueButtonTooltip"
                     defaultMessage="Filter for value"
                   />
                 }
@@ -81,23 +104,29 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                 <EuiButtonIcon
                   iconType="plusInCircle"
                   color="text"
-                  aria-label={i18n.translate('inspector.data.filterForValueButtonAriaLabel', {
+                  aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value',
                   })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
-                  onClick={() => dataColumn.filter(value)}
+                  onClick={() => {
+                    const value = table.rows[rowIndex][column.id];
+                    const eventData = { table, column: columnIndex, row: rowIndex, value };
+                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      data: { data: [eventData] },
+                    });
+                  }}
                 />
               </EuiToolTip>
             )}
 
-            {dataColumn.filterOut && (
+            {isFilterable && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="bottom"
                   content={
                     <FormattedMessage
-                      id="inspector.data.filterOutValueButtonTooltip"
+                      id="data.inspector.table.filterOutValueButtonTooltip"
                       defaultMessage="Filter out value"
                     />
                   }
@@ -105,12 +134,21 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   <EuiButtonIcon
                     iconType="minusInCircle"
                     color="text"
-                    aria-label={i18n.translate('inspector.data.filterOutValueButtonAriaLabel', {
-                      defaultMessage: 'Filter out value',
-                    })}
+                    aria-label={i18n.translate(
+                      'data.inspector.table.filterOutValueButtonAriaLabel',
+                      {
+                        defaultMessage: 'Filter out value',
+                      }
+                    )}
                     data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
-                    onClick={() => dataColumn.filterOut(value)}
+                    onClick={() => {
+                      const value = table.rows[rowIndex][column.id];
+                      const eventData = { table, column: columnIndex, row: rowIndex, value };
+                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                        data: { data: [eventData], negate: true },
+                      });
+                    }}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -121,7 +159,12 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     );
   }
 
-  static getDerivedStateFromProps({ data, isFormatted }: DataTableFormatProps) {
+  static getDerivedStateFromProps({
+    data,
+    uiActions,
+    fieldFormats,
+    isFilterable,
+  }: DataTableFormatProps) {
     if (!data) {
       return {
         columns: null,
@@ -129,12 +172,30 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       };
     }
 
-    const columns = data.columns.map((dataColumn: any) => ({
-      name: dataColumn.name,
-      field: dataColumn.field,
-      sortable: isFormatted ? (row: DataViewRow) => row[dataColumn.field].raw : true,
-      render: (value: any) => DataTableFormat.renderCell(dataColumn, value, isFormatted),
-    }));
+    const columns = data.columns.map((dataColumn: any, index: number) => {
+      const formatParams = { id: 'string', ...dataColumn.meta.params };
+      const fieldFormatter = fieldFormats.deserialize(formatParams);
+      const filterable = isFilterable(dataColumn);
+      return {
+        originalColumn: () => dataColumn,
+        name: dataColumn.name,
+        field: dataColumn.id,
+        sortable: true,
+        render: (value: any) => {
+          const formattedValue = fieldFormatter.convert(value);
+          const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
+
+          return DataTableFormat.renderCell({
+            table: data,
+            columnIndex: index,
+            rowIndex,
+            formattedValue,
+            uiActions,
+            isFilterable: filterable,
+          });
+        },
+      };
+    });
 
     return { columns, rows: data.rows };
   }
@@ -152,12 +213,12 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
           <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
             <DataDownloadOptions
-              isFormatted={this.props.isFormatted}
               title={this.props.exportTitle}
               csvSeparator={this.csvSeparator}
               quoteValues={this.quoteValues}
               columns={columns}
               rows={rows}
+              fieldFormats={this.props.fieldFormats}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
