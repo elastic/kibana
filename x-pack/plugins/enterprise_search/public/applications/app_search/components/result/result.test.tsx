@@ -49,6 +49,7 @@ describe('Result', () => {
   it('renders', () => {
     const wrapper = shallow(<Result {...props} />);
     expect(wrapper.find(EuiPanel).exists()).toBe(true);
+    expect(wrapper.find(EuiPanel).prop('title')).toEqual('Document 1');
   });
 
   it('should render a ResultField for each field except id and _meta', () => {

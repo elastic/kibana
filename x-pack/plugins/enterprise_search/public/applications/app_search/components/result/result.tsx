@@ -73,7 +73,8 @@ export const Result: React.FC<Props> = ({
       className={classes}
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
-        defaultMessage: 'View document details',
+        defaultMessage: 'Document {id}',
+        values: { id: result[ID].raw },
       })}
     >
       {conditionallyLinkedArticle(
