@@ -43,6 +43,13 @@ export const visDataRoutes = (
     async (requestContext, request, response) => {
       try {
         validateObject(request.body);
+      } catch (error) {
+        return response.badRequest({
+          body: error.message,
+        });
+      }
+
+      try {
         visPayloadSchema.validate(request.body);
       } catch (error) {
         logFailedValidation();
