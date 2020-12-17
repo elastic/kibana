@@ -21,7 +21,7 @@ import { SignalSearchResponse, ThresholdAggregationBucket } from './types';
 import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
-const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
+export const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -146,6 +146,8 @@ export const transformThresholdResultsToEcs = (
       hits: transformedHits,
     },
   };
+
+  delete thresholdResults.aggregations; // no longer needed
 
   set(thresholdResults, 'results.hits.total', transformedHits.length);
 
