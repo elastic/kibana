@@ -28,7 +28,7 @@ import { ReAuthenticate } from './re_authenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
-enum Steps {
+enum AddSourceSteps {
   ConfigIntroStep = 'Config Intro',
   SaveConfigStep = 'Save Config',
   ConfigCompletedStep = 'Config Completed',
@@ -91,28 +91,28 @@ export const AddSource: React.FC<AddSourceProps> = ({
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
 
   const getFirstStep = () => {
-    if (isCustom) return Steps.ConfigureCustomStep;
-    if (connect) return Steps.ConnectInstanceStep;
-    if (configure) return Steps.ConfigureOauthStep;
-    if (reAuthenticate) return Steps.ReAuthenticateStep;
-    return Steps.ConfigIntroStep;
+    if (isCustom) return AddSourceSteps.ConfigureCustomStep;
+    if (connect) return AddSourceSteps.ConnectInstanceStep;
+    if (configure) return AddSourceSteps.ConfigureOauthStep;
+    if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+    return AddSourceSteps.ConfigIntroStep;
   };
 
-  const [currentStep, setStep] = useState(getFirstStep());
+  const [addSourceCurrentStep, setAddSourceStep] = useState(getFirstStep());
 
   if (dataLoading) return <Loading />;
 
-  const goToConfigurationIntro = () => setStep(Steps.ConfigIntroStep);
-  const goToSaveConfig = () => setStep(Steps.SaveConfigStep);
-  const setConfigCompletedStep = () => setStep(Steps.ConfigCompletedStep);
+  const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
+  const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
+  const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
 
   const goToConnectInstance = () => {
-    setStep(Steps.ConnectInstanceStep);
+    setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
     history.push(`${getSourcesPath(addPath, isOrganization)}/connect`);
   };
 
-  const saveCustomSuccess = () => setStep(Steps.SaveCustomStep);
+  const saveCustomSuccess = () => setAddSourceStep(AddSourceSteps.SaveCustomStep);
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
   const goToFormSourceCreated = (sourceName: string) => {
@@ -123,10 +123,10 @@ export const AddSource: React.FC<AddSourceProps> = ({
 
   return (
     <>
-      {currentStep === Steps.ConfigIntroStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
-      {currentStep === Steps.SaveConfigStep && (
+      {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
           name={name}
           configuration={configuration}
@@ -135,7 +135,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigCompletedStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigCompletedStep && (
         <ConfigCompleted
           name={name}
           accountContextOnly={accountContextOnly}
@@ -144,7 +144,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConnectInstanceStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (
         <ConnectInstance
           name={name}
           serviceType={serviceType}
@@ -158,17 +158,17 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigureCustomStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigureCustomStep && (
         <ConfigureCustom
           helpText={configuration.helpText}
           advanceStep={goToSaveCustom}
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigureOauthStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigureOauthStep && (
         <ConfigureOauth name={name} onFormCreated={goToFormSourceCreated} header={header} />
       )}
-      {currentStep === Steps.SaveCustomStep && (
+      {addSourceCurrentStep === AddSourceSteps.SaveCustomStep && (
         <SaveCustom
           documentationUrl={configuration.documentationUrl}
           newCustomSource={newCustomSource}
@@ -176,7 +176,9 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ReAuthenticateStep && <ReAuthenticate name={name} header={header} />}
+      {addSourceCurrentStep === AddSourceSteps.ReAuthenticateStep && (
+        <ReAuthenticate name={name} header={header} />
+      )}
     </>
   );
 };
