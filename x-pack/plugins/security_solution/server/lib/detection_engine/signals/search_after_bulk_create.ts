@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable complexity */
 
 import { isEmpty } from 'lodash';
 import { singleSearchAfter } from './single_search_after';
@@ -99,6 +100,7 @@ export const searchAfterAndBulkCreate = async ({
           pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
           timestampOverride: ruleParams.timestampOverride,
         });
+        // console.error(`SEARCH RESULT: ${JSON.stringify(searchResult)}`);
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({
@@ -110,7 +112,7 @@ export const searchAfterAndBulkCreate = async ({
             errors: searchErrors,
           }),
         ]);
-        if (!isEmpty(searchErrors)) {
+        if (!isEmpty(searchErrors) && ruleParams.timestampOverride != null) {
           // console.error(`SEARCH ERRORS: ${JSON.stringify(searchErrors)}`);
           const {
             searchResult: searchResultB,

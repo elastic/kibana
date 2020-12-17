@@ -662,8 +662,8 @@ export const mergeReturns = (
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
-      // errors: [...new Set([...existingErrors, ...newErrors])],
-      errors: [...existingErrors, ...newErrors],
+      errors: [...new Set([...existingErrors, ...newErrors])],
+      // errors: [...existingErrors, ...newErrors],
     };
   });
 };

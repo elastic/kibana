@@ -80,7 +80,7 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
-  if (timestamp != null) {
+  if (timestamp != null && timestampOverride != null) {
     rangeFilter.push({
       bool: {
         must_not: {
