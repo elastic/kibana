@@ -156,10 +156,11 @@ export function getIndexPatternDatasource({
     },
 
     removeColumn({ prevState, layerId, columnId }) {
+      const indexPattern = prevState.indexPatterns[prevState.layers[layerId]?.indexPatternId];
       return mergeLayer({
         state: prevState,
         layerId,
-        newLayer: deleteColumn({ layer: prevState.layers[layerId], columnId }),
+        newLayer: deleteColumn({ layer: prevState.layers[layerId], columnId, indexPattern }),
       });
     },
 

@@ -99,7 +99,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+    indexPattern.getFieldByName(column.sourceField)?.displayName ??
+    i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+      defaultMessage: 'Missing field',
+    }),
   buildColumn({ field }) {
     return {
       label: field.displayName,

@@ -44,8 +44,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority?: number;
   optionalTimeScaling?: boolean;
 }) {
-  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
-    const rawLabel = ofName(name);
+  const labelLookup = (name?: string, column?: BaseIndexPatternColumn) => {
+    const rawLabel = ofName(
+      name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        })
+    );
     if (!optionalTimeScaling) {
       return rawLabel;
     }
@@ -86,7 +91,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ? adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId)
         : layer.columns[thisColumnId],
     getDefaultLabel: (column, indexPattern, columns) =>
-      labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
+      labelLookup(indexPattern.getFieldByName(column.sourceField)?.displayName, column),
     buildColumn: ({ field, previousColumn }) => ({
       label: labelLookup(field.displayName, previousColumn),
       dataType: 'number',

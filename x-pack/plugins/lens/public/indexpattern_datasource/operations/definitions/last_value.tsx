@@ -15,10 +15,16 @@ import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
 import { getInvalidFieldMessage } from './helpers';
 
-function ofName(name: string) {
+function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
     defaultMessage: 'Last value of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        }),
+    },
   });
 }
 
@@ -88,7 +94,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     defaultMessage: 'Last value',
   }),
   getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };

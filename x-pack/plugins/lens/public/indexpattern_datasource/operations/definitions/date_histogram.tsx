@@ -68,7 +68,10 @@ export const dateHistogramOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+    indexPattern.getFieldByName(column.sourceField)?.displayName ??
+    i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+      defaultMessage: 'Missing field',
+    }),
   buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;

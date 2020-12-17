@@ -20,7 +20,7 @@ import {
   getExistingColumnGroups,
   isReferenced,
 } from './operations';
-import { hasField, getInvalidLayers } from './utils';
+import { hasField } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -95,7 +95,6 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): IndexPatternSuggestion[] {
-  if (getInvalidLayers(state)?.length) return [];
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
@@ -337,7 +336,6 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  if (getInvalidLayers(state)?.length) return [];
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
@@ -378,7 +376,8 @@ export function getDatasourceSuggestionsFromCurrentState(
         }),
       ]);
   }
-  return _.flatten(
+
+  const result = _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
@@ -396,29 +395,22 @@ export function getDatasourceSuggestionsFromCurrentState(
           buckets.some((columnId) => layer.columns[columnId].dataType === 'number');
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
-        if (metrics.length === 0) {
-          // intermediary chart without metric, don't try to suggest reduced versions
-          suggestions.push(
-            buildSuggestion({
-              state,
-              layerId,
-              changeType: 'unchanged',
-            })
-          );
-        } else if (buckets.length === 0) {
+
+        // Always suggest an unchanged table, including during invalid states
+        suggestions.push(
+          buildSuggestion({
+            state,
+            layerId,
+            changeType: 'unchanged',
+          })
+        );
+
+        if (!references.length && metrics.length && buckets.length === 0) {
           if (timeField) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
           suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
-          // also suggest simple current state
-          suggestions.push(
-            buildSuggestion({
-              state,
-              layerId,
-              changeType: 'unchanged',
-            })
-          );
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
@@ -437,6 +429,8 @@ export function getDatasourceSuggestionsFromCurrentState(
         return suggestions;
       })
   );
+  // console.log('suggestions', result);
+  return result;
 }
 
 function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId: string) {
@@ -591,18 +585,11 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         columnOrder: [...bucketedColumns, ...availableMetricColumns],
       };
 
-      // Assumes that all references have exactly 1 metric, which might not be true
-      if (availableReferenceColumns.length > 1) {
-        return [
-          allMetricsSuggestion,
-          { ...layer, columnOrder: [...bucketedColumns, availableReferenceColumns[0]] },
-        ];
-      } else if (availableMetricColumns.length > 1 && !availableReferenceColumns.length) {
-        // Only simplify metrics when there are no references
-        return [
-          allMetricsSuggestion,
-          { ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] },
-        ];
+      if (availableReferenceColumns.length) {
+        // Don't remove buckets when dealing with any refs. This can break refs.
+        return [];
+      } else if (availableMetricColumns.length > 1) {
+        return [{ ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] }];
       } else {
         return allMetricsSuggestion;
       }

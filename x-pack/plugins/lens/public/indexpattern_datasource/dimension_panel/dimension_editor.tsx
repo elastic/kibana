@@ -303,7 +303,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   key={index}
                   layer={state.layers[layerId]}
                   columnId={referenceId}
-                  updateLayer={(newLayer) => {
+                  updateLayer={(newLayer: IndexPatternLayer) => {
                     setState(mergeLayer({ state, layerId, newLayer }));
                   }}
                   validation={validation}
@@ -351,7 +351,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onDeleteColumn={() => {
-                setStateWrapper(deleteColumn({ layer: state.layers[layerId], columnId }));
+                setStateWrapper(
+                  deleteColumn({
+                    layer: state.layers[layerId],
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                  })
+                );
               }}
               onChoose={(choice) => {
                 setStateWrapper(

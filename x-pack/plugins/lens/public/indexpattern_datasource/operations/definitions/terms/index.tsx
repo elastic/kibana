@@ -26,10 +26,16 @@ import { ValuesRangeInput } from './values_range_input';
 import { getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer } from '../../../types';
 
-function ofName(name: string) {
+function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
     defaultMessage: 'Top values of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        }),
+    },
   });
 }
 
@@ -142,7 +148,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {

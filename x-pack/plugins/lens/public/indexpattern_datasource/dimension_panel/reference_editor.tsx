@@ -196,7 +196,9 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
                   if (choices.length === 0) {
-                    updateLayer(deleteColumn({ layer, columnId }));
+                    updateLayer(
+                      deleteColumn({ layer, columnId, indexPattern: currentIndexPattern })
+                    );
                     return;
                   }
 
@@ -236,7 +238,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onDeleteColumn={() => {
-                updateLayer(deleteColumn({ layer, columnId }));
+                updateLayer(deleteColumn({ layer, columnId, indexPattern: currentIndexPattern }));
               }}
               onChoose={(choice) => {
                 updateLayer(

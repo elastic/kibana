@@ -18,10 +18,16 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'cardinality';
 const IS_BUCKETED = false;
 
-function ofName(name: string) {
+function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
     defaultMessage: 'Unique count of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        }),
+    },
   });
 }
 
@@ -59,7 +65,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
   buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),
