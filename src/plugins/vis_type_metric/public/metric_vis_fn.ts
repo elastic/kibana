@@ -160,7 +160,7 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const dimensions: DimensionsVisParam = {
       metrics: args.metric,
     };
@@ -175,6 +175,9 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
 
     const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
     return {
       type: 'render',
       as: 'metric_vis',
