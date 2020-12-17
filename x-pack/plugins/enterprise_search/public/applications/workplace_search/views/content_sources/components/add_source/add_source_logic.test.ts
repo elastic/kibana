@@ -41,7 +41,6 @@ import {
   SourceConnectData,
   OrganizationsMap,
 } from './add_source_logic';
-import { configure } from 'rxjs-marbles/marbles';
 
 describe('AddSourceLogic', () => {
   const defaultValues = {
@@ -346,7 +345,7 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setPreContentSourceConfigData'
           );
-          const promise = Promise.resolve(configure);
+          const promise = Promise.resolve(config);
           (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
@@ -355,7 +354,7 @@ describe('AddSourceLogic', () => {
             '/api/workplace_search/org/pre_sources/123'
           );
           await promise;
-          expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(configure);
+          expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
 
         it('handles error', async () => {
