@@ -210,86 +210,88 @@ export class ValidateJobUI extends Component {
 
     // Run job validation only if a job config has been passed on and the duration makes sense to run it.
     // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
-    if (typeof job === 'object' && duration.start !== null && duration.end !== null) {
-      let shouldShowLoadingIndicator = true;
+    if (typeof job === 'object') {
+      if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
+        let shouldShowLoadingIndicator = true;
 
-      this.props.ml
-        .validateJob({ duration, fields, job })
-        .then((messages) => {
-          shouldShowLoadingIndicator = false;
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
-              isLoading: false,
-              isModalVisible: true,
-            },
-            data: {
-              messages,
-              success: true,
-            },
-            title: job.job_id,
-          });
-          if (typeof this.props.setIsValid === 'function') {
-            this.props.setIsValid(
-              messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+        this.props.ml
+          .validateJob({ duration, fields, job })
+          .then((messages) => {
+            shouldShowLoadingIndicator = false;
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
+                isLoading: false,
+                isModalVisible: true,
+              },
+              data: {
+                messages,
+                success: true,
+              },
+              title: job.job_id,
+            });
+            if (typeof this.props.setIsValid === 'function') {
+              this.props.setIsValid(
+                messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+              );
+            }
+          })
+          .catch((error) => {
+            const { toasts } = this.props.kibana.services.notifications;
+            const toastNotificationService = toastNotificationServiceProvider(toasts);
+            toastNotificationService.displayErrorToast(
+              error,
+              i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+                defaultMessage: 'Job Validation Error',
+              })
             );
-          }
-        })
-        .catch((error) => {
-          const { toasts } = this.props.kibana.services.notifications;
-          const toastNotificationService = toastNotificationServiceProvider(toasts);
-          toastNotificationService.displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
-              defaultMessage: 'Job Validation Error',
-            })
-          );
-        });
-
-      // wait for 250ms before triggering the loading indicator
-      // to avoid flickering when there's a loading time below
-      // 250ms for the job validation data
-      const delay = 250;
-      setTimeout(() => {
-        if (shouldShowLoadingIndicator) {
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              isLoading: true,
-              isModalVisible: false,
-            },
           });
+
+        // wait for 250ms before triggering the loading indicator
+        // to avoid flickering when there's a loading time below
+        // 250ms for the job validation data
+        const delay = 250;
+        setTimeout(() => {
+          if (shouldShowLoadingIndicator) {
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                isLoading: true,
+                isModalVisible: false,
+              },
+            });
+          }
+        }, delay);
+      } else {
+        this.setState({
+          ...this.state,
+          ui: {
+            ...this.state.ui,
+            iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
+            isLoading: false,
+            isModalVisible: true,
+          },
+          data: {
+            messages: [
+              {
+                id: 'job_validation_skipped',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
+                  defaultMessage:
+                    'Job validation could not be run because of insufficient sample data. Please be aware the this job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              },
+            ],
+            success: true,
+          },
+          title: job.job_id,
+        });
+        if (typeof this.props.setIsValid === 'function') {
+          this.props.setIsValid(true);
         }
-      }, delay);
-    } else if (typeof job === 'object' && duration.start === null && duration.end === null) {
-      this.setState({
-        ...this.state,
-        ui: {
-          ...this.state.ui,
-          iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
-          isLoading: false,
-          isModalVisible: true,
-        },
-        data: {
-          messages: [
-            {
-              id: 'job_validation_skipped',
-              text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
-                defaultMessage:
-                  'Job validation could not be run because of insufficient sample data. Please be aware the this job may encounter problems when running.',
-              }),
-              status: VALIDATION_STATUS.WARNING,
-            },
-          ],
-          success: true,
-        },
-        title: job.job_id,
-      });
-      if (typeof this.props.setIsValid === 'function') {
-        this.props.setIsValid(true);
       }
     }
   };
