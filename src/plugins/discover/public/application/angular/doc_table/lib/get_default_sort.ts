@@ -25,10 +25,10 @@ import { SortOrder } from '../components/table_header/helpers';
  * the default sort is returned depending of the index pattern
  */
 export function getDefaultSort(
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | undefined,
   defaultSortOrder: string = 'desc'
 ): SortOrder[] {
-  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+  if (indexPattern?.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [[indexPattern.timeFieldName, defaultSortOrder]];
   } else {
     return [];

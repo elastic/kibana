@@ -65,6 +65,7 @@ import {
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
@@ -415,7 +416,9 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
     return {
       query,
-      sort: !sort.length ? getDefaultSort($scope.indexPattern) : sort,
+      sort: !sort.length
+        ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
+        : sort,
       columns:
         savedSearch.columns.length > 0
           ? savedSearch.columns
