@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(404));
 
-      it('should return 500 when if no strategy is provided', async () => {
+      it('should return 500 when invalid strategy is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/banana`)
           .send({
