@@ -64,6 +64,6 @@ export const reload = (afterReload: () => void) => {
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -XDELETE ${Cypress.env('ELASTICSEARCH_URL')}/.kibana_2 -k`);
+  cy.exec(`curl -XDELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
   esArchiverLoadEmptyKibana();
 };

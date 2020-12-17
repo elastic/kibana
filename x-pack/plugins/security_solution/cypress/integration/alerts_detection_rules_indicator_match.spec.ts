@@ -59,7 +59,6 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -100,8 +99,6 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
-    deleteRule();
-    removeSignalsIndex();
   });
 
   it('Creates and activates a new Indicator Match rule', () => {

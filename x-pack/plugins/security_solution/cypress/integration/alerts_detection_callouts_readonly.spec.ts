@@ -13,7 +13,6 @@ import {
   login,
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
-  deleteRoleAndUser,
 } from '../tasks/login';
 import { waitForAlertsIndexToBeCreated } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
@@ -49,12 +48,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
 
     // After that we can login as a read-only user.
     login(ROLES.reader);
-  });
-
-  after(() => {
-    deleteRoleAndUser(ROLES.reader);
-    deleteRoleAndUser(ROLES.platform_engineer);
-    removeSignalsIndex();
   });
 
   context('On Detections home page', () => {
@@ -98,7 +91,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
   context('On Rule Details page', () => {
     beforeEach(() => {
       createCustomRule(newRule);
-
       loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForPageTitleToBeShown();
       goToRuleDetails();

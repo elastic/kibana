@@ -94,7 +94,7 @@ describe('Sourcerer', () => {
       openSourcerer('timeline');
       isCustomRadio();
     });
-    it('Selected index patterns are properly queried', () => {
+    it.skip('Selected index patterns are properly queried', () => {
       openTimelineUsingToggle();
       populateTimeline();
       openSourcerer('timeline');
