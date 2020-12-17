@@ -37,7 +37,6 @@ const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
-  backgroundColor: string;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
