@@ -12,7 +12,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import { CODE_PATH_ELASTICSEARCH, ALERT_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ccr', {
   template,
@@ -37,6 +37,12 @@ uiRoutes.when('/elasticsearch/ccr', {
         getPageData,
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CCR_READ_EXCEPTIONS],
+          },
+        },
       });
 
       $scope.$watch(
@@ -45,7 +51,7 @@ uiRoutes.when('/elasticsearch/ccr', {
           if (!data) {
             return;
           }
-          this.renderReact(<Ccr data={data.data} />);
+          this.renderReact(<Ccr data={data.data} alerts={this.alerts} />);
         }
       );
     }

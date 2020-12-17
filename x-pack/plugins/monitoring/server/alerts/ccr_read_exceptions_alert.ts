@@ -16,6 +16,8 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   CommonAlertParams,
+  CommonAlertFilter,
+  CCRReadExceptionsStats,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -27,7 +29,7 @@ import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions'
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { parseDuration } from '../../../alerts/common/parse_duration';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert, RawAlertInstance } from '../../../alerts/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -198,6 +200,19 @@ export class CCRReadExceptionsAlert extends BaseAlert {
         } as AlertMessageLinkToken,
       ],
     };
+  }
+
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    const alertInstanceStates = alertInstance.state?.alertStates as AlertState[];
+    const alertFilter = filters?.find((filter) => filter.shardId);
+    if (!filters || !filters.length || !alertInstanceStates?.length || !alertFilter?.shardId) {
+      return alertInstance;
+    }
+    const shardIdInt = parseInt(alertFilter.shardId!, 10);
+    const alertStates = alertInstanceStates.filter(
+      ({ meta }) => (meta as CCRReadExceptionsStats).shardId === shardIdInt
+    );
+    return { state: { alertStates } };
   }
 
   protected executeActions(

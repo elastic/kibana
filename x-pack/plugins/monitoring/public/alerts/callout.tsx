@@ -84,11 +84,19 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             paddingLeft: `0.5rem`,
           }}
         >
-          {(status.state.state.ui.message.nextSteps || []).map((step: AlertMessage) => {
-            return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
-          })}
+          {(status.state.state.ui.message.nextSteps || []).map(
+            (step: AlertMessage, stepIndex: number) => {
+              return (
+                <EuiListGroupItem
+                  onClick={() => {}}
+                  label={replaceTokens(step)}
+                  key={index + stepIndex}
+                />
+              );
+            }
+          )}
           <EuiListGroupItem
-            label={<AlertConfiguration alert={status.alert.rawAlert} compressed />}
+            label={<AlertConfiguration alert={status.alert.rawAlert} key={index} compressed />}
           />
         </EuiListGroup>
       </EuiAccordion>
