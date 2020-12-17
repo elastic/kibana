@@ -173,7 +173,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
       !job.model_plot_config?.enabled
     ) {
       return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
-        defaultMessage: 'the datafeed contains runtime fields',
+        defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
       });
     }
   }
