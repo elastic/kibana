@@ -292,7 +292,7 @@ export class ValidateJobUI extends Component {
                 id: 'job_validation_skipped',
                 text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
                   defaultMessage:
-                    'Job validation could not be run because of insufficient sample data. Please be aware the this job may encounter problems when running.',
+                    'Job validation could not be run because of insufficient sample data. Please be aware the job may encounter problems when running.',
                 }),
                 status: VALIDATION_STATUS.WARNING,
               },
