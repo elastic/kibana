@@ -21,6 +21,7 @@ import { CoreSetup, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
   'xy core.uiSettings'
@@ -47,3 +48,7 @@ export const [getColorsService, setColorsService] = createGetterSetter<
 >('xy charts.color');
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
+
+export const [getTrackUiMetric, setTrackUiMetric] = createGetterSetter<
+  UsageCollectionSetup['reportUiCounter']
+>('trackUiMetric');
