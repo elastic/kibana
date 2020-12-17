@@ -38,7 +38,7 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 
 [float]
 [id=elastic-maps-server]
-=== Host Elastic Maps Service Locally
+=== Host Elastic Maps Service locally
 
 beta::[]
 
