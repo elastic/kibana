@@ -21,7 +21,9 @@ import {
 import { CreateAlert } from './create_alert';
 import { AlertingExampleComponentParams } from '../application';
 
-export const DocumentationPage = (deps: AlertingExampleComponentParams) => (
+export const DocumentationPage = (
+  deps: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>
+) => (
   <EuiPageBody>
     <EuiPageHeader>
       <EuiPageHeaderSection>

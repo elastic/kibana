@@ -98,7 +98,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
-      const ecExpectedFieldPanelCount = 2;
 
       const uploadFilePath = path.join(
         __dirname,
@@ -346,8 +345,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should load data for full time range');
             await ml.dataVisualizerIndexBased.clickUseFullDataButton(ecExpectedTotalCount);
 
-            await ml.testExecution.logTestStep('should display the panels of fields');
-            await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(ecExpectedFieldPanelCount);
+            await ml.testExecution.logTestStep('should display the data visualizer table');
+            await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
             await ml.testExecution.logTestStep('should not display the actions panel');
             await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();

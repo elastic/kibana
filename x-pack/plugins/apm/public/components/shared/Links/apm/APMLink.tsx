@@ -18,6 +18,7 @@ import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query?: APMQueryParams;
+  mergeQuery?: (query: APMQueryParams) => APMQueryParams;
   children?: React.ReactNode;
 }
 
@@ -37,7 +38,7 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
  */
 export function useAPMHref(
   path: string,
-  persistentFilters: Array<keyof APMQueryParams> = PERSISTENT_APM_PARAMS
+  persistentFilters: Array<keyof APMQueryParams> = []
 ) {
   const { urlParams } = useUrlParams();
   const { basePath } = useApmPluginContext().core.http;
@@ -74,11 +75,14 @@ export function getAPMHref({
   });
 }
 
-export function APMLink({ path = '', query, ...rest }: Props) {
+export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
   const { basePath } = core.http;
-  const href = getAPMHref({ basePath, path, search, query });
+
+  const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
+
+  const href = getAPMHref({ basePath, path, search, query: mergedQuery });
 
   return <EuiLink {...rest} href={href} />;
 }

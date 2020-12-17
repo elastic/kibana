@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ScopedHistory } from 'src/core/public';
 import {
   Container,
   ErrorEmbeddable,
@@ -44,10 +43,7 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(
-    private readonly getStartServices: () => Promise<DashboardContainerServices>,
-    private getHistory: () => ScopedHistory
-  ) {}
+  constructor(private readonly getStartServices: () => Promise<DashboardContainerServices>) {}
 
   public isEditable = async () => {
     // Currently unused for dashboards
@@ -74,7 +70,6 @@ export class DashboardContainerFactoryDefinition
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
-    const stateTransfer = services.embeddable.getStateTransfer(this.getHistory());
-    return new DashboardContainer(initialInput, services, stateTransfer, parent);
+    return new DashboardContainer(initialInput, services, parent);
   };
 }
