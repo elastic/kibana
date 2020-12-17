@@ -43,15 +43,13 @@ import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 
-function buildRoundRobinCategoricalWithMappedColors(
-  uiSettings: IUiSettingsClient
-): Omit<PaletteDefinition, 'title'> {
+function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
-  const mappedColors = new MappedColors(uiSettings, (num: number) => {
+  const mappedColors = new MappedColors(undefined, (num: number) => {
     return flatten(new Array(Math.ceil(num / 10)).fill(colors)).map((color) => color.toLowerCase());
   });
-  const mappedBehindTextColors = new MappedColors(uiSettings, (num: number) => {
+  const mappedBehindTextColors = new MappedColors(undefined, (num: number) => {
     return flatten(new Array(Math.ceil(num / 10)).fill(behindTextColors)).map((color) =>
       color.toLowerCase()
     );
@@ -224,7 +222,7 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.defaultPaletteLabel', {
         defaultMessage: 'Default',
       }),
-      ...buildRoundRobinCategoricalWithMappedColors(uiSettings),
+      ...buildRoundRobinCategoricalWithMappedColors(),
     },
     status: {
       title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),

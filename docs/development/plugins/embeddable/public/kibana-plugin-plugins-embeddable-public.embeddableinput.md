@@ -20,5 +20,6 @@ export declare type EmbeddableInput = {
     query?: Query;
     filters?: Filter[];
     searchSessionId?: string;
+    syncColors?: boolean;
 };
 ```
