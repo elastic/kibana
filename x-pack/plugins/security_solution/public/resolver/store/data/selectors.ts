@@ -95,40 +95,6 @@ export const originID: (state: DataState) => string | undefined = createSelector
   }
 );
 
-function currentRelatedEventRequestID(state: DataState): number | undefined {
-  if (state.currentRelatedEvent) {
-    return state.currentRelatedEvent?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
-  if (state.nodeEventsInCategory?.pendingRequest) {
-    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
-  } else if (state.nodeEventsInCategory) {
-    return state.nodeEventsInCategory?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-export const eventsInCategoryResultIsStale = createSelector(
-  currentNodeEventsInCategoryRequestID,
-  refreshCount,
-  function eventsInCategoryResultIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
-export const currentRelatedEventIsStale = createSelector(
-  currentRelatedEventRequestID,
-  refreshCount,
-  function currentRelatedEventIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
 /**
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
@@ -149,42 +115,15 @@ export const nodeDataForID: (
   };
 });
 
-const nodeDataRequestID: (state: DataState) => (id: string) => number | undefined = createSelector(
-  nodeDataForID,
-  (nodeInfo) => {
-    return (id: string) => {
-      return nodeInfo(id)?.dataRequestID;
-    };
-  }
-);
-
-/**
- * Returns true if a specific node's data is outdated. It will be outdated if a user clicked the refresh/update button
- * after the node data was retrieved.
- */
-export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeDataRequestID,
-  refreshCount,
-  (nodeRequestID, newID) => {
-    return (id: string) => {
-      const oldID = nodeRequestID(id);
-      // if we don't have the node in the map then it's data must be stale or if the refreshCount is greater than the
-      // node's requestID then it is also stale
-      return oldID === undefined || newID > oldID;
-    };
-  }
-);
-
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
 export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
-  nodeDataIsStale,
-  (nodeInfo, isStale) => {
+  (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info || isStale(id)) {
+      if (!info) {
         return 'loading';
       }
 
@@ -286,13 +225,6 @@ export const relatedEventCountByCategory: (
     };
   }
 );
-
-/**
- * Retrieves the number of times the update/refresh button was clicked to be compared against various dataRequestIDs
- */
-export function refreshCount(state: DataState) {
-  return state.refreshCount;
-}
 
 /**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
