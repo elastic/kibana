@@ -19,12 +19,7 @@ jest.mock('../../../../../shared/flash_messages', () => ({
   setSuccessMessage: jest.fn(),
   setQueuedSuccessMessage: jest.fn(),
 }));
-import {
-  FlashMessagesLogic,
-  flashAPIErrors,
-  setSuccessMessage,
-  setQueuedSuccessMessage,
-} from '../../../../../shared/flash_messages';
+import { FlashMessagesLogic, flashAPIErrors } from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
