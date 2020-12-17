@@ -5019,7 +5019,6 @@
     "xpack.apm.servicesTable.7xUpgradeServerMessage": "バージョン7.xより前からのアップグレードですか？また、\n              APMサーバーインスタンスを7.0以降にアップグレードしていることも確認してください。",
     "xpack.apm.servicesTable.avgResponseTimeColumnLabel": "平均応答時間",
     "xpack.apm.servicesTable.environmentColumnLabel": "環境",
-    "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 個の環境} other {# 個の環境}}",
     "xpack.apm.servicesTable.healthColumnLabel": "ヘルス",
     "xpack.apm.servicesTable.nameColumnLabel": "名前",
     "xpack.apm.servicesTable.noServicesLabel": "APM サービスがインストールされていないようです。追加しましょう！",
