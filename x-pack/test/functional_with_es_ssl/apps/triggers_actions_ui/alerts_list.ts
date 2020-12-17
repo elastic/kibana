@@ -353,7 +353,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const namePrefix = generateUniqueKey();
       let count = 0;
       const createdAlertsFirstPage = await Promise.all(
-        times(2, () => createAlert({ name: `${namePrefix}-0${count++}` }))
+        times(1, () => createAlert({ name: `${namePrefix}-0${count++}` }))
       );
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -371,7 +371,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.tryForTime(30000, async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 2 alerts');
+        expect(toastTitle).to.eql('Deleted 1 alert');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
