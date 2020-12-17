@@ -64,14 +64,14 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   const handleChange = (option: string) => setSelectedGithubOrganizations(option);
   const formSubmitSuccess = () => onFormCreated(name);
   const handleFormSubmitError = () => setFormLoading(false);
-  const handleFormSubmut = (e: FormEvent) => {
+  const handleFormSubmit = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
     createContentSource(currentServiceType, formSubmitSuccess, handleFormSubmitError);
   };
 
   const configfieldsForm = (
-    <form onSubmit={handleFormSubmut}>
+    <form onSubmit={handleFormSubmit}>
       <EuiFlexGroup
         direction="row"
         alignItems="flexStart"
