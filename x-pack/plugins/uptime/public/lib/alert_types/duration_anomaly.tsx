@@ -25,7 +25,6 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   alertParamsExpression: (params: unknown) => (
     <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
   ),
-  name,
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,

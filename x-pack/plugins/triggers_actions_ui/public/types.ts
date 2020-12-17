@@ -187,7 +187,6 @@ export interface AlertTypeParamsExpressionProps<
 
 export interface AlertTypeModel<AlertParamsType = any> {
   id: string;
-  name: string | JSX.Element;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
@@ -197,6 +196,7 @@ export interface AlertTypeModel<AlertParamsType = any> {
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  name?: JSX.Element;
 }
 
 export interface IErrorObject {
