@@ -328,16 +328,15 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertTotalDocCountChartExist();
 
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays elements in the search panel correctly`
+        `${testData.suiteTitle} displays elements in the data visualizer table correctly`
       );
+      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
+
       await ml.dataVisualizerTable.assertSearchPanelExist();
       await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
       await ml.dataVisualizerTable.assertFieldNameInputExists();
 
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays elements in the field count panel correctly`
-      );
       await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
       await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
@@ -351,11 +350,6 @@ export default function ({ getService }: FtrProviderContext) {
         testData.expected.populatedFieldsCount
       );
       await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
-
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays the data visualizer table`
-      );
-      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
       await ml.testExecution.logTestStep(
         'displays details for metric fields and non-metric fields correctly'

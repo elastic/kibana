@@ -63,7 +63,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
 
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
-  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context);
+  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);

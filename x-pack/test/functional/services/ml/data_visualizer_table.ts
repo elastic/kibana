@@ -7,12 +7,15 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
+import { MlCommonUI } from './common_ui';
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
-export function MachineLearningDataVisualizerTableProvider({ getService }: FtrProviderContext) {
+export function MachineLearningDataVisualizerTableProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
@@ -60,7 +63,7 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
         const tableRows = await this.parseDataVisualizerTable();
         expect(tableRows).to.have.length(
           expectedRowCount,
-          `Filtered Data Visualizer table should have ${expectedRowCount} row(s) (got '${tableRows.length}')`
+          `Data Visualizer table should have ${expectedRowCount} row(s) (got '${tableRows.length}')`
         );
       });
     }
@@ -169,94 +172,28 @@ export function MachineLearningDataVisualizerTableProvider({ getService }: FtrPr
       });
     }
 
-    public async setMultiSelectFilter(
-      testDataSubj: string,
-      fieldTypes: string[],
-      expectedRowCount = 1
-    ) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
-      await testSubjects.existOrFail(`${testDataSubj}-popover`);
-      await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
-      const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
-
-      for (const fieldType of fieldTypes) {
-        await retry.tryForTime(5000, async () => {
-          await searchBarInput.clearValueWithKeyboard();
-          await searchBarInput.type(fieldType);
-          if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}-checked`))) {
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.click(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
-          }
-        });
-      }
-
-      // escape popover
-      await browser.pressKeys(browser.keys.ESCAPE);
-      await this.assertTableRowCount(expectedRowCount);
-    }
-
-    async removeMultiSelectFilter(
-      testDataSubj: string,
-      fieldTypes: string[],
-      expectedRowCount = 1
-    ) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
-      await testSubjects.existOrFail(`${testDataSubj}-popover`);
-      await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
-      const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
-
-      for (const fieldType of fieldTypes) {
-        await retry.tryForTime(5000, async () => {
-          await searchBarInput.clearValueWithKeyboard();
-          await searchBarInput.type(fieldType);
-          if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}`))) {
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
-            await testSubjects.click(`${testDataSubj}-option-${fieldType}-checked`);
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
-          }
-        });
-      }
-
-      // escape popover
-      await browser.pressKeys(browser.keys.ESCAPE);
-      await this.assertTableRowCount(expectedRowCount);
-    }
-
     public async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
-      await this.setMultiSelectFilter(
-        'mlDataVisualizerFieldTypeSelect',
-        fieldTypes,
-        expectedRowCount
-      );
+      await mlCommonUI.setMultiSelectFilter('mlDataVisualizerFieldTypeSelect', fieldTypes);
+      await this.assertTableRowCount(expectedRowCount);
     }
 
     async removeFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
-      await this.removeMultiSelectFilter(
-        'mlDataVisualizerFieldTypeSelect',
-        fieldTypes,
-        expectedRowCount
-      );
+      await mlCommonUI.removeMultiSelectFilter('mlDataVisualizerFieldTypeSelect', fieldTypes);
+      await this.assertTableRowCount(expectedRowCount);
     }
 
     public async setFieldNameFilter(fieldNames: string[], expectedRowCount = 1) {
       await this.assertFieldNameInputExists();
-      await this.setMultiSelectFilter(
-        'mlDataVisualizerFieldNameSelect',
-        fieldNames,
-        expectedRowCount
-      );
+      await mlCommonUI.setMultiSelectFilter('mlDataVisualizerFieldNameSelect', fieldNames);
+      await this.assertTableRowCount(expectedRowCount);
     }
 
     public async removeFieldNameFilter(fieldNames: string[], expectedRowCount: number) {
       await this.assertFieldNameInputExists();
-      await this.removeMultiSelectFilter(
-        'mlDataVisualizerFieldNameSelect',
-        fieldNames,
-        expectedRowCount
-      );
+      await mlCommonUI.removeMultiSelectFilter('mlDataVisualizerFieldNameSelect', fieldNames);
+      await this.assertTableRowCount(expectedRowCount);
     }
 
     public async assertShowEmptyFieldsSwitchExists() {
