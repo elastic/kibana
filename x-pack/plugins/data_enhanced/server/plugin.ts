@@ -64,7 +64,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     });
 
     const router = core.http.createRouter();
-    registerSessionRoutes(router);
+    registerSessionRoutes(router, this.logger);
   }
 
   public start(core: CoreStart) {

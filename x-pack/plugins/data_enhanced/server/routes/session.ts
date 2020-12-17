@@ -5,10 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter, Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 
-export function registerSessionRoutes(router: IRouter): void {
+export function registerSessionRoutes(router: IRouter, logger: Logger): void {
   router.post(
     {
       path: '/internal/session',
@@ -49,6 +49,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
+        logger.error(err);
         return reportServerError(res, err);
       }
     }
@@ -73,6 +74,7 @@ export function registerSessionRoutes(router: IRouter): void {
         });
       } catch (e) {
         const err = e.output?.payload || e;
+        logger.error(err);
         return reportServerError(res, err);
       }
     }
@@ -106,6 +108,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
+        logger.error(err);
         return reportServerError(res, err);
       }
     }
@@ -128,6 +131,7 @@ export function registerSessionRoutes(router: IRouter): void {
         return res.ok();
       } catch (e) {
         const err = e.output?.payload || e;
+        logger.error(err);
         return reportServerError(res, err);
       }
     }
@@ -156,6 +160,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
+        logger.error(err);
         return reportServerError(res, err);
       }
     }
