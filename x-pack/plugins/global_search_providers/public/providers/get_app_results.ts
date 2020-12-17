@@ -5,7 +5,7 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicAppSearchDeepLinkInfo, PublicAppMetaInfo } from 'src/core/public';
+import { PublicAppInfo, PublicAppSearchDeepLinkInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
 
 /** Type used internally to represent an application unrolled into its separate searchDeepLinks */
