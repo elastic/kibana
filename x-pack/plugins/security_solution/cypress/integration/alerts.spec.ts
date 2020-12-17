@@ -41,6 +41,10 @@ describe('Alerts', () => {
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
+    afterEach(() => {
+      esArchiverUnload('alerts');
+    });
+
     it('Closes and opens alerts', () => {
       waitForAlertsPanelToBeLoaded();
       waitForAlertsToBeLoaded();
@@ -119,7 +123,6 @@ describe('Alerts', () => {
             'have.text',
             expectedNumberOfOpenedAlerts.toString()
           );
-          esArchiverUnload('alerts');
         });
     });
 
@@ -157,7 +160,6 @@ describe('Alerts', () => {
             `Showing ${numberOfAlertsToBeClosed.toString()} alert`
           );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeClosed);
-          esArchiverUnload('alerts');
         });
     });
   });
@@ -168,6 +170,10 @@ describe('Alerts', () => {
       removeSignalsIndex();
       esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+    });
+
+    afterEach(() => {
+      esArchiverUnload('closed_alerts');
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -207,8 +213,6 @@ describe('Alerts', () => {
             `Showing ${numberOfAlertsToBeOpened.toString()} alert`
           );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
-
-          esArchiverUnload('closed_alerts');
         });
     });
   });
@@ -261,8 +265,6 @@ describe('Alerts', () => {
             `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`
           );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
-
-          esArchiverUnload('closed_alerts');
         });
     });
   });

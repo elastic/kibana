@@ -22,6 +22,10 @@ describe('Alerts timeline', () => {
     loginAndWaitForPage(DETECTIONS_URL);
   });
 
+  afterEach(() => {
+    esArchiverUnload('timeline_alerts');
+  });
+
   it('Investigate alert in default timeline', () => {
     waitForAlertsPanelToBeLoaded();
     investigateFirstAlertInTimeline();
@@ -32,7 +36,5 @@ describe('Alerts timeline', () => {
         investigateFirstAlertInTimeline();
         cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
       });
-
-    esArchiverUnload('timeline_alerts');
   });
 });

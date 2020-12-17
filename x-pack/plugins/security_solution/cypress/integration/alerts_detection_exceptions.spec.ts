@@ -58,6 +58,11 @@ describe.skip('Exceptions', () => {
     cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
   });
 
+  afterEach(() => {
+    esArchiverUnload('auditbeat_for_exceptions');
+    esArchiverUnload('auditbeat_for_exceptions2');
+  });
+
   context('From rule', () => {
     it('Creates an exception and deletes it', () => {
       goToExceptionsTab();
@@ -93,9 +98,6 @@ describe.skip('Exceptions', () => {
 
       cy.get(ALERTS_COUNT).should('exist');
       cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
-
-      esArchiverUnload('auditbeat_for_exceptions');
-      esArchiverUnload('auditbeat_for_exceptions2');
     });
   });
 
@@ -130,9 +132,6 @@ describe.skip('Exceptions', () => {
 
       cy.get(ALERTS_COUNT).should('exist');
       cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
-
-      esArchiverUnload('auditbeat_for_exceptions');
-      esArchiverUnload('auditbeat_for_exceptions2');
     });
   });
 });

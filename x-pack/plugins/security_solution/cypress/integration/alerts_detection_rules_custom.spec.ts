@@ -224,6 +224,10 @@ describe.skip('Custom detection rules deletion and edition', () => {
     goToManageAlertsDetectionRules();
   });
 
+  afterEach(() => {
+    esArchiverUnload('custom_rules');
+  });
+
   context('Deletion', () => {
     it('Deletes one rule', () => {
       cy.get(RULES_TABLE)
@@ -252,8 +256,6 @@ describe.skip('Custom detection rules deletion and edition', () => {
             `Custom rules (${expectedNumberOfRulesAfterDeletion})`
           );
         });
-
-      esArchiverUnload('custom_rules');
     });
 
     it('Deletes more than one rule', () => {
@@ -284,8 +286,6 @@ describe.skip('Custom detection rules deletion and edition', () => {
             `Custom rules (${expectedNumberOfRulesAfterDeletion})`
           );
         });
-
-      esArchiverUnload('custom_rules');
     });
   });
 
@@ -359,7 +359,5 @@ describe.skip('Custom detection rules deletion and edition', () => {
         });
       }
     });
-
-    esArchiverUnload('custom_rules');
   });
 });

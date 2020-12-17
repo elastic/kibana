@@ -91,7 +91,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
   context('On Rule Details page', () => {
     beforeEach(() => {
       createCustomRule(newRule);
-
       loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForPageTitleToBeShown();
       goToRuleDetails();
