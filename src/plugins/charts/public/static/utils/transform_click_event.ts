@@ -104,13 +104,17 @@ const columnReducer = (
   xAccessor: Accessor | AccessorFn | null,
   yAccessor: Accessor | AccessorFn | null,
   splitAccessors: AllSeriesAccessors
-) => (acc: number[], { id }: Datatable['columns'][number], index: number): number[] => {
+) => (
+  acc: Array<[index: number, id: string]>,
+  { id }: Datatable['columns'][number],
+  index: number
+): Array<[index: number, id: string]> => {
   if (
     (xAccessor !== null && validateAccessorId(id, xAccessor)) ||
     (yAccessor !== null && validateAccessorId(id, yAccessor)) ||
     splitAccessors.some(([accessor]) => validateAccessorId(id, accessor))
   ) {
-    acc.push(index);
+    acc.push([index, id]);
   }
 
   return acc;
@@ -156,19 +160,18 @@ export const getFilterFromChartClickEventFn = (
   points.forEach((point) => {
     const [geometry, { yAccessor, splitAccessors }] = point;
     const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
-    const columnIndices = table.columns.reduce<number[]>(
+    const columns = table.columns.reduce<Array<[index: number, id: string]>>(
       columnReducer(xAccessor, yAccessor, allSplitAccessors),
       []
     );
     const row = table.rows.findIndex(
       rowFindPredicate(geometry, xAccessor, yAccessor, allSplitAccessors)
     );
-    const value = getAccessorValue(table.rows[row], yAccessor);
-    const newData = columnIndices.map((column) => ({
+    const newData = columns.map(([column, id]) => ({
       table,
       column,
       row,
-      value,
+      value: table.rows?.[row]?.[id] ?? null,
     }));
 
     data.push(...newData);
@@ -192,16 +195,16 @@ export const getFilterFromSeriesFn = (table: Datatable) => (
   negate = false
 ): ClickTriggerEvent => {
   const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
-  const columnIndices = table.columns.reduce<number[]>(
+  const columns = table.columns.reduce<Array<[index: number, id: string]>>(
     columnReducer(null, null, allSplitAccessors),
     []
   );
   const row = table.rows.findIndex(rowFindPredicate(null, null, null, allSplitAccessors));
-  const data: ValueClickContext['data']['data'] = columnIndices.map((column) => ({
+  const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
     table,
     column,
     row,
-    value: null,
+    value: table.rows?.[row]?.[id] ?? null,
   }));
 
   return {
