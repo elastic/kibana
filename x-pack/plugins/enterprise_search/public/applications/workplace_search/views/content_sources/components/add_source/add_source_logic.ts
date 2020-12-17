@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys, pickBy, isEmpty } from 'lodash';
+import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
@@ -304,8 +304,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const params = new URLSearchParams();
       if (subdomain) params.append('subdomain', subdomain);
       if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
-
-      const paramsString = !isEmpty(params) ? `?${params}` : '';
+      const hasParams = params.has('subdomain') || params.has('index_permissions');
+      const paramsString = hasParams ? `?${params}` : '';
 
       try {
         const response = await HttpLogic.values.http.get(`${route}${paramsString}`);
