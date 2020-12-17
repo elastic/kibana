@@ -24,7 +24,7 @@
  * serves as a central blueprint for what migrations will end up doing.
  */
 
-import { Logger } from 'src/core/server/logging';
+import { Logger } from '../../../logging';
 import { MigrationEsClient } from './migration_es_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
