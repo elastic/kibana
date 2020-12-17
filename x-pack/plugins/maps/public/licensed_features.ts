@@ -11,6 +11,7 @@ import { APP_ID } from '../common/constants';
 export enum LICENSED_FEATURES {
   GEO_LINE_AGG = 'GEO_LINE_AGG',
   GEO_SHAPE_AGGS_GEO_TILE = 'GEO_SHAPE_AGGS_GEO_TILE',
+  ON_PREM_EMS = 'ON_PREM_EMS',
 }
 
 export interface LicensedFeatureDetail {
@@ -26,6 +27,10 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
   [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]: {
     name: 'geo_tile aggregation on geo_shape field-type',
     license: 'gold',
+  },
+  [LICENSED_FEATURES.ON_PREM_EMS]: {
+    name: 'layer from local Elastic Maps Server',
+    license: 'enterprise',
   },
 };
 

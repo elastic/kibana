@@ -72,7 +72,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-          defaultMessage="See the {link} for more instructions and options."
+          defaultMessage="See the {link} for RPM / DEB deploy instructions."
           values={{
             link: (
               <EuiLink
