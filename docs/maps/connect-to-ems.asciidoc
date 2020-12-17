@@ -42,7 +42,7 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 
 beta::[]
 
-If you cannot connect to Elastic Maps Service from the Kibana server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
+If you cannot connect to Elastic Maps Service from the {kib} server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
 
 {hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. You must first download and run the image. After connecting it to your {es} cluster for license validation, you're guided to download and configure the basemaps database, which must be retrieved separately.
 
