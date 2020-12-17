@@ -5,12 +5,12 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
+import { Duration } from 'moment';
 import { useUrlState } from '../../util/url_state';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { AppStateSelectedCells } from '../explorer_utils';
 import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
 import { useTimefilter } from '../../contexts/kibana';
-import { Duration } from 'moment';
 
 export const useSelectedCells = (
   appState: ExplorerAppState,
