@@ -17,16 +17,14 @@
  * under the License.
  */
 
-export {
-  AbortError,
-  abortSignalToPromise,
-  createGetterSetter,
-  fieldWildcardFilter,
-  fieldWildcardMatcher,
-  Get,
-  getCombinedAbortSignal,
-  Set,
-  url,
-} from '../common';
-
-export { reportServerError } from './report_server_error';
+export function reportServerError(res: any, err: any) {
+  return res.customError({
+    statusCode: err.statusCode ?? 500,
+    body: {
+      message: err.message,
+      attributes: {
+        error: err.body?.error || err.message,
+      },
+    },
+  });
+}

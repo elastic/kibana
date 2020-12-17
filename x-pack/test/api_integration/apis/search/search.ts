@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body).to.have.property('rawResponse');
       });
 
-      it('should return 200 with partial response if wait_for_completion_timeout is long enough', async () => {
+      it('should return 200 with partial response if wait_for_completion_timeout is not long enough', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'foo')

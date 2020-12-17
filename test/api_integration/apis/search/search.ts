@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 500 when trying a delete on a non supporting strategy', async () => {
         const resp = await supertest.delete(`/internal/search/es/123`).send().expect(500);
-        expect(resp.body.message).to.contain("Search strategy doesn't support cancellations");
+        expect(resp.body.message).to.contain("Search strategy 123 doesn't support cancellations");
       });
     });
   });
