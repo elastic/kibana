@@ -37,7 +37,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
 
-describe('Alerts rules, prebuilt rules', () => {
+describe.skip('Alerts rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
   });
