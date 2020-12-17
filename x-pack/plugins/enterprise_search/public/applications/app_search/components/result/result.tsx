@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import classNames from 'classnames';
 
 import './result.scss';
 
@@ -53,17 +54,23 @@ export const Result: React.FC<Props> = ({
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
     return shouldLinkToDetailPage ? (
       <ReactRouterHelper to={documentLink}>
-        <article className="appSearchResult__content">{children}</article>
+        <article className="appSearchResult__content appSearchResult__content--link">
+          {children}
+        </article>
       </ReactRouterHelper>
     ) : (
       <article className="appSearchResult__content">{children}</article>
     );
   };
 
+  const classes = classNames('appSearchResult', {
+    'appSearchResult--link': shouldLinkToDetailPage,
+  });
+
   return (
     <EuiPanel
       paddingSize="none"
-      className="appSearchResult"
+      className={classes}
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
         defaultMessage: 'View document details',
@@ -114,7 +121,7 @@ export const Result: React.FC<Props> = ({
         {shouldLinkToDetailPage && (
           <ReactRouterHelper to={documentLink}>
             <a
-              className="appSearchResult__actionButton"
+              className="appSearchResult__actionButton appSearchResult__actionButton--link"
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
                 { defaultMessage: 'Visit document details' }
