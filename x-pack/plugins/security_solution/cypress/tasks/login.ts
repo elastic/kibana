@@ -239,3 +239,8 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: RolesType) =>
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
+
+export const waitForPageWithoutDateRange = (url: string, role?: RolesType) => {
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};

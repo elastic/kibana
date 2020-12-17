@@ -128,9 +128,9 @@ describe('MissingMonitoringDataAlert', () => {
           {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
-            gapDuration,
-            nodeName,
             nodeId,
+            nodeName,
+            gapDuration,
             ui: {
               isFiring: true,
               message: {

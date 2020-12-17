@@ -8,12 +8,13 @@ import { timeline } from '../objects/timeline';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
-  NOTES,
   NOTES_TAB_BUTTON,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
+  NOTE_CONTENT,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
+  TIMELINE_FILTER,
   // TIMELINE_FILTER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
@@ -24,7 +25,7 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline } from '../tasks/api_calls/timelines';
+import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -45,11 +46,12 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-describe('Timelines', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/79389
+describe.skip('Timelines', () => {
   let timelineId: string;
 
   after(() => {
-    deleteTimeline(timelineId);
+    if (timelineId) deleteTimeline(timelineId);
   });
 
   it('Creates a timeline', () => {
@@ -61,7 +63,9 @@ describe('Timelines', () => {
     addFilter(timeline.filter);
     pinFirstEvent();
 
-    cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+    cy.get(PIN_EVENT)
+      .should('have.attr', 'aria-label')
+      .and('match', /Unpin the event in row 2/);
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
@@ -89,13 +93,19 @@ describe('Timelines', () => {
       cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
       cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
-      // Comments this assertion until we agreed what to do with the filters.
-      // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      // cy.get(NOTES_COUNT).should('have.text', '1');
-      cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+      cy.get(LOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
-      cy.get(NOTES).should('have.text', timeline.notes);
+
+      getTimelineById(timelineId).then((singleTimeline) => {
+        const noteId = singleTimeline!.body.data.getOneTimeline.notes[0].noteId;
+
+        cy.get(NOTE_CONTENT(noteId)).should('have.text', timeline.notes);
+      });
     });
   });
 });

@@ -39,6 +39,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   width,
 }) => {
+  const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** tracks the latest timeout id from `setTimeout`*/
   const inputTimeoutId = useRef(0);
 
@@ -126,6 +127,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
         <EuiButtonIcon
           aria-label={i18n.CUSTOMIZE_COLUMNS}
+          buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
           data-test-subj="show-field-browser"
           iconType="list"
@@ -149,6 +151,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           onHideFieldBrowser={hideFieldBrowser}
           onOutsideClick={show ? hideFieldBrowser : noop}
           onSearchInputChange={updateFilter}
+          restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}

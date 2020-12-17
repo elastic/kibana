@@ -16,6 +16,7 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -32,6 +33,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -404,6 +406,7 @@ export const getResult = (): RuleAlertType => ({
   enabled: true,
   actions: [],
   throttle: null,
+  notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   apiKey: null,
@@ -629,6 +632,7 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     },
   ],
   throttle: null,
+  notifyWhen: null,
   apiKey: null,
   apiKeyOwner: 'elastic',
   createdBy: 'elastic',
@@ -656,4 +660,11 @@ export const getFinalizeSignalsMigrationRequest = () =>
     method: 'post',
     path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
     body: getFinalizeSignalsMigrationSchemaMock(),
+  });
+
+export const getSignalsMigrationStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+    query: getSignalsMigrationStatusSchemaMock(),
   });

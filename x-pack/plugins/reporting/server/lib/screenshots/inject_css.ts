@@ -27,6 +27,9 @@ export const injectCustomCss = async (
   );
 
   const filePath = layout.getCssOverridesPath();
+  if (!filePath) {
+    return;
+  }
   const buffer = await fsp.readFile(filePath);
   try {
     await browser.evaluate(

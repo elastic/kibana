@@ -196,8 +196,8 @@ describe('getServerOptions', () => {
       config.schema.validate({
         cors: {
           enabled: true,
-          credentials: false,
-          origin: '*',
+          allowCredentials: false,
+          allowOrigin: ['*'],
         },
       }),
       {} as any,
@@ -206,7 +206,7 @@ describe('getServerOptions', () => {
 
     expect(getServerOptions(httpConfig).routes?.cors).toEqual({
       credentials: false,
-      origin: '*',
+      origin: ['*'],
       headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
     });
   });

@@ -286,6 +286,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {
@@ -310,6 +311,8 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: 'alerts',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
     ...overloads,
   };
 }
