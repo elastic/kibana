@@ -40,7 +40,7 @@ import {
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
 import { ApiKey } from '../../../../components/shared/api_key';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { Configuration } from '../../../../types';
 
 import { ConfigDocsLinks } from './config_docs_links';
@@ -71,7 +71,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(SourceLogic);
+  const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(AddSourceLogic);
 
   const {
     sourceConfigData,
@@ -79,7 +79,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     clientIdValue,
     clientSecretValue,
     baseUrlValue,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const {
     accountContextOnly,

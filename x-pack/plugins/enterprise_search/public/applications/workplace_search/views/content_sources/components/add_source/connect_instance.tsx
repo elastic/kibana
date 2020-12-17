@@ -30,7 +30,7 @@ import {
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
 import { AppLogic } from '../../../../app_logic';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
 import { SourceFeatures } from './source_features';
@@ -82,10 +82,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourcePasswordValue,
     setSourceSubdomainValue,
     setSourceIndexPermissionsValue,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
 
   const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    SourceLogic
+    AddSourceLogic
   );
 
   const { isOrganization } = useValues(AppLogic);
@@ -95,7 +95,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
-  const redirectOauth = (oauthUrl: string) => (window.location.href = oauthUrl);
+  const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
   const handleFormSubmitError = () => setFormLoading(false);
@@ -199,7 +199,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
         {!needsPermissions && (
-          <span>
+          <span data-test-subj="NeedsPermissionsMessage">
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
               defaultMessage="Document-level permissions are not yet available for this source. {link}"

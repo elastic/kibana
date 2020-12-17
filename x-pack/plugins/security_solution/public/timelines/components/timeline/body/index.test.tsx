@@ -17,6 +17,7 @@ import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 const mockSort: Sort[] = [
   {
@@ -61,6 +62,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const props: StatefulBodyProps = {
+    activePage: 0,
     browserFields: mockBrowserFields,
     clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
@@ -76,6 +78,8 @@ describe('Body', () => {
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
+    activeTab: TimelineTabs.query,
+    totalPages: 1,
   };
 
   describe('rendering', () => {

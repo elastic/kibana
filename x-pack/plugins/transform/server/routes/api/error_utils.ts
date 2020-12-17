@@ -38,26 +38,25 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
         )
       : '';
 
-  const error = {
-    response: {
-      error: {
-        root_cause: [
-          {
-            reason: i18n.translate(
-              'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
-              {
-                defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
-                values: {
-                  id,
-                  action,
-                  extra,
-                },
-              }
-            ),
-          },
-        ],
+  const reason = i18n.translate(
+    'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
+    {
+      defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
+      values: {
+        id,
+        action,
+        extra,
       },
-    },
+    }
+  );
+
+  const error = {
+    reason,
+    root_cause: [
+      {
+        reason,
+      },
+    ],
   };
 
   const newResults: CommonResponseStatusSchema | DeleteTransformsResponseSchema = {};
@@ -66,6 +65,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     if (results[currentVal.id] === undefined) {
       accumResults[currentVal.id] = {
         success: false,
+        // @ts-ignore
         error,
       };
     } else {

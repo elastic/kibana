@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "14.14.7",
+    "**/@types/node": "14.14.14",
     "**/chokidar": "^3.4.3",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/deepmerge": "^4.2.2",
@@ -93,7 +93,7 @@
     "**/typescript": "4.1.2"
   },
   "engines": {
-    "node": "14.15.1",
+    "node": "14.15.2",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -136,6 +136,8 @@
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "@kbn/ui-shared-deps": "link:packages/kbn-ui-shared-deps",
     "@kbn/utils": "link:packages/kbn-utils",
+    "@loaders.gl/core": "^2.3.1",
+    "@loaders.gl/json": "^2.3.1",
     "@slack/webhook": "^5.0.0",
     "@storybook/addons": "^6.0.16",
     "@turf/circle": "6.0.1",
@@ -371,6 +373,7 @@
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/utility-types": "link:packages/kbn-utility-types",
+    "@loaders.gl/polyfills": "^2.3.5",
     "@mapbox/geojson-rewind": "^0.5.0",
     "@mapbox/mapbox-gl-draw": "^1.2.0",
     "@mapbox/mapbox-gl-rtl-text": "^0.2.3",
@@ -487,7 +490,7 @@
     "@types/mustache": "^0.8.31",
     "@types/ncp": "^2.0.1",
     "@types/nock": "^10.0.3",
-    "@types/node": "14.14.7",
+    "@types/node": "14.14.14",
     "@types/node-fetch": "^2.5.7",
     "@types/node-forge": "^0.9.5",
     "@types/nodemailer": "^6.4.0",
