@@ -43,13 +43,14 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
             const dataStream = dataStreams[i];
 
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { store_size, maximum_timestamp } = dataStreamsStats.find(
+            const { store_size, store_size_bytes, maximum_timestamp } = dataStreamsStats.find(
               ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
             );
 
             dataStreams[i] = {
               ...dataStream,
               store_size,
+              store_size_bytes,
               maximum_timestamp,
             };
           }
