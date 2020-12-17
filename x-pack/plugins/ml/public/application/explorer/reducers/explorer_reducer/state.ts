@@ -17,7 +17,6 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
-  TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
@@ -27,7 +26,6 @@ import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
   annotations: AnnotationsTable;
-  bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
@@ -69,7 +67,6 @@ export function getExplorerDefaultState(): ExplorerState {
       annotationsData: [],
       aggregations: {},
     },
-    bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,
