@@ -7,9 +7,7 @@
 import { useContext, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as selectors from '../store/selectors';
-import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverState } from '../types';
 import { ResolverAction } from '../store/actions';
 
 /**
@@ -23,24 +21,13 @@ export function useSyncSelectedNode() {
   const { timestamp } = useContext(SideEffectContext);
   const currentPanelParameters = useSelector(selectors.panelViewAndParameters);
   const selectedNode = useSelector(selectors.selectedNode);
-
-  // Get all the nodeIDs to confirm that the node we are attempting to pan to actually exists
-  const allNodeIDs: string[] = useSelector(
-    useCallback((state: ResolverState) => {
-      const allNodes = selectors.graphableNodes(state);
-      const allNodeIds = [];
-      for (const node of allNodes) {
-        const nodeID = nodeModel.nodeID(node);
-        if (nodeID) allNodeIds.push(nodeID);
-      }
-      return allNodeIds;
-    }, [])
-  );
+  const idToNodeMap = useSelector(selectors.graphNodeForID);
 
   useEffect(() => {
+    // Only run when actively analyzing a node (every panel view besides 'nodes'(nodeList))
     if (currentPanelParameters && currentPanelParameters.panelView !== 'nodes') {
       const { nodeID } = currentPanelParameters.panelParameters;
-      if (nodeID && allNodeIDs.includes(nodeID) && nodeID !== selectedNode) {
+      if (nodeID && idToNodeMap(nodeID) && nodeID !== selectedNode) {
         dispatch({
           type: 'userBroughtNodeIntoView',
           payload: {
@@ -50,5 +37,5 @@ export function useSyncSelectedNode() {
         });
       }
     }
-  }, [allNodeIDs, currentPanelParameters, dispatch, selectedNode, timestamp]);
+  }, [currentPanelParameters, dispatch, idToNodeMap, selectedNode, timestamp]);
 }
