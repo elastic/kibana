@@ -12,6 +12,7 @@ import { NavigationMenu } from '../components/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
+import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
@@ -32,6 +33,7 @@ export const OverviewPage: FC = () => {
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
           <NodeAvailableWarning />
+          <SavedObjectsWarning />
           <UpgradeWarning />
 
           <EuiFlexGroup>

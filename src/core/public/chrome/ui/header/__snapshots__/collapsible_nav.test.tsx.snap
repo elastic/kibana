@@ -56,6 +56,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -1973,6 +1974,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -2078,6 +2080,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2313,6 +2316,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2549,6 +2553,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -3126,6 +3131,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >

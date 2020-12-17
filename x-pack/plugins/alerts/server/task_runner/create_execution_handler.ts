@@ -12,6 +12,7 @@ import {
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { injectActionParams } from './inject_action_params';
 import {
   AlertAction,
   AlertInstanceState,
@@ -38,6 +39,7 @@ interface CreateExecutionHandlerOptions {
 
 interface ExecutionHandlerOptions {
   actionGroup: string;
+  actionSubgroup?: string;
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
@@ -60,7 +62,13 @@ export function createExecutionHandler({
   const alertTypeActionGroups = new Map(
     alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
-  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
+  return async ({
+    actionGroup,
+    actionSubgroup,
+    context,
+    state,
+    alertInstanceId,
+  }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
@@ -71,20 +79,31 @@ export function createExecutionHandler({
         return {
           ...action,
           params: transformActionParams({
+            actionsPlugin,
             alertId,
+            actionTypeId: action.actionTypeId,
             alertName,
             spaceId,
             tags,
             alertInstanceId,
             alertActionGroup: actionGroup,
             alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
+            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             state,
             alertParams,
           }),
         };
-      });
+      })
+      .map((action) => ({
+        ...action,
+        params: injectActionParams({
+          alertId,
+          actionParams: action.params,
+          actionTypeId: action.actionTypeId,
+        }),
+      }));
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
@@ -120,6 +139,7 @@ export function createExecutionHandler({
           alerting: {
             instance_id: alertInstanceId,
             action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
@@ -128,7 +148,11 @@ export function createExecutionHandler({
         },
       };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };

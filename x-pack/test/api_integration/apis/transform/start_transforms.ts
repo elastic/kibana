@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body[transformId].success).to.eql(false);
-        expect(typeof body[transformId].error).to.eql('string');
+        expect(typeof body[transformId].error).to.eql('object');
 
         await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
         await transform.api.waitForIndicesNotToExist(destinationIndex);

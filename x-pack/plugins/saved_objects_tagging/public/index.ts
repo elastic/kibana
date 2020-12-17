@@ -8,6 +8,7 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import { SavedObjectTaggingPlugin } from './plugin';
 
 export { SavedObjectTaggingPluginStart } from './types';
+export { Tag } from '../common';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingPlugin(initializerContext);
