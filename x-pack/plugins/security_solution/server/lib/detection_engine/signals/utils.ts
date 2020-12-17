@@ -530,6 +530,7 @@ export const getSignalTimeTuples = ({
 export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
   return errors.map((error) => {
     const {
+      index,
       reason: {
         reason,
         type,
@@ -541,6 +542,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
     } = error;
 
     return [
+      ...(index != null ? [`index: "${index}"`] : []),
       ...(reason != null ? [`reason: "${reason}"`] : []),
       ...(type != null ? [`type: "${type}"`] : []),
       ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
@@ -660,7 +662,8 @@ export const mergeReturns = (
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
-      errors: [...new Set([...existingErrors, ...newErrors])],
+      // errors: [...new Set([...existingErrors, ...newErrors])],
+      errors: [...existingErrors, ...newErrors],
     };
   });
 };

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
@@ -49,10 +50,15 @@ export const searchAfterAndBulkCreate = async ({
 
   // sortId tells us where to start our next consecutive search_after query
   let sortId: string | undefined;
+  let backupSortId: string | undefined;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
+
+  // const timestamps = ruleParams.timestampOverride
+  //   ? [ruleParams.timestampOverride, '@timestamp']
+  //   : ['@timestamp'];
 
   const totalToFromTuples = getSignalTimeTuples({
     logger,
@@ -104,6 +110,47 @@ export const searchAfterAndBulkCreate = async ({
             errors: searchErrors,
           }),
         ]);
+        if (!isEmpty(searchErrors)) {
+          // console.error(`SEARCH ERRORS: ${JSON.stringify(searchErrors)}`);
+          const {
+            searchResult: searchResultB,
+            searchDuration: searchDurationB,
+            searchErrors: searchErrorsB,
+          } = await singleSearchAfter({
+            buildRuleMessage,
+            searchAfterSortId: backupSortId,
+            index: inputIndexPattern,
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            services,
+            logger,
+            filter,
+            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+            timestampOverride: ruleParams.timestampOverride,
+            timestamp: '@timestamp',
+          });
+          const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
+          if (lastSortId != null && lastSortId.length !== 0) {
+            backupSortId = lastSortId[0];
+          } else {
+            logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
+            break;
+          }
+          // console.error(`SEARCHRESULTB: ${JSON.stringify(searchResultB)}`);
+          searchResult.hits.hits.push(...searchResultB.hits.hits);
+          toReturn = mergeReturns([
+            toReturn,
+            createSearchAfterReturnTypeFromResponse({
+              searchResult: searchResultB,
+              timestampOverride: undefined,
+            }),
+            createSearchAfterReturnType({
+              searchAfterTimes: [searchDurationB],
+              errors: searchErrorsB,
+            }),
+          ]);
+        }
+
         // determine if there are any candidate signals to be processed
         const totalHits = createTotalHitsFromSearchResult({ searchResult });
         logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));

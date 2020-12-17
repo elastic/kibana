@@ -25,12 +25,15 @@ import {
   getSimpleMlRule,
   getSimpleMlRuleOutput,
   waitForRuleSuccess,
+  waitForSignalsToBePresent,
   getRuleForSignalTesting,
+  getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create_rules', () => {
     describe('validation errors', () => {
@@ -199,6 +202,40 @@ export default ({ getService }: FtrProviderContext) => {
           message: 'rule_id: "rule-1" already exists',
           status_code: 409,
         });
+      });
+    });
+    describe('missing timestamps', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+        await esArchiver.load('myfakeindex');
+      });
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('myfakeindex');
+      });
+      it('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
+        // should be a failing status because one of the indices in the index pattern is missing
+        // the timestamp override field.
+        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfa*']);
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+        const bodyId = body.id;
+
+        await waitForRuleSuccess(supertest, bodyId);
+        await waitForSignalsToBePresent(supertest, 2, [bodyId]);
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [bodyId] })
+          .expect(200);
+
+        expect(statusBody[bodyId].current_status.status).to.eql('failed');
       });
     });
   });

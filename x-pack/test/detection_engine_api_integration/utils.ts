@@ -119,6 +119,25 @@ export const getRuleForSignalTesting = (
   from: '1900-01-01T00:00:00.000Z',
 });
 
+export const getRuleForSignalTestingWithTimestampOverride = (
+  index: string[],
+  ruleId = 'rule-1',
+  enabled = true,
+  timestampOverride = 'event.ingested'
+): QueryCreateSchema => ({
+  name: 'Signal Testing Query',
+  description: 'Tests a simple query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index,
+  type: 'query',
+  query: '*:*',
+  timestamp_override: timestampOverride,
+  from: '1900-01-01T00:00:00.000Z',
+});
+
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId The rule id
@@ -209,6 +228,12 @@ export const getQuerySignalsId = (ids: string[]) => ({
     terms: {
       'signal.rule.id': ids,
     },
+  },
+});
+
+export const getQuerySignalsAll = () => ({
+  query: {
+    match_all: {},
   },
 });
 
@@ -878,7 +903,11 @@ export const waitForRuleSuccess = async (
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
-    return body[id]?.current_status?.status === 'succeeded';
+    return (
+      body[id]?.current_status?.status === 'succeeded' ||
+      body[id]?.current_status?.status === 'failed' ||
+      body[id]?.current_status?.status === 'partial failure'
+    );
   }, 'waitForRuleSuccess');
 };
 
@@ -938,7 +967,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids))
+    .send(ids.length > 0 ? getQuerySignalsId(ids) : getQuerySignalsAll())
     .expect(200);
   return signalsOpen;
 };

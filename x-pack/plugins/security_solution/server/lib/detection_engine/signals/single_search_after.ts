@@ -29,6 +29,7 @@ interface SingleSearchAfterParams {
   filter: unknown;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
+  timestamp?: string;
 }
 
 // utilize search_after for paging results into bulk.
@@ -45,6 +46,7 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
+  timestamp,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -61,6 +63,7 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortId,
       timestampOverride,
+      timestamp,
     });
 
     const start = performance.now();
@@ -68,6 +71,7 @@ export const singleSearchAfter = async ({
       'search',
       searchAfterQuery
     );
+    // console.error(`SHARD FAILURES: ${JSON.stringify(nextSearchAfterResult._shards)}`);
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

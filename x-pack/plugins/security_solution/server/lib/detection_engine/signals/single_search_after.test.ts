@@ -106,7 +106,7 @@ describe('singleSearchAfter', () => {
       buildRuleMessage,
     });
     expect(searchErrors).toEqual([
-      'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+      'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
     ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {

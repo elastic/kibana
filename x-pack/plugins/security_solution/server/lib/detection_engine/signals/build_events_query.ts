@@ -19,6 +19,7 @@ interface BuildEventsSearchQuery {
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  timestamp?: string;
 }
 
 export const buildEventsSearchQuery = ({
@@ -31,66 +32,66 @@ export const buildEventsSearchQuery = ({
   searchAfterSortId,
   sortOrder,
   timestampOverride,
+  timestamp,
 }: BuildEventsSearchQuery) => {
-  const timestamp = timestampOverride ?? '@timestamp';
-  const docFields =
-    timestampOverride != null
-      ? [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: timestampOverride,
-            format: 'strict_date_optional_time',
-          },
-        ]
-      : [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ];
+  const defaultTimeFields = ['@timestamp'];
+  const timestamps =
+    timestampOverride != null && timestampOverride !== '@timestamp'
+      ? [timestampOverride, ...defaultTimeFields]
+      : defaultTimeFields;
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
 
-  const filterWithTime = [
-    filter,
+  // idea is to iterate over the timestamps and create distinct queries that can be used to search across simultaneous timestamps
+  const sortField =
+    timestamp == null && timestampOverride != null ? timestampOverride : '@timestamp';
+
+  const rangeFilter: unknown[] = [
     {
       bool: {
-        filter: [
+        should: [
           {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      gte: from,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      lte: to,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+            range: {
+              [sortField]: {
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
             },
           },
         ],
+        minimum_should_match: 1,
+      },
+    },
+    {
+      bool: {
+        should: [
+          {
+            range: {
+              [sortField]: {
+                lte: to,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
       },
     },
   ];
+  if (timestamp != null) {
+    rangeFilter.push({
+      bool: {
+        must_not: {
+          exists: {
+            field: timestampOverride,
+          },
+        },
+      },
+    });
+  }
+  const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
     allowNoIndices: true,
@@ -112,13 +113,15 @@ export const buildEventsSearchQuery = ({
       ...(aggregations ? { aggregations } : {}),
       sort: [
         {
-          [timestamp]: {
+          [sortField]: {
             order: sortOrder ?? 'asc',
           },
         },
       ],
     },
   };
+
+  // console.error(`SEARCH QUERY: ${JSON.stringify(searchQuery.body)}`);
 
   if (searchAfterSortId) {
     return {
