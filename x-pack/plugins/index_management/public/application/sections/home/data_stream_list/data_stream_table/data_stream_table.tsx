@@ -90,12 +90,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     });
 
     columns.push({
-      field: 'storageSize',
+      field: 'storageSizeBytes',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
         defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
     });
   }
 

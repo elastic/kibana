@@ -11,9 +11,11 @@ import { hostIpFilter } from '../objects/filter';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
+import { cleanKibana } from '../tasks/common';
 
 describe('SearchBar', () => {
   before(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

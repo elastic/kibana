@@ -25,7 +25,8 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
+import { getTimelineById } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -50,8 +51,8 @@ import { OVERVIEW_URL } from '../urls/navigation';
 describe.skip('Timelines', () => {
   let timelineId: string;
 
-  after(() => {
-    if (timelineId) deleteTimeline(timelineId);
+  before(() => {
+    cleanKibana();
   });
 
   it('Creates a timeline', () => {
