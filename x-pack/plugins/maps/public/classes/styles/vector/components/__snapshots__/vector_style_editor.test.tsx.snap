@@ -35,11 +35,11 @@ exports[`should render 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticColorProperty {
+        "_options": Object {
           "color": "#54B399",
         },
-        "type": "STATIC",
+        "_styleName": "fillColor",
       }
     }
     swatches={
@@ -93,11 +93,11 @@ exports[`should render 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticColorProperty {
+        "_options": Object {
           "color": "#41937c",
         },
-        "type": "STATIC",
+        "_styleName": "lineColor",
       }
     }
     swatches={
@@ -143,11 +143,11 @@ exports[`should render 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticSizeProperty {
+        "_options": Object {
           "size": 1,
         },
-        "type": "STATIC",
+        "_styleName": "lineWidth",
       }
     }
   />
@@ -194,11 +194,11 @@ exports[`should render with no style fields 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticColorProperty {
+        "_options": Object {
           "color": "#54B399",
         },
-        "type": "STATIC",
+        "_styleName": "fillColor",
       }
     }
     swatches={
@@ -242,11 +242,11 @@ exports[`should render with no style fields 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticColorProperty {
+        "_options": Object {
           "color": "#41937c",
         },
-        "type": "STATIC",
+        "_styleName": "lineColor",
       }
     }
     swatches={
@@ -292,11 +292,11 @@ exports[`should render with no style fields 1`] = `
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
     styleProperty={
-      Object {
-        "options": Object {
+      StaticSizeProperty {
+        "_options": Object {
           "size": 1,
         },
-        "type": "STATIC",
+        "_styleName": "lineWidth",
       }
     }
   />

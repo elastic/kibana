@@ -6,12 +6,18 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { VectorStyleEditor } from './vector_style_editor';
+import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
-import { FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
+import {
+  FIELD_ORIGIN,
+  LAYER_STYLE_TYPE,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import { AbstractField, IField } from '../../../fields/field';
+import { VectorStyle } from '../vector_style';
 
 jest.mock('../../../../kibana_services', () => {
   return {
@@ -42,6 +48,21 @@ function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TY
   } as unknown) as IVectorLayer;
 }
 
+const vectorStyleDescriptor = {
+  type: LAYER_STYLE_TYPE.VECTOR,
+  properties: getDefaultStaticProperties(),
+  isTimeAware: true,
+};
+const vectorStyle = new VectorStyle(
+  vectorStyleDescriptor,
+  ({} as unknown) as IVectorSource,
+  ({} as unknown) as IVectorLayer
+);
+const styleProperties: StyleProperties = {};
+vectorStyle.getAllStyleProperties().forEach((styleProperty) => {
+  styleProperties[styleProperty.getStyleName()] = styleProperty;
+});
+
 const defaultProps = {
   layer: createLayerMock(1, [VECTOR_SHAPE_TYPE.POLYGON]),
   isPointsOnly: true,
@@ -49,7 +70,7 @@ const defaultProps = {
   onIsTimeAwareChange: (isTimeAware: boolean) => {},
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => {},
   hasBorder: true,
-  styleProperties: getDefaultStaticProperties(),
+  styleProperties,
   isTimeAware: true,
   showIsTimeAware: true,
 };
