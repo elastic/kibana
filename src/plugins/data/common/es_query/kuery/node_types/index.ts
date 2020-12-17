@@ -24,6 +24,7 @@ import * as wildcard from './wildcard';
 import { NodeTypes } from './types';
 
 export { NodeTypes };
+export { nodeBuilder } from './node_builder';
 
 export const nodeTypes: NodeTypes = {
   // This requires better typing of the different typings and their return types.
