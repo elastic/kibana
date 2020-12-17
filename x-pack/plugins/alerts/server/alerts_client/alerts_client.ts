@@ -45,7 +45,7 @@ import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
 import { RegistryAlertType } from '../alert_type_registry';
-import { AlertsAuthorization, WriteOperations, ReadOperations, and } from '../authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
@@ -56,6 +56,7 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -455,7 +456,7 @@ export class AlertsClient {
       ...options,
       filter:
         (authorizationFilter && options.filter
-          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
@@ -517,7 +518,7 @@ export class AlertsClient {
           ...options,
           filter:
             (authorizationFilter && filter
-              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter])
               : authorizationFilter) ?? filter,
           page: 1,
           perPage: 0,
