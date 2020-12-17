@@ -42,7 +42,6 @@
   max-width: 300px;
 }
 
-.lnsFieldItem__buttonGroup {
-  // Enforce lowercase for buttons or else some browsers inherit all caps from flyout title
+.lnsFieldItem__fieldPanelTitle {
   text-transform: none;
 }
