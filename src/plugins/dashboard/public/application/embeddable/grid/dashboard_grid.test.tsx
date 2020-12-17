@@ -24,14 +24,15 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
+import { KibanaContextProvider } from '../../../services/kibana_react';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+} from '../../../services/embeddable_test_samples';
+import { coreMock, uiSettingsServiceMock } from '../../../../../../core/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -58,7 +59,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
       },
     },
   });
-  const options: DashboardContainerOptions = {
+  const options: DashboardContainerServices = {
     application: {} as any,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
@@ -76,11 +77,12 @@ function prepare(props?: Partial<DashboardGridProps>) {
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreMock.createStart().http,
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
-    PanelComponent: () => <div />,
     kibana: null as any,
     intl: null as any,
   };

@@ -48,21 +48,22 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/issue`;
-  const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue`;
+  const capabilitiesUrl = `${urlWithoutTrailingSlash}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
-  const getIssueTypesOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
-  const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
-  const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
-  const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
-  const searchUrl = `${url}/${BASE_URL}/search`;
+  const getIssueTypesOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypeFieldsOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
+  const getIssueTypesUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
+  const getIssueTypeFieldsUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
+  const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
 
   const getIncidentViewURL = (key: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}/${key}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   };
 
   const getCommentsURL = (issueId: string) => {
@@ -132,21 +133,24 @@ export const createExternalService = (
     [key: string]: {
       allowedValues?: Array<{}>;
       defaultValue?: {};
+      name: string;
       required: boolean;
       schema: FieldSchema;
     };
   }) =>
-    Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
-      return {
+    Object.keys(fields ?? {}).reduce(
+      (fieldsAcc, fieldKey) => ({
         ...fieldsAcc,
         [fieldKey]: {
           required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
           schema: fields[fieldKey]?.schema,
+          name: fields[fieldKey]?.name,
         },
-      };
-    }, {});
+      }),
+      {}
+    );
 
   const normalizeSearchResults = (
     issues: Array<{ id: string; key: string; fields: { summary: string } }>
@@ -385,7 +389,6 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-
         return normalizeFields(fields);
       } else {
         const res = await request({

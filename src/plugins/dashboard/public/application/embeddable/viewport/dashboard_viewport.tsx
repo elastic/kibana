@@ -19,15 +19,15 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
+import { PanelState, ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../../../kibana_react/public';
+import { context } from '../../../services/kibana_react';
+import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
+  switchViewMode?: (newViewMode: ViewMode) => void;
   container: DashboardContainer;
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
@@ -37,7 +37,6 @@ interface State {
   description?: string;
   panels: { [key: string]: PanelState };
   isEmbeddedExternally?: boolean;
-  isEmptyState?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -54,7 +53,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     } = this.props.container.getInput();
 
     this.state = {
@@ -63,7 +61,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     };
   }
 
@@ -76,7 +73,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         title,
         description,
         isEmbeddedExternally,
-        isEmptyState,
       } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
@@ -85,7 +81,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           useMargins,
           title,
           isEmbeddedExternally,
-          isEmptyState,
         });
       }
     });
@@ -104,24 +99,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
-  private renderEmptyScreen() {
-    const { renderEmpty } = this.props;
-    const { isEmbeddedExternally, isFullScreenMode } = this.state;
-    return (
-      <div className="dshDashboardEmptyScreen">
-        {isFullScreenMode && (
-          <this.context.services.ExitFullScreenButton
-            onExitFullScreenMode={this.onExitFullScreenMode}
-            toggleChrome={!isEmbeddedExternally}
-          />
-        )}
-        {renderEmpty && renderEmpty()}
-      </div>
-    );
-  }
-
-  private renderContainerScreen() {
-    const { container, PanelComponent } = this.props;
+  public render() {
+    const { container } = this.props;
+    const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const {
       isEmbeddedExternally,
       isFullScreenMode,
@@ -131,29 +111,35 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
     } = this.state;
     return (
-      <div
-        data-shared-items-count={Object.values(panels).length}
-        data-shared-items-container
-        data-title={title}
-        data-description={description}
-        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
-      >
-        {isFullScreenMode && (
-          <this.context.services.ExitFullScreenButton
-            onExitFullScreenMode={this.onExitFullScreenMode}
-            toggleChrome={!isEmbeddedExternally}
-          />
-        )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
-      </div>
-    );
-  }
-
-  public render() {
-    return (
       <React.Fragment>
-        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
-        {this.renderContainerScreen()}
+        <div
+          data-shared-items-count={Object.values(panels).length}
+          data-shared-items-container
+          data-title={title}
+          data-description={description}
+          className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
+        >
+          {isFullScreenMode && (
+            <this.context.services.ExitFullScreenButton
+              onExitFullScreenMode={this.onExitFullScreenMode}
+              toggleChrome={!isEmbeddedExternally}
+            />
+          )}
+          {this.props.container.getPanelCount() === 0 && (
+            <div className="dshDashboardEmptyScreen">
+              <DashboardEmptyScreen
+                isReadonlyMode={
+                  this.props.container.getInput().dashboardCapabilities?.hideWriteControls
+                }
+                onLinkClick={() => this.props.switchViewMode?.(ViewMode.EDIT)}
+                isEditMode={isEditMode}
+                uiSettings={this.context.services.uiSettings}
+                http={this.context.services.http}
+              />
+            </div>
+          )}
+          <DashboardGrid container={container} />
+        </div>
       </React.Fragment>
     );
   }

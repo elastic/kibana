@@ -65,6 +65,7 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
+  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -78,11 +79,14 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
+  handleCloseExpandedEvent: jest.fn(),
   start: from,
-  sort: {
-    columnId: 'foo',
-    sortDirection: 'none' as SortDirection,
-  },
+  sort: [
+    {
+      columnId: 'foo',
+      sortDirection: 'none' as SortDirection,
+    },
+  ],
   scopeId: SourcererScopeName.timeline,
   utilityBar,
 };

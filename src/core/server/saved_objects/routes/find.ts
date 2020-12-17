@@ -19,8 +19,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 
-export const registerFindRoute = (router: IRouter) => {
+interface RouteDependencies {
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
   const referenceSchema = schema.object({
     type: schema.string(),
     id: schema.string(),
@@ -60,6 +65,9 @@ export const registerFindRoute = (router: IRouter) => {
 
       const namespaces =
         typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementSavedObjectsFind({ request: req }).catch(() => {});
 
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,

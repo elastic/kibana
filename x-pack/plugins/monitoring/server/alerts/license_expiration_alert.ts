@@ -34,6 +34,9 @@ export class LicenseExpirationAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label,
       legacy: {
         watchName: 'xpack_license_expiration',
+        nodeNameLabel: i18n.translate('xpack.monitoring.alerts.licenseExpiration.nodeNameLabel', {
+          defaultMessage: 'Elasticsearch cluster alert',
+        }),
       },
       interval: '1d',
       actionVariables: [

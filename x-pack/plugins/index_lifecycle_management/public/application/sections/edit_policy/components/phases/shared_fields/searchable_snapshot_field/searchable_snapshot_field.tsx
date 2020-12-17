@@ -29,8 +29,6 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { useRolloverPath } from '../../../../constants';
-
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
@@ -54,17 +52,16 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
-  const [formData] = useFormData({ watch: [searchableSnapshotPath, useRolloverPath] });
-  const isRolloverEnabled = get(formData, useRolloverPath);
+  const [formData] = useFormData({ watch: searchableSnapshotPath });
   const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
   const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInColdDueToRollover = phase === 'cold' && !isRolloverEnabled;
+  const isDisabledInColdDueToRollover = phase === 'cold' && !isUsingRollover;
 
   const isDisabled =
     isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
