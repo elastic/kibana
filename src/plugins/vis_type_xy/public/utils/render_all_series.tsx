@@ -92,6 +92,10 @@ export const renderAllSeries = (
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
+      // needed to seperate stacked and non-stacked bars into unique pseudo groups
+      const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
+      // set domain of stacked groups to use actual groupId not pseudo groupdId
+      const useDefaultGroupDomain = isStacked ? groupId : undefined;
 
       switch (type) {
         case ChartType.Histogram:
@@ -102,10 +106,8 @@ export const renderAllSeries = (
               name={getSeriesName}
               color={getSeriesColor}
               tickFormat={yAspect.formatter}
-              // needed to seperate stacked and non-stacked bars into unique pseudo groups
-              groupId={isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId}
-              // set domain of stacked groups to use actual groupId not pseudo groupdId
-              useDefaultGroupDomain={isStacked ? groupId : undefined}
+              groupId={pseudoGroupId}
+              useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
@@ -137,7 +139,8 @@ export const renderAllSeries = (
               tickFormat={yAspect.formatter}
               name={getSeriesName}
               curve={getCurveType(interpolate)}
-              groupId={groupId}
+              groupId={pseudoGroupId}
+              useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
