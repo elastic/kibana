@@ -30,9 +30,8 @@ export function createRegionMapVisualization({
   getServiceSettings,
 }) {
   return class RegionMapsVisualization extends BaseMapsVisualization {
-    constructor(container, vis) {
-      super(container, vis);
-      this._vis = this.vis;
+    constructor(container, handlers, initialVisParams, initialEsResponse) {
+      super(container, handlers, initialVisParams, initialEsResponse);
       this._choroplethLayer = null;
       this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
@@ -88,7 +87,7 @@ export function createRegionMapVisualization({
         );
       }
 
-      this._kibanaMap.useUiStateFromVisualization(this._vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
     }
 
     async _loadConfig(fileLayerConfig) {
@@ -201,11 +200,18 @@ export function createRegionMapVisualization({
       this._choroplethLayer.on('select', (event) => {
         const { rows, columns } = this._chartData;
         const rowIndex = rows.findIndex((row) => row[columns[0].id] === event);
-        this._vis.API.events.filter({
-          table: this._chartData,
-          column: 0,
-          row: rowIndex,
-          value: event,
+        this.handlers.event({
+          name: 'filterBucket',
+          data: {
+            data: [
+              {
+                table: this._chartData,
+                column: 0,
+                row: rowIndex,
+                value: event,
+              },
+            ],
+          },
         });
       });
 

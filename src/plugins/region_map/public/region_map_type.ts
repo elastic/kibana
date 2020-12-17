@@ -16,20 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { mapToLayerWithId } from './util';
-import { createRegionMapVisualization } from './region_map_visualization';
-import { RegionMapOptions } from './components/region_map_options';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getDeprecationMessage } from './get_deprecation_message';
+import { RegionMapVisualizationDependencies } from './plugin';
+import { createRegionMapOptions } from './components';
+import { toExpressionAst } from './to_ast';
+import { RegionMapVisParams } from './region_map_types';
 
-export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
-  const visualization = createRegionMapVisualization(dependencies);
-
+export function createRegionMapTypeDefinition({
+  uiSettings,
+  regionmapsConfig,
+  getServiceSettings,
+}: RegionMapVisualizationDependencies): BaseVisTypeOptions<RegionMapVisParams> {
   return {
     name: 'region_map',
     getInfoMessage: getDeprecationMessage,
@@ -51,14 +54,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
-        showAllShapes: true, //still under consideration
+        showAllShapes: true, // still under consideration
       },
     },
-    visualization,
     editorConfig: {
-      optionsTemplate: (props) => (
-        <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
-      ),
+      optionsTemplate: createRegionMapOptions(getServiceSettings),
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
@@ -100,6 +100,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         },
       ]),
     },
+    toExpressionAst,
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
@@ -112,7 +113,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
       );
       let selectedLayer = vectorLayers[0];
-      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : undefined;
       if (regionmapsConfig.includeElasticMapsService) {
         const layers = await serviceSettings.getFileLayers();
         const newLayers = layers
@@ -133,7 +134,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
 
         [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
-        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : undefined;
 
         if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
           vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);

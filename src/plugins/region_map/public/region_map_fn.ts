@@ -19,7 +19,27 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const createRegionMapFn = () => ({
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { RegionMapVisConfig, RegionMapVisData } from './region_map_types';
+
+interface Arguments {
+  visConfig: string | null;
+}
+
+export interface RegionMapVisRenderValue {
+  visData: RegionMapVisData;
+  visType: 'region_map';
+  visConfig: RegionMapVisConfig;
+}
+
+export type RegionMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'regionmap',
+  Datatable,
+  Arguments,
+  Render<RegionMapVisRenderValue>
+>;
+
+export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
   name: 'regionmap',
   type: 'render',
   context: {
@@ -32,21 +52,19 @@ export const createRegionMapFn = () => ({
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
+      help: '',
     },
   },
   fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const visConfig = args.visConfig && JSON.parse(args.visConfig);
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'region_map_vis',
       value: {
         visData: context,
         visType: 'region_map',
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

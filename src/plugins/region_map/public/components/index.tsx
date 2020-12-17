@@ -17,29 +17,13 @@
  * under the License.
  */
 
-import { SchemaConfig } from 'src/plugins/visualizations/public';
-import { VectorLayer, FileLayerField, WMSOptions } from '../../maps_legacy/public/index';
+import React, { lazy } from 'react';
+import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { RegionMapVisParams } from '../region_map_types';
 
-export interface RegionMapVisParams {
-  readonly addTooltip: true;
-  readonly legendPosition: 'bottomright';
-  colorSchema: string;
-  emsHotLink?: string | null;
-  mapCenter: [number, number];
-  mapZoom: number;
-  outlineWeight: number | '';
-  isDisplayWarning: boolean;
-  showAllShapes: boolean;
-  selectedLayer?: VectorLayer;
-  selectedJoinField?: FileLayerField;
-  wms: WMSOptions;
-}
+const RegionMapOptions = lazy(() => import('./region_map_options'));
 
-export interface RegionMapVisConfig extends RegionMapVisParams {
-  metric: SchemaConfig;
-  bucket?: SchemaConfig;
-}
-
-export interface RegionMapVisData {
-  [key: string]: any;
-}
+export const createRegionMapOptions = (getServiceSettings: () => Promise<IServiceSettings>) => (
+  props: VisOptionsProps<RegionMapVisParams>
+) => <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />;

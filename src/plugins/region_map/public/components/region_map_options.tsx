@@ -213,4 +213,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
   );
 }
 
-export { RegionMapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RegionMapOptions as default };

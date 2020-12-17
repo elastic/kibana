@@ -23,7 +23,7 @@ import {
   SerializedFieldFormat,
 } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
-import { Vis, VisParams } from '../types';
+import { Vis } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
 interface SchemaConfigParams {
@@ -53,25 +53,6 @@ export interface Schemas {
   // catch all for schema name
   [key: string]: any[] | undefined;
 }
-
-type BuildVisFunction = (
-  params: VisParams,
-  schemas: Schemas,
-  uiState: any,
-  meta?: { savedObjectId?: string }
-) => string;
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
-
-interface BuildPipelineVisFunction {
-  [key: string]: BuildVisFunction;
-}
-
-interface BuildVisConfigFunction {
-  [key: string]: buildVisConfigFunction;
-}
-
 export interface BuildPipelineParams {
   timefilter: TimefilterContract;
   timeRange?: any;
@@ -222,32 +203,10 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
-export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  region_map: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.region_map(schemas),
-    };
-    return `regionmap ${prepareJson('visConfig', visConfig)}`;
-  },
-};
-
-const buildVisConfig: BuildVisConfigFunction = {
-  region_map: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.metric = schemas.metric[0];
-    if (schemas.segment) {
-      visConfig.bucket = schemas.segment[0];
-    }
-    return visConfig;
-  },
-};
-
 export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
-  const { uiState, title } = vis;
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -265,48 +224,21 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   if (vis.type.toExpressionAst) {
     const visAst = await vis.type.toExpressionAst(vis, params);
     pipeline += formatExpression(visAst);
-  } else {
+  } else if (vis.type.requestHandler === 'courier') {
     // request handler
-    if (vis.type.requestHandler === 'courier') {
-      pipeline += `esaggs
+    pipeline += `esaggs
     index={indexPatternLoad ${prepareString('id', indexPattern!.id)}}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false} `;
-      if (vis.data.aggs) {
-        vis.data.aggs.aggs.forEach((agg) => {
-          const ast = agg.toExpressionAst();
-          if (ast) {
-            pipeline += `aggs={${buildExpression(ast).toString()}} `;
-          }
-        });
-      }
-      pipeline += `| `;
-    }
-
-    const schemas = getSchemas(vis, params);
-
-    if (buildPipelineVisFunction[vis.type.name]) {
-      pipeline += buildPipelineVisFunction[vis.type.name](
-        { title, ...vis.params },
-        schemas,
-        uiState
-      );
-    } else {
-      const visConfig = { ...vis.params };
-      visConfig.dimensions = schemas;
-      visConfig.title = title;
-      pipeline += `visualization type='${vis.type.name}'
-    ${prepareJson('visConfig', visConfig)}
-    ${prepareJson('uiState', uiState)}
-    metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || false} `;
-      if (indexPattern) {
-        pipeline += `${prepareString('index', indexPattern.id)} `;
-        if (vis.data.aggs) {
-          pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+    if (vis.data.aggs) {
+      vis.data.aggs.aggs.forEach((agg) => {
+        const ast = agg.toExpressionAst();
+        if (ast) {
+          pipeline += `aggs={${buildExpression(ast).toString()}} `;
         }
-      }
+      });
     }
+    pipeline += `| `;
   }
 
   return pipeline;

@@ -44,9 +44,10 @@ import { RegionMapsConfigType } from './index';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { SharePluginStart } from '../../share/public';
+import { getRegionMapRenderer } from './region_map_renderer';
 
 /** @private */
-interface RegionMapVisualizationDependencies {
+export interface RegionMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
@@ -107,6 +108,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     };
 
     expressions.registerFunction(createRegionMapFn);
+    expressions.registerRenderer(getRegionMapRenderer(visualizationDependencies));
 
     visualizations.createBaseVisualization(
       createRegionMapTypeDefinition(visualizationDependencies)

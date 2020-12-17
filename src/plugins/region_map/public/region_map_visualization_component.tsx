@@ -22,39 +22,39 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { TileMapVisualizationDependencies } from './plugin';
-import { TileMapVisConfig, TileMapVisData } from './types';
+import { RegionMapVisualizationDependencies } from './plugin';
+import { RegionMapVisConfig, RegionMapVisData } from './region_map_types';
 // @ts-expect-error
-import { createTileMapVisualization } from './tile_map_visualization';
+import { createRegionMapVisualization } from './region_map_visualization';
 
-import './tile_map_visualization.scss';
+import './region_map_visualization.scss';
 
-interface TileMapVisController {
-  render(visData?: TileMapVisData, visConfig?: TileMapVisConfig): Promise<void>;
+interface RegionMapVisController {
+  render(visData?: RegionMapVisData, visConfig?: RegionMapVisConfig): Promise<void>;
   destroy(): void;
 }
 
 interface TileMapVisualizationProps {
-  deps: TileMapVisualizationDependencies;
+  deps: RegionMapVisualizationDependencies;
   handlers: IInterpreterRenderHandlers;
-  visData: TileMapVisData;
-  visConfig: TileMapVisConfig;
+  visData: RegionMapVisData;
+  visConfig: RegionMapVisConfig;
 }
 
-const TileMapVisualization = ({
+const RegionMapVisualization = ({
   deps,
   handlers,
   visData,
   visConfig,
 }: TileMapVisualizationProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
-  const visController = useRef<TileMapVisController | null>(null);
+  const visController = useRef<RegionMapVisController | null>(null);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (chartDiv.current && isFirstRender.current) {
       isFirstRender.current = false;
-      const Controller = createTileMapVisualization(deps);
+      const Controller = createRegionMapVisualization(deps);
       visController.current = new Controller(chartDiv.current, handlers, visConfig, visData);
     }
   }, [deps, handlers, visConfig, visData]);
@@ -87,8 +87,8 @@ const TileMapVisualization = ({
   return (
     <EuiResizeObserver onResize={updateChartSize}>
       {(resizeRef) => (
-        <div className="tlmChart__wrapper" ref={resizeRef}>
-          <div className="tlmChart" ref={chartDiv} />
+        <div className="rgmChart__wrapper" ref={resizeRef}>
+          <div className="rgmChart" ref={chartDiv} />
         </div>
       )}
     </EuiResizeObserver>
@@ -97,4 +97,4 @@ const TileMapVisualization = ({
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { TileMapVisualization as default };
+export { RegionMapVisualization as default };

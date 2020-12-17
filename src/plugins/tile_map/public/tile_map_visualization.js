@@ -54,8 +54,8 @@ export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
-    constructor(element, handlers, initialVisParams) {
-      super(element, handlers, initialVisParams);
+    constructor(element, handlers, initialVisParams, initialEsResponse) {
+      super(element, handlers, initialVisParams, initialEsResponse);
 
       this._geohashLayer = null;
       this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);
@@ -89,11 +89,6 @@ export const createTileMapVisualization = (dependencies) => {
 
     async render(esResponse, visParams) {
       getKibanaLegacy().loadFontAwesome();
-      if (!esResponse && !visParams) {
-        // the case from uiState updates
-        await super.render(this._esResponse, this._params);
-        return;
-      }
       await super.render(esResponse, visParams);
     }
 
