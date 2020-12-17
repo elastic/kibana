@@ -55,7 +55,7 @@ export interface AddSourceActions {
   setButtonNotLoading(): void;
 }
 
-interface SourceConfigData {
+export interface SourceConfigData {
   serviceType: string;
   name: string;
   configured: boolean;
@@ -73,12 +73,12 @@ interface SourceConfigData {
   accountContextOnly?: boolean;
 }
 
-interface SourceConnectData {
+export interface SourceConnectData {
   oauthUrl: string;
   serviceType: string;
 }
 
-interface OrganizationsMap {
+export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
 
