@@ -89,7 +89,7 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
   const derivedIndexPattern = useMemo(
     () => ({
       fields: sourceStatus?.logIndexFields ?? [],
-      title: sourceConfiguration?.configuration.name ?? 'unknown',
+      title: sourceConfiguration?.configuration.logAlias ?? 'unknown',
     }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
