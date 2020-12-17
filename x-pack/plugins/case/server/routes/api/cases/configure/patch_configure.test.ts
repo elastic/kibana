@@ -11,6 +11,7 @@ import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
+  mockCaseMappings,
 } from '../../__fixtures__';
 
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
@@ -42,6 +43,7 @@ describe('PATCH configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -75,6 +77,7 @@ describe('PATCH configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -113,6 +116,7 @@ describe('PATCH configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -166,6 +170,7 @@ describe('PATCH configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -193,6 +198,7 @@ describe('PATCH configuration', () => {
     const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 

@@ -4,7 +4,7 @@
 
 ## EmbeddableStateTransfer class
 
-A wrapper around the state object in  which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure.
+A wrapper around the session storage which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure.
 
 <b>Signature:</b>
 
@@ -16,7 +16,7 @@ export declare class EmbeddableStateTransfer
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(navigateToApp, scopedHistory, appList)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
+|  [(constructor)(navigateToApp, appList, customStorage)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
 
 ## Properties
 
@@ -28,8 +28,9 @@ export declare class EmbeddableStateTransfer
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [getIncomingEditorState(options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingeditorstate.md) |  | Fetches an [originating app](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) argument from the scoped history's location state. |
-|  [getIncomingEmbeddablePackage(options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingembeddablepackage.md) |  | Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the scoped history's location state. |
+|  [clearEditorState()](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.cleareditorstate.md) |  |  |
+|  [getIncomingEditorState(removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingeditorstate.md) |  | Fetches an [originating app](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) argument from the sessionStorage |
+|  [getIncomingEmbeddablePackage(removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingembeddablepackage.md) |  | Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the sessionStorage |
 |  [navigateToEditor(appId, options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.navigatetoeditor.md) |  | A wrapper around the  method which navigates to the specified appId with [embeddable editor state](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) |
 |  [navigateToWithEmbeddablePackage(appId, options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.navigatetowithembeddablepackage.md) |  | A wrapper around the  method which navigates to the specified appId with [embeddable package state](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) |
 
