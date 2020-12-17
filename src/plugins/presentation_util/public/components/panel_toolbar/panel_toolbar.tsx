@@ -19,13 +19,23 @@
 
 import './panel_toolbar.scss';
 import React, { FC, useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiContextMenu,
+  IconType,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { EmbeddableStart, IContainer, openAddPanelFlyout } from '../../../../embeddable/public';
 import { getSavedObjectFinder } from '../../../../saved_objects/public';
+import { ComponentStrings } from '../../i18n/components';
 
+const { PanelToolbar: strings } = ComponentStrings;
 interface Props {
   /** The label for the primary action button */
   primaryActionButton: JSX.Element;
@@ -33,12 +43,19 @@ interface Props {
   container: IContainer;
 }
 
+interface QuickButtons {
+  iconType: IconType;
+  tooltip: string;
+  action: () => void;
+}
+
 interface Services {
   core: CoreStart;
+  quickButtons?: QuickButtons[];
   embeddable: EmbeddableStart;
 }
 
-export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
+export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = [], container }) => {
   const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
   const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
   const closeEditorMenu = () => setEditorMenuOpen(false);
@@ -70,10 +87,6 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
     uiSettings,
   ]);
 
-  const editorMenuButtonLabel = i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
-    defaultMessage: 'All editors',
-  });
-
   const panels = [
     {
       id: 0,
@@ -83,6 +96,7 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
             const explicitInput = await factory.getExplicitInput();
             await container.addNewEmbeddable(factory.type, explicitInput);
           };
+
           return {
             name: factory.getDisplayName(),
             icon: 'empty',
@@ -101,25 +115,44 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
       iconType="visualizeApp"
       onClick={toggleEditorMenu}
     >
-      {editorMenuButtonLabel}
+      {strings.getEditorMenuButtonLabel()}
     </EuiButton>
   );
 
   return (
-    <EuiFlexGroup className="panelToolbar" id="kbnDashboard__panelToolbar" gutterSize="s">
+    <EuiFlexGroup className="panelToolbar" id="kbnPresentationToolbar__panelToolbar" gutterSize="s">
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          ownFocus
-          button={editorMenuButton}
-          isOpen={isEditorMenuOpen}
-          closePopover={closeEditorMenu}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </EuiFlexItem>
+      {quickButtons.length ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="none">
+            {quickButtons.map(({ iconType, tooltip, action }: QuickButtons) => (
+              <EuiFlexItem>
+                <EuiToolTip title={tooltip}>
+                  <EuiButtonIcon
+                    className="panelToolbarButton"
+                    iconType={iconType}
+                    onClick={action}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
+      {factories.length ? (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            ownFocus
+            button={editorMenuButton}
+            isOpen={isEditorMenuOpen}
+            closePopover={closeEditorMenu}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
@@ -128,9 +161,7 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, container }) => {
           iconType="folderOpen"
           onClick={addFromLibrary}
         >
-          {i18n.translate('dashboard.panelToolbar.libraryButtonLabel', {
-            defaultMessage: 'Add from library',
-          })}
+          {strings.getLibraryButtonLabel()}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

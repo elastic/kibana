@@ -480,11 +480,21 @@ export function DashboardTopNav({
       })}
     </EuiButton>
   );
+
+  const quickButtons = [
+    { iconType: 'visText', tooltip: 'Markdown', action: () => {} },
+    { iconType: 'controlsHorizontal', tooltip: 'Input controls', action: () => {} },
+  ];
+
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
       {!isErrorEmbeddable(dashboardContainer) && dashboardStateManager.getIsEditMode() ? (
-        <PanelToolbar primaryActionButton={createPanelButton} container={dashboardContainer} />
+        <PanelToolbar
+          primaryActionButton={createPanelButton}
+          quickButtons={quickButtons}
+          container={dashboardContainer}
+        />
       ) : null}
     </>
   );

@@ -110,23 +110,6 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     this.showToast(name);
   };
 
-  private getCreateMenuItems(): ReactElement[] {
-    return [...this.props.getAllFactories()]
-      .filter(
-        (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
-      )
-      .map((factory) => (
-        <EuiContextMenuItem
-          key={factory.type}
-          data-test-subj={`createNew-${factory.type}`}
-          onClick={() => this.createNewEmbeddable(factory.type)}
-          className="embPanel__addItem"
-        >
-          {capitalize(factory.getDisplayName())}
-        </EuiContextMenuItem>
-      ));
-  }
-
   public render() {
     const SavedObjectFinder = this.props.SavedObjectFinder;
     const metaData = [...this.props.getAllFactories()]
@@ -143,9 +126,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
-      >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
-      </SavedObjectFinder>
+      />
     );
 
     return (
