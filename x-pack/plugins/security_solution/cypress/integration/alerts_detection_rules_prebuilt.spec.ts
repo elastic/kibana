@@ -46,7 +46,7 @@ describe('Alerts rules, prebuilt rules', () => {
     esArchiverUnloadEmptyKibana();
   });
 
-  it('Loads prebuilt rules', () => {
+  it.skip('Loads prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
@@ -78,7 +78,7 @@ describe('Alerts rules, prebuilt rules', () => {
   });
 });
 
-describe('Deleting prebuilt rules', () => {
+describe.skip('Deleting prebuilt rules', () => {
   beforeEach(() => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;

@@ -22,6 +22,8 @@ import { getServiceDependencies } from '../lib/services/get_service_dependencies
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceInstances } from '../lib/services/get_service_instances';
+import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
+import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -43,6 +45,36 @@ export const servicesRoute = createRoute({
     });
 
     return services;
+  },
+});
+
+export const serviceMetadataDetailsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+
+    return getServiceMetadataDetails({ serviceName, setup });
+  },
+});
+
+export const serviceMetadataIconsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+
+    return getServiceMetadataIcons({ serviceName, setup });
   },
 });
 
