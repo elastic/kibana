@@ -10,8 +10,8 @@ import { GetAllSpacesPurpose, GetSpaceResult } from '../../../spaces/common/mode
 import { Space, ISpacesClient } from '../../../spaces/server';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityPluginSetup } from '..';
 import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
+import { SecurityPluginSetup } from '..';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,
