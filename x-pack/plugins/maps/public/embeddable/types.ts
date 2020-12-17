@@ -26,6 +26,7 @@ interface MapEmbeddableState {
   mapCenter?: MapCenterAndZoom;
   mapSettings?: Partial<MapSettings>;
   hiddenLayers?: string[];
+  hideFilterActions?: boolean;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;
