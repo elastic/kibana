@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureCollection, Geometry, Position } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  Geometry,
+  LineString,
+  MultiLineString,
+  MultiPolygon,
+  Position,
+} from 'geojson';
 import turfArea from '@turf/area';
 // @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
@@ -18,11 +26,9 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
     const feature = featureCollection.features[i];
     let centroidGeometry: Geometry | null = null;
     if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING) {
-      // @ts-expect-error
-      centroidGeometry = getLineCentroid(feature.geometry.coordinates as Position[]);
+      centroidGeometry = getLineCentroid((feature.geometry as LineString).coordinates);
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
-      // @ts-expect-error
-      const coordinates = feature.geometry.coordinates as Position[][];
+      const coordinates = (feature.geometry as MultiLineString).coordinates;
       let longestLine = coordinates[0];
       let longestLength = turfLength(lineString(longestLine));
       for (let j = 1; j < coordinates.length; j++) {
@@ -37,8 +43,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
     } else if (feature.geometry.type === GEO_JSON_TYPE.POLYGON) {
       centroidGeometry = turfCenterOfMass(feature).geometry;
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
-      // @ts-expect-error
-      const coordinates = feature.geometry.coordinates as Position[][][];
+      const coordinates = (feature.geometry as MultiPolygon).coordinates;
       let largestPolygon = coordinates[0];
       let largestArea = turfArea(polygon(largestPolygon));
       for (let j = 1; j < coordinates.length; j++) {
