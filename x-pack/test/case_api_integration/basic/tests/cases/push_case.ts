@@ -18,14 +18,26 @@ import {
   getConfiguration,
   getServiceNowConnector,
 } from '../../../common/lib/utils';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
+
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
 
     afterEach(async () => {
       await deleteCases(es);
@@ -39,11 +51,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
-
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
@@ -55,7 +69,6 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         )
         .expect(200);
-
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -90,7 +103,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
@@ -98,7 +114,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration(connector.id))
+        .send(
+          getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          })
+        )
         .expect(200);
 
       const { body: postedCase } = await supertest

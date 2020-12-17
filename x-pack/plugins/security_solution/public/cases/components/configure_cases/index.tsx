@@ -69,6 +69,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     connector,
     closureType,
     loading: loadingCaseConfigure,
+    mappings,
     persistLoading,
     persistCaseConfigure,
     setConnector,
@@ -83,7 +84,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
-
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
   }, []);
@@ -201,11 +201,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         <Connectors
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-          isLoading={isLoadingConnectors}
-          onChangeConnector={onChangeConnector}
-          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
-          selectedConnector={connector.id}
+          isLoading={isLoadingAny}
+          mappings={mappings}
+          onChangeConnector={onChangeConnector}
+          selectedConnector={connector}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
         />
       </SectionWrapper>
       {addFlyoutVisible && ConnectorAddFlyout}

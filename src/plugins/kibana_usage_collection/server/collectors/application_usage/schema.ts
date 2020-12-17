@@ -21,29 +21,30 @@ import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_collector';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
-  clicks_total: {
-    type: 'long',
-  },
-  clicks_7_days: {
-    type: 'long',
-  },
-  clicks_30_days: {
-    type: 'long',
-  },
-  clicks_90_days: {
-    type: 'long',
-  },
-  minutes_on_screen_total: {
-    type: 'float',
-  },
-  minutes_on_screen_7_days: {
-    type: 'float',
-  },
-  minutes_on_screen_30_days: {
-    type: 'float',
-  },
-  minutes_on_screen_90_days: {
-    type: 'float',
+  appId: { type: 'keyword' },
+  viewId: { type: 'keyword' },
+  clicks_total: { type: 'long' },
+  clicks_7_days: { type: 'long' },
+  clicks_30_days: { type: 'long' },
+  clicks_90_days: { type: 'long' },
+  minutes_on_screen_total: { type: 'float' },
+  minutes_on_screen_7_days: { type: 'float' },
+  minutes_on_screen_30_days: { type: 'float' },
+  minutes_on_screen_90_days: { type: 'float' },
+  views: {
+    type: 'array',
+    items: {
+      appId: { type: 'keyword' },
+      viewId: { type: 'keyword' },
+      clicks_total: { type: 'long' },
+      clicks_7_days: { type: 'long' },
+      clicks_30_days: { type: 'long' },
+      clicks_90_days: { type: 'long' },
+      minutes_on_screen_total: { type: 'float' },
+      minutes_on_screen_7_days: { type: 'float' },
+      minutes_on_screen_30_days: { type: 'float' },
+      minutes_on_screen_90_days: { type: 'float' },
+    },
   },
 };
 

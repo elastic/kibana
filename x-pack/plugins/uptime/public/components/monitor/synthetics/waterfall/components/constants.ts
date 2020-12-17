@@ -10,3 +10,6 @@ export const BAR_HEIGHT = 32;
 export const MAIN_GROW_SIZE = 8;
 // Flex grow value
 export const SIDEBAR_GROW_SIZE = 2;
+// Axis height
+// NOTE: This isn't a perfect solution - changes in font size etc within charts could change the ideal height here.
+export const FIXED_AXIS_HEIGHT = 32;

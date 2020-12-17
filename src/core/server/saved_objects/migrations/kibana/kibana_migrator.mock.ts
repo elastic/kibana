@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+import { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
 import { SavedObjectsType } from '../../types';
@@ -45,7 +43,16 @@ const createMigrator = (
     types: SavedObjectsType[];
   } = { types: defaultSavedObjectTypes }
 ) => {
-  const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
+  const mockMigrator: jest.Mocked<IKibanaMigrator> = {
+    kibanaVersion: '8.0.0-testing',
+    savedObjectsConfig: {
+      batchSize: 100,
+      scrollDuration: '15m',
+      pollInterval: 1500,
+      skip: false,
+      // TODO migrationsV2: remove/deprecate once we release migrations v2
+      enableV2: false,
+    },
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),

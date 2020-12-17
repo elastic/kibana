@@ -85,6 +85,7 @@ export function getBeforeSetup(
     actionGroups: [{ id: 'default', name: 'Default' }],
     recoveryActionGroup: RecoveredActionGroup,
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   }));

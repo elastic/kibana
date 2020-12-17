@@ -12,6 +12,15 @@ import '../../../../../common/mock/match_media';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('ProcessDraggable', () => {
   const mount = useMountAppended();
 
