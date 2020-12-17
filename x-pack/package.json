@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "7.11.0",
+  "version": "7.12.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -12,7 +12,7 @@
     "build": "../node_modules/.bin/gulp build",
     "testonly": "echo 'Deprecated, use `yarn test`'",
     "test": "../node_modules/.bin/gulp test",
-    "test:jest": "node scripts/jest",
+    "test:jest": "node ../scripts/jest",
     "test:mocha": "node scripts/mocha"
   },
   "kibana": {

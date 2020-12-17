@@ -19,38 +19,23 @@
 import moment, { Moment } from 'moment-timezone';
 import { METRIC_TYPE } from './';
 
-export interface ApplicationUsageCurrent {
+export interface ApplicationUsageMetric {
   type: METRIC_TYPE.APPLICATION_USAGE;
   appId: string;
+  viewId: string;
   startTime: Moment;
   numberOfClicks: number;
 }
 
-export class ApplicationUsage {
-  private currentUsage?: ApplicationUsageCurrent;
-
-  public start() {
-    // Count any clicks and assign it to the current app
-    if (window)
-      window.addEventListener(
-        'click',
-        () => this.currentUsage && this.currentUsage.numberOfClicks++
-      );
-  }
-
-  public appChanged(appId?: string) {
-    const currentUsage = this.currentUsage;
-
-    if (appId) {
-      this.currentUsage = {
-        type: METRIC_TYPE.APPLICATION_USAGE,
-        appId,
-        startTime: moment(),
-        numberOfClicks: 0,
-      };
-    } else {
-      this.currentUsage = void 0;
-    }
-    return currentUsage;
-  }
+export function createApplicationUsageMetric(
+  appId: string,
+  viewId: string
+): ApplicationUsageMetric {
+  return {
+    type: METRIC_TYPE.APPLICATION_USAGE,
+    appId,
+    viewId,
+    startTime: moment(),
+    numberOfClicks: 0,
+  };
 }
