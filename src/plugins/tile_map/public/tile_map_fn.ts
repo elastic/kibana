@@ -55,7 +55,7 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  async fn(context, args) {
+  async fn(context, args, handlers) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
     const { geohash, metric, geocentroid } = visConfig.dimensions;
 
@@ -66,6 +66,9 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       geocentroid,
     });
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
     return {
       type: 'render',
       as: 'tile_map_vis',
