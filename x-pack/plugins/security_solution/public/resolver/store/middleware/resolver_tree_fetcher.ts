@@ -34,6 +34,7 @@ export function ResolverTreeFetcher(
   return async () => {
     const state = api.getState();
     const databaseParameters = selectors.treeParametersToFetch(state);
+    const currentPanelParameters = selectors.panelViewAndParameters(state);
 
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
@@ -91,6 +92,25 @@ export function ResolverTreeFetcher(
             parameters: databaseParameters,
           },
         });
+
+        /*
+         * Necessary to handle refresh states where another node besides the origin was selected
+         * If the user has selected another node, but is back to viewing the node list
+         * Refresh will reset to the originID.
+         * This is okay for now, but can be updated if we decide to track selectedNode in panelParameters.
+         */
+        if (currentPanelParameters && currentPanelParameters.panelView !== 'nodes') {
+          const { nodeID } = currentPanelParameters.panelParameters;
+          const urlHasDefinedNode = result.find((node) => node.id === nodeID);
+          api.dispatch({
+            type: 'userBroughtNodeIntoView',
+            payload: {
+              // In the event the origin is the url selectedNode, the animation has logic to prevent an unnecessary transition taking place
+              nodeID: urlHasDefinedNode ? nodeID : entityIDToFetch,
+              time: Date.now(),
+            },
+          });
+        }
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
