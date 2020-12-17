@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 import {
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsExportOptions,
+  SavedObjectsExportByObjectOptions,
   SavedObjectsImportSuccess,
 } from 'src/core/server';
 import {
@@ -15,6 +15,7 @@ import {
   httpServerMock,
   savedObjectsTypeRegistryMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
 } from 'src/core/server/mocks';
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
@@ -24,18 +25,14 @@ jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
 jest.mock('../../../../../../src/core/server', () => {
   return {
     ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
-    exportSavedObjectsToStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
   };
 });
-import {
-  exportSavedObjectsToStream,
-  resolveSavedObjectsImportErrors,
-} from '../../../../../../src/core/server';
+import { resolveSavedObjectsImportErrors } from '../../../../../../src/core/server';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
-  exportSavedObjectsToStreamImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
+  exportByObjectsImpl?: (opts: SavedObjectsExportByObjectOptions) => Promise<Readable>;
   resolveSavedObjectsImportErrorsImpl?: (
     opts: SavedObjectsResolveImportErrorsOptions
   ) => Promise<SavedObjectsImportResponse>;
@@ -73,8 +70,10 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     const typeRegistry = savedObjectsTypeRegistryMock.create();
+    const savedObjectsExporter = savedObjectsServiceMock.createExporter();
     coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+    coreStart.savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
 
     typeRegistry.getImportableAndExportableTypes.mockReturnValue([
       // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
@@ -97,21 +96,19 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         .some((t) => t.name === type && t.namespaceType === 'agnostic')
     );
 
-    (exportSavedObjectsToStream as jest.Mock).mockImplementation(
-      async (opts: SavedObjectsExportOptions) => {
-        return (
-          setupOpts.exportSavedObjectsToStreamImpl?.(opts) ??
-          new Readable({
-            objectMode: true,
-            read() {
-              setupOpts.objects.forEach((o) => this.push(o));
+    savedObjectsExporter.exportByObjects.mockImplementation(async (opts) => {
+      return (
+        setupOpts.exportByObjectsImpl?.(opts) ??
+        new Readable({
+          objectMode: true,
+          read() {
+            setupOpts.objects.forEach((o) => this.push(o));
 
-              this.push(null);
-            },
-          })
-        );
-      }
-    );
+            this.push(null);
+          },
+        })
+      );
+    });
 
     (resolveSavedObjectsImportErrors as jest.Mock).mockImplementation(
       async (opts: SavedObjectsResolveImportErrorsOptions) => {
@@ -138,12 +135,13 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     return {
       savedObjects: coreStart.savedObjects,
       savedObjectsClient,
+      savedObjectsExporter,
       typeRegistry,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of conflict resolution calls', async () => {
-    const { savedObjects, savedObjectsClient, typeRegistry } = setup({
+    const { savedObjects, savedObjectsClient, savedObjectsExporter, typeRegistry } = setup({
       objects: mockExportResults,
     });
 
@@ -189,13 +187,11 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
       }
     `);
 
-    expect(exportSavedObjectsToStream).toHaveBeenCalledWith({
+    expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
       excludeExportDetails: true,
-      exportSizeLimit: EXPORT_LIMIT,
       includeReferencesDeep: true,
       namespace,
       objects,
-      savedObjectsClient,
     });
 
     const importOptions = {
@@ -288,7 +284,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   it(`handles stream read errors`, async () => {
     const { savedObjects } = setup({
       objects: [],
-      exportSavedObjectsToStreamImpl: (opts) => {
+      exportByObjectsImpl: (opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,
