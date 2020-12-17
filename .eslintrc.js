@@ -1,20 +1,5 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Placeholder dual-license header
  */
 
 const APACHE_2_0_LICENSE_HEADER = `
@@ -37,6 +22,11 @@ const APACHE_2_0_LICENSE_HEADER = `
  * under the License.
  */
 `;
+
+const DUAL_LICENSE_HEADER = `
+/*
+* Placeholder dual-license header
+*/`;
 
 const ELASTIC_LICENSE_HEADER = `
 /*
@@ -118,23 +108,59 @@ module.exports = {
     },
 
     /**
-     * Files that require Apache 2.0 headers, settings
+     * Files that require dual-license headers, settings
      * are overridden below for files that require Elastic
      * Licence headers
      */
     {
-      files: ['**/*.{js,mjs,ts,tsx}', '!plugins/**/*'],
+      files: [
+        '**/*.{js,mjs,ts,tsx}',
+        '!plugins/**/*',
+        '!packages/elastic-datemath/**/*',
+        '!packages/elastic-eslint-config-kibana/**/*',
+      ],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: APACHE_2_0_LICENSE_HEADER,
+            license: DUAL_LICENSE_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Files that require Apache headers
+     */
+    {
+      files: [
+        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
+        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: DUAL_LICENSE_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -156,7 +182,7 @@ module.exports = {
     },
 
     /**
-     * Files that require Elastic license headers instead of Apache 2.0 header
+     * Files that require Elastic license headers instead of dual-license header
      */
     {
       files: ['x-pack/**/*.{js,mjs,ts,tsx}'],
@@ -171,6 +197,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              DUAL_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -197,6 +224,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
@@ -219,6 +247,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -241,6 +270,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
