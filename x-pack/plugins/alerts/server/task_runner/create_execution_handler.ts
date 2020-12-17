@@ -12,6 +12,7 @@ import {
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { injectActionParams } from './inject_action_params';
 import {
   AlertAction,
   AlertInstanceState,
@@ -78,7 +79,9 @@ export function createExecutionHandler({
         return {
           ...action,
           params: transformActionParams({
+            actionsPlugin,
             alertId,
+            actionTypeId: action.actionTypeId,
             alertName,
             spaceId,
             tags,
@@ -92,7 +95,15 @@ export function createExecutionHandler({
             alertParams,
           }),
         };
-      });
+      })
+      .map((action) => ({
+        ...action,
+        params: injectActionParams({
+          alertId,
+          actionParams: action.params,
+          actionTypeId: action.actionTypeId,
+        }),
+      }));
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 

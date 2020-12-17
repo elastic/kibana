@@ -17,6 +17,9 @@ export const newCase: CasePostRequest = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const getActions = (): FindActionResult[] => [
@@ -37,27 +40,7 @@ export const getActions = (): FindActionResult[] => [
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
       apiUrl: 'https://dev102283.service-now.com',
-      isCaseOwned: true,
     },
     isPreconfigured: false,
     referencedByCount: 0,
@@ -67,25 +50,6 @@ export const getActions = (): FindActionResult[] => [
     actionTypeId: '.jira',
     name: 'Connector without isCaseOwned',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
       apiUrl: 'https://elastic.jira.com',
     },
     isPreconfigured: false,

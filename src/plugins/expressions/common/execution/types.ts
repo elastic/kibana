@@ -21,8 +21,9 @@
 import type { KibanaRequest } from 'src/core/server';
 
 import { ExpressionType, SerializableState } from '../expression_types';
-import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
+import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
+import { TablesAdapter } from '../util/tables_adapter';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -89,5 +90,5 @@ export interface ExecutionContext<
  */
 export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
-  data: DataAdapter;
+  tables: TablesAdapter;
 }

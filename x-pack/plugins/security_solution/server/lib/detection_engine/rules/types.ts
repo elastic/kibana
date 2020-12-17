@@ -28,7 +28,7 @@ import {
   Name,
   Severity,
   Tags,
-  Threat,
+  Threats,
   To,
   Type,
   References,
@@ -59,7 +59,7 @@ import {
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
@@ -231,7 +231,7 @@ export interface CreateRulesOptions {
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
-  threat: Threat;
+  threat: Threats;
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
@@ -288,7 +288,7 @@ export interface PatchRulesOptions {
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;
   threshold: ThresholdOrUndefined;

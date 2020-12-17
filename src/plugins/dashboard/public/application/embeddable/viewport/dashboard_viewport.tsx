@@ -19,21 +19,13 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import {
-  PanelState,
-  EmbeddableStart,
-  ViewMode,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
-  EmbeddableFactoryNotFoundError,
-} from '../../../services/embeddable';
+import { PanelState, ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   switchViewMode?: (newViewMode: ViewMode) => void;
   container: DashboardContainer;
 }
@@ -107,31 +99,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
-  private createNewEmbeddable = async () => {
-    const type = 'visualization';
-    const factory = this.context.services.embeddable.getEmbeddableFactory(type);
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-    const explicitInput = await factory.getExplicitInput();
-    await this.props.container.addNewEmbeddable(type, explicitInput);
-  };
-
-  private addFromLibrary = () => {
-    if (!isErrorEmbeddable(this.props.container)) {
-      openAddPanelFlyout({
-        embeddable: this.props.container,
-        getAllFactories: this.context.services.embeddable.getEmbeddableFactories,
-        getFactory: this.context.services.embeddable.getEmbeddableFactory,
-        notifications: this.context.services.notifications,
-        overlays: this.context.services.overlays,
-        SavedObjectFinder: this.context.services.SavedObjectFinder,
-      });
-    }
-  };
-
   public render() {
-    const { container, PanelComponent } = this.props;
+    const { container } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const {
       isEmbeddedExternally,
@@ -162,19 +131,14 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 isReadonlyMode={
                   this.props.container.getInput().dashboardCapabilities?.hideWriteControls
                 }
-                onLinkClick={
-                  isEditMode
-                    ? this.addFromLibrary
-                    : () => this.props.switchViewMode?.(ViewMode.EDIT)
-                }
-                showLinkToVisualize={isEditMode}
-                onVisualizeClick={this.createNewEmbeddable}
+                onLinkClick={() => this.props.switchViewMode?.(ViewMode.EDIT)}
+                isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}
                 http={this.context.services.http}
               />
             </div>
           )}
-          <DashboardGrid container={container} PanelComponent={PanelComponent} />
+          <DashboardGrid container={container} />
         </div>
       </React.Fragment>
     );

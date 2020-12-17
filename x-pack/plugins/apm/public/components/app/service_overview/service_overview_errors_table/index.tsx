@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { px, truncate, unit } from '../../../../style/variables';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { px, unit } from '../../../../style/variables';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { ServiceOverviewTable } from '../service_overview_table';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { TableLinkFlexItem } from '../table_link_flex_item';
 
 interface Props {
@@ -48,18 +48,6 @@ const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'occurrences' as const,
 };
-
-const ErrorDetailLinkWrapper = styled.div`
-  width: 100%;
-  .euiToolTipAnchor {
-    width: 100% !important;
-  }
-`;
-
-const StyledErrorDetailLink = styled(ErrorDetailLink)`
-  display: block;
-  ${truncate('100%')}
-`;
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
@@ -86,16 +74,17 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }),
       render: (_, { name, group_id: errorGroupId }) => {
         return (
-          <ErrorDetailLinkWrapper>
-            <EuiToolTip delay="long" content={name}>
-              <StyledErrorDetailLink
+          <TruncateWithTooltip
+            text={name}
+            content={
+              <ErrorDetailLink
                 serviceName={serviceName}
                 errorGroupId={errorGroupId}
               >
                 {name}
-              </StyledErrorDetailLink>
-            </EuiToolTip>
-          </ErrorDetailLinkWrapper>
+              </ErrorDetailLink>
+            }
+          />
         );
       },
     },
@@ -123,7 +112,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       width: px(unit * 12),
       render: (_, { occurrences }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             series={occurrences.timeseries ?? undefined}
             valueLabel={i18n.translate(
@@ -201,9 +190,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = data;
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
@@ -224,41 +213,47 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTable
-            columns={columns}
-            items={items}
-            pagination={{
-              pageIndex,
-              pageSize: PAGE_SIZE,
-              totalItemCount,
-              pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
-            }}
-            loading={status === FETCH_STATUS.LOADING}
-            onChange={(newTableOptions: {
-              page?: {
-                index: number;
-              };
-              sort?: { field: string; direction: SortDirection };
-            }) => {
-              setTableOptions({
-                pageIndex: newTableOptions.page?.index ?? 0,
-                sort: newTableOptions.sort
-                  ? {
-                      field: newTableOptions.sort.field as SortField,
-                      direction: newTableOptions.sort.direction,
-                    }
-                  : DEFAULT_SORT,
-              });
-            }}
-            sorting={{
-              enableAllColumns: true,
-              sort: {
-                direction: sort.direction,
-                field: sort.field,
-              },
-            }}
-          />
+          <ServiceOverviewTableContainer
+            isEmptyAndLoading={
+              items.length === 0 && status === FETCH_STATUS.LOADING
+            }
+          >
+            <EuiBasicTable
+              columns={columns}
+              items={items}
+              pagination={{
+                pageIndex,
+                pageSize: PAGE_SIZE,
+                totalItemCount,
+                pageSizeOptions: [PAGE_SIZE],
+                hidePerPageOptions: true,
+              }}
+              loading={status === FETCH_STATUS.LOADING}
+              onChange={(newTableOptions: {
+                page?: {
+                  index: number;
+                };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  pageIndex: newTableOptions.page?.index ?? 0,
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+              }}
+              sorting={{
+                enableAllColumns: true,
+                sort: {
+                  direction: sort.direction,
+                  field: sort.field,
+                },
+              }}
+            />
+          </ServiceOverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
