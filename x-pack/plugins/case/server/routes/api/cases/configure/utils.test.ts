@@ -23,12 +23,13 @@ import {
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 import { mappings as mappingsMock } from '../../../../client/configure/mock';
 const formatComment = { commentId: commentObj.commentId, comment: commentObj.comment };
+const serviceNowParams = params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams;
 describe('api/cases/configure/utils', () => {
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
       const res = prepareFieldsForTransformation({
         defaultPipes,
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
         mappings,
       });
       expect(res).toEqual([
@@ -51,7 +52,7 @@ describe('api/cases/configure/utils', () => {
       const res = prepareFieldsForTransformation({
         defaultPipes: ['myTestPipe'],
         mappings,
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
       });
       expect(res).toEqual([
         {
@@ -74,11 +75,11 @@ describe('api/cases/configure/utils', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes,
         mappings,
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
       });
 
       const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
         fields,
       });
 
@@ -90,14 +91,14 @@ describe('api/cases/configure/utils', () => {
 
     test('transform fields for update correctly', () => {
       const fields = prepareFieldsForTransformation({
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
         mappings,
         defaultPipes: ['informationUpdated'],
       });
 
       const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
         params: {
-          ...(params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams),
+          ...serviceNowParams,
           updatedAt: '2020-03-15T08:34:53.450Z',
           updatedBy: {
             username: 'anotherUser',
@@ -119,13 +120,13 @@ describe('api/cases/configure/utils', () => {
 
     test('add newline character to description', () => {
       const fields = prepareFieldsForTransformation({
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
         mappings,
         defaultPipes: ['informationUpdated'],
       });
 
       const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
         fields,
         currentIncident: {
           short_description: 'first title',
@@ -139,12 +140,12 @@ describe('api/cases/configure/utils', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes,
         mappings,
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
       });
 
       const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
         params: {
-          ...(params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams),
+          ...serviceNowParams,
           createdBy: { fullName: '', username: 'elastic' },
         },
         fields,
@@ -160,12 +161,12 @@ describe('api/cases/configure/utils', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes: ['informationUpdated'],
         mappings,
-        params: params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams,
+        params: serviceNowParams,
       });
 
       const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
         params: {
-          ...(params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams),
+          ...serviceNowParams,
           updatedAt: '2020-03-15T08:34:53.450Z',
           updatedBy: { username: 'anotherUser', fullName: '' },
         },
@@ -395,7 +396,7 @@ describe('api/cases/configure/utils', () => {
         '123',
         ConnectorTypes.servicenow,
         mappingsMock[ConnectorTypes.servicenow],
-        params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams
+        serviceNowParams
       );
       expect(res).toEqual({
         incident: {
@@ -420,7 +421,7 @@ describe('api/cases/configure/utils', () => {
         '123',
         'invalid',
         mappingsMock[ConnectorTypes.servicenow],
-        params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams
+        serviceNowParams
       ).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(new Error(`Invalid service`));
@@ -441,7 +442,7 @@ describe('api/cases/configure/utils', () => {
         '123',
         ConnectorTypes.servicenow,
         mappingsMock[ConnectorTypes.servicenow],
-        { ...(params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams), externalId: '123' }
+        { ...serviceNowParams, externalId: '123' }
       );
       expect(res).toEqual({
         incident: {
@@ -470,7 +471,7 @@ describe('api/cases/configure/utils', () => {
         '123',
         ConnectorTypes.servicenow,
         mappingsMock[ConnectorTypes.servicenow],
-        { ...(params[ConnectorTypes.servicenow] as ServiceConnectorCaseParams), externalId: '123' }
+        { ...serviceNowParams, externalId: '123' }
       ).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
@@ -519,8 +520,8 @@ describe('api/cases/configure/utils', () => {
   describe('serviceFormatter', () => {
     connectors.forEach((c) =>
       it(`formats ${c.name}`, () => {
-        const be: ServiceConnectorCaseParams = params[c.name] as ServiceConnectorCaseParams;
-        const res = serviceFormatter(c.name, be);
+        const caseParams = params[c.name] as ServiceConnectorCaseParams;
+        const res = serviceFormatter(c.name, caseParams);
         expect(res).toEqual(c.result);
       })
     );
