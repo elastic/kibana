@@ -5,7 +5,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { from } from 'rxjs';
@@ -39,6 +39,10 @@ export const enhancedEsSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy<IEsSearchRequest> => {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    await esClient.asCurrentUser.asyncSearch.delete({ id });
+  }
+
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
@@ -59,7 +63,7 @@ export const enhancedEsSearchStrategyProvider = (
 
     const cancel = async () => {
       if (id) {
-        await esClient.asCurrentUser.asyncSearch.delete({ id });
+        await cancelAsyncSearch(id, esClient);
       }
     };
 
@@ -110,7 +114,7 @@ export const enhancedEsSearchStrategyProvider = (
     },
     cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
-      await esClient.asCurrentUser.asyncSearch.delete({ id });
+      await cancelAsyncSearch(id, esClient);
     },
   };
 };
