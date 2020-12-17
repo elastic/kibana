@@ -6,12 +6,11 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
 
 import { AppLogic } from '../../../../app_logic';
-import { Loading } from '../../../../../../applications/shared/loading';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { Loading } from '../../../../../shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
 import { AddSourceLogic } from './add_source_logic';
@@ -109,14 +108,16 @@ export const AddSource: React.FC<AddSourceProps> = ({
 
   const goToConnectInstance = () => {
     setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
-    history.push(`${getSourcesPath(addPath, isOrganization)}/connect`);
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(addPath, isOrganization)}/connect`);
   };
 
   const saveCustomSuccess = () => setAddSourceStep(AddSourceSteps.SaveCustomStep);
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
   const goToFormSourceCreated = (sourceName: string) => {
-    history.push(`${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`);
+    KibanaLogic.values.navigateToUrl(
+      `${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`
+    );
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
