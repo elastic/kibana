@@ -53,7 +53,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <TruncateWithTooltip
             text={item.name}
             content={
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {item.type === 'service' ? (
                     <AgentIcon agentName={item.agentName} />
@@ -190,9 +190,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>

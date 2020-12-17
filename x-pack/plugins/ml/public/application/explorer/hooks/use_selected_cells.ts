@@ -7,15 +7,19 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { Duration } from 'moment';
 import { SWIMLANE_TYPE } from '../explorer_constants';
-import { AppStateSelectedCells, TimeRangeBounds } from '../explorer_utils';
+import { AppStateSelectedCells } from '../explorer_utils';
 import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { useTimefilter } from '../../contexts/kibana';
 
 export const useSelectedCells = (
   appState: ExplorerAppState,
   setAppState: (update: Partial<ExplorerAppState>) => void,
-  timeBounds: TimeRangeBounds | undefined,
   bucketInterval: Duration | undefined
 ): [AppStateSelectedCells | undefined, (swimlaneSelectedCells: AppStateSelectedCells) => void] => {
+  const timeFilter = useTimefilter();
+
+  const timeBounds = timeFilter.getBounds();
+
   // keep swimlane selection, restore selectedCells from AppState
   const selectedCells = useMemo(() => {
     return appState?.mlExplorerSwimlane?.selectedType !== undefined
@@ -73,12 +77,7 @@ export const useSelectedCells = (
    * Reset it entirely when it out of range.
    */
   useEffect(() => {
-    if (
-      timeBounds === undefined ||
-      selectedCells?.times === undefined ||
-      bucketInterval === undefined
-    )
-      return;
+    if (selectedCells?.times === undefined || bucketInterval === undefined) return;
 
     let [selectedFrom, selectedTo] = selectedCells.times;
 
@@ -108,7 +107,33 @@ export const useSelectedCells = (
         times: [selectedFrom, selectedTo],
       });
     }
-  }, [timeBounds, selectedCells, bucketInterval]);
+  }, [
+    timeBounds.min?.valueOf(),
+    timeBounds.max?.valueOf(),
+    selectedCells,
+    bucketInterval?.asMilliseconds(),
+  ]);
 
   return [selectedCells, setSelectedCells];
 };
+
+export interface SelectionTimeRange {
+  earliestMs: number;
+  latestMs: number;
+}
+
+export function getTimeBoundsFromSelection(
+  selectedCells: AppStateSelectedCells | undefined
+): SelectionTimeRange | undefined {
+  if (selectedCells?.times === undefined) {
+    return;
+  }
+
+  // time property of the cell data is an array, with the elements being
+  // the start times of the first and last cell selected.
+  return {
+    earliestMs: selectedCells.times[0] * 1000,
+    // Subtract 1 ms so search does not include start of next bucket.
+    latestMs: selectedCells.times[1] * 1000 - 1,
+  };
+}

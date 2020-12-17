@@ -26,7 +26,6 @@ import {
   loadTopInfluencers,
   AppStateSelectedCells,
   ExplorerJob,
-  TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
@@ -34,6 +33,7 @@ import { AnomalyTimelineService } from '../../services/anomaly_timeline_service'
 import { mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
+import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -63,7 +63,6 @@ const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 export interface LoadExplorerDataConfig {
-  bounds: TimeRangeBounds;
   influencersFilterQuery: any;
   lastRefresh: number;
   noInfluencersConfigured: boolean;
@@ -82,7 +81,6 @@ export interface LoadExplorerDataConfig {
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
   return (
     arg !== undefined &&
-    arg.bounds !== undefined &&
     arg.selectedJobs !== undefined &&
     arg.selectedJobs !== null &&
     arg.viewBySwimlaneFieldName !== undefined
@@ -92,7 +90,10 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
-const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService) => {
+const loadExplorerDataProvider = (
+  anomalyTimelineService: AnomalyTimelineService,
+  timefilter: TimefilterContract
+) => {
   const memoizedLoadOverallData = memoize(
     anomalyTimelineService.loadOverallData,
     anomalyTimelineService
@@ -107,7 +108,6 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
     }
 
     const {
-      bounds,
       lastRefresh,
       influencersFilterQuery,
       noInfluencersConfigured,
@@ -125,6 +125,9 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
 
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+
+    const bounds = timefilter.getBounds();
+
     const timerange = getSelectionTimeRange(
       selectedCells,
       swimlaneBucketInterval.asSeconds(),
@@ -287,12 +290,12 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   } = useMlKibana();
 
   const loadExplorerData = useMemo(() => {
-    const service = new AnomalyTimelineService(
+    const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
       mlResultsServiceProvider(mlApiServices)
     );
-    return loadExplorerDataProvider(service);
+    return loadExplorerDataProvider(anomalyTimelineService, timefilter);
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);

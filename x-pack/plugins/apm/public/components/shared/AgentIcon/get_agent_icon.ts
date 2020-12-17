@@ -9,6 +9,7 @@ import {
   RUM_AGENT_NAMES,
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import defaultIcon from '../span_icon/icons/default.svg';
 import dotNetIcon from './icons/dot-net.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
@@ -60,5 +61,5 @@ export function getAgentIconKey(agentName: string) {
 
 export function getAgentIcon(agentName?: string) {
   const key = agentName && getAgentIconKey(agentName);
-  return key && agentIcons[key];
+  return (key && agentIcons[key]) ?? defaultIcon;
 }
