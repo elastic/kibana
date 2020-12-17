@@ -19,13 +19,6 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-function yTickFormat(y?: number | null) {
-  return i18n.translate('xpack.apm.chart.averagePercentLabel', {
-    defaultMessage: '{y} (avg.)',
-    values: { y: yLabelFormat(y) },
-  });
-}
-
 interface Props {
   height?: number;
   showAnnotations?: boolean;
@@ -45,7 +38,7 @@ export function TransactionErrorRateChart({
     if (serviceName && start && end) {
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
+          'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
         params: {
           path: {
             serviceName,
@@ -84,13 +77,12 @@ export function TransactionErrorRateChart({
             type: 'linemark',
             color: theme.eui.euiColorVis7,
             hideLegend: true,
-            title: i18n.translate('xpack.apm.errorRate.currentPeriodLabel', {
-              defaultMessage: 'Current period',
+            title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+              defaultMessage: 'Error rate (avg.)',
             }),
           },
         ]}
         yLabelFormat={yLabelFormat}
-        yTickFormat={yTickFormat}
         yDomain={{ min: 0, max: 1 }}
       />
     </EuiPanel>

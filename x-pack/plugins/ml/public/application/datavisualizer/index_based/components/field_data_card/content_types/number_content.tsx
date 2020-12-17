@@ -47,18 +47,19 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
     setDistributionChartData(chartData);
   }, []);
-
-  const { count, sampleCount, cardinality, min, median, max, distribution } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
-
   const [detailsMode, setDetailsMode] = useState(
-    cardinality <= DEFAULT_TOP_VALUES_THRESHOLD
+    stats?.cardinality ?? 0 <= DEFAULT_TOP_VALUES_THRESHOLD
       ? DETAILS_MODE.TOP_VALUES
       : DETAILS_MODE.DISTRIBUTION
   );
-
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);
+
+  if (stats === undefined) return null;
+  const { count, sampleCount, cardinality, min, median, max, distribution } = stats;
+  if (count === undefined || sampleCount === undefined) return null;
+
+  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
 
   const detailsOptions = [
     {
@@ -176,7 +177,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup justifyContent="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <MetricDistributionChart
                 width={METRIC_DISTRIBUTION_CHART_WIDTH}
                 height={METRIC_DISTRIBUTION_CHART_HEIGHT}
@@ -190,7 +191,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       {detailsMode === DETAILS_MODE.TOP_VALUES && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
+            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

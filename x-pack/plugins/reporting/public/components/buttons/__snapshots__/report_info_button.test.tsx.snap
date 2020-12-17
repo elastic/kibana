@@ -5,6 +5,7 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
   aria-label="Show report info"
   className="euiButtonIcon euiButtonIcon--primary"
   data-test-subj="reportInfoButton"
+  disabled={false}
   onClick={[Function]}
   type="button"
 >
@@ -50,7 +51,7 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"
@@ -78,6 +79,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -163,6 +165,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -251,7 +254,7 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"
@@ -279,6 +282,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -362,6 +366,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >

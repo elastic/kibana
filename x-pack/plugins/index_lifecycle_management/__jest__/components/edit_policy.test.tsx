@@ -113,7 +113,14 @@ const expectedErrorMessages = (rendered: ReactWrapper, expectedMessages: string[
     expect(foundErrorMessage).toBe(true);
   });
 };
+const noDefaultRollover = async (rendered: ReactWrapper) => {
+  await act(async () => {
+    findTestSubject(rendered, 'useDefaultRolloverSwitch').simulate('click');
+  });
+  rendered.update();
+};
 const noRollover = async (rendered: ReactWrapper) => {
+  await noDefaultRollover(rendered);
   await act(async () => {
     findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   });
@@ -172,6 +179,9 @@ const MyComponent = ({
           existingPolicies,
           policyName,
           getUrlForApp,
+          license: {
+            canUseSearchableSnapshot: () => true,
+          },
         }}
       >
         <EditPolicy history={history} />
@@ -209,6 +219,7 @@ describe('edit policy', () => {
         getUrlForApp={jest.fn()}
         policyName="test"
         isCloudEnabled={false}
+        license={{ canUseSearchableSnapshot: () => true }}
       />
     );
 
@@ -247,6 +258,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       const rendered = mountWithIntl(component);
@@ -283,6 +295,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
 
@@ -318,8 +331,9 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', async () => {
+    test('should show errors when trying to save with no max size, no max age and no max docs', async () => {
       const rendered = mountWithIntl(component);
+      await noDefaultRollover(rendered);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       await setPolicyName(rendered, 'mypolicy');
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
@@ -332,12 +346,18 @@ describe('edit policy', () => {
         maxAgeInput.simulate('change', { target: { value: '' } });
       });
       waitForFormLibValidation(rendered);
+      const maxDocsInput = findTestSubject(rendered, 'hot-selectedMaxDocuments');
+      await act(async () => {
+        maxDocsInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation(rendered);
       await save(rendered);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeTruthy();
     });
     test('should show number above 0 required error when trying to save with -1 for max size', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -349,6 +369,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with 0 for max size', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -359,6 +380,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with -1 for max age', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '-1' } });
@@ -369,6 +391,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with 0 for max age', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '0' } });
@@ -476,7 +499,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
@@ -494,7 +517,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
@@ -545,6 +568,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'warm-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
@@ -673,6 +697,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-dataTierAllocationControls').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
@@ -827,6 +852,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={true}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       ({ http } = editPolicyHelpers.setup());

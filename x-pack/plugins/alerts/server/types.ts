@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertInstance } from './alert_instance';
+import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
@@ -28,7 +28,9 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
+  AlertNotifyWhenType,
 } from '../common';
+import { LicenseType } from '../../licensing/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -55,7 +57,7 @@ export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
+  alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
 }
 
 export interface AlertExecutorOptions<
@@ -83,6 +85,16 @@ export interface ActionVariable {
   description: string;
 }
 
+// signature of the alert type executor function
+export type ExecutorType<
+  Params,
+  State,
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> = (
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
+) => Promise<State | void>;
+
 export interface AlertType<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
@@ -96,17 +108,15 @@ export interface AlertType<
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
-  executor: ({
-    services,
-    params,
-    state,
-  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
+  recoveryActionGroup?: ActionGroup;
+  executor: ExecutorType<Params, State, InstanceState, InstanceContext>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
     params?: ActionVariable[];
   };
+  minimumLicenseRequired: LicenseType;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {
@@ -151,6 +161,7 @@ export interface RawAlert extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -161,6 +172,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
+  | 'notifyWhen'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'

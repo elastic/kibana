@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import qs from 'query-string';
@@ -265,7 +266,7 @@ export class IndexTable extends Component {
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              appServices.uiMetricService.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
+              appServices.uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >

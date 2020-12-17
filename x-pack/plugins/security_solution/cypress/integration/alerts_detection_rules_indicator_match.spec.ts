@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newThreatIndicatorRule } from '../objects/rule';
 
 import {
@@ -65,7 +66,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -80,18 +81,14 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
-const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
-const expectedTags = newThreatIndicatorRule.tags.join('');
-const expectedMitre = newThreatIndicatorRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
-const expectedNumberOfRules = 1;
-const expectedNumberOfAlerts = 1;
-
 describe('Detection rules, Indicator Match', () => {
+  const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
+  const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
+  const expectedTags = newThreatIndicatorRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
+  const expectedNumberOfRules = 1;
+  const expectedNumberOfAlerts = 1;
+
   beforeEach(() => {
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
@@ -100,11 +97,11 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
-    removeSignalsIndex();
     deleteRule();
+    removeSignalsIndex();
   });
 
-  it('Creates and activates a new Indicator Match rule', () => {
+  it.skip('Creates and activates a new Indicator Match rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -156,7 +153,10 @@ describe('Detection rules, Indicator Match', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', newThreatIndicatorRule.index.join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should(
+        'have.text',
+        newThreatIndicatorRule.index!.join('')
+      );
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');

@@ -31,12 +31,38 @@ export const HostsTabs = memo<HostsTabsProps>(
     from,
     indexNames,
     isInitializing,
-    hostsPagePath,
     setAbsoluteRangeDatePicker,
     setQuery,
     to,
     type,
   }) => {
+    const narrowDateRange = useCallback(
+      (score: Anomaly, interval: string) => {
+        const fromTo = scoreIntervalToDateTime(score, interval);
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
+    const updateDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -46,31 +72,8 @@ export const HostsTabs = memo<HostsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      narrowDateRange: useCallback(
-        (score: Anomaly, interval: string) => {
-          const fromTo = scoreIntervalToDateTime(score, interval);
-          setAbsoluteRangeDatePicker({
-            id: 'global',
-            from: fromTo.from,
-            to: fromTo.to,
-          });
-        },
-        [setAbsoluteRangeDatePicker]
-      ),
-      updateDateRange: useCallback<UpdateDateRange>(
-        ({ x }) => {
-          if (!x) {
-            return;
-          }
-          const [min, max] = x;
-          setAbsoluteRangeDatePicker({
-            id: 'global',
-            from: new Date(min).toISOString(),
-            to: new Date(max).toISOString(),
-          });
-        },
-        [setAbsoluteRangeDatePicker]
-      ),
+      narrowDateRange,
+      updateDateRange,
     };
 
     return (

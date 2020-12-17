@@ -71,6 +71,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineAlert(alertName);
 
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
@@ -89,14 +93,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-0');
+      await testSubjects.click('variableMenuButton-alertActionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         'test message {{alertActionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-1');
+      await testSubjects.click('variableMenuButton-alertId');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
         'test message {{alertActionGroup}} some additional text {{alertId}}'
@@ -174,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
@@ -195,7 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index threshold',
+          alertType: 'Always Firing',
           interval: '1m',
         },
       ]);

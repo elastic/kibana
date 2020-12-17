@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import _ from 'lodash';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -18,21 +18,31 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  ActionGroup,
 } from './types';
-import { getBuiltinActionGroups } from '../common';
+import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
+import { ILicenseState } from './lib/license_state';
+import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
+  licenseState: ILicenseState;
+  licensing: LicensingPluginSetup;
 }
 
 export interface RegistryAlertType
   extends Pick<
-    AlertType,
-    'name' | 'actionGroups' | 'defaultActionGroupId' | 'actionVariables' | 'producer'
+    NormalizedAlertType,
+    | 'name'
+    | 'actionGroups'
+    | 'recoveryActionGroup'
+    | 'defaultActionGroupId'
+    | 'actionVariables'
+    | 'producer'
+    | 'minimumLicenseRequired'
   > {
   id: string;
+  enabledInLicense: boolean;
 }
 
 /**
@@ -55,18 +65,34 @@ const alertIdSchema = schema.string({
   },
 });
 
+export type NormalizedAlertType<
+  Params extends AlertTypeParams = AlertTypeParams,
+  State extends AlertTypeState = AlertTypeState,
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> = Omit<AlertType<Params, State, InstanceState, InstanceContext>, 'recoveryActionGroup'> &
+  Pick<Required<AlertType<Params, State, InstanceState, InstanceContext>>, 'recoveryActionGroup'>;
+
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly alertTypes: Map<string, AlertType> = new Map();
+  private readonly alertTypes: Map<string, NormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly licenseState: ILicenseState;
+  private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.licenseState = licenseState;
+    this.licensing = licensing;
   }
 
   public has(id: string) {
     return this.alertTypes.has(id);
+  }
+
+  public ensureAlertTypeEnabled(id: string) {
+    this.licenseState.ensureLicenseForAlertType(this.get(id));
   }
 
   public register<
@@ -86,16 +112,24 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    validateActionGroups(alertType.id, alertType.actionGroups);
-    alertType.actionGroups = [...alertType.actionGroups, ..._.cloneDeep(getBuiltinActionGroups())];
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType } as AlertType);
+
+    const normalizedAlertType = augmentActionGroupsWithReserved(alertType as AlertType);
+
+    this.alertTypes.set(alertIdSchema.validate(alertType.id), normalizedAlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create({ ...alertType } as AlertType, context),
+          this.taskRunnerFactory.create(normalizedAlertType, context),
       },
     });
+    // No need to notify usage on basic alert types
+    if (alertType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getAlertTypeFeatureUsageName(alertType.name),
+        alertType.minimumLicenseRequired
+      );
+    }
   }
 
   public get<
@@ -103,7 +137,7 @@ export class AlertTypeRegistry {
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext
-  >(id: string): AlertType<Params, State, InstanceState, InstanceContext> {
+  >(id: string): NormalizedAlertType<Params, State, InstanceState, InstanceContext> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -114,22 +148,42 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)! as AlertType<Params, State, InstanceState, InstanceContext>;
+    return this.alertTypes.get(id)! as NormalizedAlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext
+    >;
   }
 
   public list(): Set<RegistryAlertType> {
     return new Set(
       Array.from(this.alertTypes).map(
-        ([id, { name, actionGroups, defaultActionGroupId, actionVariables, producer }]: [
-          string,
-          AlertType
-        ]) => ({
+        ([
+          id,
+          {
+            name,
+            actionGroups,
+            recoveryActionGroup,
+            defaultActionGroupId,
+            actionVariables,
+            producer,
+            minimumLicenseRequired,
+          },
+        ]: [string, NormalizedAlertType]) => ({
           id,
           name,
           actionGroups,
+          recoveryActionGroup,
           defaultActionGroupId,
           actionVariables,
           producer,
+          minimumLicenseRequired,
+          enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
+            id,
+            name,
+            minimumLicenseRequired
+          ).isValid,
         })
       )
     );
@@ -144,21 +198,52 @@ function normalizedActionVariables(actionVariables: AlertType['actionVariables']
   };
 }
 
-function validateActionGroups(alertTypeId: string, actionGroups: ActionGroup[]) {
-  const reservedActionGroups = intersection(
-    actionGroups.map((item) => item.id),
-    getBuiltinActionGroups().map((item) => item.id)
+function augmentActionGroupsWithReserved<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(
+  alertType: AlertType<Params, State, InstanceState, InstanceContext>
+): NormalizedAlertType<Params, State, InstanceState, InstanceContext> {
+  const reservedActionGroups = getBuiltinActionGroups(alertType.recoveryActionGroup);
+  const { id, actionGroups, recoveryActionGroup } = alertType;
+
+  const activeActionGroups = new Set(actionGroups.map((item) => item.id));
+  const intersectingReservedActionGroups = intersection(
+    [...activeActionGroups.values()],
+    reservedActionGroups.map((item) => item.id)
   );
-  if (reservedActionGroups.length > 0) {
+  if (recoveryActionGroup && activeActionGroups.has(recoveryActionGroup.id)) {
+    throw new Error(
+      i18n.translate(
+        'xpack.alerts.alertTypeRegistry.register.customRecoveryActionGroupUsageError',
+        {
+          defaultMessage:
+            'Alert type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
+          values: {
+            actionGroup: recoveryActionGroup.id,
+            id,
+          },
+        }
+      )
+    );
+  } else if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
       i18n.translate('xpack.alerts.alertTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
-          'Alert type [id="{alertTypeId}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
+          'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
-          actionGroups: reservedActionGroups.join(', '),
-          alertTypeId,
+          actionGroups: intersectingReservedActionGroups.join(', '),
+          id,
         },
       })
     );
   }
+
+  return {
+    ...alertType,
+    actionGroups: [...actionGroups, ...reservedActionGroups],
+    recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
+  };
 }

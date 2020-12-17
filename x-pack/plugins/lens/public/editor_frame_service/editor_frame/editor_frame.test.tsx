@@ -602,7 +602,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -682,7 +682,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1143,7 +1143,7 @@ describe('editor_frame', () => {
           .find(EuiPanel)
           .map((el) => el.parents(EuiToolTip).prop('content'))
       ).toEqual([
-        'Current',
+        'Current visualization',
         'Suggestion1',
         'Suggestion2',
         'Suggestion3',
@@ -1196,7 +1196,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(4);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(5);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,

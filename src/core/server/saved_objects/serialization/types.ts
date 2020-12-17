@@ -27,7 +27,6 @@ import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 export interface SavedObjectsRawDoc {
   _id: string;
   _source: SavedObjectsRawDocSource;
-  _type?: string;
   _seq_no?: number;
   _primary_term?: number;
 }
@@ -50,7 +49,7 @@ export interface SavedObjectsRawDocSource {
  */
 interface SavedObjectDoc<T = unknown> {
   attributes: T;
-  id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
+  id: string;
   type: string;
   namespace?: string;
   namespaces?: string[];

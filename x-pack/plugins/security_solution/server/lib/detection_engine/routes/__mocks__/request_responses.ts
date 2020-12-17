@@ -15,6 +15,8 @@ import {
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -27,8 +29,11 @@ import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -128,10 +133,11 @@ export const getDeleteAsPostBulkRequest = () =>
     body: [{ rule_id: 'rule-1' }],
   });
 
-export const getPrivilegeRequest = () =>
+export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
   requestMock.create({
     method: 'get',
     path: DETECTION_ENGINE_PRIVILEGES_URL,
+    ...options,
   });
 
 export const addPrepackagedRulesRequest = () =>
@@ -379,23 +385,7 @@ export const getResult = (): RuleAlertType => ({
     severityMapping: [],
     to: 'now',
     type: 'query',
-    threat: [
-      {
-        framework: 'MITRE ATT&CK',
-        tactic: {
-          id: 'TA0040',
-          name: 'impact',
-          reference: 'https://attack.mitre.org/tactics/TA0040/',
-        },
-        technique: [
-          {
-            id: 'T1499',
-            name: 'endpoint denial of service',
-            reference: 'https://attack.mitre.org/techniques/T1499/',
-          },
-        ],
-      },
-    ],
+    threat: getThreatMock(),
     threshold: undefined,
     timestampOverride: undefined,
     threatFilters: undefined,
@@ -416,6 +406,7 @@ export const getResult = (): RuleAlertType => ({
   enabled: true,
   actions: [],
   throttle: null,
+  notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   apiKey: null,
@@ -641,6 +632,7 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     },
   ],
   throttle: null,
+  notifyWhen: null,
   apiKey: null,
   apiKeyOwner: 'elastic',
   createdBy: 'elastic',
@@ -662,3 +654,17 @@ export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificat
   total: 1,
   data: [getNotificationResult()],
 });
+
+export const getFinalizeSignalsMigrationRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+    body: getFinalizeSignalsMigrationSchemaMock(),
+  });
+
+export const getSignalsMigrationStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+    query: getSignalsMigrationStatusSchemaMock(),
+  });

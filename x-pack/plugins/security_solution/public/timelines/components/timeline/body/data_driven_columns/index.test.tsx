@@ -20,12 +20,12 @@ describe('Columns', () => {
   test('it renders the expected columns', () => {
     const wrapper = shallow(
       <DataDrivenColumns
+        ariaRowindex={2}
         _id={mockTimelineData[0]._id}
         columnHeaders={headersSansTimestamp}
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
         ecsData={mockTimelineData[0].ecs}
-        onColumnResized={jest.fn()}
         timelineId="test"
       />
     );

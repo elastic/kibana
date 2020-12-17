@@ -41,10 +41,10 @@ import {
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { getInitialLayers } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
+import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -94,9 +94,8 @@ export class SavedMap {
       };
     } else {
       const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const references = doc.references;
-      delete doc.references;
-      this._attributes = doc;
+      const { references, ...savedObjectAttributes } = doc;
+      this._attributes = savedObjectAttributes;
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -151,7 +150,18 @@ export class SavedMap {
       );
     }
 
-    const layerList = getInitialLayers(this._attributes.layerListJSON, this._defaultLayers);
+    let layerList: LayerDescriptor[] = [];
+    if (this._attributes.layerListJSON) {
+      layerList = JSON.parse(this._attributes.layerListJSON);
+    } else {
+      const basemapLayerDescriptor = createBasemapLayerDescriptor();
+      if (basemapLayerDescriptor) {
+        layerList.push(basemapLayerDescriptor);
+      }
+      if (this._defaultLayers.length) {
+        layerList.push(...this._defaultLayers);
+      }
+    }
     this._store.dispatch<any>(replaceLayerList(layerList));
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
@@ -330,6 +340,10 @@ export class SavedMap {
     this._mapEmbeddableInput = updatedMapEmbeddableInput;
     // break connection to originating application
     this._originatingApp = undefined;
+
+    // remove editor state so the connection is still broken after reload
+    this._getStateTransfer().clearEditorState();
+
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,

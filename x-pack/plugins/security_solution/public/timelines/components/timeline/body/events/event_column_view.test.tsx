@@ -5,27 +5,22 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
-import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
 import { TimelineType } from '../../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../../common/hooks/use_selector');
 
 describe('EventColumnView', () => {
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
 
   const props = {
+    ariaRowindex: 2,
     id: 'event-id',
     actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
     associateNote: jest.fn(),
@@ -41,10 +36,8 @@ describe('EventColumnView', () => {
     },
     eventIdToNoteIds: {},
     expanded: false,
-    getNotesByIds: jest.fn(),
     loading: false,
     loadingEventIds: [],
-    onColumnResized: jest.fn(),
     onEventToggled: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
@@ -53,7 +46,7 @@ describe('EventColumnView', () => {
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
-    timelineId: 'timeline-1',
+    timelineId: 'timeline-test',
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
@@ -84,17 +77,14 @@ describe('EventColumnView', () => {
   });
 
   test('it renders correct tooltip for NotesButton - timeline template', () => {
-    (useSelector as jest.Mock).mockReturnValue({
-      ...mockTimelineModel,
-      timelineType: TimelineType.template,
-    });
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.template);
 
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
       i18n.NOTES_DISABLE_TOOLTIP
     );
-    (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {

@@ -213,4 +213,16 @@ describe('execute()', () => {
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
     );
   });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      message: '{{rogue}}',
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    expect(params.message).toBe('`*bold*`');
+  });
 });

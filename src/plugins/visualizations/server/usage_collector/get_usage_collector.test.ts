@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { getStats } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
@@ -120,8 +120,11 @@ const enlargedMockSavedObjects = [
 
 describe('Visualizations usage collector', () => {
   const mockIndex = '';
+
   const getMockCallCluster = (hits: unknown[]) =>
-    (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
+    ({
+      search: () => Promise.resolve({ body: { hits: { hits } } }) as unknown,
+    } as ElasticsearchClient);
 
   test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(getMockCallCluster(undefined as any), mockIndex);

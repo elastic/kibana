@@ -15,6 +15,9 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
+import { EuiBasicTable } from '@elastic/eui';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asDuration,
   asPercent,
@@ -31,12 +34,12 @@ import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDeta
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TableLinkFlexItem } from '../table_link_flex_item';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
-import { ServiceOverviewTable } from '../service_overview_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 type ServiceTransactionGroupItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/overview_transaction_groups'>['transactionGroups']
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
 >;
 
 interface Props {
@@ -64,9 +67,39 @@ const StyledTransactionDetailLink = styled(TransactionDetailLink)`
   ${truncate('100%')}
 `;
 
-export function ServiceOverviewTransactionsTable(props: Props) {
-  const { serviceName } = props;
+function getLatencyAggregationTypeLabel(
+  latencyAggregationType?: LatencyAggregationType
+) {
+  switch (latencyAggregationType) {
+    case 'p95': {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
+        {
+          defaultMessage: 'Latency (95th)',
+        }
+      );
+    }
+    case 'p99': {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
+        {
+          defaultMessage: 'Latency (99th)',
+        }
+      );
+    }
+    default: {
+      return i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
+        {
+          defaultMessage: 'Latency (avg.)',
+        }
+      );
+    }
+  }
+}
 
+export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+  const latencyAggregationType = useLatencyAggregationType();
   const {
     uiFilters,
     urlParams: { start, end },
@@ -94,13 +127,13 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !latencyAggregationType) {
       return;
     }
 
     return callApmApi({
       endpoint:
-        'GET /api/apm/services/{serviceName}/overview_transaction_groups',
+        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
       params: {
         path: { serviceName },
         query: {
@@ -112,6 +145,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          latencyAggregationType,
         },
       },
     }).then((response) => {
@@ -135,6 +169,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    latencyAggregationType,
   ]);
 
   const {
@@ -170,16 +205,11 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     {
       field: 'latency',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency',
-        {
-          defaultMessage: 'Latency',
-        }
-      ),
+      name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
@@ -199,7 +229,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       width: px(unit * 10),
       render: (_, { throughput }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis0"
             compact
             series={throughput.timeseries ?? undefined}
@@ -219,7 +249,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       width: px(unit * 8),
       render: (_, { errorRate }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             compact
             series={errorRate.timeseries ?? undefined}
@@ -274,41 +304,47 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
-            <ServiceOverviewTable
-              columns={columns}
-              items={items}
-              pagination={{
-                pageIndex,
-                pageSize: PAGE_SIZE,
-                totalItemCount,
-                pageSizeOptions: [PAGE_SIZE],
-                hidePerPageOptions: true,
-              }}
-              loading={status === FETCH_STATUS.LOADING}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
-              sorting={{
-                enableAllColumns: true,
-                sort: {
-                  direction: sort.direction,
-                  field: sort.field,
-                },
-              }}
-            />
+            <ServiceOverviewTableContainer
+              isEmptyAndLoading={
+                items.length === 0 && status === FETCH_STATUS.LOADING
+              }
+            >
+              <EuiBasicTable
+                columns={columns}
+                items={items}
+                pagination={{
+                  pageIndex,
+                  pageSize: PAGE_SIZE,
+                  totalItemCount,
+                  pageSizeOptions: [PAGE_SIZE],
+                  hidePerPageOptions: true,
+                }}
+                loading={status === FETCH_STATUS.LOADING}
+                onChange={(newTableOptions: {
+                  page?: {
+                    index: number;
+                  };
+                  sort?: { field: string; direction: SortDirection };
+                }) => {
+                  setTableOptions({
+                    pageIndex: newTableOptions.page?.index ?? 0,
+                    sort: newTableOptions.sort
+                      ? {
+                          field: newTableOptions.sort.field as SortField,
+                          direction: newTableOptions.sort.direction,
+                        }
+                      : DEFAULT_SORT,
+                  });
+                }}
+                sorting={{
+                  enableAllColumns: true,
+                  sort: {
+                    direction: sort.direction,
+                    field: sort.field,
+                  },
+                }}
+              />
+            </ServiceOverviewTableContainer>
           </TableFetchWrapper>
         </EuiFlexItem>
       </EuiFlexItem>

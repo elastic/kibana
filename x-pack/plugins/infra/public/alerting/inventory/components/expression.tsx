@@ -38,8 +38,6 @@ import {
 } from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -67,6 +65,7 @@ import {
 } from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -89,9 +88,9 @@ interface Props {
   };
   alertInterval: string;
   alertThrottle: string;
-  alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
+  metadata: AlertContextMeta;
 }
 
 export const defaultExpression = {
@@ -109,19 +108,13 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const {
-    setAlertParams,
-    alertParams,
-    errors,
-    alertsContext,
-    alertInterval,
-    alertThrottle,
-  } = props;
+  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
-    fetch: alertsContext.http.fetch,
-    toastWarning: alertsContext.toastNotifications.addWarning,
+    fetch: http.fetch,
+    toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
@@ -221,7 +214,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const preFillAlertCriteria = useCallback(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (md && md.options) {
       setAlertParams('criteria', [
         {
@@ -235,10 +228,10 @@ export const Expressions: React.FC<Props> = (props) => {
     } else {
       setAlertParams('criteria', [defaultExpression]);
     }
-  }, [alertsContext.metadata, setAlertParams]);
+  }, [metadata, setAlertParams]);
 
   const preFillAlertFilter = useCallback(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (md && md.filter) {
       setAlertParams('filterQueryText', md.filter);
       setAlertParams(
@@ -246,10 +239,10 @@ export const Expressions: React.FC<Props> = (props) => {
         convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
       );
     }
-  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+  }, [metadata, derivedIndexPattern, setAlertParams]);
 
   useEffect(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (!alertParams.nodeType) {
       if (md && md.nodeType) {
         setAlertParams('nodeType', md.nodeType);
@@ -272,7 +265,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
-  }, [alertsContext.metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -308,7 +301,6 @@ export const Expressions: React.FC<Props> = (props) => {
               setAlertParams={updateParams}
               errors={errors[idx] || emptyError}
               expression={e || {}}
-              alertsContextMetadata={alertsContext.metadata}
               fields={derivedIndexPattern.fields}
             />
           );
@@ -371,7 +363,7 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(alertsContext.metadata && (
+        {(metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
@@ -394,7 +386,6 @@ export const Expressions: React.FC<Props> = (props) => {
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
-        fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
         showNoDataResults={alertParams.alertOnNoData}
       />
@@ -418,7 +409,6 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
   fields: IFieldType[];
 }
 
