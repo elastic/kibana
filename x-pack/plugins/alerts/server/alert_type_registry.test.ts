@@ -6,7 +6,7 @@
 
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertType } from './types';
+import { UntypedAlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 
 const taskManager = taskManagerMock.createSetup();
@@ -217,7 +217,7 @@ describe('register()', () => {
   });
 
   test('shallow clones the given alert type', () => {
-    const alertType: AlertType = {
+    const alertType: UntypedAlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -413,7 +413,7 @@ describe('list()', () => {
   });
 });
 
-function alertTypeWithVariables(id: string, context: string, state: string): AlertType {
+function alertTypeWithVariables(id: string, context: string, state: string): UntypedAlertType {
   const baseAlert = {
     id,
     name: `${id}-name`,

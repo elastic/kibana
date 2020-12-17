@@ -23,13 +23,14 @@ import {
   RawAlert,
   AlertTypeRegistry,
   AlertAction,
-  AlertType,
+  UntypedAlertType,
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
+  AlertTypeParams,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -245,7 +246,10 @@ export class AlertsClient {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
 
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
+    const validatedAlertTypeParams = validateAlertTypeParams(
+      data.params,
+      alertType.validate?.params
+    );
     const username = await this.getUserName();
 
     const createdAPIKey = data.enabled
@@ -334,7 +338,11 @@ export class AlertsClient {
     return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
-  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
+  public async get<Params extends AlertTypeParams = AlertTypeParams>({
+    id,
+  }: {
+    id: string;
+  }): Promise<SanitizedAlert<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized(
@@ -358,7 +366,7 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -694,7 +702,10 @@ export class AlertsClient {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
+    const validatedAlertTypeParams = validateAlertTypeParams(
+      data.params,
+      alertType.validate?.params
+    );
     this.validateActions(alertType, data.actions);
 
     const { actions, references } = await this.denormalizeActions(data.actions);
@@ -1324,22 +1335,22 @@ export class AlertsClient {
     }) as Alert['actions'];
   }
 
-  private getAlertFromRaw(
+  private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
-  ): Alert {
+  ): Alert<Params> {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw(id, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert<Params>;
   }
 
-  private getPartialAlertFromRaw(
+  private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
-  ): PartialAlert {
+  ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
     // need to specifically delete the executionStatus as it's a different type
@@ -1367,7 +1378,7 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
+  private validateActions(alertType: UntypedAlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));

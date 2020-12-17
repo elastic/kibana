@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { AlertInstance } from './alert_instance';
 
-export function createAlertInstanceFactory(alertInstances: Record<string, AlertInstance>) {
-  return (id: string): AlertInstance => {
+export function createAlertInstanceFactory<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
+>(alertInstances: Record<string, AlertInstance<State, Context>>) {
+  return (id: string): AlertInstance<State, Context> => {
     if (!alertInstances[id]) {
       alertInstances[id] = new AlertInstance();
     }

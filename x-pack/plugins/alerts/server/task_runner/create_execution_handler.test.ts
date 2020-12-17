@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../types';
-import { createExecutionHandler } from './create_execution_handler';
+import {
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
+import { createExecutionHandler, CreateExecutionHandlerOptions } from './create_execution_handler';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { NormalizedAlertType } from '../alert_type_registry';
 
-const alertType: AlertType = {
+const alertType: NormalizedAlertType<
+  MockAlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+> = {
   id: 'test',
   name: 'Test',
   actionGroups: [
@@ -29,18 +40,31 @@ const alertType: AlertType = {
 };
 
 const actionsClient = actionsClientMock.create();
-const createExecutionHandlerParams = {
-  actionsPlugin: actionsMock.createStart(),
+interface MockAlertTypeParams extends AlertTypeParams {
+  foo: boolean;
+  contextVal: string;
+  stateVal: string;
+}
+
+const mockActionsPlugin = actionsMock.createStart();
+const mockEventLogger = eventLoggerMock.create();
+const createExecutionHandlerParams: jest.Mocked<
+  CreateExecutionHandlerOptions<
+    MockAlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext
+  >
+> = {
+  actionsPlugin: mockActionsPlugin,
   spaceId: 'default',
   alertId: '1',
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
   logger: loggingSystemMock.create().get(),
-  eventLogger: eventLoggerMock.create(),
+  eventLogger: mockEventLogger,
   actions: [
     {
       id: '1',
@@ -64,11 +88,9 @@ const createExecutionHandlerParams = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-  createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
-    actionsClient
-  );
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+  mockActionsPlugin.isActionExecutable.mockReturnValue(true);
+  mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
 
 test('enqueues execution per selected action', async () => {
@@ -79,9 +101,9 @@ test('enqueues execution per selected action', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(
-    createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest
-  ).toHaveBeenCalledWith(createExecutionHandlerParams.request);
+  expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
+    createExecutionHandlerParams.request
+  );
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -106,9 +128,8 @@ test('enqueues execution per selected action', async () => {
     ]
   `);
 
-  const eventLogger = createExecutionHandlerParams.eventLogger;
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+  expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(mockEventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
         Object {
@@ -142,9 +163,9 @@ test('enqueues execution per selected action', async () => {
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
   // Mock two calls, one for check against actions[0] and the second for actions[1]
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValueOnce(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
+  mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [
@@ -185,9 +206,9 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
 });
 
 test('trow error error message when action type is disabled', async () => {
-  createExecutionHandlerParams.actionsPlugin.preconfiguredActions = [];
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(false);
+  mockActionsPlugin.preconfiguredActions = [];
+  mockActionsPlugin.isActionExecutable.mockReturnValue(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
   const executionHandler = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [
@@ -214,7 +235,7 @@ test('trow error error message when action type is disabled', async () => {
 
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
+  mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
   const executionHandlerForPreconfiguredAction = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [...createExecutionHandlerParams.actions],

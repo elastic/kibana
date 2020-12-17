@@ -24,17 +24,14 @@ interface ScheduledExecutionOptions<
 }
 
 export type PublicAlertInstance<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
 > = Pick<
   AlertInstance<State, Context>,
   'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
 >;
 
-export class AlertInstance<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
-> {
+export class AlertInstance<State extends AlertInstanceState, Context extends AlertInstanceContext> {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context>;
   private meta: AlertInstanceMeta;
   private state: State;

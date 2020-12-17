@@ -19,7 +19,6 @@ import {
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
 
-export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;

@@ -17,6 +17,7 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  ActionVariables,
 } from './types';
 import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
 
@@ -27,7 +28,7 @@ interface ConstructorOptions {
 
 export interface RegistryAlertType
   extends Pick<
-    NormalizedAlertType,
+    UntypedNormalizedAlertType,
     | 'name'
     | 'actionGroups'
     | 'recoveryActionGroup'
@@ -59,16 +60,23 @@ const alertIdSchema = schema.string({
 });
 
 export type NormalizedAlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
 > = Omit<AlertType<Params, State, InstanceState, InstanceContext>, 'recoveryActionGroup'> &
   Pick<Required<AlertType<Params, State, InstanceState, InstanceContext>>, 'recoveryActionGroup'>;
 
+export type UntypedNormalizedAlertType = NormalizedAlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
+
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly alertTypes: Map<string, NormalizedAlertType> = new Map();
+  private readonly alertTypes: Map<string, UntypedNormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
 
   constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
@@ -81,10 +89,10 @@ export class AlertTypeRegistry {
   }
 
   public register<
-    Params extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
-    InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    Params extends AlertTypeParams,
+    State extends AlertTypeState,
+    InstanceState extends AlertInstanceState,
+    InstanceContext extends AlertInstanceContext
   >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
@@ -98,14 +106,25 @@ export class AlertTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
-    const normalizedAlertType = augmentActionGroupsWithReserved(alertType as AlertType);
+    const normalizedAlertType = augmentActionGroupsWithReserved<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext
+    >(alertType);
 
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), normalizedAlertType);
+    this.alertTypes.set(
+      alertIdSchema.validate(alertType.id),
+      normalizedAlertType as UntypedNormalizedAlertType
+    );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(normalizedAlertType, context),
+          this.taskRunnerFactory.create<Params, State, InstanceState, InstanceContext>(
+            normalizedAlertType,
+            context
+          ),
       },
     });
   }
@@ -147,7 +166,7 @@ export class AlertTypeRegistry {
             actionVariables,
             producer,
           },
-        ]: [string, NormalizedAlertType]) => ({
+        ]: [string, UntypedNormalizedAlertType]) => ({
           id,
           name,
           actionGroups,
@@ -161,7 +180,7 @@ export class AlertTypeRegistry {
   }
 }
 
-function normalizedActionVariables(actionVariables: AlertType['actionVariables']) {
+function normalizedActionVariables(actionVariables?: ActionVariables) {
   return {
     context: actionVariables?.context ?? [],
     state: actionVariables?.state ?? [],

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ObjectType } from '@kbn/config-schema';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -21,8 +22,8 @@ import {
   Alert,
   AlertActionParams,
   ActionGroup,
-  AlertTypeParams,
-  AlertTypeState,
+  AlertTypeParams as AlertTypeCommonParams,
+  AlertTypeState as AlertTypeCommonState,
   AlertInstanceContext,
   AlertInstanceState,
   AlertExecutionStatuses,
@@ -31,7 +32,6 @@ import {
   AlertNotifyWhenType,
 } from '../common';
 
-export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -59,11 +59,14 @@ export interface AlertServices<
   alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
 }
 
+// add support for Schema based Params
+type AlertTypeParams = AlertTypeCommonParams | ObjectType;
+type AlertTypeState = AlertTypeCommonState | ObjectType;
 export interface AlertExecutorOptions<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   alertId: string;
   startedAt: Date;
@@ -84,16 +87,25 @@ export interface ActionVariable {
   description: string;
 }
 
+export interface ActionVariables {
+  context?: ActionVariable[];
+  state?: ActionVariable[];
+  params?: ActionVariable[];
+}
+
+export interface AlertTypeParamsValidator<Params extends AlertTypeCommonParams> {
+  validate: (object: unknown) => Params;
+}
 export interface AlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   id: string;
   name: string;
   validate?: {
-    params?: { validate: (object: unknown) => Params };
+    params?: Params extends AlertTypeCommonParams ? AlertTypeParamsValidator<Params> : Params;
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
@@ -102,14 +114,22 @@ export interface AlertType<
     services,
     params,
     state,
-  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
+  }: AlertExecutorOptions<
+    Params extends ObjectType<infer ParamsType> ? ParamsType : Params,
+    State,
+    InstanceState,
+    InstanceContext
+  >) => Promise<State | void>;
   producer: string;
-  actionVariables?: {
-    context?: ActionVariable[];
-    state?: ActionVariable[];
-    params?: ActionVariable[];
-  };
+  actionVariables?: ActionVariables;
 }
+
+export type UntypedAlertType = AlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
@@ -134,7 +154,11 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
+export type PartialAlert<Params extends AlertTypeCommonParams = AlertTypeCommonParams> = Pick<
+  Alert<Params>,
+  'id'
+> &
+  Partial<Omit<Alert<Params>, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;
