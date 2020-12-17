@@ -16,28 +16,25 @@ interface MetricFieldVisConfig extends FieldVisConfig {
 
 interface NonMetricFieldVisConfig extends FieldVisConfig {
   docCountFormatted: string;
-  exampleCount?: number;
+  exampleCount: number;
 }
 
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
-  metricFieldsFilter: string;
-  nonMetricFieldsFilter: string;
-  nonMetricFieldsTypeFilter: string;
+  fieldNameFilters: string[];
+  fieldTypeFilters: string[];
   expected: {
     totalDocCountFormatted: string;
-    fieldsPanelCount: number;
-    documentCountCard: FieldVisConfig;
-    metricCards?: MetricFieldVisConfig[];
-    nonMetricCards?: NonMetricFieldVisConfig[];
-    nonMetricFieldsTypeFilterCardCount: number;
-    metricFieldsFilterCardCount: number;
-    nonMetricFieldsFilterCardCount: number;
+    metricFields?: MetricFieldVisConfig[];
+    nonMetricFields?: NonMetricFieldVisConfig[];
+    emptyFields: string[];
     visibleMetricFieldsCount: number;
     totalMetricFieldsCount: number;
     populatedFieldsCount: number;
     totalFieldsCount: number;
+    fieldNameFiltersResultCount: number;
+    fieldTypeFiltersResultCount: number;
   };
 }
 
@@ -48,19 +45,11 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteIndexPatternTestData: TestData = {
     suiteTitle: 'index pattern',
     sourceIndexOrSavedSearch: 'ft_farequote',
-    metricFieldsFilter: 'document',
-    nonMetricFieldsFilter: 'airline',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['airline', '@timestamp'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
     expected: {
       totalDocCountFormatted: '86,274',
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
-      metricCards: [
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
@@ -72,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
           topValuesCount: 10,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
@@ -80,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: true,
           loading: false,
           docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
         },
         {
           fieldName: '@version',
@@ -127,32 +117,24 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 1,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
       visibleMetricFieldsCount: 1,
       totalMetricFieldsCount: 1,
       populatedFieldsCount: 7,
       totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 2,
+      fieldTypeFiltersResultCount: 3,
     },
   };
 
   const farequoteKQLSearchTestData: TestData = {
     suiteTitle: 'KQL saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
-    metricFieldsFilter: 'responsetime',
-    nonMetricFieldsFilter: 'airline',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['@version'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.DATE, ML_JOB_FIELD_TYPES.TEXT],
     expected: {
       totalDocCountFormatted: '34,415',
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
-      metricCards: [
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
@@ -164,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           topValuesCount: 10,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
@@ -172,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: true,
           loading: false,
           docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
         },
         {
           fieldName: '@version',
@@ -219,32 +202,24 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 2,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
       visibleMetricFieldsCount: 1,
       totalMetricFieldsCount: 1,
       populatedFieldsCount: 7,
       totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 1,
+      fieldTypeFiltersResultCount: 3,
     },
   };
 
   const farequoteLuceneSearchTestData: TestData = {
     suiteTitle: 'lucene saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
-    metricFieldsFilter: 'responsetime',
-    nonMetricFieldsFilter: 'version',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['@version.keyword', 'type'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER],
     expected: {
       totalDocCountFormatted: '34,416',
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      documentCountCard: {
-        type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-        existsInDocs: true,
-        aggregatable: true,
-        loading: false,
-      },
-      metricCards: [
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
@@ -256,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           topValuesCount: 10,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
@@ -264,6 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: true,
           loading: false,
           docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
         },
         {
           fieldName: '@version',
@@ -311,13 +287,13 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 2,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
       visibleMetricFieldsCount: 1,
       totalMetricFieldsCount: 1,
       populatedFieldsCount: 7,
       totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 2,
+      fieldTypeFiltersResultCount: 1,
     },
   };
 
@@ -345,21 +321,25 @@ export default function ({ getService }: FtrProviderContext) {
         testData.expected.totalDocCountFormatted
       );
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the doc count`);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the doc count panel correctly`
+      );
       await ml.dataVisualizerIndexBased.assertTotalDocCountHeaderExist();
       await ml.dataVisualizerIndexBased.assertTotalDocCountChartExist();
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the search panel count`);
-      await ml.dataVisualizerIndexBased.assertSearchPanelExist();
-      await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
-      await ml.dataVisualizerIndexBased.assertFieldTypeInputExists();
-      await ml.dataVisualizerIndexBased.assertFieldNameInputExists();
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the data visualizer table correctly`
+      );
+      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the field count`);
+      await ml.dataVisualizerTable.assertSearchPanelExist();
+      await ml.dataVisualizerTable.assertSampleSizeInputExists();
+      await ml.dataVisualizerTable.assertFieldTypeInputExists();
+      await ml.dataVisualizerTable.assertFieldNameInputExists();
+
       await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
       await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
-      await ml.dataVisualizerIndexBased.assertShowEmptyFieldsSwitchExists();
       await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
         testData.expected.visibleMetricFieldsCount
       );
@@ -372,35 +352,58 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
 
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} displays the data visualizer table`
+        'displays details for metric fields and non-metric fields correctly'
       );
-      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
+      for (const fieldRow of testData.expected.metricFields as Array<
+        Required<MetricFieldVisConfig>
+      >) {
+        await ml.dataVisualizerTable.assertNumberFieldContents(
+          fieldRow.fieldName,
+          fieldRow.docCountFormatted,
+          fieldRow.topValuesCount
+        );
+      }
+
+      for (const fieldRow of testData.expected.nonMetricFields!) {
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
+          fieldRow.type,
+          fieldRow.fieldName!,
+          fieldRow.docCountFormatted,
+          fieldRow.exampleCount
+        );
+      }
 
       await ml.testExecution.logTestStep(
-        'displays details for the created job in the analytics table'
+        `${testData.suiteTitle} sample size control changes non-metric fields`
       );
-      for (const fieldCard of testData.expected.metricCards as Array<
-        Required<MetricFieldVisConfig>
-      >) {
-        await ml.dataVisualizerTable.assertNumberRowContents(
-          fieldCard.fieldName,
-          fieldCard.docCountFormatted
-        );
-      }
+      await ml.dataVisualizerTable.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
+      await ml.dataVisualizerTable.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');
 
-      for (const fieldCard of testData.expected.nonMetricCards as Array<
-        Required<MetricFieldVisConfig>
-      >) {
-        await ml.dataVisualizerTable.assertRowExists(fieldCard.fieldName);
-      }
+      await ml.testExecution.logTestStep('sets and resets field type filter correctly');
+      await ml.dataVisualizerTable.setFieldTypeFilter(
+        testData.fieldTypeFilters,
+        testData.expected.fieldTypeFiltersResultCount
+      );
+      await ml.dataVisualizerTable.removeFieldTypeFilter(
+        testData.fieldTypeFilters,
+        testData.expected.populatedFieldsCount
+      );
 
-      for (const fieldCard of testData.expected.nonMetricCards!) {
-        await ml.dataVisualizerTable.assertNonMetricCardContents(
-          fieldCard.type,
-          fieldCard.fieldName!,
-          fieldCard.docCountFormatted
-        );
-      }
+      await ml.testExecution.logTestStep('sets and resets field name filter correctly');
+      await ml.dataVisualizerTable.setFieldNameFilter(
+        testData.fieldNameFilters,
+        testData.expected.fieldNameFiltersResultCount
+      );
+      await ml.dataVisualizerTable.removeFieldNameFilter(
+        testData.fieldNameFilters,
+        testData.expected.populatedFieldsCount
+      );
+
+      await ml.testExecution.logTestStep('displays unpopulated fields correctly');
+      await ml.dataVisualizerTable.setShowEmptyFieldsSwitchState(
+        true,
+        testData.expected.emptyFields
+      );
     });
   }
 

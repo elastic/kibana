@@ -23,7 +23,7 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);
   const [legendText, setLegendText] = useState<{ min: number; max: number } | undefined>();
-  const dataTestSubj = fieldName;
+  const dataTestSubj = `mlDataGridChart-${fieldName}`;
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
     if (
