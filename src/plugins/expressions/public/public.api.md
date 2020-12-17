@@ -1096,6 +1096,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
 
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
+
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
