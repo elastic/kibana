@@ -207,7 +207,7 @@ describe('migration actions', () => {
   });
 
   describe('cloneIndex', () => {
-    afterEach(async () => {
+    afterAll(async () => {
       try {
         await client.indices.delete({ index: 'clone_*' });
       } catch (e) {
@@ -230,7 +230,7 @@ describe('migration actions', () => {
         }
       `);
     });
-    it.skip('resolves right after waiting for index status to be green if clone target already existed', async () => {
+    it('resolves right after waiting for index status to be green if clone target already existed', async () => {
       // Create a yellow index
       await client.indices.create({
         index: 'clone_yellow_then_green_index_2',
