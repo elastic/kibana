@@ -36,9 +36,13 @@ export const deleteCustomRule = () => {
 };
 
 export const removeSignalsIndex = () => {
-  cy.request({
-    method: 'DELETE',
-    url: `api/detection_engine/index`,
-    headers: { 'kbn-xsrf': 'delete-signals' },
+  cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
+    if (response.status === 200) {
+      cy.request({
+        method: 'DELETE',
+        url: `api/detection_engine/index`,
+        headers: { 'kbn-xsrf': 'delete-signals' },
+      });
+    }
   });
 };

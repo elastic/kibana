@@ -75,7 +75,6 @@ import {
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
-  deleteRule,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -86,7 +85,8 @@ import {
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRule,
@@ -115,15 +115,11 @@ describe('Custom detection rules creation', () => {
   const rule = { ...newRule };
 
   before(() => {
+    cleanKibana();
+    removeSignalsIndex();
     createTimeline(newRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  after(() => {
-    deleteRule();
-    deleteTimeline(rule.timeline.id!);
-    removeSignalsIndex();
   });
 
   it('Creates and activates a new rule', () => {
@@ -219,6 +215,8 @@ describe('Custom detection rules creation', () => {
 
 describe.skip('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
+    cleanKibana();
+    removeSignalsIndex();
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
