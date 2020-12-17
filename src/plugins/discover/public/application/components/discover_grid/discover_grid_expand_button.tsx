@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useContext } from 'react';
-import { EuiButtonIcon, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 

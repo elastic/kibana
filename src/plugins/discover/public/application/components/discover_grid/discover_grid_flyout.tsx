@@ -29,6 +29,8 @@ import {
   EuiPortal,
   EuiTitle,
   EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -64,7 +66,10 @@ export function DiscoverGridFlyout({
     <EuiPortal>
       <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
+          <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="expand" />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle
                 size="s"
@@ -72,7 +77,6 @@ export function DiscoverGridFlyout({
                 data-test-subj="docTableRowDetailsTitle"
               >
                 <h2>
-                  <EuiIcon type="expand" size="m" />{' '}
                   {i18n.translate('discover.grid.tableRow.detailHeading', {
                     defaultMessage: 'Expanded document',
                   })}
@@ -80,28 +84,18 @@ export function DiscoverGridFlyout({
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiFlexGroup
-            direction="column"
-            responsive={false}
-            gutterSize="none"
-            alignItems="flexEnd"
-          >
-            {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="documents"
-                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
-                  data-test-subj="docTableRowAction"
-                >
-                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkText', {
-                    defaultMessage: 'View surrounding documents',
+
+          <EuiSpacer size="m" />
+          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('discover.grid.tableRow.viewText', {
+                    defaultMessage: 'View:',
                   })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
@@ -111,12 +105,28 @@ export function DiscoverGridFlyout({
                 )}`}
                 data-test-subj="docTableRowAction"
               >
-                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
-                  defaultMessage: 'View single document',
+                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
+                  defaultMessage: 'Single document',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
+            {indexPattern.isTimeBased() && indexPattern.id && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="documents"
+                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
+                  data-test-subj="docTableRowAction"
+                >
+                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
+                    defaultMessage: 'Surrounding documents',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
           <DocViewer
             hit={hit}
             columns={columns}
