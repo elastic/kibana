@@ -4,22 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useUrlState } from '../../util/url_state';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { AppStateSelectedCells } from '../explorer_utils';
+import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { useTimefilter } from '../../contexts/kibana';
+import { Duration } from 'moment';
 
 export const useSelectedCells = (
-  appState: any,
-  setAppState: ReturnType<typeof useUrlState>[1]
+  appState: ExplorerAppState,
+  setAppState: ReturnType<typeof useUrlState>[1],
+  bucketInterval: Duration | undefined
 ): [AppStateSelectedCells | undefined, (swimlaneSelectedCells: AppStateSelectedCells) => void] => {
+  const timeFilter = useTimefilter();
+
+  const timeBounds = timeFilter.getBounds();
+
   // keep swimlane selection, restore selectedCells from AppState
   const selectedCells = useMemo(() => {
     return appState?.mlExplorerSwimlane?.selectedType !== undefined
       ? {
           type: appState.mlExplorerSwimlane.selectedType,
-          lanes: appState.mlExplorerSwimlane.selectedLanes,
-          times: appState.mlExplorerSwimlane.selectedTimes,
+          lanes: appState.mlExplorerSwimlane.selectedLanes!,
+          times: appState.mlExplorerSwimlane.selectedTimes!,
           showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
           viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
         }
@@ -28,7 +36,7 @@ export const useSelectedCells = (
   }, [JSON.stringify(appState?.mlExplorerSwimlane)]);
 
   const setSelectedCells = useCallback(
-    (swimlaneSelectedCells: AppStateSelectedCells) => {
+    (swimlaneSelectedCells?: AppStateSelectedCells) => {
       const mlExplorerSwimlane = { ...appState.mlExplorerSwimlane };
 
       if (swimlaneSelectedCells !== undefined) {
@@ -63,5 +71,68 @@ export const useSelectedCells = (
     [appState?.mlExplorerSwimlane, selectedCells, setAppState]
   );
 
+  /**
+   * Adjust cell selection with respect to the time boundaries.
+   * Reset it entirely when it out of range.
+   */
+  useEffect(() => {
+    if (selectedCells?.times === undefined || bucketInterval === undefined) return;
+
+    let [selectedFrom, selectedTo] = selectedCells.times;
+
+    const rangeFrom = timeBounds.min!.unix();
+    /**
+     * Because each cell on the swim lane represent the fixed bucket interval,
+     * the selection range could be outside of the time boundaries with
+     * correction within the bucket interval.
+     */
+    const rangeTo = timeBounds.max!.unix() + bucketInterval.asSeconds();
+
+    selectedFrom = Math.max(selectedFrom, rangeFrom);
+
+    selectedTo = Math.min(selectedTo, rangeTo);
+
+    const isSelectionOutOfRange = rangeFrom > selectedTo || rangeTo < selectedFrom;
+
+    if (isSelectionOutOfRange) {
+      // reset selection
+      setSelectedCells();
+      return;
+    }
+
+    if (selectedFrom !== rangeFrom || selectedTo !== rangeTo) {
+      setSelectedCells({
+        ...selectedCells,
+        times: [selectedFrom, selectedTo],
+      });
+    }
+  }, [
+    timeBounds.min?.valueOf(),
+    timeBounds.max?.valueOf(),
+    selectedCells,
+    bucketInterval?.asMilliseconds(),
+  ]);
+
   return [selectedCells, setSelectedCells];
 };
+
+export interface SelectionTimeRange {
+  earliestMs: number;
+  latestMs: number;
+}
+
+export function getTimeBoundsFromSelection(
+  selectedCells: AppStateSelectedCells | undefined
+): SelectionTimeRange | undefined {
+  if (selectedCells?.times === undefined) {
+    return;
+  }
+
+  // time property of the cell data is an array, with the elements being
+  // the start times of the first and last cell selected.
+  return {
+    earliestMs: selectedCells.times[0] * 1000,
+    // Subtract 1 ms so search does not include start of next bucket.
+    latestMs: selectedCells.times[1] * 1000 - 1,
+  };
+}

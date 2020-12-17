@@ -110,13 +110,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         from: globalState.time.from,
         to: globalState.time.to,
       });
-
-      const timefilterBounds = timefilter.getBounds();
-      // Only if both min/max bounds are valid moment times set the bounds.
-      // An invalid string restored from globalState might return `undefined`.
-      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        explorerService.setBounds(timefilterBounds);
-      }
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
@@ -194,29 +187,29 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState);
+  const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState, explorerState?.swimlaneBucketInterval);
 
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 
   const loadExplorerDataConfig =
-    (explorerState !== undefined && {
-      bounds: explorerState.bounds,
-      lastRefresh,
-      influencersFilterQuery: explorerState.influencersFilterQuery,
-      noInfluencersConfigured: explorerState.noInfluencersConfigured,
-      selectedCells,
-      selectedJobs: explorerState.selectedJobs,
-      swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
-      tableInterval: tableInterval.val,
-      tableSeverity: tableSeverity.val,
-      viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
-      swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
-      viewByPerPage: explorerState.viewByPerPage,
-      viewByFromPage: explorerState.viewByFromPage,
-    }) ||
-    undefined;
+    explorerState !== undefined
+      ? {
+          lastRefresh,
+          influencersFilterQuery: explorerState.influencersFilterQuery,
+          noInfluencersConfigured: explorerState.noInfluencersConfigured,
+          selectedCells,
+          selectedJobs: explorerState.selectedJobs,
+          swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+          tableInterval: tableInterval.val,
+          tableSeverity: tableSeverity.val,
+          viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+          swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
+          viewByPerPage: explorerState.viewByPerPage,
+          viewByFromPage: explorerState.viewByFromPage,
+        }
+      : undefined;
 
   useEffect(() => {
     /**
