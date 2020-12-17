@@ -117,7 +117,6 @@ describe('getAppResults', () => {
       }),
     ];
     const results = getAppResults('One', apps);
-    expect(results.length).toBe(1);
     expect(results.map(({ title }) => title)).toEqual(['App 1']);
   });
 
@@ -149,8 +148,6 @@ describe('getAppResults', () => {
     ];
 
     const results = getAppResults('TwoOne', apps);
-
-    expect(results.length).toBe(1);
     expect(results.map(({ title }) => title)).toEqual(['App 1 / Sub2 / Sub2Sub1']);
   });
 });

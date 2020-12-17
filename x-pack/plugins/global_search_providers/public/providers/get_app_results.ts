@@ -149,7 +149,7 @@ const flattenDeepLinks = (
         // shift current sublink title into array of sub-sublink titles
         subLinkTitles: [deepLink.title, ...deepAppLink.subLinkTitles],
         // combine current sublink keywords into array of sub-link keywords
-        keywords: deepLink.keywords.concat(deepAppLink.keywords),
+        keywords: [...deepLink.keywords, ...deepAppLink.keywords],
       })),
   ];
 };

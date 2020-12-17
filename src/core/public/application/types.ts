@@ -242,7 +242,7 @@ export interface App<HistoryLocationState = unknown> {
    *
    * @remarks
    * Used to populate navigational search results (where available).
-   * Can be updated using the {@link App.updater$} observable. See {@link AppSubLink} for more details.
+   * Can be updated using the {@link App.updater$} observable. See {@link PublicAppSearchDeepLinkInfo} for more details.
    *
    * @example
    * ```ts
