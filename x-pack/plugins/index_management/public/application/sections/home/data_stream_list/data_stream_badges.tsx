@@ -21,7 +21,7 @@ export const DataStreamsBadges: React.FunctionComponent<Props> = ({ dataStream }
       <EuiBadge color="hollow">
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
-          defaultMessage="Managed"
+          defaultMessage="Fleet-managed"
         />
       </EuiBadge>
     );
