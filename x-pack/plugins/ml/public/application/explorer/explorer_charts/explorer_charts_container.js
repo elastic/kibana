@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import {
@@ -188,6 +189,7 @@ export const ExplorerChartsContainerUI = ({
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
+      <EuiSpacer size={'m'} />
       <EuiFlexGrid columns={chartsColumns}>
         {seriesToPlot.length > 0 &&
           seriesToPlot.map((series) => (
