@@ -34,7 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           kibana: [
             {
-              base: ['all'],
+              feature: {
+                dashboard: ['minimal_read', 'store_search_session'],
+              },
               spaces: ['another-space'],
             },
           ],
