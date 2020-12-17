@@ -94,7 +94,7 @@ default.
 [[format-bytes-defaultpattern]]`format:bytes:defaultPattern`::
 The default <<numeral, numeral pattern>> format for the "bytes" format.
 
-[[format-currency-defaultpattern]]``format:currency:defaultPattern`::
+[[format-currency-defaultpattern]]`format:currency:defaultPattern`::
 The default <<numeral, numeral pattern>> format for the "currency" format.
 
 [[format-defaulttypemap]]`format:defaultTypeMap`::
