@@ -24,9 +24,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -254,8 +256,11 @@ export function Discover({
                             </div>
                           )}
                         </section>
+                        <EuiSpacer size="s" />
                       </EuiFlexItem>
                     )}
+
+                    <EuiHorizontalRule margin="none" />
 
                     <EuiFlexItem className="eui-yScroll">
                       <section

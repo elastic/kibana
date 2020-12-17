@@ -46,6 +46,7 @@ discover-app {
 
 .dscResultCount {
   padding: $euiSizeS;
+  min-height: $euiSize * 3;
 
   @include euiBreakpoint('xs', 's') {
     .dscResultCount__toggle {
