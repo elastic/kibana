@@ -56,7 +56,12 @@ function getChartId(series) {
 function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, mlUrlGenerator }) {
   const redirectToSingleMetricViewer = useCallback(async () => {
     const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+    // need to get the relative link for addItemToRecentlyAccessed
+    // whereas for user to navigate to link it needs the full path
+    const relativeLinkParts = singleMetricViewerLink.split('app/ml');
+    if (Array.isArray(relativeLinkParts) && relativeLinkParts.length === 2) {
+      addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, relativeLinkParts[1]);
+    }
 
     window.open(singleMetricViewerLink, '_blank');
   }, [mlUrlGenerator]);
