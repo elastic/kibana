@@ -76,7 +76,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
