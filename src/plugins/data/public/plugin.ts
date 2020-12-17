@@ -66,6 +66,7 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
+import { TriggerId } from '../../ui_actions/public';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -124,14 +125,14 @@ export class DataPublicPlugin
     );
 
     uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
+      'SELECT_RANGE_TRIGGER' as TriggerId,
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
+      'VALUE_CLICK_TRIGGER' as TriggerId,
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))

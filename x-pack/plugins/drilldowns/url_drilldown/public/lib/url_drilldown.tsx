@@ -37,6 +37,9 @@ interface EmbeddableQueryInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
+/** @internal */
+export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
+
 interface UrlDrilldownDeps {
   externalUrl: IExternalUrl;
   getGlobalScope: () => UrlDrilldownGlobalScope;
@@ -45,7 +48,7 @@ interface UrlDrilldownDeps {
   getVariablesHelpDocsLink: () => string;
 }
 
-export type ActionContext = ChartActionContext<IEmbeddable<EmbeddableQueryInput>>;
+export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
@@ -54,7 +57,7 @@ export type UrlTrigger =
   | typeof CONTEXT_MENU_TRIGGER;
 
 export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
-  embeddable?: IEmbeddable<EmbeddableQueryInput>;
+  embeddable?: EmbeddableWithQueryInput;
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
