@@ -373,6 +373,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         const response = await http(route, {
           body: JSON.stringify({ params }),
         });
+        if (successCallback) successCallback();
         if (isUpdating) {
           setSuccessMessage(
             i18n.translate(
@@ -384,7 +385,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           );
         }
         actions.setSourceConfigData(response);
-        if (successCallback) successCallback();
       } catch (e) {
         flashAPIErrors(e);
         if (!isUpdating) throw new Error(e);
