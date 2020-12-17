@@ -64,7 +64,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, machine learning', () => {
+describe.skip('Detection rules, machine learning', () => {
   const expectedUrls = machineLearningRule.referenceUrls.join('');
   const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
   const expectedTags = machineLearningRule.tags.join('');
