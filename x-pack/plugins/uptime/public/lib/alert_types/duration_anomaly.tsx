@@ -10,7 +10,7 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
 
-const { name, defaultActionMessage, description } = DurationAnomalyTranslations;
+const { defaultActionMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
 
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
