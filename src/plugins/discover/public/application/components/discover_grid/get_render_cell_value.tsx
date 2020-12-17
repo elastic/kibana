@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -35,18 +40,14 @@ export const getRenderCellValueFn = (
     const formatted = indexPattern.formatHit(row);
 
     return (
-      <dl className="dscFormatSource">
+      <EuiDescriptionList type="inline" compressed>
         {Object.keys(formatted).map((key) => (
-          <span key={key}>
-            <dt className="dscFormatSource__title">{key}</dt>
-            <dd
-              className="dscFormatSource__description"
-              /* eslint-disable-next-line react/no-danger */
-              dangerouslySetInnerHTML={{ __html: formatted[key] }}
-            />
-          </span>
+          <Fragment key={key}>
+            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription dangerouslySetInnerHTML={{ __html: formatted[key] }} />
+          </Fragment>
         ))}
-      </dl>
+      </EuiDescriptionList>
     );
   };
 
