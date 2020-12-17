@@ -6,8 +6,6 @@
 
 experimental[] Check the status of the reindex operation.
 
-Check the status of the reindex operation.
-
 [[check-reindex-status-request]]
 ==== Request
 
