@@ -113,15 +113,23 @@ export const XYSettings: FC<XYSettingsProps> = ({
         },
       },
     },
+    axes: {
+      axisTitle: {
+        padding: {
+          outer: 10,
+        },
+      },
+    },
     chartMargins:
       legendPosition === Position.Top || legendPosition === Position.Right
         ? {
-            bottom: 10,
+            bottom: (theme.chartMargins?.bottom ?? 0) + 10,
           }
         : {
-            right: 10,
+            right: (theme.chartMargins?.right ?? 0) + 10,
           },
   };
+
   const headerValueFormatter: TickFormatter<any> | undefined = xAxis.ticks?.formatter
     ? (value) => fillEmptyValue(xAxis.ticks?.formatter?.(value)) ?? ''
     : undefined;
