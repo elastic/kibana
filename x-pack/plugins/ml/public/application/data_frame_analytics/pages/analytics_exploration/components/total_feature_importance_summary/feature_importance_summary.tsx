@@ -191,7 +191,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     return [sortedData, _barSeriesSpec, _showLegend, _chartHeight];
   }, [totalFeatureImportance]);
 
-  const docLinks = docLinks.links.ml.featureImportance;
+  const docLink = docLinks.links.ml.featureImportance;
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
   // do not expand by default if no feature importance data
