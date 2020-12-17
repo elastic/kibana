@@ -80,7 +80,7 @@ export interface LegacyRequest {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
   payload: {
-    [key: string]: string;
+    [key: string]: any;
   };
   params: {
     [key: string]: string;
