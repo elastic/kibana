@@ -37,6 +37,7 @@ import {
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensEditEvent,
 } from '../../../types';
 import { DragDrop, DragContext } from '../../../drag_drop';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
@@ -50,9 +51,9 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
 import { validateDatasourceAndVisualization } from '../state_helpers';
+import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -217,8 +218,15 @@ export function WorkspacePanel({
           data: event.data,
         });
       }
+      if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+        });
+      }
     },
-    [plugins.uiActions]
+    [plugins.uiActions, dispatch, activeVisualization]
   );
 
   useEffect(() => {
@@ -374,11 +382,11 @@ export const InnerVisualizationWrapper = ({
   );
 
   const onData$ = useCallback(
-    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+    (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
         dispatch({
           type: 'UPDATE_ACTIVE_DATA',
-          tables: inspectorAdapters.tables,
+          tables: inspectorAdapters.tables.tables,
         });
       }
     },
@@ -472,6 +480,7 @@ export const InnerVisualizationWrapper = ({
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
         onData$={onData$}
+        renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 

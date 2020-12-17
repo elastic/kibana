@@ -50,7 +50,6 @@ import {
   transformSettingsMaxPageSearchSizeValidator,
 } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
-import { dictionaryToArray } from '../../../../../../common/types/common';
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
@@ -179,15 +178,12 @@ export const StepDetailsForm: FC<Props> = React.memo(
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
-        const { searchQuery, groupByList, aggList } = stepDefineState;
-        const pivotAggsArr = dictionaryToArray(aggList);
-        const pivotGroupByArr = dictionaryToArray(groupByList);
+        const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
         const pivotQuery = getPivotQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
           searchItems.indexPattern.title,
           pivotQuery,
-          pivotGroupByArr,
-          pivotAggsArr
+          partialPreviewRequest
         );
 
         const transformPreview = await api.getTransformsPreview(previewRequest);
