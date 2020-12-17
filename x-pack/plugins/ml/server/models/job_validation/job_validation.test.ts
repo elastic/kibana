@@ -12,7 +12,7 @@ import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
+  search: () => Promise.resolve({ body: { hits: { total: { value: 1, relation: 'eq' } } } }),
 };
 
 const mlClusterClient = ({
