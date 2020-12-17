@@ -60,6 +60,7 @@ function getDefaultProps() {
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
+    searchSessionId: 'sessionId',
   };
 }
 
@@ -264,6 +265,7 @@ describe('editor_frame', () => {
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         availablePalettes: defaultProps.palettes,
+        searchSessionId: 'sessionId',
       });
     });
 
