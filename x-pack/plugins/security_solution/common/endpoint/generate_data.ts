@@ -22,6 +22,7 @@ import {
   ancestryArray,
   entityIDSafeVersion,
   parentEntityIDSafeVersion,
+  processNameSafeVersion,
   timestampSafeVersion,
 } from './models/event';
 import {
@@ -965,6 +966,7 @@ export class EndpointDocGenerator {
           eventCategory: ['process'],
           eventType: ['end'],
           eventsDataStream: opts.eventsDataStream,
+          processName: processNameSafeVersion(root),
         })
       );
     }
@@ -1002,6 +1004,7 @@ export class EndpointDocGenerator {
             ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
             eventsDataStream: opts.eventsDataStream,
+            processName: processNameSafeVersion(ancestor),
           })
         );
       }

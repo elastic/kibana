@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MBMap } from './mb_map';
 import {
@@ -14,6 +16,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setMapInitError,
+  MapExtentState,
 } from '../../actions';
 import {
   getLayerList,
@@ -26,10 +29,10 @@ import {
   getSpatialFiltersLayer,
   getMapSettings,
 } from '../../selectors/map_selectors';
-
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     isMapReady: getMapReady(state),
     settings: getMapSettings(state),
@@ -44,20 +47,20 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    extentChanged: (e) => {
-      dispatch(mapExtentChanged(e));
+    extentChanged: (mapExtentState: MapExtentState) => {
+      dispatch(mapExtentChanged(mapExtentState));
     },
-    onMapReady: (e) => {
+    onMapReady: (mapExtentState: MapExtentState) => {
       dispatch(clearGoto());
-      dispatch(mapExtentChanged(e));
+      dispatch(mapExtentChanged(mapExtentState));
       dispatch(mapReady());
     },
     onMapDestroyed: () => {
       dispatch(mapDestroyed());
     },
-    setMouseCoordinates: ({ lat, lon }) => {
+    setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => {
       dispatch(setMouseCoordinates({ lat, lon }));
     },
     clearMouseCoordinates: () => {
@@ -66,7 +69,7 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setMapInitError(errorMessage) {
+    setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
     },
   };
