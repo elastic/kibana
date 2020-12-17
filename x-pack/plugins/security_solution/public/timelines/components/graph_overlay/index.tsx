@@ -20,7 +20,10 @@ import styled from 'styled-components';
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
 import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
@@ -28,10 +31,14 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
-
+import {
+  isLoadingSelector,
+  startSelector,
+  endSelector,
+} from '../../../common/components/super_date_picker/selectors';
+import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import * as i18n from './translations';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -114,12 +121,33 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
 
-  const {
-    timelineFullScreen,
-    setTimelineFullScreen,
-    globalFullScreen,
-    setGlobalFullScreen,
-  } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+  const getStartSelector = useMemo(() => startSelector(), []);
+  const getEndSelector = useMemo(() => endSelector(), []);
+  const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
+  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
+  const shouldUpdate = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getIsLoadingSelector(state.inputs.timeline);
+    } else {
+      return getIsLoadingSelector(state.inputs.global);
+    }
+  });
+  const from = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getStartSelector(state.inputs.timeline);
+    } else {
+      return getStartSelector(state.inputs.global);
+    }
+  });
+  const to = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getEndSelector(state.inputs.timeline);
+    } else {
+      return getEndSelector(state.inputs.global);
+    }
+  });
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
@@ -174,6 +202,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
           indices={indices}
+          shouldUpdate={shouldUpdate}
+          filters={{ from, to }}
         />
       ) : (
         <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>

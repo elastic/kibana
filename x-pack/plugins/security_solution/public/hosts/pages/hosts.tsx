@@ -20,7 +20,7 @@ import { SiemNavigation } from '../../common/components/navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useFullScreen } from '../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
@@ -66,7 +66,7 @@ const HostsComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   const capabilities = useMlCapabilities();
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();

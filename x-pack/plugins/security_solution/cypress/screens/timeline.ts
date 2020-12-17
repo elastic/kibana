@@ -40,7 +40,8 @@ export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
 export const HEADER = '[data-test-subj="header"]';
 
-export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
+export const HEADERS_GROUP =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
@@ -51,6 +52,10 @@ export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
 export const NOTES = '[data-test-subj="note-card-body"]';
+
+const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+
+export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
@@ -102,7 +107,8 @@ export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
 export const TIMELINE_FILTER = (filter: TimelineFilter) => {
-  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
+  // The space at the end of the line is required. We want to keep it until it is updated.
+  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned "]`;
 };
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';

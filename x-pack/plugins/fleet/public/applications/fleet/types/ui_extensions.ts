@@ -5,7 +5,7 @@
  */
 
 import { ComponentType, LazyExoticComponent } from 'react';
-import { NewPackagePolicy, PackagePolicy } from './index';
+import { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -80,7 +80,13 @@ export interface PackagePolicyCreateExtension {
 /**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
-export type PackageCustomExtensionComponent = ComponentType;
+export type PackageCustomExtensionComponent = ComponentType<PackageCustomExtensionComponentProps>;
+
+export interface PackageCustomExtensionComponentProps {
+  /** The package key value that should be used used for URLs */
+  pkgkey: string;
+  packageInfo: PackageInfo;
+}
 
 /** Extension point registration contract for Integration details Custom view */
 export interface PackageCustomExtension {
