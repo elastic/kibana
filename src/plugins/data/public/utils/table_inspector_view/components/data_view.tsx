@@ -38,6 +38,7 @@ interface DataViewComponentProps extends InspectorViewProps {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   isFilterable: (column: DatatableColumn) => boolean;
+  options: { fileName?: string };
 }
 
 class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
@@ -122,7 +123,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
     return (
       <DataTableFormat
         data={this.state.datatable}
-        exportTitle={this.props.title}
+        exportTitle={this.props.options?.fileName || this.props.title}
         uiSettings={this.props.uiSettings}
         fieldFormats={this.props.fieldFormats}
         uiActions={this.props.uiActions}
