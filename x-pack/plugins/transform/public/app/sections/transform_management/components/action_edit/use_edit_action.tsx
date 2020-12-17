@@ -6,7 +6,7 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
@@ -16,10 +16,10 @@ import { editActionNameText, EditActionName } from './edit_action_name';
 export const useEditAction = (forceDisable: boolean) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
-  const [config, setConfig] = useState<TransformPivotConfig>();
+  const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const closeFlyout = () => setIsFlyoutVisible(false);
-  const showFlyout = (newConfig: TransformPivotConfig) => {
+  const showFlyout = (newConfig: TransformConfigUnion) => {
     setConfig(newConfig);
     setIsFlyoutVisible(true);
   };

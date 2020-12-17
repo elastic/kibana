@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('data tables are filtered', async () => {
-        await dashboardExpect.dataTableRowCount(0);
+        await dashboardExpect.dataTableNoResult();
       });
 
       it('goal and guages are filtered', async () => {
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('data tables are filtered', async () => {
-        await dashboardExpect.dataTableRowCount(0);
+        await dashboardExpect.dataTableNoResult();
       });
 
       it('goal and guages are filtered', async () => {

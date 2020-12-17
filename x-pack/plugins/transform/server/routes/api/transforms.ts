@@ -450,7 +450,7 @@ async function deleteTransforms(
           ? transformConfig.dest.index[0]
           : transformConfig.dest.index;
       } catch (getTransformConfigError) {
-        transformDeleted.error = wrapError(getTransformConfigError);
+        transformDeleted.error = getTransformConfigError.meta.body.error;
         results[transformId] = {
           transformDeleted,
           destIndexDeleted,
@@ -471,7 +471,7 @@ async function deleteTransforms(
           });
           destIndexDeleted.success = true;
         } catch (deleteIndexError) {
-          destIndexDeleted.error = wrapError(deleteIndexError);
+          destIndexDeleted.error = deleteIndexError.meta.body.error;
         }
       }
 
@@ -487,7 +487,7 @@ async function deleteTransforms(
             destIndexPatternDeleted.success = true;
           }
         } catch (deleteDestIndexPatternError) {
-          destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+          destIndexPatternDeleted.error = deleteDestIndexPatternError.meta.body.error;
         }
       }
 
@@ -498,7 +498,7 @@ async function deleteTransforms(
         });
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {
-        transformDeleted.error = wrapError(deleteTransformJobError);
+        transformDeleted.error = deleteTransformJobError.meta.body.error;
         if (deleteTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
@@ -519,7 +519,7 @@ async function deleteTransforms(
           action: TRANSFORM_ACTIONS.DELETE,
         });
       }
-      results[transformId] = { transformDeleted: { success: false, error: JSON.stringify(e) } };
+      results[transformId] = { transformDeleted: { success: false, error: e.meta.body.error } };
     }
   }
   return results;
@@ -579,7 +579,7 @@ async function startTransforms(
           action: TRANSFORM_ACTIONS.START,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;
@@ -628,7 +628,7 @@ async function stopTransforms(
           action: TRANSFORM_ACTIONS.STOP,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;

@@ -94,10 +94,14 @@ export function syncSavedObjectsFactory(
           results.savedObjectsDeleted[job.jobId] = { success: true };
         } else {
           // Delete AD saved objects for jobs which no longer exist
-          const jobId = job.jobId;
+          const { jobId, namespaces } = job;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
+              if (namespaces !== undefined && namespaces.length) {
+                await jobSavedObjectService.forceDeleteAnomalyDetectionJob(jobId, namespaces[0]);
+              } else {
+                await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
+              }
               results.savedObjectsDeleted[job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
@@ -115,10 +119,14 @@ export function syncSavedObjectsFactory(
           results.savedObjectsDeleted[job.jobId] = { success: true };
         } else {
           // Delete DFA saved objects for jobs which no longer exist
-          const jobId = job.jobId;
+          const { jobId, namespaces } = job;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
+              if (namespaces !== undefined && namespaces.length) {
+                await jobSavedObjectService.forceDeleteDataFrameAnalyticsJob(jobId, namespaces[0]);
+              } else {
+                await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
+              }
               results.savedObjectsDeleted[job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {

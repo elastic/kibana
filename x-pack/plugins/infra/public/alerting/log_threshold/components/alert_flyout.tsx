@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
 
@@ -14,24 +14,23 @@ interface Props {
 }
 
 export const AlertFlyout = (props: Props) => {
+  const { visible, setVisible } = props;
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-
+  const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
       triggersActionsUI.getAddAlertFlyout({
         consumer: 'logs',
-        addFlyoutVisible: props.visible!,
-        setAddFlyoutVisibility: props.setVisible,
+        onClose: onCloseFlyout,
         canChangeTrigger: false,
         alertTypeId: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
         metadata: {
           isInternal: true,
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [triggersActionsUI, props.visible]
+    [triggersActionsUI, onCloseFlyout]
   );
 
-  return <>{AddAlertFlyout}</>;
+  return <>{visible && AddAlertFlyout}</>;
 };
