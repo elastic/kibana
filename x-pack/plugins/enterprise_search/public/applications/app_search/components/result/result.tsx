@@ -49,10 +49,11 @@ export const Result: React.FC<Props> = ({
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
+  const documentLink = getDocumentDetailRoute(resultMeta.engine, resultMeta.id);
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
     return shouldLinkToDetailPage ? (
-      <ReactRouterHelper to={getDocumentDetailRoute(resultMeta.engine, resultMeta.id)}>
-        <a className="appSearchResult__content">{children}</a>
+      <ReactRouterHelper to={documentLink}>
+        <article className="appSearchResult__content">{children}</article>
       </ReactRouterHelper>
     ) : (
       <article className="appSearchResult__content">{children}</article>
@@ -109,7 +110,21 @@ export const Result: React.FC<Props> = ({
           <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
         </button>
       )}
-      <div className="appSearchResult__actionButtons">TODO</div>
+      <div className="appSearchResult__actionButtons">
+        {shouldLinkToDetailPage && (
+          <ReactRouterHelper to={documentLink}>
+            <a
+              className="appSearchResult__actionButton"
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
+                { defaultMessage: 'Visit document details' }
+              )}
+            >
+              <EuiIcon type="popout" />
+            </a>
+          </ReactRouterHelper>
+        )}
+      </div>
     </EuiPanel>
   );
 };
