@@ -95,10 +95,11 @@ export function ResolverTreeFetcher(
 
         /*
          * Necessary to handle refresh states where another node besides the origin was selected
-         * If the user has selected another node, but is back to viewing the node list
-         * Refresh will reset to the originID.
+         * If the user has selected another node, but is back to viewing the nodeList, nodeID won't be set in the url
+         * So after a refresh the focused node will be the originID.
          * This is okay for now, but can be updated if we decide to track selectedNode in panelParameters.
          */
+        // no nodeID on the 'nodes' (nodeList) view.
         if (currentPanelParameters && currentPanelParameters.panelView !== 'nodes') {
           const { nodeID } = currentPanelParameters.panelParameters;
           const urlHasDefinedNode = result.find((node) => node.id === nodeID);
