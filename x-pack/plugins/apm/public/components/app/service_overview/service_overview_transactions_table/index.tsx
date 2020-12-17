@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,30 +13,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
-import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { px, truncate, unit } from '../../../../style/variables';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import {
   APIReturnType,
   callApmApi,
 } from '../../../../services/rest/createCallApmApi';
+import { px, unit } from '../../../../style/variables';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { TableLinkFlexItem } from '../table_link_flex_item';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
-import { ImpactBar } from '../../../shared/ImpactBar';
-import { ServiceOverviewTable } from '../service_overview_table';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
@@ -53,18 +53,6 @@ const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,
 };
-
-const TransactionGroupLinkWrapper = styled.div`
-  width: 100%;
-  .euiToolTipAnchor {
-    width: 100% !important;
-  }
-`;
-
-const StyledTransactionDetailLink = styled(TransactionDetailLink)`
-  display: block;
-  ${truncate('100%')}
-`;
 
 function getLatencyAggregationTypeLabel(
   latencyAggregationType?: LatencyAggregationType
@@ -188,17 +176,18 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       ),
       render: (_, { name, transactionType }) => {
         return (
-          <TransactionGroupLinkWrapper>
-            <EuiToolTip delay="long" content={name}>
-              <StyledTransactionDetailLink
+          <TruncateWithTooltip
+            text={name}
+            content={
+              <TransactionDetailLink
                 serviceName={serviceName}
                 transactionName={name}
                 transactionType={transactionType}
               >
                 {name}
-              </StyledTransactionDetailLink>
-            </EuiToolTip>
-          </TransactionGroupLinkWrapper>
+              </TransactionDetailLink>
+            }
+          />
         );
       },
     },
@@ -208,7 +197,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
@@ -228,7 +217,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { throughput }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis0"
             compact
             series={throughput.timeseries ?? undefined}
@@ -248,7 +237,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       width: px(unit * 8),
       render: (_, { errorRate }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             compact
             series={errorRate.timeseries ?? undefined}
@@ -273,9 +262,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   ];
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
@@ -303,41 +292,47 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
-            <ServiceOverviewTable
-              columns={columns}
-              items={items}
-              pagination={{
-                pageIndex,
-                pageSize: PAGE_SIZE,
-                totalItemCount,
-                pageSizeOptions: [PAGE_SIZE],
-                hidePerPageOptions: true,
-              }}
-              loading={status === FETCH_STATUS.LOADING}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
-              sorting={{
-                enableAllColumns: true,
-                sort: {
-                  direction: sort.direction,
-                  field: sort.field,
-                },
-              }}
-            />
+            <ServiceOverviewTableContainer
+              isEmptyAndLoading={
+                items.length === 0 && status === FETCH_STATUS.LOADING
+              }
+            >
+              <EuiBasicTable
+                columns={columns}
+                items={items}
+                pagination={{
+                  pageIndex,
+                  pageSize: PAGE_SIZE,
+                  totalItemCount,
+                  pageSizeOptions: [PAGE_SIZE],
+                  hidePerPageOptions: true,
+                }}
+                loading={status === FETCH_STATUS.LOADING}
+                onChange={(newTableOptions: {
+                  page?: {
+                    index: number;
+                  };
+                  sort?: { field: string; direction: SortDirection };
+                }) => {
+                  setTableOptions({
+                    pageIndex: newTableOptions.page?.index ?? 0,
+                    sort: newTableOptions.sort
+                      ? {
+                          field: newTableOptions.sort.field as SortField,
+                          direction: newTableOptions.sort.direction,
+                        }
+                      : DEFAULT_SORT,
+                  });
+                }}
+                sorting={{
+                  enableAllColumns: true,
+                  sort: {
+                    direction: sort.direction,
+                    field: sort.field,
+                  },
+                }}
+              />
+            </ServiceOverviewTableContainer>
           </TableFetchWrapper>
         </EuiFlexItem>
       </EuiFlexItem>

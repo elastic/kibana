@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiFocusTrap } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -32,7 +33,7 @@ interface OwnProps {
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
 
@@ -77,15 +78,14 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }
     });
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
-
   return (
     <>
-      <Visible show={show}>
-        <Pane timelineId={timelineId} />
-      </Visible>
-      <Visible show={!show}>
-        <FlyoutBottomBar timelineId={timelineId} />
-      </Visible>
+      <EuiFocusTrap disabled={!show}>
+        <Visible show={show}>
+          <Pane timelineId={timelineId} />
+        </Visible>
+      </EuiFocusTrap>
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };
