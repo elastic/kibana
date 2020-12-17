@@ -18,11 +18,11 @@
  */
 
 import React, { Suspense } from 'react';
-import { getDataViewDescription } from '../index';
-import { DataAdapter } from '../../../../common/adapters/data';
+import { getTableViewDescription } from '../index';
 import { mountWithIntl } from '@kbn/test/jest';
+import { TablesAdapter } from '../../../../../expressions/common';
 
-jest.mock('../lib/export_csv', () => ({
+jest.mock('./export_csv', () => ({
   exportAsCsv: jest.fn(),
 }));
 
@@ -30,13 +30,18 @@ describe('Inspector Data View', () => {
   let DataView: any;
 
   beforeEach(() => {
-    DataView = getDataViewDescription();
+    DataView = getTableViewDescription(() => ({
+      uiActions: {} as any,
+      uiSettings: {} as any,
+      fieldFormats: {} as any,
+      isFilterable: jest.fn(),
+    }));
   });
 
   it('should only show if data adapter is present', () => {
-    const adapter = new DataAdapter();
+    const adapter = new TablesAdapter();
 
-    expect(DataView.shouldShow({ data: adapter })).toBe(true);
+    expect(DataView.shouldShow({ tables: adapter })).toBe(true);
     expect(DataView.shouldShow({})).toBe(false);
   });
 
@@ -44,7 +49,7 @@ describe('Inspector Data View', () => {
     let adapters: any;
 
     beforeEach(() => {
-      adapters = { data: new DataAdapter() };
+      adapters = { tables: new TablesAdapter() };
     });
 
     it('should render loading state', () => {
@@ -60,9 +65,7 @@ describe('Inspector Data View', () => {
 
     it('should render empty state', async () => {
       const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
-      const tabularLoader = Promise.resolve(null);
-      adapters.data.setTabularLoader(() => tabularLoader);
-      await tabularLoader;
+      adapters.tables.logDatatable({ columns: [{ id: '1' }], rows: [{ '1': 123 }] });
       // After the loader has resolved we'll still need one update, to "flush" the state changes
       component.update();
       expect(component).toMatchSnapshot();

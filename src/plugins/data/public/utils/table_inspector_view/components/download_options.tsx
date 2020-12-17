@@ -24,8 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { DataViewColumn, DataViewRow } from '../types';
-
-import { exportAsCsv } from '../lib/export_csv';
+import { exportAsCsv } from './export_csv';
+import { FieldFormatsStart } from '../../../field_formats';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;
@@ -38,6 +38,7 @@ interface DataDownloadOptionsProps {
   csvSeparator: string;
   quoteValues: boolean;
   isFormatted?: boolean;
+  fieldFormats: FieldFormatsStart;
 }
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
@@ -45,9 +46,9 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
     title: PropTypes.string.isRequired,
     csvSeparator: PropTypes.string.isRequired,
     quoteValues: PropTypes.bool.isRequired,
-    isFormatted: PropTypes.bool,
     columns: PropTypes.array,
     rows: PropTypes.array,
+    fieldFormats: PropTypes.object.isRequired,
   };
 
   state = {
@@ -66,10 +67,10 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
     });
   };
 
-  exportCsv = (customParams: any = {}) => {
+  exportCsv = (isFormatted: boolean = true) => {
     let filename = this.props.title;
     if (!filename || filename.length === 0) {
-      filename = i18n.translate('inspector.data.downloadOptionsUnsavedFilename', {
+      filename = i18n.translate('data.inspector.table.downloadOptionsUnsavedFilename', {
         defaultMessage: 'unsaved',
       });
     }
@@ -79,38 +80,24 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
       rows: this.props.rows,
       csvSeparator: this.props.csvSeparator,
       quoteValues: this.props.quoteValues,
-      ...customParams,
+      isFormatted,
+      fieldFormats: this.props.fieldFormats,
     });
   };
 
   exportFormattedCsv = () => {
-    this.exportCsv({
-      valueFormatter: (item: any) => item.formatted,
-    });
+    this.exportCsv(true);
   };
 
   exportFormattedAsRawCsv = () => {
-    this.exportCsv({
-      valueFormatter: (item: any) => item.raw,
-    });
+    this.exportCsv(false);
   };
-
-  renderUnformattedDownload() {
-    return (
-      <EuiButton size="s" onClick={this.exportCsv}>
-        <FormattedMessage
-          id="inspector.data.downloadCSVButtonLabel"
-          defaultMessage="Download CSV"
-        />
-      </EuiButton>
-    );
-  }
 
   renderFormattedDownloads() {
     const button = (
       <EuiButton iconType="arrowDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
         <FormattedMessage
-          id="inspector.data.downloadCSVToggleButtonLabel"
+          id="data.inspector.table.downloadCSVToggleButtonLabel"
           defaultMessage="Download CSV"
         />
       </EuiButton>
@@ -121,14 +108,14 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         onClick={this.exportFormattedCsv}
         toolTipContent={
           <FormattedMessage
-            id="inspector.data.formattedCSVButtonTooltip"
+            id="data.inspector.table.formattedCSVButtonTooltip"
             defaultMessage="Download the data in table format"
           />
         }
         toolTipPosition="left"
       >
         <FormattedMessage
-          id="inspector.data.formattedCSVButtonLabel"
+          id="data.inspector.table.formattedCSVButtonLabel"
           defaultMessage="Formatted CSV"
         />
       </EuiContextMenuItem>,
@@ -137,13 +124,13 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         onClick={this.exportFormattedAsRawCsv}
         toolTipContent={
           <FormattedMessage
-            id="inspector.data.rawCSVButtonTooltip"
+            id="data.inspector.table.rawCSVButtonTooltip"
             defaultMessage="Download the data as provided, for example, dates as timestamps"
           />
         }
         toolTipPosition="left"
       >
-        <FormattedMessage id="inspector.data.rawCSVButtonLabel" defaultMessage="Raw CSV" />
+        <FormattedMessage id="data.inspector.table.rawCSVButtonLabel" defaultMessage="Raw CSV" />
       </EuiContextMenuItem>,
     ];
 
@@ -162,9 +149,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   }
 
   render() {
-    return this.props.isFormatted
-      ? this.renderFormattedDownloads()
-      : this.renderUnformattedDownload();
+    return this.renderFormattedDownloads();
   }
 }
 

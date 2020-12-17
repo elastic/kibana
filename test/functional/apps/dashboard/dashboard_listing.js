@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
         expect(onDashboardLandingPage).to.equal(false);
       });
 
-      it('title match is case insensitive', async function () {
+      it.skip('title match is case insensitive', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';

@@ -114,6 +114,19 @@ export function jobSavedObjectServiceFactory(
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
+  async function _forceDeleteJob(jobType: JobType, jobId: string, namespace: string) {
+    const id = savedObjectId({
+      job_id: jobId,
+      datafeed_id: null,
+      type: jobType,
+    });
+
+    await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
+      namespace,
+      force: true,
+    });
+  }
+
   async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
     await _createJob('anomaly-detector', jobId, datafeedId);
   }
@@ -122,12 +135,20 @@ export function jobSavedObjectServiceFactory(
     await _deleteJob('anomaly-detector', jobId);
   }
 
+  async function forceDeleteAnomalyDetectionJob(jobId: string, namespace: string) {
+    await _forceDeleteJob('anomaly-detector', jobId, namespace);
+  }
+
   async function createDataFrameAnalyticsJob(jobId: string) {
     await _createJob('data-frame-analytics', jobId);
   }
 
   async function deleteDataFrameAnalyticsJob(jobId: string) {
     await _deleteJob('data-frame-analytics', jobId);
+  }
+
+  async function forceDeleteDataFrameAnalyticsJob(jobId: string, namespace: string) {
+    await _forceDeleteJob('data-frame-analytics', jobId, namespace);
   }
 
   async function bulkCreateJobs(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
@@ -325,7 +346,9 @@ export function jobSavedObjectServiceFactory(
     createAnomalyDetectionJob,
     createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,
+    forceDeleteAnomalyDetectionJob,
     deleteDataFrameAnalyticsJob,
+    forceDeleteDataFrameAnalyticsJob,
     addDatafeed,
     deleteDatafeed,
     filterJobsForSpace,

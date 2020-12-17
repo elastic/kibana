@@ -70,6 +70,7 @@ import {
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { getTableViewDescription } from './utils/table_inspector_view';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -104,7 +105,7 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -140,6 +141,15 @@ export class DataPublicPlugin
       usageCollection,
       expressions,
     });
+
+    inspector.registerView(
+      getTableViewDescription(() => ({
+        uiActions: startServices().plugins.uiActions,
+        uiSettings: startServices().core.uiSettings,
+        fieldFormats: startServices().self.fieldFormats,
+        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+      }))
+    );
 
     return {
       autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
