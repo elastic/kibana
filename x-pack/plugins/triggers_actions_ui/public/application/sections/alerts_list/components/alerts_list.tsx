@@ -157,11 +157,13 @@ export const AlertsList: React.FunctionComponent = () => {
       try {
         const result = await loadActionTypes({ http });
         setActionTypes(
-          result.filter(
-            // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
-            // Issue: https://github.com/elastic/kibana/issues/82502.
-            ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
-          )
+          result
+            .filter(
+              // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
+              // Issue: https://github.com/elastic/kibana/issues/82502.
+              ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
         );
       } catch (e) {
         toasts.addDanger({
