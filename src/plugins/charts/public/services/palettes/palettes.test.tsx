@@ -295,7 +295,7 @@ describe('palettes', () => {
             },
           ],
           {
-            syncColors: true,
+            syncColors: false,
           }
         );
         expect(result).toEqual(createLegacyColorPalette(20)[2]);
