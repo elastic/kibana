@@ -39,7 +39,7 @@ import { totalNumberOfPrebuiltRules } from '../objects/rule';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 
-describe('Alerts rules, prebuilt rules', () => {
+describe.skip('Alerts rules, prebuilt rules', () => {
   before(() => {
     cleanKibana();
     removeSignalsIndex();
