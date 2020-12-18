@@ -464,6 +464,7 @@ export class TaskRunner {
       await partiallyUpdateAlert(client, alertId, attributes, {
         ignore404: true,
         namespace,
+        refresh: false,
       });
     } catch (err) {
       this.logger.error(
