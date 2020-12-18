@@ -14,6 +14,7 @@ import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'kibana/public';
@@ -42,7 +43,6 @@ import { ISearchSource } from 'src/plugins/data/public';
 import { IStorageWrapper as IStorageWrapper_2 } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient as IUiSettingsClient_2 } from 'src/core/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -628,12 +628,14 @@ export interface EmbeddableStartDependencies {
 export class EmbeddableStateTransfer {
     // Warning: (ae-forgotten-export) The symbol "ApplicationStart" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PublicAppInfo" needs to be exported by the entry point index.d.ts
-    constructor(navigateToApp: ApplicationStart['navigateToApp'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
+    constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
     // (undocumented)
     clearEditorState(): void;
     getAppNameFromId: (appId: string) => string | undefined;
     getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
     getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
+    // (undocumented)
+    isTransferInProgress: boolean;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;

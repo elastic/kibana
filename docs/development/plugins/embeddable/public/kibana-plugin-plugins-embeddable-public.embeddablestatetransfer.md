@@ -16,13 +16,14 @@ export declare class EmbeddableStateTransfer
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(navigateToApp, appList, customStorage)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
+|  [(constructor)(navigateToApp, currentAppId$, appList, customStorage)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [getAppNameFromId](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getappnamefromid.md) |  | <code>(appId: string) =&gt; string &#124; undefined</code> | Fetches an internationalized app title when given an appId. |
+|  [isTransferInProgress](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.istransferinprogress.md) |  | <code>boolean</code> |  |
 
 ## Methods
 
