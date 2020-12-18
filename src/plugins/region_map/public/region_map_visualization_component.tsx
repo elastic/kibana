@@ -21,23 +21,23 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers, Datatable } from 'src/plugins/expressions';
 import { RegionMapVisualizationDependencies } from './plugin';
-import { RegionMapVisConfig, RegionMapVisData } from './region_map_types';
+import { RegionMapVisConfig } from './region_map_types';
 // @ts-expect-error
 import { createRegionMapVisualization } from './region_map_visualization';
 
 import './region_map_visualization.scss';
 
 interface RegionMapVisController {
-  render(visData?: RegionMapVisData, visConfig?: RegionMapVisConfig): Promise<void>;
+  render(visData?: Datatable, visConfig?: RegionMapVisConfig): Promise<void>;
   destroy(): void;
 }
 
 interface TileMapVisualizationProps {
   deps: RegionMapVisualizationDependencies;
   handlers: IInterpreterRenderHandlers;
-  visData: RegionMapVisData;
+  visData: Datatable;
   visConfig: RegionMapVisConfig;
 }
 

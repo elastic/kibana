@@ -20,14 +20,14 @@
 import { i18n } from '@kbn/i18n';
 
 import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { RegionMapVisConfig, RegionMapVisData } from './region_map_types';
+import { RegionMapVisConfig } from './region_map_types';
 
 interface Arguments {
   visConfig: string | null;
 }
 
 export interface RegionMapVisRenderValue {
-  visData: RegionMapVisData;
+  visData: Datatable;
   visType: 'region_map';
   visConfig: RegionMapVisConfig;
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createRegionMapFn } from './region_map_fn';
 
@@ -57,11 +56,7 @@ describe('interpreter/functions#regionmap', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(
-      context,
-      { visConfig: JSON.stringify(visConfig) },
-      { logDatatable: jest.fn() }
-    );
+    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });

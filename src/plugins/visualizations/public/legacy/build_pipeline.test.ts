@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import {
-  prepareJson,
-  prepareString,
-  buildPipelineVisFunction,
-  buildPipeline,
-  SchemaConfig,
-  Schemas,
-} from './build_pipeline';
+import { prepareJson, prepareString, buildPipeline } from './build_pipeline';
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
 import { parseExpression } from '../../../expressions/common';
@@ -71,42 +64,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     it('returns empty string if data is undefined', () => {
       const actual = prepareString('foo', undefined);
       expect(actual).toBe('');
-    });
-  });
-
-  describe('buildPipelineVisFunction', () => {
-    let schemaConfig: SchemaConfig;
-    let schemasDef: Schemas;
-    let uiState: any;
-
-    beforeEach(() => {
-      schemaConfig = {
-        accessor: 0,
-        label: '',
-        format: {},
-        params: {},
-        aggType: '',
-      };
-
-      schemasDef = { metric: [schemaConfig] };
-      uiState = {};
-    });
-
-    describe('handles region_map function', () => {
-      it('without buckets', () => {
-        const params = { metric: {} };
-        const actual = buildPipelineVisFunction.region_map(params, schemasDef, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const schemas = {
-          ...schemasDef,
-          segment: [1, 2],
-        };
-        const actual = buildPipelineVisFunction.region_map({}, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
     });
   });
 

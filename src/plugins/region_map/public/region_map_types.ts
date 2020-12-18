@@ -39,7 +39,3 @@ export interface RegionMapVisConfig extends RegionMapVisParams {
   metric: SchemaConfig;
   bucket?: SchemaConfig;
 }
-
-export interface RegionMapVisData {
-  [key: string]: any;
-}
