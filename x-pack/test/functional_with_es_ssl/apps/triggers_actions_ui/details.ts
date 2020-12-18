@@ -248,6 +248,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await testSubjects.click('cancelSaveEditedAlertButton');
+        await testSubjects.existOrFail('confirmAlertCloseModal');
+        await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
 
         await editButton.click();
