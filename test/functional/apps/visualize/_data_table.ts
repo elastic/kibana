@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,7 +27,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'timePicker', 'visEditor', 'visChart']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'timePicker',
+    'visEditor',
+    'visChart',
+    'common',
+  ]);
 
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';

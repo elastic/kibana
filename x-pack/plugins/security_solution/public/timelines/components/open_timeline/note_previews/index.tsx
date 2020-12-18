@@ -63,43 +63,55 @@ const ToggleEventDetailsButton = React.memo(ToggleEventDetailsButtonComponent);
  */
 
 interface NotePreviewsProps {
+  eventIdToNoteIds?: Record<string, string[]>;
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
 }
 
-export const NotePreviews = React.memo<NotePreviewsProps>(({ notes, timelineId }) => {
-  const notesList = useMemo(
-    () =>
-      uniqBy('savedObjectId', notes).map((note) => ({
-        'data-test-subj': `note-preview-${note.savedObjectId}`,
-        username: defaultToEmptyTag(note.updatedBy),
-        event: 'added a comment',
-        timestamp: note.updated ? (
-          <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
-        ) : (
-          getEmptyValue()
-        ),
-        children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
-        actions:
-          note.eventId && timelineId ? (
-            <ToggleEventDetailsButton eventId={note.eventId} timelineId={timelineId} />
-          ) : null,
-        timelineIcon: (
-          <EuiAvatar
-            data-test-subj="avatar"
-            name={note.updatedBy != null ? note.updatedBy : '?'}
-            size="l"
-          />
-        ),
-      })),
-    [notes, timelineId]
-  );
+export const NotePreviews = React.memo<NotePreviewsProps>(
+  ({ eventIdToNoteIds, notes, timelineId }) => {
+    const notesList = useMemo(
+      () =>
+        uniqBy('savedObjectId', notes).map((note) => {
+          const eventId =
+            eventIdToNoteIds != null
+              ? Object.entries<string[]>(eventIdToNoteIds).reduce<string | null>(
+                  (acc, [id, noteIds]) => (noteIds.includes(note.noteId ?? '') ? id : acc),
+                  null
+                )
+              : note.eventId ?? null;
+          return {
+            'data-test-subj': `note-preview-${note.savedObjectId}`,
+            username: defaultToEmptyTag(note.updatedBy),
+            event: 'added a comment',
+            timestamp: note.updated ? (
+              <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
+            ) : (
+              getEmptyValue()
+            ),
+            children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
+            actions:
+              eventId && timelineId ? (
+                <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+              ) : null,
+            timelineIcon: (
+              <EuiAvatar
+                data-test-subj="avatar"
+                name={note.updatedBy != null ? note.updatedBy : '?'}
+                size="l"
+              />
+            ),
+          };
+        }),
+      [eventIdToNoteIds, notes, timelineId]
+    );
 
-  if (notes == null || notes.length === 0) {
-    return null;
+    if (notes == null || notes.length === 0) {
+      return null;
+    }
+
+    return <EuiCommentList comments={notesList} />;
   }
-
-  return <EuiCommentList comments={notesList} />;
-});
+);
 
 NotePreviews.displayName = 'NotePreviews';

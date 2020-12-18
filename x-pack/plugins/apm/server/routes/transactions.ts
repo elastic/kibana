@@ -77,11 +77,13 @@ export const transactionGroupsOverviewRoute = createRoute({
         pageIndex: toNumberRt,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         sortField: t.union([
+          t.literal('name'),
           t.literal('latency'),
           t.literal('throughput'),
           t.literal('errorRate'),
           t.literal('impact'),
         ]),
+        transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
     ]),
@@ -99,12 +101,13 @@ export const transactionGroupsOverviewRoute = createRoute({
     const {
       path: { serviceName },
       query: {
-        size,
+        latencyAggregationType,
         numBuckets,
         pageIndex,
+        size,
         sortDirection,
         sortField,
-        latencyAggregationType,
+        transactionType,
       },
     } = context.params;
 
@@ -116,6 +119,7 @@ export const transactionGroupsOverviewRoute = createRoute({
       size,
       sortDirection,
       sortField,
+      transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     });
