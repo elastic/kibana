@@ -8,9 +8,9 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { ServiceList, SERVICE_COLUMNS } from './';
+import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
+import { ServiceList } from './';
 import props from './__fixtures__/props.json';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
@@ -37,45 +37,20 @@ describe('ServiceList', () => {
   it('renders with data', () => {
     expect(() =>
       renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          items={(props.items as unknown) as ServiceListAPIResponse['items']}
+        />,
         { wrapper: Wrapper }
       )
     ).not.toThrowError();
   });
 
-  it('renders columns correctly', () => {
-    const service: any = {
-      serviceName: 'opbeans-python',
-      agentName: 'python',
-      transactionsPerMinute: {
-        value: 86.93333333333334,
-        timeseries: [],
-      },
-      errorsPerMinute: {
-        value: 12.6,
-        timeseries: [],
-      },
-      avgResponseTime: {
-        value: 91535.42944785276,
-        timeseries: [],
-      },
-      environments: ['test'],
-    };
-    const renderedColumns = SERVICE_COLUMNS.map((c) =>
-      c.render!(service[c.field!], service)
-    );
-
-    expect(renderedColumns[0]).toMatchInlineSnapshot(`
-      <HealthBadge
-        healthStatus="unknown"
-      />
-    `);
-  });
-
   describe('without ML data', () => {
     it('does not render the health column', () => {
       const { queryByText } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          items={(props.items as unknown) as ServiceListAPIResponse['items']}
+        />,
         {
           wrapper: Wrapper,
         }
@@ -87,7 +62,9 @@ describe('ServiceList', () => {
 
     it('sorts by transactions per minute', async () => {
       const { findByTitle } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          items={(props.items as unknown) as ServiceListAPIResponse['items']}
+        />,
         {
           wrapper: Wrapper,
         }
@@ -103,7 +80,7 @@ describe('ServiceList', () => {
     it('renders the health column', async () => {
       const { findByTitle } = renderWithTheme(
         <ServiceList
-          items={(props.items as ServiceListAPIResponse['items']).map(
+          items={((props.items as unknown) as ServiceListAPIResponse['items']).map(
             (item) => ({
               ...item,
               healthStatus: ServiceHealthStatus.warning,
