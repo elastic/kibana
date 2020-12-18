@@ -39,17 +39,27 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 [[create-the-dashboard]]
 == Create dashboards
 
-Open an empty dashboard, then create panels of your data using the *Lens* visualization builder, or add panels you're already created. 
+Open an empty dashboard, then create panels of your data using the *Lens* visualization builder. 
 
 . Open the main menu, then click *Dashboard*, then click *Create dashboard*.
 +
 To open an existing dashboard, click the dashboard you want to view.
 
-. To add panels, use one of the following options:
+. To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
++
+To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
-* To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
+. To save the panel, click *Save* in the toolbar, then configure the *Save visualization* options.
 
-* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
+.. Enter the *Title* and optional *Description*.
+
+.. From the *Tags* drop down, select any applicable tags. 
+
+.. Select *Add to Dashboard after saving*.
+
+.. Click *Save and return*.
+
+TIP: To access your saved panels, open the main menu, then click *Visualize*.
 
 [float]
 [[create-panels-with-lens]]
@@ -134,20 +144,7 @@ image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 [role="screenshot"]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Unique visitors`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Unique visitors` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[donut-vis]]
@@ -180,20 +177,7 @@ image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os
 [role="screenshot"]
 image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Visitors by OS`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Visitors by OS` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[mixed-multiaxis]]
@@ -302,25 +286,12 @@ image::images/lens_end_to_end_3_4.png[Multiaxis chart]
 
 The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
 
-From the *Legend* dropdown, select the top position.
-
+. From the *Legend* dropdown, select the top position.
++
 [role="screenshot"]
 image::images/lens_end_to_end_3_5.png[legend position]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Average Bytes vs. Unique Visitors`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Average Bytes vs. Unique Visitors` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[percentage-stacked-area]]
@@ -394,20 +365,7 @@ image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
 
 .. Click *Close*.
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Response Codes Over Time`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Response Codes Over Time` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[histogram]]
@@ -438,20 +396,7 @@ To find the best time to shut down your website for maintenance, create a histog
 [role="screenshot"]
 image::images/lens_end_to_end_5_2.png[Create custom ranges]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Hourly Traffic Distribution`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Hourly Traffic Distribution` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[custom-ranges]]
@@ -497,20 +442,7 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 [role="screenshot"]
 image::images/lens_end_to_end_6_2.png[Files size distribution]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `File size distribution`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `File size distribution` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
 [[treemap]]
@@ -575,20 +507,7 @@ image::images/lens_end_to_end_7_3.png[Group other values as Other]
 
 .. Click *Close*.
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. In the *Title* field, enter `Traffic Source For Top 3 Countries`. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+. *Save* the panel, enter `Traffic Source For Top 3 Countries` in the *Title* field, then add the panel to the dashboard.
 
 [float]
 [[save-dashboards]]
@@ -623,7 +542,7 @@ To add other types of panels to your dashboard:
 
 * Manually create panels with the <<add-panels-with-advanced-editors,advanced editors>> or <<add-aggregation-based-visualization-panels,aggregation-based visualization panels>>.
 
-* Add context to your dashboard panels with <<add-text,text>>, or filter the dashboard data in real-time with a <<add-controls,*Controls*>> panel. 
+* Add context to your panels with <<add-text,text>>, or filter the data in real-time with a <<add-controls,*Controls*>> panel. 
 
 * Add a <<save-your-search,saved search>> from *Discover*.
 

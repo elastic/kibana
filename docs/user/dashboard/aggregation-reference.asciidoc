@@ -10,7 +10,7 @@ story about the trends, patterns, and outliers in your data.
 [[bucket-aggregations]]
 === Bucket aggregations
 
-For information about Elasticsearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
 [options="header"]
 |===
@@ -93,7 +93,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 [[metrics-aggregations]]
 === Metrics aggregations
 
-For information about Elasticsearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
 [options="header"]
 |===
@@ -169,7 +169,7 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 [[pipeline-aggregations]]
 === Pipeline aggregations
 
-For information about Elasticsearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 
 [options="header"]
 |===

@@ -5,13 +5,20 @@ To get a closer look at your data, drill down into the data elements, or explore
 
 [float]
 [[viewing-detailed-information]]
-=== Inspect elements
+=== View the panel data 
 
-To view the data and requests behind the visualizations and saved searches, you can drill down into the elements.
+To view the data and requests in the panels, you can drill down into the elements.
 
-From the panel menu, select *Inspect*.
-The data that displays depends on the element that you inspect.
+. Open the panel menu, then select *More > Inspect*.
 
+. From the *View* dropdown, choose one of the following options:
+
+* To view the panel data, select *Data*. 
+
+* To view the query request, select *Requests*.
+
+. To download the panel data, click *Download CSV*, then select the CSV type from the dropdown.
++
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
@@ -45,10 +52,12 @@ image::images/explore_data_in_chart.png[Explore underlying data from chart]
 [[download_csv]]
 === Download the underlying data
 
-To download the *Dashboard* data, download the CSV file. You can download multiple CSV files. For example, you can download the underlying for a *Lens*
-bar chart with multiple layers.
+To download the underlying data in a *Lens* panel, download the CSV file. If the panel contains multiple indices, you can download multiple CSV files. 
+For example, you can download the underlying for a bar chart with multiple layers.
 
-Open the panel menu, then click *Download as CSV*.
+. From the toolbar, click *Edit*.
 
+. Open the *Lens* panel menu, then select *Download as CSV*.
++
 [role="screenshot"]
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]

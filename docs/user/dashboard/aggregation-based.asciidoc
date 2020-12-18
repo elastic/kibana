@@ -98,6 +98,8 @@ Choose the type of panel you want to create, then use the editor to configure th
 .. Click the data source you want to visualize.
 
 . From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
++
+NOTE: To use *auto* from the *Minimal interval* dropdown, the *Date Histogram* aggregation must be the primary field. 
 
 . To change the order, drag the aggregations along the editor. 
 + 
@@ -144,9 +146,9 @@ Open the bar chart visualization builder and change the time range.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
-==== Configure the bar chart
+==== Create the bar chart
 
-To specify the bar chart options, use the editor.
+To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
 
 . Add a *Buckets* aggregation.
 
@@ -162,6 +164,8 @@ image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
 . To show the top five log traffic sources, add a sub-bucket aggregation.
 
 .. Click *Add*, then select *Split series*.
++
+TIP: Aggregation-based panels support a maximum of three *Split series*.
 
 .. From the *Sub aggregation* dropdown, select *Terms*.
 

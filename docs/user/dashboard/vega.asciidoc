@@ -1,10 +1,10 @@
 [[vega]]
-=== Add custom panels with Vega
+=== Create custom panels with Vega
 
 With *Vega*, you configure the visualization panels by editing the *Vega* and *Vega-Lite* specs.
 
 [float]
-==== Tutorial: Create charts with Vega and Vega-lite
+==== Tutorial: Create custom panels with Vega and Vega-lite
 
 You collected sales data for your store, and you want to visualize and analyze the data on a dashboard. To create custom panels of the data, use *Vega* and *Vega-Lite* to 
 create a stacked area chart and an area chart.
@@ -38,7 +38,7 @@ A pre-populated line chart displays the total number of documents.
 [float]
 ===== Create a stacked area chart
 
-To create the stacked area chart, edit the Vega-Lite spec. The Vega-Lite spec uses https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
+To create a stacked area chart, edit the Vega-Lite spec. The Vega-Lite spec uses https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
 
 HJSON supports the following:
 
@@ -49,49 +49,32 @@ HJSON supports the following:
 * Double or single quotes
 * Multiline strings
 
-When you are finished with the tutorial, you'll have a stacked area chart that displays the sales data.
-
-[role="screenshot"]
-image::visualize/images/vega_lite_tutorial_1.png[Vega-Lite tutorial stacked area chart]
-
-[float]
-===== Change the index
-
-Change the index to the *eCommerce sample data*. 
-
-In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
+. In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
 
 ```yaml
 index: kibana_sample_data_ecommerce
 ```
-
++
 A flat line appears with zero results.
 
-[float]
-===== Change the data fields
-
-Add a data field from the *kibana_sample_data_ecommerce* index. 
-
-. In the *Vega-Lite* spec, replace the following:
+. To add the data fields from the *kibana_sample_data_ecommerce* index, replace the following, then click *Update*:
 
 * `%timefield%: @timestamp` with `%timefield%: order_date`
 
 * `field: @timestamp` with `field: order_date`
-
-. Click *Update*.
 
 [float]
 ===== Add the aggregations
 
 To create the stacked area chart, add the aggregations. 
 
-. To check your work, open and use the <<console-kibana,*Console*>> on a separate browser tab.
+To check your work, open and use the <<console-kibana,*Console*>> on a separate browser tab.
 
-.. Open {kib} on a new tab. 
+. Open {kib} on a new tab. 
 
-.. Open the main menu, then click *Dev Tools*.
+. Open the main menu, then click *Dev Tools*.
 
-.. On the *Console* editor, enter the aggregation, then click *Click to send request*:
+. On the *Console* editor, enter the aggregation, then click *Click to send request*:
 
 ```js
 POST kibana_sample_data_ecommerce/_search
@@ -240,9 +223,9 @@ image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key 
 *key* is unable to convert because the property is category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
 
 [float]
-===== Add the encoding block
+===== Add and debug the encoding block 
 
-In the *Vega-Lite* spec, add an `encoding` block:
+In the *Vega-Lite* spec, add the `encoding` block:
 
 ```yaml
   encoding: {
@@ -320,12 +303,10 @@ Vega-Lite displays *undefined* values because there are duplicate names.
   }
 ```
 
-The stacked area chart appears. 
-
 [float]
 ===== Add hover states and tooltips
 
-With the *Vega-Lite* spec, you can add hover states and tooltips with a `selection` block.
+With the *Vega-Lite* spec, you can add hover states and tooltips to the stacked area chart with the `selection` block.
 
 In the *Vega-Lite* spec, add the `encoding` block, then click *Update*:
 
@@ -595,7 +576,7 @@ In the *Vega* spec, enter the following, then click *Update*:
 }
 ```
 
-Add a valid {es} search query with the `data` block, then click *Update*:
+Add the {es} search query with the `data` block, then click *Update*:
 
 ```yaml
   data: [
@@ -683,15 +664,13 @@ Add the `key` and `doc_count` fields as the X- and Y-axis values, then click *Up
   ]
 ```
 
-An area chart appears in the *Vega* visualization buider.
-
 [role="screenshot"]
 image::visualize/images/vega_tutorial_3.png[]
 
 [float]
 ===== Add a block to the `marks` section
 
-Show the clickable points to filter for a specific date.
+Show the clickable points on the area chart to filter for a specific date.
 
 In the *Vega* spec, add to the `marks` block, then click *Update*.
 

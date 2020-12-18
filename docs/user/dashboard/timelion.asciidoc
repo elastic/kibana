@@ -15,7 +15,7 @@ link:https://www.elastic.co/guide/en/kibana/current/release-notes-7.10.0.html#de
 ====
 
 [float]
-==== Tutorial: Create visualization with Timelion 
+==== Tutorial: Create visualizations with Timelion 
 
 You collected data from your operating system using Metricbeat, and you want to visualize and analyze the data on a dashboard. To create panels of the data, use *Timelion* to 
 create a time series visualization, 
@@ -185,7 +185,7 @@ Move the legend to the north west position  with two columns, then click *Update
 ----------------------------------
 
 [role="screenshot"]
-image::images/timelion-customize04.png[]
+image::images/timelion-customize04.png[Final time series visualization]
 {nbsp}
 
 [float]
@@ -307,7 +307,7 @@ Customize and format the visualization using the following functions, then click
 ----------------------------------
 
 [role="screenshot"]
-image::images/timelion-math05.png[]
+image::images/timelion-math05.png[Final visualization that displays inbound and outbound network traffic]
 {nbsp}
 
 [float]
@@ -482,7 +482,7 @@ Customize and format the visualization using the following functions, then click
 ----------------------------------
 
 [role="screenshot"]
-image::images/timelion-conditional04.png[]
+image::images/timelion-conditional04.png[Final visualization that displays outliers and patterns over time]
 {nbsp}
 
 [float]
