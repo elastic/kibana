@@ -341,11 +341,14 @@ describe('terms', () => {
         layer: {
           columns: {
             col1: {
-              label: 'Last value',
+              label: 'Last value of a',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'source',
+              sourceField: 'a',
               operationType: 'last_value',
+              params: {
+                sortField: 'datefield',
+              },
             },
           },
           columnOrder: [],
