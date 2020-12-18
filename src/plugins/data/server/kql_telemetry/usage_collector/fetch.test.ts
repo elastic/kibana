@@ -47,6 +47,16 @@ function setupMockCallCluster(
           found: false,
         },
       });
+    } else {
+      return Promise.resolve({
+        body: {
+          _source: {
+            'kql-telemetry': { ...optCount },
+            type: 'kql-telemetry',
+            updated_at: '2018-10-05T20:20:56.258Z',
+          },
+        },
+      });
     }
   }
   function mockedEsSearchMethod() {
