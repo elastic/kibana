@@ -67,7 +67,6 @@ describe('ContextAppLegacy test', () => {
     successorStatus: 'loaded',
     topNavMenu: TopNavMenuMock,
   };
-
   const topNavProps = {
     appName: 'context',
     showSearchBar: true,
