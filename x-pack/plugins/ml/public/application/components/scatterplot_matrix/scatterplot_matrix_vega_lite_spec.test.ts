@@ -25,7 +25,7 @@ describe('getColorSpec()', () => {
     expect(colorSpec).toEqual({ value: DEFAULT_COLOR });
   });
 
-  it('should return a conditial spec for outliers', () => {
+  it('should return a conditional spec for outliers', () => {
     const colorSpec = getColorSpec(euiThemeLight, true);
 
     expect(colorSpec).toEqual({
