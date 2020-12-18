@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { EuiBasicTable } from '@elastic/eui';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { px, truncate, unit } from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { TableLinkFlexItem } from '../table_link_flex_item';
 
@@ -50,24 +50,12 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
-const ErrorDetailLinkWrapper = styled.div`
-  width: 100%;
-  .euiToolTipAnchor {
-    width: 100% !important;
-  }
-`;
-
-const StyledErrorDetailLink = styled(ErrorDetailLink)`
-  display: block;
-  ${truncate('100%')}
-`;
-
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
-
+  const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -87,16 +75,17 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }),
       render: (_, { name, group_id: errorGroupId }) => {
         return (
-          <ErrorDetailLinkWrapper>
-            <EuiToolTip delay="long" content={name}>
-              <StyledErrorDetailLink
+          <TruncateWithTooltip
+            text={name}
+            content={
+              <ErrorDetailLink
                 serviceName={serviceName}
                 errorGroupId={errorGroupId}
               >
                 {name}
-              </StyledErrorDetailLink>
-            </EuiToolTip>
-          </ErrorDetailLinkWrapper>
+              </ErrorDetailLink>
+            }
+          />
         );
       },
     },
@@ -153,7 +142,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !transactionType) {
       return;
     }
 
@@ -170,6 +159,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
         },
       },
     }).then((response) => {
@@ -193,6 +183,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
   ]);
 
   const {
@@ -202,9 +193,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = data;
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>

@@ -115,15 +115,14 @@ def functionalXpack(Map params = [:]) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }
 
-    // FLAKY: https://github.com/elastic/kibana/issues/86080
-    // whenChanged([
-    //   'x-pack/plugins/security_solution/',
-    //   'x-pack/test/security_solution_cypress/',
-    //   'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
-    //   'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
-    // ]) {
-    //   task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
-    // }
+     whenChanged([
+       'x-pack/plugins/security_solution/',
+       'x-pack/test/security_solution_cypress/',
+       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
+       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
+     ]) {
+       task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+     }
   }
 }
 
