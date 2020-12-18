@@ -182,6 +182,7 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
+                'data-test-subj': 'homeLink',
                 onClick: (event) => {
                   if (isModifiedOrPrevented(event)) {
                     return;

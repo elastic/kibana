@@ -91,6 +91,7 @@ export const OverviewPageHeader: FC<Props> = ({
                 <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                   <RedirectAppLinks application={application}>
                     <EuiButtonEmpty
+                      data-test-subj="homeAddData"
                       className="kbnOverviewPageHeader__actionButton"
                       flush="both"
                       href={addBasePath('/app/home#/tutorial_directory')}
@@ -107,6 +108,7 @@ export const OverviewPageHeader: FC<Props> = ({
                   <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
+                        data-test-subj="homeManage"
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
@@ -127,6 +129,7 @@ export const OverviewPageHeader: FC<Props> = ({
                   <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
+                        data-test-subj="homeDevTools"
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="wrench"

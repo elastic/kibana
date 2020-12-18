@@ -51,6 +51,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
         <EuiFlexItem className="homDataAdd__actions" grow={false}>
           <div>
             <EuiButtonEmpty
+              data-test-subj="addSampleData"
               className="homDataAdd__actionButton"
               flush="left"
               href="#/tutorial_directory/sampleData"
