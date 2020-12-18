@@ -57,7 +57,7 @@ export async function listAgents(
 
   let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters),
+    filters: [_joinFilters(filters)],
     sortField,
     sortOrder,
     page,
@@ -126,7 +126,7 @@ export async function countInactiveAgents(
 
   const { total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters),
+    filters: [_joinFilters(filters)],
     perPage: 0,
   });
 

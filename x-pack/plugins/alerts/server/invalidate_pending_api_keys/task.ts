@@ -143,7 +143,7 @@ function taskRunner(
           do {
             const apiKeysToInvalidate = await savedObjectsClient.find<InvalidatePendingApiKey>({
               type: 'api_key_pending_invalidation',
-              filter: `api_key_pending_invalidation.attributes.createdAt <= "${delay}"`,
+              filters: [`api_key_pending_invalidation.attributes.createdAt <= "${delay}"`],
               page: 1,
               sortField: 'createdAt',
               sortOrder: 'asc',

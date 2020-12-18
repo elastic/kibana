@@ -16,6 +16,7 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryAlertType } from '../../alert_type_registry';
+import { esKuery } from '../../../../../../src/plugins/data/server';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -140,7 +141,9 @@ describe('aggregate()', () => {
       expect(unsecuredSavedObjectsClient.find.mock.calls[ndx]).toEqual([
         {
           fields: undefined,
-          filter: `alert.attributes.executionStatus.status:(${status})`,
+          filters: [
+            esKuery.fromKueryExpression(`alert.attributes.executionStatus.status:(${status})`),
+          ],
           page: 1,
           perPage: 0,
           type: 'alert',
@@ -160,7 +163,11 @@ describe('aggregate()', () => {
       expect(unsecuredSavedObjectsClient.find.mock.calls[ndx]).toEqual([
         {
           fields: undefined,
-          filter: `someTerm and alert.attributes.executionStatus.status:(${status})`,
+          filters: [
+            esKuery.fromKueryExpression(
+              `someTerm and alert.attributes.executionStatus.status:(${status})`
+            ),
+          ],
           page: 1,
           perPage: 0,
           type: 'alert',

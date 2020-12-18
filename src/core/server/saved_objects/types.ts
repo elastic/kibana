@@ -108,7 +108,7 @@ export interface SavedObjectsFindOptions {
    * The search operator to use with the provided filter. Defaults to `OR`
    */
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string | KueryNode;
+  filters?: Array<string | KueryNode>;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved

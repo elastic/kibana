@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -15,7 +16,6 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert,
@@ -56,7 +56,6 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -454,10 +453,10 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
-      filter:
-        (authorizationFilter && options.filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
-          : authorizationFilter) ?? options.filter,
+      filters: [
+        authorizationFilter,
+        options.filter ? esKuery.fromKueryExpression(options.filter) : null,
+      ].filter(Boolean),
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
@@ -511,15 +510,20 @@ export class AlertsClient {
           filter: authorizationFilter,
           logSuccessfulAuthorization,
         } = await this.authorization.getFindAuthorizationFilter();
-        const filter = options.filter
-          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+
+        const { filter: optionalFilter, ...restOptions } = options;
+        const filter = optionalFilter
+          ? `${optionalFilter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
+
+        const filters = [
+          authorizationFilter,
+          filter ? esKuery.fromKueryExpression(filter) : null,
+        ].filter(Boolean);
+
         const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
-          ...options,
-          filter:
-            (authorizationFilter && filter
-              ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter])
-              : authorizationFilter) ?? filter,
+          ...restOptions,
+          filters,
           page: 1,
           perPage: 0,
           type: 'alert',

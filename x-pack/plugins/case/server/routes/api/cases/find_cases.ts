@@ -73,7 +73,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
               client,
               options: {
                 ...query,
-                filter,
+                filters: [filter],
                 sortField: sortToSnake(query.sortField ?? ''),
               },
             }
@@ -87,7 +87,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter(caseStatus, myFilters),
+            filters: [getStatusFilter(caseStatus, myFilters)],
           },
         }));
 

@@ -26,7 +26,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: `${CASE_SAVED_OBJECT}.attributes.status: ${status}`,
+            filters: [`${CASE_SAVED_OBJECT}.attributes.status: ${status}`],
           },
         }));
 

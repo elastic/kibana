@@ -145,13 +145,13 @@ describe('#getQueryParams', () => {
 
     describe('`kueryNode` parameter', () => {
       it('does not include the clause when `kueryNode` is not specified', () => {
-        const result = getQueryParams({ registry, kueryNode: undefined });
+        const result = getQueryParams({ registry, kueryNodes: undefined });
         expect(result.query.bool.filter).toHaveLength(1);
       });
 
       it('includes the specified Kuery clause', () => {
         const test = (kueryNode: KueryNode) => {
-          const result = getQueryParams({ registry, kueryNode });
+          const result = getQueryParams({ registry, kueryNodes: [kueryNode] });
           const expected = esKuery.toElasticsearchQuery(kueryNode);
           expect(result.query.bool.filter).toHaveLength(2);
           expectResult(result, expected);

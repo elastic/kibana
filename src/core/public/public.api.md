@@ -1173,7 +1173,7 @@ export interface SavedObjectsFindOptions {
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    filter?: string | KueryNode;
+    filters?: Array<string | KueryNode>;
     hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
     hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)

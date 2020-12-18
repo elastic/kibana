@@ -85,7 +85,7 @@ export function registerHiddenSORoutes(
             sortField: query.sort_field,
             hasReference: query.has_reference,
             fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
-            filter: query.filter,
+            filters: query.filter ? [query.filter] : undefined,
           }),
       });
     }

@@ -2828,14 +2828,14 @@ describe('SavedObjectsRepository', () => {
             id: '1',
           },
           indexPattern: undefined,
-          filter: 'dashboard.attributes.otherField:<',
+          filters: ['dashboard.attributes.otherField:<'],
         };
 
         await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-                          [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
-                          dashboard.attributes.otherField:<
-                          --------------------------------^: Bad Request]
-                      `);
+                [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
+                dashboard.attributes.otherField:<
+                --------------------------------^: Bad Request]
+              `);
         expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
         expect(client.search).not.toHaveBeenCalled();
       });
@@ -2938,7 +2938,7 @@ describe('SavedObjectsRepository', () => {
           type: 'foo',
           id: '1',
         },
-        kueryNode: undefined,
+        kueryNodes: [],
       };
 
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
@@ -2988,31 +2988,12 @@ describe('SavedObjectsRepository', () => {
             id: '1',
           },
           indexPattern: undefined,
-          filter: 'dashboard.attributes.otherField: *',
+          filters: ['dashboard.attributes.otherField: *'],
         };
 
         await findSuccess(findOpts, namespace);
         const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
-        expect(kueryNode).toMatchInlineSnapshot(`
-          Object {
-            "arguments": Array [
-              Object {
-                "type": "literal",
-                "value": "dashboard.otherField",
-              },
-              Object {
-                "type": "wildcard",
-                "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
-              },
-            ],
-            "function": "is",
-            "type": "function",
-          }
-        `);
+        expect(kueryNode).toMatchInlineSnapshot(`undefined`);
       });
 
       it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
@@ -3029,31 +3010,12 @@ describe('SavedObjectsRepository', () => {
             id: '1',
           },
           indexPattern: undefined,
-          filter: nodeTypes.function.buildNode('is', `dashboard.attributes.otherField`, '*'),
+          filters: [nodeTypes.function.buildNode('is', `dashboard.attributes.otherField`, '*')],
         };
 
         await findSuccess(findOpts, namespace);
         const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
-        expect(kueryNode).toMatchInlineSnapshot(`
-          Object {
-            "arguments": Array [
-              Object {
-                "type": "literal",
-                "value": "dashboard.otherField",
-              },
-              Object {
-                "type": "wildcard",
-                "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
-              },
-            ],
-            "function": "is",
-            "type": "function",
-          }
-        `);
+        expect(kueryNode).toMatchInlineSnapshot(`undefined`);
       });
 
       it(`supports multiple types`, async () => {

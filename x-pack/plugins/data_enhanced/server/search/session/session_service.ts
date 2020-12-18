@@ -109,7 +109,7 @@ export class BackgroundSessionService implements ISessionService {
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
       perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
-      filter,
+      filters: [filter],
       namespaces: ['*'],
     });
     this.logger.warn(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);

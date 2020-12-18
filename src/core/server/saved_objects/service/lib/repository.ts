@@ -739,7 +739,7 @@ export class SavedObjectsRepository {
       namespaces,
       type,
       typeToNamespacesMap,
-      filter,
+      filters,
       preference,
     } = options;
 
@@ -779,11 +779,15 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
 
-    let kueryNode;
+    const kueryNodes = [];
 
     try {
-      if (filter) {
-        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      if (Array.isArray(filters)) {
+        kueryNodes.push(
+          ...filters.map((filter) => {
+            return validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+          })
+        );
       }
     } catch (e) {
       if (e.name === 'KQLSyntaxError') {
@@ -814,7 +818,7 @@ export class SavedObjectsRepository {
           typeToNamespacesMap,
           hasReference,
           hasReferenceOperator,
-          kueryNode,
+          kueryNodes,
         }),
       },
     };

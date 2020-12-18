@@ -165,7 +165,7 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
       savedObjectsClient.find<ApplicationUsageDaily>({
         perPage: 10000,
         type: SAVED_OBJECTS_DAILY_TYPE,
-        filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`,
+        filters: [`${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`],
       }),
     ]);
 

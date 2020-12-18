@@ -149,7 +149,7 @@ export async function getAgentActionsForCheckin(
 
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter,
+    filters: [filter],
   });
 
   return Promise.all(
@@ -264,7 +264,7 @@ export async function getNewActionsSince(
   const actions = (
     await soClient.find<AgentActionSOAttributes>({
       type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-      filter,
+      filters: [filter],
     })
   ).saved_objects
     .filter(isAgentActionSavedObject)

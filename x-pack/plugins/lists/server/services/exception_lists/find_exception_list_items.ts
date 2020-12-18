@@ -64,7 +64,7 @@ export const findExceptionListsItem = async ({
     return null;
   } else {
     const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-      filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
+      filters: [getExceptionListsItemFilter({ filter, listId, savedObjectType })],
       page,
       perPage,
       sortField,
@@ -116,7 +116,9 @@ export const findValueListExceptionListItems = async ({
   sortOrder,
 }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    filters: [
+      `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    ],
     page,
     perPage,
     sortField,

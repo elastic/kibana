@@ -77,8 +77,9 @@ describe('saved_object', () => {
       const contsOnly = true;
       await getExistingPrepackagedTimelines(mockRequest, contsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -89,8 +90,9 @@ describe('saved_object', () => {
       const contsOnly = false;
       await getExistingPrepackagedTimelines(mockRequest, contsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
+        ],
         type: 'siem-ui-timeline',
       });
     });
@@ -103,8 +105,9 @@ describe('saved_object', () => {
       };
       await getExistingPrepackagedTimelines(mockRequest, contsOnly, pageInfo);
       expect(mockFindSavedObject).toBeCalledWith({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 10,
         type: 'siem-ui-timeline',
@@ -155,7 +158,7 @@ describe('saved_object', () => {
 
     test('should send correct options if no filters applys', async () => {
       expect(mockFindSavedObject.mock.calls[0][0]).toEqual({
-        filter: 'not siem-ui-timeline.attributes.status: draft',
+        filters: ['not siem-ui-timeline.attributes.status: draft'],
         page: pageInfo.pageIndex,
         perPage: pageInfo.pageSize,
         type: 'siem-ui-timeline',
@@ -168,8 +171,9 @@ describe('saved_object', () => {
 
     test('should send correct options for counts of default timelines', async () => {
       expect(mockFindSavedObject.mock.calls[1][0]).toEqual({
-        filter:
+        filters: [
           'not siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -178,8 +182,9 @@ describe('saved_object', () => {
 
     test('should send correct options for counts of timeline templates', async () => {
       expect(mockFindSavedObject.mock.calls[2][0]).toEqual({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft',
+        ],
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -188,8 +193,9 @@ describe('saved_object', () => {
 
     test('should send correct options for counts of Elastic prebuilt templates', async () => {
       expect(mockFindSavedObject.mock.calls[3][0]).toEqual({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -198,8 +204,9 @@ describe('saved_object', () => {
 
     test('should send correct options for counts of custom templates', async () => {
       expect(mockFindSavedObject.mock.calls[4][0]).toEqual({
-        filter:
+        filters: [
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -208,8 +215,9 @@ describe('saved_object', () => {
 
     test('should send correct options for counts of favorite timeline', async () => {
       expect(mockFindSavedObject.mock.calls[5][0]).toEqual({
-        filter:
+        filters: [
           'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        ],
         page: 1,
         perPage: 1,
         search: ' dXNlcm5hbWU=',

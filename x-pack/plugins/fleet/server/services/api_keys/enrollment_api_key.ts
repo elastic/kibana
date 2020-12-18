@@ -32,9 +32,9 @@ export async function listEnrollmentApiKeys(
     perPage,
     sortField: 'created_at',
     sortOrder: 'desc',
-    filter:
+    filters:
       kuery && kuery !== ''
-        ? normalizeKuery(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, kuery)
+        ? [normalizeKuery(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, kuery)]
         : undefined,
   });
 

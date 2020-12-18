@@ -8,7 +8,6 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { nodeTypes } from '../../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
@@ -169,7 +168,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": undefined,
+          "filters": Array [],
           "type": "alert",
         },
       ]
@@ -191,9 +190,7 @@ describe('find()', () => {
       await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
-      expect(options.filter).toEqual(
-        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
-      );
+      expect(options.filters).toEqual([filter, esKuery.fromKueryExpression('someTerm')]);
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
 
@@ -257,6 +254,7 @@ describe('find()', () => {
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
         fields: ['tags', 'alertTypeId', 'consumer'],
         type: 'alert',
+        filters: [],
       });
       expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
       expect(logSuccessfulAuthorization).toHaveBeenCalled();

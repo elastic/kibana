@@ -25,7 +25,9 @@ export const getHealth = async (
   };
 
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+    filters: [
+      `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+    ],
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -42,7 +44,9 @@ export const getHealth = async (
   }
 
   const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+    filters: [
+      `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+    ],
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -59,7 +63,9 @@ export const getHealth = async (
   }
 
   const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+    filters: [
+      `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+    ],
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -76,7 +82,7 @@ export const getHealth = async (
   }
 
   const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: 'not alert.attributes.executionStatus.status:error',
+    filters: ['not alert.attributes.executionStatus.status:error'],
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',

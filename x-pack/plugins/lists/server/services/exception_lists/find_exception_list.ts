@@ -41,7 +41,7 @@ export const findExceptionList = async ({
 }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
   const savedObjectTypes = getSavedObjectTypes({ namespaceType });
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: getExceptionListFilter({ filter, savedObjectTypes }),
+    filters: [getExceptionListFilter({ filter, savedObjectTypes })],
     page,
     perPage,
     sortField,

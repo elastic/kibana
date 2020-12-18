@@ -235,7 +235,7 @@ class PackagePolicyService {
       sortOrder,
       page,
       perPage,
-      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      filters: kuery ? [normalizeKuery(SAVED_OBJECT_TYPE, kuery)] : undefined,
     });
 
     return {

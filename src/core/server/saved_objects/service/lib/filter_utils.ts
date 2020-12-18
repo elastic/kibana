@@ -27,10 +27,17 @@ type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
+type ValidationScope = 'root' | 'attributes';
+
+interface ValidationOptions {
+  scope: ValidationScope;
+}
+
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
   filter: string | KueryNode,
-  indexMapping: IndexMapping
+  indexMapping: IndexMapping,
+  options: ValidationOptions = { scope: 'attributes' }
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
@@ -65,7 +72,9 @@ export const validateConvertFilterToKueryNode = (
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
-        existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
+        // strip off the "type". e.g. `dashboard.updatedBy` becomes `updatedBy`
+        const [, ...rest] = existingKueryNode.arguments[0].value.split('.');
+        existingKueryNode.arguments[0].value = rest.join('.');
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           set(
@@ -75,6 +84,10 @@ export const validateConvertFilterToKueryNode = (
               esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
               existingKueryNode,
             ])
+          );
+        } else {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            `Filtering on a saved object attribute using an invalid type (${item.type}) is not supported.`
           );
         }
       } else {
@@ -172,6 +185,10 @@ const getType = (key: string | undefined | null) =>
  */
 export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: IndexMapping) => {
   const keySplit = key != null ? key.split('.') : [];
+  const [, ...rest] = keySplit;
+  if (fieldDefined(indexMapping, rest.join('.'))) {
+    return true;
+  }
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
   } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
@@ -197,18 +214,20 @@ export const hasFilterKeyError = (
       return `This type ${keySplit[0]} is not allowed`;
     }
     if (
-      (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
-      (keySplit.length > 2 && keySplit[1] !== 'attributes')
+      !isSavedObjectAttr(key, indexMapping) &&
+      ((keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
+        (keySplit.length > 2 && keySplit[1] !== 'attributes'))
     ) {
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
     if (
-      (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
-      (keySplit.length > 2 &&
-        !fieldDefined(
-          indexMapping,
-          `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
-        ))
+      !isSavedObjectAttr(key, indexMapping) &&
+      ((keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
+        (keySplit.length > 2 &&
+          !fieldDefined(
+            indexMapping,
+            `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
+          )))
     ) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
     }

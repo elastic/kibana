@@ -147,7 +147,7 @@ interface QueryParams {
   rootSearchFields?: string[];
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
-  kueryNode?: KueryNode;
+  kueryNodes?: KueryNode[];
 }
 
 function getReferencesFilter(
@@ -212,7 +212,7 @@ export function getQueryParams({
   defaultSearchOperator,
   hasReference,
   hasReferenceOperator,
-  kueryNode,
+  kueryNodes,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -225,7 +225,9 @@ export function getQueryParams({
 
   const bool: any = {
     filter: [
-      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
+      ...(Array.isArray(kueryNodes)
+        ? kueryNodes.map((node) => esKuery.toElasticsearchQuery(node))
+        : []),
       ...(hasReference?.length ? [getReferencesFilter(hasReference, hasReferenceOperator)] : []),
       {
         bool: {

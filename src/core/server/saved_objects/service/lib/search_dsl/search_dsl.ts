@@ -38,7 +38,7 @@ interface GetSearchDslOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
-  kueryNode?: KueryNode;
+  kueryNodes?: KueryNode[];
 }
 
 export function getSearchDsl(
@@ -58,7 +58,7 @@ export function getSearchDsl(
     typeToNamespacesMap,
     hasReference,
     hasReferenceOperator,
-    kueryNode,
+    kueryNodes,
   } = options;
 
   if (!type) {
@@ -81,7 +81,7 @@ export function getSearchDsl(
       defaultSearchOperator,
       hasReference,
       hasReferenceOperator,
-      kueryNode,
+      kueryNodes,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };

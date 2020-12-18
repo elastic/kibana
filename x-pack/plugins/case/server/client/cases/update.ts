@@ -164,7 +164,7 @@ export const update = ({
         caseId: theCase.id,
         options: {
           fields: [],
-          filter: 'cases-comments.attributes.type: alert',
+          filters: ['cases-comments.attributes.type: alert'],
           page: 1,
           perPage: 1,
         },
@@ -175,7 +175,7 @@ export const update = ({
         caseId: theCase.id,
         options: {
           fields: [],
-          filter: 'cases-comments.attributes.type: alert',
+          filters: ['cases-comments.attributes.type: alert'],
           page: 1,
           perPage: totalComments.total,
         },

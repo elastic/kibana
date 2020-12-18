@@ -81,7 +81,7 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
         hasReference: query.has_reference,
         hasReferenceOperator: query.has_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
-        filter: query.filter,
+        filters: query.filter ? [query.filter] : undefined,
         namespaces,
       });
 

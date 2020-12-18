@@ -57,7 +57,7 @@ export function jobSavedObjectServiceFactory(
       perPage: 10000,
       ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
       searchFields,
-      filter,
+      filters: [filter],
     };
 
     const jobs = await savedObjectsClient.find<JobObject>(options);
@@ -196,7 +196,7 @@ export function jobSavedObjectServiceFactory(
       perPage: 10000,
       ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
       searchFields,
-      filter,
+      filters: [filter],
     };
 
     return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;

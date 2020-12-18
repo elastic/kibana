@@ -23,8 +23,8 @@ export async function getAgentEvents(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { total, saved_objects } = await soClient.find<AgentEventSOAttributes>({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    filter:
-      kuery && kuery !== '' ? normalizeKuery(AGENT_EVENT_SAVED_OBJECT_TYPE, kuery) : undefined,
+    filters:
+      kuery && kuery !== '' ? [normalizeKuery(AGENT_EVENT_SAVED_OBJECT_TYPE, kuery)] : undefined,
     perPage,
     page,
     sortField: 'timestamp',

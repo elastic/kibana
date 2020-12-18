@@ -23,7 +23,7 @@ export const SavedObjectFindOptionsRt = rt.partial({
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   hasReference: rt.type({ id: rt.string, type: rt.string }),
   fields: rt.array(rt.string),
-  filter: rt.string,
+  filters: rt.array(rt.string),
   page: NumberFromString,
   perPage: NumberFromString,
   search: rt.string,
