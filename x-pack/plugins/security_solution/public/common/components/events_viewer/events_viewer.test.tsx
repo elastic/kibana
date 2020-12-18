@@ -30,6 +30,13 @@ jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useDataGridColumnSorting: jest.fn(),
+  };
+});
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -217,15 +224,13 @@ describe('EventsViewer', () => {
       expect(wrapper.find(`[data-test-subj="alerts-table-filter-group"]`).exists()).toBe(true);
     });
 
-    test.only('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', () => {
+    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', () => {
       const wrapper = mount(
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={
-              <AlertsTableFilterGroup display="block" onFilterGroupChanged={jest.fn()} />
-            }
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
           />
         </TestProviders>
       );
