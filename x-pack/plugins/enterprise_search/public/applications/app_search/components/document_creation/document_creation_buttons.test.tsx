@@ -43,7 +43,7 @@ describe('DocumentCreationButtons', () => {
     expect(wrapper.find(EuiCardTo).prop('isDisabled')).toEqual(true);
   });
 
-  it('opens the DocumentCreationModal on click', () => {
+  it('opens the DocumentCreationFlyout on click', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     wrapper.find(EuiCard).at(0).simulate('click');
