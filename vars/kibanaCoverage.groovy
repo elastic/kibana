@@ -148,9 +148,32 @@ def generateReports(title) {
     yarn kbn bootstrap
     # Return to project root
     cd ..
+
+
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
-    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+    PWD=$(pwd)
+
+    echo "### Create path coverage /dev/shm/workspace"
+    mkdir -p /dev/shm/workspace
+    cd ..
+    cp -RlP kibana /dev/shm/workspace/kibana
+
+    COVERAGE_TEMP_DIR=/tmp/extracted_coverage/target/kibana-coverage/
+    export COVERAGE_TEMP_DIR
+
+    cd /dev/shm/workspace/kibana
+
+    echo "### Merge coverage reports"
+    for x in jest functional; do
+      yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.${x}.config.js
+    done
+
+    echo "### Coping final reports"
+    cp -r /dev/shm/workspace/kibana/target/kibana-coverage "${PWD}/target"
+
+    echo "### Back to original path"
+    cd ${PWD}
+    
     . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
     # zip combined reports
     tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
