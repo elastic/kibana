@@ -7,7 +7,7 @@
 import './drag_drop.scss';
 import React, { useState, useContext, useEffect } from 'react';
 import classNames from 'classnames';
-import { keys, EuiScreenReaderOnly } from '@elastic/eui';
+import { keys, EuiScreenReaderOnly, EuiBottomBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DragContext, DragContextState, ReorderContext, ReorderState } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -267,43 +267,51 @@ const DragDropInner = React.memo(function DragDropInner(
   ) {
     const { label } = props as DraggableProps;
     return (
-      <ReorderableDragDrop
-        dropTo={dropTo}
-        label={label}
-        className={className}
-        dataTestSubj={props['data-test-subj'] || 'lnsDragDrop'}
-        draggingProps={{
-          className: classNames(children.props.className, classes),
-          draggable,
-          onDragEnd: dragEnd,
-          onDragStart: dragStart,
-          isReorderDragging,
-        }}
-        dropProps={{
-          onDrop: drop,
-          onDragOver: dragOver,
-          onDragLeave: dragLeave,
-          dragging,
-          droppable,
-          itemsInGroup,
-          id: value.id,
-          isActive: state.isActive,
-        }}
-      >
-        {children}
-      </ReorderableDragDrop>
+      <>
+        <ReorderableDragDrop
+          dropTo={dropTo}
+          label={label}
+          className={className}
+          dataTestSubj={props['data-test-subj'] || 'lnsDragDrop'}
+          draggingProps={{
+            className: classNames(children.props.className, classes),
+            draggable,
+            onDragEnd: dragEnd,
+            onDragStart: dragStart,
+            isReorderDragging,
+          }}
+          dropProps={{
+            onDrop: drop,
+            onDragOver: dragOver,
+            onDragLeave: dragLeave,
+            dragging,
+            droppable,
+            itemsInGroup,
+            id: value.id,
+            isActive: state.isActive,
+          }}
+        >
+          {children}
+        </ReorderableDragDrop>
+        {dragging && <EuiBottomBar>Message is displayed</EuiBottomBar>}
+      </>
     );
   }
-  return React.cloneElement(children, {
-    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
-    className: classNames(children.props.className, classes, className),
-    onDragOver: dragOver,
-    onDragLeave: dragLeave,
-    onDrop: drop,
-    draggable,
-    onDragEnd: dragEnd,
-    onDragStart: dragStart,
-  });
+  return (
+    <>
+      {React.cloneElement(children, {
+        'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+        className: classNames(children.props.className, classes, className),
+        onDragOver: dragOver,
+        onDragLeave: dragLeave,
+        onDrop: drop,
+        draggable,
+        onDragEnd: dragEnd,
+        onDragStart: dragStart,
+      })}
+      {dragging && <EuiBottomBar>Message is displayed</EuiBottomBar>}
+    </>
+  );
 });
 
 const getKeyboardReorderMessageMoved = (
@@ -484,6 +492,7 @@ export const ReorderableDragDrop = ({
           dropProps.onDrop(e);
           setReorderState((s: ReorderState) => ({
             ...s,
+            isReorderOn: false,
             reorderedItems: [],
           }));
         }}

@@ -236,7 +236,7 @@ export function LayerPanel(
                         : 'reorder'
                       : 'add';
 
-                    const isFromCompatibleGroup =
+                    const isCompatibleFromOtherGroup =
                       dragging?.groupId !== group.groupId &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
@@ -252,7 +252,7 @@ export function LayerPanel(
                     const isDroppable = isDraggedOperation(dragging)
                       ? dragType === 'reorder'
                         ? isFromTheSameGroup
-                        : isFromCompatibleGroup
+                        : isCompatibleFromOtherGroup
                       : layerDatasource.canHandleDrop({
                           ...layerDatasourceDropProps,
                           columnId: accessor,
@@ -438,14 +438,6 @@ export function LayerPanel(
                         // isFromTheSameGroup
                         (isDraggedOperation(dragDropContext.dragging) &&
                           dragDropContext.dragging.groupId === group.groupId)
-
-                        // const isFromCompatibleGroup =
-                        // dragging?.groupId !== group.groupId &&
-                        // layerDatasource.canHandleDrop({
-                        //   ...layerDatasourceDropProps,
-                        //   columnId: accessor,
-                        //   filterOperations: group.filterOperations,
-                        // });
                       }
                       onDrop={(droppedItem) => {
                         const dropResult = layerDatasource.onDrop({
@@ -459,13 +451,6 @@ export function LayerPanel(
                           },
                           filterOperations: group.filterOperations,
                         });
-                        console.log('duplicating', {
-                          ...layerDatasourceDropProps,
-                          droppedItem,
-                          columnId: newId,
-                          filterOperations: group.filterOperations,
-                        });
-
                         if (dropResult) {
                           props.updateVisualization(
                             activeVisualization.setDimension({
