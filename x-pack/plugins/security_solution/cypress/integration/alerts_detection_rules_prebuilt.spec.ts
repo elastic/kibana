@@ -30,23 +30,23 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
+import { esArchiverLoadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 
 describe.skip('Alerts rules, prebuilt rules', () => {
   before(() => {
+    cleanKibana();
+    removeSignalsIndex();
     esArchiverLoadEmptyKibana();
   });
 
-  after(() => {
-    esArchiverUnloadEmptyKibana();
-  });
-
-  it.skip('Loads prebuilt rules', () => {
+  it('Loads prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
@@ -78,11 +78,12 @@ describe.skip('Alerts rules, prebuilt rules', () => {
   });
 });
 
-describe.skip('Deleting prebuilt rules', () => {
+describe('Deleting prebuilt rules', () => {
   beforeEach(() => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
+    cleanKibana();
     esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -96,10 +97,6 @@ describe.skip('Deleting prebuilt rules', () => {
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
-  });
-
-  afterEach(() => {
-    esArchiverUnloadEmptyKibana();
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {
