@@ -76,12 +76,10 @@ export async function renderApp({
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const stateTransfer = getEmbeddableService()?.getStateTransfer(
-      history as AppMountParameters['history']
-    );
+    const stateTransfer = getEmbeddableService()?.getStateTransfer();
 
     const { embeddableId, originatingApp, valueInput } =
-      stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+      stateTransfer?.getIncomingEditorState() || {};
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {

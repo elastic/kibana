@@ -11,6 +11,7 @@ import {
   CaseConnector,
   CommentRequest,
   CaseStatuses,
+  CaseAttributes,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -63,6 +64,7 @@ export interface Case {
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
+  settings: CaseAttributes['settings'];
 }
 
 export interface QueryParams {
@@ -127,6 +129,11 @@ export interface ActionLicense {
 }
 
 export interface DeleteCase {
+  id: string;
+  title?: string;
+}
+
+export interface FieldMappings {
   id: string;
   title?: string;
 }

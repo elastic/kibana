@@ -63,14 +63,15 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -94,14 +95,11 @@ describe.skip('Detection rules, override', () => {
   const rule = { ...newOverrideRule };
 
   beforeEach(() => {
+    cleanKibana();
+    removeSignalsIndex();
     createTimeline(newOverrideRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new custom rule with override option', () => {

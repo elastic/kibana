@@ -36,8 +36,10 @@ export interface DataStreamFromEs {
   template: string;
   ilm_policy?: string;
   store_size?: string;
+  store_size_bytes?: number;
   maximum_timestamp?: number;
   privileges: PrivilegesFromEs;
+  hidden: boolean;
 }
 
 export interface DataStreamIndexFromEs {
@@ -56,9 +58,11 @@ export interface DataStream {
   indexTemplateName: string;
   ilmPolicyName?: string;
   storageSize?: string;
+  storageSizeBytes?: number;
   maxTimeStamp?: number;
   _meta?: Meta;
   privileges: Privileges;
+  hidden: boolean;
 }
 
 export interface DataStreamIndex {

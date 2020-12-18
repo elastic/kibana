@@ -22,8 +22,8 @@ import { Chart } from './_chart';
 import { gaugeTypes } from './gauges/gauge_types';
 
 export class GaugeChart extends Chart {
-  constructor(handler, chartEl, chartData, deps) {
-    super(handler, chartEl, chartData, deps);
+  constructor(handler, chartEl, chartData, uiSettings) {
+    super(handler, chartEl, chartData, uiSettings);
     this.gaugeConfig = handler.visConfig.get('gauge', {});
     this.gauge = new gaugeTypes[this.gaugeConfig.type](this);
   }
@@ -31,7 +31,10 @@ export class GaugeChart extends Chart {
   addEvents(element) {
     const events = this.events;
 
-    return element.call(events.addHoverEvent()).call(events.addMouseoutEvent());
+    return element
+      .call(events.addHoverEvent())
+      .call(events.addMouseoutEvent())
+      .call(events.addClickEvent());
   }
 
   /**

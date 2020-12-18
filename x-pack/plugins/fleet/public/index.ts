@@ -17,3 +17,4 @@ export * from './applications/fleet/types/intra_app_route_state';
 export * from './applications/fleet/types/ui_extensions';
 
 export { pagePathGetters } from './applications/fleet/constants';
+export { pkgKeyFromPackageInfo } from './applications/fleet/services/pkg_key_from_package_info';

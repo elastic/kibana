@@ -41,6 +41,7 @@ export const NESTED_FIELD = 'parent.field';
 // Exception List specific
 export const ID = 'uuid_here';
 export const ITEM_ID = 'some-list-item-id';
+export const DETECTION_TYPE = 'detection';
 export const ENDPOINT_TYPE = 'endpoint';
 export const FIELD = 'host.name';
 export const OPERATOR = 'included';

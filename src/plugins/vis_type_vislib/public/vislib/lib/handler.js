@@ -21,15 +21,16 @@ import d3 from 'd3';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 
+import { dispatchRenderComplete } from '../../../../kibana_utils/public';
+
+import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { NoResults } from '../errors';
 import { Layout } from './layout/layout';
 import { ChartTitle } from './chart_title';
 import { Alerts } from './alerts';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
-import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { Binder } from './binder';
-import { dispatchRenderComplete } from '../../../../kibana_utils/public';
 
 const markdownIt = new MarkdownIt({
   html: false,

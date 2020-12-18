@@ -66,9 +66,9 @@ export interface DiscoverProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
-  fetchError: Error;
+  fetchError?: Error;
   fieldCounts: Record<string, number>;
-  histogramData: Chart;
+  histogramData?: Chart;
   hits: number;
   indexPattern: IndexPattern;
   minimumVisibleRows: number;
@@ -266,23 +266,26 @@ export function DiscoverLegacy({
                             />
                           </EuiFlexItem>
                         )}
-                        <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                          <EuiButtonEmpty
-                            size="xs"
-                            iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                            onClick={() => {
-                              toggleChart(!toggleOn);
-                            }}
-                          >
-                            {toggleOn
-                              ? i18n.translate('discover.hideChart', {
-                                  defaultMessage: 'Hide chart',
-                                })
-                              : i18n.translate('discover.showChart', {
-                                  defaultMessage: 'Show chart',
-                                })}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
+                        {opts.timefield && (
+                          <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                            <EuiButtonEmpty
+                              size="xs"
+                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                              onClick={() => {
+                                toggleChart(!toggleOn);
+                              }}
+                              data-test-subj="discoverChartToggle"
+                            >
+                              {toggleOn
+                                ? i18n.translate('discover.hideChart', {
+                                    defaultMessage: 'Hide chart',
+                                  })
+                                : i18n.translate('discover.showChart', {
+                                    defaultMessage: 'Show chart',
+                                  })}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        )}
                       </EuiFlexGroup>
                       <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
@@ -297,7 +300,7 @@ export function DiscoverLegacy({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && rows.length !== 0 && (
+                          {opts.chartAggConfigs && rows.length !== 0 && histogramData && (
                             <div className="dscHistogram" data-test-subj="discoverChart">
                               <DiscoverHistogram
                                 chartData={histogramData}

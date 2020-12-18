@@ -45,7 +45,7 @@ import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
 import { RegistryAlertType } from '../alert_type_registry';
-import { AlertsAuthorization, WriteOperations, ReadOperations, and } from '../authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
@@ -56,6 +56,7 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -241,6 +242,8 @@ export class AlertsClient {
       );
       throw error;
     }
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
 
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
@@ -453,7 +456,7 @@ export class AlertsClient {
       ...options,
       filter:
         (authorizationFilter && options.filter
-          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
@@ -515,7 +518,7 @@ export class AlertsClient {
           ...options,
           filter:
             (authorizationFilter && filter
-              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter])
               : authorizationFilter) ?? filter,
           page: 1,
           perPage: 0,
@@ -652,6 +655,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
     const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
 
@@ -830,6 +835,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
@@ -912,6 +919,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -1012,6 +1021,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -1086,6 +1097,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
@@ -1145,6 +1158,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
@@ -1203,6 +1218,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1267,6 +1284,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {

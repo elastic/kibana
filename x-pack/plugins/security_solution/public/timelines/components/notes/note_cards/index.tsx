@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -14,6 +14,8 @@ import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
 import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
+
+import * as i18n from '../translations';
 
 const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
@@ -40,6 +42,7 @@ const NotesContainer = styled(EuiFlexGroup)`
 NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
+  ariaRowindex: number;
   associateNote: AssociateNote;
   noteIds: string[];
   showAddNote: boolean;
@@ -48,7 +51,7 @@ interface Props {
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
+  ({ ariaRowindex, associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
     const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
     const notesById = useDeepEqualSelector(getNotesByIds);
     const [newNote, setNewNote] = useState('');
@@ -78,6 +81,9 @@ export const NoteCards = React.memo<Props>(
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
             <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
+              <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+                <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
+              </EuiScreenReaderOnly>
               <NotePreviews notes={notes} />
             </NotesContainer>
           </NotePreviewsContainer>
