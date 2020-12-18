@@ -28,6 +28,7 @@ export interface UserMenuLink {
   iconType: IconType;
   href: string;
   order?: number;
+  setAsProfile?: boolean;
 }
 
 interface Props {
@@ -41,6 +42,7 @@ interface State {
   isOpen: boolean;
   authenticatedUser: AuthenticatedUser | null;
   userMenuLinks: UserMenuLink[];
+  profileOverridden: boolean;
 }
 
 export class SecurityNavControl extends Component<Props, State> {
@@ -53,6 +55,7 @@ export class SecurityNavControl extends Component<Props, State> {
       isOpen: false,
       authenticatedUser: null,
       userMenuLinks: [],
+      profileOverridden: false,
     };
 
     props.user.then((authenticatedUser) => {
@@ -65,6 +68,27 @@ export class SecurityNavControl extends Component<Props, State> {
   componentDidMount() {
     this.subscription = this.props.userMenuLinks$.subscribe(async (userMenuLinks) => {
       this.setState({ userMenuLinks });
+
+      if (userMenuLinks.length) {
+        let overrideCount = 0;
+        for (const key in userMenuLinks) {
+          // Check if any user links are profile links (i.e. override the default profile link)
+          if (userMenuLinks[key].setAsProfile) {
+            overrideCount++;
+
+            this.setState({
+              profileOverridden: true,
+            });
+          }
+        }
+        // Show a warning when more than one override exits.
+        if (overrideCount > 1) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'More than one profile link override has been found. A single override is recommended.'
+          );
+        }
+      }
     });
   }
 
@@ -92,7 +116,7 @@ export class SecurityNavControl extends Component<Props, State> {
 
   render() {
     const { editProfileUrl, logoutUrl } = this.props;
-    const { authenticatedUser, userMenuLinks } = this.state;
+    const { authenticatedUser, userMenuLinks, profileOverridden } = this.state;
 
     const username =
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
@@ -135,7 +159,7 @@ export class SecurityNavControl extends Component<Props, State> {
 
     if (!isAnonymousUser) {
       const profileMenuItem = {
-        name: userMenuLinks.length ? (
+        name: profileOverridden ? (
           <FormattedMessage
             id="xpack.security.navControlComponent.editProfileLinkTextSecondary"
             defaultMessage="Preferences"
@@ -146,7 +170,7 @@ export class SecurityNavControl extends Component<Props, State> {
             defaultMessage="Profile"
           />
         ),
-        icon: <EuiIcon type={userMenuLinks.length ? 'controlsHorizontal' : 'user'} size="m" />,
+        icon: <EuiIcon type={profileOverridden ? 'controlsHorizontal' : 'user'} size="m" />,
         href: editProfileUrl,
         'data-test-subj': 'profileLink',
       };

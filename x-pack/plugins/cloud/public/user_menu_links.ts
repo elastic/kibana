@@ -20,6 +20,7 @@ export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => 
       iconType: 'user',
       href: resetPasswordUrl,
       order: 100,
+      setAsProfile: true,
     });
   }
 
