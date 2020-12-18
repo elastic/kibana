@@ -104,7 +104,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
               <EuiDescriptionListTitle>
                 <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <span>{i18n.STATUS}</span>
+                    <span>{i18n.SYNC_ALERTS}</span>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
