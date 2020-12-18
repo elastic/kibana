@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * Legacy events are stored in indices with endgame-* prefix
- */
-export const legacyEventIndexPattern = 'endgame-*';
+import { validIDs } from './index';
+
+describe('validIDs', () => {
+  it('removes empty strings', () => {
+    expect(validIDs(['', 5, 'hello', '', 0])).toEqual([5, 'hello', 0]);
+  });
+});
