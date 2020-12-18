@@ -1,4 +1,6 @@
-extends: stylelint-config-standard
-files:
-  include:
-    - '**/*.s+(a|c)ss'
+{
+  "rules": {
+    "number-leading-zero": "never",
+    "color-hex-case": "upper"
+  }
+}
