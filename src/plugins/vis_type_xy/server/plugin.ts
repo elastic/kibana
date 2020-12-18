@@ -29,7 +29,7 @@ export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
   // https://github.com/elastic/kibana/issues/56143
   [LEGACY_CHARTS_LIBRARY]: {
     name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
-      defaultMessage: 'Legact charts library',
+      defaultMessage: 'Legacy charts library',
     }),
     value: true,
     description: i18n.translate(
