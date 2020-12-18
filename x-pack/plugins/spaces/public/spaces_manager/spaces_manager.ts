@@ -22,16 +22,21 @@ export class SpacesManager {
 
   private readonly serverBasePath: string;
 
-  public readonly onActiveSpaceChange$: Observable<Space>;
+  private readonly _onActiveSpaceChange$: Observable<Space>;
 
   constructor(private readonly http: HttpSetup) {
     this.serverBasePath = http.basePath.serverBasePath;
 
-    this.onActiveSpaceChange$ = this.activeSpace$
+    this._onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
+  }
 
-    this.refreshActiveSpace();
+  public get onActiveSpaceChange$() {
+    if (!this.activeSpace$.value) {
+      this.refreshActiveSpace();
+    }
+    return this._onActiveSpaceChange$;
   }
 
   public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
@@ -44,14 +49,14 @@ export class SpacesManager {
     return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
   }
 
-  public getActiveSpace({ forceRefresh = false } = {}) {
+  public async getActiveSpace({ forceRefresh = false } = {}) {
     if (this.isAnonymousPath()) {
       throw new Error(`Cannot retrieve the active space for anonymous paths`);
     }
-    if (!forceRefresh && this.activeSpace$.value) {
-      return Promise.resolve(this.activeSpace$.value);
+    if (forceRefresh || !this.activeSpace$.value) {
+      await this.refreshActiveSpace();
     }
-    return this.http.get('/internal/spaces/_active_space') as Promise<Space>;
+    return this.activeSpace$.value!;
   }
 
   public async createSpace(space: Space) {
@@ -149,7 +154,7 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.getActiveSpace({ forceRefresh: true });
+    const activeSpace = await this.http.get('/internal/spaces/_active_space');
     this.activeSpace$.next(activeSpace);
   }
 

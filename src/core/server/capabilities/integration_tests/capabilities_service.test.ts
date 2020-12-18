@@ -72,17 +72,57 @@ describe('CapabilitiesService', () => {
           `);
     });
 
-    it('uses the service capabilities providers', async () => {
-      serviceSetup.registerProvider(() => ({
+    it('uses the service capabilities providers and switchers', async () => {
+      const getInitialCapabilities = () => ({
         catalogue: {
           something: true,
         },
-      }));
+        management: {},
+        navLinks: {},
+      });
+      serviceSetup.registerProvider(() => getInitialCapabilities());
+
+      const switcher = jest.fn((_, capabilities) => capabilities);
+      serviceSetup.registerSwitcher(switcher);
 
       const result = await supertest(httpSetup.server.listener)
         .post('/api/core/capabilities')
         .send({ applications: [] })
         .expect(200);
+
+      expect(switcher).toHaveBeenCalledTimes(1);
+      expect(switcher).toHaveBeenCalledWith(expect.anything(), getInitialCapabilities(), false);
+      expect(result.body).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {
+            "something": true,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+    });
+
+    it('passes useDefaultCapabilities to registered switchers', async () => {
+      const getInitialCapabilities = () => ({
+        catalogue: {
+          something: true,
+        },
+        management: {},
+        navLinks: {},
+      });
+      serviceSetup.registerProvider(() => getInitialCapabilities());
+
+      const switcher = jest.fn((_, capabilities) => capabilities);
+      serviceSetup.registerSwitcher(switcher);
+
+      const result = await supertest(httpSetup.server.listener)
+        .post('/api/core/capabilities?useDefaultCapabilities=true')
+        .send({ applications: [] })
+        .expect(200);
+
+      expect(switcher).toHaveBeenCalledTimes(1);
+      expect(switcher).toHaveBeenCalledWith(expect.anything(), getInitialCapabilities(), true);
       expect(result.body).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {

@@ -31,7 +31,19 @@ How to restrict some capabilities
 ```ts
 // my-plugin/server/plugin.ts
 public setup(core: CoreSetup, deps: {}) {
-   core.capabilities.registerSwitcher((request, capabilities) => {
+   core.capabilities.registerSwitcher((request, capabilities, useDefaultCapabilities) => {
+     // useDefaultCapabilities is a special case that switchers typically don't have to concern themselves with.
+     // The default capabilities are typically the ones you provide in your CapabilitiesProvider, but this flag
+     // gives each switcher an opportunity to change the default capabilities of other plugins' capabilities.
+     // For example, you may decide to flip another plugin's capability to false if today is Tuesday,
+     // but you wouldn't want to do this when we are requesting the default set of capabilities.
+     if (useDefaultCapabilities) {
+       return {
+         somePlugin: {
+           featureEnabledByDefault: true
+         }
+       }
+     }
      if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
        return {
          somePlugin: {

@@ -15,10 +15,11 @@ export function setupCapabilitiesSwitcher(
   getSpacesService: () => SpacesServiceStart,
   logger: Logger
 ): CapabilitiesSwitcher {
-  return async (request, capabilities) => {
+  return async (request, capabilities, useDefaultCapabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
+    const shouldToggleCapabilities = !isAnonymousRequest && !useDefaultCapabilities;
 
-    if (isAnonymousRequest) {
+    if (!shouldToggleCapabilities) {
       return capabilities;
     }
 
