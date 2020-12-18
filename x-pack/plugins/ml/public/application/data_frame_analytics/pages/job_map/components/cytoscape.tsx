@@ -132,7 +132,7 @@ export function Cytoscape({
 
   return (
     <CytoscapeContext.Provider value={cy}>
-      <div ref={ref} style={divStyle}>
+      <div ref={ref} style={divStyle} data-test-subj="mlPageDataFrameAnalyticsMapCytoscape">
         {children}
       </div>
     </CytoscapeContext.Provider>

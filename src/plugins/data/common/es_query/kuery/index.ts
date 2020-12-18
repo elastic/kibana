@@ -18,7 +18,7 @@
  */
 
 export { KQLSyntaxError } from './kuery_syntax_error';
-export { nodeTypes } from './node_types';
+export { nodeTypes, nodeBuilder } from './node_types';
 export * from './ast';
 
 export * from './types';
