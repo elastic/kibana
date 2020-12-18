@@ -57,9 +57,10 @@ describe('<AccountManagementPage>', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(
-      user.full_name
-    );
+    // Replace non breaking spaces (&nbsp;) with ordinary space
+    expect(
+      wrapper.find('EuiText[data-test-subj="userDisplayName"]').text().replace(/\s/g, ' ')
+    ).toEqual(`Settings for ${user.full_name}`);
     expect(wrapper.find('[data-test-subj="username"]').text()).toEqual(user.username);
     expect(wrapper.find('[data-test-subj="email"]').text()).toEqual(user.email);
   });
@@ -79,7 +80,10 @@ describe('<AccountManagementPage>', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(user.username);
+    // Replace non breaking spaces (&nbsp;) with ordinary space
+    expect(
+      wrapper.find('EuiText[data-test-subj="userDisplayName"]').text().replace(/\s/g, ' ')
+    ).toEqual(`Settings for ${user.username}`);
   });
 
   it(`displays a placeholder when no email address is provided`, async () => {
