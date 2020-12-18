@@ -8,11 +8,14 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../../../case/common/api';
-
 import { StatusContextMenu } from './status_context_menu';
 
 describe('SyncAlertsSwitch', () => {
   const onStatusChanged = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('it renders', async () => {
     const wrapper = mount(
