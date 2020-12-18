@@ -29,7 +29,12 @@ const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
-    inputDisplay: 'Only on status change',
+    inputDisplay: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.display',
+      {
+        defaultMessage: 'Only on status change.',
+      }
+    ),
     'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
       <Fragment>
@@ -52,7 +57,12 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   },
   {
     value: 'onActiveAlert',
-    inputDisplay: 'Every time alert is active',
+    inputDisplay: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.display',
+      {
+        defaultMessage: 'Every time alert is active',
+      }
+    ),
     'data-test-subj': 'onActiveAlert',
     dropdownDisplay: (
       <Fragment>
@@ -75,7 +85,12 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   },
   {
     value: 'onThrottleInterval',
-    inputDisplay: 'On a custom action interval',
+    inputDisplay: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onThrottleInterval.display',
+      {
+        defaultMessage: 'On a custom action interval',
+      }
+    ),
     'data-test-subj': 'onThrottleInterval',
     dropdownDisplay: (
       <Fragment>
