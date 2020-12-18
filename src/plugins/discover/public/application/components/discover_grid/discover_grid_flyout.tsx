@@ -25,7 +25,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
