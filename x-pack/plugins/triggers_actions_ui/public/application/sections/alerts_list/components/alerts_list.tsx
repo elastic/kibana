@@ -59,6 +59,7 @@ import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
 
 const ENTER_KEY = 13;
@@ -156,7 +157,15 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
+        setActionTypes(
+          result
+            .filter(
+              // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
+              // Issue: https://github.com/elastic/kibana/issues/82502.
+              ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
