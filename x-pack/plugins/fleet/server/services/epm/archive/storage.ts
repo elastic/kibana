@@ -6,7 +6,7 @@
 
 import { extname } from 'path';
 import { uniq } from 'lodash';
-import yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
@@ -152,14 +152,7 @@ export async function getAsset(opts: {
 
   return storedAsset;
 }
-export async function getAssetsFromReferences(opts: {
-  savedObjectsClient: SavedObjectsClientContract;
-  references: PackageAssetReference[];
-}): Promise<PackageAsset[]> {
-  const { savedObjectsClient, references } = opts;
-  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(references);
-  return bulkRes.saved_objects.map((so) => so.attributes);
-}
+
 export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
@@ -167,7 +160,13 @@ export const getEsPackage = async (
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const assets = await getAssetsFromReferences({ references, savedObjectsClient });
+  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
+    references.map((reference) => ({
+      ...reference,
+      fields: ['asset_path', 'data_utf8', 'data_base64'],
+    }))
+  );
+  const assets = bulkRes.saved_objects.map((so) => so.attributes);
 
   // add asset references to cache
   const paths: string[] = [];
@@ -180,27 +179,25 @@ export const getEsPackage = async (
   });
   setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
   // create the packageInfo
-  // TODO: this is mostly copied from validtion.ts, but we should save packageInfo somewhere
-  // so we don't need to do this again as this was already done either in registry or through upload
+  // TODO: this is mostly copied from validtion.ts, needed in case package does not exist in storage yet or is missing from cache
+  // we don't want to reach out to the registry again so recreate it here.  should check whether it exists in packageInfoCache first
 
   const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
-  const soResManifest = await savedObjectsClient.find<PackageAsset>({
-    type: ASSETS_SAVED_OBJECT_TYPE,
-    perPage: 1,
-    page: 1,
-    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${manifestPath}`,
-  });
-  const packageInfo = yaml.load(soResManifest.saved_objects[0].attributes.data_utf8);
+  const soResManifest = await savedObjectsClient.get<PackageAsset>(
+    ASSETS_SAVED_OBJECT_TYPE,
+    assetPathToObjectId(manifestPath)
+  );
+  const packageInfo = safeLoad(soResManifest.attributes.data_utf8);
 
-  const readmePath = `${pkgName}-${pkgVersion}/docs/README.md`;
-  const readmeRes = await savedObjectsClient.find<PackageAsset>({
-    type: ASSETS_SAVED_OBJECT_TYPE,
-    perPage: 1,
-    page: 1,
-    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${readmePath}`,
-  });
-  if (readmeRes.total > 0) {
-    packageInfo.readme = `package/${readmePath}`;
+  try {
+    const readmePath = `docs/README.md`;
+    await savedObjectsClient.get<PackageAsset>(
+      ASSETS_SAVED_OBJECT_TYPE,
+      assetPathToObjectId(`${pkgName}-${pkgVersion}/${readmePath}`)
+    );
+    packageInfo.readme = `/package/${pkgName}/${pkgVersion}/${readmePath}`;
+  } catch (err) {
+    // read me doesn't exist
   }
 
   let dataStreamPaths: string[] = [];
@@ -217,16 +214,11 @@ export const getEsPackage = async (
   await Promise.all(
     dataStreamPaths.map(async (dataStreamPath) => {
       const dataStreamManifestPath = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
-      const soResDataStreamManifest = await savedObjectsClient.find<PackageAsset>({
-        type: ASSETS_SAVED_OBJECT_TYPE,
-        perPage: 1,
-        page: 1,
-        filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${pkgVersion} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path:${dataStreamManifestPath}`,
-      });
-      const dataStreamManifest = yaml.load(
-        soResDataStreamManifest.saved_objects[0].attributes.data_utf8
+      const soResDataStreamManifest = await savedObjectsClient.get<PackageAsset>(
+        ASSETS_SAVED_OBJECT_TYPE,
+        assetPathToObjectId(dataStreamManifestPath)
       );
-
+      const dataStreamManifest = safeLoad(soResDataStreamManifest.attributes.data_utf8);
       const {
         title: dataStreamTitle,
         release,

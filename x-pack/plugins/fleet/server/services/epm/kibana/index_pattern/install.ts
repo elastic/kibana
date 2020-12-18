@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
 import { RegistryPackage, DataType } from '../../../../types';
-import {
-  getInstallationObject,
-  getPackageFromSource,
-  getPackageSavedObjects,
-} from '../../packages/get';
+import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -85,12 +81,12 @@ export async function installIndexPatterns(
   );
 
   const packagesToFetch = installedPackagesSavedObjects.reduce<
-    Array<{ name: string; version: string; installedPkgSO: SavedObject<Installation> | undefined }>
-  >((acc, pkgSO) => {
+    Array<{ name: string; version: string; installedPkg: Installation | undefined }>
+  >((acc, pkg) => {
     acc.push({
-      name: pkgSO.attributes.name,
-      version: pkgSO.attributes.version,
-      installedPkgSO: pkgSO,
+      name: pkg.attributes.name,
+      version: pkg.attributes.version,
+      installedPkg: pkg.attributes,
     });
     return acc;
   }, []);
@@ -107,7 +103,7 @@ export async function installIndexPatterns(
       packagesToFetch.push({
         name: pkgName,
         version: pkgVersion,
-        installedPkgSO: await getInstallationObject({ savedObjectsClient, pkgName }),
+        installedPkg: await getInstallation({ savedObjectsClient, pkgName }),
       });
     }
   }
@@ -116,7 +112,7 @@ export async function installIndexPatterns(
     getPackageFromSource({
       pkgName: pkg.name,
       pkgVersion: pkg.version,
-      installedPkgSO: pkg.installedPkgSO,
+      installedPkg: pkg.installedPkg,
       savedObjectsClient,
     })
   );
