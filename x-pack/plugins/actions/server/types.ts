@@ -32,7 +32,7 @@ export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
   /**
-   * @deprecated use `scopedClusterClient`
+   * @deprecated Use `scopedClusterClient` instead.
    */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
