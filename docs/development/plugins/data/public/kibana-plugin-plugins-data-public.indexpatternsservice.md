@@ -23,6 +23,7 @@ export declare class IndexPatternsService
 |  [clearCache](./kibana-plugin-plugins-data-public.indexpatternsservice.clearcache.md) |  | <code>(id?: string &#124; undefined) =&gt; void</code> | Clear index pattern list cache |
 |  [ensureDefaultIndexPattern](./kibana-plugin-plugins-data-public.indexpatternsservice.ensuredefaultindexpattern.md) |  | <code>EnsureDefaultIndexPattern</code> |  |
 |  [fieldArrayToMap](./kibana-plugin-plugins-data-public.indexpatternsservice.fieldarraytomap.md) |  | <code>(fields: FieldSpec[]) =&gt; Record&lt;string, FieldSpec&gt;</code> | Converts field array to map |
+|  [find](./kibana-plugin-plugins-data-public.indexpatternsservice.find.md) |  | <code>(search: string, size?: number) =&gt; Promise&lt;IndexPattern[]&gt;</code> |  |
 |  [get](./kibana-plugin-plugins-data-public.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
 |  [getCache](./kibana-plugin-plugins-data-public.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
 |  [getDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
@@ -43,10 +44,6 @@ export declare class IndexPatternsService
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-public.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-public.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
-<<<<<<< HEAD
 |  [migrate(indexPattern, newTitle)](./kibana-plugin-plugins-data-public.indexpatternsservice.migrate.md) |  |  |
-|  [updateSavedObject(indexPattern, saveAttempts)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
-=======
 |  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
->>>>>>> cdb922f2a2... Move indexPattern.popularizeField into discover (#77668)
 
