@@ -19,7 +19,6 @@ exports[`Should render default props 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
 >
   <div
     style={
@@ -74,7 +73,6 @@ exports[`Should render metrics expression for metrics 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
 >
   <div
     style={

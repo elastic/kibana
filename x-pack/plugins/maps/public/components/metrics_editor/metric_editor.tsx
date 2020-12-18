@@ -154,6 +154,7 @@ export function MetricEditor({
         initialValue={
           typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE
         }
+        display="columnCompressed"
       />
     );
   }

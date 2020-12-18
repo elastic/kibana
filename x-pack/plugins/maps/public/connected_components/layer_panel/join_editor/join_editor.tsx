@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { Join } from './resources/join';
 import { ILayer } from '../../../classes/layers/layer';
+import { DEFAULT_TERM_JOIN_SIZE } from '../../../../common/constants';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../../classes/fields/field';
 
@@ -60,6 +61,15 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
   };
 
   const addJoin = () => {
+    let size = DEFAULT_TERM_JOIN_SIZE;
+    const sourceDataRequest = layer.getSourceDataRequest();
+    if (sourceDataRequest) {
+      const leftFeatures = _.get(sourceDataRequest.getData(), 'features');
+      if (leftFeatures) {
+        size = leftFeatures.length;
+      }
+    }
+
     onChange(layer, [
       ...joins,
       {
@@ -67,6 +77,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
           id: uuid(),
           applyGlobalQuery: true,
           applyGlobalTime: true,
+          size,
         },
       } as JoinDescriptor,
     ]);
