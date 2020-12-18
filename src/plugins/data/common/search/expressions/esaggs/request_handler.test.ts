@@ -39,7 +39,6 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockParams = {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
-      addFilters: jest.fn(),
       aggs: ({
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
         setTimeRange: jest.fn(),

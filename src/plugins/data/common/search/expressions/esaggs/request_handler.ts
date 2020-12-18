@@ -36,13 +36,9 @@ import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
 
-import type { AddFilters } from './build_tabular_inspector_data';
-import { buildTabularInspectorData } from './build_tabular_inspector_data';
-
 /** @internal */
 export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
-  addFilters?: AddFilters;
   aggs: IAggConfigs;
   deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
@@ -59,7 +55,6 @@ export interface RequestHandlerParams {
 
 export const handleRequest = async ({
   abortSignal,
-  addFilters,
   aggs,
   deserializeFieldFormat,
   filters,
@@ -198,17 +193,6 @@ export const handleRequest = async ({
   };
 
   const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
-
-  if (inspectorAdapters.data) {
-    inspectorAdapters.data.setTabularLoader(
-      () =>
-        buildTabularInspectorData(tabifiedResponse, {
-          addFilters,
-          deserializeFieldFormat,
-        }),
-      { returnsFormattedValues: true }
-    );
-  }
 
   return tabifiedResponse;
 };
