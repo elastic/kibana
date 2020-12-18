@@ -44,7 +44,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe.skip('Events Viewer', () => {
+describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       cleanKibana();
@@ -62,7 +62,7 @@ describe.skip('Events Viewer', () => {
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', 'default ECS');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
@@ -136,7 +136,7 @@ describe.skip('Events Viewer', () => {
         .invoke('text')
         .then((initialNumberOfEvents) => {
           kqlSearch(`${filterInput}{enter}`);
-          cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
+          cy.get(HEADER_SUBTITLE).should('not.have.text', initialNumberOfEvents);
         });
     });
   });
@@ -161,9 +161,9 @@ describe.skip('Events Viewer', () => {
       const expectedOrderAfterDragAndDrop =
         'message@timestamp1host.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
-      cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
+      cy.get(HEADERS_GROUP).should('have.text', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 0 });
-      cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
+      cy.get(HEADERS_GROUP).should('have.text', expectedOrderAfterDragAndDrop);
     });
   });
 });
