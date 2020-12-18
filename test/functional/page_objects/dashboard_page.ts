@@ -36,7 +36,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;

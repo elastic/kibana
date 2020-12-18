@@ -88,9 +88,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     );
   },
   buildColumn({ layer, field, indexPattern }) {
-    const [existingMetricColumn] = Object.entries(layer.columns).filter(
-      ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
-    )[0];
+    const existingMetricColumn = Object.entries(layer.columns)
+      .filter(
+        ([columnId, column]) =>
+          column && !isReferenced(layer, columnId) && isSortableByColumn(column)
+      )
+      .map(([id]) => id)[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
       (col) => col && col.isBucketed
