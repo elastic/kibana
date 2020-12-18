@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -399,7 +400,9 @@ describe('DraggableWrapperHoverContent', () => {
       wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
       wrapper.update();
 
-      expect(startDragToTimeline).toHaveBeenCalled();
+      waitFor(() => {
+        expect(startDragToTimeline).toHaveBeenCalled();
+      });
     });
   });
 
@@ -473,7 +476,9 @@ describe('DraggableWrapperHoverContent', () => {
       );
       const button = wrapper.find(`[data-test-subj="show-top-field"]`).first();
       button.simulate('mouseenter');
-      expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      waitFor(() => {
+        expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      });
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
