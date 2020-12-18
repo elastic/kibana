@@ -181,9 +181,25 @@ export class JoinExpression extends Component {
   }
 
   _getExpressionValue() {
-    const { leftSourceName, leftValue, rightSourceName, rightValue } = this.props;
+    const { leftSourceName, leftValue, rightSourceName, rightValue, rightSize } = this.props;
     if (leftSourceName && leftValue && rightSourceName && rightValue) {
-      return `${leftSourceName}:${leftValue} with ${rightSourceName}:${rightValue}`;
+      return i18n.translate('xpack.maps.layerPanel.joinExpression.value', {
+        defaultMessage:
+          '{leftSourceName}:{leftValue} with {sizeFragment} {rightSourceName}:{rightValue}',
+        values: {
+          leftSourceName,
+          leftValue,
+          sizeFragment:
+            rightSize !== undefined
+              ? i18n.translate('xpack.maps.layerPanel.joinExpression.sizeFragment', {
+                  defaultMessage: 'top {rightSize} terms from',
+                  values: { rightSize },
+                })
+              : '',
+          rightSourceName,
+          rightValue,
+        },
+      });
     }
 
     return i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
