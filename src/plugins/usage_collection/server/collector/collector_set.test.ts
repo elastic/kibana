@@ -26,7 +26,6 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '../../../../core/server/mocks';
-import { createCollectorFetchContextMock } from '../mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -45,13 +44,6 @@ describe('CollectorSet', () => {
       loggerSpies.debug.mockRestore();
       loggerSpies.warn.mockRestore();
     });
-    // TODO: create a fetch context mock and figure out how to use the esClient to replace the legacy callCluster without any args.
-
-    const esClientMock = jest.fn().mockResolvedValue({ body: { passTest: 1000 } });
-    const mockCollectorFetchContext = {
-      esClient: esClientMock,
-    };
-    const mockCallCluster = jest.fn().mockResolvedValue({ passTest: 1000 });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const mockSoClient = savedObjectsRepositoryMock.create();
     const req = void 0; // No need to instantiate any KibanaRequest in these tests
@@ -90,12 +82,13 @@ describe('CollectorSet', () => {
     });
 
     it('should log debug status of fetching from the collector', async () => {
+      mockEsClient.get.mockResolvedValue({ passTest: 1000 } as any);
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: (collectorFetchContext: any) => {
-            return collectorFetchContext.callCluster();
+            return collectorFetchContext.esClient.get();
           },
           isReady: () => true,
         })
