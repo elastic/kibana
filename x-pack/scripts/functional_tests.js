@@ -68,6 +68,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/spaces_api_integration/spaces_only/config.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic.ts'),
+  require.resolve('../test/saved_object_access_control/config.ts'),
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config_trial.ts'),
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config_basic.ts'),
   require.resolve('../test/saved_object_api_integration/security_only/config_trial.ts'),

@@ -1,0 +1,242 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space",
+        "name": "Default Space"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the first test space",
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space_2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the second test space",
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "confidential:alice_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "alice"
+      },
+      "confidential": {
+        "name": "Alice's first confidential object in the default space"
+      },
+      "type": "confidential",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:index_pattern_1",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "title": "First index pattern"
+      },
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:confidential:alice_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "alice"
+      },
+      "confidential": {
+        "name": "Alice's first confidential object in the space_1 space"
+      },
+      "type": "confidential",
+      "namespace": "space_1",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_2:confidential:alice_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "alice"
+      },
+      "confidential": {
+        "name": "Alice's first confidential object in the space_2 space"
+      },
+      "type": "confidential",
+      "namespace": "space_2",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:confidential:alice_space_1_doc",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "alice"
+      },
+      "confidential": {
+        "name": "Alice's second confidential object in the space_1 space. This does not exist in the default space."
+      },
+      "type": "confidential",
+      "namespace": "space_1",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "confidential:bob_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "bob"
+      },
+      "confidential": {
+        "name": "Bob's first confidential object in the default space"
+      },
+      "type": "confidential",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:confidential:bob_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "bob"
+      },
+      "confidential": {
+        "name": "Bob's first confidential object in the space_1 space"
+      },
+      "type": "confidential",
+      "namespace": "space_1",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "confidential:charlie_doc_1",
+    "index": ".kibana",
+    "source": {
+      "accessControl": {
+        "owner": "charlie"
+      },
+      "confidential": {
+        "name": "Charlie's first confidential object in the default space. He cannot access this, despite being the owner."
+      },
+      "type": "confidential",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "confidential_multinamespace:alice_alias-match-newid",
+    "source": {
+      "type": "confidential_multinamespace",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "confidential_multinamespace": {
+        "name": "Resolve outcome aliasMatch"
+      },
+      "accessControl": {
+        "owner": "alice"
+      },
+      "namespaces": [
+        "space_1"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:confidential_multinamespace:alice_alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "targetNamespace": "space_1",
+        "targetType": "confidential_multinamespace",
+        "targetId": "alice_alias-match-newid"
+      }
+    }
+  }
+}

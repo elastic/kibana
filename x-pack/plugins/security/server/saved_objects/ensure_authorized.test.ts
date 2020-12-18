@@ -62,6 +62,7 @@ describe('ensureAuthorized', () => {
     await ensureAuthorized(deps, types, actions, namespaces);
     expect(deps.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
       [
+        'saved_object:some-version:manage',
         'mock-saved_object:a/foo',
         'mock-saved_object:a/bar',
         'mock-saved_object:b/foo',
@@ -93,6 +94,8 @@ describe('ensureAuthorized', () => {
         ['b', { foo: { authorizedSpaces: ['x', 'y'] }, bar: { authorizedSpaces: ['x', 'y'] } }],
         ['c', { foo: { authorizedSpaces: ['x', 'y'] }, bar: { authorizedSpaces: ['x', 'y'] } }],
       ]),
+      canSpecifyAccessControl: true,
+      requiresObjectAuthorization: false,
     };
 
     test('with default options', async () => {
@@ -163,6 +166,8 @@ describe('ensureAuthorized', () => {
           ['b', { foo: { authorizedSpaces: ['x', 'y'] } }],
           ['c', { foo: { authorizedSpaces: ['x'] }, bar: { authorizedSpaces: ['x'] } }],
         ]),
+        canSpecifyAccessControl: false,
+        requiresObjectAuthorization: true,
       });
     });
   });
@@ -208,7 +213,12 @@ describe('ensureAuthorized', () => {
       deps.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue(resolvedPrivileges);
       const options = { requireFullAuthorization: false };
       const result = await ensureAuthorized(deps, types, actions, namespaces, options);
-      expect(result).toEqual({ status: 'unauthorized', typeActionMap: new Map() });
+      expect(result).toEqual({
+        status: 'unauthorized',
+        typeActionMap: new Map(),
+        canSpecifyAccessControl: false,
+        requiresObjectAuthorization: true,
+      });
     });
   });
 });

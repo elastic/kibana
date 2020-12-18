@@ -125,6 +125,13 @@ export class SavedObjectTypeRegistry {
   public isImportableAndExportable(type: string) {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
+
+  /**
+   * Returns `true` if the given type is marked as `private`, and `false` otherwise.
+   */
+  public isPrivate(type: string) {
+    return this.types.get(type)?.accessClassification === 'private' ?? false;
+  }
 }
 
 const validateType = ({ name, management }: SavedObjectsType) => {

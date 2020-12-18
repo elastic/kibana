@@ -293,13 +293,16 @@ export {
 } from './saved_objects';
 
 export type {
+  SavedObjectAccessControl,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsOptions,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,

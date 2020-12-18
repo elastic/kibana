@@ -163,6 +163,12 @@ export class SavedObjectsErrorHelpers {
     );
   }
 
+  public static createIncompatibleAccessControlError(type: string, id: string) {
+    return SavedObjectsErrorHelpers.decorateConflictError(
+      Boom.conflict(`Saved object [${type}/${id}] conflict: incompatible accessControl`)
+    );
+  }
+
   public static isConflictError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_CONFLICT;
   }

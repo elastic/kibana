@@ -8,6 +8,7 @@
 import type { CoreSetup, LegacyRequest } from 'src/core/server';
 
 import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
+import type { AuthenticatedUser } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
@@ -22,6 +23,7 @@ interface SetupSavedObjectsParams {
   >;
   savedObjects: CoreSetup['savedObjects'];
   getSpacesService(): SpacesService | undefined;
+  getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 }
 
 export type {
@@ -43,6 +45,7 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getSpacesService,
+  getCurrentUser,
 }: SetupSavedObjectsParams) {
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
@@ -58,20 +61,26 @@ export function setupSavedObjects({
     }
   );
 
-  savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
-    const kibanaRequest = getKibanaRequest(request);
-    return authz.mode.useRbacForRequest(kibanaRequest)
-      ? new SecureSavedObjectsClientWrapper({
-          actions: authz.actions,
-          legacyAuditLogger,
-          auditLogger: audit.asScoped(kibanaRequest),
-          baseClient: client,
-          checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
-            kibanaRequest
-          ),
-          errors: SavedObjectsClient.errors,
-          getSpacesService,
-        })
-      : client;
-  });
+  savedObjects.addClientWrapper(
+    Number.MAX_SAFE_INTEGER - 1,
+    'security',
+    ({ client, request, typeRegistry }) => {
+      const kibanaRequest = getKibanaRequest(request);
+      return authz.mode.useRbacForRequest(kibanaRequest)
+        ? new SecureSavedObjectsClientWrapper({
+            actions: authz.actions,
+            legacyAuditLogger,
+            auditLogger: audit.asScoped(kibanaRequest),
+            baseClient: client,
+            checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
+              kibanaRequest
+            ),
+            typeRegistry,
+            errors: SavedObjectsClient.errors,
+            getSpacesService,
+            getCurrentUser: () => getCurrentUser(kibanaRequest),
+          })
+        : client;
+    }
+  );
 }

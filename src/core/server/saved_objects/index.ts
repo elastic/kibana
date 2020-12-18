@@ -86,6 +86,7 @@ export type {
 } from './migrations';
 
 export type {
+  SavedObjectAccessControl,
   SavedObjectsNamespaceType,
   SavedObjectStatusMeta,
   SavedObjectsType,

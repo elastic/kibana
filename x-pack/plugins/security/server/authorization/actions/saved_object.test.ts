@@ -35,3 +35,10 @@ describe('#get', () => {
     );
   });
 });
+
+describe(`#manage`, () => {
+  test('returns `saved_object:${version}:manage`', () => {
+    const spaceActions = new SavedObjectActions(version);
+    expect(spaceActions.manage).toBe('saved_object:1.0.0-zeta1:manage');
+  });
+});

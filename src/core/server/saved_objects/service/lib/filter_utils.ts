@@ -55,7 +55,8 @@ export const validateConvertFilterToKueryNode = (
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
-        existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
+        const [, ...kueryNodeParts] = existingKueryNode.arguments[0].value.split('.');
+        existingKueryNode.arguments[0].value = kueryNodeParts.join('.');
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           set(
@@ -147,7 +148,8 @@ export const validateFilterKueryNode = ({
           ),
           isSavedObjectAttr: isSavedObjectAttr(
             nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
-            indexMapping
+            indexMapping,
+            types
           ),
           key: nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
           type: getType(nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value),
@@ -168,15 +170,21 @@ const getType = (key: string | undefined | null) =>
  * @param key
  * @param indexMapping
  */
-export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: IndexMapping) => {
+export const isSavedObjectAttr = (
+  key: string | null | undefined,
+  indexMapping: IndexMapping,
+  types: string[]
+) => {
   const keySplit = key != null ? key.split('.') : [];
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
-  } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
-    return true;
-  } else {
-    return false;
+  } else if (keySplit.length >= 2) {
+    const attributeKey = `${keySplit.slice(1, keySplit.length).join('.')}`;
+    if (!types.includes(keySplit[1]) && fieldDefined(indexMapping, attributeKey)) {
+      return true;
+    }
   }
+  return false;
 };
 
 export const hasFilterKeyError = (
@@ -193,6 +201,9 @@ export const hasFilterKeyError = (
     const keySplit = key.split('.');
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
+    }
+    if (isSavedObjectAttr(key, indexMapping, types)) {
+      return null;
     }
     if (
       (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||

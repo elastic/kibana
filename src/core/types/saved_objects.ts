@@ -48,6 +48,16 @@ export interface SavedObjectReference {
 }
 
 /**
+ * The "Access Control" describing which users should be authorized to access this SavedObject.
+ *
+ * @public
+ */
+export interface SavedObjectAccessControl {
+  /** The owner of this SavedObject. */
+  owner: string;
+}
+
+/**
  * Information about the migrations that have been applied to this SavedObject.
  * When Kibana starts up, KibanaMigrator detects outdated documents and
  * migrates them based on this value. For each migration that has been applied,
@@ -96,6 +106,7 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  accessControl?: SavedObjectAccessControl;
 }
 
 export interface SavedObjectError {

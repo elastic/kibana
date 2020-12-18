@@ -25,4 +25,8 @@ export class SavedObjectActions {
 
     return `${this.prefix}${type}/${operation}`;
   }
+
+  public get manage(): string {
+    return `${this.prefix}manage`;
+  }
 }

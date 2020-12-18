@@ -17,11 +17,23 @@ import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
  * Gets the types based on the type. Uses mappings to support
  * null type (all types), a single type string or an array
  */
-function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) {
-  if (!type) {
-    return registry.getAllTypes().map((registeredType) => registeredType.name);
+function getTypes(
+  registry: ISavedObjectTypeRegistry,
+  typeToNamespacesMap?: Map<string, string[] | undefined>,
+  allowedTypes?: string | string[]
+) {
+  const allTypes = typeToNamespacesMap
+    ? Array.from(typeToNamespacesMap.keys())
+    : registry.getAllTypes().map((registeredType) => registeredType.name);
+
+  if (Array.isArray(allowedTypes)) {
+    return allTypes.filter((name) => allowedTypes.includes(name));
   }
-  return Array.isArray(type) ? type : [type];
+  if (typeof allowedTypes === 'string') {
+    return allTypes.filter((name) => name === allowedTypes);
+  }
+  // otherwise, no restrictions
+  return allTypes;
 }
 
 /**
@@ -204,10 +216,7 @@ export function getQueryParams({
   hasReferenceOperator,
   kueryNode,
 }: QueryParams) {
-  const types = getTypes(
-    registry,
-    typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
-  );
+  const types = getTypes(registry, typeToNamespacesMap, type);
 
   if (hasReference && !Array.isArray(hasReference)) {
     hasReference = [hasReference];

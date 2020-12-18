@@ -24,6 +24,7 @@ const createRegistryMock = (): jest.Mocked<
     isHidden: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
+    isPrivate: jest.fn(),
   };
 
   mock.getVisibleTypes.mockReturnValue([]);
@@ -39,6 +40,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
   mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
+  mock.isPrivate.mockReturnValue(false);
 
   return mock;
 };

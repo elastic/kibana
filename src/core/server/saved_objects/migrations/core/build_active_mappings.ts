@@ -127,6 +127,15 @@ function defaultMapping(): IndexMapping {
       type: {
         type: 'keyword',
       },
+      accessControl: {
+        type: 'object',
+        dynamic: 'strict',
+        properties: {
+          owner: {
+            type: 'keyword',
+          },
+        },
+      },
       namespace: {
         type: 'keyword',
       },

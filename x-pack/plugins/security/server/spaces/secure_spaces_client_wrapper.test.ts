@@ -831,6 +831,8 @@ describe('SecureSpacesClientWrapper', () => {
           typeActionMap: new Map()
             .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
             .set('type-2', { bulk_update: { authorizedSpaces: ['space-1'] } }), // the user is not authorized to bulkUpdate type-2 in space-2, so this will throw a forbidden error
+          requiresObjectAuthorization: true,
+          canSpecifyAccessControl: false,
         });
         const { wrapper, baseClient, auditLogger, forbiddenError } = setup({ securityEnabled });
         const aliases = [alias1, alias2];
@@ -849,6 +851,8 @@ describe('SecureSpacesClientWrapper', () => {
           typeActionMap: new Map()
             .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
             .set('type-2', { bulk_update: { authorizedSpaces: ['space-2'] } }),
+          requiresObjectAuthorization: true,
+          canSpecifyAccessControl: false,
         });
         const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
         const aliases = [alias1, alias2];

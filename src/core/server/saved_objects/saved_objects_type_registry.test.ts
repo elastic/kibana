@@ -330,6 +330,22 @@ describe('SavedObjectTypeRegistry', () => {
     });
   });
 
+  describe('#isPrivate', () => {
+    it('returns correct value for the type', () => {
+      registry.registerType(createType({ name: 'typeA', accessClassification: 'private' }));
+      registry.registerType(createType({ name: 'typeB', accessClassification: 'public' }));
+
+      expect(registry.isPrivate('typeA')).toEqual(true);
+      expect(registry.isPrivate('typeB')).toEqual(false);
+    });
+    it('returns false when the type is not registered', () => {
+      registry.registerType(createType({ name: 'typeA', accessClassification: 'private' }));
+      registry.registerType(createType({ name: 'typeB', accessClassification: 'public' }));
+
+      expect(registry.isPrivate('unknownType')).toEqual(false);
+    });
+  });
+
   describe('#getIndex', () => {
     it('returns correct value for the type', () => {
       registry.registerType(createType({ name: 'typeA', indexPattern: '.custom-index' }));

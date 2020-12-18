@@ -15,6 +15,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [accessControl](./kibana-plugin-core-server.savedobjectsbulkcreateobject.accesscontrol.md) | <code>SavedObjectAccessControl</code> | The [accessControl](./kibana-plugin-core-server.savedobjectaccesscontrol.md) to associate with this saved object. |
 |  [attributes](./kibana-plugin-core-server.savedobjectsbulkcreateobject.attributes.md) | <code>T</code> |  |
 |  [coreMigrationVersion](./kibana-plugin-core-server.savedobjectsbulkcreateobject.coremigrationversion.md) | <code>string</code> | A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the current Kibana version, it will result in an error. |
 |  [id](./kibana-plugin-core-server.savedobjectsbulkcreateobject.id.md) | <code>string</code> |  |

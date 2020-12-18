@@ -12,7 +12,7 @@ import { esKuery } from '../../es_query';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import type { SavedObject, SavedObjectsBaseOptions, SavedObjectAccessControl } from '../../types';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
 import type {
@@ -68,6 +68,8 @@ export interface SavedObjectReferenceWithContext {
   type: string;
   /** The ID of the referenced object */
   id: string;
+  /** The access control of the referenced object */
+  accessControl?: SavedObjectAccessControl;
   /** The space(s) that the referenced object exists in */
   spaces: string[];
   /**
@@ -79,6 +81,8 @@ export interface SavedObjectReferenceWithContext {
     type: string;
     /** The ID of the object that has the inbound reference */
     id: string;
+    /** The access control specification of the object that has the inbound reference */
+    accessControl?: SavedObjectAccessControl;
     /** The name of the inbound reference */
     name: string;
   }>;
@@ -138,7 +142,14 @@ export async function collectMultiNamespaceReferences(
     const { type, id } = parseKey(referenceKey);
     const object = objectMap.get(referenceKey);
     const spaces = object?.namespaces ?? [];
-    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
+    return {
+      type,
+      id,
+      accessControl: object?.accessControl,
+      spaces,
+      inboundReferences,
+      ...(object === null && { isMissing: true }),
+    };
   });
 
   const aliasesMap = await checkLegacyUrlAliases(createPointInTimeFinder, objectsWithContext);

@@ -12,6 +12,7 @@ References to this object; note that this does not contain \_all inbound referen
 inboundReferences: Array<{
         type: string;
         id: string;
+        accessControl?: SavedObjectAccessControl;
         name: string;
     }>;
 ```

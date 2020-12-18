@@ -9,7 +9,7 @@ Check what conflicts will result when creating a given array of saved objects. T
 <b>Signature:</b>
 
 ```typescript
-checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
+checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsCheckConflictsOptions): Promise<SavedObjectsCheckConflictsResponse>;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObje
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | <code>SavedObjectsCheckConflictsObject[]</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  options | <code>SavedObjectsCheckConflictsOptions</code> |  |
 
 <b>Returns:</b>
 

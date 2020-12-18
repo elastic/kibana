@@ -9,6 +9,7 @@
 /** This module is intended for consumption by public to avoid import issues with server-side code */
 export type { PluginOpaqueId } from './plugins/types';
 export type {
+  SavedObjectAccessControl,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,

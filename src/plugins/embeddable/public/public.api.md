@@ -49,6 +49,7 @@ import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
+import { SavedObjectAccessControl as SavedObjectAccessControl_2 } from 'src/core/types';
 import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';

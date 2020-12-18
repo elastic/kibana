@@ -24,6 +24,8 @@ export interface EnsureAuthorizedOptions {
 export interface EnsureAuthorizedResult<T extends string> {
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
   typeActionMap: Map<string, Record<T, EnsureAuthorizedActionResult>>;
+  requiresObjectAuthorization: boolean;
+  canSpecifyAccessControl: boolean;
 }
 
 export interface EnsureAuthorizedActionResult {
@@ -53,10 +55,13 @@ export async function ensureAuthorized<T extends string>(
       actions.map((action) => [deps.actions.savedObject.get(type, action), { type, action }])
     )
   );
-  const privilegeActions = Array.from(privilegeActionsMap.keys());
+  const privilegeActions = [
+    deps.actions.savedObject.manage,
+    ...Array.from(privilegeActionsMap.keys()),
+  ];
   const { hasAllRequested, privileges } = await checkPrivileges(deps, privilegeActions, spaceIds);
 
-  const missingPrivileges = getMissingPrivileges(privileges);
+  const missingPrivileges = getMissingPrivileges(privileges, [deps.actions.savedObject.manage]);
   const typeActionMap = privileges.kibana.reduce<
     Map<string, Record<T, EnsureAuthorizedActionResult>>
   >((acc, { resource, privilege }) => {
@@ -64,7 +69,8 @@ export async function ensureAuthorized<T extends string>(
       (resource && missingPrivileges.get(resource)?.has(privilege)) ||
       (!resource && missingPrivileges.get(undefined)?.has(privilege));
 
-    if (missingPrivilegesAtResource) {
+    const isManageSavedObjectsPrivilege = privilege === deps.actions.savedObject.manage;
+    if (missingPrivilegesAtResource || isManageSavedObjectsPrivilege) {
       return acc;
     }
     const { type, action } = privilegeActionsMap.get(privilege)!; // always defined
@@ -89,16 +95,36 @@ export async function ensureAuthorized<T extends string>(
     });
   }, new Map());
 
-  if (hasAllRequested) {
-    return { typeActionMap, status: 'fully_authorized' };
+  const isFullyAuthorized = missingPrivileges.size === 0;
+  // `hasAllRequested` comes from the ES privilege check above, which has been augmented to include the "manage" saved object privilege.
+  const requiresObjectAuthorization = hasAllRequested === false;
+  const canSpecifyAccessControl = hasAllRequested === true;
+
+  if (isFullyAuthorized) {
+    return {
+      typeActionMap,
+      status: 'fully_authorized',
+      requiresObjectAuthorization,
+      canSpecifyAccessControl,
+    };
   }
 
   if (!requireFullAuthorization) {
     const isPartiallyAuthorized = typeActionMap.size > 0;
     if (isPartiallyAuthorized) {
-      return { typeActionMap, status: 'partially_authorized' };
+      return {
+        typeActionMap,
+        status: 'partially_authorized',
+        requiresObjectAuthorization,
+        canSpecifyAccessControl,
+      };
     } else {
-      return { typeActionMap, status: 'unauthorized' };
+      return {
+        typeActionMap,
+        status: 'unauthorized',
+        requiresObjectAuthorization,
+        canSpecifyAccessControl,
+      };
     }
   }
 
@@ -170,10 +196,13 @@ async function checkPrivileges(
   }
 }
 
-function getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
+function getMissingPrivileges(
+  privileges: CheckPrivilegesResponse['privileges'],
+  ignorePrivileges: string[] = []
+) {
   return privileges.kibana.reduce<Map<string | undefined, Set<string>>>(
     (acc, { resource, privilege, authorized }) => {
-      if (!authorized) {
+      if (!authorized && !ignorePrivileges.includes(privilege)) {
         if (resource) {
           acc.set(resource, (acc.get(resource) || new Set()).add(privilege));
         }

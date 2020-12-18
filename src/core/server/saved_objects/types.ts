@@ -33,6 +33,7 @@ import { SavedObject } from '../../types';
 type KueryNode = any;
 
 export type {
+  SavedObjectAccessControl,
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
@@ -249,6 +250,13 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 /**
+ * The access classification dictates the protection level of the saved object:
+ *  - public (default): instances of this saved object type will be accessible to all users within the given namespace, who are authorized to act on objects of this type.
+ *  - private: instances of this saved object type will belong to the user who created them, and will not be accessible by other users, except for administrators.
+ */
+export type SavedObjectsAccessClassification = 'public' | 'private';
+
+/**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
  * @public
@@ -269,6 +277,11 @@ export interface SavedObjectsType<Attributes = any> {
    * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
   namespaceType: SavedObjectsNamespaceType;
+
+  /**
+   * The {@link SavedObjectsAccessClassification | access classification} for the type.
+   */
+  accessClassification?: SavedObjectsAccessClassification;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */

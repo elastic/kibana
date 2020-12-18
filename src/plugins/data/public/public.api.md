@@ -100,6 +100,7 @@ import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject } from 'src/core/server';
 import { SavedObject as SavedObject_2 } from 'kibana/server';
+import { SavedObjectAccessControl as SavedObjectAccessControl_2 } from 'src/core/types';
 import { SavedObjectReference as SavedObjectReference_2 } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectsFindOptions } from 'kibana/public';

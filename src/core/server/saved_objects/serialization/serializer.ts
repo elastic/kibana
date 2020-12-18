@@ -91,6 +91,7 @@ export class SavedObjectsSerializer {
       migrationVersion,
       references,
       coreMigrationVersion,
+      accessControl,
     } = _source;
 
     const version =
@@ -108,6 +109,7 @@ export class SavedObjectsSerializer {
       ...(includeNamespace && { namespace }),
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
+      ...(accessControl && { accessControl }),
       attributes: _source[type],
       references: references || [],
       ...(migrationVersion && { migrationVersion }),
@@ -136,6 +138,7 @@ export class SavedObjectsSerializer {
       version,
       references,
       coreMigrationVersion,
+      accessControl,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -144,6 +147,7 @@ export class SavedObjectsSerializer {
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
+      ...(accessControl && { accessControl }),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(updated_at && { updated_at }),

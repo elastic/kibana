@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectAccessControl } from 'src/core/types';
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
@@ -29,6 +30,7 @@ export interface SavedObjectsRawDocSource {
   updated_at?: string;
   references?: SavedObjectReference[];
   originId?: string;
+  accessControl?: SavedObjectAccessControl;
 
   [typeMapping: string]: any;
 }
@@ -47,6 +49,7 @@ interface SavedObjectDoc<T = unknown> {
   version?: string;
   updated_at?: string;
   originId?: string;
+  accessControl?: SavedObjectAccessControl;
 }
 
 interface Referencable {

@@ -9,7 +9,7 @@ Creates multiple documents at once
 <b>Signature:</b>
 
 ```typescript
-bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsBulkCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | <code>Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsCreateOptions</code> |  |
+|  options | <code>SavedObjectsBulkCreateOptions</code> |  |
 
 <b>Returns:</b>
 

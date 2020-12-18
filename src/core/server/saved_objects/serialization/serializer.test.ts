@@ -75,13 +75,13 @@ describe('#rawToSavedObject', () => {
         type: 'foo',
         migrationVersion: {
           hello: '1.2.3',
-          acl: '33.3.5',
+          accessControl: '33.3.5',
         },
       },
     });
     expect(actual).toHaveProperty('migrationVersion', {
       hello: '1.2.3',
-      acl: '33.3.5',
+      accessControl: '33.3.5',
     });
   });
 
@@ -109,7 +109,7 @@ describe('#rawToSavedObject', () => {
         },
         migrationVersion: {
           hello: '1.2.3',
-          acl: '33.3.5',
+          accessControl: '33.3.5',
         },
         updated_at: now,
       },
@@ -124,12 +124,33 @@ describe('#rawToSavedObject', () => {
       },
       migrationVersion: {
         hello: '1.2.3',
-        acl: '33.3.5',
+        accessControl: '33.3.5',
       },
       updated_at: now,
       references: [],
     };
     expect(expected).toEqual(actual);
+  });
+
+  test('if specified it copies the _source.accessControl property to accessControl', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        accessControl: { owner: 'alice' },
+      },
+    });
+    expect(actual).toHaveProperty('accessControl', { owner: 'alice' });
+  });
+
+  test(`if _source.accessControl is unspecified it doesn't set accessControl`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('accessControl');
   });
 
   test('if specified it copies the _source.coreMigrationVersion property to coreMigrationVersion', () => {

@@ -14,6 +14,7 @@ export interface SavedObject<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [accessControl](./kibana-plugin-core-public.savedobject.accesscontrol.md) | <code>SavedObjectAccessControl</code> |  |
 |  [attributes](./kibana-plugin-core-public.savedobject.attributes.md) | <code>T</code> | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [coreMigrationVersion](./kibana-plugin-core-public.savedobject.coremigrationversion.md) | <code>string</code> | A semver value that is used when upgrading objects between Kibana versions. |
 |  [error](./kibana-plugin-core-public.savedobject.error.md) | <code>SavedObjectError</code> |  |

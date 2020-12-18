@@ -263,6 +263,38 @@ describe('savedObjectsClient/errorTypes', () => {
     });
   });
 
+  describe('Incompatible accessControl error', () => {
+    describe('createIncompatibleAccessControlError', () => {
+      it('makes the error identifiable as a Conflict error', () => {
+        const error = SavedObjectsErrorHelpers.createIncompatibleAccessControlError('type', 'id');
+        expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
+      });
+
+      it('adds boom properties', () => {
+        const error = SavedObjectsErrorHelpers.createIncompatibleAccessControlError('type', 'id');
+        expect(error).toHaveProperty('isBoom', true);
+      });
+
+      describe('error.output', () => {
+        it('prefixes message with reason', () => {
+          const error = SavedObjectsErrorHelpers.createIncompatibleAccessControlError('type', 'id');
+          expect(error.output.payload).toMatchInlineSnapshot(`
+            Object {
+              "error": "Conflict",
+              "message": "Saved object [type/id] conflict: incompatible accessControl",
+              "statusCode": 409,
+            }
+          `);
+        });
+
+        it('sets statusCode to 409', () => {
+          const error = SavedObjectsErrorHelpers.createIncompatibleAccessControlError('type', 'id');
+          expect(error.output).toHaveProperty('statusCode', 409);
+        });
+      });
+    });
+  });
+
   describe('TooManyRequests error', () => {
     describe('decorateTooManyRequestsError', () => {
       it('returns original object', () => {

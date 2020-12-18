@@ -102,7 +102,9 @@ describe('#checkConflicts', () => {
   it('returns expected result', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects, namespace });
-    socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
+    socCheckConflicts.mockResolvedValue({
+      errors: [obj2Error, obj3Error, obj4Error],
+    });
 
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual({
@@ -129,7 +131,9 @@ describe('#checkConflicts', () => {
   it('does not return errors for regular conflicts when ignoreRegularConflicts=true', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects, namespace, ignoreRegularConflicts: true });
-    socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
+    socCheckConflicts.mockResolvedValue({
+      errors: [obj2Error, obj3Error, obj4Error],
+    });
 
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(
@@ -197,7 +201,9 @@ describe('#checkConflicts', () => {
   it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects, namespace, createNewCopies: true });
-    socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
+    socCheckConflicts.mockResolvedValue({
+      errors: [obj2Error, obj3Error, obj4Error],
+    });
 
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(

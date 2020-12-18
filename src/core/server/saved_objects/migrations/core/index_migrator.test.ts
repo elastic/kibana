@@ -61,6 +61,7 @@ describe('IndexMigrator', () => {
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
+              accessControl: 'f759893589b96eeddcb456de15abb5f4',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
               type: '2f4316de49999235636386fe51dc06c1',
@@ -75,6 +76,15 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
+            accessControl: {
+              dynamic: 'strict',
+              properties: {
+                owner: {
+                  type: 'keyword',
+                },
+              },
+              type: 'object',
+            },
             references: {
               type: 'nested',
               properties: {
@@ -186,6 +196,7 @@ describe('IndexMigrator', () => {
               originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
+              accessControl: 'f759893589b96eeddcb456de15abb5f4',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
             },
@@ -199,6 +210,15 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
+            accessControl: {
+              dynamic: 'strict',
+              properties: {
+                owner: {
+                  type: 'keyword',
+                },
+              },
+              type: 'object',
+            },
             references: {
               type: 'nested',
               properties: {
@@ -247,6 +267,7 @@ describe('IndexMigrator', () => {
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
+              accessControl: 'f759893589b96eeddcb456de15abb5f4',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
               type: '2f4316de49999235636386fe51dc06c1',
@@ -262,6 +283,15 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
+            accessControl: {
+              dynamic: 'strict',
+              properties: {
+                owner: {
+                  type: 'keyword',
+                },
+              },
+              type: 'object',
+            },
             references: {
               type: 'nested',
               properties: {

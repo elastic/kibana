@@ -601,7 +601,7 @@ describe('#getQueryParams', () => {
 
         expect(
           mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])
-        ).toEqual(['saved.title', 'pending.title', 'saved.desc', 'pending.desc']);
+        ).toEqual(['pending.title', 'saved.title', 'pending.desc', 'saved.desc']);
       });
 
       it('uses all registered types when `type` is not provided', () => {

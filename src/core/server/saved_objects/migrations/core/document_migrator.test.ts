@@ -280,9 +280,9 @@ describe('DocumentMigrator', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
-          name: 'acl',
+          name: 'accessControl',
           migrations: {
-            '2.3.5': setAttr('acl', 'admins-only, sucka!'),
+            '2.3.5': setAttr('accessControl', 'admins-only, sucka!'),
           },
         }),
       });
@@ -291,15 +291,15 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        acl: 'anyone',
+        accessControl: { owner: 'anyone' },
         migrationVersion: {},
       } as SavedObjectUnsanitizedDoc);
       expect(actual).toEqual({
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        migrationVersion: { acl: '2.3.5' },
-        acl: 'admins-only, sucka!',
+        migrationVersion: { accessControl: '2.3.5' },
+        accessControl: 'admins-only, sucka!',
         coreMigrationVersion: kibanaVersion,
       });
     });

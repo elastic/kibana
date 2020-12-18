@@ -197,6 +197,9 @@ const providersConfigSchema = schema.object(
   }
 );
 
+// xpack.security.session.idleTimeout: '1h'
+// xpack.security.session.lifespan: '3d'
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),

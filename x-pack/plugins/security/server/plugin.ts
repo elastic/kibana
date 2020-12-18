@@ -298,6 +298,7 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getSpacesService: () => spaces?.spacesService,
+      getCurrentUser: (request: KibanaRequest) => this.getAuthentication().getCurrentUser(request),
     });
 
     defineRoutes({
