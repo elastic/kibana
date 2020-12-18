@@ -141,7 +141,7 @@ def collectVcsInfo(title) {
 }
 
 def generateReports(title) {
-  kibanaPipeline.bash("""
+  kibanaPipeline.bash('''
     source src/dev/ci_setup/setup_env.sh true
     # bootstrap from x-pack folder
     cd x-pack
@@ -177,7 +177,7 @@ def generateReports(title) {
     . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
     # zip combined reports
     tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
-  """, title)
+  ''', title)
 }
 
 def uploadCombinedReports() {
