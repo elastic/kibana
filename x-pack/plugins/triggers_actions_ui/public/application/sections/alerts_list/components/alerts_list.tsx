@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLink,
-  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiCallOut,
   EuiButtonEmpty,
@@ -60,6 +59,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 const ENTER_KEY = 13;
 
@@ -674,11 +674,7 @@ export const AlertsList: React.FunctionComponent = () => {
       {loadedItems.length || isFilterApplied ? (
         table
       ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CenterJustifiedSpinner />
       ) : authorizedToCreateAnyAlerts ? (
         <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
       ) : (
