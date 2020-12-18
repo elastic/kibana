@@ -9,7 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
-import { AlertType } from '../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../alerts/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
@@ -112,7 +117,9 @@ export interface GeoContainmentParams {
   boundaryIndexQuery?: Query;
 }
 
-export function getAlertType(logger: Logger): AlertType<GeoContainmentParams> {
+export function getAlertType(
+  logger: Logger
+): AlertType<GeoContainmentParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Geo tracking containment',
   });

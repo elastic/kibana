@@ -19,6 +19,10 @@ test('should return passed in params when validation not defined', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovery',
+        name: 'Recovery',
+      },
       minimumLicenseRequired: 'basic',
       async executor() {},
       producer: 'alerts',
@@ -42,6 +46,10 @@ test('should validate and apply defaults when params is valid', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovery',
+        name: 'Recovery',
+      },
       minimumLicenseRequired: 'basic',
       validate: {
         params: schema.object({
@@ -73,6 +81,10 @@ test('should validate and throw error when params is invalid', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: {
+          id: 'recove',
+          name: 'Recove',
+        },
         minimumLicenseRequired: 'basic',
         validate: {
           params: schema.object({

@@ -17,12 +17,12 @@ import {
   AlertAction,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertType,
   AlertTypeParams,
   RawAlert,
 } from '../types';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 
-interface CreateExecutionHandlerOptions {
+export interface CreateExecutionHandlerOptions {
   alertId: string;
   alertName: string;
   tags?: string[];
@@ -30,7 +30,7 @@ interface CreateExecutionHandlerOptions {
   actions: AlertAction[];
   spaceId: string;
   apiKey: RawAlert['apiKey'];
-  alertType: AlertType;
+  alertType: UntypedNormalizedAlertType;
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;

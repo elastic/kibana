@@ -96,10 +96,10 @@ export type ExecutorType<
 ) => Promise<State | void>;
 
 export interface AlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   id: string;
   name: string;
@@ -118,6 +118,13 @@ export interface AlertType<
   };
   minimumLicenseRequired: LicenseType;
 }
+
+export type UntypedAlertType = AlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;

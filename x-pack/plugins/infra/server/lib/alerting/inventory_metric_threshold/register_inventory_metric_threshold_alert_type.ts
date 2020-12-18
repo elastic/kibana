@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { AlertType } from '../../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerts/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -39,7 +45,9 @@ const condition = schema.object({
   ),
 });
 
-export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs): AlertType => ({
+export const registerMetricInventoryThresholdAlertType = (
+  libs: InfraBackendLibs
+): AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   name: 'Inventory',
   validate: {

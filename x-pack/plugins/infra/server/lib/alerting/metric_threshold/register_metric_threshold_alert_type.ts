@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { AlertType } from '../../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
@@ -20,7 +26,9 @@ import {
   thresholdActionVariableDescription,
 } from '../common/messages';
 
-export function registerMetricThresholdAlertType(libs: InfraBackendLibs): AlertType {
+export function registerMetricThresholdAlertType(
+  libs: InfraBackendLibs
+): AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),

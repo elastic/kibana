@@ -23,7 +23,6 @@ import {
   RawAlert,
   AlertTypeRegistry,
   AlertAction,
-  AlertType,
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
@@ -44,7 +43,7 @@ import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/se
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
-import { RegistryAlertType } from '../alert_type_registry';
+import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
@@ -1386,7 +1385,10 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
+  private validateActions(
+    alertType: UntypedNormalizedAlertType,
+    actions: NormalizedAlertAction[]
+  ): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));

@@ -6,10 +6,16 @@
 
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
-import { AlertType } from '../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../alerts/server';
 
 export type UptimeAlertTypeFactory = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
-) => AlertType;
+) => AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>;

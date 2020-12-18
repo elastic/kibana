@@ -9,7 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
-import { AlertType } from '../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../alerts/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
@@ -172,7 +177,9 @@ export interface GeoThresholdParams {
   boundaryIndexQuery?: Query;
 }
 
-export function getAlertType(logger: Logger): AlertType<GeoThresholdParams> {
+export function getAlertType(
+  logger: Logger
+): AlertType<GeoThresholdParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoThreshold.alertTypeTitle', {
     defaultMessage: 'Geo tracking threshold',
   });

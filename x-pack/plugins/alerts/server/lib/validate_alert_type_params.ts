@@ -5,10 +5,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { AlertType, AlertExecutorOptions } from '../types';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import { AlertExecutorOptions } from '../types';
 
 export function validateAlertTypeParams(
-  alertType: AlertType,
+  alertType: UntypedNormalizedAlertType,
   params: Record<string, unknown>
 ): AlertExecutorOptions['params'] {
   const validator = alertType.validate && alertType.validate.params;

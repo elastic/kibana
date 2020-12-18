@@ -40,7 +40,7 @@ import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { ActionGroup } from '../../common';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -59,11 +59,11 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: NormalizedAlertType;
+  private alertType: UntypedNormalizedAlertType;
   private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
-    alertType: NormalizedAlertType,
+    alertType: UntypedNormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {

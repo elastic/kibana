@@ -8,7 +8,10 @@ import {
   AlertsClient,
   PartialAlert,
   AlertType,
+  AlertTypeParams,
   AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   AlertExecutorOptions,
 } from '../../../../../alerts/server';
 import { Alert } from '../../../../../alerts/common';
@@ -97,11 +100,14 @@ export type NotificationExecutorOptions = Omit<AlertExecutorOptions, 'params'> &
 // since we are only increasing the strictness of params.
 export const isNotificationAlertExecutor = (
   obj: NotificationAlertTypeDefinition
-): obj is AlertType => {
+): obj is AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
   return true;
 };
 
-export type NotificationAlertTypeDefinition = Omit<AlertType, 'executor'> & {
+export type NotificationAlertTypeDefinition = Omit<
+  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>,
+  'executor'
+> & {
   executor: ({
     services,
     params,

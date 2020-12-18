@@ -5,12 +5,23 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AlertExecutorOptions, AlertType, AlertTypeState } from '../../../../alerts/server';
+import {
+  AlertExecutorOptions,
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../alerts/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { createUptimeESClient, UptimeESClient } from '../lib';
 
-export interface UptimeAlertType extends Omit<AlertType, 'executor' | 'producer'> {
+export interface UptimeAlertType
+  extends Omit<
+    AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>,
+    'executor' | 'producer'
+  > {
   executor: ({
     options,
     uptimeEsClient,
