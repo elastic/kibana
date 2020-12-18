@@ -31,7 +31,7 @@ import {
   SelectOption,
   PaletteRegistry,
 } from '../../../../charts/public';
-import { PieVisParams } from '../../types';
+import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
 interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
@@ -111,7 +111,7 @@ const PieOptions = (props: PieOptionsProps) => {
           disabled={!stateParams.labels.show}
           options={getLabelPositions()}
           paramName="position"
-          value={stateParams.labels.position}
+          value={stateParams.labels.position || LabelPositions.DEFAULT}
           setValue={setLabels}
         />
         <SwitchOption
@@ -129,7 +129,7 @@ const PieOptions = (props: PieOptionsProps) => {
           disabled={!stateParams.labels.values}
           options={getValuesFormats()}
           paramName="valuesFormat"
-          value={stateParams.labels.valuesFormat}
+          value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
           setValue={setLabels}
         />
         <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />

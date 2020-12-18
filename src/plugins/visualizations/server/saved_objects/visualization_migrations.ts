@@ -781,11 +781,6 @@ const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
                 type: 'palette',
                 name: 'kibana_palette',
               },
-              labels: {
-                ...visState.params.labels,
-                valuesFormat: 'percent',
-                position: 'default',
-              },
             },
           }),
         },

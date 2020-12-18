@@ -1717,13 +1717,5 @@ describe('migration visualization', () => {
 
       expect(palette.name).toEqual('kibana_palette');
     });
-
-    it('should decorate existing docs with the new labels settings', () => {
-      const migratedTestDoc = migrate(generateDoc());
-      const { labels } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(labels.valuesFormat).toEqual('percent');
-      expect(labels.position).toEqual('default');
-    });
   });
 });
