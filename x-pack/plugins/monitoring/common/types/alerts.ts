@@ -104,6 +104,7 @@ export interface AlertUiState {
 
 export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
+  code?: string;
   nextSteps?: AlertMessage[];
   tokens?: AlertMessageToken[];
 }

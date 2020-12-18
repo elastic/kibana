@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage } from '../../common/types/alerts';
@@ -66,12 +67,24 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
       </div>
     );
 
+    const { code } = status.state.state.ui.message;
     const accordion = (
       <EuiAccordion
         id={`monitoringAlertCallout_${index}`}
         buttonContent={buttonContent}
         paddingSize="s"
       >
+        {code?.length ? (
+          <EuiCodeBlock
+            fontSize="s"
+            paddingSize="s"
+            language="json"
+            isCopyable={true}
+            overflowHeight={300}
+          >
+            {code}
+          </EuiCodeBlock>
+        ) : null}
         <EuiListGroup
           flush={true}
           bordered={true}
