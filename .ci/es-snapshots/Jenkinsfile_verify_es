@@ -60,7 +60,7 @@ kibanaPipeline(timeoutMinutes: 150) {
         ])
       }
 
-      promoteSnapshot(SNAPSHOT_VERSION, SNAPSHOT_ID)
+      // promoteSnapshot(SNAPSHOT_VERSION, SNAPSHOT_ID)
     }
   }
 
