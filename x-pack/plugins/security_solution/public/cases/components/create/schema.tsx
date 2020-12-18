@@ -46,7 +46,7 @@ export const schema: FormSchema<FormProps> = {
   connectorId: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.CONNECTORS,
-    // defaultValue: 'none',
+    defaultValue: 'none',
   },
   fields: {},
   syncAlerts: {
