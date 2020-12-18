@@ -35,6 +35,10 @@ discover-app {
   }
 }
 
+.dscPageContent {
+  border: $euiBorderThin;
+}
+
 .dscPageContent,
 .dscPageContent__inner {
   height: 100%;
