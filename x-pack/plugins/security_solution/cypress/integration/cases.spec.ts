@@ -38,8 +38,8 @@ import {
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens/timeline';
 
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
-import { deleteCase, openCaseTimeline } from '../tasks/case_details';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { openCaseTimeline } from '../tasks/case_details';
 import { cleanKibana } from '../tasks/common';
 import {
   attachTimeline,

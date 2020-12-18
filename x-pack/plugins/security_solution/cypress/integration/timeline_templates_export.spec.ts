@@ -12,10 +12,7 @@ import {
 } from '../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../urls/navigation';
-import {
-  createTimelineTemplate,
-  deleteTimeline as deleteTimelineTemplate,
-} from '../tasks/api_calls/timelines';
+import { createTimelineTemplate } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {

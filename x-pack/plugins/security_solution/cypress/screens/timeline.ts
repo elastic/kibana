@@ -61,6 +61,8 @@ export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
+export const NOTES_TEXT = '.euiMarkdownFormat';
+
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
