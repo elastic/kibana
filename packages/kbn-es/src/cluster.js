@@ -277,12 +277,11 @@ exports.Cluster = class Cluster {
 
     options.esEnvVars = options.esEnvVars || {};
 
-    // In CI, we run many ES instances on large machines,
-    // so we need to make sure they don't all automatically set really large heap sizes
-    if (process.env.CI) {
-      options.esEnvVars.ES_JAVA_OPTS =
-        (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars} ` : '') + '-Xms1g -Xmx1g';
-    }
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    options.esEnvVars.ES_JAVA_OPTS =
+      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars} ` : '') + '-Xms1g -Xmx1g';
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
