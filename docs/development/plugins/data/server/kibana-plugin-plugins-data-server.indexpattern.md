@@ -21,7 +21,6 @@ export declare class IndexPattern implements IIndexPattern
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [deleteFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
-|  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-server.indexpattern.flattenhit.md) |  | <code>(hit: Record&lt;string, any&gt;, deep?: boolean) =&gt; Record&lt;string, any&gt;</code> |  |
@@ -30,16 +29,16 @@ export declare class IndexPattern implements IIndexPattern
 |  [getFieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.getfieldattrs.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: FieldAttrSet;</code><br/><code>    }</code> |  |
 |  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-server.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        fieldAttrs?: string &#124; undefined;</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
 |  [id](./kibana-plugin-plugins-data-server.indexpattern.id.md) |  | <code>string</code> |  |
-|  [intervalName](./kibana-plugin-plugins-data-server.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
+|  [intervalName](./kibana-plugin-plugins-data-server.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> | deprecated. used by time range index patterns |
 |  [metaFields](./kibana-plugin-plugins-data-server.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-server.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> | Reset last saved saved object fields. used after saving |
 |  [setFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.setfieldformat.md) |  | <code>(fieldName: string, format: SerializedFieldFormat) =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpattern.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
-|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
-|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> |  |
+|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> | type is used to identify rollup index patterns |
+|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> | only used by rollup indices. store info required to create field list |
+|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> | savedObject version |
 
 ## Methods
 
@@ -62,5 +61,5 @@ export declare class IndexPattern implements IIndexPattern
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcount.md) |  |  |
 |  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcustomlabel.md) |  |  |
-|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  |  |
+|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  | Create static representation of index pattern |
 

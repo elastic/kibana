@@ -4,6 +4,8 @@
 
 ## IndexPatternAttributes interface
 
+Used for index pattern saved object
+
 <b>Signature:</b>
 
 ```typescript

@@ -51,7 +51,7 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) |  |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Used for index pattern saved object |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |

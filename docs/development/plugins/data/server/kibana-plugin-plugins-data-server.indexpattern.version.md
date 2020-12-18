@@ -4,6 +4,8 @@
 
 ## IndexPattern.version property
 
+savedObject version
+
 <b>Signature:</b>
 
 ```typescript

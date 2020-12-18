@@ -4,6 +4,8 @@
 
 ## IndexPatternsService.find property
 
+find and load index patterns by title
+
 <b>Signature:</b>
 
 ```typescript

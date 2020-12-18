@@ -4,6 +4,8 @@
 
 ## IIndexPattern.getFormatterForField property
 
+Used to look up formatter for a given field
+
 <b>Signature:</b>
 
 ```typescript

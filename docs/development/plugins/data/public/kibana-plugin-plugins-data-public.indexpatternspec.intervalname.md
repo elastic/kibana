@@ -4,6 +4,8 @@
 
 ## IndexPatternSpec.intervalName property
 
+Deprecated. Was used by time range based index patterns
+
 <b>Signature:</b>
 
 ```typescript

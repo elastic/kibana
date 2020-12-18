@@ -4,6 +4,8 @@
 
 ## IndexPattern.typeMeta property
 
+only used by rollup indices. store info required to create field list
+
 <b>Signature:</b>
 
 ```typescript

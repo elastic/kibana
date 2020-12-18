@@ -65,12 +65,12 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
+|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) | IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) |  |
-|  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) |  |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Used for index pattern saved object |
+|  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) | Static index pattern format |
 |  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |

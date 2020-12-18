@@ -4,6 +4,8 @@
 
 ## IndexPattern.toSpec() method
 
+Create static representation of index pattern
+
 <b>Signature:</b>
 
 ```typescript

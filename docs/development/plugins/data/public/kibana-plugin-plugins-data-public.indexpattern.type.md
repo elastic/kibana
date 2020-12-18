@@ -4,6 +4,8 @@
 
 ## IndexPattern.type property
 
+type is used to identify rollup index patterns
+
 <b>Signature:</b>
 
 ```typescript
