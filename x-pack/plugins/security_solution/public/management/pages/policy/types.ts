@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
@@ -66,6 +67,8 @@ export interface PolicyDetailsState {
     success: boolean;
     error?: ServerApiError;
   };
+  /** current license */
+  license?: ILicense;
 }
 
 /**
