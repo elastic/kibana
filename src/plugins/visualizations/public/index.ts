@@ -48,6 +48,7 @@ export { SchemaConfig, BuildPipelineParams } from './legacy/build_pipeline';
 export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
 export {
+  VisualizationControllerConstructor,
   VisualizationController,
   SavedVisState,
   ISavedVis,

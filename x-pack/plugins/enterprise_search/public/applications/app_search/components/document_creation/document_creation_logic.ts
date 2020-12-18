@@ -5,13 +5,17 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import dedent from 'dedent';
 
+import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { DocumentCreationMode, DocumentCreationStep } from './types';
 
 interface DocumentCreationValues {
   isDocumentCreationOpen: boolean;
   creationMode: DocumentCreationMode;
   creationStep: DocumentCreationStep;
+  textInput: string;
+  fileInput: File | null;
 }
 
 interface DocumentCreationActions {
@@ -19,6 +23,8 @@ interface DocumentCreationActions {
   openDocumentCreation(creationMode: DocumentCreationMode): { creationMode: DocumentCreationMode };
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
+  setTextInput(textInput: string): { textInput: string };
+  setFileInput(fileInput: File | null): { fileInput: File | null };
 }
 
 export const DocumentCreationLogic = kea<
@@ -30,6 +36,8 @@ export const DocumentCreationLogic = kea<
     openDocumentCreation: (creationMode) => ({ creationMode }),
     closeDocumentCreation: () => null,
     setCreationStep: (creationStep) => ({ creationStep }),
+    setTextInput: (textInput) => ({ textInput }),
+    setFileInput: (fileInput) => ({ fileInput }),
   }),
   reducers: () => ({
     isDocumentCreationOpen: [
@@ -52,6 +60,18 @@ export const DocumentCreationLogic = kea<
         showCreationModes: () => DocumentCreationStep.ShowCreationModes,
         openDocumentCreation: () => DocumentCreationStep.AddDocuments,
         setCreationStep: (_, { creationStep }) => creationStep,
+      },
+    ],
+    textInput: [
+      dedent(DOCUMENTS_API_JSON_EXAMPLE),
+      {
+        setTextInput: (_, { textInput }) => textInput,
+      },
+    ],
+    fileInput: [
+      null,
+      {
+        setFileInput: (_, { fileInput }) => fileInput,
       },
     ],
   }),

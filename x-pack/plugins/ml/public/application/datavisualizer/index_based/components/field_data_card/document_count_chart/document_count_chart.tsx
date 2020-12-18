@@ -52,7 +52,7 @@ export const DocumentCountChart: FC<Props> = ({
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
   return (
-    <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataCardDocumentCountChart">
+    <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataDocumentCountChart">
       <Chart
         size={{
           width: '100%',

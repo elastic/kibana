@@ -183,6 +183,11 @@ export interface AggregationOptionsByType {
     metrics: { field: string } | MaybeReadonlyArray<{ field: string }>;
     sort: SortOptions;
   };
+  avg_bucket: {
+    buckets_path: string;
+    gap_policy?: 'skip' | 'insert_zeros';
+    format?: string;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -390,6 +395,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       >;
     }
   ];
+  avg_bucket: {
+    value: number | null;
+  };
 }
 
 type TopMetricsMap<TFieldName> = TFieldName extends string
