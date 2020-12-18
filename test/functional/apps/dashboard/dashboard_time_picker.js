@@ -38,6 +38,8 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       await kibanaServer.uiSettings.replace({});
       await browser.refresh();
+      const alert = await browser.getAlert();
+      await alert?.accept();
     });
 
     it('Visualization updated when time picker changes', async () => {
@@ -86,6 +88,8 @@ export default function ({ getService, getPageObjects }) {
         `)`;
       log.debug('go to url' + `${kibanaBaseUrl}#${urlQuery}`);
       await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
+      const alert = await browser.getAlert();
+      await alert?.accept();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const time = await PageObjects.timePicker.getTimeConfig();
       const refresh = await PageObjects.timePicker.getRefreshConfig();
@@ -97,6 +101,8 @@ export default function ({ getService, getPageObjects }) {
     it('Timepicker respects dateFormat from UI settings', async () => {
       await kibanaServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
       await browser.refresh();
+      const alert = await browser.getAlert();
+      await alert?.accept();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
