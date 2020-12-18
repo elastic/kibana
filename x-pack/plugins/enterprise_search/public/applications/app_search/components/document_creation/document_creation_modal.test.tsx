@@ -8,10 +8,17 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiModal, EuiModalBody } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 
+import {
+  ShowCreationModes,
+  ApiCodeExample,
+  PasteJsonText,
+  UploadJsonFile,
+} from './creation_mode_components';
 import { DocumentCreationStep } from './types';
-import { DocumentCreationModal, DocumentCreationButtons } from './';
+
+import { DocumentCreationModal, ModalContent } from './document_creation_modal';
 
 describe('DocumentCreationModal', () => {
   const values = {
@@ -44,58 +51,58 @@ describe('DocumentCreationModal', () => {
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
-  describe('modal content', () => {
-    it('renders document creation mode buttons', () => {
+  describe('ModalContent', () => {
+    it('renders ShowCreationModes', () => {
       setMockValues({ ...values, creationStep: DocumentCreationStep.ShowCreationModes });
-      const wrapper = shallow(<DocumentCreationModal />);
+      const wrapper = shallow(<ModalContent />);
 
-      expect(wrapper.find(DocumentCreationButtons)).toHaveLength(1);
+      expect(wrapper.find(ShowCreationModes)).toHaveLength(1);
     });
 
     describe('creation modes', () => {
       it('renders ApiCodeExample', () => {
         setMockValues({ ...values, creationMode: 'api' });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('ApiCodeExample'); // TODO: actual component
+        expect(wrapper.find(ApiCodeExample)).toHaveLength(1);
       });
 
       it('renders PasteJsonText', () => {
         setMockValues({ ...values, creationMode: 'text' });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('PasteJsonText'); // TODO: actual component
+        expect(wrapper.find(PasteJsonText)).toHaveLength(1);
       });
 
       it('renders UploadJsonFile', () => {
         setMockValues({ ...values, creationMode: 'file' });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('UploadJsonFile'); // TODO: actual component
+        expect(wrapper.find(UploadJsonFile)).toHaveLength(1);
       });
     });
 
     describe('creation steps', () => {
       it('renders an error page', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowError });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('DocumentCreationError'); // TODO: actual component
+        expect(wrapper.text()).toBe('DocumentCreationError'); // TODO: actual component
       });
 
       it('renders an error summary', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowErrorSummary });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('DocumentCreationSummary'); // TODO: actual component
+        expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component
       });
 
       it('renders a success summary', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowSuccessSummary });
-        const wrapper = shallow(<DocumentCreationModal />);
+        const wrapper = shallow(<ModalContent />);
 
         // TODO: Figure out if the error and success summary should remain the same vs different components
-        expect(wrapper.find(EuiModalBody).dive().text()).toBe('DocumentCreationSummary'); // TODO: actual component
+        expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component
       });
     });
   });
