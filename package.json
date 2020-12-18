@@ -111,7 +111,7 @@
     "@elastic/request-crypto": "1.1.4",
     "@elastic/safer-lodash-set": "link:packages/elastic-safer-lodash-set",
     "@elastic/search-ui-app-search-connector": "^1.5.0",
-    "@hapi/boom": "^9.1.0",
+    "@hapi/boom": "^9.1.1",
     "@hapi/cookie": "^11.0.2",
     "@hapi/good-squeeze": "6.0.0",
     "@hapi/h2o2": "^9.0.2",

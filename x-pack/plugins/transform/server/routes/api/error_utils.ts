@@ -130,7 +130,6 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
     const causedByChain = extractCausedByChain(caused_by);
     const defaultCause = root_cause.length ? extractCausedByChain(root_cause[0]) : undefined;
 
-    // @ts-expect-error cause is not defined on payload type
     boomError.output.payload.cause = causedByChain.length ? causedByChain : defaultCause;
 
     // Set error message based on the root cause
