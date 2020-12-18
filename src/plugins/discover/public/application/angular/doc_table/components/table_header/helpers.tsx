@@ -82,7 +82,7 @@ export function getDisplayedColumns(
           const field = indexPattern.getFieldByName(column);
           return {
             name: column,
-            displayName: field ? field.displayName : column,
+            displayName: field?.displayName ?? column,
             isSortable: !!(field && field.sortable),
             isRemoveable: column !== '_source' || columns.length > 1,
             colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,

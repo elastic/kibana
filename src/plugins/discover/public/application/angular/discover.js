@@ -412,16 +412,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
-  function removeElFromColumns(el, columns) {
-    const index = columns.indexOf(el);
-    if (index !== -1) {
-      columns.splice(index, 1);
-    }
-    return columns;
-  }
-
   function removeSourceFromColumns(columns) {
-    return removeElFromColumns('_source', columns);
+    return columns.filter((col) => col !== '_source');
   }
 
   function getDefaultColumns() {
@@ -433,7 +425,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     if (columns.length > 0) {
       return columns;
     }
-    return config.get(DEFAULT_COLUMNS_SETTING).slice();
+    return [...config.get(DEFAULT_COLUMNS_SETTING)];
   }
 
   function getStateDefaults() {

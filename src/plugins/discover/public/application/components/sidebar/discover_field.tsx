@@ -133,7 +133,13 @@ export function DiscoverField({
 
   const getTitle = (indexPatternField: IndexPatternField) => {
     return indexPatternField.displayName !== indexPatternField.name
-      ? `${indexPatternField.name} (${indexPatternField.displayName} )`
+      ? i18n.translate('discover.field.title', {
+          defaultMessage: '{fieldName} ({fieldDisplayName})',
+          values: {
+            fieldName: indexPatternField.name,
+            fieldDisplayName: indexPatternField.displayName,
+          },
+        })
       : indexPatternField.displayName;
   };
 
