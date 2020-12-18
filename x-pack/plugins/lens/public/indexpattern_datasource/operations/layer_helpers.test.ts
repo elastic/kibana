@@ -1834,7 +1834,7 @@ describe('state_helpers', () => {
   });
 
   describe('getErrorMessages', () => {
-    it('should collect errors from all types of operation definitions', () => {
+    it('should collect errors from metric-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.avg.getErrorMessage = mock;
       const errors = getErrorMessages({
@@ -1849,7 +1849,7 @@ describe('state_helpers', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('should collect errors from the operation definitions', () => {
+    it('should collect errors from reference-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = mock;
       const errors = getErrorMessages({
@@ -1862,50 +1862,6 @@ describe('state_helpers', () => {
         },
       });
       expect(mock).toHaveBeenCalled();
-      expect(errors).toHaveLength(1);
-    });
-
-    it('should identify missing references on reference-based calculation', () => {
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          col1:
-            // @ts-expect-error not statically analyzed yet
-            { operationType: 'testReference', references: ['ref1', 'ref2'] },
-        },
-      });
-      expect(errors).toHaveLength(2);
-    });
-
-    it('should identify references that are no longer valid', () => {
-      // There is only one operation with `none` as the input type
-      // @ts-expect-error this function is not valid
-      operationDefinitionMap.testReference.requiredReferences = [
-        {
-          input: ['none'],
-          validateMetadata: () => true,
-        },
-      ];
-
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          // @ts-expect-error incomplete operation
-          ref1: {
-            dataType: 'string',
-            isBucketed: true,
-            operationType: 'terms',
-          },
-          col1: {
-            label: '',
-            references: ['ref1'],
-            // @ts-expect-error tests only
-            operationType: 'testReference',
-          },
-        },
-      });
       expect(errors).toHaveLength(1);
     });
   });

@@ -7,7 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
-import { checkForDateHistogram, dateBasedOperationToExpression } from './utils';
+import {
+  checkForDateHistogram,
+  getErrorsForDateReference,
+  dateBasedOperationToExpression,
+} from './utils';
 import { OperationDefinition } from '..';
 
 const ofName = (name?: string) => {
@@ -81,9 +85,10 @@ export const cumulativeSumOperation: OperationDefinition<
   isTransferable: () => {
     return true;
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
         defaultMessage: 'Cumulative sum',
       })

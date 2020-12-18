@@ -9,6 +9,7 @@ import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '.
 import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
+  getErrorsForDateReference,
   checkForDateHistogram,
   dateBasedOperationToExpression,
   hasDateField,
@@ -89,9 +90,10 @@ export const counterRateOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.counterRate', {
         defaultMessage: 'Counter rate',
       })

@@ -345,4 +345,90 @@ describe('reference editor', () => {
     expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
   });
+
+  it('should show the FieldSelect as invalid in the empty state for field-only forms', () => {
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        selectionStyle="field"
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const fieldSelect = wrapper.find(FieldSelect);
+    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
+    expect(fieldSelect.prop('selectedField')).toBeUndefined();
+    expect(fieldSelect.prop('selectedOperationType')).toBeUndefined();
+    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
+  });
+
+  it('should show the ParamEditor for functions that offer one', () => {
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Last value of bytes',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'last_value',
+              sourceField: 'bytes',
+              params: {
+                sortField: 'timestamp',
+              },
+            },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]').exists()).toBe(
+      true
+    );
+  });
+
+  it('should hide the ParamEditor for incomplete functions', () => {
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Last value of bytes',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'last_value',
+              sourceField: 'bytes',
+              params: {
+                sortField: 'timestamp',
+              },
+            },
+          },
+          incompleteColumns: {
+            ref: { operationType: 'max' },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]').exists()).toBe(
+      false
+    );
+  });
 });

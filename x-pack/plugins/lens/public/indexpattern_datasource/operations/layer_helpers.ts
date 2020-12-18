@@ -5,7 +5,6 @@
  */
 
 import _, { partition } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -603,41 +602,6 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
     if (def.getErrorMessage) {
       errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
     }
-
-    if ('references' in column) {
-      column.references.forEach((referenceId, index) => {
-        if (!layer.columns[referenceId]) {
-          errors.push(
-            i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
-              defaultMessage: '"{dimensionLabel}" is missing required configuration',
-              values: {
-                dimensionLabel: column.label,
-              },
-            })
-          );
-        } else {
-          const referenceColumn = layer.columns[referenceId]!;
-          const requirements =
-            // @ts-expect-error not statically analyzed
-            operationDefinitionMap[column.operationType].requiredReferences[index];
-          const isValid = isColumnValidAsReference({
-            validation: requirements,
-            column: referenceColumn,
-          });
-
-          if (!isValid) {
-            errors.push(
-              i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
-                defaultMessage: 'Dimension {dimensionLabel} does not have a valid configuration',
-                values: {
-                  dimensionLabel: column.label,
-                },
-              })
-            );
-          }
-        }
-      });
-    }
   });
 
   return errors.length ? errors : undefined;
@@ -648,23 +612,6 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
     'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
-}
-
-export function isColumnValidAsReference({
-  column,
-  validation,
-}: {
-  column: IndexPatternColumn;
-  validation: RequiredReference;
-}): boolean {
-  if (!column) return false;
-  const operationType = column.operationType;
-  const operationDefinition = operationDefinitionMap[operationType];
-  return (
-    validation.input.includes(operationDefinition.input) &&
-    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
-    validation.validateMetadata(column)
-  );
 }
 
 export function isOperationAllowedAsReference({

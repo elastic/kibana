@@ -42,7 +42,6 @@ export const {
   getErrorMessages,
   isReferenced,
   resetIncomplete,
-  isColumnValidAsReference,
   isOperationAllowedAsReference,
 } = actualHelpers;
 

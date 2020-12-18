@@ -177,6 +177,14 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     ? [functionOptions.find(({ value }) => value === column.operationType)!]
     : [];
 
+  // If the operationType is incomplete, the user needs to select a field- so
+  // the function is marked as valid.
+  const showOperationInvalid = !column && !Boolean(incompleteInfo?.operationType);
+  // The field is invalid if the operation has been updated without a field,
+  // or if we are in a field-only mode but empty state
+  const showFieldInvalid =
+    Boolean(incompleteInfo?.operationType) || (selectionStyle === 'field' && !column);
+
   return (
     <div id={columnId}>
       <div>
@@ -188,11 +196,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 defaultMessage: 'Choose a sub-function',
               })}
               fullWidth
-              isInvalid={
-                // If the operationType is incomplete, the user needs to select a field- so
-                // the function is marked as valid.
-                !column && !Boolean(incompleteInfo?.operationType)
-              }
+              isInvalid={showOperationInvalid}
             >
               <EuiComboBox
                 fullWidth
@@ -206,7 +210,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                   }
                 )}
                 options={functionOptions}
-                isInvalid={!column && !Boolean(incompleteInfo?.operationType)}
+                isInvalid={showOperationInvalid}
                 selectedOptions={selectedOption}
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
@@ -234,10 +238,10 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               defaultMessage: 'Select a field',
             })}
             fullWidth
-            isInvalid={Boolean(incompleteInfo?.operationType)}
+            isInvalid={showFieldInvalid}
           >
             <FieldSelect
-              fieldIsInvalid={Boolean(incompleteInfo?.operationType)}
+              fieldIsInvalid={showFieldInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={existingFields}
               operationSupportMatrix={operationSupportMatrix}

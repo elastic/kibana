@@ -14,6 +14,7 @@ import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,
+  getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
 } from './utils';
@@ -99,9 +100,10 @@ export const movingAverageOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.movingAverage', {
         defaultMessage: 'Moving average',
       })
