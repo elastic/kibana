@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuidv5 from 'uuid/v5';
 import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from './__mocks__/es_results';
-import { NAMESPACE_ID, transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
+import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
+import { calculateThresholdSignalUuid } from './utils';
 
-describe('', () => {
+describe('transformThresholdResultsToEcs', () => {
   it('should return transformed threshold results', () => {
     const threshold = {
       field: 'source.ip',
@@ -40,10 +40,10 @@ describe('', () => {
       undefined,
       loggingSystemMock.createLogger(),
       threshold,
-      'abcd',
+      '1234',
       undefined
     );
-    const _id = uuidv5(`abcd${startedAt}source.ip127.0.0.1`, NAMESPACE_ID);
+    const _id = calculateThresholdSignalUuid('1234', startedAt, 'source.ip', '127.0.0.1');
     expect(transformedResults).toEqual({
       took: 10,
       timed_out: false,
