@@ -39,7 +39,7 @@ export async function lintFiles(log, files) {
   const paths = files.map((file) => file.getRelativePath());
 
   const options = {
-    files: paths.join(', '),
+    files: paths,
     config: styleLintConfig,
     formatter: 'string',
     ignorePath: path.resolve(__dirname, '..', '..', '..', '.stylelintignore'),

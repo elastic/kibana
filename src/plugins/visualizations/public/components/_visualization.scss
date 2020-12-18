@@ -27,7 +27,7 @@
     display: flex;
     flex-direction: row;
     overflow: auto;
-    transition: opacity 0.01s;
+    transition: opacity .01s;
 
     // IE11 Hack
     //
@@ -45,7 +45,7 @@
 
   // SASSTODO: Can't find exact usage
   .loading {
-    opacity: 0.5;
+    opacity: .5;
   }
 
   // SASSTODO: Can't find exact usage
@@ -55,7 +55,7 @@
     left: 0;
     right: 0;
     z-index: 20;
-    opacity: 0.5;
+    opacity: .5;
   }
 }
 

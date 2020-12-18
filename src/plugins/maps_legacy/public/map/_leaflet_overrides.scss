@@ -23,7 +23,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 .leaflet-clickable {
   &:hover {
     stroke-width: $euiSizeS;
-    stroke-opacity: 0.8;
+    stroke-opacity: .8;
   }
 }
 
@@ -146,7 +146,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
 img.leaflet-tile {
   @if (lightness($euiTextColor) < 50) {
-    filter: brightness(1.03) grayscale(0.73);
+    filter: brightness(1.03) grayscale(.73);
   } @else {
     filter: invert(1) brightness(1.75) grayscale(1);
   }

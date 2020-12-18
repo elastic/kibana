@@ -35,7 +35,7 @@
   }
 
   &__rowHighlighted {
-    background-color: transparentize($euiColorGhost, 0.9);
+    background-color: transparentize($euiColorGhost, .9);
   }
 
   &--hidden {

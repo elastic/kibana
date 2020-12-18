@@ -1,8 +1,8 @@
-$mlColorCritical: #fe5050;
-$mlColorMajor: #fba740;
-$mlColorMinor: #fdec25;
-$mlColorWarning: #8bc8fb;
-$mlColorUnknown: #c0c0c0;
+$mlColorCritical: #FE5050;
+$mlColorMajor: #FBA740;
+$mlColorMinor: #FDEC25;
+$mlColorWarning: #8BC8FB;
+$mlColorUnknown: #C0C0C0;
 
 $mlColorCriticalText: makeHighContrastColor($mlColorCritical, $euiColorEmptyShade);
 $mlColorMajorText: makeHighContrastColor($mlColorMajor, $euiColorEmptyShade);
