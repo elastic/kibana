@@ -47,13 +47,13 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     }
   };
 
-  const writeCoverage = (coverageJson: string) => {
-    if (!Fs.existsSync(coverageDir)) {
-      Fs.mkdirSync(coverageDir, { recursive: true });
+  const writeCoverage = (coverageJson: string, dir = coverageDir) => {
+    if (!Fs.existsSync(dir)) {
+      Fs.mkdirSync(dir, { recursive: true });
     }
     const id = coverageCounter++;
     const timestamp = Date.now();
-    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    const path = resolve(dir, `${id}.${timestamp}.coverage.json`);
     log.info('writing coverage to', path);
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
@@ -84,8 +84,14 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
           const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
           const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-          writeCoverage(coverageJson);
-
+          if (process.env.CI) {
+            // on CI we make hard link clone and run tests from kibana${process.env.CI_GROUP} root path
+            const re = new RegExp(`kibana${process.env.CI_GROUP}`, 'g');
+            const updatedJson = coverageJson.replace(re, 'kibana');
+            writeCoverage(updatedJson, coverageDir.replace(re, 'kibana'));
+          } else {
+            writeCoverage(coverageJson);
+          }
           // filter out this message
           return [];
         }
