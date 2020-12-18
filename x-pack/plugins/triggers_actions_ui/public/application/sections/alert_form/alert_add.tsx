@@ -101,7 +101,7 @@ const AlertAdd = ({
 
   const checkForChangesAndCloseFlyout = () => {
     if (
-      alertHasChanged(alert, initialAlert) ||
+      alertHasChanged(alert, initialAlert, false) ||
       alertParamsHaveChanged(alert.params, defaultAlertParams)
     ) {
       setIsConfirmAlertCloseModalOpen(true);

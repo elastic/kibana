@@ -89,7 +89,7 @@ export const AlertEdit = ({
     ) !== undefined;
 
   const checkForChangesAndCloseFlyout = () => {
-    if (alertHasChanged(alert, initialAlert)) {
+    if (alertHasChanged(alert, initialAlert, true)) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
       onClose();
