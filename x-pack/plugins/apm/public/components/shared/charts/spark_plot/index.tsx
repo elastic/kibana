@@ -58,7 +58,7 @@ export function SparkPlot({
   const colorValue = theme.eui[color];
 
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         {!series || series.every((point) => point.y === null) ? (
           <EuiIcon type="visLine" color="subdued" />
