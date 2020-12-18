@@ -284,7 +284,7 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
+   * @api {post} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
    * @apiName CanDeleteJob
    * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
    *                 to fully delete the job and whether they are able to remove it from
