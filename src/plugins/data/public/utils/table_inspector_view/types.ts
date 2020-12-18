@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { TabularDataRow } from '../../../common/adapters';
+import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
 
-type DataViewColumnRender = (value: string, _item: TabularDataRow) => string;
+type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
 
 export interface DataViewColumn {
+  originalColumn: () => DatatableColumn;
   name: string;
   field: string;
-  sortable: (item: TabularDataRow) => string | number;
+  sortable: (item: DatatableRow) => string | number;
   render: DataViewColumnRender;
 }
 
-export type DataViewRow = TabularDataRow;
+export type DataViewRow = DatatableRow;
+
+export interface TableInspectorAdapter {
+  [key: string]: Datatable;
+}
