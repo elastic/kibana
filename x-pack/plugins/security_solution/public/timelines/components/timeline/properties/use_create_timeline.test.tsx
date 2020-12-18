@@ -125,7 +125,10 @@ describe('useCreateTimelineButton', () => {
       );
 
       await waitForNextUpdate();
-      const button = result.current.getButton({ outline: false, title: 'mock title' });
+      const button = result.current.getButton({
+        outline: false,
+        title: 'mock title',
+      });
       await waitFor(() => {
         const wrapper = mount(button);
         wrapper.update();
