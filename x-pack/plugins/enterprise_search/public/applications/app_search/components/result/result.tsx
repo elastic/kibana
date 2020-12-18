@@ -48,12 +48,12 @@ export const Result: React.FC<Props> = ({
   };
 
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
-    if (!shouldLinkToDetailPage)
-      return <article className="appSearchResult__content">{children}</article>;
-    return (
+    return shouldLinkToDetailPage ? (
       <ReactRouterHelper to={getDocumentDetailRoute(resultMeta.engine, resultMeta.id)}>
         <a className="appSearchResult__content">{children}</a>
       </ReactRouterHelper>
+    ) : (
+      <article className="appSearchResult__content">{children}</article>
     );
   };
 
