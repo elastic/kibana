@@ -57,7 +57,7 @@ export const setSignalsStatusRoute = (router: IRouter) => {
         const result = await clusterClient.callAsCurrentUser('updateByQuery', {
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',
-          refresh: 'wait_for',
+          // refresh: 'wait_for',
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,

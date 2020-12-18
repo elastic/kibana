@@ -180,7 +180,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup grow={true}>
-            {canUserCRUD && hasIndexWrite && (
+            {hasIndexWrite && (
               <>
                 <UtilityBarText dataTestSubj="selectedAlerts">
                   {i18n.SELECTED_ALERTS(

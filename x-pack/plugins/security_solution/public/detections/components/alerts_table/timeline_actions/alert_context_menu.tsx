@@ -215,7 +215,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="open-alert-status"
       id={FILTER_OPEN}
       onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexUpdateDelete}
+      disabled={!hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -248,7 +248,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="close-alert-status"
       id={FILTER_CLOSED}
       onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexUpdateDelete}
+      disabled={!hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
     </EuiContextMenuItem>
