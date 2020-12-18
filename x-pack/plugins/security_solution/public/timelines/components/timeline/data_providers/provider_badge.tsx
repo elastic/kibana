@@ -180,6 +180,11 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
       [field, formattedValue, operator, prefix]
     );
 
+    const ariaLabel = useMemo(
+      () => i18n.SHOW_OPTIONS_DATA_PROVIDER({ field, value: `${formattedValue}` }),
+      [field, formattedValue]
+    );
+
     return (
       <ProviderContainer id={`${providerId}-${field}-${val}`}>
         <>
@@ -192,7 +197,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             iconType="cross"
             iconSide="right"
             onClick={togglePopover}
-            onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
+            onClickAriaLabel={ariaLabel}
             closeButtonProps={closeButtonProps}
             data-test-subj="providerBadge"
             $timelineType={timelineType}

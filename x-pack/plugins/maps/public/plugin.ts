@@ -49,7 +49,7 @@ import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
+import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
@@ -167,7 +167,7 @@ export class MapsPlugin
     plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
 
     return {
-      createSecurityLayerDescriptors,
+      createLayerDescriptors,
       registerLayerWizard,
       registerSource,
     };

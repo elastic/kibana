@@ -46,6 +46,7 @@ export function SparkPlot({
   const defaultChartTheme = useChartTheme();
 
   const sparkplotChartTheme = merge({}, defaultChartTheme, {
+    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
@@ -57,7 +58,7 @@ export function SparkPlot({
   const colorValue = theme.eui[color];
 
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         {!series || series.every((point) => point.y === null) ? (
           <EuiIcon type="visLine" color="subdued" />

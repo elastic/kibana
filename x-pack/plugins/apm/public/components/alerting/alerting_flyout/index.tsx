@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertType } from '../../../../common/alert_types';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
@@ -23,17 +23,21 @@ export function AlertingFlyout(props: Props) {
   const {
     services: { triggersActionsUi },
   } = useKibana<KibanaDeps>();
+
+  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
+    setAddFlyoutVisibility,
+  ]);
+
   const addAlertFlyout = useMemo(
     () =>
       alertType &&
       triggersActionsUi.getAddAlertFlyout({
         consumer: 'apm',
-        addFlyoutVisible,
-        setAddFlyoutVisibility,
+        onClose: onCloseAddFlyout,
         alertTypeId: alertType,
         canChangeTrigger: false,
       }),
-    [addFlyoutVisible, alertType, setAddFlyoutVisibility, triggersActionsUi]
+    [alertType, onCloseAddFlyout, triggersActionsUi]
   );
-  return <>{addAlertFlyout}</>;
+  return <>{addFlyoutVisible && addAlertFlyout}</>;
 }
