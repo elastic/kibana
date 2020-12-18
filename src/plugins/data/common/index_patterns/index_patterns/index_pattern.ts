@@ -55,17 +55,17 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
   /**
-   * only used by rollup indices. store info required to create field list
+   * Only used by rollup indices. Info required to create field list
    */
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   /**
-   * deprecated. used by time range index patterns
+   * Deprecated. used by time range index patterns
    */
   public intervalName: string | undefined;
   /**
-   * type is used to identify rollup index patterns
+   * Type is used to identify rollup index patterns
    */
   public type: string | undefined;
   public formatHit: {
@@ -76,7 +76,7 @@ export class IndexPattern implements IIndexPattern {
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
   /**
-   * savedObject version
+   * SavedObject version
    */
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];

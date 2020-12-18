@@ -1275,9 +1275,7 @@ export class IndexPattern implements IIndexPattern {
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
-        time_zone?: string | undefined; /**
-         * Get last saved saved object fields
-         */
+        time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
         fieldAttrs: string | undefined;

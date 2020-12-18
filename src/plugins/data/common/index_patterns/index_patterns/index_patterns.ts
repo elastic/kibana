@@ -136,7 +136,7 @@ export class IndexPatternsService {
   };
 
   /**
-   * find and load index patterns by title
+   * Find and load index patterns by title
    * @param search
    * @param size
    * @returns IndexPattern[]

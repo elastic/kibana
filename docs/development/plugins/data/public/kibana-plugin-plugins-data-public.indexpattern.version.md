@@ -4,7 +4,7 @@
 
 ## IndexPattern.version property
 
-savedObject version
+SavedObject version
 
 <b>Signature:</b>
 

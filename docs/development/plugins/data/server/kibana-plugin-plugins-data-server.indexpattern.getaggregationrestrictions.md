@@ -13,9 +13,7 @@ getAggregationRestrictions(): Record<string, Record<string, {
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
-        time_zone?: string | undefined; /**
-         * Get last saved saved object fields
-         */
+        time_zone?: string | undefined;
     }>> | undefined;
 ```
 <b>Returns:</b>
@@ -26,8 +24,6 @@ getAggregationRestrictions(): Record<string, Record<string, {
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
-        time_zone?: string | undefined; /**
-         * Get last saved saved object fields
-         */
+        time_zone?: string | undefined;
     }>> | undefined`
 

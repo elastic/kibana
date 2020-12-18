@@ -42,7 +42,7 @@ export interface IIndexPattern {
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   /**
-   * Used to look up formatter for a given field
+   * Look up formatter for a given field
    */
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType

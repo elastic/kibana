@@ -4,7 +4,7 @@
 
 ## IndexPatternsService.find property
 
-find and load index patterns by title
+Find and load index patterns by title
 
 <b>Signature:</b>
 

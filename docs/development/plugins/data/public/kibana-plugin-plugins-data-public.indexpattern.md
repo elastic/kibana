@@ -29,16 +29,16 @@ export declare class IndexPattern implements IIndexPattern
 |  [getFieldAttrs](./kibana-plugin-plugins-data-public.indexpattern.getfieldattrs.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: FieldAttrSet;</code><br/><code>    }</code> |  |
 |  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        fieldAttrs?: string &#124; undefined;</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
-|  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> | deprecated. used by time range index patterns |
+|  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> | Deprecated. used by time range index patterns |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> | Reset last saved saved object fields. used after saving |
 |  [setFieldFormat](./kibana-plugin-plugins-data-public.indexpattern.setfieldformat.md) |  | <code>(fieldName: string, format: SerializedFieldFormat) =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string &#124; undefined</code> | type is used to identify rollup index patterns |
-|  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> | only used by rollup indices. store info required to create field list |
-|  [version](./kibana-plugin-plugins-data-public.indexpattern.version.md) |  | <code>string &#124; undefined</code> | savedObject version |
+|  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string &#124; undefined</code> | Type is used to identify rollup index patterns |
+|  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> | Only used by rollup indices. Info required to create field list |
+|  [version](./kibana-plugin-plugins-data-public.indexpattern.version.md) |  | <code>string &#124; undefined</code> | SavedObject version |
 
 ## Methods
 
