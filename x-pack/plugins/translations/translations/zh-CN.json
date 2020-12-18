@@ -9487,7 +9487,6 @@
     "xpack.infra.logsPage.noLoggingIndicesDescription": "让我们添加一些！",
     "xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel": "查看设置说明",
     "xpack.infra.logsPage.noLoggingIndicesTitle": "似乎您没有任何日志索引。",
-    "xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel": "搜索日志条目",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder": "搜索日志条目……（例如 host.name:host-1）",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.percentSeriesLabel": "百分比",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.sectionLabel": "CPU 使用率",
