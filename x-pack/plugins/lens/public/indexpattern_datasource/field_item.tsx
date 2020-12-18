@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
-  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -19,7 +19,9 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import {
@@ -270,20 +272,28 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
-  if (hideDetails) {
-    return (
-      <EuiFlexItem grow={true}>
-        <DragToWorkspaceButton
-          getSuggestionForField={getSuggestionForField}
-          dropOntoWorkspace={dropOntoWorkspace}
-          field={{
-            indexPatternId: indexPattern.id,
-            id: field.name,
-            field,
-          }}
-        />
+  const FieldPanelHeader = () => (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+        </EuiTitle>
       </EuiFlexItem>
-    );
+
+      <DragToWorkspaceButton
+        getSuggestionForField={getSuggestionForField}
+        dropOntoWorkspace={dropOntoWorkspace}
+        field={{
+          indexPatternId: indexPattern.id,
+          id: field.name,
+          field,
+        }}
+      />
+    </EuiFlexGroup>
+  );
+
+  if (hideDetails) {
+    return <FieldPanelHeader />;
   }
 
   let formatter: { convert: (data: unknown) => string };
@@ -316,25 +326,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
     return (
-      <div>
+      <>
+        <EuiPopoverTitle>
+          <FieldPanelHeader />
+        </EuiPopoverTitle>
+
         <EuiText size="s">
           {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
             defaultMessage:
               'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
           })}
         </EuiText>
-        <EuiFlexItem grow={true}>
-          <DragToWorkspaceButton
-            getSuggestionForField={getSuggestionForField}
-            dropOntoWorkspace={dropOntoWorkspace}
-            field={{
-              indexPatternId: indexPattern.id,
-              id: field.name,
-              field,
-            }}
-          />
-        </EuiFlexItem>
-      </div>
+      </>
     );
   }
 
@@ -369,31 +372,42 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     );
   } else if (field.type === 'date') {
     title = (
-      <>
-        {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
-          defaultMessage: 'Time distribution',
-        })}
-      </>
+      <EuiTitle size="xxxs">
+        <h6>
+          {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
+            defaultMessage: 'Time distribution',
+          })}
+        </h6>
+      </EuiTitle>
     );
   } else if (topValues && topValues.buckets.length) {
     title = (
-      <>
-        {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-          defaultMessage: 'Top values',
-        })}
-      </>
+      <EuiTitle size="xxxs">
+        <h6>
+          {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+            defaultMessage: 'Top values',
+          })}
+        </h6>
+      </EuiTitle>
     );
   }
 
   function wrapInPopover(el: React.ReactElement) {
     return (
       <>
-        {title ? <EuiPopoverTitle>{title}</EuiPopoverTitle> : <></>}
+        <EuiPopoverTitle>
+          <FieldPanelHeader />
+        </EuiPopoverTitle>
+
+        {title ? title : <></>}
+
+        <EuiSpacer size="s" />
+
         {el}
 
         {props.totalDocuments ? (
           <EuiPopoverFooter>
-            <EuiText size="xs" textAlign="center">
+            <EuiText color="subdued" size="xs">
               {props.sampledDocuments && (
                 <>
                   {i18n.translate('xpack.lens.indexPattern.percentageOfLabel', {
@@ -413,17 +427,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                 defaultMessage: 'documents',
               })}
             </EuiText>
-            <EuiFlexItem grow={true}>
-              <DragToWorkspaceButton
-                getSuggestionForField={getSuggestionForField}
-                dropOntoWorkspace={dropOntoWorkspace}
-                field={{
-                  indexPatternId: indexPattern.id,
-                  id: field.name,
-                  field,
-                }}
-              />
-            </EuiFlexItem>
           </EuiPopoverFooter>
         ) : (
           <></>
@@ -585,45 +588,24 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 }
 
 const DragToWorkspaceButton = ({ field, getSuggestionForField, dropOntoWorkspace }) => {
-  if (!getSuggestionForField(field)) {
+  const buttonTitle = i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
+    defaultMessage: 'Add field to workspace',
+  });
+
+  if (getSuggestionForField(field)) {
     return (
-      <EuiToolTip
-        position="right"
-        content={i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabledTooltip', {
-          defaultMessage: `Field cannot be moved to workspace. There are no suggestions for this field for current visualization. Move the field directly to the editor.`,
-        })}
-      >
-        <EuiButton
-          iconSide="right"
-          iconType="arrowRight"
-          color="primary"
-          fullWidth
-          disabled
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          aria-label={buttonTitle}
+          iconType="plusInCircle"
           onClick={() => {
             dropOntoWorkspace(field);
           }}
-        >
-          {i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-            defaultMessage: 'Move to workspace',
-          })}
-        </EuiButton>
-      </EuiToolTip>
+          title={buttonTitle}
+        />
+      </EuiFlexItem>
     );
+  } else {
+    return null;
   }
-
-  return (
-    <EuiButton
-      iconSide="right"
-      iconType="arrowRight"
-      color="primary"
-      fullWidth
-      onClick={() => {
-        dropOntoWorkspace(field);
-      }}
-    >
-      {i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-        defaultMessage: 'Move to workspace',
-      })}
-    </EuiButton>
-  );
 };
