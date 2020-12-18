@@ -140,7 +140,6 @@ export async function getPackageFromSource(options: {
       name: pkgName,
       version: pkgVersion,
     });
-    // check storage
     if (!res) {
       res = await getEsPackage(
         pkgName,

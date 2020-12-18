@@ -10,11 +10,7 @@ import yaml from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkGetObject,
-} from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   InstallablePackage,
@@ -22,7 +18,7 @@ import {
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
-import { getArchiveEntry } from './index';
+import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
 
@@ -130,6 +126,15 @@ export async function archiveEntryToBulkCreateObject(opts: {
     attributes: doc,
   };
 }
+export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
+  const { asset_path: path, data_utf8: utf8, data_base64: base64 } = asset;
+  const buffer = utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
+
+  return {
+    path,
+    buffer,
+  };
+}
 
 export async function getAsset(opts: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -147,16 +152,33 @@ export async function getAsset(opts: {
 
   return storedAsset;
 }
+export async function getAssetsFromReferences(opts: {
+  savedObjectsClient: SavedObjectsClientContract;
+  references: PackageAssetReference[];
+}): Promise<PackageAsset[]> {
+  const { savedObjectsClient, references } = opts;
+  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(references);
+  return bulkRes.saved_objects.map((so) => so.attributes);
+}
 export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
-  packageAssets: SavedObjectsBulkGetObject[],
+  references: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const soRes = await savedObjectsClient.bulkGet<PackageAsset>(packageAssets);
-  const paths = soRes.saved_objects.map((asset) => asset.attributes.asset_path);
+  const assets = await getAssetsFromReferences({ references, savedObjectsClient });
 
+  // add asset references to cache
+  const paths: string[] = [];
+  const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
+  entries.forEach(({ path, buffer }) => {
+    if (path && buffer) {
+      setArchiveEntry(path, buffer);
+      paths.push(path);
+    }
+  });
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
   // create the packageInfo
   // TODO: this is mostly copied from validtion.ts, but we should save packageInfo somewhere
   // so we don't need to do this again as this was already done either in registry or through upload
@@ -228,6 +250,10 @@ export const getEsPackage = async (
   );
   packageInfo.policy_templates = parseAndVerifyPolicyTemplates(packageInfo);
   packageInfo.data_streams = dataStreams;
+  packageInfo.assets = paths.map((path) => {
+    return path.replace(`${pkgName}-${pkgVersion}`, `/package/${pkgName}/${pkgVersion}`);
+  });
+
   return {
     paths,
     packageInfo,
