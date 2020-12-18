@@ -110,11 +110,12 @@ describe('Data Streams tab', () => {
         },
       ]);
 
-      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1', '5b', 5);
       setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
-        createDataStreamPayload('dataStream2'),
+        createDataStreamPayload('dataStream2', '1kb', 1000),
       ]);
+
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
       testBed = await setup();
@@ -167,8 +168,28 @@ describe('Data Streams tab', () => {
       // The table renders with the stats columns though.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+      ]);
+    });
+
+    test('sorting on stats sorts by bytes value instead of human readable value', async () => {
+      // Guards against regression of #86122.
+      const { actions, table, component } = testBed;
+
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      actions.sortTableOnStorageSize();
+
+      // The table sorts by the underlying byte values in ascending order, instead of sorting by
+      // the human-readable string values.
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
       ]);
     });
 
