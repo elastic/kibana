@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   EuiButtonIcon,
@@ -90,6 +90,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const { addWarning } = useAppToasts();
 
+  // TODO: This happens after another render where alertStatus should already have the correct value ???
+  useEffect(() => {
+    const status =
+      (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined;
+    if (alertStatus !== status) {
+      setAlertStatus(status);
+    }
+  }, [ecsRowData, alertStatus]);
+
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -156,7 +165,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       }
       setAlertStatus(newStatus);
     },
-    [dispatchToaster, addWarning]
+    [dispatchToaster, addWarning, setAlertStatus]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
