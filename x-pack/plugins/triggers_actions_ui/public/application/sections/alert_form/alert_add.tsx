@@ -7,12 +7,14 @@ import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import {
   ActionTypeRegistryContract,
   Alert,
   AlertAction,
   AlertTypeRegistryContract,
   IErrorObject,
+  AlertTypeParams,
 } from '../../../types';
 import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
@@ -24,7 +26,7 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { alertHasChanged } from './alert_has_changed';
+import { alertHasChanged, alertParamsHaveChanged } from './alert_has_changed';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -68,6 +70,7 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
+  const [defaultAlertParams, setDefaultAlertParams] = useState<AlertTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
@@ -88,8 +91,19 @@ const AlertAdd = ({
     setAlertProperty('alertTypeId', alertTypeId ?? null);
   }, [alertTypeId]);
 
+  useEffect(() => {
+    // This captures the first change to the alert params,
+    // when consumers set a default value for the alert params expression
+    if (isEmpty(defaultAlertParams)) {
+      setDefaultAlertParams(alert.params);
+    }
+  }, [alert.params, defaultAlertParams, setDefaultAlertParams]);
+
   const checkForChangesAndCloseFlyout = () => {
-    if (alertHasChanged(alert, initialAlert)) {
+    if (
+      alertHasChanged(alert, initialAlert) ||
+      alertParamsHaveChanged(alert.params, defaultAlertParams)
+    ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
       onClose();

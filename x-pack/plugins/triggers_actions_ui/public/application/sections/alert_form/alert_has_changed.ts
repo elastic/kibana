@@ -8,7 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import { InitialAlert } from './alert_reducer';
 
-const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions', 'params', 'notifyWhen'];
+const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions', 'notifyWhen'];
 
 function getNonNullCompareFields(alert: InitialAlert) {
   const { name, alertTypeId, throttle } = alert;
