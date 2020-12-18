@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiCode, EuiCodeBlock, EuiButtonEmpty } from '@elastic/eui';
 
-import { ApiCodeExample, ModalHeader, ModalBody, ModalFooter } from './api_code_example';
+import { ApiCodeExample, FlyoutHeader, FlyoutBody, FlyoutFooter } from './api_code_example';
 
 describe('ApiCodeExample', () => {
   const values = {
@@ -29,23 +29,23 @@ describe('ApiCodeExample', () => {
 
   it('renders', () => {
     const wrapper = shallow(<ApiCodeExample />);
-    expect(wrapper.find(ModalHeader)).toHaveLength(1);
-    expect(wrapper.find(ModalBody)).toHaveLength(1);
-    expect(wrapper.find(ModalFooter)).toHaveLength(1);
+    expect(wrapper.find(FlyoutHeader)).toHaveLength(1);
+    expect(wrapper.find(FlyoutBody)).toHaveLength(1);
+    expect(wrapper.find(FlyoutFooter)).toHaveLength(1);
   });
 
-  describe('ModalHeader', () => {
+  describe('FlyoutHeader', () => {
     it('renders', () => {
-      const wrapper = shallow(<ModalHeader />);
+      const wrapper = shallow(<FlyoutHeader />);
       expect(wrapper.find('h2').text()).toEqual('Indexing by API');
     });
   });
 
-  describe('ModalBody', () => {
+  describe('FlyoutBody', () => {
     let wrapper: ShallowWrapper;
 
     beforeAll(() => {
-      wrapper = shallow(<ModalBody />);
+      wrapper = shallow(<FlyoutBody />);
     });
 
     it('renders with the full remote Enterprise Search API URL', () => {
@@ -64,9 +64,9 @@ describe('ApiCodeExample', () => {
     });
   });
 
-  describe('ModalFooter', () => {
-    it('closes the modal', () => {
-      const wrapper = shallow(<ModalFooter />);
+  describe('FlyoutFooter', () => {
+    it('closes the flyout', () => {
+      const wrapper = shallow(<FlyoutFooter />);
 
       wrapper.find(EuiButtonEmpty).simulate('click');
       expect(actions.closeDocumentCreation).toHaveBeenCalled();
