@@ -328,7 +328,6 @@ const SchemaInformation = ({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <StyledEuiButtonIcon
           data-test-subj="resolver:graph-controls:schema-info-button"
@@ -443,7 +442,6 @@ const NodeLegend = ({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <StyledEuiButtonIcon
           data-test-subj="resolver:graph-controls:node-legend-button"

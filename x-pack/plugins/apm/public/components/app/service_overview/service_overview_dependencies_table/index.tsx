@@ -27,12 +27,12 @@ import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { TableLinkFlexItem } from '../table_link_flex_item';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { px, unit } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
-import { ServiceOverviewTableContainer } from '../service_overview_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 interface Props {
   serviceName: string;
@@ -53,7 +53,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <TruncateWithTooltip
             text={item.name}
             content={
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {item.type === 'service' ? (
                     <AgentIcon agentName={item.agentName} />
@@ -88,7 +88,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
             valueLabel={asDuration(latency.value)}
@@ -108,7 +108,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { throughput }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis0"
             series={throughput.timeseries}
@@ -129,7 +129,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       width: px(unit * 10),
       render: (_, { errorRate }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             compact
             color="euiColorVis7"
             series={errorRate.timeseries}
@@ -190,9 +190,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>

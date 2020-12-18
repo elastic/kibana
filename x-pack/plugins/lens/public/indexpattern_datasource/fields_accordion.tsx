@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
@@ -39,6 +40,7 @@ export interface FieldsAccordionProps {
   onToggle: (open: boolean) => void;
   id: string;
   label: string;
+  helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
   isFiltered: boolean;
@@ -55,6 +57,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   onToggle,
   id,
   label,
+  helpTooltip,
   hasLoaded,
   fieldsCount,
   isFiltered,
@@ -82,6 +85,11 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
     [fieldProps, exists, hideDetails, dropOntoWorkspace, getSuggestionForField]
   );
 
+  const titleClassname = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    lnsInnerIndexPatternDataPanel__titleTooltip: !!helpTooltip,
+  });
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -90,7 +98,20 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       id={id}
       buttonContent={
         <EuiText size="xs">
-          <strong>{label}</strong>
+          <strong className={titleClassname}>{label}</strong>
+          {!!helpTooltip && (
+            <EuiIconTip
+              aria-label={helpTooltip}
+              type="questionInCircle"
+              color="subdued"
+              size="s"
+              position="right"
+              content={helpTooltip}
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+            />
+          )}
         </EuiText>
       }
       extraAction={

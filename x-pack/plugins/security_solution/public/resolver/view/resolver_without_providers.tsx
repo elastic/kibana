@@ -33,7 +33,14 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
+    {
+      className,
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -41,7 +48,13 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
+    useStateSyncingActions({
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    });
 
     const { timestamp } = useContext(SideEffectContext);
 
@@ -93,45 +106,47 @@ export const ResolverWithoutProviders = React.memo(
             </div>
           </div>
         ) : (
-          <GraphContainer
-            data-test-subj="resolver:graph"
-            className="resolver-graph kbn-resetFocusState"
-            onMouseDown={onMouseDown}
-            ref={ref}
-            role="tree"
-            tabIndex={0}
-            aria-activedescendant={activeDescendantId || undefined}
-          >
-            {connectingEdgeLineSegments.map(
-              ({ points: [startPosition, endPosition], metadata }) => (
-                <EdgeLine
-                  edgeLineMetadata={metadata}
-                  key={metadata.reactKey}
-                  startPosition={startPosition}
-                  endPosition={endPosition}
-                  projectionMatrix={projectionMatrix}
-                />
-              )
-            )}
-            {[...processNodePositions].map(([treeNode, position]) => {
-              const nodeID = nodeModel.nodeID(treeNode);
-              if (nodeID === undefined) {
-                throw new Error('Tried to render a node without an ID');
-              }
-              return (
-                <ProcessEventDot
-                  key={nodeID}
-                  nodeID={nodeID}
-                  position={position}
-                  projectionMatrix={projectionMatrix}
-                  node={treeNode}
-                  timeAtRender={timeAtRender}
-                />
-              );
-            })}
-          </GraphContainer>
+          <>
+            <GraphContainer
+              data-test-subj="resolver:graph"
+              className="resolver-graph kbn-resetFocusState"
+              onMouseDown={onMouseDown}
+              ref={ref}
+              role="tree"
+              tabIndex={0}
+              aria-activedescendant={activeDescendantId || undefined}
+            >
+              {connectingEdgeLineSegments.map(
+                ({ points: [startPosition, endPosition], metadata }) => (
+                  <EdgeLine
+                    edgeLineMetadata={metadata}
+                    key={metadata.reactKey}
+                    startPosition={startPosition}
+                    endPosition={endPosition}
+                    projectionMatrix={projectionMatrix}
+                  />
+                )
+              )}
+              {[...processNodePositions].map(([treeNode, position]) => {
+                const nodeID = nodeModel.nodeID(treeNode);
+                if (nodeID === undefined) {
+                  throw new Error('Tried to render a node without an ID');
+                }
+                return (
+                  <ProcessEventDot
+                    key={nodeID}
+                    nodeID={nodeID}
+                    position={position}
+                    projectionMatrix={projectionMatrix}
+                    node={treeNode}
+                    timeAtRender={timeAtRender}
+                  />
+                );
+              })}
+            </GraphContainer>
+            <PanelRouter />
+          </>
         )}
-        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>
