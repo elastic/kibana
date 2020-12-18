@@ -46,8 +46,8 @@ interface PopoverActionItemsProps {
 }
 
 // helper
-const PopoverAction = ({ textColor, iconType, children }: PopoverActionProps) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" component="span">
+const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActionProps) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center" component="span" {...props}>
     <EuiFlexItem grow={false} component="span">
       <EuiIcon color={textColor} type={iconType} />
     </EuiFlexItem>
@@ -101,7 +101,12 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
         {
           key: `action-${actionType}`,
           name: (
-            <PopoverAction textColor={textColor} iconType={iconType}>
+            <PopoverAction
+              textColor={textColor}
+              iconType={iconType}
+              data-test-subj={`session-mgmt-popover-action-${actionType}`}
+              data-test-id={session.id}
+            >
               {label}
             </PopoverAction>
           ),

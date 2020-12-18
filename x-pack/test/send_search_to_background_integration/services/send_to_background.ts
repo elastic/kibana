@@ -65,6 +65,10 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverClosed();
     }
 
+    public async openPopover() {
+      await this.ensurePopoverOpened();
+    }
+
     private async ensurePopoverOpened() {
       const isAlreadyOpen = await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ);
       if (isAlreadyOpen) return;

@@ -24,12 +24,13 @@ export const InlineActions = ({ url, session }: InlineActionProps) => {
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" component="span">
       <EuiFlexItem
         key="inline-action-view"
-        data-test-subj={`session-mgmt-view-action-${session.id}`}
+        data-test-subj="session-mgmt-view-action"
+        data-test-id={session.id}
         grow={false}
         component="span"
       >
         <TableText>
-          <EuiLink href={url} data-test-subj={`session-mgmt-view-href`}>
+          <EuiLink href={url}>
             <FormattedMessage
               id="xpack.data.mgmt.searchSessions.actionView"
               defaultMessage="View"

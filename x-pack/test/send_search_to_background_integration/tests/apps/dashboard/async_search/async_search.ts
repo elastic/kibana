@@ -11,6 +11,7 @@ import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_pa
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
   const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
@@ -130,6 +131,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // should leave session state untouched
         await PageObjects.dashboard.switchToEditMode();
         await sendToBackground.expectState('restored');
+      });
+    });
+
+    describe('Management UI', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+      });
+
+      it('Saves a session and verifies it in the Management app', async () => {
+        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await sendToBackground.expectState('completed');
+        await sendToBackground.save();
+        await sendToBackground.expectState('backgroundCompleted');
+
+        await sendToBackground.openPopover();
+        await sendToBackground.viewBackgroundSessions();
+
+        await testSubjects.existOrFail('session-mgmt-view-status-label-in_progress');
+        await testSubjects.existOrFail('session-mgmt-view-status-tooltip-in_progress');
+        await testSubjects.existOrFail('session-mgmt-table-col-created');
+        await testSubjects.existOrFail('session-mgmt-view-action');
+
+        expect(
+          await find.existsByCssSelector(
+            '[data-test-subj="session-mgmt-table-col-app-icon"][data-test-app-id="dashboard"]'
+          )
+        ).to.be(true);
+
+        expect(
+          await testSubjects.find('session-mgmt-table-col-name').then((n) => n.getVisibleText())
+        ).to.be('Not Delayed');
       });
     });
   });

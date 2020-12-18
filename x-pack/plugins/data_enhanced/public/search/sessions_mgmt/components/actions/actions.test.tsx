@@ -6,9 +6,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
-import { LocaleWrapper } from '../__mocks__';
-import { InlineActions } from './actions';
+import { STATUS, UISession } from '../../../../../common/search/sessions_mgmt';
+import { LocaleWrapper } from '../../__mocks__';
+import { InlineActions } from './inline_actions';
 
 let session: UISession;
 
@@ -35,13 +35,8 @@ describe('Background Search Session management actions', () => {
         </LocaleWrapper>
       );
 
-      expect(
-        actions.find(`[data-test-subj="session-mgmt-view-action-wtywp9u2802hahgp-gluk"]`).exists()
-      ).toBe(true);
-
-      expect(actions.find(`[data-test-subj="session-mgmt-view-href"]`).first().prop('href')).toBe(
-        '/app/kibana/coolapp'
-      );
+      expect(actions.find(`[data-test-subj="session-mgmt-view-action"]`).exists()).toBe(true);
+      expect(actions.find('a').prop('href')).toBe('/app/kibana/coolapp');
     });
 
     test('isViewable = false', () => {
@@ -52,9 +47,7 @@ describe('Background Search Session management actions', () => {
         </LocaleWrapper>
       );
 
-      expect(
-        actions.find(`[data-test-subj="session-mgmt-view-action-wtywp9u2802hahgp-gluk"]`).exists()
-      ).toBe(false);
+      expect(actions.find(`[data-test-subj="session-mgmt-view-action"]`).exists()).toBe(false);
     });
 
     test('error handling', () => {
@@ -69,9 +62,7 @@ describe('Background Search Session management actions', () => {
       );
 
       // no unhandled errors
-      expect(
-        actions.find(`[data-test-subj="session-mgmt-view-action-wtywp9u2802hahgp-gluk"]`).exists()
-      ).toBe(true);
+      expect(actions.find(`[data-test-subj="session-mgmt-view-action"]`).exists()).toBe(true);
     });
   });
 });

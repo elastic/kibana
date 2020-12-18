@@ -50,11 +50,15 @@ export const getColumns = (
         defaultMessage: 'Type',
       }),
       sortable: true,
-      render: (appId: UISession['appId']) => {
+      render: (appId: UISession['appId'], { id }) => {
         const app = `${appToIcon(appId)}`;
         return (
           <EuiToolTip content={capitalize(app)}>
-            <EuiIcon data-test-subj="session-mgmt-view-icon" type={`${app}App`} />
+            <EuiIcon
+              data-test-subj="session-mgmt-table-col-app-icon"
+              data-test-app-id={app}
+              type={`${app}App`}
+            />
           </EuiToolTip>
         );
       },
@@ -70,8 +74,8 @@ export const getColumns = (
       width: '20%',
       render: (name: UISession['name'], { appId, url, id }) => {
         return (
-          <EuiLink href={url}>
-            <TableText data-test-subj="session-mgmt-view-name">{name}</TableText>
+          <EuiLink href={url} data-test-subj="session-mgmt-table-col-name" data-test-id={id}>
+            <TableText>{name}</TableText>
           </EuiLink>
         );
       },
@@ -99,7 +103,15 @@ export const getColumns = (
       render: (created: UISession['created'], { id }) => {
         try {
           const startedOn = dateString(created, uiSettings);
-          return <TableText color="subdued">{startedOn}</TableText>;
+          return (
+            <TableText
+              color="subdued"
+              data-test-subj="session-mgmt-table-col-created"
+              data-test-id={id}
+            >
+              {startedOn}
+            </TableText>
+          );
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error(err);
@@ -115,14 +127,21 @@ export const getColumns = (
         defaultMessage: 'Expiration',
       }),
       sortable: true,
-      render: (expires: UISession['expires'], session) => {
-        const { status } = session;
+      render: (expires: UISession['expires'], { id, status }) => {
         if (expires && status !== STATUS.IN_PROGRESS && status !== STATUS.ERROR) {
           try {
             const expiresOn = dateString(expires, uiSettings);
 
             // return
-            return <TableText color="subdued">{expiresOn}</TableText>;
+            return (
+              <TableText
+                color="subdued"
+                data-test-subj="session-mgmt-table-col-expires"
+                data-test-id={id}
+              >
+                {expiresOn}
+              </TableText>
+            );
           } catch (err) {
             // eslint-disable-next-line no-console
             console.error(err);
@@ -138,10 +157,10 @@ export const getColumns = (
       field: 'status',
       name: '',
       sortable: false,
-      render: (status, session) => {
-        if (session.expiresSoon) {
+      render: (status, { id, expires, expiresSoon }) => {
+        if (expiresSoon) {
           const tNow = moment().valueOf();
-          const tFuture = moment(session.expires).valueOf();
+          const tFuture = moment(expires).valueOf();
 
           const numDays = Math.floor(moment.duration(tFuture - tNow).asDays());
           const toolTipContent = i18n.translate(
@@ -158,6 +177,8 @@ export const getColumns = (
                 <FormattedMessage
                   id="xpack.data.mgmt.searchSessions.status.expiresSoonTooltip"
                   defaultMessage="{numDays} days"
+                  data-test-subj="session-mgmt-table-col-expires"
+                  data-test-id={id}
                   values={{ numDays }}
                 />
               </EuiBadge>

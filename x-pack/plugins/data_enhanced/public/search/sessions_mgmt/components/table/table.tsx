@@ -93,6 +93,7 @@ export function SearchSessionsMgmtTable({ api, http, uiSettings, initialTable, .
     <EuiInMemoryTable<UISession>
       {...props}
       id={TABLE_ID}
+      data-test-subj={TABLE_ID}
       columns={getColumns(api, http, uiSettings, handleActionCompleted)}
       items={tableData}
       pagination={pagination}
