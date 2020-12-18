@@ -249,6 +249,8 @@ export class DataRecognizer {
       })
     );
 
+    results.sort((res1, res2) => res1.id.localeCompare(res2.id));
+
     return results;
   }
 

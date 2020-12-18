@@ -134,7 +134,7 @@ export const dashboardExportCsvAction = {
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
-      defaultMessage: 'unsaved',
+      defaultMessage: 'untitled',
     }),
 };
 

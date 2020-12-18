@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await browser.setWindowSize(1800, 1200);
     });
-    describe('Endpoint Resolver Tree', function () {
+    describe.skip('Endpoint Resolver Tree', function () {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
