@@ -84,7 +84,7 @@ const eventsViewerDefaultProps = {
   sort: [
     {
       columnId: 'foo',
-      sortDirection: 'none' as SortDirection,
+      sortDirection: 'asc' as SortDirection,
     },
   ],
   scopeId: SourcererScopeName.timeline,
@@ -217,13 +217,15 @@ describe('EventsViewer', () => {
       expect(wrapper.find(`[data-test-subj="alerts-table-filter-group"]`).exists()).toBe(true);
     });
 
-    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', () => {
+    test.only('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', () => {
       const wrapper = mount(
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup display="block" onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );

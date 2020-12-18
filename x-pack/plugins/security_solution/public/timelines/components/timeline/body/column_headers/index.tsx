@@ -197,18 +197,22 @@ export const ColumnHeadersComponent = ({
   );
 
   const DroppableContent = useCallback(
-    (dropProvided, snapshot) => (
-      <>
-        <EventsThGroupData
-          data-test-subj="headers-group"
-          ref={dropProvided.innerRef}
-          isDragging={snapshot.isDraggingOver}
-          {...dropProvided.droppableProps}
-        >
-          {ColumnHeaderList}
-        </EventsThGroupData>
-      </>
-    ),
+    (dropProvided, snapshot) => {
+      console.log('snapshot', snapshot);
+      console.log('HERY', snapshot.isDraggingOver);
+      return (
+        <>
+          <EventsThGroupData
+            data-test-subj="headers-group"
+            ref={dropProvided.innerRef}
+            isDragging={snapshot.isDraggingOver}
+            {...dropProvided.droppableProps}
+          >
+            {ColumnHeaderList}
+          </EventsThGroupData>
+        </>
+      );
+    },
     [ColumnHeaderList]
   );
 
@@ -224,8 +228,9 @@ export const ColumnHeadersComponent = ({
   );
 
   const onSortColumns = useCallback(
-    (cols: EuiDataGridSorting['columns']) =>
-      dispatch(
+    (cols: EuiDataGridSorting['columns']) => {
+      console.log('cols', cols);
+      return dispatch(
         timelineActions.updateSort({
           id: timelineId,
           sort: cols.map(({ id, direction }) => ({
@@ -233,7 +238,8 @@ export const ColumnHeadersComponent = ({
             sortDirection: direction as SortDirection,
           })),
         })
-      ),
+      );
+    },
     [dispatch, timelineId]
   );
   const sortedColumns = useMemo(
