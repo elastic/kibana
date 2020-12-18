@@ -109,7 +109,8 @@ export const Result: React.FC<Props> = ({
                 defaultMessage: 'Hide additional fields',
               })
             : i18n.translate('xpack.enterpriseSearch.appSearch.result.showAdditionalFields', {
-                defaultMessage: 'Show {numberOfAdditionalFields} additional fields',
+                defaultMessage:
+                  'Show {numberOfAdditionalFields, number} additional {numberOfAdditionalFields, plural, one {field} other {fields}}',
                 values: {
                   numberOfAdditionalFields: numResults - RESULT_CUTOFF,
                 },
