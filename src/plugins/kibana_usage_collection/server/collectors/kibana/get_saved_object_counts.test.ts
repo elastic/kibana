@@ -21,29 +21,20 @@ import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 export function mockGetSavedObjectsCounts(params: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search
+  esClient.search.mockResolvedValue(
     // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...params },
-      }
-    );
+    {
+      body: { ...params },
+    }
+  );
   return esClient;
 }
 
 describe('getSavedObjectsCounts', () => {
   test('Get all the saved objects equal to 0 because no results were found', async () => {
-    const esClient = mockGetSavedObjectsCounts({
-      dashboard: { total: 0 },
-      visualization: { total: 0 },
-      search: { total: 0 },
-      index_pattern: { total: 0 },
-      graph_workspace: { total: 0 },
-      timelion_sheet: { total: 0 },
-    });
+    const esClient = mockGetSavedObjectsCounts({});
 
-    const results = await getSavedObjectsCounts(esClient as any, '.kibana');
+    const results = await getSavedObjectsCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -68,7 +59,7 @@ describe('getSavedObjectsCounts', () => {
       },
     });
 
-    const results = await getSavedObjectsCounts(esClient as any, '.kibana');
+    const results = await getSavedObjectsCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 1 },
       visualization: { total: 0 },
