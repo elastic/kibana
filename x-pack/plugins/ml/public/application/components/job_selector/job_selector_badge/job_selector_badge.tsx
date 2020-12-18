@@ -7,6 +7,7 @@
 import React, { FC } from 'react';
 import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tabColor } from '../../../../../common/util/group_color_utils';
 
 interface JobSelectorBadgeProps {
@@ -47,7 +48,12 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
   }
 
   return (
-    <EuiBadge key={`${id}-id`} data-test-subj={`mlJobSelectionBadge ${id}`} {...props}>
+    <EuiBadge
+      key={`${id}-id`}
+      data-test-subj={`mlJobSelectionBadge ${id}`}
+      {...props}
+      style={{ color: `${theme.euiColorEmptyShade}` }}
+    >
       {`${id}${jobCount ? jobCount : ''}`}
     </EuiBadge>
   );
