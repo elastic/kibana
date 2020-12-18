@@ -69,7 +69,7 @@ export const Result: React.FC<Props> = ({
       {conditionallyLinkedArticle(
         <>
           <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
-          <div>
+          <div className="appSearchResult__body">
             {resultFields
               .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
               .map(([field, value]: [string, FieldValue]) => (
