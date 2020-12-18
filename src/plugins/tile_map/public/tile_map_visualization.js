@@ -54,8 +54,8 @@ export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
-    constructor(element, handlers, initialVisParams, initialEsResponse) {
-      super(element, handlers, initialVisParams, initialEsResponse);
+    constructor(element, handlers, initialVisParams) {
+      super(element, handlers, initialVisParams);
 
       this._geohashLayer = null;
       this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);

@@ -34,10 +34,9 @@ export function BaseMapsVisualizationProvider() {
    * @constructor
    */
   return class BaseMapsVisualization {
-    constructor(element, handlers, initialVisParams, initialEsResponse) {
+    constructor(element, handlers, initialVisParams) {
       this.handlers = handlers;
       this._params = initialVisParams;
-      this._esResponse = initialEsResponse;
       this._container = element;
       this._kibanaMap = null;
       this._chartData = null; //reference to data currently on the map.
@@ -82,6 +81,10 @@ export function BaseMapsVisualizationProvider() {
       this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
 
       await this._whenBaseLayerIsLoaded();
+    }
+
+    resize() {
+      this._kibanaMap.resize();
     }
 
     /**
@@ -216,7 +219,7 @@ export function BaseMapsVisualizationProvider() {
     }
 
     _hasESResponseChanged(data) {
-      return this._esResponse && this._esResponse !== data;
+      return this._esResponse !== data;
     }
 
     /**

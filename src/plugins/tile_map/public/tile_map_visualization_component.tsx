@@ -31,6 +31,7 @@ import './tile_map_visualization.scss';
 
 interface TileMapVisController {
   render(visData?: TileMapVisData, visConfig?: TileMapVisConfig): Promise<void>;
+  resize(): void;
   destroy(): void;
 }
 
@@ -55,7 +56,7 @@ const TileMapVisualization = ({
     if (chartDiv.current && isFirstRender.current) {
       isFirstRender.current = false;
       const Controller = createTileMapVisualization(deps);
-      visController.current = new Controller(chartDiv.current, handlers, visConfig, visData);
+      visController.current = new Controller(chartDiv.current, handlers, visConfig);
     }
   }, [deps, handlers, visConfig, visData]);
 
@@ -82,7 +83,7 @@ const TileMapVisualization = ({
     };
   }, []);
 
-  const updateChartSize = useMemo(() => throttle(() => visController.current?.render(), 300), []);
+  const updateChartSize = useMemo(() => throttle(() => visController.current?.resize(), 300), []);
 
   return (
     <EuiResizeObserver onResize={updateChartSize}>

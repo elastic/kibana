@@ -30,8 +30,8 @@ export function createRegionMapVisualization({
   getServiceSettings,
 }) {
   return class RegionMapsVisualization extends BaseMapsVisualization {
-    constructor(container, handlers, initialVisParams, initialEsResponse) {
-      super(container, handlers, initialVisParams, initialEsResponse);
+    constructor(container, handlers, initialVisParams) {
+      super(container, handlers, initialVisParams);
       this._choroplethLayer = null;
       this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
