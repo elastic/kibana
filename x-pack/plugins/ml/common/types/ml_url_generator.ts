@@ -90,7 +90,7 @@ export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: number[];
+    selectedTimes?: [number, number];
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;
@@ -228,7 +228,12 @@ export type FilterEditUrlState = MLPageState<
   }
 >;
 
-export type ExpandablePanels = 'analysis' | 'evaluation' | 'feature_importance' | 'results';
+export type ExpandablePanels =
+  | 'analysis'
+  | 'evaluation'
+  | 'feature_importance'
+  | 'results'
+  | 'splom';
 
 export type ExplorationPageUrlState = {
   queryText: string;

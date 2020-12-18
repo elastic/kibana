@@ -5,6 +5,7 @@
  */
 
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -12,8 +13,9 @@ import { executeTimelineKQL } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('timeline search or filter KQL bar', () => {
+describe.skip('timeline search or filter KQL bar', () => {
   beforeEach(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
   });
 

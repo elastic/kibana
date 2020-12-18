@@ -30,10 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1800, 1200);
     });
-    after(async () => {
-      await pageObjects.hosts.deleteDataStreams();
-    });
-    describe('Endpoint Resolver Tree', function () {
+    describe.skip('Endpoint Resolver Tree', function () {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
