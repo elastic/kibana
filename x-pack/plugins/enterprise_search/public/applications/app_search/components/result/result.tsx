@@ -83,19 +83,17 @@ export const Result: React.FC<Props> = ({
             showScore={!!showScore}
             isMetaEngine={isMetaEngine}
           />
-          <div className="appSearchResult__body">
-            {resultFields
-              .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-              .map(([field, value]: [string, FieldValue]) => (
-                <ResultField
-                  key={field}
-                  field={field}
-                  raw={value.raw}
-                  snippet={value.snippet}
-                  type={typeForField(field)}
-                />
-              ))}
-          </div>
+          {resultFields
+            .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
+            .map(([field, value]: [string, FieldValue]) => (
+              <ResultField
+                key={field}
+                field={field}
+                raw={value.raw}
+                snippet={value.snippet}
+                type={typeForField(field)}
+              />
+            ))}
         </>
       )}
       {numResults > RESULT_CUTOFF && (
