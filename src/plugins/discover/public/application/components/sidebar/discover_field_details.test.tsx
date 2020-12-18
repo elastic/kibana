@@ -38,7 +38,7 @@ const indexPattern = getStubIndexPattern(
 describe('discover sidebar field details', function () {
   const defaultProps = {
     indexPattern,
-    details: { buckets: [], error: '', exists: 1, total: true, columns: [] },
+    details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
     onAddFilter: jest.fn(),
   };
 

@@ -8,7 +8,7 @@ exports[`discover sidebar field details footer renders properly 1`] = `
       "columns": Array [],
       "error": "",
       "exists": 1,
-      "total": true,
+      "total": 2,
     }
   }
   field={
@@ -681,26 +681,19 @@ exports[`discover sidebar field details footer renders properly 1`] = `
                   type="button"
                 >
                   <FormattedMessage
-                    defaultMessage="Exists in"
-                    id="discover.fieldChooser.detailViews.existsText"
-                    values={Object {}}
+                    defaultMessage="Exists in {value} / {totalValue} records"
+                    id="discover.fieldChooser.detailViews.existsInRecordsText"
+                    values={
+                      Object {
+                        "totalValue": 2,
+                        "value": 1,
+                      }
+                    }
                   >
-                    Exists in
+                    Exists in 1 / 2 records
                   </FormattedMessage>
-                   
-                  1
                 </button>
               </EuiLink>
-               
-              / 
-               
-              <FormattedMessage
-                defaultMessage="records"
-                id="discover.fieldChooser.detailViews.recordsText"
-                values={Object {}}
-              >
-                records
-              </FormattedMessage>
             </div>
           </EuiTextAlign>
         </div>

@@ -25,7 +25,7 @@ export interface IndexPatternRef {
 export interface FieldDetails {
   error: string;
   exists: number;
-  total: boolean;
+  total: number;
   buckets: Bucket[];
   columns: string[];
 }

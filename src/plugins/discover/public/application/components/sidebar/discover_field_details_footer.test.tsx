@@ -39,7 +39,7 @@ describe('discover sidebar field details footer', function () {
   const onAddFilter = jest.fn();
   const defaultProps = {
     indexPattern,
-    details: { buckets: [], error: '', exists: 1, total: true, columns: [] },
+    details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
     onAddFilter,
   };
 
