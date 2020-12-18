@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
-import { ForLastExpression } from '../../../../../../triggers_actions_ui/public';
+import {
+  AlertTypeParamsExpressionProps,
+  ForLastExpression,
+} from '../../../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Comparator,
-  ThresholdType,
   isRatioAlert,
+  ThresholdType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Threshold } from './threshold';
-import { Criteria } from './criteria';
-import { TypeSwitcher } from './type_switcher';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useSourceId } from '../../../../containers/source_id';
+import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
+import { errorsRT } from '../../validation';
+import { Criteria } from './criteria';
+import { Threshold } from './threshold';
+import { TypeSwitcher } from './type_switcher';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
-import { Errors } from '../../validation';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -141,6 +145,13 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
   });
   const { sourceId, sourceStatus } = useLogSourceContext();
 
+  const {
+    criteria: criteriaErrors,
+    threshold: thresholdErrors,
+    timeSizeUnit: timeSizeUnitErrors,
+    timeWindowSize: timeWindowSizeErrors,
+  } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
+
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
@@ -218,7 +229,7 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
     <Criteria
       fields={supportedFields}
       criteria={alertParams.criteria}
-      errors={errors.criteria}
+      errors={criteriaErrors}
       alertParams={alertParams}
       sourceId={sourceId}
       updateCriteria={updateCriteria}
@@ -235,7 +246,7 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
         comparator={alertParams.count?.comparator}
         value={alertParams.count?.value}
         updateThreshold={updateThreshold}
-        errors={errors.threshold}
+        errors={thresholdErrors}
       />
 
       <ForLastExpression
@@ -243,7 +254,7 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
         timeWindowUnit={alertParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
-        errors={{ timeWindowSize: errors.timeWindowSize, timeSizeUnit: errors.timeSizeUnit }}
+        errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
       />
 
       <GroupByExpression

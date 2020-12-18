@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import * as rt from 'io-ts';
 import { isNumber, isFinite } from 'lodash';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
+import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Criteria,
@@ -16,33 +17,38 @@ import {
   getDenominator,
 } from '../../../common/alerting/logs/log_threshold/types';
 
-export interface CriterionErrors {
-  [id: string]: {
-    field: string[];
-    comparator: string[];
-    value: string[];
-  };
-}
+export const criterionErrorRT = rt.type({
+  field: rt.array(rt.string),
+  comparator: rt.array(rt.string),
+  value: rt.array(rt.string),
+});
 
-export interface Errors {
-  threshold: {
-    value: string[];
-  };
+export const criterionErrorsRT = rt.record(rt.string, criterionErrorRT);
+
+export type CriterionErrors = rt.TypeOf<typeof criterionErrorsRT>;
+
+const alertingErrorRT: rt.Type<IErrorObject> = rt.recursion('AlertingError', () =>
+  rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), alertingErrorRT]))
+);
+
+export const errorsRT = rt.type({
+  threshold: rt.type({
+    value: rt.array(rt.string),
+  }),
   // NOTE: The data structure for criteria errors isn't 100%
   // ideal but we need to conform to the interfaces that the alerting
   // framework expects.
-  criteria: {
-    [id: string]: CriterionErrors;
-  };
-  timeWindowSize: string[];
-  timeSizeUnit: string[];
-}
+  criteria: rt.record(rt.string, criterionErrorsRT),
+  timeWindowSize: rt.array(rt.string),
+  timeSizeUnit: rt.array(rt.string),
+});
+
+export type Errors = rt.TypeOf<typeof errorsRT>;
 
 export function validateExpression({
   count,
   criteria,
   timeSize,
-  timeUnit,
 }: Partial<AlertParams>): ValidationResult {
   const validationResult = { errors: {} };
 
