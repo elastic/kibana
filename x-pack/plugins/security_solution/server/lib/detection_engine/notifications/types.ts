@@ -27,7 +27,6 @@ export interface FindNotificationParams {
   page?: number;
   sortField?: string;
   filter?: string;
-  fields?: string[];
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -37,7 +36,6 @@ export interface FindNotificationsRequestParams {
   search?: string;
   sort_field?: string;
   filter?: string;
-  fields?: string[];
   sort_order?: 'asc' | 'desc';
 }
 

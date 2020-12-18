@@ -56,7 +56,6 @@ export const readRawTags = async ({
   // Get just one record so we can get the total count
   const firstTags = await findRules({
     alertsClient,
-    fields: ['tags'],
     perPage: 1,
     page: 1,
     sortField: 'createdAt',
@@ -66,7 +65,6 @@ export const readRawTags = async ({
   // Get all the rules to aggregate over all the tags of the rules
   const rules = await findRules({
     alertsClient,
-    fields: ['tags'],
     perPage: firstTags.total,
     sortField: 'createdAt',
     sortOrder: 'desc',

@@ -43,7 +43,6 @@ export const readRules = async ({
       alertsClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
-      fields: undefined,
       perPage: undefined,
       sortField: undefined,
       sortOrder: undefined,

@@ -20,14 +20,12 @@ export const findNotifications = async ({
   alertsClient,
   perPage,
   page,
-  fields,
   filter,
   sortField,
   sortOrder,
 }: FindNotificationParams): Promise<FindResult> =>
   alertsClient.find({
     options: {
-      fields,
       page,
       perPage,
       filter: getFilter(filter),

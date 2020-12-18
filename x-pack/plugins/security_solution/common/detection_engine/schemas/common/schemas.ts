@@ -401,8 +401,6 @@ export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
-export const fieldsOrUndefined = t.union([fields, t.undefined]);
-export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
 
 export const threat_framework = t.string;
 export const threat_tactic_id = t.string;

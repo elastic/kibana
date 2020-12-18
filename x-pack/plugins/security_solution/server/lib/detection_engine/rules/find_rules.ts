@@ -20,14 +20,12 @@ export const findRules = async ({
   alertsClient,
   perPage,
   page,
-  fields,
   filter,
   sortField,
   sortOrder,
 }: FindRuleOptions): Promise<FindResult> => {
   return alertsClient.find({
     options: {
-      fields,
       page,
       perPage,
       filter: getFilter(filter),

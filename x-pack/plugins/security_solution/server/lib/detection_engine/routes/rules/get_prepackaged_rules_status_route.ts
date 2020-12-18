@@ -53,7 +53,6 @@ export const getPrepackagedRulesStatusRoute = (
           sortField: 'enabled',
           sortOrder: 'desc',
           filter: 'alert.attributes.tags:"__internal_immutable:false"',
-          fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });

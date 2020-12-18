@@ -67,7 +67,6 @@ import {
   PageOrUndefined,
   SortFieldOrUndefined,
   QueryFilterOrUndefined,
-  FieldsOrUndefined,
   SortOrderOrUndefined,
   JobStatus,
   LastSuccessAt,
@@ -326,6 +325,5 @@ export interface FindRuleOptions {
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   filter: QueryFilterOrUndefined;
-  fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }

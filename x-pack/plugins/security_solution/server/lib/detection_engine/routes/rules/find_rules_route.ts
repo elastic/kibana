@@ -55,7 +55,6 @@ export const findRulesRoute = (router: IRouter) => {
           sortField: query.sort_field,
           sortOrder: query.sort_order,
           filter: query.filter,
-          fields: query.fields,
         });
 
         // if any rules attempted to execute but failed before the rule executor is called,

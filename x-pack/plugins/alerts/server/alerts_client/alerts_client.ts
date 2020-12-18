@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
+import { omit, isEqual, map, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -104,7 +104,6 @@ export interface FindOptions extends IndexType {
     type: string;
     id: string;
   };
-  fields?: string[];
   filter?: string;
 }
 
@@ -426,9 +425,7 @@ export class AlertsClient {
     });
   }
 
-  public async find({
-    options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult> {
+  public async find({ options = {} }: { options?: FindOptions } = {}): Promise<FindResult> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter();
@@ -458,7 +455,6 @@ export class AlertsClient {
         (authorizationFilter && options.filter
           ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
           : authorizationFilter) ?? options.filter,
-      fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
 
@@ -475,11 +471,7 @@ export class AlertsClient {
         );
         throw error;
       }
-      return this.getAlertFromRaw(
-        id,
-        fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        references
-      );
+      return this.getAlertFromRaw(id, attributes, references);
     });
 
     authorizedData.forEach(({ id }) =>
@@ -502,7 +494,7 @@ export class AlertsClient {
   }
 
   public async aggregate({
-    options: { fields, ...options } = {},
+    options = {},
   }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
     // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
@@ -1446,10 +1438,6 @@ export class AlertsClient {
       actions,
       references,
     };
-  }
-
-  private includeFieldsRequiredForAuthentication(fields: string[]): string[] {
-    return uniq([...fields, 'alertTypeId', 'consumer']);
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
