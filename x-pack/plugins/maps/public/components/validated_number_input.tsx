@@ -5,6 +5,7 @@
  */
 
 import React, { Component, ChangeEvent, ReactNode } from 'react';
+// @ts-expect-error
 import { EuiFieldNumber, EuiFormRow, EuiFormRowDisplayKeys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
