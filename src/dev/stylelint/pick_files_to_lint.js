@@ -32,5 +32,5 @@ function matchesInclude(file) {
 }
 
 export function pickFilesToLint(log, files) {
-  return files.filter(matchesInclude);
+  return files.filter((file) => file.isSass()).filter(matchesInclude);
 }
