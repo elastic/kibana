@@ -2,5 +2,3 @@ extends: stylelint-config-standard
 files:
   include:
     - '**/*.s+(a|c)ss'
-  ignore:
-    - 'x-pack/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss'

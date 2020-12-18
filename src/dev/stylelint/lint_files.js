@@ -42,6 +42,7 @@ export async function lintFiles(log, files) {
     files: paths.join(', '),
     config: styleLintConfig,
     formatter: 'string',
+    ignorePath: path.resolve(__dirname, '..', '..', '..', '.stylelintignore'),
   };
 
   const report = await stylelint.lint(options);

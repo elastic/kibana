@@ -19,8 +19,12 @@
 
 import { resolve } from 'path';
 
+const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
+const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+
 process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-process.argv.push('--config', resolve(__dirname, '..', '..', '.stylelintrc')); // configuration file
+process.argv.push('--config', stylelintConfigPath); // configuration file
+process.argv.push('--ignore-path', stylelintIgnorePath); // ignore file
 
 // common-js is required so that logic before this executes before loading sass-lint
 require('stylelint/bin/stylelint');

@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import fs from 'fs';
-import { safeLoad } from 'js-yaml';
 import { makeRe } from 'minimatch';
-import path from 'path';
 
-// load the include globs from .stylelintrc and convert them to regular expressions for filtering files
-const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');
-const styleLintConfig = safeLoad(fs.readFileSync(stylelintPath));
-const {
-  files: { include: includeGlobs },
-} = styleLintConfig;
+const includeGlobs = ['**/*.s+(a|c)ss'];
 const includeRegex = includeGlobs.map((glob) => makeRe(glob));
 
 function matchesInclude(file) {
