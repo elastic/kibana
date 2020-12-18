@@ -130,7 +130,12 @@ export class CcrShard extends PureComponent {
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
           <EuiPanel>
-            <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat} />
+            <Status
+              stat={stat}
+              formattedLeader={formattedLeader}
+              oldestStat={oldestStat}
+              alerts={alerts}
+            />
           </EuiPanel>
           <EuiSpacer size="m" />
           <AlertsCallout alerts={alerts} />

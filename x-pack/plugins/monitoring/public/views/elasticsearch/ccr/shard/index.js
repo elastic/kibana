@@ -16,7 +16,10 @@ import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
 import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CCR_READ_EXCEPTIONS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../../common/constants';
+import { SetupModeRenderer } from '../../../../components/renderers';
+import { SetupModeContext } from '../../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -77,7 +80,20 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
             })
           );
 
-          this.renderReact(<CcrShard {...data} alerts={this.alerts} />);
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <CcrShard {...data} alerts={this.alerts} />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
+          );
         }
       );
     }
