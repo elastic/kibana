@@ -27,10 +27,11 @@ import { ChartsPluginSetup } from '../../charts/public';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
+import { PieRenderValue } from './pie_fn';
 
 import './index.scss';
 
-type VislibWrapperProps = VislibRenderValue & {
+type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
   core: VisTypeVislibCoreSetup;
   charts: ChartsPluginSetup;
   handlers: IInterpreterRenderHandlers;

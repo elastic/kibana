@@ -38,5 +38,6 @@ export { Trim } from './trim';
 export { Uppercase } from './uppercase';
 export { UrlDecode } from './url_decode';
 export { UserAgent } from './user_agent';
+export { UriParts } from './uri_parts';
 
 export { FormFieldsComponent } from './shared';

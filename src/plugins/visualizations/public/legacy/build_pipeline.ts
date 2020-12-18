@@ -23,7 +23,9 @@ import {
   SerializedFieldFormat,
 } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
+
 import { Vis, VisParams } from '../types';
+
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
 interface SchemaConfigParams {
