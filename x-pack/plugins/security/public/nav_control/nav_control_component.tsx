@@ -20,7 +20,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AuthenticatedUser } from '../../common/model';
-import { CloudSetup } from '../../../cloud/public';
 
 import './nav_control_component.scss';
 
@@ -36,7 +35,6 @@ interface Props {
   editProfileUrl: string;
   logoutUrl: string;
   userMenuLinks$: Observable<UserMenuLink[]>;
-  cloud?: CloudSetup;
 }
 
 interface State {
@@ -93,9 +91,8 @@ export class SecurityNavControl extends Component<Props, State> {
   };
 
   render() {
-    const { editProfileUrl, logoutUrl, cloud } = this.props;
+    const { editProfileUrl, logoutUrl } = this.props;
     const { authenticatedUser, userMenuLinks } = this.state;
-    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     const username =
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
@@ -138,9 +135,9 @@ export class SecurityNavControl extends Component<Props, State> {
 
     if (!isAnonymousUser) {
       const profileMenuItem = {
-        name: isCloudEnabled ? (
+        name: userMenuLinks.length ? (
           <FormattedMessage
-            id="xpack.security.navControlComponent.editProfileLinkTextCloud"
+            id="xpack.security.navControlComponent.editProfileLinkTextSecondary"
             defaultMessage="Preferences"
           />
         ) : (
@@ -149,7 +146,7 @@ export class SecurityNavControl extends Component<Props, State> {
             defaultMessage="Profile"
           />
         ),
-        icon: <EuiIcon type={isCloudEnabled ? 'controlsHorizontal' : 'user'} size="m" />,
+        icon: <EuiIcon type={userMenuLinks.length ? 'controlsHorizontal' : 'user'} size="m" />,
         href: editProfileUrl,
         'data-test-subj': 'profileLink',
       };
