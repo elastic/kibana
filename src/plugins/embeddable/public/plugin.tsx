@@ -161,6 +161,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     this.stateTransferService = new EmbeddableStateTransfer(
       core.application.navigateToApp,
+      core.application.currentAppId$,
       this.appList
     );
     this.isRegistryReady = true;
@@ -206,7 +207,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         ),
       getStateTransfer: (storage?: Storage) =>
         storage
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, this.appList, storage)
+          ? new EmbeddableStateTransfer(
+              core.application.navigateToApp,
+              core.application.currentAppId$,
+              this.appList,
+              storage
+            )
           : this.stateTransferService,
       EmbeddablePanel: getEmbeddablePanelHoc(),
       telemetry: getTelemetryFunction(commonContract),

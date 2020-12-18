@@ -109,10 +109,6 @@ export const ACTION_EDIT_PANEL = "editPanel";
 export interface Adapters {
     // (undocumented)
     [key: string]: any;
-    // Warning: (ae-forgotten-export) The symbol "DataAdapter" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    data?: DataAdapter;
     // Warning: (ae-forgotten-export) The symbol "RequestAdapter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -632,12 +628,14 @@ export interface EmbeddableStartDependencies {
 export class EmbeddableStateTransfer {
     // Warning: (ae-forgotten-export) The symbol "ApplicationStart" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PublicAppInfo" needs to be exported by the entry point index.d.ts
-    constructor(navigateToApp: ApplicationStart['navigateToApp'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
+    constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
     // (undocumented)
     clearEditorState(): void;
     getAppNameFromId: (appId: string) => string | undefined;
     getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
     getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
+    // (undocumented)
+    isTransferInProgress: boolean;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;

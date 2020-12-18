@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import {
   CaseStatuses,
   CommentAttributes,
@@ -14,8 +14,8 @@ import {
   ESCaseAttributes,
   ESCasesConfigureAttributes,
 } from '../../../../common/api';
-import { mappings } from '../cases/configure/mock';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../saved_object_types';
+import { mappings } from '../../../client/configure/mock';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
   {
@@ -381,31 +381,13 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
   },
 ];
 
-export const mockCaseConfigureFind: Array<SavedObjectsFindResponse<ESCasesConfigureAttributes>> = [
-  {
-    page: 1,
-    per_page: 5,
-    total: mockCaseConfigure.length,
-    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
-  },
-];
-
 export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
   {
     type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
     id: 'mock-mappings-1',
     attributes: {
-      mappings,
+      mappings: mappings[ConnectorTypes.jira],
     },
     references: [],
-  },
-];
-
-export const mockCaseMappingsFind: Array<SavedObjectsFindResponse<ConnectorMappings>> = [
-  {
-    page: 1,
-    per_page: 5,
-    total: mockCaseConfigure.length,
-    saved_objects: [{ ...mockCaseMappings[0], score: 0 }],
   },
 ];
