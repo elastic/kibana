@@ -183,10 +183,8 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [SEARCH_FIELDS_FROM_SOURCE]: {
     name: 'Read fields from _source',
-    description: `Disable to retrieve fields via the new <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-fields.html#search-fields"
-        target="_blank" rel="noopener">Fields API</a> in the high-level search service. Keep this setting enabled
-        to continue retrieving fields directly from \`_source\`.`,
-    value: true,
+    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    value: false,
     category: ['discover'],
     schema: schema.boolean(),
   },

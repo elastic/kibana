@@ -292,14 +292,16 @@ export function DiscoverField({
           showFooter={!shouldRenderMultiFields}
         />
       )}
-      {shouldRenderMultiFields ? renderMultiFields() : null}
       {shouldRenderMultiFields ? (
-        <DiscoverFieldDetailsFooter
-          indexPattern={indexPattern}
-          field={field}
-          details={getDetails(field)}
-          onAddFilter={onAddFilter}
-        />
+        <>
+          {renderMultiFields()}
+          <DiscoverFieldDetailsFooter
+            indexPattern={indexPattern}
+            field={field}
+            details={getDetails(field)}
+            onAddFilter={onAddFilter}
+          />
+        </>
       ) : null}
     </EuiPopover>
   );

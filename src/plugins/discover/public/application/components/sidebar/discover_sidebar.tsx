@@ -181,20 +181,17 @@ export function DiscoverSidebar({
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
-    const map = new Map();
+    const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
     fields.forEach((field) => {
       const parent = field.spec?.subType?.multi?.parent;
       if (!parent) {
         return;
       }
-      if (!map.has(parent)) {
-        map.set(parent, []);
-      }
       const multiField = {
         field,
         isSelected: selectedFields.includes(field),
       };
-      const value = map.get(parent);
+      const value = map.get(parent) ?? [];
       value.push(multiField);
       map.set(parent, value);
     });

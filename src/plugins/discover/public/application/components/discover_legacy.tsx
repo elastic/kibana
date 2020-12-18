@@ -342,7 +342,7 @@ export function DiscoverLegacy({
                         {rows && rows.length && (
                           <div>
                             <DocTableLegacyMemoized
-                              columns={getDisplayColumns() || []}
+                              columns={getDisplayColumns()}
                               indexPattern={indexPattern}
                               minimumVisibleRows={minimumVisibleRows}
                               rows={rows}

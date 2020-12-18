@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { keys, template } from 'lodash';
+import { template } from 'lodash';
 import { IndexPattern } from '../../../kibana_services';
 
 function noWhiteSpace(html: string) {
@@ -35,16 +35,13 @@ const templateHtml = `
 export const doTemplate = template(noWhiteSpace(templateHtml));
 
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
-  const highlights = (hit && hit.highlight) || {};
+  const highlights = hit?.highlight ?? {};
   const formatted = indexPattern.formatHit(hit);
-  const highlightPairs: any[] = [];
-  const sourcePairs: any[] = [];
-
-  keys(formatted).forEach((key) => {
+  const highlightPairs: Array<[string, unknown]> = [];
+  const sourcePairs: Array<[string, unknown]> = [];
+  Object.entries(formatted).forEach(([key, val]) => {
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    const val = formatted[key];
     pairs.push([key, val]);
-  }, []);
-
-  return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+  });
+  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };
