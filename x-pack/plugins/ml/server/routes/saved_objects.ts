@@ -12,7 +12,7 @@ import {
   jobsAndCurrentSpace,
   syncJobObjects,
   jobTypeSchema,
-  canDeleteJobScheme,
+  canDeleteJobSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { JobType } from '../../common/types/saved_objects';
@@ -308,7 +308,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
         params: jobTypeSchema,
-        body: canDeleteJobScheme,
+        body: canDeleteJobSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],

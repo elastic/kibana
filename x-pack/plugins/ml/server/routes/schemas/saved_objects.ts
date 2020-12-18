@@ -23,7 +23,7 @@ export const jobTypeSchema = schema.object({
   jobType: schema.string(),
 });
 
-export const canDeleteJobScheme = schema.object({
+export const canDeleteJobSchema = schema.object({
   /** List of job IDs. */
   jobIds: schema.arrayOf(schema.maybe(schema.string())),
 });
