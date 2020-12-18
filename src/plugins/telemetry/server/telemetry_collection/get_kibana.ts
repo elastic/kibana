@@ -88,16 +88,10 @@ export function handleKibanaStats(
 
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
-  callWithInternalUser: LegacyAPICaller,
   asInternalUser: ElasticsearchClient,
   soClient: SavedObjectsClientContract | ISavedObjectsRepository,
   kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
 ): Promise<KibanaUsageStats> {
-  const usage = await usageCollection.bulkFetch(
-    callWithInternalUser,
-    asInternalUser,
-    soClient,
-    kibanaRequest
-  );
+  const usage = await usageCollection.bulkFetch(asInternalUser, soClient, kibanaRequest);
   return usageCollection.toObject(usage);
 }

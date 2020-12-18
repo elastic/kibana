@@ -26,6 +26,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '../../../../core/server/mocks';
+import { createCollectorFetchContextMock } from '../mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -44,6 +45,12 @@ describe('CollectorSet', () => {
       loggerSpies.debug.mockRestore();
       loggerSpies.warn.mockRestore();
     });
+    // TODO: create a fetch context mock and figure out how to use the esClient to replace the legacy callCluster without any args.
+
+    const esClientMock = jest.fn().mockResolvedValue({ body: { passTest: 1000 } });
+    const mockCollectorFetchContext = {
+      esClient: esClientMock,
+    };
     const mockCallCluster = jest.fn().mockResolvedValue({ passTest: 1000 });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const mockSoClient = savedObjectsRepositoryMock.create();
@@ -94,7 +101,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
@@ -119,7 +126,7 @@ describe('CollectorSet', () => {
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+        result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       } catch (err) {
         // Do nothing
       }
@@ -137,7 +144,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -155,7 +162,7 @@ describe('CollectorSet', () => {
         } as any)
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',

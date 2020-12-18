@@ -66,17 +66,11 @@ export function registerStatsRoute({
   overallStatus$: Observable<ServiceStatus>;
 }) {
   const getUsage = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest
   ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(
-      callCluster,
-      esClient,
-      savedObjectsClient,
-      kibanaRequest
-    );
+    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
     return collectorSet.toObject(usage);
   };
 
@@ -110,7 +104,6 @@ export function registerStatsRoute({
 
       let extended;
       if (isExtended) {
-        const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
         const { asCurrentUser } = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
 
@@ -122,7 +115,7 @@ export function registerStatsRoute({
         }
 
         const usagePromise = shouldGetUsage
-          ? getUsage(callCluster, asCurrentUser, savedObjectsClient, req)
+          ? getUsage(asCurrentUser, savedObjectsClient, req)
           : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([
           usagePromise,
