@@ -70,9 +70,6 @@ export const getColorPicker = (
   const ref = useRef<HTMLDivElement | null>(null);
   const seriesName = seriesIdentifier.key;
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-    if (!seriesName) {
-      return;
-    }
     if (newColor) {
       onChange(newColor);
     }
