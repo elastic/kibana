@@ -2985,11 +2985,6 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
-// Warning: (ae-missing-release-tag) "validateObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export function validateObject(obj: any): void;
-
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
 
