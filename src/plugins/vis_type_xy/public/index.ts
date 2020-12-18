@@ -17,11 +17,35 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
 export { VisTypeXyPluginSetup } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+// TODO: Remove when vis_type_vislib is removed
+// https://github.com/elastic/kibana/issues/56143
+export {
+  CategoryAxis,
+  ThresholdLine,
+  ValueAxis,
+  Grid,
+  SeriesParam,
+  Dimension,
+  Dimensions,
+  ScaleType,
+  AxisType,
+  HistogramParams,
+  DateHistogramParams,
+} from './types';
+export type { ValidationVisOptionsProps } from './editor/components/common/validation_wrapper';
+export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
+export { getPositions } from './editor/positions';
+export { getScaleTypes } from './editor/scale_types';
+export { xyVisTypes } from './vis_types';
+export { getAggId } from './config/get_agg_id';
+
+// Export common types
+export * from '../common';
+
+export function plugin() {
+  return new Plugin();
 }
