@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import { AppLogic } from '../../../app_logic';
-import { ConfiguredLimits } from '../../../types';
 
 import { MODAL_CANCEL_BUTTON, MODAL_CONTINUE_BUTTON } from '../constants';
 import { DocumentCreationLogic } from '../';
@@ -52,9 +51,7 @@ export const ModalHeader: React.FC = () => {
 
 export const ModalBody: React.FC = () => {
   const { configuredLimits } = useValues(AppLogic);
-  const {
-    engine: { maxDocumentByteSize },
-  } = configuredLimits as ConfiguredLimits;
+  const maxDocumentByteSize = configuredLimits?.engine?.maxDocumentByteSize;
 
   const { textInput } = useValues(DocumentCreationLogic);
   const { setTextInput } = useActions(DocumentCreationLogic);
