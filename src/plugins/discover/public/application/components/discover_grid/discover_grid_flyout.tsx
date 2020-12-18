@@ -64,26 +64,19 @@ export function DiscoverGridFlyout({
   return (
     <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="expand" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle
-              size="s"
-              className="dscTable__flyoutHeader"
-              data-test-subj="docTableRowDetailsTitle"
-            >
-              <h2>
-                {i18n.translate('discover.grid.tableRow.detailHeading', {
-                  defaultMessage: 'Expanded document',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle
+          size="s"
+          className="dscTable__flyoutHeader"
+          data-test-subj="docTableRowDetailsTitle"
+        >
+          <h2>
+            {i18n.translate('discover.grid.tableRow.detailHeading', {
+              defaultMessage: 'Expanded document',
+            })}
+          </h2>
+        </EuiTitle>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText size="s">

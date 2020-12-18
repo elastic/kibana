@@ -19,7 +19,7 @@
 export const kibanaJSON = 'kibana-json';
 export const geoPoint = 'geo-point';
 export const gridStyle = {
-  border: 'horizontal',
+  border: 'all',
   fontSize: 's',
   cellPadding: 's',
   rowHover: 'none',
