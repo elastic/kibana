@@ -14,7 +14,7 @@ meta?: AppMeta;
 
 ## Remarks
 
-Used to populate navigational search results (where available). Can be updated using the [App.updater$](./kibana-plugin-core-public.app.updater_.md) observable. See  for more details.
+Used to populate navigational search results (where available). Can be updated using the [App.updater$](./kibana-plugin-core-public.app.updater_.md) observable. See [PublicAppSearchDeepLinkInfo](./kibana-plugin-core-public.publicappsearchdeeplinkinfo.md) for more details.
 
 ## Example
 

@@ -56,7 +56,6 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
     meta?: AppMeta;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
