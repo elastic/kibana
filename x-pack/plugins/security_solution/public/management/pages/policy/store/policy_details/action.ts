@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILicense } from '../../../../../../../licensing/common/types';
 import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/rest_spec';
 import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
@@ -62,6 +63,11 @@ interface UserClickedPolicyDetailsSaveButton {
   type: 'userClickedPolicyDetailsSaveButton';
 }
 
+interface LicenseChanged {
+  type: 'licenseChanged';
+  payload: ILicense;
+}
+
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
@@ -70,4 +76,5 @@ export type PolicyDetailsAction =
   | ServerReturnedUpdatedPolicyDetailsData
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
-  | UserChangedAntivirusRegistration;
+  | UserChangedAntivirusRegistration
+  | LicenseChanged;
