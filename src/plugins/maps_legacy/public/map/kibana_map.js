@@ -690,12 +690,6 @@ export class KibanaMap extends EventEmitter {
       }
     }
 
-    // this._leafletMap.on('resize', () => {
-    //   visualization.sessionState.mapBounds = this.getBounds();
-    // });
-    // this._leafletMap.on('load', () => {
-    //   visualization.sessionState.mapBounds = this.getBounds();
-    // });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }
