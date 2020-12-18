@@ -115,7 +115,10 @@ export const Result: React.FC<Props> = ({
                   numberOfAdditionalFields: numResults - RESULT_CUTOFF,
                 },
               })}
-          <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
+          <EuiIcon
+            type={isOpen ? 'arrowUp' : 'arrowDown'}
+            data-test-subj={isOpen ? 'CollapseResult' : 'ExpandResult'}
+          />
         </button>
       )}
       <div className="appSearchResult__actionButtons">

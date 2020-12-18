@@ -76,16 +76,20 @@ describe('Result', () => {
   describe('document detail link', () => {
     it('will render a link if shouldLinkToDetailPage is true', () => {
       const wrapper = shallow(<Result {...props} shouldLinkToDetailPage={true} />);
-      expect(wrapper.find(ReactRouterHelper).prop('to')).toEqual('/engines/my-engine/documents/1');
-      expect(wrapper.find('article.appSearchResult__content').exists()).toBe(false);
-      expect(wrapper.find('a.appSearchResult__content').exists()).toBe(true);
+      wrapper.find(ReactRouterHelper).forEach((link) => {
+        expect(link.prop('to')).toEqual('/engines/my-engine/documents/1');
+      });
+      expect(wrapper.hasClass('appSearchResult--link')).toBe(true);
+      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(true);
+      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(true);
     });
 
     it('will not render a link if shouldLinkToDetailPage is not set', () => {
       const wrapper = shallow(<Result {...props} />);
       expect(wrapper.find(ReactRouterHelper).exists()).toBe(false);
-      expect(wrapper.find('article.appSearchResult__content').exists()).toBe(true);
-      expect(wrapper.find('a.appSearchResult__content').exists()).toBe(false);
+      expect(wrapper.hasClass('appSearchResult--link')).toBe(false);
+      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(false);
+      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(false);
     });
   });
 
@@ -140,18 +144,16 @@ describe('Result', () => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
       });
 
-      it('renders a collapse button', () => {
+      it('renders a hidden fields toggle button', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(false);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(true);
-      });
-
-      it('renders a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').text()).toEqual(
-          '1 more fields'
-        );
       });
 
       it('shows no more than 5 fields', () => {
@@ -164,20 +166,22 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
       });
 
-      it('renders a collapse button', () => {
+      it('renders correct toggle text', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').text()).toEqual(
+          'Hide additional fields<EuiIcon />'
+        );
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(true);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(false);
-      });
-
-      it('does not render a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').exists()).toBe(false);
       });
 
       it('shows all fields', () => {
@@ -190,23 +194,23 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
-        wrapper.find('.appSearchResult__actionButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').exists()).toBe(true);
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
+        wrapper.find('.appSearchResult__hiddenFieldsToggle').simulate('click');
       });
 
-      it('renders a collapse button', () => {
+      it('renders correct toggle text', () => {
+        expect(wrapper.find('.appSearchResult__hiddenFieldsToggle').text()).toEqual(
+          'Show 1 additional field<EuiIcon />'
+        );
+      });
+
+      it('renders a collapse icon', () => {
         expect(wrapper.find('[data-test-subj="CollapseResult"]').exists()).toBe(false);
       });
 
-      it('does not render an expand button', () => {
+      it('does not render an expand icon', () => {
         expect(wrapper.find('[data-test-subj="ExpandResult"]').exists()).toBe(true);
-      });
-
-      it('renders a hidden fields indicator', () => {
-        expect(wrapper.find('.appSearchResult__hiddenFieldsIndicator').text()).toEqual(
-          '1 more fields'
-        );
       });
 
       it('shows no more than 5 fields', () => {
