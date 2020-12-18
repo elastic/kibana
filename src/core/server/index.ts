@@ -201,7 +201,6 @@ export {
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
-  validateObject,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidationFunction,

@@ -29,8 +29,8 @@ import Hoek from '@hapi/hoek';
 import type { ServerOptions as TLSOptions } from 'https';
 import type { ValidationError } from 'joi';
 import uuid from 'uuid';
+import { validateObject } from '@kbn/std';
 import { HttpConfig } from './http_config';
-import { validateObject } from './prototype_pollution';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 /**

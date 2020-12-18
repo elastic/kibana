@@ -19,12 +19,12 @@
 
 import { IRouter, KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { validateObject } from '@kbn/std';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { ValidationTelemetryServiceSetup } from '../index';
 import { Framework } from '../plugin';
-import { validateObject } from '../../../../core/server';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

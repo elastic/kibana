@@ -14,7 +14,7 @@ export declare function validateObject(obj: any): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  obj | <code>any</code> |  |
+|  obj | <code>any</code> | Is used to validate object properties for containing constructor and prototype with detecting circular references
 
 <b>Returns:</b>
 
