@@ -18,7 +18,7 @@
  */
 
 import { fetchProvider } from './fetch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
@@ -30,7 +30,7 @@ jest.mock('../../../common', () => ({
 }));
 
 let fetch: ReturnType<typeof fetchProvider>;
-let callCluster: LegacyAPICaller;
+let esClient: ElasticsearchClient;
 let collectorFetchContext: CollectorFetchContext;
 const collectorFetchContextMock = createCollectorFetchContextMock();
 
@@ -38,34 +38,23 @@ function setupMockCallCluster(
   optCount: { optInCount?: number; optOutCount?: number } | null,
   language: string | undefined | null
 ) {
-  callCluster = (jest.fn((method, params) => {
-    if (params && 'id' in params && params.id === 'kql-telemetry:kql-telemetry') {
-      if (optCount === null) {
-        return Promise.resolve({
+  function mockedEsGetMethod() {
+    if (optCount === null) {
+      return Promise.resolve({
+        body: {
           _index: '.kibana_1',
           _id: 'kql-telemetry:kql-telemetry',
           found: false,
-        });
-      } else {
-        return Promise.resolve({
-          _source: {
-            'kql-telemetry': {
-              ...optCount,
-            },
-            type: 'kql-telemetry',
-            updated_at: '2018-10-05T20:20:56.258Z',
-          },
-        });
-      }
-    } else if (params && 'body' in params && params.body.query.term.type === 'config') {
-      if (language === 'missingConfigDoc') {
-        return Promise.resolve({
-          hits: {
-            hits: [],
-          },
-        });
-      } else {
-        return Promise.resolve({
+        },
+      });
+    }
+  }
+  function mockedEsSearchMethod() {
+    if (language === 'missingConfigDoc') {
+      return Promise.resolve({ body: { hits: { hits: [] } } });
+    } else {
+      return Promise.resolve({
+        body: {
           hits: {
             hits: [
               {
@@ -77,12 +66,15 @@ function setupMockCallCluster(
               },
             ],
           },
-        });
-      }
+        },
+      });
     }
-
-    throw new Error('invalid call');
-  }) as unknown) as LegacyAPICaller;
+  }
+  const esClientMock = ({
+    get: jest.fn().mockImplementation(mockedEsGetMethod),
+    search: jest.fn().mockImplementation(mockedEsSearchMethod),
+  } as unknown) as ElasticsearchClient;
+  esClient = esClientMock;
 }
 
 describe('makeKQLUsageCollector', () => {
@@ -95,7 +87,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.optInCount).toBe(1);
@@ -106,7 +98,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('kuery');
@@ -117,7 +109,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, null);
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('lucene');
@@ -127,7 +119,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, undefined);
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
@@ -137,7 +129,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster(null, 'kuery');
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.optInCount).toBe(0);
@@ -148,7 +140,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster(null, 'missingConfigDoc');
       collectorFetchContext = {
         ...collectorFetchContextMock,
-        callCluster,
+        esClient,
       };
       const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
