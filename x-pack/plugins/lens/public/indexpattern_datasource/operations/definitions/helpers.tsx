@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { operationDefinitionMap } from '.';
+import { IndexPatternColumn, operationDefinitionMap } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
 
@@ -61,4 +61,11 @@ export function getInvalidFieldMessage(
         }),
       ]
     : undefined;
+}
+
+export function getEsAggsSuffix(column: IndexPatternColumn) {
+  const operationDefinition = operationDefinitionMap[column.operationType];
+  return operationDefinition.input === 'field' && operationDefinition.getEsAggsSuffix
+    ? operationDefinition.getEsAggsSuffix(column)
+    : '';
 }

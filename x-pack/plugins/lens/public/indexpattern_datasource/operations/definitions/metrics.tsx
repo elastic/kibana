@@ -85,17 +85,20 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       optionalTimeScaling ? adjustTimeScaleOnOtherColumnChange(column, otherColumns) : column,
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
-    buildColumn: ({ field, previousColumn }) => ({
-      label: labelLookup(field.displayName, previousColumn),
-      dataType: 'number',
-      operationType: type,
-      sourceField: field.name,
-      isBucketed: false,
-      scale: 'ratio',
-      timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-      params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
-    }),
+    buildColumn: ({ field, previousColumn }) =>
+      ({
+        label: labelLookup(field.displayName, previousColumn),
+        dataType: 'number',
+        operationType: type,
+        sourceField: field.name,
+        isBucketed: false,
+        scale: 'ratio',
+        timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
+        params:
+          previousColumn && previousColumn.dataType === 'number'
+            ? previousColumn.params
+            : undefined,
+      } as T),
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,

@@ -24,7 +24,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
-import { getInvalidFieldMessage } from '../helpers';
+import { getEsAggsSuffix, getInvalidFieldMessage } from '../helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -88,11 +88,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     );
   },
   buildColumn({ layer, field, indexPattern }) {
-    const existingMetricColumn = Object.entries(layer.columns)
-      .filter(
-        ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
-      )
-      .map(([id]) => id)[0];
+    const [existingMetricColumn] = Object.entries(layer.columns).filter(
+      ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
+    )[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
       (col) => col && col.isBucketed
@@ -108,7 +106,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: {
         size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
-          ? { type: 'column', columnId: existingMetricColumn }
+          ? {
+              type: 'column',
+              columnId: existingMetricColumn,
+            }
           : { type: 'alphabetical' },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
@@ -116,14 +117,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern) => {
+  toEsAggsFn: (column, columnId, _indexPattern, layer) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
       orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        column.params.orderBy.type === 'alphabetical'
+          ? '_key'
+          : `${column.params.orderBy.columnId}${getEsAggsSuffix(
+              layer.columns[column.params.orderBy.columnId]
+            )}`,
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),
