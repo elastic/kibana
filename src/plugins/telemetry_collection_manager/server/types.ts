@@ -18,7 +18,6 @@
  */
 
 import {
-  LegacyAPICaller,
   ElasticsearchClient,
   Logger,
   KibanaRequest,
