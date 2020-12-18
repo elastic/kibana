@@ -10,7 +10,6 @@ import {
 } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
-  ECSField,
   ResolverEntityIndex,
   ResolverNode,
 } from '../../../../plugins/security_solution/common/endpoint/types';
