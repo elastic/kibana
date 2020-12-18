@@ -9,7 +9,11 @@ import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { OperationSupportMatrix } from './operation_support';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DateRange } from '../../../common';
+import type { OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
@@ -35,6 +39,14 @@ export interface ReferenceEditorProps {
   updateLayer: (newLayer: IndexPatternLayer) => void;
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
+  dateRange: DateRange;
+
+  // Services
+  uiSettings: IUiSettingsClient;
+  storage: IStorageWrapper;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpSetup;
+  data: DataPublicPluginStart;
 }
 
 export function ReferenceEditor(props: ReferenceEditorProps) {
@@ -46,10 +58,14 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     existingFields,
     validation,
     selectionStyle,
+    dateRange,
+    ...services
   } = props;
 
   const column = layer.columns[columnId];
   const selectedOperationDefinition = column && operationDefinitionMap[column.operationType];
+
+  const ParamEditor = selectedOperationDefinition?.paramEditor;
 
   const incompleteInfo = layer.incompleteColumns ? layer.incompleteColumns[columnId] : undefined;
   const incompleteOperation = incompleteInfo?.operationType;
@@ -161,11 +177,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     ? [functionOptions.find(({ value }) => value === column.operationType)!]
     : [];
 
-  const invalidField =
-    column &&
-    selectedOperationDefinition.input === 'field' &&
-    !operationSupportMatrix.fieldByOperation[column.operationType]?.size;
-
   return (
     <div id={columnId}>
       <div>
@@ -177,7 +188,11 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 defaultMessage: 'Choose a sub-function',
               })}
               fullWidth
-              isInvalid={!column || Boolean(incompleteInfo?.operationType)}
+              isInvalid={
+                // If the operationType is incomplete, the user needs to select a field- so
+                // the function is marked as valid.
+                !column && !Boolean(incompleteInfo?.operationType)
+              }
             >
               <EuiComboBox
                 fullWidth
@@ -191,7 +206,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                   }
                 )}
                 options={functionOptions}
-                isInvalid={!column || Boolean(incompleteInfo?.operationType)}
+                isInvalid={!column && !Boolean(incompleteInfo?.operationType)}
                 selectedOptions={selectedOption}
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
@@ -219,10 +234,10 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               defaultMessage: 'Select a field',
             })}
             fullWidth
-            isInvalid={invalidField}
+            isInvalid={Boolean(incompleteInfo?.operationType)}
           >
             <FieldSelect
-              fieldIsInvalid={invalidField}
+              fieldIsInvalid={Boolean(incompleteInfo?.operationType)}
               currentIndexPattern={currentIndexPattern}
               existingFields={existingFields}
               operationSupportMatrix={operationSupportMatrix}
@@ -254,6 +269,20 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
             />
           </EuiFormRow>
         ) : null}
+
+        {column && !incompleteInfo && ParamEditor && (
+          <>
+            <ParamEditor
+              updateLayer={updateLayer}
+              currentColumn={column}
+              layer={layer}
+              columnId={columnId}
+              indexPattern={currentIndexPattern}
+              dateRange={dateRange}
+              {...services}
+            />
+          </>
+        )}
       </div>
     </div>
   );

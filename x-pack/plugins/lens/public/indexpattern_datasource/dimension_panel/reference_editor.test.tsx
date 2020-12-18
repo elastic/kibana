@@ -9,6 +9,9 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
@@ -40,6 +43,12 @@ describe('reference editor', () => {
           source: true,
         },
       },
+      dateRange: { fromDate: 'now-1d', toDate: 'now' },
+      storage: {} as IStorageWrapper,
+      uiSettings: {} as IUiSettingsClient,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+      http: {} as HttpSetup,
+      data: {} as DataPublicPluginStart,
     };
   }
 
@@ -297,7 +306,7 @@ describe('reference editor', () => {
     );
 
     const fieldSelect = wrapper.find(FieldSelect);
-    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(false);
+    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
     expect(fieldSelect.prop('selectedField')).toEqual('bytes');
     expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
     expect(fieldSelect.prop('incompleteOperation')).toEqual('max');

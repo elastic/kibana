@@ -377,7 +377,7 @@ export function getDatasourceSuggestionsFromCurrentState(
       ]);
   }
 
-  const result = _.flatten(
+  return _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
@@ -429,8 +429,6 @@ export function getDatasourceSuggestionsFromCurrentState(
         return suggestions;
       })
   );
-  // console.log('suggestions', result);
-  return result;
 }
 
 function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId: string) {
