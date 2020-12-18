@@ -77,7 +77,7 @@ case $1 in
               --gid "<%= group %>" \
               --shell /sbin/nologin \
               --comment "kibana service user" \
-              "<%= user %>" \
+              "<%= user %>"
       echo " OK"
     fi
 

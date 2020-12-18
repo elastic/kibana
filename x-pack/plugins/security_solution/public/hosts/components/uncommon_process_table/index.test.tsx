@@ -19,6 +19,15 @@ import { mockData } from './mock';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../common/components/link_to');
 
 describe('Uncommon Process Table Component', () => {

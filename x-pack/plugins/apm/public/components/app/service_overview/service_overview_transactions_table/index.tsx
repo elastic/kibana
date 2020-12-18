@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,31 +13,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
-import { EuiBasicTable } from '@elastic/eui';
-import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { px, truncate, unit } from '../../../../style/variables';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import {
   APIReturnType,
   callApmApi,
 } from '../../../../services/rest/createCallApmApi';
+import { px, unit } from '../../../../style/variables';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TableLinkFlexItem } from '../table_link_flex_item';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ImpactBar } from '../../../shared/ImpactBar';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { TableLinkFlexItem } from '../table_link_flex_item';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
@@ -54,18 +53,6 @@ const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,
 };
-
-const TransactionGroupLinkWrapper = styled.div`
-  width: 100%;
-  .euiToolTipAnchor {
-    width: 100% !important;
-  }
-`;
-
-const StyledTransactionDetailLink = styled(TransactionDetailLink)`
-  display: block;
-  ${truncate('100%')}
-`;
 
 function getLatencyAggregationTypeLabel(
   latencyAggregationType?: LatencyAggregationType
@@ -189,17 +176,18 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       ),
       render: (_, { name, transactionType }) => {
         return (
-          <TransactionGroupLinkWrapper>
-            <EuiToolTip delay="long" content={name}>
-              <StyledTransactionDetailLink
+          <TruncateWithTooltip
+            text={name}
+            content={
+              <TransactionDetailLink
                 serviceName={serviceName}
                 transactionName={name}
                 transactionType={transactionType}
               >
                 {name}
-              </StyledTransactionDetailLink>
-            </EuiToolTip>
-          </TransactionGroupLinkWrapper>
+              </TransactionDetailLink>
+            }
+          />
         );
       },
     },
@@ -274,9 +262,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   ];
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
