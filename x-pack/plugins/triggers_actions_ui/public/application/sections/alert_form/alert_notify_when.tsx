@@ -29,13 +29,13 @@ const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
-    inputDisplay: 'Run only on status change',
+    inputDisplay: 'Only on status change',
     'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage="Run only on status change"
+            defaultMessage="Only on status change"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.label"
           />
         </strong>
@@ -52,13 +52,13 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   },
   {
     value: 'onActiveAlert',
-    inputDisplay: 'Run every time alert is active',
+    inputDisplay: 'Every time alert is active',
     'data-test-subj': 'onActiveAlert',
     dropdownDisplay: (
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage="Run every time alert is active"
+            defaultMessage="Every time alert is active"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.label"
           />
         </strong>
@@ -75,13 +75,13 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   },
   {
     value: 'onThrottleInterval',
-    inputDisplay: 'Set a custom action interval',
+    inputDisplay: 'On a custom action interval',
     'data-test-subj': 'onThrottleInterval',
     dropdownDisplay: (
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage="Set a custom action interval"
+            defaultMessage="On a custom action interval"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onThrottleInterval.label"
           />
         </strong>
@@ -143,7 +143,7 @@ export const AlertNotifyWhen = ({
     <>
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Notify every"
+        defaultMessage="Notify"
       />{' '}
       <EuiIconTip
         position="right"
