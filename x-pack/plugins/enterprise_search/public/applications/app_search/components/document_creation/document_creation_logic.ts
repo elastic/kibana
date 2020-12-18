@@ -15,8 +15,7 @@ interface DocumentCreationValues {
   creationMode: DocumentCreationMode;
   creationStep: DocumentCreationStep;
   textInput: string;
-  fileInput: FileList | [];
-  hasFile: boolean; // For some reason fileInput changes don't trigger a rerender, so we can't simply use fileInput.length
+  fileInput: File | null;
 }
 
 interface DocumentCreationActions {
@@ -25,7 +24,7 @@ interface DocumentCreationActions {
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
   setTextInput(textInput: string): { textInput: string };
-  setFileInput(fileInput: FileList): { fileInput: FileList };
+  setFileInput(fileInput: File | null): { fileInput: File | null };
 }
 
 export const DocumentCreationLogic = kea<
@@ -70,15 +69,9 @@ export const DocumentCreationLogic = kea<
       },
     ],
     fileInput: [
-      [],
+      null,
       {
         setFileInput: (_, { fileInput }) => fileInput,
-      },
-    ],
-    hasFile: [
-      false,
-      {
-        setFileInput: (_, { fileInput }) => !!fileInput.length,
       },
     ],
   }),

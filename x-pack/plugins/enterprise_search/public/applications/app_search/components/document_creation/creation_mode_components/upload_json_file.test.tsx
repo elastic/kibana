@@ -19,9 +19,9 @@ import { EuiFilePicker, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { UploadJsonFile, ModalHeader, ModalBody, ModalFooter } from './upload_json_file';
 
 describe('UploadJsonFile', () => {
+  const mockFile = new File(['mock'], 'mock.json', { type: 'application/json' });
   const values = {
-    fileInput: [],
-    hasFile: false,
+    fileInput: null,
     configuredLimits: {
       engine: {
         maxDocumentByteSize: 102400,
@@ -54,11 +54,14 @@ describe('UploadJsonFile', () => {
   });
 
   describe('ModalBody', () => {
-    it('updates state when files are dropped in', () => {
+    it('updates fileInput when files are added & removed', () => {
       const wrapper = shallow(<ModalBody />);
 
-      wrapper.find(EuiFilePicker).simulate('change', ['mock file']);
-      expect(actions.setFileInput).toHaveBeenCalledWith(['mock file']);
+      wrapper.find(EuiFilePicker).simulate('change', [mockFile]);
+      expect(actions.setFileInput).toHaveBeenCalledWith(mockFile);
+
+      wrapper.find(EuiFilePicker).simulate('change', []);
+      expect(actions.setFileInput).toHaveBeenCalledWith(null);
     });
   });
 
@@ -74,9 +77,9 @@ describe('UploadJsonFile', () => {
       const wrapper = shallow(<ModalFooter />);
       expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(true);
 
-      setMockValues({ ...values, hasFile: true });
+      setMockValues({ ...values, fineInput: mockFile });
       rerender(wrapper);
-      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(false);
+      expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(true);
     });
   });
 });

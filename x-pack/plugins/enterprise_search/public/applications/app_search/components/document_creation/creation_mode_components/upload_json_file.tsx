@@ -75,7 +75,7 @@ export const ModalBody: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiFilePicker
-        onChange={(files) => files && setFileInput(files)}
+        onChange={(files) => setFileInput(files?.length ? files[0] : null)}
         accept="application/json"
         fullWidth
       />
@@ -84,13 +84,13 @@ export const ModalBody: React.FC = () => {
 };
 
 export const ModalFooter: React.FC = () => {
-  const { hasFile } = useValues(DocumentCreationLogic);
+  const { fileInput } = useValues(DocumentCreationLogic);
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
     <EuiModalFooter>
       <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-      <EuiButton fill isDisabled={!hasFile}>
+      <EuiButton fill isDisabled={!fileInput}>
         {MODAL_CONTINUE_BUTTON}
       </EuiButton>
     </EuiModalFooter>
