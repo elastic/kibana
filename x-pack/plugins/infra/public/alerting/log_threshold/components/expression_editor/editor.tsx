@@ -34,15 +34,6 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
-interface Props {
-  errors: Errors;
-  alertParams: Partial<AlertParams>;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  sourceId: string;
-  metadata: LogsContextMeta;
-}
-
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
 const DEFAULT_BASE_EXPRESSION = {
@@ -71,8 +62,10 @@ const DEFAULT_RATIO_EXPRESSION = {
   ],
 };
 
-export const ExpressionEditor: React.FC<Props> = (props) => {
-  const isInternal = props.metadata?.isInternal;
+export const ExpressionEditor: React.FC<
+  AlertTypeParamsExpressionProps<AlertParams, LogsContextMeta>
+> = (props) => {
+  const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
   const { http } = useKibana().services;
 
@@ -80,12 +73,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     <>
       {isInternal ? (
         <SourceStatusWrapper {...props}>
-          <Editor {...props} sourceId={sourceId} />
+          <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
         <LogSourceProvider sourceId={sourceId} fetch={http!.fetch}>
           <SourceStatusWrapper {...props}>
-            <Editor {...props} sourceId={sourceId} />
+            <Editor {...props} />
           </SourceStatusWrapper>
         </LogSourceProvider>
       )}
@@ -93,7 +86,7 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
   );
 };
 
-export const SourceStatusWrapper: React.FC<Props> = (props) => {
+export const SourceStatusWrapper: React.FC = ({ children }) => {
   const {
     initialize,
     isLoadingSourceStatus,
@@ -101,7 +94,6 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
     hasFailedLoadingSourceStatus,
     loadSourceStatus,
   } = useLogSourceContext();
-  const { children } = props;
 
   useMount(() => {
     initialize();
@@ -136,16 +128,18 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
   );
 };
 
-export const Editor: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, sourceId } = props;
+export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsContextMeta>> = (
+  props
+) => {
+  const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { sourceStatus } = useLogSourceContext();
   useMount(() => {
     for (const [key, value] of Object.entries({ ...DEFAULT_COUNT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
     }
     setHasSetDefaults(true);
   });
+  const { sourceId, sourceStatus } = useLogSourceContext();
 
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {

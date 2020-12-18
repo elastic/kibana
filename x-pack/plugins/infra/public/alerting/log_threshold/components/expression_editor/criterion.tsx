@@ -90,7 +90,7 @@ const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | und
 interface Props {
   idx: number;
   fields: IFieldType[];
-  criterion: CriterionType;
+  criterion: Partial<CriterionType>;
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   canDelete: boolean;
@@ -116,7 +116,11 @@ export const Criterion: React.FC<Props> = ({
   }, [fields]);
 
   const fieldInfo: IFieldType | undefined = useMemo(() => {
-    return getFieldInfo(fields, criterion.field);
+    if (criterion.field) {
+      return getFieldInfo(fields, criterion.field);
+    } else {
+      return undefined;
+    }
   }, [fields, criterion]);
 
   const compatibleComparatorOptions = useMemo(() => {

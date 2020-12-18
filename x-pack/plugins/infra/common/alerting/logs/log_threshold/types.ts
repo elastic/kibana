@@ -105,14 +105,14 @@ const ThresholdRT = rt.type({
 
 export type Threshold = rt.TypeOf<typeof ThresholdRT>;
 
-export const CriterionRT = rt.type({
+export const criterionRT = rt.type({
   field: rt.string,
   comparator: ComparatorRT,
   value: rt.union([rt.string, rt.number]),
 });
+export type Criterion = rt.TypeOf<typeof criterionRT>;
 
-export type Criterion = rt.TypeOf<typeof CriterionRT>;
-export const criteriaRT = rt.array(CriterionRT);
+export const criteriaRT = rt.array(criterionRT);
 export type Criteria = rt.TypeOf<typeof criteriaRT>;
 
 export const countCriteriaRT = criteriaRT;
