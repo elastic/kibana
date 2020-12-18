@@ -20,13 +20,17 @@ import {
   ThresholdType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import {
+  LogIndexField,
+  LogSourceProvider,
+  useLogSourceContext,
+} from '../../../../containers/logs/log_source';
 import { useSourceId } from '../../../../containers/source_id';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
-import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -38,33 +42,41 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
-const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
-
 const DEFAULT_BASE_EXPRESSION = {
   timeSize: 5,
   timeUnit: 'm',
 };
 
-const DEFAULT_COUNT_EXPRESSION = {
+const DEFAULT_FIELD = 'log.level';
+
+const createDefaultCriterion = (
+  availableFields: LogIndexField[],
+  value: ExpressionCriteria['value']
+) =>
+  availableFields.some((availableField) => availableField.name === DEFAULT_FIELD)
+    ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
+    : { field: undefined, comparator: undefined, value: undefined };
+
+const createDefaultCountAlertParams = (availableFields: LogIndexField[]) => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
     comparator: Comparator.GT,
   },
-  criteria: [DEFAULT_CRITERIA],
-};
+  criteria: [createDefaultCriterion(availableFields, 'error')],
+});
 
-const DEFAULT_RATIO_EXPRESSION = {
+const createDefaultRatioAlertParams = (availableFields: LogIndexField[]) => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
     comparator: Comparator.GT,
   },
   criteria: [
-    [DEFAULT_CRITERIA],
-    [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
+    createDefaultCriterion(availableFields, 'error'),
+    createDefaultCriterion([], 'warning'),
   ],
-};
+});
 
 export const ExpressionEditor: React.FC<
   AlertTypeParamsExpressionProps<AlertParams, LogsContextMeta>
@@ -137,12 +149,6 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
 ) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  useMount(() => {
-    for (const [key, value] of Object.entries({ ...DEFAULT_COUNT_EXPRESSION, ...alertParams })) {
-      setAlertParams(key, value);
-    }
-    setHasSetDefaults(true);
-  });
   const { sourceId, sourceStatus } = useLogSourceContext();
 
   const {
@@ -210,7 +216,10 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
 
   const updateType = useCallback(
     (type: ThresholdType) => {
-      const defaults = type === 'count' ? DEFAULT_COUNT_EXPRESSION : DEFAULT_RATIO_EXPRESSION;
+      const defaults =
+        type === 'count'
+          ? createDefaultCountAlertParams(supportedFields)
+          : createDefaultRatioAlertParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
       for (const [key, value] of Object.entries({
         criteria: defaults.criteria,
@@ -219,8 +228,16 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
         setAlertParams(key, value);
       }
     },
-    [setAlertParams]
+    [setAlertParams, supportedFields]
   );
+
+  useMount(() => {
+    const defaultAlertParams = createDefaultCountAlertParams(supportedFields);
+    for (const [key, value] of Object.entries({ ...defaultAlertParams, ...alertParams })) {
+      setAlertParams(key, value);
+    }
+    setHasSetDefaults(true);
+  });
 
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
