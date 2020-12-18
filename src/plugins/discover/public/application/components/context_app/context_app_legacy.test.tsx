@@ -68,13 +68,26 @@ describe('ContextAppLegacy test', () => {
     topNavMenu: TopNavMenuMock,
   };
 
+  const topNavProps = {
+    appName: 'context',
+    showSearchBar: true,
+    showQueryBar: false,
+    showFilterBar: true,
+    showSaveQuery: false,
+    showDatePicker: false,
+    indexPatterns: [indexPattern],
+    useDefaultBehaviors: true,
+  };
+
   it('renders correctly', () => {
     const component = mountWithIntl(<ContextAppLegacy {...defaultProps} />);
     expect(component.find(DocTableLegacy).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
-    expect(component.find(TopNavMenuMock).length).toBe(1);
+    const topNavMenu = component.find(TopNavMenuMock);
+    expect(topNavMenu.length).toBe(1);
+    expect(topNavMenu.props()).toStrictEqual(topNavProps);
   });
 
   it('renders loading indicator', () => {
