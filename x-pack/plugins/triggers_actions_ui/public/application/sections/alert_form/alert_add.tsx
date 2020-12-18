@@ -70,7 +70,7 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
-  const [defaultAlertParams, setDefaultAlertParams] = useState<AlertTypeParams>({});
+  const [initialAlertParams, setInitialAlertParams] = useState<AlertTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
@@ -92,17 +92,22 @@ const AlertAdd = ({
   }, [alertTypeId]);
 
   useEffect(() => {
-    // This captures the first change to the alert params,
-    // when consumers set a default value for the alert params expression
-    if (isEmpty(defaultAlertParams)) {
-      setDefaultAlertParams(alert.params);
+    if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
+      // alert params are explicitly cleared when the alert type is cleared
+      // clear the "initial" in order to params in order to capture the
+      // default when a new alert type is selected
+      setInitialAlertParams({});
+    } else if (isEmpty(initialAlertParams)) {
+      // captures the first change to the alert params,
+      // when consumers set a default value for the alert params
+      setInitialAlertParams(alert.params);
     }
-  }, [alert.params, defaultAlertParams, setDefaultAlertParams]);
+  }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (
       alertHasChanged(alert, initialAlert, false) ||
-      alertParamsHaveChanged(alert.params, defaultAlertParams)
+      alertParamsHaveChanged(alert.params, initialAlertParams)
     ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
