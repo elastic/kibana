@@ -33,6 +33,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
       | 'icon'
       | 'image'
       | 'inspectorAdapters'
+      | 'getUsedIndexPattern'
       | 'name'
       | 'requestHandler'
       | 'responseHandler'

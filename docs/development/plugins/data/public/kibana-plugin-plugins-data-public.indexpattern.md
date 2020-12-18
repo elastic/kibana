@@ -54,11 +54,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
-<<<<<<< HEAD
 |  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-public.indexpattern.isunsupportedtimepattern.md) |  |  |
-|  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
-=======
->>>>>>> cdb922f2a2... Move indexPattern.popularizeField into discover (#77668)
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

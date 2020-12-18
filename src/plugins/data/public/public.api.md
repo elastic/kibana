@@ -1345,6 +1345,8 @@ export class IndexPatternsService {
     // (undocumented)
     ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
     fieldArrayToMap: (fields: FieldSpec[]) => Record<string, FieldSpec>;
+    // (undocumented)
+    find: (search: string, size?: number) => Promise<IndexPattern[]>;
     get: (id: string) => Promise<IndexPattern>;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //

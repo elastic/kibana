@@ -502,6 +502,20 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
+  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
   /**
    * Create a new index pattern and save it right away
    * @param spec
