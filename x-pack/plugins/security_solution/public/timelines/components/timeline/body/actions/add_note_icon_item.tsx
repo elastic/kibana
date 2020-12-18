@@ -12,18 +12,21 @@ import { NotesButton } from '../../properties/helpers';
 import { ActionIconItem } from './action_icon_item';
 
 interface AddEventNoteActionProps {
+  ariaLabel?: string;
   showNotes: boolean;
   timelineType: TimelineType;
   toggleShowNotes: () => void;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
+  ariaLabel,
   showNotes,
   timelineType,
   toggleShowNotes,
 }) => (
   <ActionIconItem>
     <NotesButton
+      ariaLabel={ariaLabel}
       data-test-subj="add-note"
       showNotes={showNotes}
       timelineType={timelineType}

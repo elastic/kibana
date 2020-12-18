@@ -13,7 +13,6 @@ export function mockTreeFetcherParameters(): TreeFetcherParameters {
   return {
     databaseDocumentID: '',
     indices: [],
-    dataRequestID: 0,
     filters: {},
   };
 }

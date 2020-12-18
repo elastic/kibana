@@ -11,7 +11,7 @@ import {
   NOTES_TAB_BUTTON,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
-  NOTE_BY_NOTE_ID,
+  NOTE_CONTENT,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
@@ -25,7 +25,8 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
+import { getTimelineById } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -47,11 +48,11 @@ import { openTimeline } from '../tasks/timelines';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/79389
-describe('Timelines', () => {
+describe.skip('Timelines', () => {
   let timelineId: string;
 
-  after(() => {
-    if (timelineId) deleteTimeline(timelineId);
+  before(() => {
+    cleanKibana();
   });
 
   it('Creates a timeline', () => {
@@ -63,7 +64,9 @@ describe('Timelines', () => {
     addFilter(timeline.filter);
     pinFirstEvent();
 
-    cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+    cy.get(PIN_EVENT)
+      .should('have.attr', 'aria-label')
+      .and('match', /Unpin the event in row 2/);
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
@@ -92,14 +95,17 @@ describe('Timelines', () => {
       cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
       cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+      cy.get(LOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 
       getTimelineById(timelineId).then((singleTimeline) => {
         const noteId = singleTimeline!.body.data.getOneTimeline.notes[0].noteId;
 
-        cy.get(`${NOTE_BY_NOTE_ID(noteId)} p`).should('have.text', timeline.notes);
+        cy.get(NOTE_CONTENT(noteId)).should('have.text', timeline.notes);
       });
     });
   });

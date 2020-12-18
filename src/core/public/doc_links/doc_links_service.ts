@@ -148,6 +148,9 @@ export class DocLinksService {
           outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
         },
+        transforms: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/transforms.html`,
+        },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
@@ -258,6 +261,7 @@ export interface DocLinksStart {
     };
     readonly management: Record<string, string>;
     readonly ml: Record<string, string>;
+    readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
   };
 }
