@@ -30,7 +30,7 @@ interface DocumentCreationActions {
 export const DocumentCreationLogic = kea<
   MakeLogicType<DocumentCreationValues, DocumentCreationActions>
 >({
-  path: ['enterprise_search', 'app_search', 'document_creation_modal_logic'],
+  path: ['enterprise_search', 'app_search', 'document_creation_logic'],
   actions: () => ({
     showCreationModes: () => null,
     openDocumentCreation: (creationMode) => ({ creationMode }),
