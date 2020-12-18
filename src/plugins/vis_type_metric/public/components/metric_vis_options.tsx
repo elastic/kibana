@@ -30,15 +30,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  VisOptionsProps,
   ColorRanges,
   SetColorRangeValue,
+  VisOptionsProps,
   SwitchOption,
   SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   RangeOption,
 } from '../../../vis_default_editor/public';
-import { ColorModes } from '../../../charts/public';
+import { ColorMode } from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
 
 function MetricVisOptions({
@@ -86,7 +86,7 @@ function MetricVisOptions({
   );
 
   const setColorMode: EuiButtonGroupProps['onChange'] = useCallback(
-    (id: string) => setMetricValue('metricColorMode', id as ColorModes),
+    (id: string) => setMetricValue('metricColorMode', id as ColorMode),
     [setMetricValue]
   );
 
@@ -158,7 +158,7 @@ function MetricVisOptions({
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
           disabled={
             stateParams.metric.colorsRange.length === 1 ||
-            stateParams.metric.metricColorMode === ColorModes.NONE
+            stateParams.metric.metricColorMode === ColorMode.None
           }
           invertColors={stateParams.metric.invertColors}
           setValue={setMetricValue as SetColorSchemaOptionsValue}

@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from '../../vis_options_props';

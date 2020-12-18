@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { ColorModes, Rotates } from './collections';
+export { ColorMode, LabelRotation, defaultCountLabel } from './collections';
 export { ColorSchemaParams, Labels, Style } from './types';
+export { LegendToggle } from './legend_toggle';
+export { ColorPicker } from './color_picker';
+export { CurrentTime } from './current_time';
+export * from './endzones';
