@@ -20,7 +20,6 @@ export const EXPLORER_ACTION = {
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_JOBS: 'clearJobs',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
-  SET_BOUNDS: 'setBounds',
   SET_CHARTS: 'setCharts',
   SET_EXPLORER_DATA: 'setExplorerData',
   SET_FILTER_DATA: 'setFilterData',

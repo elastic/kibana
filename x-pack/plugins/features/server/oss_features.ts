@@ -28,7 +28,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query', 'index-pattern'],
+            all: ['search', 'query', 'index-pattern', 'background-session'],
             read: [],
           },
           ui: ['show', 'save', 'saveQuery'],
@@ -156,6 +156,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'lens',
               'map',
               'tag',
+              'background-session',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],

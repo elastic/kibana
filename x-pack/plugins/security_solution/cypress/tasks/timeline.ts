@@ -118,6 +118,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.wait(1000);
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
@@ -140,7 +141,7 @@ export const markAsFavorite = () => {
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
 };
 
 export const openTimelineInspectButton = () => {

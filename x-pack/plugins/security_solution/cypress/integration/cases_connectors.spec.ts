@@ -8,6 +8,7 @@ import { serviceNowConnector } from '../objects/case';
 import { SERVICE_NOW_MAPPING, TOASTER } from '../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../tasks/all_cases';
+import { cleanKibana } from '../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -38,6 +39,7 @@ describe('Cases connectors', () => {
     version: 'WzEwNCwxXQ==',
   };
   before(() => {
+    cleanKibana();
     cy.intercept('POST', '/api/actions/action').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
       const connector = req.body.connector;

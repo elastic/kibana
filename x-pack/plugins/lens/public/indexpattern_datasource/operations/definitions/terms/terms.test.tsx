@@ -293,7 +293,7 @@ describe('terms', () => {
       expect(termsColumn.params.otherBucket).toEqual(false);
     });
 
-    it('should use existing metric column as order column', () => {
+    it('should use existing sortable metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: {
@@ -321,6 +321,37 @@ describe('terms', () => {
         expect.objectContaining({
           orderBy: { type: 'column', columnId: 'col1' },
         })
+      );
+    });
+    it('should set alphabetical order type if metric column is of type last value', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        layer: {
+          columns: {
+            col1: {
+              label: 'Last value of a',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'a',
+              operationType: 'last_value',
+              params: {
+                sortField: 'datefield',
+              },
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({ orderBy: { type: 'alphabetical' } })
       );
     });
 
