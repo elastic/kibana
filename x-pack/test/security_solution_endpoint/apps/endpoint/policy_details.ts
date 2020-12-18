@@ -222,7 +222,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -241,7 +241,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -366,7 +366,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -385,7 +385,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -503,7 +503,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -522,7 +522,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
