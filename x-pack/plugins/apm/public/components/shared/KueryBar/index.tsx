@@ -37,7 +37,7 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
-export function KueryBar() {
+export function KueryBar(props: { prepend?: React.ReactNode | string }) {
   const { groupId, serviceName } = useParams<{
     groupId?: string;
     serviceName?: string;
@@ -152,6 +152,7 @@ export function KueryBar() {
         onSubmit={onSubmit}
         suggestions={state.suggestions}
         placeholder={placeholder}
+        prepend={props.prepend}
       />
     </Container>
   );

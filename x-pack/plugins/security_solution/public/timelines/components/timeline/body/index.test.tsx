@@ -17,6 +17,7 @@ import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 const mockSort: Sort[] = [
   {
@@ -77,6 +78,7 @@ describe('Body', () => {
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
+    activeTab: TimelineTabs.query,
     totalPages: 1,
   };
 
