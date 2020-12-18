@@ -280,37 +280,6 @@ export function LayerPanel(
                         label={columnLabelMap[accessor]}
                         droppable={dragging && isDroppable}
                         dropTo={(dropTargetId: string) => {
-                          if (dropTargetId === 'new') {
-                            const dropResult = layerDatasource.onDrop({
-                              ...layerDatasourceDropProps,
-                              droppedItem: {
-                                columnId: accessor,
-                                groupId: group.groupId,
-                                layerId,
-                                id: accessor,
-                              },
-                              dropTarget: {
-                                groupId: group.groupId,
-                                columnId: newId,
-                                layerId,
-                                isNew: true,
-                              },
-                              filterOperations: group.filterOperations,
-                            });
-
-                            if (dropResult) {
-                              props.updateVisualization(
-                                activeVisualization.setDimension({
-                                  layerId,
-                                  groupId: group.groupId,
-                                  columnId: newId,
-                                  prevState: props.visualizationState,
-                                })
-                              );
-                            }
-                            return;
-                          }
-
                           layerDatasource.onDrop({
                             ...layerDatasourceDropProps,
                             droppedItem: {
