@@ -18,12 +18,22 @@ import turfArea from '@turf/area';
 import turfCenterOfMass from '@turf/center-of-mass';
 import turfLength from '@turf/length';
 import { lineString, polygon } from '@turf/helpers';
-import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from './constants';
+import {
+  GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
+} from './constants';
 
 export function getCentroidFeatures(featureCollection: FeatureCollection): Feature[] {
   const centroidFeatures = [];
   for (let i = 0; i < featureCollection.features.length; i++) {
     const feature = featureCollection.features[i];
+
+    // do not add centroid for kibana added features
+    if (feature.properties?.[KBN_TOO_MANY_FEATURES_PROPERTY]) {
+      continue;
+    }
+
     let centroidGeometry: Geometry | null = null;
     if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING) {
       centroidGeometry = getLineCentroid((feature.geometry as LineString).coordinates);
