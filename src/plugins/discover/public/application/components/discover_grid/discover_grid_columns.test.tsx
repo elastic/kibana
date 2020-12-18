@@ -28,6 +28,7 @@ describe('Discover grid columns ', function () {
         Object {
           "actions": Object {
             "showHide": Object {
+              "iconType": "cross",
               "label": "Remove column",
             },
             "showMoveLeft": true,
@@ -42,6 +43,7 @@ describe('Discover grid columns ', function () {
         Object {
           "actions": Object {
             "showHide": Object {
+              "iconType": "cross",
               "label": "Remove column",
             },
             "showMoveLeft": true,
@@ -119,6 +121,7 @@ describe('Discover grid columns ', function () {
         Object {
           "actions": Object {
             "showHide": Object {
+              "iconType": "cross",
               "label": "Remove column",
             },
             "showMoveLeft": true,
@@ -133,6 +136,7 @@ describe('Discover grid columns ', function () {
         Object {
           "actions": Object {
             "showHide": Object {
+              "iconType": "cross",
               "label": "Remove column",
             },
             "showMoveLeft": true,

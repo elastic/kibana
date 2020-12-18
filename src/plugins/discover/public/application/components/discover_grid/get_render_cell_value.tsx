@@ -33,10 +33,16 @@ export const getRenderCellValueFn = (
   const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
   const field = indexPattern.fields.getByName(columnId);
 
-  if (typeof row === 'undefined' || !field) {
+  if (typeof row === 'undefined') {
     return <span>-</span>;
   }
-  const formatSource = () => {
+
+  if (isDetails && typeof row[columnId] === 'object') {
+    // nicely formatted JSON for the expanded view
+    return <span>{JSON.stringify(row[columnId], null, 2)}</span>;
+  }
+
+  if (field && field.type === '_source') {
     const formatted = indexPattern.formatHit(row);
 
     return (
@@ -49,19 +55,13 @@ export const getRenderCellValueFn = (
         ))}
       </EuiDescriptionList>
     );
-  };
-
-  const value =
-    field && field.type === '_source' ? (
-      formatSource()
-    ) : (
-      // eslint-disable-next-line react/no-danger
-      <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
-    );
-
-  if (isDetails && field && field.type === '_source') {
-    // nicely formatted JSON for the expanded view
-    return <span>{JSON.stringify(row[columnId], null, 2)}</span>;
   }
-  return value;
+  const valueFormatted = indexPattern.formatField(row, columnId);
+  if (typeof valueFormatted === 'undefined') {
+    return <span>-</span>;
+  }
+  return (
+    // eslint-disable-next-line react/no-danger
+    <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
+  );
 };

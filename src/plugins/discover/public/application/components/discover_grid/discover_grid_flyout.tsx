@@ -26,7 +26,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
-  EuiPortal,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
@@ -63,80 +62,78 @@ export function DiscoverGridFlyout({
   services,
 }: Props) {
   return (
-    <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="expand" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle
-                size="s"
-                className="dscTable__flyoutHeader"
-                data-test-subj="docTableRowDetailsTitle"
-              >
-                <h2>
-                  {i18n.translate('discover.grid.tableRow.detailHeading', {
-                    defaultMessage: 'Expanded document',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="expand" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="s"
+              className="dscTable__flyoutHeader"
+              data-test-subj="docTableRowDetailsTitle"
+            >
+              <h2>
+                {i18n.translate('discover.grid.tableRow.detailHeading', {
+                  defaultMessage: 'Expanded document',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiSpacer size="m" />
-          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('discover.grid.tableRow.viewText', {
-                    defaultMessage: 'View:',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('discover.grid.tableRow.viewText', {
+                  defaultMessage: 'View:',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="document"
+              href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                hit._id as string
+              )}`}
+              data-test-subj="docTableRowAction"
+            >
+              {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
+                defaultMessage: 'Single document',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {indexPattern.isTimeBased() && indexPattern.id && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                iconType="document"
-                href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                  hit._id as string
-                )}`}
+                iconType="documents"
+                href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
                 data-test-subj="docTableRowAction"
               >
-                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
-                  defaultMessage: 'Single document',
+                {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
+                  defaultMessage: 'Surrounding documents',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="documents"
-                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
-                  data-test-subj="docTableRowAction"
-                >
-                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
-                    defaultMessage: 'Surrounding documents',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <DocViewer
-            hit={hit}
-            columns={columns}
-            indexPattern={indexPattern}
-            filter={onFilter}
-            onRemoveColumn={onRemoveColumn}
-            onAddColumn={onAddColumn}
-          />
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    </EuiPortal>
+          )}
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <DocViewer
+          hit={hit}
+          columns={columns}
+          indexPattern={indexPattern}
+          filter={onFilter}
+          onRemoveColumn={onRemoveColumn}
+          onAddColumn={onAddColumn}
+        />
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 }

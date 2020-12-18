@@ -77,7 +77,7 @@ export function getPopoverContents() {
     },
     [kibanaJSON]: ({ children }: { children: ReactNode }) => {
       return (
-        <EuiCodeBlock language="json" paddingSize="none" transparentBackground={true}>
+        <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>
           {children}
         </EuiCodeBlock>
       );

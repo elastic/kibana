@@ -58,7 +58,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<dl class=\\"euiDescriptionList euiDescriptionList--inline euiDescriptionList--compressed\\"><dt class="euiDescriptionList__title">bytes</dt><dd class="euiDescriptionList__description"><span>100</span></dd></dl>"`
+      `"<dl class=\\"euiDescriptionList euiDescriptionList--inline euiDescriptionList--compressed\\"><dt class=\\"euiDescriptionList__title\\">bytes</dt><dd class=\\"euiDescriptionList__description\\">100</dd></dl>"`
     );
   });
 
