@@ -27,17 +27,19 @@ export const buildTimelineEventsAllQuery = ({
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;
-      return [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-              format: 'strict_date_optional_time',
+      return !isEmpty(to) && !isEmpty(from)
+        ? [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
-          },
-        },
-      ];
+          ]
+        : [];
     }
     return [];
   };

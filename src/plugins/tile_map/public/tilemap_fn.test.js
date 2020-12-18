@@ -80,13 +80,17 @@ describe('interpreter/functions#tilemap', () => {
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(
+      context,
+      { visConfig: JSON.stringify(visConfig) },
+      { logDatatable: jest.fn() }
+    );
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', () => {
     const { geohash, metric, geocentroid } = visConfig.dimensions;
-    fn(context, { visConfig: JSON.stringify(visConfig) });
+    fn(context, { visConfig: JSON.stringify(visConfig) }, { logDatatable: jest.fn() });
     expect(convertToGeoJson).toHaveBeenCalledTimes(1);
     expect(convertToGeoJson).toHaveBeenCalledWith(context, {
       geohash,
