@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[1].click();
+        await rowActions[0].click();
       });
 
       const hasDocHit = await testSubjects.exists('doc-hit');
