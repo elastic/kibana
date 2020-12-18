@@ -17,48 +17,33 @@
  * under the License.
  */
 
-import { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { Observable } from 'rxjs';
+import React, { FC } from 'react';
+import { TrackApplicationViewComponent } from './track_application_view_component';
 import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewProps } from './types';
 
-interface Props extends TrackApplicationViewProps {
-  applicationUsageTracker$: Observable<IApplicationUsageTracker>;
-}
+/**
+ * React component to track the number of clicks and minutes on screen of the children components.
+ * @param props {@Link TrackApplicationViewProps}
+ * @constructor
+ */
+export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {
+  const propsWithTracker = { ...props, applicationUsageTracker };
+  return <TrackApplicationViewComponent {...propsWithTracker} />;
+};
 
-export class TrackApplicationViewComponent extends Component<Props> {
-  private applicationUsageTracker: IApplicationUsageTracker | undefined;
+/**
+ * Maintain in memory the applicationUsageTracker in the browser.
+ * There should only exist one reporter at a time, so this is not a big deal to have a global variable.
+ * @private
+ */
+let applicationUsageTracker: IApplicationUsageTracker | undefined;
 
-  constructor(props: Props) {
-    super(props);
-    props.applicationUsageTracker$.subscribe((applicationUsageTracker) => {
-      this.applicationUsageTracker = applicationUsageTracker;
-    });
-  }
-
-  onClick = () => {
-    const { viewId } = this.props;
-    this.applicationUsageTracker?.updateViewClickCounter(viewId);
-  };
-
-  componentDidMount() {
-    const { viewId } = this.props;
-    if (this.applicationUsageTracker) {
-      this.applicationUsageTracker.trackApplicationViewUsage(viewId);
-      ReactDOM.findDOMNode(this)?.parentNode?.addEventListener('click', this.onClick);
-    }
-  }
-
-  componentWillUnmount() {
-    const { viewId } = this.props;
-    if (this.applicationUsageTracker) {
-      this.applicationUsageTracker.flushTrackedView(viewId);
-      ReactDOM.findDOMNode(this)?.parentNode?.removeEventListener('click', this.onClick);
-    }
-  }
-
-  render() {
-    return this.props.children;
-  }
+/**
+ * Lazy setter of the singleton applicationUsageTracker. To be called by the plugin once the reporter is initialised.
+ * @param newApplicationUsageTracker The new applicationUsageTracker to be set.
+ * @private
+ */
+export function setApplicationUsageTracker(newApplicationUsageTracker: IApplicationUsageTracker) {
+  applicationUsageTracker = newApplicationUsageTracker;
 }
