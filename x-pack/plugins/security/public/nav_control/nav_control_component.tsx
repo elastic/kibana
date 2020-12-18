@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AuthenticatedUser } from '../../common/model';
+import { CloudSetup } from '../../../cloud/public';
 
 import './nav_control_component.scss';
 
@@ -35,6 +36,7 @@ interface Props {
   editProfileUrl: string;
   logoutUrl: string;
   userMenuLinks$: Observable<UserMenuLink[]>;
+  cloud?: CloudSetup;
 }
 
 interface State {
@@ -91,8 +93,9 @@ export class SecurityNavControl extends Component<Props, State> {
   };
 
   render() {
-    const { editProfileUrl, logoutUrl } = this.props;
+    const { editProfileUrl, logoutUrl, cloud } = this.props;
     const { authenticatedUser, userMenuLinks } = this.state;
+    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     const username =
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
@@ -121,21 +124,6 @@ export class SecurityNavControl extends Component<Props, State> {
     const isAnonymousUser = authenticatedUser?.authentication_provider.type === 'anonymous';
     const items: EuiContextMenuPanelItemDescriptor[] = [];
 
-    if (!isAnonymousUser) {
-      const profileMenuItem = {
-        name: (
-          <FormattedMessage
-            id="xpack.security.navControlComponent.editProfileLinkText"
-            defaultMessage="Settings"
-          />
-        ),
-        icon: <EuiIcon type="controlsHorizontal" size="m" />,
-        href: editProfileUrl,
-        'data-test-subj': 'profileLink',
-      };
-      items.push(profileMenuItem);
-    }
-
     if (userMenuLinks.length) {
       const userMenuLinkMenuItems = userMenuLinks
         .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
@@ -145,11 +133,27 @@ export class SecurityNavControl extends Component<Props, State> {
           href,
           'data-test-subj': `userMenuLink__${label}`,
         }));
+      items.push(...userMenuLinkMenuItems);
+    }
 
-      items.push(...userMenuLinkMenuItems, {
-        isSeparator: true,
-        key: 'securityNavControlComponent__userMenuLinksSeparator',
-      });
+    if (!isAnonymousUser) {
+      const profileMenuItem = {
+        name: isCloudEnabled ? (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkTextCloud"
+            defaultMessage="Preferences"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkText"
+            defaultMessage="Profile"
+          />
+        ),
+        icon: <EuiIcon type={isCloudEnabled ? 'controlsHorizontal' : 'user'} size="m" />,
+        href: editProfileUrl,
+        'data-test-subj': 'profileLink',
+      };
+      items.push(profileMenuItem);
     }
 
     const logoutMenuItem = {
