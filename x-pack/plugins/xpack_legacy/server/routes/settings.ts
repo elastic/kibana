@@ -59,7 +59,7 @@ export function registerSettingsRoute({
         (await settingsCollector.fetch(collectorFetchContext)) ??
         settingsCollector.getEmailValueStructure(null);
 
-      const { body } = await collectorFetchContext.esClient.info();
+      const { body } = await collectorFetchContext.esClient.info({ filter_path: 'cluster_uuid' });
       const uuid: string = body.cluster_uuid;
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
