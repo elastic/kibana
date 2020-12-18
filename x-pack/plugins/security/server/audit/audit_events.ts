@@ -20,7 +20,7 @@ export interface AuditEvent {
    * Human readable message describing action, outcome and user.
    *
    * @example
-   * User [jdoe] logged in using basic provider [name=basic1]
+   * Failed attempt to login using basic provider [name=basic1]
    */
   message: string;
   event: {
@@ -208,7 +208,7 @@ export enum SavedObjectAction {
 
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
+const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
   saved_object_update: ['update', 'updating', 'updated'],
@@ -223,7 +223,7 @@ const eventVerbs: Record<SavedObjectAction, VerbsTuple> = {
   ],
 };
 
-const eventTypes: Record<SavedObjectAction, EventType> = {
+const savedObjectAuditTypes: Record<SavedObjectAction, EventType> = {
   saved_object_create: EventType.CREATION,
   saved_object_get: EventType.ACCESS,
   saved_object_update: EventType.CHANGE,
@@ -252,13 +252,13 @@ export function savedObjectEvent({
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
-  const [present, progressive, past] = eventVerbs[action];
+  const [present, progressive, past] = savedObjectAuditVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === EventOutcome.UNKNOWN
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
-  const type = eventTypes[action];
+  const type = savedObjectAuditTypes[action];
 
   if (
     type === EventType.ACCESS &&
@@ -280,6 +280,70 @@ export function savedObjectEvent({
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export enum SpaceAuditAction {
+  CREATE = 'space_create',
+  GET = 'space_get',
+  UPDATE = 'space_update',
+  DELETE = 'space_delete',
+  FIND = 'space_find',
+}
+
+const spaceAuditVerbs: Record<SpaceAuditAction, VerbsTuple> = {
+  space_create: ['create', 'creating', 'created'],
+  space_get: ['access', 'accessing', 'accessed'],
+  space_update: ['update', 'updating', 'updated'],
+  space_delete: ['delete', 'deleting', 'deleted'],
+  space_find: ['access', 'accessing', 'accessed'],
+};
+
+const spaceAuditTypes: Record<SpaceAuditAction, EventType> = {
+  space_create: EventType.CREATION,
+  space_get: EventType.ACCESS,
+  space_update: EventType.CHANGE,
+  space_delete: EventType.DELETION,
+  space_find: EventType.ACCESS,
+};
+
+export interface SpacesAuditEventParams {
+  action: SpaceAuditAction;
+  outcome?: EventOutcome;
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+  error?: Error;
+}
+
+export function spaceAuditEvent({
+  action,
+  savedObject,
+  outcome,
+  error,
+}: SpacesAuditEventParams): AuditEvent {
+  const doc = savedObject ? `space [id=${savedObject.id}]` : 'spaces';
+  const [present, progressive, past] = spaceAuditVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === EventOutcome.UNKNOWN
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+  const type = spaceAuditTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: EventCategory.DATABASE,
+      type,
+      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+    },
+    kibana: {
+      saved_object: savedObject,
     },
     error: error && {
       code: error.name,

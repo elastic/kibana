@@ -26,6 +26,7 @@ import {
   goToInProgressAlerts,
 } from '../tasks/alerts';
 import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -34,16 +35,17 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
     afterEach(() => {
       esArchiverUnload('alerts');
-      removeSignalsIndex();
     });
 
-    it.skip('Closes and opens alerts', () => {
+    it('Closes and opens alerts', () => {
       waitForAlertsPanelToBeLoaded();
       waitForAlertsToBeLoaded();
 
@@ -117,13 +119,11 @@ describe('Alerts', () => {
             `Showing ${expectedNumberOfOpenedAlerts.toString()} alerts`
           );
 
-          cy.get(
-            '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]'
-          ).should('have.text', expectedNumberOfOpenedAlerts.toString());
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfOpenedAlerts.toString());
         });
     });
 
-    it.skip('Closes one alert when more than one opened alerts are selected', () => {
+    it('Closes one alert when more than one opened alerts are selected', () => {
       waitForAlertsToBeLoaded();
 
       cy.get(ALERTS_COUNT)
@@ -163,16 +163,17 @@ describe('Alerts', () => {
 
   context('Opening alerts', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
     afterEach(() => {
       esArchiverUnload('closed_alerts');
-      removeSignalsIndex();
     });
 
-    it.skip('Open one alert when more than one closed alerts are selected', () => {
+    it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlerts();
       goToClosedAlerts();
       waitForAlertsToBeLoaded();
@@ -215,6 +216,8 @@ describe('Alerts', () => {
 
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
@@ -224,7 +227,7 @@ describe('Alerts', () => {
       removeSignalsIndex();
     });
 
-    it.skip('Mark one alert in progress when more than one open alerts are selected', () => {
+    it('Mark one alert in progress when more than one open alerts are selected', () => {
       waitForAlerts();
       waitForAlertsToBeLoaded();
 
