@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -110,7 +109,6 @@ export function ErrorCountAlertTrigger(props: Props) {
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={ALERT_TYPES_CONFIG[AlertType.ErrorCount].name}
       defaults={defaults}
       fields={fields}
       setAlertParams={setAlertParams}

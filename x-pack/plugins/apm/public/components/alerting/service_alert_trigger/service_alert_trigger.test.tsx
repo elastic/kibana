@@ -18,7 +18,6 @@ describe('ServiceAlertTrigger', () => {
     expect(() =>
       render(
         <ServiceAlertTrigger
-          alertTypeName="test alert type name"
           defaults={{}}
           fields={[null]}
           setAlertParams={() => {}}
