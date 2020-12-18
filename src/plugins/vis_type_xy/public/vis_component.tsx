@@ -41,6 +41,7 @@ import {
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
 
+import { compact } from 'lodash';
 import {
   getFilterFromChartClickEventFn,
   getFilterFromSeriesFn,
@@ -58,7 +59,8 @@ import {
   renderAllSeries,
   getSeriesNameFn,
   getLegendActions,
-  getColorPicker,
+  useColorPicker,
+  getXAccessor,
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
@@ -66,7 +68,11 @@ import { getThemeService, getColorsService, getDataActions } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
-import { getXAccessor } from './utils/get_x_accessor';
+import {
+  COMPLEX_SPLIT_ACCESSOR,
+  getComplexAccessor,
+  getSplitSeriesAccessorFnMap,
+} from './utils/accessors';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -111,14 +117,22 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleFilterClick = useCallback(
-    (visData: Datatable, xAccessor: Accessor | AccessorFn): ElementClickListener => (elements) => {
-      if (xAccessor !== null) {
-        const event = getFilterFromChartClickEventFn(
-          visData,
-          xAccessor
-        )(elements as XYChartElementEvent[]);
-        props.fireEvent(event);
-      }
+    (
+      visData: Datatable,
+      xAccessor: Accessor | AccessorFn,
+      splitSeriesAccessors: Array<Accessor | AccessorFn>
+    ): ElementClickListener => {
+      const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
+      return (elements) => {
+        if (xAccessor !== null) {
+          const event = getFilterFromChartClickEventFn(
+            visData,
+            xAccessor,
+            splitSeriesAccessorFnMap
+          )(elements as XYChartElementEvent[]);
+          props.fireEvent(event);
+        }
+      };
     },
     [props]
   );
@@ -140,14 +154,19 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const getFilterEventData = useCallback(
-    (visData: Datatable, xAccessor: Accessor | AccessorFn) => (
-      series: XYChartSeriesIdentifier
-    ): ClickTriggerEvent | null => {
-      if (xAccessor !== null) {
-        return getFilterFromSeriesFn(visData)(series);
-      }
+    (
+      visData: Datatable,
+      xAccessor: Accessor | AccessorFn,
+      splitSeriesAccessors: Array<Accessor | AccessorFn>
+    ) => {
+      const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
+      return (series: XYChartSeriesIdentifier): ClickTriggerEvent | null => {
+        if (xAccessor !== null) {
+          return getFilterFromSeriesFn(visData)(series, splitSeriesAccessorFnMap);
+        }
 
-      return null;
+        return null;
+      };
     },
     []
   );
@@ -242,6 +261,9 @@ const VisComponent = (props: VisComponentProps) => {
     [allSeries, getSeriesName, props.uiState]
   );
   const xAccessor = getXAccessor(config.aspects.x);
+  const splitSeriesAccessors = config.aspects.series
+    ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
+    : [];
 
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
@@ -257,15 +279,15 @@ const VisComponent = (props: VisComponentProps) => {
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={getColorPicker(legendPosition, setColor, getSeriesName)}
-          onElementClick={handleFilterClick(visData, xAccessor)}
+          legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
+          onElementClick={handleFilterClick(visData, xAccessor, splitSeriesAccessors)}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(visData, xAccessor),
+                  getFilterEventData(visData, xAccessor, splitSeriesAccessors),
                   handleFilterAction,
                   getSeriesName
                 )
@@ -293,7 +315,8 @@ const VisComponent = (props: VisComponentProps) => {
           getSeriesName,
           getSeriesColor,
           timeZone,
-          xAccessor
+          xAccessor,
+          splitSeriesAccessors
         )}
       </Chart>
     </div>

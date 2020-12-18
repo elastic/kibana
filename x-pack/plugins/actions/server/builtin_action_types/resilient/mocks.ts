@@ -6,8 +6,6 @@
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
 
-import { MapRecord } from '../case/types';
-
 export const resilientFields = [
   {
     id: 17,
@@ -348,62 +346,28 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const mapping: Map<string, Partial<MapRecord>> = new Map();
-
-mapping.set('title', {
-  target: 'name',
-  actionType: 'overwrite',
-});
-
-mapping.set('description', {
-  target: 'description',
-  actionType: 'overwrite',
-});
-
-mapping.set('comments', {
-  target: 'comments',
-  actionType: 'append',
-});
-
-mapping.set('name', {
-  target: 'title',
-  actionType: 'overwrite',
-});
-
 const executorParams: ExecutorSubActionPushParams = {
-  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
-  externalId: 'incident-3',
-  createdAt: '2020-06-03T15:09:13.606Z',
-  createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-06-03T15:09:13.606Z',
-  updatedBy: { fullName: 'Elastic User', username: 'elastic' },
-  title: 'Incident title',
-  description: 'Incident description',
-  incidentTypes: [1001],
-  severityCode: 6,
+  incident: {
+    externalId: 'incident-3',
+    name: 'Incident title',
+    description: 'Incident description',
+    incidentTypes: [1001],
+    severityCode: 6,
+  },
   comments: [
     {
       commentId: 'case-comment-1',
       comment: 'A comment',
-      createdAt: '2020-06-03T15:09:13.606Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-06-03T15:09:13.606Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
     {
       commentId: 'case-comment-2',
       comment: 'Another comment',
-      createdAt: '2020-06-03T15:09:13.606Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-06-03T15:09:13.606Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
   ],
 };
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalObject: { name: 'Incident title', description: 'Incident description' },
 };
 
 const incidentTypes = [
@@ -457,4 +421,4 @@ const severity = [
   },
 ];
 
-export { externalServiceMock, mapping, executorParams, apiParams, incidentTypes, severity };
+export { externalServiceMock, executorParams, apiParams, incidentTypes, severity };

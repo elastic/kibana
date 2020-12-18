@@ -25,6 +25,7 @@ import {
   waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -123,6 +124,9 @@ export default ({ getService }: FtrProviderContext) => {
             kind: 'event',
             module: 'system',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -191,6 +195,9 @@ export default ({ getService }: FtrProviderContext) => {
             kind: 'signal',
             module: 'system',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -244,6 +251,9 @@ export default ({ getService }: FtrProviderContext) => {
                 type: 'event',
               },
             ],
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
           });
         });
 
@@ -314,6 +324,9 @@ export default ({ getService }: FtrProviderContext) => {
                 type: 'signal',
               },
             ],
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
           });
         });
       });
@@ -398,6 +411,9 @@ export default ({ getService }: FtrProviderContext) => {
           },
           original_time: '2020-10-28T05:08:53.000Z',
           original_signal: 1,
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -462,6 +478,9 @@ export default ({ getService }: FtrProviderContext) => {
           original_time: signalNoRule.original_time, // original_time will always be changing sine it's based on a signal created here, so skip testing it
           original_event: {
             kind: 'signal',
+          },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
           },
         });
       });
@@ -550,6 +569,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -614,6 +636,9 @@ export default ({ getService }: FtrProviderContext) => {
           original_time: signalNoRule.original_time, // original_time will always be changing sine it's based on a signal created here, so skip testing it
           original_event: {
             kind: 'signal',
+          },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
           },
         });
       });

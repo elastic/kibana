@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization(vizName1);
 
       // hover and click on cell to filter
-      await PageObjects.visChart.filterOnTableCell('1', '2');
+      await PageObjects.visChart.filterOnTableCell(1, 2);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();

@@ -44,17 +44,7 @@
           "id": "T1064",
           "name": "Scripting",
           "reference": "https://attack.mitre.org/techniques/T1064/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0002",
-        "name": "Execution",
-        "reference": "https://attack.mitre.org/tactics/TA0002/"
-      },
-      "technique": [
+        },
         {
           "id": "T1086",
           "name": "PowerShell",
@@ -64,5 +54,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

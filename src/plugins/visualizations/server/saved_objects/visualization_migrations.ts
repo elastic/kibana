@@ -760,6 +760,35 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+// [Data table visualization] Enable toolbar by default
+const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
+  let visState;
+
+  try {
+    visState = JSON.parse(doc.attributes.visState);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  if (visState?.type === 'table') {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify({
+          ...visState,
+          params: {
+            ...visState.params,
+            showToolbar: true,
+          },
+        }),
+      },
+    };
+  }
+
+  return doc;
+};
+
 /**
  * Decorate axes with default label filter value
  */
@@ -855,6 +884,7 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
   '7.9.3': flow(migrateMatchAllQuery),
-  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource, migrateVislibAreaLineBarTypes),
-  '7.11.0': flow(migrateVislibAreaLineBarTypes),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.11.0': flow(enableDataTableVisToolbar),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes),
 };

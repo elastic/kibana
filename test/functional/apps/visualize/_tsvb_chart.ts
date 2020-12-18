@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/75127
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([
@@ -145,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('10');
+        expect(newValue).to.eql('18');
       });
     });
 
@@ -175,9 +174,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
 
         log.debug('Check timeseries chart and panel config is rendered');
-        await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
-        await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
-        await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+        await retry.try(async () => {
+          await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
+          await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
+          await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+        });
 
         log.debug('Go forward in browser history');
         await browser.goForward();

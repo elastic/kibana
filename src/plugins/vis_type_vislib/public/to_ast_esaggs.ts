@@ -18,8 +18,11 @@
  */
 
 import { Vis } from '../../visualizations/public';
-import { buildExpressionFunction } from '../../expressions/public';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 
 import { PieVisParams } from './pie';
 import { BasicVislibParams } from './types';
@@ -32,10 +35,13 @@ import { BasicVislibParams } from './types';
  */
 export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs?.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 }

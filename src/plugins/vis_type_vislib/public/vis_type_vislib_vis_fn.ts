@@ -64,10 +64,14 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
       help: 'vislib vis config',
     },
   },
-  fn(context, args) {
+  fn(context, args, handlers) {
     const visType = args.type as Exclude<VislibChartType, 'pie'>;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
     const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
 
     return {
       type: 'render',

@@ -21,6 +21,7 @@ import { HomePublicPluginSetup, HomePublicPluginStart } from 'src/plugins/home/p
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
@@ -30,6 +31,7 @@ export interface KibanaOverviewPluginStart {}
 
 export interface AppPluginSetupDependencies {
   home: HomePublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface AppPluginStartDependencies {

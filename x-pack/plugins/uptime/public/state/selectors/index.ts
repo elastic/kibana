@@ -96,3 +96,5 @@ export const selectedFiltersSelector = ({ selectedFilters }: AppState) => select
 export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 
 export const journeySelector = ({ journeys }: AppState) => journeys;
+
+export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;

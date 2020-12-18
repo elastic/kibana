@@ -61,7 +61,7 @@ export default function ({ getService }) {
         expect(_.omit(firstObject, ['updated_at'])).to.eql({
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
-          version: 'WzgsMV0=',
+          version: firstObject.version,
           attributes: {
             title: 'An existing visualization',
           },
@@ -74,7 +74,7 @@ export default function ({ getService }) {
         expect(_.omit(secondObject, ['updated_at'])).to.eql({
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
-          version: 'WzksMV0=',
+          version: secondObject.version,
           attributes: {
             title: 'An existing dashboard',
           },

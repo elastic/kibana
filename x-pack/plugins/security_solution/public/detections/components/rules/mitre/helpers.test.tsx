@@ -4,10 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isMitreAttackInvalid } from './helpers';
+import { getValidThreat } from '../../../mitre/valid_threat_mock';
+import { hasSubtechniqueOptions } from './helpers';
 
-describe('isMitreAttackInvalid', () => {
-  it('returns true if tacticName is empty', () => {
-    expect(isMitreAttackInvalid('', undefined)).toBe(true);
+const mockTechniques = getValidThreat()[0].technique;
+
+describe('helpers', () => {
+  describe('hasSubtechniqueOptions', () => {
+    describe('when technique has subtechnique options', () => {
+      const technique = mockTechniques[0];
+      it('returns true', () => {
+        expect(hasSubtechniqueOptions(technique)).toBe(true);
+      });
+    });
+
+    describe('when technique has no subtechnique options', () => {
+      const technique = {
+        reference: 'https://test.com',
+        name: 'Mock technique with no subtechniques',
+        id: 'T0000',
+        subtechnique: [],
+      };
+      it('returns false', () => {
+        expect(hasSubtechniqueOptions(technique)).toBe(false);
+      });
+    });
   });
 });

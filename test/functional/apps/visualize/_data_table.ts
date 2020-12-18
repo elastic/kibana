@@ -105,12 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show percentage columns', async () => {
       async function expectValidTableData() {
-        const data = await PageObjects.visChart.getTableVisData();
-        expect(data.trim().split('\n')).to.be.eql([
-          '≥ 0B and < 1,000B',
-          '1,351 64.703%',
-          '≥ 1,000B and < 1.953KB',
-          '737 35.297%',
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([
+          ['≥ 0B and < 1,000B', '1,351', '64.703%'],
+          ['≥ 1,000B and < 1.953KB', '737', '35.297%'],
         ]);
       }
 
@@ -150,12 +148,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
       await PageObjects.visEditor.clickOptionsTab();
 
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '≥ 0B and < 1,000B',
-        '344.094B',
-        '≥ 1,000B and < 1.953KB',
-        '1.697KB',
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([
+        ['≥ 0B and < 1,000B', '344.094B'],
+        ['≥ 1,000B and < 1.953KB', '1.697KB'],
       ]);
     });
 
@@ -169,9 +165,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
       await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      log.debug('-- table data', data.trim().split('\n'));
-      expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([['14,004', '1,412.6']]);
     });
 
     it('should show correct data for a data table with date histogram', async () => {
@@ -184,35 +179,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('@timestamp');
       await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
-      ]);
-    });
-
-    it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Day');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([
+        ['2015-09-20', '4,757'],
+        ['2015-09-21', '4,614'],
+        ['2015-09-22', '4,633'],
       ]);
     });
 
@@ -226,14 +197,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('UTC time');
       await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([
+        ['2015-09-20', '4,757'],
+        ['2015-09-21', '4,614'],
+        ['2015-09-22', '4,633'],
       ]);
       const header = await PageObjects.visChart.getTableVisHeader();
       expect(header).to.contain('UTC time');
@@ -242,15 +210,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should show correct data for a data table with top hits', async () => {
@@ -262,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
       await PageObjects.visEditor.selectField('agent.raw', 'metrics');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
+      const data = await PageObjects.visChart.getTableVisContent();
       log.debug(data);
       expect(data.length).to.be.greaterThan(0);
     });
@@ -276,12 +244,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Range');
       await PageObjects.visEditor.selectField('bytes');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '≥ 0B and < 1,000B',
-        '1,351',
-        '≥ 1,000B and < 1.953KB',
-        '737',
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([
+        ['≥ 0B and < 1,000B', '1,351'],
+        ['≥ 1,000B and < 1.953KB', '737'],
       ]);
     });
 

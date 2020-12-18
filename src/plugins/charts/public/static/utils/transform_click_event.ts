@@ -27,7 +27,7 @@ import {
 } from '@elastic/charts';
 
 import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { Datatable } from '../../../../expressions/public';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';
@@ -39,6 +39,13 @@ export interface BrushTriggerEvent {
   data: RangeSelectContext['data'];
 }
 
+type AllSeriesAccessors = Array<[accessor: Accessor | AccessorFn, value: string | number]>;
+
+/**
+ * returns accessor value from string or function accessor
+ * @param datum
+ * @param accessor
+ */
 function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
   if (typeof accessor === 'function') {
     return accessor(datum);
@@ -52,8 +59,12 @@ function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
  * difficult to match the correct column. This creates a test object to throw
  * an error when the target id is accessed, thus matcing the target column.
  */
-function validateFnAccessorId(id: string, accessor: AccessorFn) {
-  const matchedMessage = 'validateFnAccessorId matched';
+function validateAccessorId(id: string, accessor: Accessor | AccessorFn) {
+  if (typeof accessor !== 'function') {
+    return id === accessor;
+  }
+
+  const matchedMessage = 'validateAccessorId matched';
 
   try {
     accessor({
@@ -68,57 +79,102 @@ function validateFnAccessorId(id: string, accessor: AccessorFn) {
 }
 
 /**
+ * Groups split accessors by their accessor string or function and related value
+ *
+ * @param splitAccessors
+ * @param splitSeriesAccessorFnMap
+ */
+const getAllSplitAccessors = (
+  splitAccessors: Map<string | number, string | number>,
+  splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>
+): Array<[accessor: Accessor | AccessorFn, value: string | number]> =>
+  [...splitAccessors.entries()].map(([key, value]) => [
+    splitSeriesAccessorFnMap?.get?.(key) ?? key,
+    value,
+  ]);
+
+/**
+ * Reduces matching column indexes
+ *
+ * @param xAccessor
+ * @param yAccessor
+ * @param splitAccessors
+ */
+const columnReducer = (
+  xAccessor: Accessor | AccessorFn | null,
+  yAccessor: Accessor | AccessorFn | null,
+  splitAccessors: AllSeriesAccessors
+) => (
+  acc: Array<[index: number, id: string]>,
+  { id }: Datatable['columns'][number],
+  index: number
+): Array<[index: number, id: string]> => {
+  if (
+    (xAccessor !== null && validateAccessorId(id, xAccessor)) ||
+    (yAccessor !== null && validateAccessorId(id, yAccessor)) ||
+    splitAccessors.some(([accessor]) => validateAccessorId(id, accessor))
+  ) {
+    acc.push([index, id]);
+  }
+
+  return acc;
+};
+
+/**
+ * Finds matching row index for given accessors and geometry values
+ *
+ * @param geometry
+ * @param xAccessor
+ * @param yAccessor
+ * @param splitAccessors
+ */
+const rowFindPredicate = (
+  geometry: GeometryValue | null,
+  xAccessor: Accessor | AccessorFn | null,
+  yAccessor: Accessor | AccessorFn | null,
+  splitAccessors: AllSeriesAccessors
+) => (row: Datatable['rows'][number]): boolean =>
+  (geometry === null ||
+    (xAccessor !== null &&
+      getAccessorValue(row, xAccessor) === geometry.x &&
+      yAccessor !== null &&
+      getAccessorValue(row, yAccessor) === geometry.y)) &&
+  [...splitAccessors].every(([accessor, value]) => getAccessorValue(row, accessor) === value);
+
+/**
  * Helper function to transform `@elastic/charts` click event into filter action event
+ *
+ * @param table
+ * @param xAccessor
+ * @param splitSeriesAccessorFnMap needed when using `splitSeriesAccessors` as `AccessorFn`
+ * @param negate
  */
 export const getFilterFromChartClickEventFn = (
   table: Datatable,
   xAccessor: Accessor | AccessorFn,
+  splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
   negate: boolean = false
 ) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
   const data: ValueClickContext['data']['data'] = [];
-  const seenKeys = new Set<string>();
 
   points.forEach((point) => {
     const [geometry, { yAccessor, splitAccessors }] = point;
-    const columnIndices = table.columns.reduce<number[]>((acc, { id }, index) => {
-      if (
-        (typeof xAccessor === 'function' && validateFnAccessorId(id, xAccessor)) ||
-        [xAccessor, yAccessor, ...splitAccessors.keys()].includes(id)
-      ) {
-        acc.push(index);
-      }
-
-      return acc;
-    }, []);
-
-    const rowIndex = table.rows.findIndex((row) => {
-      return (
-        getAccessorValue(row, xAccessor) === geometry.x &&
-        row[yAccessor] === geometry.y &&
-        [...splitAccessors.entries()].every(([key, value]) => row[key] === value)
-      );
-    });
-
-    data.push(
-      ...columnIndices
-        .map((column) => ({
-          table,
-          column,
-          row: rowIndex,
-          value: null,
-        }))
-        .filter((column) => {
-          // filter duplicate values when multiple geoms are highlighted
-          const key = `column:${column},row:${rowIndex}`;
-          if (seenKeys.has(key)) {
-            return false;
-          }
-
-          seenKeys.add(key);
-
-          return true;
-        })
+    const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
+    const columns = table.columns.reduce<Array<[index: number, id: string]>>(
+      columnReducer(xAccessor, yAccessor, allSplitAccessors),
+      []
     );
+    const row = table.rows.findIndex(
+      rowFindPredicate(geometry, xAccessor, yAccessor, allSplitAccessors)
+    );
+    const newData = columns.map(([column, id]) => ({
+      table,
+      column,
+      row,
+      value: table.rows?.[row]?.[id] ?? null,
+    }));
+
+    data.push(...newData);
   });
 
   return {
@@ -135,22 +191,21 @@ export const getFilterFromChartClickEventFn = (
  */
 export const getFilterFromSeriesFn = (table: Datatable) => (
   { splitAccessors }: XYChartSeriesIdentifier,
+  splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
   negate = false
 ): ClickTriggerEvent => {
-  const data = table.columns.reduce<ValueClickContext['data']['data']>((acc, { id }, column) => {
-    if ([...splitAccessors.keys()].includes(id)) {
-      const value = splitAccessors.get(id);
-      const row = table.rows.findIndex((r) => r[id] === value);
-      acc.push({
-        table,
-        column,
-        row,
-        value,
-      });
-    }
-
-    return acc;
-  }, []);
+  const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
+  const columns = table.columns.reduce<Array<[index: number, id: string]>>(
+    columnReducer(null, null, allSplitAccessors),
+    []
+  );
+  const row = table.rows.findIndex(rowFindPredicate(null, null, null, allSplitAccessors));
+  const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
+    table,
+    column,
+    row,
+    value: table.rows?.[row]?.[id] ?? null,
+  }));
 
   return {
     name: 'filterBucket',
@@ -170,7 +225,7 @@ export const getBrushFromChartBrushEventFn = (
 ) => ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
   const [start, end] = selectedRange ?? [0, 0];
   const range: [number, number] = [start, end];
-  const column = table.columns.findIndex((c) => c.id === xAccessor);
+  const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
 
   return {
     data: {

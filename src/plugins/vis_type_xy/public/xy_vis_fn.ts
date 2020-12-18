@@ -64,9 +64,13 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
       help: 'xy vis config',
     },
   },
-  fn(context, args) {
+  fn(context, args, handlers) {
     const visConfig = JSON.parse(args.visConfig) as VisParams;
     const visType = visConfig.type;
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
 
     return {
       type: 'render',
@@ -76,9 +80,6 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
         visType,
         visConfig,
         visData: context,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },
