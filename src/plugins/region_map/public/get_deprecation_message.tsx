@@ -71,6 +71,7 @@ export function getDeprecationMessage(vis: Vis) {
     const bucketAggs = vis.data?.aggs?.byType('buckets');
     if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
       createUrlParams.termsFieldName = bucketAggs[0].getField()?.name;
+      createUrlParams.termsSize = bucketAggs[0].getParam('size');
     }
 
     const metricAggs = vis.data?.aggs?.byType('metrics');

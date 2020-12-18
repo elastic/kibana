@@ -183,6 +183,7 @@ export const createRegionMapUrlGenerator = (
     emsLayerId,
     leftFieldName,
     termsFieldName,
+    termsSize,
     colorSchema,
     indexPatternId,
     indexPatternTitle,
@@ -197,6 +198,7 @@ export const createRegionMapUrlGenerator = (
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
+    termsSize?: number;
     colorSchema: string;
     indexPatternId?: string;
     indexPatternTitle?: string;
@@ -214,6 +216,7 @@ export const createRegionMapUrlGenerator = (
       emsLayerId,
       leftFieldName,
       termsFieldName,
+      termsSize,
       colorSchema,
       indexPatternId,
       indexPatternTitle,

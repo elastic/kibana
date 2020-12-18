@@ -52,6 +52,7 @@ interface LazyLoadedMapModules {
     emsLayerId,
     leftFieldName,
     termsFieldName,
+    termsSize,
     colorSchema,
     indexPatternId,
     indexPatternTitle,
@@ -62,6 +63,7 @@ interface LazyLoadedMapModules {
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
+    termsSize?: number;
     colorSchema: string;
     indexPatternId?: string;
     indexPatternTitle?: string;
