@@ -12,8 +12,8 @@ import {
   jobsAndCurrentSpace,
   syncJobObjects,
   jobTypeSchema,
+  canDeleteJobScheme,
 } from './schemas/saved_objects';
-import { jobIdsSchema } from './schemas/job_service_schema';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { JobType } from '../../common/types/saved_objects';
 
@@ -284,8 +284,8 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/delete_job_check Check whether user can delete a job
-   * @apiName DeleteJobCheck
+   * @api {get} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
+   * @apiName CanDeleteJob
    * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
    *                 to fully delete the job and whether they are able to remove it from
    *                 the current space.
@@ -298,7 +298,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
         params: jobTypeSchema,
-        body: jobIdsSchema,
+        body: canDeleteJobScheme,
       },
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
