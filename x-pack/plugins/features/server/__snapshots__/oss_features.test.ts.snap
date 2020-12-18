@@ -83,6 +83,7 @@ Array [
           "lens",
           "map",
           "tag",
+          "background-session",
         ],
       },
       "ui": Array [
@@ -204,6 +205,7 @@ Array [
           "search",
           "query",
           "index-pattern",
+          "background-session",
           "url",
         ],
         "read": Array [],
@@ -565,6 +567,7 @@ Array [
           "lens",
           "map",
           "tag",
+          "background-session",
         ],
       },
       "ui": Array [
@@ -686,6 +689,7 @@ Array [
           "search",
           "query",
           "index-pattern",
+          "background-session",
           "url",
         ],
         "read": Array [],

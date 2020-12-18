@@ -5,6 +5,7 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { Cloud } from './fields/cloud';
 import { Container } from './fields/container';
 import { Host } from './fields/host';
 import { Http } from './fields/http';
@@ -64,4 +65,5 @@ export interface TransactionRaw extends APMBaseDoc {
   url?: Url;
   user?: User;
   user_agent?: UserAgent;
+  cloud?: Cloud;
 }

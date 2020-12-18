@@ -93,6 +93,16 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 
 
 [float]
+[[full-page-pdf]]
+== Full page PDF layout &mdash;Canvas only
+
+To create a PDF without margins surrounding the Canvas workpad, turn on *Full page layout* before generating the PDF.
+
+[role="screenshot"]
+image::user/reporting/images/canvas-full-page-layout.png["Full Page Layout"]
+
+
+[float]
 [[manage-report-history]]
 == View and manage report history
 

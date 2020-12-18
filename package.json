@@ -77,7 +77,7 @@
     "**/@types/hapi__boom": "^7.4.1",
     "**/@types/hapi__hapi": "^18.2.6",
     "**/@types/hapi__mimos": "4.1.0",
-    "**/@types/node": "14.14.7",
+    "**/@types/node": "14.14.14",
     "**/chokidar": "^3.4.3",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/deepmerge": "^4.2.2",
@@ -97,7 +97,7 @@
     "**/typescript": "4.1.2"
   },
   "engines": {
-    "node": "14.15.1",
+    "node": "14.15.2",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -497,7 +497,7 @@
     "@types/mustache": "^0.8.31",
     "@types/ncp": "^2.0.1",
     "@types/nock": "^10.0.3",
-    "@types/node": "14.14.7",
+    "@types/node": "14.14.14",
     "@types/node-fetch": "^2.5.7",
     "@types/node-forge": "^0.9.5",
     "@types/nodemailer": "^6.4.0",
@@ -609,7 +609,7 @@
     "cpy": "^8.1.1",
     "cronstrue": "^1.51.0",
     "css-loader": "^3.4.2",
-    "cypress": "^6.0.1",
+    "cypress": "^6.1.0",
     "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-multi-reporters": "^1.4.0",
     "d3": "3.5.17",
