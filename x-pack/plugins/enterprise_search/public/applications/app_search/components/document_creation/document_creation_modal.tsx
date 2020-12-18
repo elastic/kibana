@@ -7,52 +7,51 @@
 import React from 'react';
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-import {
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-} from '@elastic/eui';
+import { EuiOverlayMask, EuiModal } from '@elastic/eui';
 
-import { DocumentCreationLogic, DocumentCreationButtons } from './';
+import { DocumentCreationLogic } from './';
 import { DocumentCreationStep } from './types';
+
+import {
+  ShowCreationModes,
+  ApiCodeExample,
+  PasteJsonText,
+  UploadJsonFile,
+} from './creation_mode_components';
 
 export const DocumentCreationModal: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
-  const { isDocumentCreationOpen, creationMode, creationStep } = useValues(DocumentCreationLogic);
+  const { isDocumentCreationOpen } = useValues(DocumentCreationLogic);
 
-  if (!isDocumentCreationOpen) return null;
-
-  return (
+  return isDocumentCreationOpen ? (
     <EuiOverlayMask>
       <EuiModal onClose={closeDocumentCreation}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.modalTitle', {
-              defaultMessage: 'Document Import',
-            })}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          {creationStep === DocumentCreationStep.ShowError && <>DocumentCreationError</>}
-          {creationStep === DocumentCreationStep.ShowCreationModes && <DocumentCreationButtons />}
-          {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'api' && (
-            <>ApiCodeExample</>
-          )}
-          {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'text' && (
-            <>PasteJsonText</>
-          )}
-          {creationStep === DocumentCreationStep.AddDocuments && creationMode === 'file' && (
-            <>UploadJsonFile</>
-          )}
-          {creationStep === DocumentCreationStep.ShowErrorSummary && <>DocumentCreationSummary</>}
-          {creationStep === DocumentCreationStep.ShowSuccessSummary && <>DocumentCreationSummary</>}
-        </EuiModalBody>
-        <EuiModalFooter />
+        <ModalContent />
       </EuiModal>
     </EuiOverlayMask>
-  );
+  ) : null;
+};
+
+export const ModalContent: React.FC = () => {
+  const { creationStep, creationMode } = useValues(DocumentCreationLogic);
+
+  switch (creationStep) {
+    case DocumentCreationStep.ShowCreationModes:
+      return <ShowCreationModes />;
+    case DocumentCreationStep.AddDocuments:
+      switch (creationMode) {
+        case 'api':
+          return <ApiCodeExample />;
+        case 'text':
+          return <PasteJsonText />;
+        case 'file':
+          return <UploadJsonFile />;
+      }
+    case DocumentCreationStep.ShowError:
+      return <>DocumentCreationError</>;
+    case DocumentCreationStep.ShowErrorSummary:
+      return <>DocumentCreationSummary</>;
+    case DocumentCreationStep.ShowSuccessSummary:
+      return <>DocumentCreationSummary</>;
+  }
 };

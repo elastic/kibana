@@ -18,7 +18,7 @@
  */
 
 import { ColorSchemas } from '../color_maps';
-import { Rotates } from './collections';
+import { LabelRotation } from './collections';
 
 export interface ColorSchemaParams {
   colorSchema: ColorSchemas;
@@ -29,8 +29,8 @@ export interface Labels {
   color?: string;
   filter?: boolean;
   overwriteColor?: boolean;
-  rotate?: Rotates;
-  show: boolean;
+  rotate?: LabelRotation;
+  show?: boolean;
   truncate?: number | null;
 }
 

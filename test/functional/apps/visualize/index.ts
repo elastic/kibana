@@ -42,6 +42,37 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       isOss = await deployment.isOss();
     });
 
+    // TODO: Remove when vislib is removed
+    describe('chartsLibrary', function () {
+      this.tags('ciGroup7');
+
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:chartsLibrary': true,
+        });
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:chartsLibrary': false,
+        });
+        await browser.refresh();
+      });
+
+      // Test replaced vislib chart types
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+
+      // Test non-replaced vislib chart types
+      loadTestFile(require.resolve('./_gauge_chart'));
+      loadTestFile(require.resolve('./_heatmap_chart'));
+      loadTestFile(require.resolve('./_pie_chart'));
+    });
+
     describe('', function () {
       this.tags('ciGroup9');
 
@@ -66,9 +97,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup4');
+      this.tags('ciGroup11');
 
-      loadTestFile(require.resolve('./_line_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
@@ -76,6 +108,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
+
       if (isOss) {
         loadTestFile(require.resolve('./_tile_map'));
         loadTestFile(require.resolve('./_region_map'));
