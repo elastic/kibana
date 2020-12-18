@@ -38,6 +38,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await el.getVisibleText();
     }
 
+    /**
+     * Placeholder until we get an elastic-chart alternative to check the ticks value
+     */
+    public async getBarChartXTicks() {
+      return [];
+    }
+
     public async findFieldByName(name: string) {
       const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
       await fieldSearch.type(name);
