@@ -5,13 +5,13 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SetupDeps, StartDeps } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
   public setup(core: CoreSetup, { developerExamples, ...depsSetup }: SetupDeps): void {
     core.application.register({
-      id: 'reportingExample',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
