@@ -31,7 +31,12 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../kibana_react/public';
-import { EmbeddableStart, IContainer, openAddPanelFlyout } from '../../../../embeddable/public';
+import {
+  EmbeddableStart,
+  IContainer,
+  openAddPanelFlyout,
+  EmbeddableInput,
+} from '../../../../embeddable/public';
 import { getSavedObjectFinder } from '../../../../saved_objects/public';
 import { ComponentStrings } from '../../i18n/components';
 
@@ -93,8 +98,7 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
       items: [
         ...factories.map((factory) => {
           const onClick = async () => {
-            const explicitInput = await factory.getExplicitInput();
-            await container.addNewEmbeddable(factory.type, explicitInput);
+            await factory.create({} as EmbeddableInput, container);
           };
 
           return {
