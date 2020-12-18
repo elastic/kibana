@@ -165,13 +165,14 @@ export default function ({ getService }) {
     });
 
     describe('application usage limits', () => {
-      function createSavedObject() {
+      function createSavedObject(viewId) {
         return supertest
           .post('/api/saved_objects/application_usage_transactional')
           .send({
             attributes: {
               appId: 'test-app',
-              minutesOnScreen: 10.99,
+              viewId,
+              minutesOnScreen: 10.33,
               numberOfClicks: 10,
               timestamp: new Date().toISOString(),
             },
@@ -181,14 +182,22 @@ export default function ({ getService }) {
       }
 
       describe('basic behaviour', () => {
-        let savedObjectId;
-        before('create 1 entry', async () => {
-          return createSavedObject().then((id) => (savedObjectId = id));
+        let savedObjectIds = [];
+        before('create application usage entries', async () => {
+          savedObjectIds = await Promise.all([
+            createSavedObject(),
+            createSavedObject('appView1'),
+            createSavedObject(),
+          ]);
         });
-        after('cleanup', () => {
-          return supertest
-            .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
-            .expect(200);
+        after('cleanup', async () => {
+          await Promise.all(
+            savedObjectIds.map((savedObjectId) => {
+              return supertest
+                .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
+                .expect(200);
+            })
+          );
         });
 
         it('should return application_usage data', async () => {
@@ -202,14 +211,30 @@ export default function ({ getService }) {
           const stats = body[0];
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
-              clicks_total: 10,
-              clicks_7_days: 10,
-              clicks_30_days: 10,
-              clicks_90_days: 10,
-              minutes_on_screen_total: 10.99,
-              minutes_on_screen_7_days: 10.99,
-              minutes_on_screen_30_days: 10.99,
-              minutes_on_screen_90_days: 10.99,
+              appId: 'test-app',
+              viewId: 'main',
+              clicks_total: 20,
+              clicks_7_days: 20,
+              clicks_30_days: 20,
+              clicks_90_days: 20,
+              minutes_on_screen_total: 20.66,
+              minutes_on_screen_7_days: 20.66,
+              minutes_on_screen_30_days: 20.66,
+              minutes_on_screen_90_days: 20.66,
+              views: [
+                {
+                  appId: 'test-app',
+                  viewId: 'appView1',
+                  clicks_total: 10,
+                  clicks_7_days: 10,
+                  clicks_30_days: 10,
+                  clicks_90_days: 10,
+                  minutes_on_screen_total: 10.33,
+                  minutes_on_screen_7_days: 10.33,
+                  minutes_on_screen_30_days: 10.33,
+                  minutes_on_screen_90_days: 10.33,
+                },
+              ],
             },
           });
         });
@@ -253,6 +278,8 @@ export default function ({ getService }) {
           const stats = body[0];
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
+              appId: 'test-app',
+              viewId: 'main',
               clicks_total: 10000,
               clicks_7_days: 10000,
               clicks_30_days: 10000,
@@ -261,6 +288,7 @@ export default function ({ getService }) {
               minutes_on_screen_7_days: 10000,
               minutes_on_screen_30_days: 10000,
               minutes_on_screen_90_days: 10000,
+              views: [],
             },
           });
         });

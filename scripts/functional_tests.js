@@ -27,4 +27,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/examples/config.js'),
   require.resolve('../test/new_visualize_flow/config.ts'),
   require.resolve('../test/security_functional/config.ts'),
+  require.resolve('../test/functional/config.legacy.ts'),
 ]);

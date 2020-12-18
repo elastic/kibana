@@ -45,11 +45,63 @@ describe('TreeFetcherParameters#equal:', () => {
       { databaseDocumentID: 'b', indices: ['1', '2'], filters: {} },
       true,
     ],
-    // all parameters the same, except for the request id
+    // all parameters the same, except for the filters
     [
-      { databaseDocumentID: 'b', indices: [], dataRequestID: 0, filters: {} },
-      { databaseDocumentID: 'b', indices: [], dataRequestID: 1, filters: {} },
+      { databaseDocumentID: 'b', indices: [], filters: {} },
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to', from: 'from' },
+      },
       false,
+    ],
+    // all parameters the same, except for the filters.to
+    [
+      { databaseDocumentID: 'b', indices: [], filters: { to: '100' } },
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to' },
+      },
+      false,
+    ],
+    // all parameters the same, except for the filters.to, parameters are swapped from the one above
+    [
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to' },
+      },
+      { databaseDocumentID: 'b', indices: [], filters: { to: '100' } },
+      false,
+    ],
+    // all parameters the same
+    [
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to', from: 'from' },
+      },
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to', from: 'from' },
+      },
+      true,
+    ],
+    // all parameters the same, only using the filters.to field
+    [
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to' },
+      },
+      {
+        databaseDocumentID: 'b',
+        indices: [],
+        filters: { to: 'to' },
+      },
+      true,
     ],
   ];
   describe.each(cases)('%p when compared to %p', (first, second, expected) => {
