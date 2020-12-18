@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys, pickBy, isEmpty } from 'lodash';
+import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
@@ -55,7 +55,7 @@ export interface AddSourceActions {
   setButtonNotLoading(): void;
 }
 
-interface SourceConfigData {
+export interface SourceConfigData {
   serviceType: string;
   name: string;
   configured: boolean;
@@ -73,12 +73,12 @@ interface SourceConfigData {
   accountContextOnly?: boolean;
 }
 
-interface SourceConnectData {
+export interface SourceConnectData {
   oauthUrl: string;
   serviceType: string;
 }
 
-interface OrganizationsMap {
+export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
 
@@ -160,7 +160,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
@@ -182,7 +181,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       true,
       {
         getPreContentSourceConfigData: () => true,
-        setSearchResults: () => false,
         setPreContentSourceConfigData: () => false,
       },
     ],
@@ -306,8 +304,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const params = new URLSearchParams();
       if (subdomain) params.append('subdomain', subdomain);
       if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
-
-      const paramsString = !isEmpty(params) ? `?${params}` : '';
+      const hasParams = params.has('subdomain') || params.has('index_permissions');
+      const paramsString = hasParams ? `?${params}` : '';
 
       try {
         const response = await HttpLogic.values.http.get(`${route}${paramsString}`);
@@ -375,6 +373,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         const response = await http(route, {
           body: JSON.stringify({ params }),
         });
+        if (successCallback) successCallback();
         if (isUpdating) {
           setSuccessMessage(
             i18n.translate(
@@ -386,10 +385,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           );
         }
         actions.setSourceConfigData(response);
-        if (successCallback) successCallback();
       } catch (e) {
         flashAPIErrors(e);
-        if (!isUpdating) throw new Error(e);
       } finally {
         actions.setButtonNotLoading();
       }
@@ -432,7 +429,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } catch (e) {
         flashAPIErrors(e);
         if (errorCallback) errorCallback();
-        throw new Error('Auth Error');
       } finally {
         actions.setButtonNotLoading();
       }
