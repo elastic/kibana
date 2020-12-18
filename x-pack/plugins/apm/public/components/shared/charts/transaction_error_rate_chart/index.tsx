@@ -14,16 +14,10 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../timeseries_chart';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
-}
-
-function yTickFormat(y?: number | null) {
-  return i18n.translate('xpack.apm.chart.averagePercentLabel', {
-    defaultMessage: '{y} (avg.)',
-    values: { y: yLabelFormat(y) },
-  });
 }
 
 interface Props {
@@ -38,8 +32,8 @@ export function TransactionErrorRateChart({
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, transactionType, transactionName } = urlParams;
+  const { transactionType } = useApmServiceContext();
+  const { start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(() => {
     if (serviceName && start && end) {
@@ -84,13 +78,12 @@ export function TransactionErrorRateChart({
             type: 'linemark',
             color: theme.eui.euiColorVis7,
             hideLegend: true,
-            title: i18n.translate('xpack.apm.errorRate.currentPeriodLabel', {
-              defaultMessage: 'Current period',
+            title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+              defaultMessage: 'Error rate (avg.)',
             }),
           },
         ]}
         yLabelFormat={yLabelFormat}
-        yTickFormat={yTickFormat}
         yDomain={{ min: 0, max: 1 }}
       />
     </EuiPanel>

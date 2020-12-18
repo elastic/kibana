@@ -280,11 +280,8 @@ export class DashboardPlugin
       getHistory: () => this.currentHistory!,
     });
 
-    const factory = new DashboardContainerFactoryDefinition(
-      getStartServices,
-      () => this.currentHistory!
-    );
-    embeddable.registerEmbeddableFactory(factory.type, factory);
+    const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
+    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);

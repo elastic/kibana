@@ -156,7 +156,13 @@ export class Typeahead extends Component {
   };
 
   render() {
-    const { placeholder } = this.props;
+    const {
+      disabled,
+      isLoading,
+      placeholder,
+      prepend,
+      suggestions,
+    } = this.props;
 
     return (
       <ClickOutside
@@ -175,7 +181,7 @@ export class Typeahead extends Component {
                 this.inputRef = node;
               }
             }}
-            disabled={this.props.disabled}
+            disabled={disabled}
             value={this.state.value}
             onKeyDown={this.onKeyDown}
             onKeyUp={this.onKeyUp}
@@ -183,9 +189,10 @@ export class Typeahead extends Component {
             onClick={this.onClickInput}
             autoComplete="off"
             spellCheck={false}
+            prepend={prepend}
           />
 
-          {this.props.isLoading && (
+          {isLoading && (
             <EuiProgress
               size="xs"
               color="accent"
@@ -200,7 +207,7 @@ export class Typeahead extends Component {
 
         <Suggestions
           show={this.state.isSuggestionsVisible}
-          suggestions={this.props.suggestions}
+          suggestions={suggestions}
           index={this.state.index}
           onClick={this.onClickSuggestion}
           onMouseEnter={this.onMouseEnterSuggestion}
@@ -218,6 +225,7 @@ Typeahead.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired,
   placeholder: PropTypes.string.isRequired,
+  prepend: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
 
 Typeahead.defaultProps = {
