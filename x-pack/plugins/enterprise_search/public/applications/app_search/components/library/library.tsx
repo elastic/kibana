@@ -15,7 +15,7 @@ import {
 import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SchemaTypes } from '../../../shared/types';
+import { Schema } from '../../../shared/types';
 import { Result } from '../result/result';
 
 export const Library: React.FC = () => {
@@ -57,15 +57,15 @@ export const Library: React.FC = () => {
     },
   };
 
-  const schema = {
-    title: 'text' as SchemaTypes,
-    description: 'text' as SchemaTypes,
-    date_established: 'date' as SchemaTypes,
-    location: 'geolocation' as SchemaTypes,
-    states: 'text' as SchemaTypes,
-    visitors: 'number' as SchemaTypes,
-    size: 'number' as SchemaTypes,
-    length: 'number' as SchemaTypes,
+  const schema: Schema = {
+    title: 'text',
+    description: 'text',
+    date_established: 'date',
+    location: 'geolocation',
+    states: 'text',
+    visitors: 'number',
+    size: 'number',
+    length: 'number',
   };
 
   return (
