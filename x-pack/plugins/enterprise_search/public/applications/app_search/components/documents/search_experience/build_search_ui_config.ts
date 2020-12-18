@@ -16,16 +16,19 @@ export const buildSearchUIConfig = (apiConnector: object, schema: Schema) => {
       sortField: 'id',
     },
     searchQuery: {
-      result_fields: Object.keys(schema).reduce((acc: { [key: string]: object }, key: string) => {
-        acc[key] = {
-          snippet: {
-            size: 300,
-            fallback: true,
-          },
-          raw: {},
-        };
-        return acc;
-      }, {}),
+      result_fields: Object.keys(schema || {}).reduce(
+        (acc: { [key: string]: object }, key: string) => {
+          acc[key] = {
+            snippet: {
+              size: 300,
+              fallback: true,
+            },
+            raw: {},
+          };
+          return acc;
+        },
+        {}
+      ),
     },
   };
 };
