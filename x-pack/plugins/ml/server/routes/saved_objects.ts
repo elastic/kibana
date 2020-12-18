@@ -289,8 +289,18 @@ export function savedObjectsRoutes(
    * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
    *                 to fully delete the job and whether they are able to remove it from
    *                 the current space.
+   *                 Note, this is only for enabling UI controls. A user calling endpoints
+   *                 directly will still be able to delete or remove the job from a space.
    *
-   * @apiSchema (body) jobIdsSchema (params) jobTypeSchema
+   * @apiSchema (params) jobTypeSchema
+   * @apiSchema (body) jobIdsSchema
+   * @apiSuccessExample {json} Error-Response:
+   * {
+   *   "my_job": {
+   *     "canDelete": false,
+   *     "canRemoveFromSpace": true
+   *   }
+   * }
    *
    */
   router.post(
