@@ -100,6 +100,7 @@ export const searchAfterAndBulkCreate = async ({
           filter,
           pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
           timestampOverride: ruleParams.timestampOverride,
+          excludeDocsWithTimestampOverride: false,
         });
         // console.error(`SEARCH RESULT: ${JSON.stringify(searchResult)}`);
         toReturn = mergeReturns([
@@ -141,7 +142,7 @@ export const searchAfterAndBulkCreate = async ({
             filter,
             pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
             timestampOverride: ruleParams.timestampOverride,
-            timestamp: '@timestamp',
+            excludeDocsWithTimestampOverride: true,
           });
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {

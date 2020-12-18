@@ -19,7 +19,7 @@ interface BuildEventsSearchQuery {
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  timestamp?: string;
+  excludeDocsWithTimestampOverride: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -32,13 +32,11 @@ export const buildEventsSearchQuery = ({
   searchAfterSortId,
   sortOrder,
   timestampOverride,
-  timestamp,
+  excludeDocsWithTimestampOverride,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
-    timestampOverride != null && timestampOverride !== '@timestamp'
-      ? [timestampOverride, ...defaultTimeFields]
-      : defaultTimeFields;
+    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
   const docFields = timestamps.map((tstamp) => ({
     field: tstamp,
     format: 'strict_date_optional_time',
@@ -46,7 +44,9 @@ export const buildEventsSearchQuery = ({
 
   // idea is to iterate over the timestamps and create distinct queries that can be used to search across simultaneous timestamps
   const sortField =
-    timestamp == null && timestampOverride != null ? timestampOverride : '@timestamp';
+    timestampOverride != null && !excludeDocsWithTimestampOverride
+      ? timestampOverride
+      : '@timestamp';
 
   const rangeFilter: unknown[] = [
     {
@@ -80,7 +80,7 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
-  if (timestamp != null && timestampOverride != null) {
+  if (excludeDocsWithTimestampOverride) {
     rangeFilter.push({
       bool: {
         must_not: {

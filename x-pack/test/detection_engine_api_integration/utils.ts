@@ -892,22 +892,23 @@ export const getRule = async (
  * Waits for the rule in find status to be succeeded before continuing
  * @param supertest Deps
  */
-export const waitForRuleSuccess = async (
+export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  id: string
+  id: string,
+  status?: 'succeeded' | 'failed' | 'partial failure'
 ): Promise<void> => {
   // wait for Task Manager to finish executing the rule
+  let statusToWaitFor = status;
+  if (statusToWaitFor == null) {
+    statusToWaitFor = 'succeeded';
+  }
   await waitFor(async () => {
     const { body } = await supertest
       .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
-    return (
-      body[id]?.current_status?.status === 'succeeded' ||
-      body[id]?.current_status?.status === 'failed' ||
-      body[id]?.current_status?.status === 'partial failure'
-    );
+    return body[id]?.current_status?.status === statusToWaitFor;
   }, 'waitForRuleSuccess');
 };
 

@@ -29,7 +29,7 @@ interface SingleSearchAfterParams {
   filter: unknown;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  timestamp?: string;
+  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -46,7 +46,7 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  timestamp,
+  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -63,7 +63,7 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortId,
       timestampOverride,
-      timestamp,
+      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();
