@@ -48,7 +48,6 @@ import {
   fillCasesMandatoryfields,
 } from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { closeTimeline } from '../tasks/timeline';
 
 import { CASES_URL } from '../urls/navigation';
 
@@ -60,12 +59,6 @@ describe('Cases', () => {
     createTimeline(case1.timeline).then((response) => {
       mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  after(() => {
-    closeTimeline();
-    deleteTimeline(mycase.timeline.id!);
-    deleteCase();
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {

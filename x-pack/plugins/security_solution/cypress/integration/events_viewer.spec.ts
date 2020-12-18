@@ -23,7 +23,6 @@ import { openEvents } from '../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
-  closeModal,
   dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
@@ -78,11 +77,6 @@ describe.skip('Events Viewer', () => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
-    });
-
-    after(() => {
-      closeModal();
-      cy.get(INSPECT_MODAL).should('not.exist');
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {

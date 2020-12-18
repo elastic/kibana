@@ -46,7 +46,6 @@ describe('value lists', () => {
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       deleteAllValueListsFromUI();
     });
 

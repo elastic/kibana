@@ -12,11 +12,11 @@ import {
   selectCase,
 } from '../tasks/timeline';
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../screens/create_new_case';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { TIMELINE_CASE_ID } from '../objects/case';
-import { caseTimeline, timeline } from '../objects/timeline';
+import { case1 } from '../objects/case';
+import { timeline } from '../objects/timeline';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
+import { createCase } from '../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   const myTimeline = { ...timeline };
@@ -62,25 +62,29 @@ describe('attach timeline to case', () => {
   });
 
   context('with cases created', () => {
+    let timelineId: string;
+    let caseId: string;
     before(() => {
       cleanKibana();
-      esArchiverLoad('case_and_timeline');
+      createTimeline(timeline).then((response) => {
+        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+      });
+      createCase(case1).then((response) => {
+        caseId = response.body.id;
+      });
     });
 
     it('attach timeline to an existing case', () => {
-      loginAndWaitForTimeline(caseTimeline.id!);
+      loginAndWaitForTimeline(timelineId);
       attachTimelineToExistingCase();
-      selectCase(TIMELINE_CASE_ID);
+      selectCase(caseId);
 
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${
-            caseTimeline.title
-          }](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id!}%27,isOpen:!t))`
+          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${timelineId}%27,isOpen:!t))`
         );
       });
-      esArchiverUnload('case_and_timeline');
     });
   });
 });

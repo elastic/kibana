@@ -53,7 +53,7 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
-const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+export const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
 
 export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 

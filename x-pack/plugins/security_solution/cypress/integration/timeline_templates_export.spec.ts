@@ -31,10 +31,6 @@ describe('Export timelines', () => {
     });
   });
 
-  after(() => {
-    deleteTimelineTemplate(templateId);
-  });
-
   it('Exports a custom timeline template', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     exportTimeline(templateId!);

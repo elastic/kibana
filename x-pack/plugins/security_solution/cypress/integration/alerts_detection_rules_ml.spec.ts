@@ -46,14 +46,12 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
@@ -75,11 +73,6 @@ describe('Detection rules, machine learning', () => {
 
   before(() => {
     cleanKibana();
-    removeSignalsIndex();
-  });
-  after(() => {
-    removeSignalsIndex();
-    deleteRule();
   });
 
   it('Creates and activates a new ml rule', () => {

@@ -44,6 +44,7 @@ export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testi
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,
+      tags: ['rule1'],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
