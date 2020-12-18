@@ -6,7 +6,7 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 150) {
   catchErrors {
     // retryable.enable(2)
-    withEnv(["KBN_ES_SNAPSHOT_USE_UNVERIFIED_X=true"]) {
+    withEnv(["KBN_ES_SNAPSHOT_USE_UNVERIFIED=true"]) {
       parallel([
         'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
           'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),

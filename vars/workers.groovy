@@ -147,7 +147,7 @@ def intake(jobName, String script) {
 // Worker for running functional tests. Runs a setup process (e.g. the kibana build) then executes a map of closures in parallel (e.g. one for each ciGroup)
 def functional(name, Closure setup, Map processes) {
   return {
-    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, size: 'xl-highmem')
+    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, size: 'xl')
   }
 }
 
