@@ -403,7 +403,7 @@ describe('DraggableWrapperHoverContent', () => {
   });
 
   describe('Top N', () => {
-    test(`it renders the 'Show top field' button when showTopN is false and an aggregatable string field is provided`, async () => {
+    test(`it renders the 'Show top field' button when showTopN is false and an aggregatable string field is provided`, () => {
       const aggregatableStringField = 'cloud.account.id';
       const wrapper = mount(
         <TestProviders>
@@ -421,7 +421,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
-    test(`it renders the 'Show top field' button when showTopN is false and a allowlisted signal field is provided`, async () => {
+    test(`it renders the 'Show top field' button when showTopN is false and a allowlisted signal field is provided`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -439,7 +439,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
-    test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, async () => {
+    test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, () => {
       const notKnownToBrowserFields = 'unknown.field';
       const wrapper = mount(
         <TestProviders>
@@ -477,7 +477,7 @@ describe('DraggableWrapperHoverContent', () => {
       });
     });
 
-    test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
+    test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -518,7 +518,7 @@ describe('DraggableWrapperHoverContent', () => {
       );
     });
 
-    test(`it does NOT render the 'Show top field' button when showTopN is true`, async () => {
+    test(`it does NOT render the 'Show top field' button when showTopN is true`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -537,7 +537,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
-    test(`it renders the Top N histogram when when showTopN is true`, async () => {
+    test(`it renders the Top N histogram when when showTopN is true`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
