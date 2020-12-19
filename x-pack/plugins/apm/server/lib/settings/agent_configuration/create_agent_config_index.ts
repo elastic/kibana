@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyClusterClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
   MappingsDefinition,
@@ -13,18 +13,18 @@ import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
-  esClient,
+  client,
   config,
   logger,
 }: {
-  esClient: ILegacyClusterClient;
+  client: ElasticsearchClient;
   config: APMConfig;
   logger: Logger;
 }) {
   const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
   return createOrUpdateIndex({
     index,
-    apiCaller: esClient.callAsInternalUser,
+    client,
     logger,
     mappings,
   });

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from 'kibana/server';
 import * as t from 'io-ts';
-import { Client } from 'elasticsearch';
 import Boom from '@hapi/boom';
 import { ILicense } from '../../../../licensing/server';
 import {
@@ -15,9 +14,9 @@ import {
   Annotation,
   getAnnotationByIdRt,
 } from '../../../common/annotations';
-import { PromiseReturnType } from '../../../typings/common';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { mappings } from './mappings';
+import { unwrapEsResponse } from '../../utils/unwrap_es_response';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
@@ -38,19 +37,25 @@ interface IndexDocumentResponse {
   result: string;
 }
 
+interface GetResponse {
+  _id: string;
+  _index: string;
+  _source: Annotation;
+}
+
 export function createAnnotationsClient(params: {
   index: string;
-  apiCaller: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   logger: Logger;
   license?: ILicense;
 }) {
-  const { index, apiCaller, logger, license } = params;
+  const { index, esClient, logger, license } = params;
 
   const initIndex = () =>
     createOrUpdateIndex({
       index,
       mappings,
-      apiCaller,
+      client: esClient,
       logger,
     });
 
@@ -71,9 +76,11 @@ export function createAnnotationsClient(params: {
       async (
         createParams: CreateParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-        const indexExists = await apiCaller('indices.exists', {
-          index,
-        });
+        const indexExists = await unwrapEsResponse(
+          esClient.indices.exists({
+            index,
+          })
+        );
 
         if (!indexExists) {
           await initIndex();
@@ -86,35 +93,42 @@ export function createAnnotationsClient(params: {
           },
         };
 
-        const response = (await apiCaller('index', {
-          index,
-          body: annotation,
-          refresh: 'wait_for',
-        })) as IndexDocumentResponse;
+        const body = await unwrapEsResponse(
+          esClient.index<IndexDocumentResponse>({
+            index,
+            body: annotation,
+            refresh: 'wait_for',
+          })
+        );
 
-        return apiCaller('get', {
-          index,
-          id: response._id,
-        });
+        return (
+          await esClient.get<GetResponse>({
+            index,
+            id: body._id,
+          })
+        ).body;
       }
     ),
     getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
       const { id } = getByIdParams;
 
-      return apiCaller('get', {
-        id,
-        index,
-      });
+      return unwrapEsResponse(
+        esClient.get<GetResponse>({
+          id,
+          index,
+        })
+      );
     }),
     delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
       const { id } = deleteParams;
 
-      const response = (await apiCaller('delete', {
-        index,
-        id,
-        refresh: 'wait_for',
-      })) as PromiseReturnType<Client['delete']>;
-      return response;
+      return unwrapEsResponse(
+        esClient.delete({
+          index,
+          id,
+          refresh: 'wait_for',
+        })
+      );
     }),
   };
 }

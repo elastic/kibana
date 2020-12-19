@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import pRetry from 'p-retry';
-import { Logger, LegacyAPICaller } from 'src/core/server';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 
 export interface MappingsObject {
   type: string;
@@ -24,12 +24,12 @@ export interface MappingsDefinition {
 export async function createOrUpdateIndex({
   index,
   mappings,
-  apiCaller,
+  client,
   logger,
 }: {
   index: string;
   mappings: MappingsDefinition;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   logger: Logger;
 }) {
   try {
@@ -43,21 +43,21 @@ export async function createOrUpdateIndex({
      */
     await pRetry(
       async () => {
-        const indexExists = await apiCaller('indices.exists', { index });
+        const indexExists = (await client.indices.exists({ index })).body;
         const result = indexExists
           ? await updateExistingIndex({
               index,
-              apiCaller,
+              client,
               mappings,
             })
           : await createNewIndex({
               index,
-              apiCaller,
+              client,
               mappings,
             });
 
-        if (!result.acknowledged) {
-          const resultError = result && result.error && JSON.stringify(result.error);
+        if (!result.body.acknowledged) {
+          const resultError = result && result.body.error && JSON.stringify(result.body.error);
           throw new Error(resultError);
         }
       },
@@ -75,14 +75,14 @@ export async function createOrUpdateIndex({
 
 function createNewIndex({
   index,
-  apiCaller,
+  client,
   mappings,
 }: {
   index: string;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   mappings: MappingsDefinition;
 }) {
-  return apiCaller('indices.create', {
+  return client.indices.create<{ acknowledged: boolean; error: any }>({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
@@ -94,14 +94,14 @@ function createNewIndex({
 
 function updateExistingIndex({
   index,
-  apiCaller,
+  client,
   mappings,
 }: {
   index: string;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   mappings: MappingsDefinition;
 }) {
-  return apiCaller('indices.putMapping', {
+  return client.indices.putMapping<{ acknowledged: boolean; error: any }>({
     index,
     body: mappings,
   });

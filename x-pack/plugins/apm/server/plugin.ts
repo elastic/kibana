@@ -173,7 +173,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
         ]);
 
-        const esClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         return createApmEventClient({
           debug: debug ?? false,
@@ -195,13 +195,13 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     // create agent configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });
     // create custom action index without blocking start lifecycle
     createApmCustomLinkIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });

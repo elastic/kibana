@@ -31,6 +31,15 @@ jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
 }));
 
 function getMockRequest() {
+  const esClientMock = {
+    asCurrentUser: {
+      search: jest.fn().mockResolvedValue({ body: {} }),
+    },
+    asInternalUser: {
+      search: jest.fn().mockResolvedValue({ body: {} }),
+    },
+  };
+
   const mockContext = ({
     config: new Proxy(
       {},
@@ -45,12 +54,7 @@ function getMockRequest() {
     },
     core: {
       elasticsearch: {
-        legacy: {
-          client: {
-            callAsCurrentUser: jest.fn(),
-            callAsInternalUser: jest.fn(),
-          },
-        },
+        client: esClientMock,
       },
       uiSettings: {
         client: {
@@ -69,12 +73,7 @@ function getMockRequest() {
   } as unknown) as APMRequestHandlerContext & {
     core: {
       elasticsearch: {
-        legacy: {
-          client: {
-            callAsCurrentUser: jest.Mock<any, any>;
-            callAsInternalUser: jest.Mock<any, any>;
-          };
-        };
+        client: typeof esClientMock;
       };
       uiSettings: {
         client: {
@@ -91,6 +90,11 @@ function getMockRequest() {
 
   const mockRequest = ({
     url: '',
+    events: {
+      aborted$: {
+        subscribe: jest.fn(),
+      },
+    },
   } as unknown) as KibanaRequest;
 
   return { mockContext, mockRequest };
@@ -106,8 +110,8 @@ describe('setupRequest', () => {
         body: { foo: 'bar' },
       });
       expect(
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser
-      ).toHaveBeenCalledWith('search', {
+        mockContext.core.elasticsearch.client.asCurrentUser.search
+      ).toHaveBeenCalledWith({
         index: ['apm-*'],
         body: {
           foo: 'bar',
@@ -133,8 +137,8 @@ describe('setupRequest', () => {
         body: { foo: 'bar' },
       } as any);
       expect(
-        mockContext.core.elasticsearch.legacy.client.callAsInternalUser
-      ).toHaveBeenCalledWith('search', {
+        mockContext.core.elasticsearch.client.asInternalUser.search
+      ).toHaveBeenCalledWith({
         index: ['apm-*'],
         body: {
           foo: 'bar',
@@ -154,8 +158,8 @@ describe('setupRequest', () => {
         body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
       });
       const params =
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-          .calls[0][1];
+        mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+          .calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -184,8 +188,8 @@ describe('setupRequest', () => {
         }
       );
       const params =
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-          .calls[0][1];
+        mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+          .calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -214,8 +218,8 @@ describe('without a bool filter', () => {
       },
     });
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.body).toEqual({
       query: {
         bool: {
@@ -245,8 +249,8 @@ describe('with includeFrozen=false', () => {
     });
 
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.ignore_throttled).toBe(true);
   });
 });
@@ -265,8 +269,8 @@ describe('with includeFrozen=true', () => {
     });
 
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.ignore_throttled).toBe(false);
   });
 });
