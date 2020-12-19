@@ -20,7 +20,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'X-Pack Background Search UI (Enabled WIP Feature)',
     },
 
-    testFiles: [resolve(__dirname, './tests/apps/dashboard/async_search')],
+    testFiles: [
+      resolve(__dirname, './tests/apps/dashboard/async_search'),
+      resolve(__dirname, './tests/apps/management/background_sessions'),
+    ],
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),

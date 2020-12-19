@@ -148,7 +148,15 @@ export const getColumns = (
             return <TableText>{expires}</TableText>;
           }
         }
-        return <TableText color="subdued">--</TableText>;
+        return (
+          <TableText
+            color="subdued"
+            data-test-subj="session-mgmt-table-col-expires"
+            data-test-id={id}
+          >
+            --
+          </TableText>
+        );
       },
     },
 
