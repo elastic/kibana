@@ -22,8 +22,8 @@ import { Datatable } from '../../../../expressions';
 import { Trigger, RowClickContext } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
-export interface EmbeddableContext {
-  embeddable: IEmbeddable;
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
 }
 
 export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
@@ -85,6 +85,28 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
   }),
   description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
     defaultMessage: 'Actions appear in top-right corner of a panel.',
+  }),
+};
+
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+  id: SELECT_RANGE_TRIGGER,
+  title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
+    defaultMessage: 'Range selection',
+  }),
+  description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
+    defaultMessage: 'A range of values on the visualization',
+  }),
+};
+
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+  id: VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.valueClickTrigger.title', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('embeddableApi.valueClickTrigger.description', {
+    defaultMessage: 'A data point click on the visualization',
   }),
 };
 

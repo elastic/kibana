@@ -18,15 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '.';
+import { Trigger } from '../../../ui_actions/public';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
   id: APPLY_FILTER_TRIGGER,
-  title: i18n.translate('uiActions.triggers.applyFilterTitle', {
+  title: i18n.translate('data.triggers.applyFilterTitle', {
     defaultMessage: 'Apply filter',
   }),
-  description: i18n.translate('uiActions.triggers.applyFilterDescription', {
+  description: i18n.translate('data.triggers.applyFilterDescription', {
     defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
   }),
 };
