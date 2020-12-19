@@ -151,7 +151,7 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     href={singleThreat.tactic.reference}
                     target="_blank"
                   >
-                    {tactic != null ? tactic.text : ''}
+                    {tactic != null ? tactic.text : i18n.UNKNOWN_TACTIC}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                     {singleThreat.technique.map((technique, techniqueIndex) => {
@@ -165,7 +165,7 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                             iconType={ListTreeIcon}
                             size="xs"
                           >
-                            {myTechnique != null ? myTechnique.label : ''}
+                            {myTechnique != null ? myTechnique.label : i18n.UNKNOWN_TECHNIQUE}
                           </TechniqueLinkItem>
                           <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                             {technique.subtechnique != null &&
@@ -184,7 +184,9 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                                       iconType={ListTreeIcon}
                                       size="xs"
                                     >
-                                      {mySubtechnique != null ? mySubtechnique.label : ''}
+                                      {mySubtechnique != null
+                                        ? mySubtechnique.label
+                                        : i18n.UNKNOWN_SUBTECHNIQUE}
                                     </TechniqueLinkItem>
                                   </SubtechniqueFlexItem>
                                 );
