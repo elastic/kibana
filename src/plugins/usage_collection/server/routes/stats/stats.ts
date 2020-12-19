@@ -28,7 +28,6 @@ import {
   IRouter,
   ISavedObjectsRepository,
   KibanaRequest,
-  LegacyAPICaller,
   MetricsServiceSetup,
   SavedObjectsClientContract,
   ServiceStatus,
