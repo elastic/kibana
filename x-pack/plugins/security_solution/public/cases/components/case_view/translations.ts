@@ -150,3 +150,7 @@ export const CHANGED_CONNECTOR_FIELD = i18n.translate(
     defaultMessage: `changed connector field`,
   }
 );
+
+export const SYNC_ALERTS = i18n.translate('xpack.securitySolution.case.caseView.syncAlertsLabel', {
+  defaultMessage: `Sync alerts`,
+});
