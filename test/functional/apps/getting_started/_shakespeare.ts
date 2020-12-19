@@ -49,22 +49,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // order they are added.
     let aggIndex = 1;
     // Used to track flag before and after reset
-    let isNewChartUiEnabled = false;
+    let isNewChartsLibraryEnabled = false;
 
     before(async function () {
       log.debug(
         'Load empty_kibana and Shakespeare Getting Started data\n' +
           'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
       );
-      isNewChartUiEnabled = await PageObjects.visChart.isNewChartUiEnabled();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
       await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
 
-      if (isNewChartUiEnabled) {
+      if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': true,
+          'visualization:visualize:legacyChartsLibrary': false,
         });
         await browser.refresh();
       }

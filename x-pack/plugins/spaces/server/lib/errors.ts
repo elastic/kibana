@@ -11,7 +11,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   const boom = isBoom(error) ? error : boomify(error);
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 }
