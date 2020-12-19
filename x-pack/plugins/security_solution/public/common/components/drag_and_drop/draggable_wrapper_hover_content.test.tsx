@@ -14,7 +14,6 @@ import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
-import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
@@ -41,8 +40,14 @@ jest.mock('uuid', () => {
     v4: jest.fn(() => 'uuid.v4()'),
   };
 });
-
-jest.mock('../../hooks/use_add_to_timeline');
+const mockStartDragToTimeline = jest.fn();
+jest.mock('../../hooks/use_add_to_timeline', () => {
+  const original = jest.requireActual('../../hooks/use_add_to_timeline');
+  return {
+    ...original,
+    useAddToTimeline: () => ({ startDragToTimeline: mockStartDragToTimeline }),
+  };
+});
 const mockAddFilters = jest.fn();
 const mockGetTimelineFilterManager = jest.fn().mockReturnValue({
   addFilters: mockAddFilters,
@@ -78,8 +83,7 @@ const defaultProps = {
 
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
-    // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
-    (useAddToTimeline as jest.Mock).mockReturnValue({ startDragToTimeline: jest.fn() });
+    mockStartDragToTimeline.mockReset();
     (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
       selectedPatterns: [],
@@ -376,7 +380,7 @@ describe('DraggableWrapperHoverContent', () => {
       });
     });
 
-    test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', () => {
+    test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', async () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
@@ -389,19 +393,11 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      // The following "startDragToTimeline" function returned by our mock
-      // useAddToTimeline hook is called when the user clicks the
-      // Add to timeline investigation action:
-      const { startDragToTimeline } = useAddToTimeline({
-        draggableId,
-        fieldName: aggregatableStringField,
-      });
-
       wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
-      wrapper.update();
 
-      waitFor(() => {
-        expect(startDragToTimeline).toHaveBeenCalled();
+      await waitFor(() => {
+        wrapper.update();
+        expect(mockStartDragToTimeline).toHaveBeenCalled();
       });
     });
   });
@@ -461,7 +457,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
-    test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, () => {
+    test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, async () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -476,7 +472,7 @@ describe('DraggableWrapperHoverContent', () => {
       );
       const button = wrapper.find(`[data-test-subj="show-top-field"]`).first();
       button.simulate('mouseenter');
-      waitFor(() => {
+      await waitFor(() => {
         expect(goGetTimelineId).toHaveBeenCalledWith(true);
       });
     });
@@ -502,7 +498,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(toggleTopN).toBeCalled();
     });
 
-    test(`it does NOT render the Top N histogram when when showTopN is false`, async () => {
+    test(`it does NOT render the Top N histogram when when showTopN is false`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>

@@ -123,7 +123,7 @@ export const DataDrivenColumns = React.memo<Props>(
             </EuiScreenReaderOnly>
           )}
 
-          {hasRowRenderers && (
+          {notesCount && (
             <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
               <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
             </EuiScreenReaderOnly>
