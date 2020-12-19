@@ -163,7 +163,7 @@ export class SearchSessionsMgmtAPI {
   // Extend
   public async sendExtend(id: string): Promise<UISession[] | null> {
     this.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
+      title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
         defaultMessage: 'Failed to extend the session expiration!',
       }),
     });

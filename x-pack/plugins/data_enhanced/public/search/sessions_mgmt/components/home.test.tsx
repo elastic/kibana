@@ -9,6 +9,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup } from 'kibana/public';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
+import { SessionsClient } from 'src/plugins/data/public/search';
 import { UISession, STATUS } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
@@ -16,6 +17,7 @@ import { LocaleWrapper, mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtHome } from './home';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let sessionsClient: SessionsClient;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
@@ -23,7 +25,9 @@ describe('Background Search Session Management Home', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
 
-    api = new SearchSessionsMgmtAPI(mockCoreSetup.http, mockUrls, mockCoreSetup.notifications);
+    sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
+
+    api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
 
     initialTable = [
       {

@@ -8,8 +8,8 @@ import Boom from '@hapi/boom';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup } from 'kibana/public';
 import sinon from 'sinon';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { SessionsClient } from '../../../../../../../src/plugins/data/public/search';
+import { coreMock } from 'src/core/public/mocks';
+import { SessionsClient } from 'src/plugins/data/public/search';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 

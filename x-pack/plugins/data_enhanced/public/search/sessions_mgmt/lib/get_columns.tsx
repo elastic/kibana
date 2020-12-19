@@ -46,7 +46,7 @@ export const getColumns = (
     // Type (appIcon)
     {
       field: 'appId',
-      name: i18n.translate('xpack.data.mgmt.searchSessions.table.headerName', {
+      name: i18n.translate('xpack.data.mgmt.searchSessions.table.headerType', {
         defaultMessage: 'Type',
       }),
       sortable: true,
