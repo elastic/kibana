@@ -53,7 +53,7 @@ starting point.
 ## Build args
 
 A good how-to on building Chromium from source is
-[here](https://chromium).googlesource.com/chromium/src/+/master/docs/get_the_code.md.
+[here](https://chromium.googlesource.com/chromium/src/+/master/docs/get_the_code.md).
 
 There are documents for each OS that will explain how to customize arguments
 for the build using the `gn` tool. Those instructions do not apply for the
@@ -65,6 +65,7 @@ We have an `args.gn` file per platform:
 - mac: `darwin/args.gn`
 - linux 64bit: `linux-x64/args.gn`
 - windows: `windows/args.gn`
+- ARM 64bit: linux-aarch64/args.gn
 
 To get a list of the build arguments that are enabled, install `depot_tools` and run
 `gn args out/headless --list`. It prints out all of the flags and their
