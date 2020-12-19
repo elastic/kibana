@@ -32,6 +32,7 @@ import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import {
   AddSourceLogic,
+  AddSourceSteps,
   SourceConfigData,
   SourceConnectData,
   OrganizationsMap,
@@ -39,6 +40,8 @@ import {
 
 describe('AddSourceLogic', () => {
   const defaultValues = {
+    addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
+    addSourceProps: {},
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
@@ -69,6 +72,8 @@ describe('AddSourceLogic', () => {
     serviceType: 'github',
     githubOrganizations: ['foo', 'bar'],
   };
+
+  const CUSTOM_SERVICE_TYPE_INDEX = 17;
 
   const clearFlashMessagesSpy = jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
 
@@ -224,6 +229,53 @@ describe('AddSourceLogic', () => {
   });
 
   describe('listeners', () => {
+    it('initializeAddSource', () => {
+      const addSourceProps = { sourceIndex: 1 };
+      const getSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'getSourceConfigData');
+      const setAddSourcePropsSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceProps');
+      const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+
+      AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+      expect(setAddSourcePropsSpy).toHaveBeenCalledWith({ addSourceProps });
+      expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigIntroStep);
+      expect(getSourceConfigDataSpy).toHaveBeenCalledWith('confluence_cloud');
+    });
+
+    describe('getFirstStep', () => {
+      it('sets custom as first step', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = { sourceIndex: CUSTOM_SERVICE_TYPE_INDEX };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureCustomStep);
+      });
+
+      it('sets connect as first step', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = { sourceIndex: 1, connect: true };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+      });
+
+      it('sets configure as first step', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = { sourceIndex: 1, configure: true };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureOauthStep);
+      });
+
+      it('sets reAuthenticate as first step', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = { sourceIndex: 1, reAuthenticate: true };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReAuthenticateStep);
+      });
+    });
+
     describe('organization context', () => {
       describe('getSourceConfigData', () => {
         it('calls API and sets values', async () => {
