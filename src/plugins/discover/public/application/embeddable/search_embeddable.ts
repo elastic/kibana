@@ -48,6 +48,7 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -200,6 +201,13 @@ export class SearchEmbeddable
     const { searchSource } = this.savedSearch;
     const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
+    if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
+      this.savedSearch.sort = getDefaultSort(
+        indexPattern,
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+      );
+    }
+
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchScope || !this.input.timeRange) return;
@@ -341,7 +349,14 @@ export class SearchEmbeddable
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
-    searchScope.sort = this.input.sort || this.savedSearch.sort;
+    const savedSearchSort =
+      this.savedSearch.sort && this.savedSearch.sort.length
+        ? this.savedSearch.sort
+        : getDefaultSort(
+            this.searchScope?.indexPattern,
+            getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+          );
+    searchScope.sort = this.input.sort || savedSearchSort;
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (forceFetch || isFetchRequired) {
