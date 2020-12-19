@@ -19,7 +19,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Export rules', () => {
   let ruleResponse: Cypress.Response;
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept(
       'POST',

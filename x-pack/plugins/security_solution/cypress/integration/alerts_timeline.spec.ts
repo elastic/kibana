@@ -12,7 +12,7 @@ import {
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
-import { createCustomRuleActivated, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -23,7 +23,6 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Alerts timeline', () => {
   beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
     loginAndWaitForPage(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

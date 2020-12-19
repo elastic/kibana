@@ -38,7 +38,7 @@ import { totalNumberOfPrebuiltRules } from '../objects/rule';
 import { cleanKibana } from '../tasks/common';
 
 describe('Alerts rules, prebuilt rules', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
   });
 

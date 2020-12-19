@@ -84,7 +84,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createCustomRuleActivated, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
 import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import {
@@ -114,7 +114,7 @@ describe('Custom detection rules creation', () => {
 
   const rule = { ...newRule };
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(newRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
@@ -216,7 +216,6 @@ describe('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
-      removeSignalsIndex();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
@@ -294,7 +293,6 @@ describe('Custom detection rules deletion and edition', () => {
 
     before(() => {
       cleanKibana();
-      removeSignalsIndex();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();

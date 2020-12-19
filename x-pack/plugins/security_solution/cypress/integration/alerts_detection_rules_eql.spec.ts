@@ -87,7 +87,7 @@ describe.skip('Detection rules, EQL', () => {
 
   const rule = { ...eqlRule };
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(eqlRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
@@ -178,7 +178,7 @@ describe.skip('Detection rules, sequence EQL', () => {
   const expectedNumberOfSequenceAlerts = 1;
   const rule = { ...eqlSequenceRule };
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;

@@ -27,11 +27,7 @@ import {
   goToInProgressAlerts,
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import {
-  createCustomRuleActivated,
-  deleteCustomRule,
-  removeSignalsIndex,
-} from '../tasks/api_calls/rules';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -43,7 +39,6 @@ describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       cleanKibana();
-      removeSignalsIndex();
       loginAndWaitForPage(DETECTIONS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
@@ -157,7 +152,6 @@ describe('Alerts', () => {
   context('Opening alerts', () => {
     beforeEach(() => {
       cleanKibana();
-      removeSignalsIndex();
       loginAndWaitForPage(DETECTIONS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
@@ -171,11 +165,6 @@ describe('Alerts', () => {
       closeAlerts();
       waitForAlerts();
       refreshPage();
-    });
-
-    afterEach(() => {
-      deleteCustomRule();
-      removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -230,18 +219,12 @@ describe('Alerts', () => {
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
       cleanKibana();
-      removeSignalsIndex();
       loginAndWaitForPage(DETECTIONS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(newRule);
       refreshPage();
       waitForAlertsToPopulate();
-    });
-
-    afterEach(() => {
-      deleteCustomRule();
-      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {

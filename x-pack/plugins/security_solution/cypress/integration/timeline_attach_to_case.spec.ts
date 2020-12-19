@@ -14,7 +14,7 @@ import {
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../screens/create_new_case';
 import { case1 } from '../objects/case';
 import { timeline } from '../objects/timeline';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import { createCase } from '../tasks/api_calls/cases';
 
@@ -22,15 +22,11 @@ describe('attach timeline to case', () => {
   const myTimeline = { ...timeline };
 
   context('without cases created', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       createTimeline(timeline).then((response) => {
         myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
       });
-    });
-
-    after(() => {
-      deleteTimeline(myTimeline.id!);
     });
 
     it('attach timeline to a new case', () => {

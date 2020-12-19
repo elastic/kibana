@@ -36,7 +36,7 @@ import { cleanKibana } from '../tasks/common';
 import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../objects/rule';
 
 describe('Alerts detection rules', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

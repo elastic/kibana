@@ -47,11 +47,10 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/79389
 describe('Timelines', () => {
   let timelineId: string;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
   });
 
