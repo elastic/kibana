@@ -18,18 +18,24 @@
  */
 import { UiActionsSetup } from '../../ui_actions/public';
 import {
-  contextMenuTrigger,
-  panelBadgeTrigger,
-  EmbeddableContext,
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
   ACTION_ADD_PANEL,
   ACTION_CUSTOMIZE_PANEL,
-  ACTION_INSPECT_PANEL,
-  REMOVE_PANEL_ACTION,
   ACTION_EDIT_PANEL,
-  panelNotificationTrigger,
+  ACTION_INSPECT_PANEL,
+  CONTEXT_MENU_TRIGGER,
+  contextMenuTrigger,
+  EmbeddableContext,
+  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
+  panelBadgeTrigger,
+  panelNotificationTrigger,
+  RangeSelectContext,
+  REMOVE_PANEL_ACTION,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  ValueClickContext,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
 } from './lib';
 
 declare module '../../ui_actions/public' {
@@ -37,6 +43,8 @@ declare module '../../ui_actions/public' {
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
     [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
+    [SELECT_RANGE_TRIGGER]: RangeSelectContext;
+    [VALUE_CLICK_TRIGGER]: ValueClickContext;
   }
 
   export interface ActionContextMapping {
@@ -56,4 +64,6 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(panelNotificationTrigger);
+  uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
 };
