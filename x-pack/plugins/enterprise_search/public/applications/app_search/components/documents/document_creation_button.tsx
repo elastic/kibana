@@ -5,16 +5,29 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { useActions } from 'kea';
 
+import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 
+import { DocumentCreationLogic, DocumentCreationFlyout } from '../document_creation';
+
 export const DocumentCreationButton: React.FC = () => {
+  const { showCreationModes } = useActions(DocumentCreationLogic);
+
   return (
-    <EuiButton fill={true} color="primary" data-test-subj="IndexDocumentsButton">
-      {i18n.translate('xpack.enterpriseSearch.appSearch.documents.indexDocuments', {
-        defaultMessage: 'Index documents',
-      })}
-    </EuiButton>
+    <>
+      <EuiButton
+        fill={true}
+        color="primary"
+        data-test-subj="IndexDocumentsButton"
+        onClick={showCreationModes}
+      >
+        {i18n.translate('xpack.enterpriseSearch.appSearch.documents.indexDocuments', {
+          defaultMessage: 'Index documents',
+        })}
+      </EuiButton>
+      <DocumentCreationFlyout />
+    </>
   );
 };

@@ -45,10 +45,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
-      {};
+      services.embeddable.getStateTransfer().getIncomingEditorState() || {};
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
