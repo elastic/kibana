@@ -18,22 +18,18 @@ const initialState: DataState = {
     data: null,
   },
   resolverComponentInstanceID: undefined,
-  refreshCount: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
-    const refreshCount = state.refreshCount + (action.payload.shouldUpdate ? 1 : 0);
     const nextState: DataState = {
       ...state,
-      refreshCount,
       tree: {
         ...state.tree,
         currentParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
           filters: action.payload.filters,
-          dataRequestID: refreshCount,
         },
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
@@ -61,7 +57,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         pendingRequestParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
-          dataRequestID: action.payload.dataRequestID,
           filters: action.payload.filters,
         },
       },
@@ -194,7 +189,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       receivedEvents: action.payload.nodeData,
       requestedNodes: action.payload.requestedIDs,
       numberOfRequestedEvents: action.payload.numberOfRequestedEvents,
-      dataRequestID: action.payload.dataRequestID,
     });
 
     return {
@@ -210,8 +204,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   } else if (action.type === 'appRequestingNodeData') {
     const updatedNodeData = nodeDataModel.setRequestedNodes(
       state.nodeData,
-      action.payload.requestedIDs,
-      action.payload.dataRequestID
+      action.payload.requestedIDs
     );
 
     return {
@@ -219,11 +212,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       nodeData: updatedNodeData,
     };
   } else if (action.type === 'serverFailedToReturnNodeData') {
-    const updatedData = nodeDataModel.setErrorNodes(
-      state.nodeData,
-      action.payload.requestedIDs,
-      action.payload.dataRequestID
-    );
+    const updatedData = nodeDataModel.setErrorNodes(state.nodeData, action.payload.requestedIDs);
 
     return {
       ...state,
@@ -243,7 +232,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       currentRelatedEvent: {
         loading: false,
-        ...action.payload,
+        data: {
+          ...action.payload,
+        },
       },
     };
     return nextState;
