@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -15,31 +15,25 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiTextColor,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsStatus } from '../../../alerts/status';
 import './ccr.scss';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
 }
 
-export class Ccr extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      itemIdToExpandedRowMap: {},
-    };
-  }
+export const Ccr = (props) => {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
+  const toggleShards = (index, shards) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-  toggleShards(index, shards) {
-    const itemIdToExpandedRowMap = {
-      ...this.state.itemIdToExpandedRowMap,
-    };
-
-    if (itemIdToExpandedRowMap[index]) {
-      delete itemIdToExpandedRowMap[index];
+    if (itemIdToExpandedRowMapValues[index]) {
+      delete itemIdToExpandedRowMapValues[index];
     } else {
       let pagination = {
         initialPageSize: 5,
@@ -50,7 +44,7 @@ export class Ccr extends Component {
         pagination = false;
       }
 
-      itemIdToExpandedRowMap[index] = (
+      itemIdToExpandedRowMapValues[index] = (
         <EuiInMemoryTable
           items={shards}
           columns={[
@@ -74,6 +68,25 @@ export class Ccr extends Component {
             },
             {
               render: () => null,
+            },
+            {
+              field: 'alerts',
+              sortable: true,
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.alertsColumnTitle',
+                {
+                  defaultMessage: 'Alerts',
+                }
+              ),
+              render: (_field, item) => {
+                return (
+                  <AlertsStatus
+                    showBadge={true}
+                    alerts={props.alerts}
+                    stateFilter={(state) => state.meta.shardId === item.shardId}
+                  />
+                );
+              },
             },
             {
               field: 'syncLagOps',
@@ -156,11 +169,11 @@ export class Ccr extends Component {
         />
       );
     }
-    this.setState({ itemIdToExpandedRowMap });
-  }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
-  renderTable() {
-    const { data } = this.props;
+  const renderTable = () => {
+    const { data, alerts } = props;
     const items = data;
 
     let pagination = {
@@ -193,9 +206,9 @@ export class Ccr extends Component {
             ),
             sortable: true,
             render: (index, { shards }) => {
-              const expanded = !!this.state.itemIdToExpandedRowMap[index];
+              const expanded = !!itemIdToExpandedRowMap[index];
               return (
-                <EuiLink onClick={() => this.toggleShards(index, shards)}>
+                <EuiLink onClick={() => toggleShards(index, shards)}>
                   {index}
                   &nbsp;
                   {expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" />}
@@ -212,6 +225,25 @@ export class Ccr extends Component {
                 defaultMessage: 'Follows',
               }
             ),
+          },
+          {
+            field: 'alerts',
+            sortable: true,
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.alertsColumnTitle',
+              {
+                defaultMessage: 'Alerts',
+              }
+            ),
+            render: (_field, item) => {
+              return (
+                <AlertsStatus
+                  showBadge={true}
+                  alerts={alerts}
+                  stateFilter={(state) => state.meta.followerIndex === item.index}
+                />
+              );
+            },
           },
           {
             field: 'syncLagOps',
@@ -263,20 +295,26 @@ export class Ccr extends Component {
         }}
         sorting={sorting}
         itemId="id"
-        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       />
     );
-  }
+  };
 
-  render() {
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-}
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.ccr.heading"
+              defaultMessage="CCR"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPageContent>
+          <EuiPageContentBody>{renderTable()}</EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
