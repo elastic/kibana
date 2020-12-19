@@ -18,6 +18,7 @@
  */
 
 import { IFieldFormatsRegistry } from '../../../../../data/common';
+
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
 import { Aspect } from './point_series';
@@ -94,7 +95,12 @@ describe('getPoint', function () {
 
     it('should call deserialize', function () {
       const seriesAspect = [
-        { accessor: '1', format: { id: 'number', params: { pattern: '$' } } } as Aspect,
+        {
+          title: 'series',
+          accessor: '1',
+          format: { id: 'number', params: { pattern: '$' } },
+          params: {},
+        } as Aspect,
       ];
       getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 

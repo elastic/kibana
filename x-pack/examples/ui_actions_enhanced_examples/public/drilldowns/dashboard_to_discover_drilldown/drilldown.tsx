@@ -13,7 +13,7 @@ import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
 
 const isOutputWithIndexPatterns = (
   output: unknown
