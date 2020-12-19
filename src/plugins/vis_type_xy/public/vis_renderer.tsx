@@ -24,6 +24,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
+import type { PersistedState } from '../../visualizations/public';
 
 import { XyVisType } from '../common';
 import { SplitChartWarning } from './components/split_chart_warning';
@@ -59,7 +60,7 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
               visData={visData}
               renderComplete={handlers.done}
               fireEvent={handlers.event}
-              uiState={handlers.uiState}
+              uiState={handlers.uiState as PersistedState}
             />
           </VisualizationContainer>
         </>
