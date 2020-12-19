@@ -13,13 +13,8 @@
       "wait_for_completion": "__flag__",
       "only_ancient_segments": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "_upgrade",
-      "{indices}/_upgrade"
-    ],
+    "methods": [],
+    "patterns": [],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
   }
 }

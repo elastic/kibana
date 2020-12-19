@@ -1,0 +1,21 @@
+{
+  "indices.get_data_stream": {
+    "url_params": {
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_stream",
+      "_data_stream/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "searchable_snapshots.stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_searchable_snapshots/stats",
+      "{indices}/_searchable_snapshots/stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/searchable-snapshots-apis.html"
+  }
+}
