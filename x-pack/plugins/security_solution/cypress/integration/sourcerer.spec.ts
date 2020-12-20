@@ -36,6 +36,7 @@ describe('Sourcerer', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
   });
+
   describe('Default scope', () => {
     it('has SIEM index patterns selected on initial load', () => {
       openSourcerer();

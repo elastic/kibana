@@ -57,13 +57,13 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-export const reload = (afterReload: () => void) => {
+export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
-  afterReload();
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -XDELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
+  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
+  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/.siem-signals\*" -k`);
   esArchiverLoadEmptyKibana();
 };

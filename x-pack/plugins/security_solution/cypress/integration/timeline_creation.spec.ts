@@ -47,10 +47,7 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/79389
-describe.skip('Timelines', () => {
-  let timelineId: string;
-
+describe('Timelines', () => {
   before(() => {
     cleanKibana();
   });
@@ -72,7 +69,7 @@ describe.skip('Timelines', () => {
     addNameToTimeline(timeline.title);
 
     cy.wait('@timeline').then(({ response }) => {
-      timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(timeline.description);
       addNotesToTimeline(timeline.notes);

@@ -49,9 +49,8 @@ const ABSOLUTE_DATE = {
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/61612
-describe.skip('url state', () => {
-  before(() => {
+describe('url state', () => {
+  beforeEach(() => {
     cleanKibana();
   });
 

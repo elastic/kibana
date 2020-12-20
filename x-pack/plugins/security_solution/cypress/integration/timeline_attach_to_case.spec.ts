@@ -19,43 +19,39 @@ import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 describe('attach timeline to case', () => {
-  const myTimeline = { ...timeline };
-
   context('without cases created', () => {
     before(() => {
       cleanKibana();
       createTimeline(timeline).then((response) => {
-        myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
     });
 
-    after(() => {
-      deleteTimeline(myTimeline.id!);
+    after(function () {
+      deleteTimeline(this.myTimeline.savedObjectId);
     });
 
-    it('attach timeline to a new case', () => {
-      loginAndWaitForTimeline(myTimeline.id!);
+    it('attach timeline to a new case', function () {
+      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id}%27,isOpen:!t))`
+          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
         );
       });
     });
 
-    it('attach timeline to an existing case with no case', () => {
-      loginAndWaitForTimeline(myTimeline.id!);
+    it('attach timeline to an existing case with no case', function () {
+      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
       attachTimelineToExistingCase();
       addNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${
-            myTimeline.title
-          }](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id!}%27,isOpen:!t))`
+          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
         );
       });
     });

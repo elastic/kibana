@@ -36,14 +36,11 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 
-describe.skip('Alerts rules, prebuilt rules', () => {
+describe('Alerts rules, prebuilt rules', () => {
   before(() => {
     cleanKibana();
-    removeSignalsIndex();
-    esArchiverLoadEmptyKibana();
   });
 
   it('Loads prebuilt rules', () => {
