@@ -38,6 +38,7 @@ const indexPatternUpdateSchema = schema.object({
   ),
   fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
+  allowNoIndex: schema.maybe(schema.boolean()),
 });
 
 export const registerUpdateIndexPatternRoute = (
