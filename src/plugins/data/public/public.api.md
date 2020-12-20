@@ -464,14 +464,17 @@ export type AggsStart = Assign<AggsCommonStart, {
     types: AggTypesRegistryStart;
 }>;
 
+// Warning: (ae-missing-release-tag) "APPLY_FILTER_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const APPLY_FILTER_TRIGGER = "FILTER_TRIGGER";
+
 // Warning: (ae-missing-release-tag) "ApplyGlobalFilterActionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface ApplyGlobalFilterActionContext {
-    // Warning: (ae-forgotten-export) The symbol "IEmbeddable" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    embeddable?: IEmbeddable;
+    embeddable?: unknown;
     // (undocumented)
     filters: Filter[];
     // (undocumented)
