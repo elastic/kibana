@@ -10,7 +10,6 @@ import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
@@ -736,11 +735,12 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     getRenderMode: () => RenderMode;
     // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { schema, FormProps } from './schema';
 import { Form, useForm } from '../../../shared_imports';
@@ -15,6 +15,7 @@ import {
 } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
 
 const initialCaseValue: FormProps = {
@@ -23,6 +24,7 @@ const initialCaseValue: FormProps = {
   title: '',
   connectorId: 'none',
   fields: null,
+  syncAlerts: true,
 };
 
 interface Props {
@@ -31,17 +33,32 @@ interface Props {
 
 export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { connectors } = useConnectors();
+  const { connector: configurationConnector } = useCaseConfigure();
   const { caseData, postCase } = usePostCase();
+  const connectorId = useMemo(
+    () =>
+      connectors.some((connector) => connector.id === configurationConnector.id)
+        ? configurationConnector.id
+        : 'none',
+    [configurationConnector.id, connectors]
+  );
 
   const submitCase = useCallback(
-    async ({ connectorId: dataConnectorId, fields, ...dataWithoutConnectorId }, isValid) => {
+    async (
+      { connectorId: dataConnectorId, fields, syncAlerts, ...dataWithoutConnectorId },
+      isValid
+    ) => {
       if (isValid) {
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        await postCase({ ...dataWithoutConnectorId, connector: connectorToUpdate });
+        await postCase({
+          ...dataWithoutConnectorId,
+          connector: connectorToUpdate,
+          settings: { syncAlerts },
+        });
       }
     },
     [postCase, connectors]
@@ -53,6 +70,11 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
     schema,
     onSubmit: submitCase,
   });
+
+  const { setFieldValue } = form;
+
+  // Set the selected connector to the configuration connector
+  useEffect(() => setFieldValue('connectorId', connectorId), [connectorId, setFieldValue]);
 
   useEffect(() => {
     if (caseData && onSuccess) {

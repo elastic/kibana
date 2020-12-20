@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type IFieldFormat = PublicMethodsOf<FieldFormat>;
+export declare type IFieldFormat = FieldFormat;
 ```

@@ -71,21 +71,21 @@ describe('terms', () => {
     };
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
-      const esAggsConfig = termsOperation.toEsAggsConfig(
+      const esAggsFn = termsOperation.toEsAggsFn(
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            orderBy: '_key',
-            field: 'category',
-            size: 3,
-            otherBucket: true,
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
+            field: ['category'],
+            size: [3],
+            otherBucket: [true],
           }),
         })
       );
@@ -93,7 +93,7 @@ describe('terms', () => {
 
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
-      const esAggsConfig = termsOperation.toEsAggsConfig(
+      const esAggsFn = termsOperation.toEsAggsFn(
         {
           ...termsColumn,
           params: { ...termsColumn.params, otherBucket: false, missingBucket: true },
@@ -101,11 +101,11 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            otherBucket: false,
-            missingBucket: false,
+          arguments: expect.objectContaining({
+            otherBucket: [false],
+            missingBucket: [false],
           }),
         })
       );
@@ -305,7 +305,7 @@ describe('terms', () => {
       expect(termsColumn.params.otherBucket).toEqual(false);
     });
 
-    it('should use existing metric column as order column', () => {
+    it('should use existing sortable metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: {
@@ -333,6 +333,37 @@ describe('terms', () => {
         expect.objectContaining({
           orderBy: { type: 'column', columnId: 'col1' },
         })
+      );
+    });
+    it('should set alphabetical order type if metric column is of type last value', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        layer: {
+          columns: {
+            col1: {
+              label: 'Last value of a',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'a',
+              operationType: 'last_value',
+              params: {
+                sortField: 'datefield',
+              },
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({ orderBy: { type: 'alphabetical' } })
       );
     });
 

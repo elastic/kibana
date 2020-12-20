@@ -18,21 +18,18 @@
  */
 
 import {
-  KibanaMigratorMock,
   migratorInstanceMock,
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
@@ -163,29 +160,6 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#start()', () => {
-    it('creates a KibanaMigrator which retries NoLivingConnectionsError errors from ES client', async () => {
-      const coreContext = createCoreContext();
-
-      const soService = new SavedObjectsService(coreContext);
-      const coreSetup = createSetupDeps();
-      const coreStart = createStartDeps();
-
-      coreStart.elasticsearch.client.asInternalUser.indices.create = jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.reject(new esErrors.NoLivingConnectionsError('reason', {} as any))
-        )
-        .mockImplementationOnce(() =>
-          elasticsearchClientMock.createSuccessTransportRequestPromise('success')
-        );
-
-      await soService.setup(coreSetup);
-      await soService.start(coreStart, 1);
-
-      const response = await KibanaMigratorMock.mock.calls[0][0].client.indices.create();
-      return expect(response.body).toBe('success');
-    });
-
     it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);

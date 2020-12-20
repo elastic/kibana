@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PersistedState } from 'src/plugins/visualizations/public';
-
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
@@ -82,6 +80,12 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
+  hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
-  uiState?: PersistedState;
+  /**
+   * This uiState interface is actually `PersistedState` from the visualizations plugin,
+   * but expressions cannot know about vis or it creates a mess of circular dependencies.
+   * Downstream consumers of the uiState handler will need to cast for now.
+   */
+  uiState?: unknown;
 }

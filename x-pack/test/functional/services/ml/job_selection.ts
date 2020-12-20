@@ -23,5 +23,18 @@ export function MachineLearningJobSelectionProvider({ getService }: FtrProviderC
         `Job selection should display jobs or groups '${jobOrGroupIds}' (got '${actualJobOrGroupLabels}')`
       );
     },
+
+    async assertJobSelectionNotContains(jobOrGroupId: string) {
+      const selectedJobsOrGroups = await testSubjects.findAll(
+        'mlJobSelectionBadges > ~mlJobSelectionBadge'
+      );
+      const actualJobOrGroupLabels = await Promise.all(
+        selectedJobsOrGroups.map(async (badge) => await badge.getVisibleText())
+      );
+      expect(actualJobOrGroupLabels).to.not.contain(
+        jobOrGroupId,
+        `Job selection should not contain job or group '${jobOrGroupId}' (got '${actualJobOrGroupLabels}')`
+      );
+    },
   };
 }

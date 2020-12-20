@@ -58,20 +58,17 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   value?: string[] | string | null;
 }
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-
 const TopNComponent: React.FC<Props> = ({
   combinedQueries,
   defaultView,
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   field,
   from,
   indexPattern,
   indexNames,
   options,
-  query = DEFAULT_QUERY,
+  query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -132,7 +129,6 @@ const TopNComponent: React.FC<Props> = ({
             filters={filters}
             from={from}
             headerChildren={headerChildren}
-            indexPattern={indexPattern}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}

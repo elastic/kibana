@@ -330,7 +330,8 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
       soClient,
-      request.query.policyId
+      request.query.policyId,
+      request.query.kuery
     );
 
     const body: GetAgentStatusResponse = { results };

@@ -7,6 +7,7 @@
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -47,6 +48,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { Duration as Duration_2 } from 'moment-timezone';
 import { EnvironmentMode } from '@kbn/config';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -101,7 +103,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
@@ -177,9 +178,10 @@ export interface AppCategory {
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
@@ -539,23 +541,137 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsExport.kibanaRequest.no'?: number;
+    'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsExport.kibanaRequest.yes'?: number;
+    'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsExport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsImport.kibanaRequest.no'?: number;
+    'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsImport.kibanaRequest.yes'?: number;
+    'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
     // (undocumented)
@@ -567,11 +683,33 @@ export interface CoreUsageStats {
     // (undocumented)
     'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no'?: number;
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
-    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes'?: number;
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsResolveImportErrors.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.total'?: number;
 }
 
 // @public (undocumented)
@@ -932,6 +1070,18 @@ export interface ICspConfig {
 // @public
 export interface ICustomClusterClient extends IClusterClient {
     close: () => Promise<void>;
+}
+
+// @public
+export interface IExternalUrlConfig {
+    readonly policy: IExternalUrlPolicy[];
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
 }
 
 // @public
@@ -1391,7 +1541,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
 };
 
 // @public
-export interface LegacyElasticsearchError extends Boom {
+export interface LegacyElasticsearchError extends Boom.Boom {
     // (undocumented)
     [code]?: string;
 }
@@ -2461,8 +2611,6 @@ export interface SavedObjectsRawDoc {
     //
     // (undocumented)
     _source: SavedObjectsRawDocSource;
-    // (undocumented)
-    _type?: string;
 }
 
 // @public (undocumented)
@@ -2751,7 +2899,7 @@ export interface ShardsResponse {
 
 // @public (undocumented)
 export type SharedGlobalConfig = RecursiveReadonly<{
-    kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
+    kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;

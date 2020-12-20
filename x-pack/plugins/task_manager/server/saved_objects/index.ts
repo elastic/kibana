@@ -17,7 +17,7 @@ export function setupSavedObjects(
     name: 'task',
     namespaceType: 'agnostic',
     hidden: true,
-    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
+    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id; ctx._source.remove("kibana")`,
     mappings: mappings.task,
     migrations,
     indexPattern: config.index,

@@ -19,7 +19,6 @@
 
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -72,6 +71,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -100,6 +102,7 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private searchSessionId?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -155,8 +158,11 @@ export class VisualizeEmbeddable
       .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
-      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-        this.handleChanges();
+      this.getUpdated$().subscribe(() => {
+        const isDirty = this.handleChanges();
+        if (isDirty && this.handler) {
+          this.updateHandler();
+        }
       })
     );
 
@@ -220,7 +226,7 @@ export class VisualizeEmbeddable
     }
   }
 
-  public async handleChanges() {
+  private handleChanges(): boolean {
     this.transferCustomizationsToUiState();
 
     let dirty = false;
@@ -243,13 +249,16 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.searchSessionId !== this.input.searchSessionId) {
+      this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
-    }
+    return dirty;
   }
 
   // this is a hack to make editor still work, will be removed once we clean up editor
@@ -395,6 +404,7 @@ export class VisualizeEmbeddable
   }
 
   private handleVisUpdate = async () => {
+    this.handleChanges();
     this.updateHandler();
   };
 

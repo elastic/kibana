@@ -25,6 +25,7 @@ import { EuiButtonGroup } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
+import { act } from '@testing-library/react';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -206,7 +207,9 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
       const filterGroup = wrapper.find(EuiButtonGroup).first();
-      filterGroup.getElement().props.onChange('filterIn');
+      act(() => {
+        filterGroup.getElement().props.onChange('filterIn');
+      });
 
       expect(fireEvent).toHaveBeenCalledWith({
         name: 'filterBucket',
@@ -219,7 +222,9 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
       const filterGroup = wrapper.find(EuiButtonGroup).first();
-      filterGroup.getElement().props.onChange('filterOut');
+      act(() => {
+        filterGroup.getElement().props.onChange('filterOut');
+      });
 
       expect(fireEvent).toHaveBeenCalledWith({
         name: 'filterBucket',
@@ -238,7 +243,7 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      expect(wrapper.exists('.visLegend__valueDetails')).toBe(true);
+      expect(wrapper.exists('.visColorPicker')).toBe(true);
     });
   });
 
@@ -251,8 +256,8 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      const popover = wrapper.find('.visLegend__valueDetails').first();
-      const firstColor = popover.find('.visLegend__valueColorPickerDot').first();
+      const popover = wrapper.find('.visColorPicker').first();
+      const firstColor = popover.find('.visColorPicker__valueDot').first();
       firstColor.simulate('click');
 
       const colors = mockState.get('vis.colors');

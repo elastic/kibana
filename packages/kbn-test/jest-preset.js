@@ -85,7 +85,7 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
-    '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
+    '<rootDir>/packages/kbn-ui-framework/dist/',
     '<rootDir>/packages/kbn-pm/dist/',
     `integration_tests/`,
   ],
@@ -111,7 +111,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
   collectCoverageFrom: [
     '**/*.{js,mjs,jsx,ts,tsx}',
-    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
+    '!**/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
     '!**/*mock*.ts',
     '!**/*.test.ts',
     '!**/*.d.ts',

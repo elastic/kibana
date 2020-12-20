@@ -14,24 +14,18 @@ import { useValues } from 'kea';
 
 import { ResultView } from './views';
 import { Pagination } from './pagination';
+import { Props as ResultViewProps } from './views/result_view';
 import { useSearchContextState } from './hooks';
 import { DocumentCreationButton } from '../document_creation_button';
 import { AppLogic } from '../../../app_logic';
 import { EngineLogic } from '../../engine';
 import { DOCS_PREFIX } from '../../../routes';
 
-// TODO This is temporary until we create real Result type
-interface Result {
-  [key: string]: {
-    raw: string | string[] | number | number[] | undefined;
-  };
-}
-
 export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
   const { myRole } = useValues(AppLogic);
-  const { engineName, isMetaEngine } = useValues(EngineLogic);
+  const { isMetaEngine, engine } = useValues(EngineLogic);
 
   if (!wasSearched) return null;
 
@@ -49,8 +43,8 @@ export const SearchExperienceContent: React.FC = () => {
         <EuiSpacer />
         <Results
           titleField="id"
-          resultView={(props: { result: Result }) => {
-            return <ResultView {...props} engineName={engineName} />;
+          resultView={(props: ResultViewProps) => {
+            return <ResultView {...props} schemaForTypeHighlights={engine.schema} />;
           }}
         />
         <EuiSpacer />

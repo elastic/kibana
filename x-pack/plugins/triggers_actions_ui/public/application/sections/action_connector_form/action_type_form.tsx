@@ -22,7 +22,6 @@ import {
   EuiFormLabel,
   EuiFormControlLayout,
   EuiSuperSelect,
-  EuiLoadingSpinner,
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
@@ -60,6 +59,7 @@ export type ActionTypeFormProps = {
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
   defaultParams: DefaultActionParams;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -94,6 +94,7 @@ export const ActionTypeForm = ({
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
+  isActionGroupDisabledForActionType,
   defaultParams,
 }: ActionTypeFormProps) => {
   const {
@@ -145,6 +146,28 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
+  const actionGroupDisplay = (
+    actionGroupId: string,
+    actionGroupName: string,
+    actionTypeId: string
+  ): string =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+        ? i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            {
+              defaultMessage: '{actionGroupName} (Not Currently Supported)',
+              values: { actionGroupName },
+            }
+          )
+        : actionGroupName
+      : actionGroupName;
+
+  const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+      : false;
+
   const optionsList = connectors
     .filter(
       (connectorItem) =>
@@ -191,7 +214,8 @@ export const ActionTypeForm = ({
                   data-test-subj={`addNewActionConnectorActionGroup-${index}`}
                   options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    inputDisplay: name,
+                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
                     'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
                   }))}
                   valueOfSelected={selectedActionGroup.id}
@@ -255,15 +279,7 @@ export const ActionTypeForm = ({
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
+          <Suspense fallback={null}>
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}

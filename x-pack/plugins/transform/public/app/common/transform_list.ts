@@ -6,7 +6,7 @@
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
-import { TransformId, TransformPivotConfig } from '../../../common/types/transform';
+import { TransformConfigUnion, TransformId } from '../../../common/types/transform';
 import { TransformStats } from '../../../common/types/transform_stats';
 
 // Used to pass on attribute names to table columns
@@ -17,7 +17,7 @@ export enum TRANSFORM_LIST_COLUMN {
 
 export interface TransformListRow {
   id: TransformId;
-  config: TransformPivotConfig;
+  config: TransformConfigUnion;
   mode?: string; // added property on client side to allow filtering by this field
   stats: TransformStats;
 }
