@@ -20,3 +20,4 @@
 export * from './color_maps';
 export * from './colors';
 export * from './components';
+export * from './utils';

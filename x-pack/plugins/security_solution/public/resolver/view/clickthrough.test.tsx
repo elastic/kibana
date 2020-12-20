@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactWrapper } from 'enzyme';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -13,7 +14,6 @@ import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
-import { ReactWrapper } from 'enzyme';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 let simulator: Simulator;
