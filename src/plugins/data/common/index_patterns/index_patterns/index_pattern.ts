@@ -84,6 +84,10 @@ export class IndexPattern implements IIndexPattern {
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
+  /**
+   * prevents errors when index pattern exists before indices
+   */
+  public readonly allowNoIndex: boolean = false;
 
   constructor({
     spec = {},
@@ -120,6 +124,7 @@ export class IndexPattern implements IIndexPattern {
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
     this.intervalName = spec.intervalName;
+    this.allowNoIndex = spec.allowNoIndex || false;
   }
 
   /**
@@ -217,6 +222,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormats: this.fieldFormatMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
+      allowNoIndex: this.allowNoIndex,
     };
   }
 
@@ -322,6 +328,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
     };
   }
 

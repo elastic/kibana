@@ -14,10 +14,12 @@ import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiFilePicker,
@@ -27,40 +29,40 @@ import {
 
 import { AppLogic } from '../../../app_logic';
 
-import { MODAL_CANCEL_BUTTON, MODAL_CONTINUE_BUTTON } from '../constants';
+import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON, FLYOUT_CONTINUE_BUTTON } from '../constants';
 import { DocumentCreationLogic } from '../';
 
 export const UploadJsonFile: React.FC = () => (
   <>
-    <ModalHeader />
-    <ModalBody />
-    <ModalFooter />
+    <FlyoutHeader />
+    <FlyoutBody />
+    <FlyoutFooter />
   </>
 );
 
-export const ModalHeader: React.FC = () => {
+export const FlyoutHeader: React.FC = () => {
   return (
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>
-        <h2>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2 id={FLYOUT_ARIA_LABEL_ID}>
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.documentCreation.uploadJsonFile.title',
             { defaultMessage: 'Drag and drop .json' }
           )}
         </h2>
-      </EuiModalHeaderTitle>
-    </EuiModalHeader>
+      </EuiTitle>
+    </EuiFlyoutHeader>
   );
 };
 
-export const ModalBody: React.FC = () => {
+export const FlyoutBody: React.FC = () => {
   const { configuredLimits } = useValues(AppLogic);
   const maxDocumentByteSize = configuredLimits?.engine?.maxDocumentByteSize;
 
   const { setFileInput } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiModalBody>
+    <EuiFlyoutBody>
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -79,20 +81,26 @@ export const ModalBody: React.FC = () => {
         accept="application/json"
         fullWidth
       />
-    </EuiModalBody>
+    </EuiFlyoutBody>
   );
 };
 
-export const ModalFooter: React.FC = () => {
+export const FlyoutFooter: React.FC = () => {
   const { fileInput } = useValues(DocumentCreationLogic);
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiModalFooter>
-      <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-      <EuiButton fill isDisabled={!fileInput}>
-        {MODAL_CONTINUE_BUTTON}
-      </EuiButton>
-    </EuiModalFooter>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill isDisabled={!fileInput}>
+            {FLYOUT_CONTINUE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
   );
 };

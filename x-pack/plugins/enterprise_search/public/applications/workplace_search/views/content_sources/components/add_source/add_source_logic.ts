@@ -18,10 +18,40 @@ import {
   FlashMessagesLogic,
 } from '../../../../../shared/flash_messages';
 
+import { staticSourceData } from '../../source_data';
+import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+
 import { AppLogic } from '../../../../app_logic';
 import { CustomSource } from '../../../../types';
 
+export interface AddSourceProps {
+  sourceIndex: number;
+  connect?: boolean;
+  configure?: boolean;
+  reAuthenticate?: boolean;
+}
+
+export enum AddSourceSteps {
+  ConfigIntroStep = 'Config Intro',
+  SaveConfigStep = 'Save Config',
+  ConfigCompletedStep = 'Config Completed',
+  ConnectInstanceStep = 'Connect Instance',
+  ConfigureCustomStep = 'Configure Custom',
+  ConfigureOauthStep = 'Configure Oauth',
+  SaveCustomStep = 'Save Custom',
+  ReAuthenticateStep = 'ReAuthenticate',
+}
+
 export interface AddSourceActions {
+  initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
+  setAddSourceProps: ({
+    addSourceProps,
+  }: {
+    addSourceProps: AddSourceProps;
+  }) => {
+    addSourceProps: AddSourceProps;
+  };
+  setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setClientIdValue(clientIdValue: string): string;
@@ -83,6 +113,8 @@ export interface OrganizationsMap {
 }
 
 interface AddSourceValues {
+  addSourceProps: AddSourceProps;
+  addSourceCurrentStep: AddSourceSteps;
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
@@ -112,6 +144,11 @@ interface PreContentSourceResponse {
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
   actions: {
+    initializeAddSource: (addSourceProps: AddSourceProps) => ({ addSourceProps }),
+    setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => ({
+      addSourceProps,
+    }),
+    setAddSourceStep: (addSourceCurrentStep: AddSourceSteps) => addSourceCurrentStep,
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
     setClientIdValue: (clientIdValue: string) => clientIdValue,
@@ -145,6 +182,18 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setButtonNotLoading: () => false,
   },
   reducers: {
+    addSourceProps: [
+      {} as AddSourceProps,
+      {
+        setAddSourceProps: (_, { addSourceProps }) => addSourceProps,
+      },
+    ],
+    addSourceCurrentStep: [
+      AddSourceSteps.ConfigIntroStep,
+      {
+        setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
+      },
+    ],
     sourceConfigData: [
       {} as SourceConfigData,
       {
@@ -282,6 +331,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     ],
   }),
   listeners: ({ actions, values }) => ({
+    initializeAddSource: ({ addSourceProps }) => {
+      const { serviceType } = staticSourceData[addSourceProps.sourceIndex];
+      actions.setAddSourceProps({ addSourceProps });
+      actions.setAddSourceStep(getFirstStep(addSourceProps));
+      actions.getSourceConfigData(serviceType);
+    },
     getSourceConfigData: async ({ serviceType }) => {
       const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
@@ -435,3 +490,15 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     },
   }),
 });
+
+const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
+  const { sourceIndex, connect, configure, reAuthenticate } = props;
+  const { serviceType } = staticSourceData[sourceIndex];
+  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+
+  if (isCustom) return AddSourceSteps.ConfigureCustomStep;
+  if (connect) return AddSourceSteps.ConnectInstanceStep;
+  if (configure) return AddSourceSteps.ConfigureOauthStep;
+  if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+  return AddSourceSteps.ConfigIntroStep;
+};

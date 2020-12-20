@@ -17,16 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Trigger } from '.';
-
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
-  id: SELECT_RANGE_TRIGGER,
-  title: i18n.translate('uiActions.triggers.selectRangeTitle', {
-    defaultMessage: 'Range selection',
-  }),
-  description: i18n.translate('uiActions.triggers.selectRangeDescription', {
-    defaultMessage: 'A range of values on the visualization',
-  }),
-};
+export * from './apply_filter_trigger';
