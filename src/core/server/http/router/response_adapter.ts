@@ -56,7 +56,7 @@ export class HapiResponseAdapter {
   }
 
   public toInternalError() {
-    const error = new Boom('', {
+    const error = new Boom.Boom('', {
       statusCode: 500,
     });
 
@@ -129,7 +129,7 @@ export class HapiResponseAdapter {
     }
 
     // we use for BWC with Boom payload for error responses - {error: string, message: string, statusCode: string}
-    const error = new Boom('', {
+    const error = new Boom.Boom('', {
       statusCode: kibanaResponse.status,
     });
 
@@ -142,8 +142,7 @@ export class HapiResponseAdapter {
 
     const headers = kibanaResponse.options.headers;
     if (headers) {
-      // Hapi typings for header accept only strings, although string[] is a valid value
-      error.output.headers = headers as any;
+      error.output.headers = headers;
     }
 
     return error;
