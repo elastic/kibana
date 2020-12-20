@@ -27,6 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
+    after(async function () {
+      await sendToBackground.deleteAllBackgroundSessions();
+    });
+
     it('not delayed should load', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');

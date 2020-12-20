@@ -13,10 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const sendToBackground = getService('sendToBackground');
   const esArchiver = getService('esArchiver');
 
-  describe('dashboard with async search', () => {
-    describe('Send to background', () => {
+  describe('Background search sessions Management UI', () => {
+    describe('New sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
+      });
+
+      after(async () => {
+        await sendToBackground.deleteAllBackgroundSessions();
       });
 
       it('Saves a session and verifies it in the Management app', async () => {
@@ -40,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Management UI', () => {
+    describe('Archived sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('management/kibana/background_sessions');
       });

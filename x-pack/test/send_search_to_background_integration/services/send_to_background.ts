@@ -23,6 +23,7 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
+  const esSupertest = getService('esSupertest');
 
   return new (class SendToBackgroundService {
     public async find(): Promise<WebElementWrapper> {
@@ -45,6 +46,16 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     public async viewBackgroundSessions() {
       await this.ensurePopoverOpened();
       await testSubjects.click('backgroundSessionIndicatorViewBackgroundSessionsLink');
+    }
+
+    public async deleteAllBackgroundSessions() {
+      // ignores 409 errs and keeps retrying
+      await retry.tryForTime(5000, async () => {
+        await esSupertest
+          .post('/.kibana*/_delete_by_query')
+          .send({ query: { match: { type: 'background-session' } } })
+          .expect(200);
+      });
     }
 
     public async save() {
