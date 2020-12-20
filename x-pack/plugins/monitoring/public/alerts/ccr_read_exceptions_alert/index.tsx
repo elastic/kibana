@@ -33,7 +33,6 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
 export function createCCRReadExceptionsAlertType(): AlertTypeModel {
   return {
     id: ALERT_CCR_READ_EXCEPTIONS,
-    name: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].label,
     description: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
