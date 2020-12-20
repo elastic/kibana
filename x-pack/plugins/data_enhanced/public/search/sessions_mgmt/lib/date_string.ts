@@ -7,9 +7,6 @@
 import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment';
 
-// Helper function to format date string per UI Settings config
-// Can throw exception for null date, or error from moment
-
 export const dateString = (inputString: string, uiSettings: IUiSettingsClient): string => {
   if (inputString == null) {
     throw new Error('Invalid date string!');

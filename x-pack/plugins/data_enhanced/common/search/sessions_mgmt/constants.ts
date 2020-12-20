@@ -10,7 +10,7 @@ export const REFRESH_INTERVAL_MS = 3000;
 
 export const EXPIRES_SOON_IN_DAYS = 2;
 
-export const MAX_SEARCH_HITS = 10000;
+export const SESSIONS_LISTING_SEARCH_SIZE = 10000;
 
 export enum ACTION {
   EXTEND = 'extend',

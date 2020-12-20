@@ -22,13 +22,8 @@ export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (
     const { status: statusType } = session;
     const existingOption = options.find((o) => o.value === statusType);
     if (!existingOption) {
-      return [
-        ...options,
-        {
-          value: statusType,
-          view: <TableText>{getStatusText(session.status)}</TableText>,
-        },
-      ];
+      const view = <TableText>{getStatusText(session.status)}</TableText>;
+      return [...options, { value: statusType, view }];
     }
 
     return options;

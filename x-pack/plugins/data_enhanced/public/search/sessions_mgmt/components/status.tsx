@@ -92,7 +92,6 @@ const getStatusAttributes = ({
         throw new Error(`Could not instantiate a expiration Date object from: ${session.expires}`);
       }
 
-    //
     case STATUS.CANCELLED:
       return {
         icon: <EuiIcon color="#9AA" type="crossInACircleFilled" />,
@@ -102,7 +101,6 @@ const getStatusAttributes = ({
         }),
       };
 
-    //
     case STATUS.ERROR:
       return {
         textColor: 'danger',
@@ -114,7 +112,6 @@ const getStatusAttributes = ({
         }),
       };
 
-    //
     case STATUS.COMPLETE:
       try {
         const expiresOnDate = dateString(session.expires!, uiSettings);
@@ -140,7 +137,6 @@ const getStatusAttributes = ({
       // Error was thrown
       return null;
 
-    //
     default:
       throw new Error(`Unknown status: ${session.status}`);
   }

@@ -13,7 +13,7 @@ import { BackgroundSessionSavedObjectAttributes } from '../../../../common';
 import {
   ACTION,
   EXPIRES_SOON_IN_DAYS,
-  MAX_SEARCH_HITS,
+  SESSIONS_LISTING_SEARCH_SIZE,
   STATUS,
   UISession,
 } from '../../../../common/search/sessions_mgmt';
@@ -73,7 +73,6 @@ const mapToUISession = (urls: UrlGeneratorsStart) => async (
     console.error(err);
   }
 
-  //
   return {
     id: savedObject.id,
     isViewable: true, // always viewable
@@ -88,21 +87,18 @@ const mapToUISession = (urls: UrlGeneratorsStart) => async (
   };
 };
 
-// Main
 export class SearchSessionsMgmtAPI {
-  //
   constructor(
     private sessionsClient: ISessionsClient,
     private urls: UrlGeneratorsStart,
     private notifications: NotificationsStart
   ) {}
 
-  //
   public async fetchTableData(): Promise<UISession[] | null> {
     try {
       const result = await this.sessionsClient.find({
         page: 1,
-        perPage: MAX_SEARCH_HITS, // NOTE: using an easier approach to paging the table in-memory, not requesting single pages as they are viewed
+        perPage: SESSIONS_LISTING_SEARCH_SIZE,
         sortField: 'created',
         sortOrder: 'asc',
       });

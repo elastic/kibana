@@ -19,7 +19,6 @@ export const getAction = (
   actionComplete: ActionComplete
 ): IClickActionDescriptor | null => {
   switch (actionType) {
-    //
     case ACTION.CANCEL:
       return {
         iconType: 'crossInACircleFilled',
@@ -29,7 +28,6 @@ export const getAction = (
         }),
       };
 
-    //
     case ACTION.DELETE:
       return {
         iconType: 'trash',
@@ -37,7 +35,6 @@ export const getAction = (
         label: <DeleteButton api={api} id={id} actionComplete={actionComplete} />,
       };
 
-    //
     case ACTION.EXTEND:
       return {
         iconType: extendSessionIcon,
@@ -47,7 +44,6 @@ export const getAction = (
         }),
       };
 
-    //
     default:
       // eslint-disable-next-line no-console
       console.error(`Unknown action: ${actionType}`);

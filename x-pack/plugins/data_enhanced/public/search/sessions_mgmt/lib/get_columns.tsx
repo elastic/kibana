@@ -34,7 +34,6 @@ const appToIcon = (app: string) => {
   return app;
 };
 
-// Main
 export const getColumns = (
   api: SearchSessionsMgmtAPI,
   http: HttpStart,

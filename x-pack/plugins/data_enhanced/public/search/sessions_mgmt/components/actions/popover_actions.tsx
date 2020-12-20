@@ -57,7 +57,6 @@ const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActio
   </EuiFlexGroup>
 );
 
-// main
 export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -116,7 +115,6 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
     return itemSet;
   }, [] as Array<EuiContextMenuPanelItemDescriptorEntry | EuiContextMenuPanelItemSeparator>);
 
-  //
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
   return (

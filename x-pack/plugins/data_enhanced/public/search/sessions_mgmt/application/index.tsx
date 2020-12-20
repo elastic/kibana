@@ -5,10 +5,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
 import {
   APP,
   AppDependencies,
@@ -19,19 +16,12 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
 
-type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
-
-//
 export class SearchSessionsMgmtApp {
-  private urls$ = new Rx.Subject<UrlGeneratorsStart>();
-
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
-  ) {
-    this.urls$.pipe(first()).subscribe((urls) => {});
-  }
+  ) {}
 
   public async mountManagementSection() {
     const { coreSetup, params, pluginsSetup } = this;

@@ -88,7 +88,6 @@ export function SearchSessionsMgmtTable({ api, http, uiSettings, initialTable, .
   // table config: sorting
   const sorting = { sort: { field: 'startedDate', direction: 'desc' as 'desc' } };
 
-  //
   return (
     <EuiInMemoryTable<UISession>
       {...props}
