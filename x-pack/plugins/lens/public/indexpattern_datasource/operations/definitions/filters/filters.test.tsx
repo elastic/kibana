@@ -90,7 +90,8 @@ describe('filters', () => {
       const esAggsFn = filtersOperation.toEsAggsFn(
         state.layers.first.columns.col1 as FiltersIndexPatternColumn,
         'col1',
-        state.indexPatterns['1']
+        state.indexPatterns['1'],
+        state.layers.first
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

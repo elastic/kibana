@@ -248,7 +248,8 @@ describe('date_histogram', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
-        state.indexPatterns['1']
+        state.indexPatterns['1'],
+        state.layers.first
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -299,7 +300,8 @@ describe('date_histogram', () => {
               },
             },
           ]),
-        }
+        },
+        state.layers.first
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

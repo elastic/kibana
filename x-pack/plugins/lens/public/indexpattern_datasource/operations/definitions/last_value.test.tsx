@@ -80,7 +80,8 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        state.layers.first
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

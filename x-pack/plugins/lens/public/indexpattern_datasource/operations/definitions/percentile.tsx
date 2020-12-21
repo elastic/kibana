@@ -36,7 +36,7 @@ function ofName(name: string, percentile: number) {
   });
 }
 
-const DEFAULT_PERCENTILE_VALUE = 93;
+const DEFAULT_PERCENTILE_VALUE = 95;
 
 export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
   type: 'percentile',
@@ -45,11 +45,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   }),
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (
-      fieldType === 'number' &&
-      aggregatable &&
-      (!aggregationRestrictions || aggregationRestrictions.percentile)
-    ) {
+    if (fieldType === 'number' && aggregatable && !aggregationRestrictions) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -64,7 +60,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       newField &&
         newField.type === 'number' &&
         newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.percentile)
+        !newField.aggregationRestrictions
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
@@ -173,6 +169,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
             defaultMessage: 'Percentile',
           })}
+          data-test-subj="lns-indexPattern-percentile-form"
           display="columnCompressed"
           fullWidth
           isInvalid={!inputValueIsValid}
@@ -184,6 +181,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           }
         >
           <EuiFieldNumber
+            data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue}
             min={0}

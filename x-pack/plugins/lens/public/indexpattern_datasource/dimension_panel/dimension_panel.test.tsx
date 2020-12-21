@@ -1321,8 +1321,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Maximum',
       'Median',
       'Minimum',
+      'Percentile',
       'Sum',
       'Unique count',
+      '\u00a0',
     ]);
   });
 

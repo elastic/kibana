@@ -152,7 +152,8 @@ describe('ranges', () => {
       const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        state.layers.first
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -194,7 +195,8 @@ describe('ranges', () => {
       const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        state.layers.first
       );
 
       expect(esAggsFn).toEqual(
@@ -213,7 +215,8 @@ describe('ranges', () => {
       const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        state.layers.first
       );
 
       expect(esAggsFn).toEqual(
@@ -232,7 +235,8 @@ describe('ranges', () => {
       const esAggsFn = rangeOperation.toEsAggsFn(
         state.layers.first.columns.col1 as RangeIndexPatternColumn,
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        state.layers.first
       );
 
       expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
