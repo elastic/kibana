@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Vis } from '../../visualizations/public';
+import { VisToExpressionAst } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
 
-export const toExpressionAst = (vis: Vis) => {
+export const toExpressionAst: VisToExpressionAst = (vis) => {
   const { markdown, fontSize, openLinksInNewTab } = vis.params;
 
   const markdownVis = buildExpressionFunction<MarkdownVisExpressionFunctionDefinition>(

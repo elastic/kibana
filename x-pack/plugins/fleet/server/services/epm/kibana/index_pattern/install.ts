@@ -5,15 +5,11 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import {
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_PLACEHOLDER_SUFFIX,
-} from '../../../../constants';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { ArchivePackage, InstallSource, ValueOf } from '../../../../../common/types';
-import { RegistryPackage, CallESAsCurrentUser, DataType } from '../../../../types';
-import { appContextService } from '../../../../services';
+import { RegistryPackage, DataType } from '../../../../types';
 import { getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {
@@ -172,6 +168,7 @@ export const createIndexPattern = (indexPatternType: string, fields: Fields) => 
     timeFieldName: '@timestamp',
     fields: JSON.stringify(indexPatternFields),
     fieldFormatMap: JSON.stringify(fieldFormatMap),
+    allowNoIndex: true,
   };
 };
 
@@ -381,32 +378,4 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   if (field.url_template) params.urlTemplate = field.url_template;
   if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
-};
-
-export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => {
-  // create placeholder indices to supress errors in the kibana Dashboards app
-  // that no matching indices exist https://github.com/elastic/kibana/issues/62343
-  const logger = appContextService.getLogger();
-  return Promise.all(
-    Object.values(dataTypes).map(async (indexPattern) => {
-      const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
-      const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
-      if (!indexExists) {
-        try {
-          await callCluster('indices.create', {
-            index: defaultIndexPatternName,
-            body: {
-              mappings: {
-                properties: {
-                  '@timestamp': { type: 'date' },
-                },
-              },
-            },
-          });
-        } catch (putErr) {
-          logger.error(`${defaultIndexPatternName} could not be created`);
-        }
-      }
-    })
-  );
 };

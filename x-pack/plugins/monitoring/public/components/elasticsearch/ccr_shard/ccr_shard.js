@@ -25,6 +25,7 @@ import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export class CcrShard extends PureComponent {
   renderCharts() {
@@ -123,13 +124,22 @@ export class CcrShard extends PureComponent {
   }
 
   render() {
-    const { stat, oldestStat, formattedLeader } = this.props;
+    const { stat, oldestStat, formattedLeader, alerts } = this.props;
 
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat} />
-          <EuiSpacer size="s" />
+          <EuiPanel>
+            <Status
+              stat={stat}
+              formattedLeader={formattedLeader}
+              oldestStat={oldestStat}
+              alerts={alerts}
+            />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <AlertsCallout alerts={alerts} />
+          <EuiSpacer size="m" />
           {this.renderErrors()}
           <EuiFlexGroup wrap>{this.renderCharts()}</EuiFlexGroup>
           <EuiHorizontalRule />
