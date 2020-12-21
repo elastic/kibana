@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import classNames from 'classnames';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FilterBarProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -45,7 +46,14 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       const filterPinnedState = pinned ? 'pinned' : 'unpinned';
       const filterNegatedState = negated ? 'filter-negated' : '';
       return testSubjects.exists(
-        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value} filter-${filterPinnedState} ${filterNegatedState}`,
+        classNames(
+          'filter',
+          `filter-${filterActivationState}`,
+          key !== '' && `filter-key-${key}`,
+          value !== '' && `filter-value-${value}`,
+          `filter-${filterPinnedState}`,
+          filterNegatedState
+        ),
         {
           allowHidden: true,
         }
