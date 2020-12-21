@@ -23,7 +23,7 @@ import { EventDetailsWidthProvider } from '../../../../common/components/events_
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { TimelineModel } from '../../../store/timeline/model';
+import { TimelineModel, TimelineTabs } from '../../../store/timeline/model';
 import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
@@ -183,6 +183,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                tabType={TimelineTabs.pinned}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,

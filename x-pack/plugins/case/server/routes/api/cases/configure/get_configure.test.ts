@@ -17,7 +17,8 @@ import {
 
 import { initGetCaseConfigure } from './get_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
-import { mappings } from './mock';
+import { mappings } from '../../../../client/configure/mock';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 
 describe('GET configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -42,7 +43,7 @@ describe('GET configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
       ...mockCaseConfigure[0].attributes,
-      mappings,
+      mappings: mappings[ConnectorTypes.jira],
       version: mockCaseConfigure[0].version,
     });
   });
@@ -76,7 +77,7 @@ describe('GET configuration', () => {
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
-      mappings,
+      mappings: mappings[ConnectorTypes.jira],
       updated_at: '2020-04-09T09:43:51.778Z',
       updated_by: {
         full_name: 'elastic',

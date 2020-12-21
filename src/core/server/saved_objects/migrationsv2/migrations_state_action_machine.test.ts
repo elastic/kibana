@@ -142,8 +142,8 @@ describe('migrationsStateActionMachine', () => {
       }
     `);
   });
-  it('resolves when reaching the DONE state', () => {
-    return expect(
+  it('resolves when reaching the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState,
         logger: mockLogger.get(),
@@ -152,8 +152,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.anything());
   });
-  it('resolves with migrated status if some sourceIndex in the DONE state', () => {
-    return expect(
+  it('resolves with migrated status if some sourceIndex in the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
         logger: mockLogger.get(),
@@ -162,8 +162,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'migrated' }));
   });
-  it('resolves with patched status if none sourceIndex in the DONE state', () => {
-    return expect(
+  it('resolves with patched status if none sourceIndex in the DONE state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.none } },
         logger: mockLogger.get(),
@@ -172,8 +172,8 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'patched' }));
   });
-  it('rejects with error message when reaching the FATAL state', () => {
-    return expect(
+  it('rejects with error message when reaching the FATAL state', async () => {
+    await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),

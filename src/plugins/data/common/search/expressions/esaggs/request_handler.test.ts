@@ -150,7 +150,8 @@ describe('esaggs expression function - public', () => {
     });
   });
 
-  test('calls agg.postFlightRequest if it exiests', async () => {
+  test('calls agg.postFlightRequest if it exiests and agg is enabled', async () => {
+    mockParams.aggs.aggs[0].enabled = true;
     await handleRequest(mockParams);
     expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(1);
 
@@ -158,6 +159,12 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockParams.aggs.aggs[0] = ({ type: { name: 'count' } } as unknown) as IAggConfig;
     expect(async () => await handleRequest(mockParams)).not.toThrowError();
+  });
+
+  test('should skip agg.postFlightRequest call if the agg is disabled', async () => {
+    mockParams.aggs.aggs[0].enabled = false;
+    await handleRequest(mockParams);
+    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(0);
   });
 
   test('tabifies response data', async () => {
