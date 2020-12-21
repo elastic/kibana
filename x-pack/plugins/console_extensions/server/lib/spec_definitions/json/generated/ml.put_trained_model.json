@@ -4,8 +4,8 @@
       "PUT"
     ],
     "patterns": [
-      "_ml/inference/{model_id}"
+      "_ml/trained_models/{model_id}"
     ],
-    "documentation": "TODO"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-models.html"
   }
 }

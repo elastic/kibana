@@ -6,7 +6,7 @@ pageLoadAssetSize:
   beatsManagement: 188135
   bfetch: 41874
   canvas: 1065624
-  charts: 159211
+  charts: 195358
   cloud: 21076
   console: 46235
   core: 692684
@@ -98,7 +98,7 @@ pageLoadAssetSize:
   visTypeTimeseries: 155347
   visTypeVega: 153861
   visTypeVislib: 242982
-  visTypeXy: 20255
+  visTypeXy: 113478
   visualizations: 295169
   visualize: 57433
   watcher: 43742

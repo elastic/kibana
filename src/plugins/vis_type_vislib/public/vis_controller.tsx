@@ -22,7 +22,7 @@ import React, { RefObject } from 'react';
 
 import { mountReactNode } from '../../../core/public/utils';
 import { ChartsPluginSetup } from '../../charts/public';
-import { PersistedState } from '../../visualizations/public';
+import type { PersistedState } from '../../visualizations/public';
 import { IInterpreterRenderHandlers } from '../../expressions/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
@@ -115,7 +115,7 @@ export const createVislibVisController = (
           })
           .addClass((legendClassName as any)[visParams.legendPosition]);
 
-        this.mountLegend(esResponse, visParams, fireEvent, uiState);
+        this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
       }
 
       this.vislibVis.render(esResponse, uiState);
@@ -128,7 +128,7 @@ export const createVislibVisController = (
         CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
       ) {
         this.unmountLegend?.();
-        this.mountLegend(esResponse, visParams, fireEvent, uiState);
+        this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
         this.vislibVis.render(esResponse, uiState);
       }
     }

@@ -5,6 +5,11 @@
  */
 
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../drag_and_drop/helpers';
+import {
+  NOTES_CONTAINER_CLASS_NAME,
+  NOTE_CONTENT_CLASS_NAME,
+  ROW_RENDERER_CLASS_NAME,
+} from '../../../timelines/components/timeline/body/helpers';
 import { HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME } from '../with_hover_actions';
 
 /**
@@ -62,6 +67,9 @@ export const isArrowDownOrArrowUp = (event: React.KeyboardEvent): boolean =>
 /** Returns `true` if an arrow key was pressed */
 export const isArrowKey = (event: React.KeyboardEvent): boolean =>
   isArrowRightOrArrowLeft(event) || isArrowDownOrArrowUp(event);
+
+/** Returns `true` if the right arrow key was pressed */
+export const isArrowRight = (event: React.KeyboardEvent): boolean => event.key === 'ArrowRight';
 
 /** Returns `true` if the escape key was pressed */
 export const isEscape = (event: React.KeyboardEvent): boolean => event.key === 'Escape';
@@ -284,6 +292,12 @@ export type OnColumnFocused = ({
   newFocusedColumnAriaColindex: number | null;
 }) => void;
 
+export const getRowRendererClassName = (ariaRowindex: number) =>
+  `${ROW_RENDERER_CLASS_NAME}-${ariaRowindex}`;
+
+export const getNotesContainerClassName = (ariaRowindex: number) =>
+  `${NOTES_CONTAINER_CLASS_NAME}-${ariaRowindex}`;
+
 /**
  * This function implements arrow key support for the `onKeyDownFocusHandler`.
  *
@@ -312,6 +326,28 @@ export const onArrowKeyDown = ({
   onColumnFocused?: OnColumnFocused;
   rowindexAttribute: string;
 }) => {
+  if (isArrowDown(event) && event.shiftKey) {
+    const firstRowRendererDraggable = containerElement?.querySelector<HTMLDivElement>(
+      `.${getRowRendererClassName(focusedAriaRowindex)} .${DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}`
+    );
+
+    if (firstRowRendererDraggable) {
+      firstRowRendererDraggable.focus();
+      return;
+    }
+  }
+
+  if (isArrowRight(event) && event.shiftKey) {
+    const firstNoteContent = containerElement?.querySelector<HTMLDivElement>(
+      `.${getNotesContainerClassName(focusedAriaRowindex)} .${NOTE_CONTENT_CLASS_NAME}`
+    );
+
+    if (firstNoteContent) {
+      firstNoteContent.focus();
+      return;
+    }
+  }
+
   const ariaColindex = isArrowRightOrArrowLeft(event)
     ? getNewAriaColindex({
         focusedAriaColindex,
