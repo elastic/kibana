@@ -36,6 +36,7 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  calculateThresholdSignalUuid,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1301,6 +1302,20 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('calculateThresholdSignalUuid', () => {
+    it('should generate a uuid without key', () => {
+      const startedAt = new Date('2020-12-17T16:27:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'agent.name');
+      expect(signalUuid).toEqual('c0cbe4b7-48de-5734-ae81-d8de3e79839d');
+    });
+
+    it('should generate a uuid with key', () => {
+      const startedAt = new Date('2019-11-18T13:32:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'host.ip', '1.2.3.4');
+      expect(signalUuid).toEqual('f568509e-b570-5d3c-a7ed-7c73fd29ddaf');
     });
   });
 });
