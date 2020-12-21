@@ -59,8 +59,6 @@ export const createMockBucketColumns = (): BucketColumns[] => {
         id: 'terms',
         params: {
           id: 'string',
-          otherBucketLabel: 'Other',
-          missingBucketLabel: 'Missing',
         },
       },
     },
@@ -102,8 +100,6 @@ export const createMockBucketColumns = (): BucketColumns[] => {
         id: 'terms',
         params: {
           id: 'boolean',
-          otherBucketLabel: 'Other',
-          missingBucketLabel: 'Missing',
         },
       },
     },
