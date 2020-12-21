@@ -38,9 +38,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('session-mgmt-table-col-created');
         await testSubjects.existOrFail('session-mgmt-view-action');
 
-        expect(
-          await testSubjects.find('session-mgmt-table-col-name').then((n) => n.getVisibleText())
-        ).to.be('Not Delayed');
+        // find there is only one item in the table which is the newly saved session
+        const names = await testSubjects.findAll('session-mgmt-table-col-name');
+        expect(names.length).to.be(1);
+        expect(await Promise.all(names.map((n) => n.getVisibleText()))).to.eql(['Not Delayed']);
+
+        // navigate to dashboard
+        await testSubjects.click('session-mgmt-table-col-name');
+
+        // embeddable has loaded
+        await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension');
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        // background session was restored
+        await sendToBackground.expectState('restored');
       });
     });
 
@@ -128,11 +139,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]
         `);
 
-        await esArchiver.unload('data/bckgnd_sessions');
-      });
-
-      it('pagination', async () => {
-        await esArchiver.load('data/bckgnd_sessions');
         await esArchiver.unload('data/bckgnd_sessions');
       });
     });
