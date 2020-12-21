@@ -19,12 +19,20 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
+import { Datatable } from 'src/plugins/expressions';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
-import { RangeSelectContext } from '../../../../embeddable/public';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
-export async function createFiltersFromRangeSelectAction(event: RangeSelectContext['data']) {
+/** @internal */
+export interface RangeSelectDataContext {
+  table: Datatable;
+  column: number;
+  range: number[];
+  timeFieldName?: string;
+}
+
+export async function createFiltersFromRangeSelectAction(event: RangeSelectDataContext) {
   const column: Record<string, any> = event.table.columns[event.column];
 
   if (!column || !column.meta) {

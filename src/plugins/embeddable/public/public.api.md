@@ -8,48 +8,29 @@ import { Action } from 'history';
 import { Action as Action_3 } from 'src/plugins/ui_actions/public';
 import { ActionExecutionContext as ActionExecutionContext_2 } from 'src/plugins/ui_actions/public';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
-import { Assign } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
-import { CoreSetup as CoreSetup_2 } from 'src/core/public';
-import { CoreSetup as CoreSetup_3 } from 'kibana/public';
-import { CoreStart as CoreStart_2 } from 'kibana/public';
 import * as CSS from 'csstype';
-import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
-import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
-import { ErrorToastOptions as ErrorToastOptions_2 } from 'src/core/public/notifications';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
-import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
-import { HttpSetup as HttpSetup_2 } from 'kibana/public';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
-import { ISearchOptions } from 'src/plugins/data/public';
-import { ISearchSource } from 'src/plugins/data/public';
-import { IStorageWrapper as IStorageWrapper_2 } from 'src/plugins/kibana_utils/public';
-import { IUiSettingsClient as IUiSettingsClient_2 } from 'src/core/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { Moment } from 'moment';
-import { NameList } from 'elasticsearch';
 import { NotificationsStart as NotificationsStart_2 } from 'src/core/public';
 import { Observable } from 'rxjs';
 import { Optional } from '@kbn/utility-types';
@@ -57,39 +38,23 @@ import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PluginInitializerContext } from 'src/core/public';
-import { PluginInitializerContext as PluginInitializerContext_3 } from 'kibana/public';
 import * as PropTypes from 'prop-types';
-import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { RequestAdapter as RequestAdapter_2 } from 'src/plugins/inspector/common';
-import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject as SavedObject_2 } from 'kibana/server';
-import { SavedObject as SavedObject_3 } from 'src/core/server';
 import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
-import { SavedObjectsClientContract as SavedObjectsClientContract_3 } from 'src/core/public';
-import { SavedObjectsFindOptions as SavedObjectsFindOptions_3 } from 'kibana/public';
-import { SavedObjectsFindResponse as SavedObjectsFindResponse_2 } from 'kibana/server';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { SearchResponse } from 'elasticsearch';
-import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
-import { StartServicesAccessor as StartServicesAccessor_2 } from 'kibana/public';
-import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
-import { ToastsSetup as ToastsSetup_2 } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
@@ -348,7 +313,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
 // Warning: (ae-missing-release-tag) "EmbeddableChildPanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_3> {
+export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_2> {
     constructor(props: EmbeddableChildPanelProps);
     // (undocumented)
     [panel: string]: any;
@@ -381,9 +346,9 @@ export interface EmbeddableChildPanelProps {
 // Warning: (ae-missing-release-tag) "EmbeddableContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EmbeddableContext {
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
     // (undocumented)
-    embeddable: IEmbeddable;
+    embeddable: T;
 }
 
 // @public
@@ -444,9 +409,6 @@ export type EmbeddableInput = {
     enhancements?: SerializableState;
     disabledActions?: string[];
     disableTriggers?: boolean;
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
     searchSessionId?: string;
 };
 
@@ -501,7 +463,7 @@ export interface EmbeddablePackageState {
 // Warning: (ae-missing-release-tag) "EmbeddablePanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class EmbeddablePanel extends React.Component<Props, State_4> {
+export class EmbeddablePanel extends React.Component<Props, State_3> {
     constructor(props: Props);
     // (undocumented)
     closeMyContextMenuPanel: () => void;
@@ -571,10 +533,6 @@ export interface EmbeddableSetup {
 //
 // @public (undocumented)
 export interface EmbeddableSetupDependencies {
-    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginSetup" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    data: DataPublicPluginSetup;
     // Warning: (ae-forgotten-export) The symbol "UiActionsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -610,10 +568,6 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
 //
 // @public (undocumented)
 export interface EmbeddableStartDependencies {
-    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginStart" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    data: DataPublicPluginStart;
     // Warning: (ae-forgotten-export) The symbol "Start" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -715,7 +669,7 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
 // Warning: (ae-missing-release-tag) "isContextMenuTriggerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext;
+export const isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext<IEmbeddable<import("..").EmbeddableInput, import("..").EmbeddableOutput>>;
 
 // Warning: (ae-missing-release-tag) "isEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -869,6 +823,16 @@ export interface SavedObjectEmbeddableInput extends EmbeddableInput {
     savedObjectId: string;
 }
 
+// Warning: (ae-missing-release-tag) "SELECT_RANGE_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const SELECT_RANGE_TRIGGER = "SELECT_RANGE_TRIGGER";
+
+// Warning: (ae-missing-release-tag) "VALUE_CLICK_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const VALUE_CLICK_TRIGGER = "VALUE_CLICK_TRIGGER";
+
 // Warning: (ae-missing-release-tag) "ValueClickContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -912,10 +876,7 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:44:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:59:3 - (ae-forgotten-export) The symbol "TimeRange" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:64:3 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:69:3 - (ae-forgotten-export) The symbol "Filter" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:42:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/triggers/triggers.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
