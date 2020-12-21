@@ -149,6 +149,39 @@ export class IndexPatternsService {
     return await Promise.all(getIndexPatternPromises);
   };
 
+  filter = async (
+    search: string,
+    fields: string[] = ['title'],
+    size: number = 10
+  ): Promise<IndexPattern[]> => {
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields,
+      search,
+      searchFields: fields,
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      console.log(savedObject.id);
+      return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
+  // filter = async (
+  //   filterFunction: (savedObject: SavedObject<IndexPatternSavedObjectAttrs>) => boolean
+  // ): Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>>> => {
+  //   if (!this.savedObjectsCache) {
+  //     await this.refreshSavedObjectsCache();
+  //   }
+  //   if (!this.savedObjectsCache) {
+  //     return [];
+  //   }
+  //   return Promise.all(this.savedObjectsCache.map(filterFunction)).then((results) =>
+  //     this.savedObjectsCache!.filter((_v, index) => results[index])
+  //   );
+  // };
+  //
   /**
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
