@@ -107,6 +107,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
+      partialFailure: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
@@ -185,6 +186,29 @@ describe('rules_notification_alert_type', () => {
       expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
         gap: '2 hours',
       });
+    });
+
+    it('should set a partial failure for when rules cannot read all provided indices', async () => {
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: true,
+          },
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
+      payload.params.index = ['some*', 'myfa*'];
+      await alert.executor(payload);
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'Missing required read permissions on indexes: ["some*"]'
+      );
     });
 
     it('should NOT warn about the gap between runs if gap small', async () => {

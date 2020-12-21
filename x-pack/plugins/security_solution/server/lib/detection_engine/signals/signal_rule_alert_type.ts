@@ -172,6 +172,7 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
+      let wroteStatus = false;
       await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
@@ -182,24 +183,19 @@ export const signalRulesAlertType = ({
         const privileges = await checkPrivileges(services, inputIndex);
 
         const indexNames = Object.keys(privileges.index);
-        logger.debug(buildRuleMessage(`INDEX NAMES: ${JSON.stringify(indexNames, null, 2)}`));
         const everyIndexHasReadPrivileges = indexNames.every(
           (indexName) => privileges.index[indexName].read
         );
-        logger.debug(buildRuleMessage(`has everything? ${everyIndexHasReadPrivileges}`));
         if (!everyIndexHasReadPrivileges) {
-          await ruleStatusService.error(
-            `Missing required read permissions on indexes: ${JSON.stringify(
-              indexNames.filter((indexName) => privileges.index[indexName].read !== true),
-              null,
-              2
-            )}`
-          );
-          // exit rule early?
-          return;
+          const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
+            indexNames.filter((indexName) => privileges.index[indexName].read !== true)
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
         }
       } catch (exc) {
-        logger.error(`OOPS: ${exc}`);
+        logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
@@ -629,7 +625,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError) {
+          if (!hasError && !wroteStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
