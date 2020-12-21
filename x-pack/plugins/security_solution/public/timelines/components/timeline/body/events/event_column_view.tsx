@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
@@ -45,15 +45,18 @@ interface Props {
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
+  notesCount: number;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
+  hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   showNotes: boolean;
+  tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes: () => void;
 }
@@ -74,15 +77,18 @@ export const EventColumnView = React.memo<Props>(
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
+    notesCount,
     onEventToggled,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
     refetch,
+    hasRowRenderers,
     onRuleChange,
     selectedEventIds,
     showCheckboxes,
     showNotes,
+    tabType,
     timelineId,
     toggleShowNotes,
   }) => {
@@ -228,6 +234,9 @@ export const EventColumnView = React.memo<Props>(
           columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
+          hasRowRenderers={hasRowRenderers}
+          notesCount={notesCount}
+          tabType={tabType}
           timelineId={timelineId}
         />
       </EventsTrData>

@@ -5,7 +5,7 @@
  */
 /* eslint-disable react/display-name */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { resolverStoreFactory } from '../store';
 import { StartServices } from '../../types';
@@ -27,8 +27,16 @@ export const Resolver = React.memo((props: ResolverProps) => {
     return resolverStoreFactory(dataAccessLayer);
   }, [dataAccessLayer]);
 
+  const [activeStore, updateActiveStore] = useState(store);
+
+  useEffect(() => {
+    if (props.shouldUpdate) {
+      updateActiveStore(resolverStoreFactory(dataAccessLayer));
+    }
+  }, [dataAccessLayer, props.shouldUpdate]);
+
   return (
-    <Provider store={store}>
+    <Provider store={activeStore}>
       <ResolverWithoutProviders {...props} />
     </Provider>
   );

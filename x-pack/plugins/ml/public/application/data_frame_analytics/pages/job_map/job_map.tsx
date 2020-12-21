@@ -131,7 +131,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
 
   return (
-    <>
+    <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -197,6 +197,6 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
           />
         </Cytoscape>
       </div>
-    </>
+    </div>
   );
 };

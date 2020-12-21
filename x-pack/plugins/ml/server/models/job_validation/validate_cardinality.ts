@@ -132,35 +132,54 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           datafeedConfig
         );
 
-        uniqueFieldNames.forEach((uniqueFieldName) => {
-          const field = stats.aggregatableExistsFields.find(
-            (fieldData) => fieldData.fieldName === uniqueFieldName
-          );
-          if (field !== undefined && typeof field === 'object' && field.stats) {
-            modelPlotCardinality +=
-              modelPlotConfigFieldCount > 0 ? modelPlotConfigFieldCount : field.stats.cardinality!;
+        if (stats.totalCount === 0) {
+          messages.push({
+            id: 'cardinality_no_results',
+          });
+        } else {
+          uniqueFieldNames.forEach((uniqueFieldName) => {
+            const aggregatableNotExistsField = stats.aggregatableNotExistsFields.find(
+              (fieldData) => fieldData.fieldName === uniqueFieldName
+            );
 
-            if (isInvalid(field.stats.cardinality!)) {
+            if (aggregatableNotExistsField !== undefined) {
               messages.push({
-                id: messageId || (`cardinality_${type}_field` as MessageId),
+                id: 'cardinality_field_not_exists',
                 fieldName: uniqueFieldName,
               });
+            } else {
+              const field = stats.aggregatableExistsFields.find(
+                (fieldData) => fieldData.fieldName === uniqueFieldName
+              );
+              if (field !== undefined && typeof field === 'object' && field.stats) {
+                modelPlotCardinality +=
+                  modelPlotConfigFieldCount > 0
+                    ? modelPlotConfigFieldCount
+                    : field.stats.cardinality!;
+
+                if (isInvalid(field.stats.cardinality!)) {
+                  messages.push({
+                    id: messageId || (`cardinality_${type}_field` as MessageId),
+                    fieldName: uniqueFieldName,
+                  });
+                }
+              } else {
+                // only report uniqueFieldName as not aggregatable if it's not part
+                // of a valid categorization configuration and if it's not a scripted field or runtime mapping.
+                if (
+                  !isValidCategorizationConfig(job, uniqueFieldName) &&
+                  !isScriptField(job, uniqueFieldName) &&
+                  !isRuntimeMapping(job, uniqueFieldName)
+                ) {
+                  messages.push({
+                    id: 'field_not_aggregatable',
+                    fieldName: uniqueFieldName,
+                  });
+                }
+              }
             }
-          } else {
-            // only report uniqueFieldName as not aggregatable if it's not part
-            // of a valid categorization configuration and if it's not a scripted field or runtime mapping.
-            if (
-              !isValidCategorizationConfig(job, uniqueFieldName) &&
-              !isScriptField(job, uniqueFieldName) &&
-              !isRuntimeMapping(job, uniqueFieldName)
-            ) {
-              messages.push({
-                id: 'field_not_aggregatable',
-                fieldName: uniqueFieldName,
-              });
-            }
-          }
-        });
+          });
+        }
       } catch (e) {
         // checkAggregatableFieldsExist may return an error if 'fielddata' is
         // disabled for text fields (which is the default). If there was only

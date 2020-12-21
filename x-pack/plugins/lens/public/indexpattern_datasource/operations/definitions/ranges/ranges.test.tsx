@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { IndexPatternPrivateState, IndexPattern } from '../../../types';
+import type { IndexPatternLayer, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { rangeOperation } from '../index';
 import { RangeIndexPatternColumn } from './ranges';
@@ -51,6 +51,7 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ p
 type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
   React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
+const sourceField = 'MyField';
 const defaultOptions = {
   storage: {} as IStorageWrapper,
   // need this for MAX_HISTOGRAM value
@@ -64,74 +65,63 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   http: {} as HttpSetup,
+  indexPattern: {
+    id: '1',
+    title: 'my_index_pattern',
+    hasRestrictions: false,
+    fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+    getFieldByName: getFieldByNameFactory([
+      { name: sourceField, type: 'number', displayName: sourceField },
+    ]),
+  },
 };
 
 describe('ranges', () => {
-  let state: IndexPatternPrivateState;
+  let layer: IndexPatternLayer;
   const InlineOptions = rangeOperation.paramEditor!;
-  const sourceField = 'MyField';
   const MAX_HISTOGRAM_VALUE = 100;
   const GRANULARITY_DEFAULT_VALUE = (MAX_HISTOGRAM_VALUE - MIN_HISTOGRAM_BARS) / 2;
   const GRANULARITY_STEP = (MAX_HISTOGRAM_VALUE - MIN_HISTOGRAM_BARS) / SLICES;
 
   function setToHistogramMode() {
-    const column = state.layers.first.columns.col1 as RangeIndexPatternColumn;
+    const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'number';
     column.scale = 'interval';
     column.params.type = MODES.Histogram;
   }
 
   function setToRangeMode() {
-    const column = state.layers.first.columns.col1 as RangeIndexPatternColumn;
+    const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'string';
     column.scale = 'ordinal';
     column.params.type = MODES.Range;
   }
 
-  function getDefaultState(): IndexPatternPrivateState {
+  function getDefaultLayer(): IndexPatternLayer {
     return {
-      indexPatternRefs: [],
-      indexPatterns: {
-        '1': {
-          id: '1',
-          title: 'my_index_pattern',
-          hasRestrictions: false,
-          fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
-          getFieldByName: getFieldByNameFactory([
-            { name: sourceField, type: 'number', displayName: sourceField },
-          ]),
-        },
-      },
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            // Start with the histogram type
-            col1: {
-              label: sourceField,
-              dataType: 'number',
-              operationType: 'range',
-              scale: 'interval',
-              isBucketed: true,
-              sourceField,
-              params: {
-                type: MODES.Histogram,
-                ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-                maxBars: 'auto',
-              },
-            },
-            col2: {
-              label: 'Count',
-              dataType: 'number',
-              isBucketed: false,
-              sourceField: 'Records',
-              operationType: 'count',
-            },
+      indexPatternId: '1',
+      columnOrder: ['col1', 'col2'],
+      columns: {
+        // Start with the histogram type
+        col1: {
+          label: sourceField,
+          dataType: 'number',
+          operationType: 'range',
+          scale: 'interval',
+          isBucketed: true,
+          sourceField,
+          params: {
+            type: MODES.Histogram,
+            ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+            maxBars: 'auto',
           },
+        },
+        col2: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
         },
       },
     };
@@ -142,7 +132,7 @@ describe('ranges', () => {
   });
 
   beforeEach(() => {
-    state = getDefaultState();
+    layer = getDefaultLayer();
   });
 
   describe('toEsAggsFn', () => {
@@ -150,7 +140,7 @@ describe('ranges', () => {
 
     it('should reflect params correctly', () => {
       const esAggsFn = rangeOperation.toEsAggsFn(
-        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
@@ -189,10 +179,10 @@ describe('ranges', () => {
     });
 
     it('should set maxBars param if provided', () => {
-      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+      (layer.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
 
       const esAggsFn = rangeOperation.toEsAggsFn(
-        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
@@ -211,7 +201,7 @@ describe('ranges', () => {
       setToRangeMode();
 
       const esAggsFn = rangeOperation.toEsAggsFn(
-        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
@@ -225,12 +215,12 @@ describe('ranges', () => {
 
     it('should include custom labels', () => {
       setToRangeMode();
-      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges = [
+      (layer.columns.col1 as RangeIndexPatternColumn).params.ranges = [
         { from: 0, to: 100, label: 'customlabel' },
       ];
 
       const esAggsFn = rangeOperation.toEsAggsFn(
-        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
@@ -276,36 +266,30 @@ describe('ranges', () => {
   describe('paramEditor', () => {
     describe('Modify intervals in basic mode', () => {
       beforeEach(() => {
-        state = getDefaultState();
+        layer = getDefaultLayer();
       });
 
       it('should start update the state with the default maxBars value', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
         mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    ...state.layers.first.columns.col1.params,
-                    maxBars: GRANULARITY_DEFAULT_VALUE,
-                  },
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...layer.columns.col1.params,
+                maxBars: GRANULARITY_DEFAULT_VALUE,
               },
             },
           },
@@ -313,16 +297,15 @@ describe('ranges', () => {
       });
 
       it('should update state when changing Max bars number', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -343,20 +326,15 @@ describe('ranges', () => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    ...state.layers.first.columns.col1.params,
-                    maxBars: MAX_HISTOGRAM_VALUE,
-                  },
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...layer.columns.col1.params,
+                maxBars: MAX_HISTOGRAM_VALUE,
               },
             },
           },
@@ -364,16 +342,15 @@ describe('ranges', () => {
       });
 
       it('should update the state using the plus or minus buttons by the step amount', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -389,20 +366,15 @@ describe('ranges', () => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    ...state.layers.first.columns.col1.params,
-                    maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
-                  },
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...layer.columns.col1.params,
+                maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
               },
             },
           },
@@ -417,25 +389,19 @@ describe('ranges', () => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    ...state.layers.first.columns.col1.params,
-                    maxBars: GRANULARITY_DEFAULT_VALUE,
-                  },
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...layer.columns.col1.params,
+                maxBars: GRANULARITY_DEFAULT_VALUE,
               },
             },
           },
         });
-        // });
       });
     });
 
@@ -446,16 +412,15 @@ describe('ranges', () => {
       beforeEach(() => setToRangeMode());
 
       it('should show one range interval to start with', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -463,16 +428,15 @@ describe('ranges', () => {
       });
 
       it('should add a new range', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -495,23 +459,18 @@ describe('ranges', () => {
           } as React.ChangeEvent<HTMLInputElement>);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      ranges: [
-                        { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                        { from: 50, to: Infinity, label: '' },
-                      ],
-                    },
-                  },
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...layer.columns.col1.params,
+                  ranges: [
+                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                    { from: 50, to: Infinity, label: '' },
+                  ],
                 },
               },
             },
@@ -520,16 +479,15 @@ describe('ranges', () => {
       });
 
       it('should add a new range with custom label', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -552,23 +510,18 @@ describe('ranges', () => {
           } as React.ChangeEvent<HTMLInputElement>);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      ranges: [
-                        { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                        { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
-                      ],
-                    },
-                  },
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...layer.columns.col1.params,
+                  ranges: [
+                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                    { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
+                  ],
                 },
               },
             },
@@ -577,16 +530,15 @@ describe('ranges', () => {
       });
 
       it('should open a popover to edit an existing range', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -607,20 +559,15 @@ describe('ranges', () => {
           } as React.ChangeEvent<HTMLInputElement>);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      ranges: [{ from: 0, to: 50, label: '' }],
-                    },
-                  },
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...layer.columns.col1.params,
+                  ranges: [{ from: 0, to: 50, label: '' }],
                 },
               },
             },
@@ -629,16 +576,15 @@ describe('ranges', () => {
       });
 
       it('should not accept invalid ranges', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -670,10 +616,10 @@ describe('ranges', () => {
       });
 
       it('should be possible to remove a range if multiple', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         // Add an extra range
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
+        (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
           from: DEFAULT_INTERVAL,
           to: 2 * DEFAULT_INTERVAL,
           label: '',
@@ -682,11 +628,10 @@ describe('ranges', () => {
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -709,10 +654,10 @@ describe('ranges', () => {
       });
 
       it('should handle correctly open ranges when saved', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         // Add an extra open range:
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
+        (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
           from: null,
           to: null,
           label: '',
@@ -721,11 +666,10 @@ describe('ranges', () => {
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -749,21 +693,21 @@ describe('ranges', () => {
       });
 
       it('should correctly handle the default formatter for the field', () => {
-        const setStateSpy = jest.fn();
-
-        // set a default formatter for the sourceField used
-        state.indexPatterns['1'].fieldFormatMap = {
-          MyField: { id: 'custom', params: {} },
-        };
+        const updateLayerSpy = jest.fn();
 
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
+            indexPattern={{
+              ...defaultOptions.indexPattern,
+              fieldFormatMap: {
+                MyField: { id: 'custom', params: {} },
+              },
+            }}
           />
         );
 
@@ -773,15 +717,10 @@ describe('ranges', () => {
       });
 
       it('should correctly pick the dimension formatter for the field', () => {
-        const setStateSpy = jest.fn();
-
-        // set a default formatter for the sourceField used
-        state.indexPatterns['1'].fieldFormatMap = {
-          MyField: { id: 'custom', params: {} },
-        };
+        const updateLayerSpy = jest.fn();
 
         // now set a format on the range operation
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+        (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'bytes',
           params: { decimals: 0 },
         };
@@ -789,11 +728,16 @@ describe('ranges', () => {
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
+            indexPattern={{
+              ...defaultOptions.indexPattern,
+              fieldFormatMap: {
+                MyField: { id: 'custom', params: {} },
+              },
+            }}
           />
         );
 
@@ -803,25 +747,24 @@ describe('ranges', () => {
       });
 
       it('should not update the state on mount', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
 
         mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
-        expect(setStateSpy.mock.calls.length).toBe(0);
+        expect(updateLayerSpy.mock.calls.length).toBe(0);
       });
 
       it('should not reset formatters when switching between custom ranges and auto histogram', () => {
-        const setStateSpy = jest.fn();
+        const updateLayerSpy = jest.fn();
         // now set a format on the range operation
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+        (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'custom',
           params: { decimals: 3 },
         };
@@ -829,11 +772,10 @@ describe('ranges', () => {
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
+            layer={layer}
+            updateLayer={updateLayerSpy}
             columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
@@ -842,7 +784,7 @@ describe('ranges', () => {
           instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
         });
 
-        expect(setStateSpy.mock.calls[1][0].layers.first.columns.col1.params.format).toEqual({
+        expect(updateLayerSpy.mock.calls[1][0].columns.col1.params.format).toEqual({
           id: 'custom',
           params: { decimals: 3 },
         });

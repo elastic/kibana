@@ -133,10 +133,11 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    * @apiName RecognizeIndex
    * @apiDescription By supplying an index pattern, discover if any of the modules are a match for data in that index.
    * @apiSchema (params) modulesIndexPatternTitleSchema
-   * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern.
+   * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern, sorted by module ID.
    * @apiSuccessExample {json} Success-Response:
    * [{
    *    "id": "nginx_ecs",
+   *    "title": "Nginx access logs",
    *     "query": {
    *        "bool": {
    *          "filter": [
