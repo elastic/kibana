@@ -22,16 +22,9 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier } from '@elastic/charts';
-import { ValueClickContext } from '../../../embeddable/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { PieVisParams } from '../types';
-// import { ClickTriggerEvent } from '../../../charts/public';
-
-// this is temporary
-export interface ClickTriggerEvent {
-  name: 'filterBucket';
-  data: ValueClickContext['data'];
-}
+import { ClickTriggerEvent } from '../../../charts/public';
 
 export const getLegendActions = (
   canFilter: (

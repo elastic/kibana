@@ -41,10 +41,8 @@ import {
 import { keys } from '@elastic/eui';
 
 import {
-  // getFilterFromChartClickEventFn,
-  // getFilterFromSeriesFn,
-  // LegendToggle,
-  // ClickTriggerEvent,
+  LegendToggle,
+  ClickTriggerEvent,
   ChartsPluginSetup,
   PaletteRegistry,
 } from '../../charts/public';
@@ -56,14 +54,12 @@ import {
   getColorPicker,
   getLayers,
   getLegendActions,
-  ClickTriggerEvent,
   canFilter,
   getFilterClickData,
   getFilterEventData,
   getConfig,
   getColumns,
 } from './utils';
-import { LegendToggle } from './temp';
 
 import './chart.scss';
 

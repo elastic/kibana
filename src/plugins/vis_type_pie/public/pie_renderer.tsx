@@ -19,7 +19,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import type { PersistedState } from '../../visualizations/public';
@@ -54,21 +54,23 @@ export const getPieVisRenderer: (
     const services = await getStartDeps();
 
     render(
-      <>
-        {isSplitChart && <SplitChartWarning docLinks={services.docLinks} />}
-        <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
-          <PieComponent
-            chartsThemeService={theme}
-            palettes={palettes}
-            visParams={visConfig}
-            visData={visData}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
-            services={services.data}
-          />
-        </VisualizationContainer>
-      </>,
+      <I18nProvider>
+        <>
+          {isSplitChart && <SplitChartWarning docLinks={services.docLinks} />}
+          <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
+            <PieComponent
+              chartsThemeService={theme}
+              palettes={palettes}
+              visParams={visConfig}
+              visData={visData}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              services={services.data}
+            />
+          </VisualizationContainer>
+        </>
+      </I18nProvider>,
       domNode
     );
   },

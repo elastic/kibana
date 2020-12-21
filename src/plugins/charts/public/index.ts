@@ -25,6 +25,7 @@ export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
 export * from './services/palettes/types';
+export { lightenColor } from './services/palettes/lighten_color';
 export {
   PaletteOutput,
   CustomPaletteArguments,

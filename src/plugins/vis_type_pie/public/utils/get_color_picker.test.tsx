@@ -23,7 +23,7 @@ import { mount } from 'enzyme';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getColorPicker } from './get_color_picker';
-import { ColorPicker } from '../temp';
+import { ColorPicker } from '../../../charts/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();

@@ -18,7 +18,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
 import { Schemas } from '../../../vis_default_editor/public';

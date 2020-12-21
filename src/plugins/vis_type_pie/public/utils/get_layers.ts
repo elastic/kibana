@@ -18,10 +18,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
-import { SeriesLayer, PaletteRegistry } from '../../../charts/public';
+import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { BucketColumns, PieVisParams } from '../types';
-import { lightenColor } from '../temp';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 

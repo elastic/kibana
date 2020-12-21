@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart } from 'src/core/public';
 
 interface SplitChartWarningProps {
@@ -32,29 +32,27 @@ export function SplitChartWarning({ docLinks }: SplitChartWarningProps) {
   const advancedSettingsLink = docLinks.links.management.visualizationSettings;
 
   return (
-    <I18nProvider>
-      <EuiCallOut
-        title={i18n.translate('visTypePie.splitChartWarning.title', {
-          defaultMessage: 'Warning',
-        })}
-        color="warning"
-        iconType="help"
-      >
-        <FormattedMessage
-          id="visTypePie.splitChartWarning.content"
-          defaultMessage="The new charts library does not support split chart aggregation. Please enable the {link} advanced setting to use split chart aggregation."
-          values={{
-            link: (
-              <EuiLink href={advancedSettingsLink} target="_blank" external>
-                <FormattedMessage
-                  id="visTypePie.splitChartWarning.link"
-                  defaultMessage="Legacy charts library"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
-    </I18nProvider>
+    <EuiCallOut
+      title={i18n.translate('visTypePie.splitChartWarning.title', {
+        defaultMessage: 'Warning',
+      })}
+      color="warning"
+      iconType="help"
+    >
+      <FormattedMessage
+        id="visTypePie.splitChartWarning.content"
+        defaultMessage="The new charts library does not support split chart aggregation. Please enable the {link} advanced setting to use split chart aggregation."
+        values={{
+          link: (
+            <EuiLink href={advancedSettingsLink} target="_blank" external>
+              <FormattedMessage
+                id="visTypePie.splitChartWarning.link"
+                defaultMessage="Legacy charts library"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
   );
 }

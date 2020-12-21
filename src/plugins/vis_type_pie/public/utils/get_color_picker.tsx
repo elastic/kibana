@@ -22,8 +22,8 @@ import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiPopover } from '@elastic/eui';
 import { DatatableRow } from '../../../expressions/public';
+import { ColorPicker } from '../../../charts/public';
 import { BucketColumns } from '../types';
-import { ColorPicker } from '../temp';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   switch (legendPosition) {
