@@ -9,12 +9,12 @@ import * as rt from 'io-ts';
 import { isNumber, isFinite } from 'lodash';
 import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
-  AlertParams,
-  Criteria,
-  RatioCriteria,
+  PartialCountCriteria,
   isRatioAlert,
   getNumerator,
   getDenominator,
+  PartialRequiredAlertParams,
+  PartialCriteria,
 } from '../../../common/alerting/logs/log_threshold/types';
 
 export const criterionErrorRT = rt.type({
@@ -49,7 +49,9 @@ export function validateExpression({
   count,
   criteria,
   timeSize,
-}: Partial<AlertParams>): ValidationResult {
+}: PartialRequiredAlertParams & {
+  criteria: PartialCriteria;
+}): ValidationResult {
   const validationResult = { errors: {} };
 
   // NOTE: In the case of components provided by the Alerting framework the error property names
@@ -85,7 +87,7 @@ export function validateExpression({
 
   // Criteria validation
   if (criteria && criteria.length > 0) {
-    const getCriterionErrors = (_criteria: Criteria): CriterionErrors => {
+    const getCriterionErrors = (_criteria: PartialCountCriteria): CriterionErrors => {
       const _errors: CriterionErrors = {};
 
       _criteria.forEach((criterion, idx) => {
@@ -120,12 +122,12 @@ export function validateExpression({
     };
 
     if (!isRatioAlert(criteria)) {
-      const criteriaErrors = getCriterionErrors(criteria as Criteria);
+      const criteriaErrors = getCriterionErrors(criteria);
       errors.criteria[0] = criteriaErrors;
     } else {
-      const numeratorErrors = getCriterionErrors(getNumerator(criteria as RatioCriteria));
+      const numeratorErrors = getCriterionErrors(getNumerator(criteria));
       errors.criteria[0] = numeratorErrors;
-      const denominatorErrors = getCriterionErrors(getDenominator(criteria as RatioCriteria));
+      const denominatorErrors = getCriterionErrors(getDenominator(criteria));
       errors.criteria[1] = denominatorErrors;
     }
   }

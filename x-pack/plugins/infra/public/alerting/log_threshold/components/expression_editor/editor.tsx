@@ -17,6 +17,7 @@ import {
   AlertParams,
   Comparator,
   isRatioAlert,
+  PartialCriteria as PartialCriteriaType,
   ThresholdType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -187,7 +188,7 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
   );
 
   const updateCriteria = useCallback(
-    (criteria: AlertParams['criteria']) => {
+    (criteria: PartialCriteriaType) => {
       setAlertParams('criteria', criteria);
     },
     [setAlertParams]

@@ -112,14 +112,23 @@ export const criterionRT = rt.type({
 });
 export type Criterion = rt.TypeOf<typeof criterionRT>;
 
-export const criteriaRT = rt.array(criterionRT);
-export type Criteria = rt.TypeOf<typeof criteriaRT>;
+export const partialCriterionRT = rt.partial(criterionRT.props);
+export type PartialCriterion = rt.TypeOf<typeof partialCriterionRT>;
 
-export const countCriteriaRT = criteriaRT;
+export const countCriteriaRT = rt.array(criterionRT);
 export type CountCriteria = rt.TypeOf<typeof countCriteriaRT>;
 
-export const ratioCriteriaRT = rt.tuple([criteriaRT, criteriaRT]);
+export const partialCountCriteriaRT = rt.array(partialCriterionRT);
+export type PartialCountCriteria = rt.TypeOf<typeof partialCountCriteriaRT>;
+
+export const ratioCriteriaRT = rt.tuple([countCriteriaRT, countCriteriaRT]);
 export type RatioCriteria = rt.TypeOf<typeof ratioCriteriaRT>;
+
+export const partialRatioCriteriaRT = rt.tuple([partialCountCriteriaRT, partialCountCriteriaRT]);
+export type PartialRatioCriteria = rt.TypeOf<typeof partialRatioCriteriaRT>;
+
+export const partialCriteriaRT = rt.union([partialCountCriteriaRT, partialRatioCriteriaRT]);
+export type PartialCriteria = rt.TypeOf<typeof partialCriteriaRT>;
 
 export const TimeUnitRT = rt.union([
   rt.literal('s'),
@@ -140,11 +149,14 @@ const RequiredAlertParamsRT = rt.type({
   timeSize: timeSizeRT,
 });
 
+const partialRequiredAlertParamsRT = rt.partial(RequiredAlertParamsRT.props);
+export type PartialRequiredAlertParams = rt.TypeOf<typeof partialRequiredAlertParamsRT>;
+
 const OptionalAlertParamsRT = rt.partial({
   groupBy: groupByRT,
 });
 
-export const alertParamsRT = rt.intersection([
+export const countAlertParamsRT = rt.intersection([
   rt.type({
     criteria: countCriteriaRT,
     ...RequiredAlertParamsRT.props,
@@ -153,8 +165,7 @@ export const alertParamsRT = rt.intersection([
     ...OptionalAlertParamsRT.props,
   }),
 ]);
-
-export type CountAlertParams = rt.TypeOf<typeof alertParamsRT>;
+export type CountAlertParams = rt.TypeOf<typeof countAlertParamsRT>;
 
 export const ratioAlertParamsRT = rt.intersection([
   rt.type({
@@ -165,13 +176,12 @@ export const ratioAlertParamsRT = rt.intersection([
     ...OptionalAlertParamsRT.props,
   }),
 ]);
-
 export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
 
-export const AlertParamsRT = rt.union([alertParamsRT, ratioAlertParamsRT]);
-export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
+export const alertParamsRT = rt.union([countAlertParamsRT, ratioAlertParamsRT]);
+export type AlertParams = rt.TypeOf<typeof alertParamsRT>;
 
-export const isRatioAlert = (criteria: AlertParams['criteria']): criteria is RatioCriteria => {
+export const isRatioAlert = (criteria: PartialCriteria): criteria is PartialRatioCriteria => {
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
 };
 
@@ -179,11 +189,13 @@ export const isRatioAlertParams = (params: AlertParams): params is RatioAlertPar
   return isRatioAlert(params.criteria);
 };
 
-export const getNumerator = (criteria: RatioCriteria): Criteria => {
+export const getNumerator = <C extends RatioCriteria | PartialRatioCriteria>(criteria: C): C[0] => {
   return criteria[0];
 };
 
-export const getDenominator = (criteria: RatioCriteria): Criteria => {
+export const getDenominator = <C extends RatioCriteria | PartialRatioCriteria>(
+  criteria: C
+): C[1] => {
   return criteria[1];
 };
 
