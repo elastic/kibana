@@ -142,7 +142,11 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
         if (preResponseResult.isNext(result)) {
           if (result.headers) {
             if (isBoom(response)) {
-              findHeadersIntersection(response.output.headers, result.headers, log);
+              findHeadersIntersection(
+                response.output.headers as { [key: string]: string },
+                result.headers,
+                log
+              );
               // hapi wraps all error response in Boom object internally
               response.output.headers = {
                 ...response.output.headers,
@@ -157,7 +161,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           const overriddenResponse = responseToolkit.response(result.body).code(statusCode);
 
           const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
-          setHeaders(overriddenResponse, originalHeaders);
+          setHeaders(overriddenResponse, originalHeaders as { [key: string]: string });
           if (result.headers) {
             setHeaders(overriddenResponse, result.headers);
           }
@@ -178,8 +182,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
   };
 }
 
-function isBoom(response: any): response is Boom {
-  return response instanceof Boom;
+function isBoom(response: any): response is Boom.Boom {
+  return response instanceof Boom.Boom;
 }
 
 function setHeaders(response: ResponseObject, headers: ResponseHeaders) {

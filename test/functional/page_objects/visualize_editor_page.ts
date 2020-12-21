@@ -74,7 +74,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickGo() {
-      if (await visChart.isNewChartUiEnabled()) {
+      if (await visChart.isNewChartsLibraryEnabled()) {
         await elasticChart.setNewChartUiDebugFlag();
       }
 
