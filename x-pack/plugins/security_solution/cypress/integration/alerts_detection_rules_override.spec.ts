@@ -190,7 +190,7 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.above', 0);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.gte(1));
     cy.get(ALERT_RULE_NAME).first().should('have.text', 'auditbeat');
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');

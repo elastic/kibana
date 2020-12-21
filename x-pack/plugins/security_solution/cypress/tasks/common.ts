@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
 import { esArchiverLoadEmptyKibana } from './es_archiver';
 
 const primaryButton = 0;
@@ -64,6 +65,6 @@ export const reload = () => {
 
 export const cleanKibana = () => {
   cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
-  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/.siem-signals\*" -k`);
+  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
   esArchiverLoadEmptyKibana();
 };

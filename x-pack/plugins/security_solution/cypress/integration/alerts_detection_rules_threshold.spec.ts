@@ -169,7 +169,7 @@ describe.skip('Detection rules, threshold', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.below', 100);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.lt(100));
     cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');

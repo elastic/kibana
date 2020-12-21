@@ -9,5 +9,5 @@ import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const waitForAuthenticationsToBeLoaded = () => {
   cy.get(AUTHENTICATIONS_TABLE).should('exist');
-  cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };

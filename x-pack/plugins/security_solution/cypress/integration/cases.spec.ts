@@ -111,6 +111,6 @@ describe('Cases', () => {
 
     cy.get(TIMELINE_TITLE).contains(this.mycase.timeline.title);
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
-    cy.get(TIMELINE_QUERY).invoke('text').should('eq', this.mycase.timeline.query);
+    cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
   });
 });

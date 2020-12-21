@@ -100,12 +100,7 @@ describe('Sourcerer', () => {
       populateTimeline();
       openSourcerer('timeline');
       deselectSourcererOptions(rawPatterns, 'timeline');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((strCount) => {
-          const intCount = +strCount;
-          cy.wrap(intCount).should('eq', 0);
-        });
+      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text).to.eql(0));
     });
   });
 });

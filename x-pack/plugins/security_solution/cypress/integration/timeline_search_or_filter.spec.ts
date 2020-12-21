@@ -24,11 +24,6 @@ describe('timeline search or filter KQL bar', () => {
     openTimelineUsingToggle();
     executeTimelineKQL(hostExistsQuery);
 
-    cy.get(SERVER_SIDE_EVENT_COUNT)
-      .invoke('text')
-      .then((strCount) => {
-        const intCount = +strCount;
-        cy.wrap(intCount).should('be.above', 0);
-      });
+    cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
   });
 });
