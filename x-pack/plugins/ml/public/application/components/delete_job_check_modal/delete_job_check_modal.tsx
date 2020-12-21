@@ -36,31 +36,31 @@ interface ModalContentReturnType {
 
 interface JobCheckRespSummary {
   canDelete: boolean;
-  canUntag: boolean;
+  canRemoveFromSpace: boolean;
   canTakeAnyAction: boolean;
 }
 
 function getRespSummary(resp: CanDeleteJobResponse): JobCheckRespSummary {
   const jobsChecked = Object.keys(resp);
   // Default to first job's permissions
-  const { canDelete, canUntag } = resp[jobsChecked[0]];
+  const { canDelete, canRemoveFromSpace } = resp[jobsChecked[0]];
   let canTakeAnyAction = true;
 
   if (jobsChecked.length > 1) {
     // Check all jobs and make sure they have the same permissions - otherwise no action can be taken
     canTakeAnyAction = jobsChecked.every(
-      (id) => resp[id].canDelete === canDelete && resp[id].canUntag === canUntag
+      (id) => resp[id].canDelete === canDelete && resp[id].canRemoveFromSpace === canRemoveFromSpace
     );
   }
 
-  return { canDelete, canUntag, canTakeAnyAction };
+  return { canDelete, canRemoveFromSpace, canTakeAnyAction };
 }
 
 function getModalContent(
   jobIds: string[],
   respSummary: JobCheckRespSummary
 ): ModalContentReturnType {
-  const { canDelete, canUntag, canTakeAnyAction } = respSummary;
+  const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
 
   if (canTakeAnyAction === false) {
     return {
@@ -116,7 +116,7 @@ function getModalContent(
         </EuiText>
       ),
     };
-  } else if (canUntag) {
+  } else if (canRemoveFromSpace) {
     return {
       buttonText: (
         <FormattedMessage
@@ -173,8 +173,8 @@ export const DeleteJobCheckModal: FC<Props> = ({
     // Do the spaces check and set the content for the modal and buttons depending on results
     canDeleteJob(jobType, jobIds).then((resp) => {
       const respSummary = getRespSummary(resp);
-      const { canDelete, canUntag, canTakeAnyAction } = respSummary;
-      if (canTakeAnyAction && canDelete && !canUntag) {
+      const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
+      if (canTakeAnyAction && canDelete && !canRemoveFromSpace) {
         // Go straight to delete flow if that's the only action available
         canDeleteCallback();
         return;
@@ -260,7 +260,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   {!hasUntagged &&
                     jobCheckRespSummary?.canTakeAnyAction &&
-                    jobCheckRespSummary?.canUntag &&
+                    jobCheckRespSummary?.canRemoveFromSpace &&
                     jobCheckRespSummary?.canDelete && (
                       <EuiButtonEmpty
                         isLoading={isUntagging}
@@ -277,7 +277,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
                     size="s"
                     onClick={
                       jobCheckRespSummary?.canTakeAnyAction &&
-                      jobCheckRespSummary?.canUntag &&
+                      jobCheckRespSummary?.canRemoveFromSpace &&
                       !jobCheckRespSummary?.canDelete
                         ? onUntagClick
                         : onClick
