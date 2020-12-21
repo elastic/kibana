@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
-const signalSchema = schema.object({
+export const signalSchema = schema.object({
   anomalyThreshold: schema.maybe(schema.number()),
   author: schema.arrayOf(schema.string(), { defaultValue: [] }),
   buildingBlockType: schema.nullable(schema.string()),

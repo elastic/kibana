@@ -635,11 +635,11 @@ export class EventsFactory {
   }
 }
 
-function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert {
+function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
   return { ...BaseAlert, ...overrides };
 }
 
-const BaseAlert: SanitizedAlert = {
+const BaseAlert: SanitizedAlert<{ bar: boolean }> = {
   id: 'alert-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },
