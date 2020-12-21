@@ -17,7 +17,7 @@ To add the `index.query.default_field` setting to an {es} index, submit a POST r
 
 [source,js]
 --------------------------------------------------
-GET /api/upgrade_assistant/add_query_default_field/myIndex
+POST /api/upgrade_assistant/add_query_default_field/myIndex
 {
   "fieldTypes": ["text", "keyword"], <1>
   "otherFields": ["myField.*"] <2>
@@ -83,7 +83,7 @@ Make the following request to {kib}:
 
 [source,js]
 --------------------------------------------------
-GET /api/upgrade_assistant/add_query_default_field/myIndex
+POST /api/upgrade_assistant/add_query_default_field/myIndex
 {
   "fieldTypes": ["text", "long"],
   "otherFields": ["field2"]
