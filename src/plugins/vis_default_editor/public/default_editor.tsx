@@ -26,7 +26,7 @@ import { EuiResizableContainer } from '@elastic/eui';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
+import { KibanaContextProvider } from '../../kibana_react/public';
 import { Storage } from '../../kibana_utils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';

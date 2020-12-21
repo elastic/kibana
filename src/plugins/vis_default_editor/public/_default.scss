@@ -17,7 +17,6 @@
   background: $euiColorLightestShade;
   position: relative;
   display: flex;
-  flex-shrink: 0;
 
   @include euiBreakpoint('xs', 's', 'm') {
     // If we are on a small screen we force the editor to take 100% width.
@@ -90,12 +89,6 @@
   &.embedded {
     flex-shrink: 1;
     flex-basis: 100%;
-  }
-
-  .visualize {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 100%;
   }
 
   .visChart {
