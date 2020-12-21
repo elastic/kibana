@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useCallback, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import * as selectors from '../store/selectors';
