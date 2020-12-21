@@ -43,13 +43,13 @@ export function getKibanaUsageCollector(
       graph_workspace: { total: { type: 'long' } },
       timelion_sheet: { total: { type: 'long' } },
     },
-    async fetch({ callCluster }) {
+    async fetch({ esClient }) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();
       return {
         index,
-        ...(await getSavedObjectsCounts(callCluster, index)),
+        ...(await getSavedObjectsCounts(esClient, index)),
       };
     },
   });

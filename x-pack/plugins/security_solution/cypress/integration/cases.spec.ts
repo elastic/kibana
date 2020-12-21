@@ -38,8 +38,9 @@ import {
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens/timeline';
 
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
-import { deleteCase, openCaseTimeline } from '../tasks/case_details';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { openCaseTimeline } from '../tasks/case_details';
+import { cleanKibana } from '../tasks/common';
 import {
   attachTimeline,
   backToCases,
@@ -47,23 +48,17 @@ import {
   fillCasesMandatoryfields,
 } from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { closeTimeline } from '../tasks/timeline';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe('Cases', () => {
+describe.skip('Cases', () => {
   const mycase = { ...case1 };
 
   before(() => {
+    cleanKibana();
     createTimeline(case1.timeline).then((response) => {
       mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  after(() => {
-    closeTimeline();
-    deleteTimeline(mycase.timeline.id!);
-    deleteCase();
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {
