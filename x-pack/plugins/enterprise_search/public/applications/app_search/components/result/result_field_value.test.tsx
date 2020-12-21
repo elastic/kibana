@@ -159,9 +159,9 @@ describe('ResultFieldValue', () => {
       );
     });
 
-    it('will render content as html with class names appended to em tags', () => {
+    it('will render content as html with mark tags', () => {
       expect(wrapper.find('div').html()).toContain(
-        'a <em class="enterpriseSearchResultHighlight">long</em> description'
+        'a <mark class="euiMark">long</mark> description'
       );
     });
 

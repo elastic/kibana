@@ -112,7 +112,7 @@ export const DataVisualizerDataGrid = ({
         const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
           <EuiButtonIcon
-            data-test-subj={`mlDataVisualizerToggleDetails ${item.fieldName} ${direction}`}
+            data-test-subj={`mlDataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
             onClick={() => toggleDetails(item)}
             aria-label={
               expandedRowItemIds.includes(item.fieldName)

@@ -79,11 +79,11 @@ export function LegacyDataTableVisProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    public async filterOnTableCell(column: number, row: number) {
+    public async filterOnTableCell(columnIndex: number, rowIndex: number) {
       await retry.try(async () => {
         const tableVis = await testSubjects.find('tableVis');
         const cell = await tableVis.findByCssSelector(
-          `tbody tr:nth-child(${row}) td:nth-child(${column})`
+          `tbody tr:nth-child(${rowIndex}) td:nth-child(${columnIndex})`
         );
         await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);

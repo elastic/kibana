@@ -25,7 +25,7 @@ export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
   const { myRole } = useValues(AppLogic);
-  const { isMetaEngine } = useValues(EngineLogic);
+  const { isMetaEngine, engine } = useValues(EngineLogic);
 
   if (!wasSearched) return null;
 
@@ -44,7 +44,7 @@ export const SearchExperienceContent: React.FC = () => {
         <Results
           titleField="id"
           resultView={(props: ResultViewProps) => {
-            return <ResultView {...props} />;
+            return <ResultView {...props} schemaForTypeHighlights={engine.schema} />;
           }}
         />
         <EuiSpacer />
