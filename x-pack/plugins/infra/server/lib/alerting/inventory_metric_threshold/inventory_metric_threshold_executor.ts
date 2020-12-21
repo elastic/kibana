@@ -9,7 +9,11 @@ import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RecoveredActionGroup,
+} from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
@@ -35,7 +39,15 @@ interface InventoryMetricThresholdParams {
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
   services,
   params,
-}: AlertExecutorOptions) => {
+}: AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext
+>) => {
   const {
     criteria,
     filterQuery,

@@ -36,12 +36,7 @@ import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
-import {
-  IndexPatternPrivateState,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-} from '../../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
@@ -115,10 +110,10 @@ export {
  */
 export interface ParamEditorProps<C> {
   currentColumn: C;
-  state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
+  layer: IndexPatternLayer;
+  updateLayer: (newLayer: IndexPatternLayer) => void;
   columnId: string;
-  layerId: string;
+  indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;

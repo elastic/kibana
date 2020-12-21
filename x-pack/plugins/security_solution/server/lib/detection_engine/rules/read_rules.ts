@@ -6,6 +6,7 @@
 
 import { SanitizedAlert } from '../../../../../alerts/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
+import { RuleTypeParams } from '../types';
 import { findRules } from './find_rules';
 import { isAlertType, ReadRuleOptions } from './types';
 
@@ -21,7 +22,7 @@ export const readRules = async ({
   alertsClient,
   id,
   ruleId,
-}: ReadRuleOptions): Promise<SanitizedAlert | null> => {
+}: ReadRuleOptions): Promise<SanitizedAlert<RuleTypeParams> | null> => {
   if (id != null) {
     try {
       const rule = await alertsClient.get({ id });
