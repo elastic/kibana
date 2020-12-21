@@ -7,11 +7,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
-import { AllCases } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useGetCasesMockState } from '../../containers/mock';
+import { casesStatus, useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
 import { CaseStatuses } from '../../../../../case/common/api';
@@ -22,6 +21,7 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { getCasesColumns } from './columns';
+import { AllCases } from '.';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -72,9 +72,7 @@ describe('AllCases', () => {
   };
 
   const defaultCasesStatus = {
-    countClosedCases: 0,
-    countOpenCases: 5,
-    countInProgressCases: 2,
+    ...casesStatus,
     fetchCasesStatus,
     isError: false,
     isLoading: false,
@@ -148,7 +146,7 @@ describe('AllCases', () => {
           .find('[data-test-subj="openStatsHeader"] .euiDescriptionList__description')
           .first()
           .text()
-      ).toBe('5');
+      ).toBe('20');
 
       expect(wrapper.find('[data-test-subj="inProgressStatsHeader"]').exists()).toBeTruthy();
       expect(
@@ -156,7 +154,7 @@ describe('AllCases', () => {
           .find('[data-test-subj="inProgressStatsHeader"] .euiDescriptionList__description')
           .first()
           .text()
-      ).toBe('2');
+      ).toBe('40');
 
       expect(wrapper.find('[data-test-subj="closedStatsHeader"]').exists()).toBeTruthy();
       expect(
@@ -164,7 +162,7 @@ describe('AllCases', () => {
           .find('[data-test-subj="closedStatsHeader"] .euiDescriptionList__description')
           .first()
           .text()
-      ).toBe('0');
+      ).toBe('130');
     });
   });
 
@@ -606,6 +604,27 @@ describe('AllCases', () => {
       expect(setQueryParams).toBeCalledWith({
         sortField: 'createdAt',
       });
+    });
+  });
+
+  it('should show the correct count on stats', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={false} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+      expect(wrapper.find('button[data-test-subj="case-status-filter-open"]').text()).toBe(
+        'Open (20)'
+      );
+      expect(wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').text()).toBe(
+        'In progress (40)'
+      );
+      expect(wrapper.find('button[data-test-subj="case-status-filter-closed"]').text()).toBe(
+        'Closed (130)'
+      );
     });
   });
 });
