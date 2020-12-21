@@ -13,6 +13,7 @@ import {
   METRIC_JAVA_THREAD_COUNT,
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
+  SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 
 const getServiceNodes = async ({
@@ -28,6 +29,14 @@ const getServiceNodes = async ({
 
   const params = mergeProjection(projection, {
     body: {
+      query: {
+        bool: {
+          filter: [
+            ...projection.body.query.bool.filter,
+            { exists: { field: SERVICE_NODE_NAME } },
+          ],
+        },
+      },
       aggs: {
         nodes: {
           terms: {
