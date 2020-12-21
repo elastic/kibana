@@ -14,9 +14,6 @@ export function registerApmAlerts(
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
-    name: i18n.translate('xpack.apm.alertTypes.errorCount', {
-      defaultMessage: 'Error count threshold',
-    }),
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
@@ -45,9 +42,6 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDuration,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-      defaultMessage: 'Transaction duration threshold',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
       {
@@ -82,9 +76,6 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
-    name: i18n.translate('xpack.apm.alertTypes.transactionErrorRate', {
-      defaultMessage: 'Transaction error rate threshold',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
       {
@@ -119,9 +110,6 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
-      defaultMessage: 'Transaction duration anomaly',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
       {

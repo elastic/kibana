@@ -58,9 +58,9 @@ export function registerSettingsRoute({
       const settings =
         (await settingsCollector.fetch(collectorFetchContext)) ??
         settingsCollector.getEmailValueStructure(null);
-      const { cluster_uuid: uuid } = await callAsCurrentUser('info', {
-        filterPath: 'cluster_uuid',
-      });
+
+      const { body } = await collectorFetchContext.esClient.info({ filter_path: 'cluster_uuid' });
+      const uuid: string = body.cluster_uuid;
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
 
@@ -76,7 +76,6 @@ export function registerSettingsRoute({
         snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
         status: ServiceStatusToLegacyState[overallStatus.level.toString()],
       };
-
       return res.ok({
         body: {
           cluster_uuid: uuid,

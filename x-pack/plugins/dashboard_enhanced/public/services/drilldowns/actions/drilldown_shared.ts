@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
 import {
-  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
-  TriggerId,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../../src/plugins/embeddable/public';
+import { TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
