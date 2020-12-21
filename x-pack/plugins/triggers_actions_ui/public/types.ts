@@ -181,9 +181,9 @@ export interface AlertTypeParamsExpressionProps<
   alertInterval: string;
   alertThrottle: string;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
-  setAlertProperty: <Key extends keyof Alert>(
-    key: Key,
-    value: SanitizedAlert<Params>[Key] | null
+  setAlertProperty: <Prop extends keyof Alert>(
+    key: Prop,
+    value: SanitizedAlert<Params>[Prop] | null
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
