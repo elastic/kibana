@@ -52,7 +52,7 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
       key={`${id}-id`}
       data-test-subj={`mlJobSelectionBadge ${id}`}
       {...props}
-      style={{ color: `${theme.euiColorEmptyShade}` }}
+      style={isGroup ? { color: `${theme.euiColorEmptyShade}` } : undefined}
     >
       {`${id}${jobCount ? jobCount : ''}`}
     </EuiBadge>
