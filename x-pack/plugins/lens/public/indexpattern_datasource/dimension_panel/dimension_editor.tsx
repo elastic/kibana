@@ -391,7 +391,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               updateLayer={setStateWrapper}
               columnId={columnId}
               currentColumn={state.layers[layerId].columns[columnId]}
-              dateRange={props.dateRange}
+              dateRange={dateRange}
               indexPattern={currentIndexPattern}
               {...services}
             />
