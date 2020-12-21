@@ -49,6 +49,7 @@ import {
   PaletteRegistry,
 } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
+import type { PersistedState } from '../../visualizations/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { PieVisParams, BucketColumns, ValueFormats } from './types';
 import {
@@ -69,7 +70,7 @@ import './chart.scss';
 export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
-  uiState: IInterpreterRenderHandlers['uiState'];
+  uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
