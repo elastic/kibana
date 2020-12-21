@@ -55,7 +55,7 @@ import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibna } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

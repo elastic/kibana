@@ -56,7 +56,7 @@ export const DatavisualizerSelector: FC = () => {
     services: {
       licenseManagement,
       http: { basePath },
-      services: { docLinks },
+      docLinks,
     },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
