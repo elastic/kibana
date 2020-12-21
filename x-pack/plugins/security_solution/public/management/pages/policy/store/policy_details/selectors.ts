@@ -6,6 +6,8 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { ILicense } from '../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -20,6 +22,24 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
+/** Returns current active license */
+export const licenseState = (state: Immutable<PolicyDetailsState>) => state.license;
+
+export const licensedPolicy: (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<PolicyData> | undefined = createSelector(
+  policyDetails,
+  licenseState,
+  (policyData, license) => {
+    if (policyData) {
+      unsetPolicyFeaturesAboveLicenseLevel(
+        policyData?.inputs[0]?.config.policy.value,
+        license as ILicense
+      );
+    }
+    return policyData;
+  }
+);
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
@@ -75,7 +95,7 @@ export const getPolicyDataForUpdate = (
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
-) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
+) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
     return getPolicyDataForUpdate(policy);
   }
@@ -111,7 +131,7 @@ const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
  * Note: this will return a default full policy if the `policyItem` is `undefined`
  */
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
-  policyDetails,
+  licensedPolicy,
   (policyData) => {
     return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }

@@ -54,7 +54,16 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
   };
 };
 
+const addAllowNoIndex: SavedObjectMigrationFn<any, any> = (doc) => ({
+  ...doc,
+  attributes: {
+    ...doc.attributes,
+    allowNoIndex: doc.id === 'logs-*' || doc.id === 'metrics-*' || undefined,
+  },
+});
+
 export const indexPatternSavedObjectTypeMigrations = {
   '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
   '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
+  '7.11.0': flow(addAllowNoIndex),
 };
