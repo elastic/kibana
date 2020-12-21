@@ -173,14 +173,6 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       setFilters(formattedFilter);
     }, []);
 
-    const handleSearchChange = useCallback(
-      (event: ChangeEvent<HTMLInputElement>) => {
-        const val = event.target.value;
-        handleSearch(val);
-      },
-      [handleSearch]
-    );
-
     const paginationMemo = useMemo(
       () => ({
         pageIndex: pagination.page - 1,
@@ -228,7 +220,6 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
                 placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
                 onSearch={handleSearch}
-                onChange={handleSearchChange}
                 disabled={initLoading}
                 incremental={false}
                 fullWidth
