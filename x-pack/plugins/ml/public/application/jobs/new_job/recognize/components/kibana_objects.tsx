@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaObjectUi } from '../page';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 export interface KibanaObjectItemProps {
   objectType: string;
@@ -57,7 +58,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                       </EuiText>
                       {success === false && error !== undefined && (
                         <EuiText size="xs" color="danger">
-                          {error.message}
+                          {extractErrorMessage(error)}
                         </EuiText>
                       )}
                     </EuiFlexItem>
