@@ -34,7 +34,7 @@ import {
 import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
-interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
+export interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
   palettes: PaletteRegistry | undefined;
   showElasticChartsOptions: boolean;
 }
@@ -75,6 +75,7 @@ const PieOptions = (props: PieOptionsProps) => {
             paramName="nestedLegend"
             value={stateParams.nestedLegend}
             setValue={setValue}
+            data-test-subj="visTypePieNestedLegendSwitch"
           />
         )}
         {props.showElasticChartsOptions && props.palettes && (
@@ -117,6 +118,7 @@ const PieOptions = (props: PieOptionsProps) => {
             paramName="position"
             value={stateParams.labels.position || LabelPositions.DEFAULT}
             setValue={setLabels}
+            data-test-subj="visTypePieLabelPositionSelect"
           />
         )}
         {!props.showElasticChartsOptions && (
@@ -127,6 +129,7 @@ const PieOptions = (props: PieOptionsProps) => {
             paramName="last_level"
             value={stateParams.labels.last_level}
             setValue={setLabels}
+            data-test-subj="visTypePieTopLevelSwitch"
           />
         )}
         <SwitchOption
@@ -147,6 +150,7 @@ const PieOptions = (props: PieOptionsProps) => {
             paramName="valuesFormat"
             value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
             setValue={setLabels}
+            data-test-subj="visTypePieValueFormatsSelect"
           />
         )}
         <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />
