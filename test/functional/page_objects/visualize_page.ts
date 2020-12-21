@@ -27,7 +27,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
   const log = getService('log');
   const globalNav = getService('globalNav');
   const listingTable = getService('listingTable');
-  const { common, header, visEditor } = getPageObjects(['common', 'header', 'visEditor']);
+  const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const { common, header, visEditor, visChart } = getPageObjects([
+    'common',
+    'header',
+    'visEditor',
+    'visChart',
+  ]);
 
   /**
    * This page object contains the visualization type selection, the landing page,
@@ -89,6 +96,13 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
           throw new Error('wait for visualization select page');
         }
       });
+    }
+
+    public async clickRefresh() {
+      if (await visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+      await queryBar.clickQuerySubmitButton();
     }
 
     public async waitForGroupsSelectPage() {

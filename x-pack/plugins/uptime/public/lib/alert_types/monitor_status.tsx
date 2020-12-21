@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 
@@ -23,12 +22,6 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
-  name: (
-    <FormattedMessage
-      id="xpack.uptime.alerts.monitorStatus.title.label"
-      defaultMessage="Uptime monitor status"
-    />
-  ),
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {

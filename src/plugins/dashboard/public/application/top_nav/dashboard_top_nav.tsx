@@ -27,6 +27,7 @@ import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
   EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
@@ -135,10 +136,7 @@ export function DashboardTopNav({
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
-    const explicitInput = await factory.getExplicitInput();
-    if (dashboardContainer) {
-      await dashboardContainer.addNewEmbeddable(type, explicitInput);
-    }
+    await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const onChangeViewMode = useCallback(

@@ -131,6 +131,14 @@ describe('MissingMonitoringDataAlert', () => {
             nodeId,
             nodeName,
             gapDuration,
+            itemLabel: undefined,
+            meta: {
+              clusterUuid,
+              gapDuration,
+              limit: 86400000,
+              nodeId,
+              nodeName,
+            },
             ui: {
               isFiring: true,
               message: {

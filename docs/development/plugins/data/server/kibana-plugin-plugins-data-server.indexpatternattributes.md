@@ -14,6 +14,7 @@ export interface IndexPatternAttributes
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-server.indexpatternattributes.allownoindex.md) | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpatternattributes.fieldattrs.md) | <code>string</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpatternattributes.fields.md) | <code>string</code> |  |
