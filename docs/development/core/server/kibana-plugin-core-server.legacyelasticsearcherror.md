@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface LegacyElasticsearchError extends Boom 
+export interface LegacyElasticsearchError extends Boom.Boom 
 ```
 
 ## Properties

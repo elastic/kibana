@@ -17,22 +17,28 @@
  * under the License.
  */
 
+import { AppMeta } from 'kibana/public';
 import { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
 
 export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
   mount: Mount;
   basePath: string;
+  meta?: AppMeta;
 }
 
 export class ManagementApp extends ManagementItem {
   public readonly mount: Mount;
   public readonly basePath: string;
+  public readonly meta: AppMeta;
 
   constructor(args: RegisterManagementAppArgs) {
     super(args);
 
     this.mount = args.mount;
     this.basePath = args.basePath;
+    this.meta = {
+      keywords: args.meta?.keywords || [],
+    };
   }
 }
