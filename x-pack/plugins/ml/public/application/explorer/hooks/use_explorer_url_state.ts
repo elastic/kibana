@@ -10,7 +10,7 @@ import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 
 export function useExplorerUrlState() {
   /**
-   * Originally `mlExplorerSwimlane` resided directly in the app URL state (`_a` URL state key)ß.
+   * Originally `mlExplorerSwimlane` resided directly in the app URL state (`_a` URL state key).
    * With current URL structure it has been moved under the `explorer` key of the app state (_a).
    */
   const [legacyExplorerState] = usePageUrlState<ExplorerAppState['mlExplorerSwimlane']>(
