@@ -7,6 +7,7 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ObjectRemover } from '../../services/alerting/object_remover';
 
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
@@ -62,9 +63,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
+    const objectRemover = new ObjectRemover(supertest);
+
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
+    });
+
+    after(async () => {
+      await objectRemover.removeAll();
     });
 
     it('should create an alert', async () => {
@@ -120,7 +127,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
       ]);
 
-      // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
