@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 import moment from 'moment';
 import { CollectorFetchContext } from '../../../../../usage_collection/server';
@@ -41,17 +42,23 @@ export interface TelemetryResponse {
   last_uninstall_set: string | null;
 }
 
+type ESResponse = SearchResponse<SearchHit>;
+
 export function fetchProvider(index: string) {
-  return async ({ callCluster }: CollectorFetchContext) => {
-    const response = await callCluster('search', {
-      index,
-      body: {
-        query: { term: { type: { value: 'sample-data-telemetry' } } },
-        _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
+  return async ({ esClient }: CollectorFetchContext) => {
+    const { body: response } = await esClient.search<ESResponse>(
+      {
+        index,
+        body: {
+          query: { term: { type: { value: 'sample-data-telemetry' } } },
+          _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
+        },
+        filter_path: 'hits.hits._id,hits.hits._source',
       },
-      filter_path: 'hits.hits._id,hits.hits._source',
-      ignore: [404],
-    });
+      {
+        ignore: [404],
+      }
+    );
 
     const getLast = (
       dataSet: string,
