@@ -76,15 +76,6 @@ const createAlertServicesMock = <
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
-// export type AlertServicesMock<
-//   InstanceState extends AlertInstanceState = AlertInstanceState,
-//   InstanceContext extends AlertInstanceContext = AlertInstanceContext
-// > = {
-//   alertInstanceFactory: jest.Mock<
-//     jest.Mocked<AlertInstance<InstanceState, InstanceContext>>,
-//     [string]
-//   >;
-// } & Omit<ReturnType<typeof createAlertServicesMock>, 'alertInstanceFactory'>;
 
 export const alertsMock = {
   createAlertInstanceFactory: createAlertInstanceFactoryMock,
