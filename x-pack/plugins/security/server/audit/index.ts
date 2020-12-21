@@ -13,6 +13,8 @@ export {
   userLoginEvent,
   httpRequestEvent,
   savedObjectEvent,
+  spaceAuditEvent,
   SavedObjectAction,
+  SpaceAuditAction,
 } from './audit_events';
 export { SecurityAuditLogger } from './security_audit_logger';

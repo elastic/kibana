@@ -13,10 +13,10 @@ export const QUERY_TAB = i18n.translate(
   }
 );
 
-export const GRAPH_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.graphTabTimelineTitle',
+export const ANALYZER_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle',
   {
-    defaultMessage: 'Graph',
+    defaultMessage: 'Analyzer',
   }
 );
 
