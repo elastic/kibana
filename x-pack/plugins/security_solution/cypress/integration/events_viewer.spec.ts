@@ -45,7 +45,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe.skip('Events Viewer', () => {
+describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       cleanKibana();
