@@ -94,7 +94,7 @@
     "**/typescript": "4.1.2"
   },
   "engines": {
-    "node": "14.15.2",
+    "node": "14.15.3",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -606,7 +606,7 @@
     "cpy": "^8.1.1",
     "cronstrue": "^1.51.0",
     "css-loader": "^3.4.2",
-    "cypress": "^6.0.1",
+    "cypress": "^6.1.0",
     "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-multi-reporters": "^1.4.0",
     "d3": "3.5.17",

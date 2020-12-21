@@ -20,6 +20,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-public.indexpattern.allownoindex.md) |  | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [deleteFieldFormat](./kibana-plugin-plugins-data-public.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
 |  [fieldAttrs](./kibana-plugin-plugins-data-public.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
@@ -51,8 +52,8 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
-|  [getIndex()](./kibana-plugin-plugins-data-public.indexpattern.getindex.md) |  |  |
 |  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
+|  [getIndex()](./kibana-plugin-plugins-data-public.indexpattern.getindex.md) |  |  |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
@@ -60,7 +61,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
 |  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-public.indexpattern.isunsupportedtimepattern.md) |  |  |
-|  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-public.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcount.md) |  |  |
