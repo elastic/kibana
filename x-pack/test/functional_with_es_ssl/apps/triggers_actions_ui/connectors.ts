@@ -7,32 +7,43 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ObjectRemover } from '../../services/alerting/object_remover';
 
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const supertest = getService('supertest');
 
   describe('Connectors', function () {
-    before(async () => {
-      await alerting.actions.createAction({
-        name: `slack-${Date.now()}`,
-        actionTypeId: '.slack',
-        config: {},
-        secrets: {
-          webhookUrl: 'https://test',
-        },
-      });
+    const objectRemover = new ObjectRemover(supertest);
 
+    before(async () => {
+      const { body: createdAction } = await supertest
+        .post(`/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: `slack-${Date.now()}`,
+          actionTypeId: '.slack',
+          config: {},
+          secrets: {
+            webhookUrl: 'https://test',
+          },
+        })
+        .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
+      objectRemover.add(createdAction.id, 'action', 'actions');
+    });
+
+    after(async () => {
+      await objectRemover.removeAll();
     });
 
     it('should create a connector', async () => {
