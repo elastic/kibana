@@ -17,14 +17,14 @@
  * under the License.
  */
 import { Position } from '@elastic/charts';
-import { DatatableColumn } from '../../../expressions/public';
+import { DatatableColumn, SerializedFieldFormat } from '../../../expressions/public';
 import { PaletteOutput } from '../../../charts/public';
 
 export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: { pattern?: string; [key: string]: any };
+    params?: SerializedFieldFormat<object>;
   };
 }
 
@@ -54,39 +54,11 @@ export interface PieVisParams {
   };
 }
 
-export interface Column {
-  // -1 value can be in a fake X aspect
-  id: string | -1;
-  name: string;
-}
-
-export interface Row {
-  [key: string]: number | string | object;
-}
-
-export interface TableParent {
-  table: Table;
-  tables?: Table[];
-  column: number;
-  row: number;
-  key: number;
-  name: string;
-}
-export interface Table {
-  columns: Column[];
-  rows: Row[];
-  $parent?: TableParent;
-}
-
 export interface BucketColumns extends DatatableColumn {
   format?: {
     id?: string;
-    params?: { pattern?: string; [key: string]: any };
+    params?: SerializedFieldFormat<object>;
   };
-}
-
-export interface EmptyBucket {
-  name: string;
 }
 
 export enum LabelPositions {
