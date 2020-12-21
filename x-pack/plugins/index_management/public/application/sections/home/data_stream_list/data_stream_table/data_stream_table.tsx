@@ -7,23 +7,16 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiLink,
-  EuiBadge,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
-import { isManagedByIngestManager } from '../../../../lib/data_streams';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface Props {
   dataStreams?: DataStream[];
@@ -61,26 +54,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           >
             {name}
           </EuiLink>
-          {isManagedByIngestManager(dataStream) ? (
-            <Fragment>
-              &nbsp;
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamList.table.managedDataStreamTooltip',
-                  {
-                    defaultMessage: 'Created and managed by Fleet',
-                  }
-                )}
-              >
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
-                    defaultMessage="Managed"
-                  />
-                </EuiBadge>
-              </EuiToolTip>
-            </Fragment>
-          ) : null}
+          <DataStreamsBadges dataStream={dataStream} />
         </Fragment>
       );
     },
@@ -96,6 +70,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
@@ -116,12 +91,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     });
 
     columns.push({
-      field: 'storageSize',
+      field: 'storageSizeBytes',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
         defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
     });
   }
 
@@ -255,6 +232,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
+        tableLayout={'auto'}
       />
     </>
   );

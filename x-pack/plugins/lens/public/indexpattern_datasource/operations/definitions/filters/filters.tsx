@@ -14,7 +14,13 @@ import { OperationDefinition } from '../index';
 import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
-import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  Query,
+  esKuery,
+  esQuery,
+} from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
@@ -110,31 +116,26 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     };
   },
 
-  toEsAggsConfig: (column, columnId, indexPattern) => {
+  toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
-    return {
+    return buildExpressionFunction<AggFunctionsMapping['aggFilters']>('aggFilters', {
       id: columnId,
       enabled: true,
-      type: 'filters',
       schema: 'segment',
-      params: {
-        filters: validFilters?.length > 0 ? validFilters : [defaultFilter],
-      },
-    };
+      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+    }).toAst();
   },
 
-  paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
-    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: ({ layer, columnId, currentColumn, indexPattern, updateLayer, data }) => {
     const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName: 'filters',
           value: newFilters,
         })
@@ -203,7 +204,7 @@ export const FilterList = ({
     <>
       <DragDropBuckets
         onDragEnd={updateFilters}
-        onDragStart={() => setIsOpenByCreation(false)}
+        onDragStart={() => {}}
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
@@ -227,8 +228,7 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {

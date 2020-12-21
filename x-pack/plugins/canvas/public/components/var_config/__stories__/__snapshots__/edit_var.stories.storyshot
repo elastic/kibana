@@ -79,7 +79,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -88,86 +88,7 @@ Array [
           >
             <div
               className="euiPopover__anchor"
-            >
-              <input
-                id="generated-id"
-                type="hidden"
-                value="boolean"
-              />
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <span
-                    className="euiScreenReaderOnly"
-                    id="generated-id"
-                  >
-                    Select an option: 
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenBoolean"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        Boolean
-                      </span>
-                    </div>
-                    , is selected
-                  </span>
-                  <button
-                    aria-haspopup="true"
-                    aria-labelledby="generated-id generated-id"
-                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    type="button"
-                  >
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenBoolean"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        Boolean
-                      </span>
-                    </div>
-                  </button>
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -343,6 +264,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -442,7 +364,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -451,86 +373,7 @@ Array [
           >
             <div
               className="euiPopover__anchor"
-            >
-              <input
-                id="generated-id"
-                type="hidden"
-                value="number"
-              />
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <span
-                    className="euiScreenReaderOnly"
-                    id="generated-id"
-                  >
-                    Select an option: 
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenNumber"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        Number
-                      </span>
-                    </div>
-                    , is selected
-                  </span>
-                  <button
-                    aria-haspopup="true"
-                    aria-labelledby="generated-id generated-id"
-                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    type="button"
-                  >
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenNumber"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        Number
-                      </span>
-                    </div>
-                  </button>
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -647,6 +490,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -746,7 +590,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -755,86 +599,7 @@ Array [
           >
             <div
               className="euiPopover__anchor"
-            >
-              <input
-                id="generated-id"
-                type="hidden"
-                value="string"
-              />
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <span
-                    className="euiScreenReaderOnly"
-                    id="generated-id"
-                  >
-                    Select an option: 
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenString"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        String
-                      </span>
-                    </div>
-                    , is selected
-                  </span>
-                  <button
-                    aria-haspopup="true"
-                    aria-labelledby="generated-id generated-id"
-                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    type="button"
-                  >
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenString"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        String
-                      </span>
-                    </div>
-                  </button>
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -951,6 +716,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -1026,7 +792,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -1035,86 +801,7 @@ Array [
           >
             <div
               className="euiPopover__anchor"
-            >
-              <input
-                id="generated-id"
-                type="hidden"
-                value="string"
-              />
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
-              >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
-                >
-                  <span
-                    className="euiScreenReaderOnly"
-                    id="generated-id"
-                  >
-                    Select an option: 
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenString"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        String
-                      </span>
-                    </div>
-                    , is selected
-                  </span>
-                  <button
-                    aria-haspopup="true"
-                    aria-labelledby="generated-id generated-id"
-                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    type="button"
-                  >
-                    <div
-                      className="canvasEditVar__typeOption"
-                    >
-                      <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
-                        style={Object {}}
-                      >
-                        <span
-                          data-euiicon-type="tokenString"
-                          size="m"
-                        />
-                      </span>
-                       
-                      <span>
-                        String
-                      </span>
-                    </div>
-                  </button>
-                  <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                  >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -1231,6 +918,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >

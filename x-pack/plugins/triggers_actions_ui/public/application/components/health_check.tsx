@@ -9,31 +9,29 @@ import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocLinksStart, HttpSetup } from 'kibana/public';
-
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { DocLinksStart } from 'kibana/public';
 import { AlertingFrameworkHealth } from '../../types';
 import { health } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
+import { useKibana } from '../../common/lib/kibana';
+import { CenterJustifiedSpinner } from './center_justified_spinner';
 
 interface Props {
-  docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
-  http: HttpSetup;
   inFlyout?: boolean;
   waitForCheck: boolean;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
-  docLinks,
-  http,
   children,
   waitForCheck,
   inFlyout = false,
 }) => {
+  const { http, docLinks } = useKibana().services;
   const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
@@ -50,7 +48,15 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   return pipe(
     alertingHealth,
     fold(
-      () => (waitForCheck ? <EuiLoadingSpinner size="m" /> : <Fragment>{children}</Fragment>),
+      () =>
+        waitForCheck ? (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <CenterJustifiedSpinner />
+          </Fragment>
+        ) : (
+          <Fragment>{children}</Fragment>
+        ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>
@@ -66,9 +72,10 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   );
 };
 
-type PromptErrorProps = Pick<Props, 'docLinks'> & {
+interface PromptErrorProps {
+  docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   className?: string;
-};
+}
 
 const TlsAndEncryptionError = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -251,6 +251,7 @@ export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
 export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
 export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
+export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
 
 /**
  * Legacy alerts details/label for server and public use
@@ -451,7 +452,63 @@ export const ALERT_DETAILS = {
         'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
   },
+  [ALERT_CCR_READ_EXCEPTIONS]: {
+    paramDetails: {
+      duration: {
+        label: i18n.translate(
+          'xpack.monitoring.alerts.ccrReadExceptions.paramDetails.duration.label',
+          {
+            defaultMessage: `In the last`,
+          }
+        ),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.label', {
+      defaultMessage: 'CCR read exceptions',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.description', {
+      defaultMessage: 'Alert if any CCR read exceptions have been detected.',
+    }),
+  },
 };
+
+export const ALERT_PANEL_MENU = [
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.clusterHealth', {
+      defaultMessage: 'Cluster health',
+    }),
+    alerts: [
+      { alertName: ALERT_NODES_CHANGED },
+      { alertName: ALERT_CLUSTER_HEALTH },
+      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH },
+      { alertName: ALERT_KIBANA_VERSION_MISMATCH },
+      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.resourceUtilization', {
+      defaultMessage: 'Resource utilization',
+    }),
+    alerts: [
+      { alertName: ALERT_CPU_USAGE },
+      { alertName: ALERT_DISK_USAGE },
+      { alertName: ALERT_MEMORY_USAGE },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.errors', {
+      defaultMessage: 'Errors and exceptions',
+    }),
+    alerts: [
+      { alertName: ALERT_MISSING_MONITORING_DATA },
+      { alertName: ALERT_LICENSE_EXPIRATION },
+      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
+      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
+      { alertName: ALERT_CCR_READ_EXCEPTIONS },
+    ],
+  },
+];
 
 /**
  * A listing of all alert types
@@ -469,6 +526,7 @@ export const ALERTS = [
   ALERT_MISSING_MONITORING_DATA,
   ALERT_THREAD_POOL_SEARCH_REJECTIONS,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_CCR_READ_EXCEPTIONS,
 ];
 
 /**

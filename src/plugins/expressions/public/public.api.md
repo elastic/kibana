@@ -12,7 +12,6 @@ import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
@@ -532,7 +531,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode }?: Partial<ExpressionRenderHandlerParams>);
+    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -544,7 +543,7 @@ export class ExpressionRenderHandler {
     // (undocumented)
     render$: Observable<number>;
     // (undocumented)
-    render: (data: any, uiState?: any) => Promise<void>;
+    render: (value: any, uiState?: any) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UpdateValue" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -888,6 +887,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
+    hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+    // (undocumented)
     inspectorAdapters?: Adapters;
     // Warning: (ae-forgotten-export) The symbol "RenderErrorHandlerFnType" needs to be exported by the entry point index.d.ts
     //
@@ -917,11 +918,12 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     getRenderMode: () => RenderMode;
     // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -1091,6 +1093,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 //
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
+
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
 
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

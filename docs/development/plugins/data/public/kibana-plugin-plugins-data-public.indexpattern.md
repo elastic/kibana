@@ -20,6 +20,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-public.indexpattern.allownoindex.md) |  | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [deleteFieldFormat](./kibana-plugin-plugins-data-public.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
 |  [fieldAttrs](./kibana-plugin-plugins-data-public.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
@@ -59,5 +60,8 @@ export declare class IndexPattern implements IIndexPattern
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
+|  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-public.indexpattern.setfieldattrs.md) |  |  |
+|  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcount.md) |  |  |
+|  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcustomlabel.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

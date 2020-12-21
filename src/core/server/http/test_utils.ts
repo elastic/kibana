@@ -32,28 +32,42 @@ const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 
 const configService = configServiceMock.create();
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['localhost'],
-    maxPayload: new ByteSizeValue(1024),
-    autoListen: true,
-    ssl: {
-      enabled: false,
-    },
-    compression: { enabled: true },
-    xsrf: {
-      disableProtection: true,
-      allowlist: [],
-    },
-    customResponseHeaders: {},
-    requestId: {
-      allowFromAnyIp: true,
-      ipAllowlist: [],
-    },
-    keepaliveTimeout: 120_000,
-    socketTimeout: 120_000,
-  } as any)
-);
+configService.atPath.mockImplementation((path) => {
+  if (path === 'server') {
+    return new BehaviorSubject({
+      hosts: ['localhost'],
+      maxPayload: new ByteSizeValue(1024),
+      autoListen: true,
+      ssl: {
+        enabled: false,
+      },
+      cors: {
+        enabled: false,
+      },
+      compression: { enabled: true },
+      xsrf: {
+        disableProtection: true,
+        allowlist: [],
+      },
+      customResponseHeaders: {},
+      requestId: {
+        allowFromAnyIp: true,
+        ipAllowlist: [],
+      },
+      keepaliveTimeout: 120_000,
+      socketTimeout: 120_000,
+    } as any);
+  }
+  if (path === 'externalUrl') {
+    return new BehaviorSubject({
+      policy: [],
+    } as any);
+  }
+  if (path === 'csp') {
+    return new BehaviorSubject({} as any);
+  }
+  throw new Error(`Unexpected config path: ${path}`);
+});
 
 const defaultContext: CoreContext = {
   coreId,

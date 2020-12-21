@@ -38,6 +38,7 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { MapsStartApi } from '../../maps/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -61,6 +62,7 @@ export interface ApmPluginStartDeps {
   licensing: void;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -138,12 +140,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
 

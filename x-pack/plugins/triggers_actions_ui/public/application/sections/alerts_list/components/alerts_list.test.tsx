@@ -26,6 +26,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
+  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -42,7 +43,6 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 
 const alertType = {
   id: 'test_alert_type',
-  name: 'some alert type',
   description: 'test',
   iconClass: 'test',
   documentationUrl: null,
@@ -56,9 +56,11 @@ const alertTypeFromApi = {
   id: 'test_alert_type',
   name: 'some alert type',
   actionGroups: [{ id: 'default', name: 'Default' }],
+  recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
   producer: ALERTS_FEATURE_ID,
+  minimumLicenseRequired: 'basic',
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
@@ -113,7 +115,16 @@ describe('alerts_list component empty', () => {
     expect(
       wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
     ).toHaveLength(1);
-    expect(wrapper.find('AlertAdd')).toHaveLength(1);
+    expect(wrapper.find('AlertAdd').exists()).toBeFalsy();
+
+    wrapper.find('button[data-test-subj="createFirstAlertButton"]').simulate('click');
+
+    // When the AlertAdd component is rendered, it waits for the healthcheck to resolve
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertAdd').exists()).toEqual(true);
   });
 });
 

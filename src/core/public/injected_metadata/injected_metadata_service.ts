@@ -22,6 +22,7 @@ import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
+  IExternalUrlPolicy,
   PackageInfo,
   UiSettingsParams,
   UserProvidedValues,
@@ -44,9 +45,13 @@ export interface InjectedMetadataParams {
     branch: string;
     basePath: string;
     serverBasePath: string;
+    publicBaseUrl: string;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
+    };
+    externalUrl: {
+      policy: IExternalUrlPolicy[];
     };
     vars: {
       [key: string]: unknown;
@@ -95,6 +100,10 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getPublicBaseUrl: () => {
+        return this.state.publicBaseUrl;
+      },
+
       getAnonymousStatusPage: () => {
         return this.state.anonymousStatusPage;
       },
@@ -105,6 +114,10 @@ export class InjectedMetadataService {
 
       getCspConfig: () => {
         return this.state.csp;
+      },
+
+      getExternalUrlConfig: () => {
+        return this.state.externalUrl;
       },
 
       getPlugins: () => {
@@ -142,11 +155,15 @@ export class InjectedMetadataService {
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
+  getPublicBaseUrl: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
+  };
+  getExternalUrlConfig: () => {
+    policy: IExternalUrlPolicy[];
   };
   /**
    * An array of frontend plugins in topological order.

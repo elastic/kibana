@@ -17,75 +17,238 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { Subscription } from 'rxjs';
+import _ from 'lodash';
 import { History } from 'history';
+import { merge, Subscription } from 'rxjs';
+import React, { useEffect, useCallback, useState } from 'react';
 
-import { ViewMode } from 'src/plugins/embeddable/public';
-import { IIndexPattern, TimeRange, Query, Filter, SavedQuery } from 'src/plugins/data/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { useKibana } from '../../../kibana_react/public';
+import { DashboardConstants } from '../dashboard_constants';
+import { DashboardTopNav } from './top_nav/dashboard_top_nav';
+import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
+import {
+  getInputSubscription,
+  getOutputSubscription,
+  getFiltersSubscription,
+  getSearchSessionIdFromURL,
+  getDashboardContainerInput,
+  getChangesFromAppStateForContainerState,
+} from './dashboard_app_functions';
+import {
+  useDashboardBreadcrumbs,
+  useDashboardContainer,
+  useDashboardStateManager,
+  useSavedDashboard,
+} from './hooks';
 
-import { DashboardAppState, SavedDashboardPanel } from '../types';
-import { DashboardAppController } from './dashboard_app_controller';
-import { RenderDeps } from './application';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { removeQueryParam } from '../services/kibana_utils';
+import { IndexPattern } from '../services/data';
+import { EmbeddableRenderer } from '../services/embeddable';
+import { DashboardContainerInput } from '.';
+import { leaveConfirmStrings } from '../dashboard_strings';
 
-export interface DashboardAppScope extends ng.IScope {
-  dash: SavedObjectDashboard;
-  appState: DashboardAppState;
-  model: {
-    query: Query;
-    filters: Filter[];
-    timeRestore: boolean;
-    title: string;
-    description: string;
-    timeRange:
-      | TimeRange
-      | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
-    refreshInterval: any;
-  };
-  savedQuery?: SavedQuery;
-  refreshInterval: any;
-  panels: SavedDashboardPanel[];
-  indexPatterns: IIndexPattern[];
-  dashboardViewMode: ViewMode;
-  expandedPanel?: string;
-  getShouldShowEditHelp: () => boolean;
-  getShouldShowViewHelp: () => boolean;
-  handleRefresh: (
-    { query, dateRange }: { query?: Query; dateRange: TimeRange },
-    isUpdate?: boolean
-  ) => void;
-  topNavMenu: any;
-  showAddPanel: any;
-  showSaveQuery: boolean;
-  kbnTopNav: any;
-  enterEditMode: () => void;
-  timefilterSubscriptions$: Subscription;
-  isVisible: boolean;
+export interface DashboardAppProps {
+  history: History;
+  savedDashboardId?: string;
+  redirectTo: DashboardRedirect;
+  embedSettings?: DashboardEmbedSettings;
 }
 
-export function initDashboardAppDirective(app: any, deps: RenderDeps) {
-  app.directive('dashboardApp', () => ({
-    restrict: 'E',
-    controllerAs: 'dashboardApp',
-    controller: (
-      $scope: DashboardAppScope,
-      $route: any,
-      $routeParams: {
-        id?: string;
-      },
-      kbnUrlStateStorage: IKbnUrlStateStorage,
-      history: History
-    ) =>
-      new DashboardAppController({
-        $route,
-        $scope,
-        $routeParams,
-        indexPatterns: deps.data.indexPatterns,
-        kbnUrlStateStorage,
-        history,
-        ...deps,
-      }),
-  }));
+export function DashboardApp({
+  savedDashboardId,
+  embedSettings,
+  redirectTo,
+  history,
+}: DashboardAppProps) {
+  const {
+    data,
+    core,
+    onAppLeave,
+    uiSettings,
+    embeddable,
+    dashboardCapabilities,
+    indexPatterns: indexPatternService,
+  } = useKibana<DashboardAppServices>().services;
+
+  const [lastReloadTime, setLastReloadTime] = useState(0);
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+
+  const savedDashboard = useSavedDashboard(savedDashboardId, history);
+  const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
+  const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
+
+  const refreshDashboardContainer = useCallback(
+    (lastReloadRequestTime?: number) => {
+      if (!dashboardContainer || !dashboardStateManager) {
+        return;
+      }
+
+      const changes = getChangesFromAppStateForContainerState({
+        dashboardContainer,
+        appStateDashboardInput: getDashboardContainerInput({
+          isEmbeddedExternally: Boolean(embedSettings),
+          dashboardStateManager,
+          lastReloadRequestTime,
+          dashboardCapabilities,
+          query: data.query,
+        }),
+      });
+
+      if (changes) {
+        // state keys change in which likely won't need a data fetch
+        const noRefetchKeys: Array<keyof DashboardContainerInput> = [
+          'viewMode',
+          'title',
+          'description',
+          'expandedPanelId',
+          'useMargins',
+          'isEmbeddedExternally',
+          'isFullScreenMode',
+        ];
+        const shouldRefetch = Object.keys(changes).some(
+          (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
+        );
+        if (getSearchSessionIdFromURL(history)) {
+          // going away from a background search results
+          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        dashboardContainer.updateInput({
+          ...changes,
+          // do not start a new session if this is irrelevant state change to prevent excessive searches
+          ...(shouldRefetch && { searchSessionId: data.search.session.start() }),
+        });
+      }
+    },
+    [
+      history,
+      data.query,
+      embedSettings,
+      dashboardContainer,
+      data.search.session,
+      dashboardCapabilities,
+      dashboardStateManager,
+    ]
+  );
+
+  // Manage dashboard container subscriptions
+  useEffect(() => {
+    if (!dashboardStateManager || !dashboardContainer) {
+      return;
+    }
+    const timeFilter = data.query.timefilter.timefilter;
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      getInputSubscription({
+        dashboardContainer,
+        dashboardStateManager,
+        filterManager: data.query.filterManager,
+      })
+    );
+    subscriptions.add(
+      getOutputSubscription({
+        dashboardContainer,
+        indexPatterns: indexPatternService,
+        onUpdateIndexPatterns: (newIndexPatterns) => setIndexPatterns(newIndexPatterns),
+      })
+    );
+    subscriptions.add(
+      getFiltersSubscription({
+        query: data.query,
+        dashboardStateManager,
+      })
+    );
+    subscriptions.add(
+      merge(
+        ...[timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()]
+      ).subscribe(() => refreshDashboardContainer())
+    );
+    subscriptions.add(
+      data.search.session.onRefresh$.subscribe(() => {
+        setLastReloadTime(() => new Date().getTime());
+      })
+    );
+    dashboardStateManager.registerChangeListener(() => {
+      // we aren't checking dirty state because there are changes the container needs to know about
+      // that won't make the dashboard "dirty" - like a view mode change.
+      refreshDashboardContainer();
+    });
+
+    return () => {
+      subscriptions.unsubscribe();
+    };
+  }, [
+    core.http,
+    uiSettings,
+    data.query,
+    dashboardContainer,
+    data.search.session,
+    indexPatternService,
+    dashboardStateManager,
+    refreshDashboardContainer,
+  ]);
+
+  // Sync breadcrumbs when Dashboard State Manager changes
+  useDashboardBreadcrumbs(dashboardStateManager, redirectTo);
+
+  // Build onAppLeave when Dashboard State Manager changes
+  useEffect(() => {
+    if (!dashboardStateManager || !dashboardContainer) {
+      return;
+    }
+    onAppLeave((actions) => {
+      if (
+        dashboardStateManager?.getIsDirty() &&
+        !embeddable.getStateTransfer().isTransferInProgress
+      ) {
+        return actions.confirm(
+          leaveConfirmStrings.getLeaveSubtitle(),
+          leaveConfirmStrings.getLeaveTitle()
+        );
+      }
+      return actions.default();
+    });
+    return () => {
+      // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
+      onAppLeave((actions) => actions.default());
+    };
+  }, [dashboardStateManager, dashboardContainer, onAppLeave, embeddable]);
+
+  // Refresh the dashboard container when lastReloadTime changes
+  useEffect(() => {
+    refreshDashboardContainer(lastReloadTime);
+  }, [lastReloadTime, refreshDashboardContainer]);
+
+  return (
+    <div className="app-container dshAppContainer">
+      {savedDashboard && dashboardStateManager && dashboardContainer && (
+        <>
+          <DashboardTopNav
+            {...{
+              redirectTo,
+              embedSettings,
+              indexPatterns,
+              savedDashboard,
+              dashboardContainer,
+              dashboardStateManager,
+            }}
+            lastDashboardId={savedDashboardId}
+            timefilter={data.query.timefilter.timefilter}
+            onQuerySubmit={(_payload, isUpdate) => {
+              if (isUpdate === false) {
+                // The user can still request a reload in the query bar, even if the
+                // query is the same, and in that case, we have to explicitly ask for
+                // a reload, since no state changes will cause it.
+                setLastReloadTime(() => new Date().getTime());
+              }
+            }}
+          />
+          <div className="dashboardViewport">
+            <EmbeddableRenderer embeddable={dashboardContainer} />
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

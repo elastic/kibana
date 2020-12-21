@@ -185,7 +185,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 {kib} provides you with several editors that help you create panels.
 
 [float]
-[[lens]]
+[[create-panels-with-lens]]
 === Create panels with Lens
 
 *Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields
@@ -227,6 +227,20 @@ To view the data field summary information, navigate to the field, then click *i
 
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window]
+
+*Lens* shows a summary depending on the type of data: date fields show the time distribution, string fields show the top 10 values, and numeric fields show a detailed summary with the top 10 values and a value distribution.
+
+[role="screenshot"]
+image::images/lens_data_info_documents.png[Data summary analyzed documents]
+
+*Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
+
+When *Lens* presents the top 10 values distribution, it also shows the percentage of "Other" values. For array value fields, the percentage distribution is considers each value in the array separate.
+
+[role="screenshot"]
+image::images/lens_data_info_other.png[Data summary window with Other]
+
+NOTE: the sum of all the entries and "Other" may be above 100% by a small amount, that is due to a rounding problem when presenting all values as integers.
 
 [float]
 [[change-the-visualization-type]]

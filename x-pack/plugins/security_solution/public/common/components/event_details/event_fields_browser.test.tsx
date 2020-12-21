@@ -9,13 +9,31 @@ import React from 'react';
 import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
-
+import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../link_to');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();
@@ -27,12 +45,9 @@ describe('EventFieldsBrowser', () => {
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
-              columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              onUpdateColumns={jest.fn()}
               timelineId="test"
-              toggleColumn={jest.fn()}
             />
           </TestProviders>
         );
@@ -48,12 +63,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -74,12 +86,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -96,12 +105,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -113,18 +119,14 @@ describe('EventFieldsBrowser', () => {
 
     test('it invokes toggleColumn when the checkbox is clicked', () => {
       const field = '@timestamp';
-      const toggleColumn = jest.fn();
 
       const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={toggleColumn}
           />
         </TestProviders>
       );
@@ -138,11 +140,12 @@ describe('EventFieldsBrowser', () => {
         });
       wrapper.update();
 
-      expect(toggleColumn).toBeCalledWith({
-        columnHeaderType: 'not-filtered',
-        id: '@timestamp',
-        width: 180,
-      });
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.removeColumn({
+          columnId: '@timestamp',
+          id: 'test',
+        })
+      );
     });
   });
 
@@ -152,12 +155,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -179,16 +179,35 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="field-name"]').at(0).text()).toEqual('@timestamp');
+    });
+
+    test('it renders the expected icon for description', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            timelineId="test"
+          />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find('.euiTableRow')
+          .find('.euiTableRowCell')
+          .at(1)
+          .find('[data-euiicon-type]')
+          .last()
+          .prop('data-euiicon-type')
+      ).toEqual('iInCircle');
     });
   });
 
@@ -198,12 +217,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -219,12 +235,9 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

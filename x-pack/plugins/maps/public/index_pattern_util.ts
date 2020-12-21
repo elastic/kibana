@@ -69,6 +69,12 @@ export function getGeoFields(fields: IFieldType[]): IFieldType[] {
   });
 }
 
+export function getGeoPointFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
+  });
+}
+
 export function getFieldsWithGeoTileAgg(fields: IFieldType[]): IFieldType[] {
   return fields.filter(supportsGeoTileAgg);
 }

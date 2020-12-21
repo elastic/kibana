@@ -18,7 +18,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
     >
       <a
         data-test-subj="monitor-page-link-bad-ssl"
-        href="/monitor/YmFkLXNzbA==/?selectedPingStatus=down"
+        href="/monitor/YmFkLXNzbA==/?statusFilter=down"
       >
         Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
       </a>

@@ -16,6 +16,8 @@ import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_a
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
+import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertType } from '../alert_type_registry';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -172,6 +174,8 @@ beforeEach(() => {
     name: 'My Alert Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
   }));
@@ -530,29 +534,38 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
-    const mySecondAppAlertType = {
+    const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
@@ -820,21 +833,27 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('filterByAlertTypeAuthorization', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
@@ -877,9 +896,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -903,9 +928,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -969,9 +1000,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -991,9 +1028,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1052,9 +1095,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1142,9 +1191,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1164,9 +1219,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1238,9 +1299,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);

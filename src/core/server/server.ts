@@ -53,6 +53,7 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { config as externalUrlConfig } from './external_url';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -165,6 +166,7 @@ export class Server {
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
+      http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
     });
@@ -314,6 +316,7 @@ export class Server {
       pathConfig,
       cspConfig,
       elasticsearchConfig,
+      externalUrlConfig,
       loggingConfig,
       httpConfig,
       pluginsConfig,

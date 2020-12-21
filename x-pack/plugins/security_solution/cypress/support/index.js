@@ -21,21 +21,13 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import 'cypress-promise/register';
 
 Cypress.Cookies.defaults({
   preserve: 'sid',
 });
 
-Cypress.on('uncaught:exception', (err) => {
-  if (err.message.includes('ResizeObserver loop limit exceeded')) {
-    return false;
-  }
-});
-
-Cypress.on('window:before:load', (win) => {
-  win.fetch = null;
-  win.Blob = null;
+Cypress.on('uncaught:exception', () => {
+  return false;
 });
 
 // Alternatively you can use CommonJS syntax:

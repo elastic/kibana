@@ -37,9 +37,9 @@ export function registerCanvasUsageCollector(
   const canvasCollector = usageCollection.makeUsageCollector<CanvasUsage>({
     type: 'canvas',
     isReady: () => true,
-    fetch: async ({ callCluster }: CollectorFetchContext) => {
+    fetch: async ({ esClient }: CollectorFetchContext) => {
       const collectorResults = await Promise.all(
-        collectors.map((collector) => collector(kibanaIndex, callCluster))
+        collectors.map((collector) => collector(kibanaIndex, esClient))
       );
 
       return collectorResults.reduce((reduction, usage) => {

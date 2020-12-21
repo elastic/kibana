@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { tagsCacheMock } from '../tags/tags_cache.mock';
+import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTag } from '../../common/test_utils';
 import { buildParseSearchQuery } from './parse_search_query';
 
@@ -36,7 +36,18 @@ describe('parseSearchQuery', () => {
 
     expect(parseSearchQuery(searchTerm)).toEqual({
       searchTerm,
-      tagReferences: undefined,
+      tagReferences: [],
+      valid: true,
+    });
+  });
+
+  it('returns the raw search term when the syntax is not valid', () => {
+    const searchTerm = 'tag:id-1 [search term]';
+
+    expect(parseSearchQuery(searchTerm)).toEqual({
+      searchTerm,
+      tagReferences: [],
+      valid: false,
     });
   });
 
@@ -46,6 +57,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: false })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -55,6 +67,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -64,6 +77,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { tagField: 'custom' })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -73,6 +87,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1')],
+      valid: true,
     });
   });
 });

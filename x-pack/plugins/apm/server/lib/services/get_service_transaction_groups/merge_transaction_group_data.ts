@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
+import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
 
@@ -20,11 +22,13 @@ export function mergeTransactionGroupData({
   end,
   transactionGroups,
   timeseriesData,
+  latencyAggregationType,
 }: {
   start: number;
   end: number;
   transactionGroups: TransactionGroupWithoutTimeseriesData[];
   timeseriesData: TransactionGroupTimeseriesData;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   const deltaAsMinutes = (end - start) / 1000 / 60;
 
@@ -53,7 +57,10 @@ export function mergeTransactionGroupData({
             ...acc.latency,
             timeseries: acc.latency.timeseries.concat({
               x: point.key,
-              y: point.avg_latency.value,
+              y: getLatencyValue({
+                latencyAggregationType,
+                aggregation: point.latency,
+              }),
             }),
           },
           throughput: {

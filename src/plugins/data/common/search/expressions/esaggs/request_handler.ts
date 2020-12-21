@@ -29,21 +29,16 @@ import {
   Query,
   TimeRange,
 } from '../../../../common';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  IAggConfigs,
-  ISearchStartSearchSource,
-  tabifyAggResponse,
-} from '../../../../common/search';
 import { FormatFactory } from '../../../../common/field_formats/utils';
 
-import { AddFilters, buildTabularInspectorData } from './build_tabular_inspector_data';
+import { IAggConfigs } from '../../aggs';
+import { ISearchStartSearchSource } from '../../search_source';
+import { tabifyAggResponse } from '../../tabify';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
 
 /** @internal */
 export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
-  addFilters?: AddFilters;
   aggs: IAggConfigs;
   deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
@@ -60,7 +55,6 @@ export interface RequestHandlerParams {
 
 export const handleRequest = async ({
   abortSignal,
-  addFilters,
   aggs,
   deserializeFieldFormat,
   filters,
@@ -176,7 +170,7 @@ export const handleRequest = async ({
   // response data incorrectly in the inspector.
   let response = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (typeof agg.type.postFlightRequest === 'function') {
+    if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
       response = await agg.type.postFlightRequest(
         response,
         aggs,
@@ -199,17 +193,6 @@ export const handleRequest = async ({
   };
 
   const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
-
-  if (inspectorAdapters.data) {
-    inspectorAdapters.data.setTabularLoader(
-      () =>
-        buildTabularInspectorData(tabifiedResponse, {
-          addFilters,
-          deserializeFieldFormat,
-        }),
-      { returnsFormattedValues: true }
-    );
-  }
 
   return tabifiedResponse;
 };

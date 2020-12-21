@@ -93,7 +93,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggersActionsUi,
+          triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 
@@ -156,6 +156,7 @@ export class MonitoringPlugin
       './alerts/thread_pool_rejections_alert'
     );
     const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
+    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
 
     const {
       triggersActionsUi: { alertTypeRegistry },
@@ -176,6 +177,7 @@ export class MonitoringPlugin
         ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
       )
     );
+    alertTypeRegistry.register(createCCRReadExceptionsAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

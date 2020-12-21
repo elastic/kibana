@@ -7,7 +7,7 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, AlertTypeModel } from '../../../../types';
+import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
 import {
@@ -47,21 +47,24 @@ const mockAlertApis = {
 const authorizedConsumers = {
   [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
+const recoveryActionGroup = { id: 'recovered', name: 'Recovered' };
 
-// const AlertDetails = withBulkAlertOperations(RawAlertDetails);
 describe('alert_details', () => {
   // mock Api handlers
 
   it('renders the alert name as a title', () => {
     const alert = mockAlert();
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -79,14 +82,17 @@ describe('alert_details', () => {
 
   it('renders the alert type badge', () => {
     const alert = mockAlert();
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -107,14 +113,17 @@ describe('alert_details', () => {
         },
       },
     });
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      enabledInLicense: true,
     };
 
     expect(
@@ -141,14 +150,17 @@ describe('alert_details', () => {
         ],
       });
 
-      const alertType = {
+      const alertType: AlertType = {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        enabledInLicense: true,
       };
 
       const actionTypes: ActionType[] = [
@@ -195,14 +207,17 @@ describe('alert_details', () => {
           },
         ],
       });
-      const alertType = {
+      const alertType: AlertType = {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'basic',
         authorizedConsumers,
+        enabledInLicense: true,
       };
       const actionTypes: ActionType[] = [
         {
@@ -254,14 +269,17 @@ describe('alert_details', () => {
     it('links to the app that created the alert', () => {
       const alert = mockAlert();
 
-      const alertType = {
+      const alertType: AlertType = {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       };
 
       expect(
@@ -274,14 +292,17 @@ describe('alert_details', () => {
     it('links to the Edit flyout', () => {
       const alert = mockAlert();
 
-      const alertType = {
+      const alertType: AlertType = {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       };
 
       expect(
@@ -303,14 +324,17 @@ describe('disable button', () => {
       enabled: true,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -331,14 +355,17 @@ describe('disable button', () => {
       enabled: false,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -359,14 +386,17 @@ describe('disable button', () => {
       enabled: true,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const disableAlert = jest.fn();
@@ -396,14 +426,17 @@ describe('disable button', () => {
       enabled: false,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableAlert = jest.fn();
@@ -436,14 +469,17 @@ describe('mute button', () => {
       muteAll: false,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -465,14 +501,17 @@ describe('mute button', () => {
       muteAll: true,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -494,14 +533,17 @@ describe('mute button', () => {
       muteAll: false,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const muteAlert = jest.fn();
@@ -532,14 +574,17 @@ describe('mute button', () => {
       muteAll: true,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const unmuteAlert = jest.fn();
@@ -570,14 +615,17 @@ describe('mute button', () => {
       muteAll: false,
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     const enableButton = shallow(
@@ -606,18 +654,17 @@ describe('edit button', () => {
     },
   ];
   alertTypeRegistry.has.mockReturnValue(true);
-  const alertTypeR = ({
+  const alertTypeR: AlertTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: () => {
       return { errors: {} };
     },
-    alertParamsExpression: () => {},
+    alertParamsExpression: jest.fn(),
     requiresAppContext: false,
-  } as unknown) as AlertTypeModel;
+  };
   alertTypeRegistry.get.mockReturnValue(alertTypeR);
   useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
@@ -635,14 +682,17 @@ describe('edit button', () => {
       ],
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(
@@ -677,14 +727,17 @@ describe('edit button', () => {
       ],
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(
@@ -712,14 +765,17 @@ describe('edit button', () => {
       actions: [],
     });
 
-    const alertType = {
+    const alertType: AlertType = {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
     };
 
     expect(
@@ -756,6 +812,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {

@@ -73,6 +73,20 @@ const breadcrumbGetters: {
     },
     { text: pkgTitle },
   ],
+  integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integrations(),
+      text: i18n.translate('xpack.fleet.breadcrumbs.integrationPageTitle', {
+        defaultMessage: 'Integration',
+      }),
+    },
+    {
+      href: pagePathGetters.integration_details({ pkgkey, panel: 'policies' }),
+      text: pkgTitle,
+    },
+    { text: policyName },
+  ],
   policies: () => [
     BASE_BREADCRUMB,
     {

@@ -23,7 +23,10 @@ import {
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
   serviceThroughputRoute,
-  serviceTransactionGroupsRoute,
+  serviceDependenciesRoute,
+  serviceMetadataDetailsRoute,
+  serviceMetadataIconsRoute,
+  serviceInstancesRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -52,13 +55,14 @@ import {
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
+  transactionChartsBreakdownRoute,
+  transactionChartsDistributionRoute,
+  transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
+  transactionGroupsOverviewRoute,
+  transactionLatencyChatsRoute,
+  transactionThroughputChatsRoute,
+} from './transactions';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,
@@ -100,6 +104,11 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
 } from './rum_client';
+import {
+  transactionErrorRateChartPreview,
+  transactionErrorCountChartPreview,
+  transactionDurationChartPreview,
+} from './alerts/chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -122,7 +131,10 @@ const createApmApi = () => {
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
     .add(serviceThroughputRoute)
-    .add(serviceTransactionGroupsRoute)
+    .add(serviceDependenciesRoute)
+    .add(serviceMetadataDetailsRoute)
+    .add(serviceMetadataIconsRoute)
+    .add(serviceInstancesRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -152,13 +164,14 @@ const createApmApi = () => {
     .add(tracesByIdRoute)
     .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
+    // Transactions
+    .add(transactionChartsBreakdownRoute)
+    .add(transactionChartsDistributionRoute)
+    .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
+    .add(transactionGroupsOverviewRoute)
+    .add(transactionLatencyChatsRoute)
+    .add(transactionThroughputChatsRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
@@ -202,7 +215,12 @@ const createApmApi = () => {
     .add(rumJSErrors)
     .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
-    .add(rumHasDataRoute);
+    .add(rumHasDataRoute)
+
+    // Alerting
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorRateChartPreview);
 
   return api;
 };
