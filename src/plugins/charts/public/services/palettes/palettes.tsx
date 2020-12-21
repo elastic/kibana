@@ -28,12 +28,12 @@ import {
   euiPaletteNegative,
   euiPalettePositive,
   euiPaletteWarm,
-  euiPaletteColorBlindBehindText,
   euiPaletteForStatus,
   euiPaletteForTemperature,
   euiPaletteComplimentary,
+  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
+import { flatten, zip } from 'lodash';
 import {
   ChartsPluginSetup,
   createColorPalette as createLegacyColorPalette,
@@ -46,13 +46,11 @@ import { MappedColors } from '../mapped_colors';
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
+  const behindTextColorMap: Record<string, string> = Object.fromEntries(
+    zip(colors, behindTextColors)
+  );
   const mappedColors = new MappedColors(undefined, (num: number) => {
     return flatten(new Array(Math.ceil(num / 10)).fill(colors)).map((color) => color.toLowerCase());
-  });
-  const mappedBehindTextColors = new MappedColors(undefined, (num: number) => {
-    return flatten(new Array(Math.ceil(num / 10)).fill(behindTextColors)).map((color) =>
-      color.toLowerCase()
-    );
   });
   function getColor(
     series: SeriesLayer[],
@@ -62,10 +60,8 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
     if (chartConfiguration.syncColors) {
       const colorKey = series[0].name;
       mappedColors.mapKeys([colorKey]);
-      mappedBehindTextColors.mapKeys([colorKey]);
-      outputColor = chartConfiguration.behindText
-        ? mappedBehindTextColors.get(colorKey)
-        : mappedColors.get(colorKey);
+      const mappedColor = mappedColors.get(colorKey);
+      outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
     } else {
       outputColor = chartConfiguration.behindText
         ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]

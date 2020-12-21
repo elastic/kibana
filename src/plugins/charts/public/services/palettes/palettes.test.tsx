@@ -22,6 +22,7 @@ import { createColorPalette as createLegacyColorPalette } from '../../../../../.
 import { PaletteDefinition } from './types';
 import { buildPalettes } from './palettes';
 import { colorsServiceMock } from '../legacy_colors/mock';
+import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
   const palettes: Record<string, PaletteDefinition> = buildPalettes(
@@ -201,31 +202,84 @@ describe('palettes', () => {
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getColor(
+          [
+            {
+              name: 'klm',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 5,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 2,
+            },
+          ],
           {
-            name: 'klm',
-            rankAtDepth: 0,
-            totalSeriesAtDepth: 5,
-          },
+            syncColors: true,
+          }
+        );
+        const color2 = palette.getColor(
+          [
+            {
+              name: 'klm',
+              rankAtDepth: 3,
+              totalSeriesAtDepth: 5,
+            },
+            {
+              name: 'ghj',
+              rankAtDepth: 1,
+              totalSeriesAtDepth: 1,
+            },
+          ],
           {
-            name: 'def',
-            rankAtDepth: 0,
-            totalSeriesAtDepth: 2,
-          },
-        ]);
-        const color2 = palette.getColor([
-          {
-            name: 'klm',
-            rankAtDepth: 0,
-            totalSeriesAtDepth: 5,
-          },
-          {
-            name: 'ghj',
-            rankAtDepth: 1,
-            totalSeriesAtDepth: 1,
-          },
-        ]);
+            syncColors: true,
+          }
+        );
         expect(color1).toEqual(color2);
+      });
+
+      it('should return the same index of the behind text palette for same key', () => {
+        const palette = palettes.default;
+
+        const color1 = palette.getColor(
+          [
+            {
+              name: 'klm',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 5,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 2,
+            },
+          ],
+          {
+            syncColors: true,
+          }
+        );
+        const color2 = palette.getColor(
+          [
+            {
+              name: 'klm',
+              rankAtDepth: 3,
+              totalSeriesAtDepth: 5,
+            },
+            {
+              name: 'ghj',
+              rankAtDepth: 1,
+              totalSeriesAtDepth: 1,
+            },
+          ],
+          {
+            syncColors: true,
+            behindText: true,
+          }
+        );
+        const color1Index = euiPaletteColorBlind({ rotations: 2 }).indexOf(color1!);
+        const color2Index = euiPaletteColorBlindBehindText({ rotations: 2 }).indexOf(color2!);
+        expect(color1Index).toEqual(color2Index);
       });
     });
   });
