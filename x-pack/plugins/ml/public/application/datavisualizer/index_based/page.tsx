@@ -54,6 +54,8 @@ import type { FieldRequestConfig, FieldVisConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
+import { HelpMenu } from '../../components/help_menu';
+import { useMlKibna } from '../../contexts/kibana';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -659,7 +661,10 @@ export const Page: FC = () => {
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
   }, [overallStats, showEmptyFields]);
-
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
@@ -747,6 +752,7 @@ export const Page: FC = () => {
           </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

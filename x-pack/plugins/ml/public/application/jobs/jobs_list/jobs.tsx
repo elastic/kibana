@@ -11,6 +11,8 @@ import { JobsListView } from './components/jobs_list_view/index';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { ListingPageUrlState } from '../../../../common/types/common';
+import { HelpMenu } from '../../components/help_menu';
+import { useMlKibana } from '../../contexts/kibana';
 
 interface JobsPageProps {
   blockRefresh?: boolean;
@@ -31,11 +33,15 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
   );
-
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="anomaly_detection" />
       <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
+      <HelpMenu docLink={helpLink} />
     </div>
   );
 };
