@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, SearchResponse } from 'kibana/server';
 import { ReportingConfig } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { GetLicense } from './';
@@ -18,7 +18,7 @@ import {
   KeyCountBucket,
   RangeStats,
   ReportingUsageType,
-  // SearchResponse,
+  ReportingUsageSearchResponse,
   StatusByAppBucket,
 } from './types';
 
@@ -99,7 +99,9 @@ type RangeStatSets = Partial<RangeStats> & {
   last7Days: Partial<RangeStats>;
 };
 
-async function handleResponse(response: unknown): Promise<Partial<RangeStatSets>> {
+type ESResponse = Partial<SearchResponse<ReportingUsageSearchResponse>>;
+
+async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
   const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
@@ -167,7 +169,7 @@ export async function getReportingUsage(
   const featureAvailability = await getLicense();
   return esClient
     .search(params)
-    .then(({ body: newResponse }) => handleResponse(newResponse))
+    .then(({ body: response }) => handleResponse(response))
     .then(
       (usage: Partial<RangeStatSets>): ReportingUsageType => {
         // Allow this to explicitly throw an exception if/when this config is deprecated,
@@ -190,28 +192,4 @@ export async function getReportingUsage(
         };
       }
     );
-  // return callCluster('search', params)
-  //   .then((response: SearchResponse) => handleResponse(response))
-  //   .then(
-  //     (usage: Partial<RangeStatSets>): ReportingUsageType => {
-  //       // Allow this to explicitly throw an exception if/when this config is deprecated,
-  //       // because we shouldn't collect browserType in that case!
-  //       const browserType = config.get('capture', 'browser', 'type');
-
-  //       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-  //       const availability = exportTypesHandler.getAvailability(
-  //         featureAvailability
-  //       ) as FeatureAvailabilityMap;
-
-  //       const { last7Days, ...all } = usage;
-
-  //       return {
-  //         available: true,
-  //         browser_type: browserType,
-  //         enabled: true,
-  //         last7Days: decorateRangeStats(last7Days, availability),
-  //         ...decorateRangeStats(all, availability),
-  //       };
-  //     }
-  //   );
 }
