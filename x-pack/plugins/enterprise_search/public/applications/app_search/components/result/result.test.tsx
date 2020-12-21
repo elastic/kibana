@@ -11,6 +11,9 @@ import { EuiPanel } from '@elastic/eui';
 
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
+import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
+import { SchemaTypes } from '../../../shared/types';
+
 import { Result } from './result';
 
 describe('Result', () => {
@@ -37,6 +40,12 @@ describe('Result', () => {
     },
   };
 
+  const schema = {
+    title: 'text' as SchemaTypes,
+    description: 'text' as SchemaTypes,
+    length: 'number' as SchemaTypes,
+  };
+
   it('renders', () => {
     const wrapper = shallow(<Result {...props} />);
     expect(wrapper.find(EuiPanel).exists()).toBe(true);
@@ -60,6 +69,33 @@ describe('Result', () => {
       score: 100,
       engine: 'my-engine',
     });
+  });
+
+  describe('document detail link', () => {
+    it('will render a link if shouldLinkToDetailPage is true', () => {
+      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage={true} />);
+      expect(wrapper.find(ReactRouterHelper).prop('to')).toEqual('/engines/my-engine/documents/1');
+      expect(wrapper.find('article.appSearchResult__content').exists()).toBe(false);
+      expect(wrapper.find('a.appSearchResult__content').exists()).toBe(true);
+    });
+
+    it('will not render a link if shouldLinkToDetailPage is not set', () => {
+      const wrapper = shallow(<Result {...props} />);
+      expect(wrapper.find(ReactRouterHelper).exists()).toBe(false);
+      expect(wrapper.find('article.appSearchResult__content').exists()).toBe(true);
+      expect(wrapper.find('a.appSearchResult__content').exists()).toBe(false);
+    });
+  });
+
+  it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
+    const wrapper = shallow(
+      <Result {...props} shouldLinkToDetailPage={true} schemaForTypeHighlights={schema} />
+    );
+    expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
+      'text',
+      'text',
+      'number',
+    ]);
   });
 
   describe('when there are more than 5 fields', () => {
