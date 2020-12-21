@@ -55,11 +55,6 @@ export interface LensAppState {
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
 
-  // Properties needed to interface with TopNav
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;

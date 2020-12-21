@@ -7,7 +7,7 @@
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -71,7 +71,6 @@ export function App({
   } = useKibana<LensAppServices>().services;
 
   const [state, setState] = useState<LensAppState>(() => {
-    const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
       // Do not use app-specific filters from previous app,
@@ -81,10 +80,6 @@ export function App({
         : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
-      dateRange: {
-        fromDate: currentRange.from,
-        toDate: currentRange.to,
-      },
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveModalVisible: false,
       indicateNoData: false,
@@ -108,9 +103,13 @@ export function App({
     state.indicateNoData,
     state.query,
     state.filters,
-    state.dateRange,
     state.indexPatternsForTopNav,
+    state.searchSessionId,
   ]);
+
+  // Need a stable reference for the frame component of the dateRange
+  const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
+  const currentDateRange = useMemo(() => ({ fromDate, toDate }), [fromDate, toDate]);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -172,13 +171,8 @@ export function App({
 
     const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
       next: () => {
-        const currentRange = data.query.timefilter.timefilter.getTime();
         setState((s) => ({
           ...s,
-          dateRange: {
-            fromDate: currentRange.from,
-            toDate: currentRange.to,
-          },
           searchSessionId: data.search.session.start(),
         }));
       },
@@ -613,10 +607,8 @@ export function App({
             appName={'lens'}
             onQuerySubmit={(payload) => {
               const { dateRange, query } = payload;
-              if (
-                dateRange.from !== state.dateRange.fromDate ||
-                dateRange.to !== state.dateRange.toDate
-              ) {
+              const currentRange = data.query.timefilter.timefilter.getTime();
+              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
                 data.query.timefilter.timefilter.setTime(dateRange);
                 trackUiEvent('app_date_change');
               } else {
@@ -643,12 +635,6 @@ export function App({
               setState((s) => ({
                 ...s,
                 savedQuery: { ...savedQuery }, // Shallow query for reference issues
-                dateRange: savedQuery.attributes.timefilter
-                  ? {
-                      fromDate: savedQuery.attributes.timefilter.from,
-                      toDate: savedQuery.attributes.timefilter.to,
-                    }
-                  : s.dateRange,
               }));
             }}
             onClearSavedQuery={() => {
@@ -661,8 +647,8 @@ export function App({
               }));
             }}
             query={state.query}
-            dateRangeFrom={state.dateRange.fromDate}
-            dateRangeTo={state.dateRange.toDate}
+            dateRangeFrom={fromDate}
+            dateRangeTo={toDate}
             indicateNoData={state.indicateNoData}
           />
         </div>
@@ -672,7 +658,7 @@ export function App({
             render={editorFrame.mount}
             nativeProps={{
               searchSessionId: state.searchSessionId,
-              dateRange: state.dateRange,
+              dateRange: currentDateRange,
               query: state.query,
               filters: state.filters,
               savedQuery: state.savedQuery,
