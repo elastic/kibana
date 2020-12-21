@@ -18,7 +18,7 @@
  */
 
 import {
-  createCustomLabelSelectHandled,
+  createCustomLabelSelectHandler,
   createSelectHandler,
   HandleChange,
 } from './create_select_handler';
@@ -44,16 +44,16 @@ describe('createSelectHandler', () => {
     });
   });
 
-  describe('createCustomLabelSelectHandled()', () => {
+  describe('createCustomLabelSelectHandler()', () => {
     let handleChange: HandleChange;
-    let changeHandler: ReturnType<typeof createCustomLabelSelectHandled>;
+    let changeHandler: ReturnType<typeof createCustomLabelSelectHandler>;
 
     beforeEach(() => {
       handleChange = jest.fn();
-      changeHandler = createCustomLabelSelectHandled(handleChange);
+      changeHandler = createCustomLabelSelectHandler(handleChange);
     });
 
-    test('should calls handleChange() function with correct data', () => {
+    test('should calls handleChange() function with the correct data', () => {
       const fn = changeHandler('test');
 
       fn([{ value: 'foo', label: 'foo' }]);
@@ -63,7 +63,7 @@ describe('createSelectHandler', () => {
       });
     });
 
-    test('should calls handleChange() with custom label', () => {
+    test('should calls handleChange() with the custom label', () => {
       const fn = changeHandler('test');
 
       fn([{ value: 'foo', label: 'custom label' }]);

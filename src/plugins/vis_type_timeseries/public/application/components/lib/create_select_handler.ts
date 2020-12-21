@@ -27,7 +27,7 @@ export const createSelectHandler = (handleChange: HandleChange) => (name: string
     [name]: selected[0]?.value ?? null,
   });
 
-export const createCustomLabelSelectHandled = (handleChange: HandleChange) => (name: string) => (
+export const createCustomLabelSelectHandler = (handleChange: HandleChange) => (name: string) => (
   selected: EuiComboBoxOptionOption[] = []
 ) => {
   const firstItem = selected[0];

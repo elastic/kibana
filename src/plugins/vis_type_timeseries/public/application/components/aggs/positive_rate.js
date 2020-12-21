@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandled, createSelectHandler } from '../lib/create_select_handler';
+import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -74,7 +74,7 @@ export const PositiveRateAgg = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
+  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
   const indexPattern =

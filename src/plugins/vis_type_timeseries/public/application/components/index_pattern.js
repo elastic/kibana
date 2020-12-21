@@ -33,7 +33,7 @@ import {
   EuiFormLabel,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { createSelectHandler, createCustomLabelSelectHandled } from './lib/create_select_handler';
+import { createSelectHandler, createCustomLabelSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
@@ -97,7 +97,7 @@ export const IndexPattern = ({
     [onChange, maxBarsName]
   );
 
-  const handleFieldsChange = createCustomLabelSelectHandled(onChange);
+  const handleFieldsChange = createCustomLabelSelectHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
 

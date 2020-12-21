@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandled, createSelectHandler } from '../lib/create_select_handler';
+import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
 import { createNumberHandler } from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
@@ -49,7 +49,7 @@ export function PercentileAgg(props) {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
+  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;

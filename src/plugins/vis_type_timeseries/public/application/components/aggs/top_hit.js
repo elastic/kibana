@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { i18n } from '@kbn/i18n';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandled, createSelectHandler } from '../lib/create_select_handler';
+import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
@@ -126,7 +126,7 @@ const TopHitAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
+  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const field = fields[indexPattern].find((f) => f.name === extractTimefieldName(model.field));
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);

@@ -19,8 +19,10 @@
 
 import { TimeFieldObject } from './types';
 
-const isTimefieldObject = (timeField: any): timeField is { name: string; label: string } => {
-  return timeField && timeField.name && timeField.label;
+const isTimefieldObject = (
+  timeField: TimeFieldObject
+): timeField is { name: string; label: string } => {
+  return Boolean(timeField && typeof timeField !== 'string' && timeField.name);
 };
 
 export const extractTimefieldName = (timeField: TimeFieldObject) =>
