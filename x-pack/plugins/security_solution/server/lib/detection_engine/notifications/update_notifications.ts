@@ -6,7 +6,7 @@
 
 import { PartialAlert } from '../../../../../alerts/server';
 import { readNotifications } from './read_notifications';
-import { UpdateNotificationParams } from './types';
+import { RuleNotificationAlertTypeParams, UpdateNotificationParams } from './types';
 import { addTags } from './add_tags';
 import { createNotifications } from './create_notifications';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
@@ -18,11 +18,11 @@ export const updateNotifications = async ({
   ruleAlertId,
   name,
   interval,
-}: UpdateNotificationParams): Promise<PartialAlert | null> => {
+}: UpdateNotificationParams): Promise<PartialAlert<RuleNotificationAlertTypeParams> | null> => {
   const notification = await readNotifications({ alertsClient, id: undefined, ruleAlertId });
 
   if (interval && notification) {
-    return alertsClient.update({
+    return alertsClient.update<RuleNotificationAlertTypeParams>({
       id: notification.id,
       data: {
         tags: addTags([], ruleAlertId),

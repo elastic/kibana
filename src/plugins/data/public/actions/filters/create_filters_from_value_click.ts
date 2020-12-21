@@ -20,8 +20,19 @@
 import { Datatable } from '../../../../../plugins/expressions/public';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
-import { ValueClickContext } from '../../../../embeddable/public';
 import { AggConfigSerialized } from '../../../common/search/aggs';
+
+/** @internal */
+export interface ValueClickDataContext {
+  data: Array<{
+    table: Pick<Datatable, 'rows' | 'columns'>;
+    column: number;
+    row: number;
+    value: any;
+  }>;
+  timeFieldName?: string;
+  negate?: boolean;
+}
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -120,7 +131,7 @@ const createFilter = async (
 export const createFiltersFromValueClickAction = async ({
   data,
   negate,
-}: ValueClickContext['data']) => {
+}: ValueClickDataContext) => {
   const filters: Filter[] = [];
 
   await Promise.all(
