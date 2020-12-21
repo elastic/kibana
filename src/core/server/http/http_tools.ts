@@ -29,7 +29,7 @@ import Hoek from '@hapi/hoek';
 import type { ServerOptions as TLSOptions } from 'https';
 import type { ValidationError } from 'joi';
 import uuid from 'uuid';
-import { validateObject } from '@kbn/std';
+import { ensureNoUnsafeProperties } from '@kbn/std';
 import { HttpConfig } from './http_config';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
@@ -69,7 +69,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         // This is a default payload validation which applies to all LP routes which do not specify their own
         // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
         // (All NP routes are already required to specify their own validation in order to access the payload)
-        payload: (value) => Promise.resolve(validateObject(value)),
+        payload: (value) => Promise.resolve(ensureNoUnsafeProperties(value)),
       },
     },
     state: {
