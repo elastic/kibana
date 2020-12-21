@@ -121,7 +121,7 @@ describe('useSelectedCells', () => {
     expect(setUrlState).toHaveBeenCalledWith({
       mlExplorerSwimlane: {
         selectedLanes: ['Overall'],
-        selectedTimes: [1498780800, 1502366798],
+        selectedTimes: [1500984778, 1502366798],
         selectedType: 'overall',
         showTopFieldValues: true,
         viewByFieldName: 'apache2.access.remote_ip',

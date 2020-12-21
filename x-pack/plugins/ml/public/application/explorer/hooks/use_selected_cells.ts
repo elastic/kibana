@@ -107,7 +107,7 @@ export const useSelectedCells = (
       if (resultFrom !== rangeFrom || resultTo !== rangeTo) {
         setSelectedCells({
           ...selectedCells,
-          times: [selectedFrom, selectedTo],
+          times: [resultFrom, resultTo],
         });
       }
     },
