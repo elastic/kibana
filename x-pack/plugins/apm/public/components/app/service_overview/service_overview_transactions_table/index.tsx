@@ -32,7 +32,7 @@ import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
-import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
+import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_ink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
@@ -282,14 +282,14 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <TransactionLink serviceName={serviceName}>
+            <TransactionOverviewLink serviceName={serviceName}>
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
                 {
                   defaultMessage: 'View transactions',
                 }
               )}
-            </TransactionLink>
+            </TransactionOverviewLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
