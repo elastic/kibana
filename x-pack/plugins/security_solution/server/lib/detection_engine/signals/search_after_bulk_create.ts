@@ -110,17 +110,8 @@ export const searchAfterAndBulkCreate = async ({
           }),
         ]);
 
-        // if the result set is empty it could mean that the index
-        // has the timestamp override field mapped, but it is unused
-        // in that case we want to try to query against
-        // the @timestamp field as a backup.
-        // not only are we checking if the timestamp override field exists | not
-        // we also want to check if it is in use.
-        // we will need to figure out partial erroring later.
-        if (
-          (!isEmpty(searchErrors) || isEmpty(searchResult.hits.hits)) &&
-          ruleParams.timestampOverride != null
-        ) {
+        // if there is a timestampOverride param we always want to do a secondary search against @timestamp
+        if (ruleParams.timestampOverride != null) {
           const {
             searchResult: searchResultB,
             searchDuration: searchDurationB,
