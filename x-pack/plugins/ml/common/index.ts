@@ -8,3 +8,4 @@ export { SearchResponse7 } from './types/es_client';
 export { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants/anomalies';
 export { getSeverityColor, getSeverityType } from './util/anomaly_utils';
 export { composeValidators, patternValidator } from './util/validators';
+export { extractErrorMessage } from './util/errors';

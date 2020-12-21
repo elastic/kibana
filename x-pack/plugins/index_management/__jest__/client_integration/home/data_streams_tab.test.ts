@@ -469,12 +469,12 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('listed in the table with Managed label', () => {
+    test('listed in the table with Fleet-managed label', () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
     });
@@ -484,7 +484,7 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
 

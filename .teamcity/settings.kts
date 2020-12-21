@@ -2,7 +2,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import projects.Kibana
 import projects.KibanaConfiguration
 
-version = "2020.1"
+version = "2020.2"
 
 val config = KibanaConfiguration {
   agentNetwork = DslContext.getParameter("agentNetwork", "teamcity")

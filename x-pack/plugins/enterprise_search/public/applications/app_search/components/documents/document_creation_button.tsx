@@ -10,7 +10,7 @@ import { useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 
-import { DocumentCreationLogic, DocumentCreationModal } from '../document_creation';
+import { DocumentCreationLogic, DocumentCreationFlyout } from '../document_creation';
 
 export const DocumentCreationButton: React.FC = () => {
   const { showCreationModes } = useActions(DocumentCreationLogic);
@@ -27,7 +27,7 @@ export const DocumentCreationButton: React.FC = () => {
           defaultMessage: 'Index documents',
         })}
       </EuiButton>
-      <DocumentCreationModal />
+      <DocumentCreationFlyout />
     </>
   );
 };
