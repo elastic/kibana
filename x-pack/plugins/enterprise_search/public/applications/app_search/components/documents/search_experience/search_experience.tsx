@@ -20,6 +20,7 @@ import { externalUrl } from '../../../../shared/enterprise_search_url';
 
 import { SearchBoxView, SortingView } from './views';
 import { SearchExperienceContent } from './search_experience_content';
+import { buildSearchUIConfig } from './build_search_ui_config';
 
 const DEFAULT_SORT_OPTIONS = [
   {
@@ -52,15 +53,7 @@ export const SearchExperience: React.FC = () => {
     searchKey: engine.apiKey,
   });
 
-  const searchProviderConfig = {
-    alwaysSearchOnInitialLoad: true,
-    apiConnector: connector,
-    trackUrlState: false,
-    initialState: {
-      sortDirection: 'desc',
-      sortField: 'id',
-    },
-  };
+  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {});
 
   return (
     <div className="documentsSearchExperience">
