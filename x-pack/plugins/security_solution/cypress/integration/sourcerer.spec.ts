@@ -34,6 +34,7 @@ describe('Sourcerer', () => {
   });
 
   beforeEach(() => {
+    cy.clearLocalStorage();
     loginAndWaitForPage(HOSTS_URL);
   });
 
@@ -47,6 +48,7 @@ describe('Sourcerer', () => {
       openSourcerer();
       isSourcererOptions([`metrics-*`, `logs-*`]);
     });
+
     it('selected KIP gets added to sourcerer', () => {
       setSourcererOption(`metrics-*`);
       openSourcerer();
