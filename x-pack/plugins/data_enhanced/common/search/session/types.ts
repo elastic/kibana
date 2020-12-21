@@ -19,7 +19,12 @@ export interface BackgroundSessionSavedObjectAttributes {
   urlGeneratorId: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
-  idMapping: Record<string, string>;
+  idMapping: Record<string, BackgroundSessionSearchInfo>;
+}
+
+export interface BackgroundSessionSearchInfo {
+  id: string; // ID of the async search request
+  strategy: string; // Search strategy used to submit the search request
 }
 
 export interface BackgroundSessionFindOptions {
