@@ -19,6 +19,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
@@ -77,7 +78,13 @@ export async function getServiceTransactionStats({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }, ...esFilter],
+          filter: [
+            { range: rangeFilter(start, end) },
+            ...esFilter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
         },
       },
       aggs: {

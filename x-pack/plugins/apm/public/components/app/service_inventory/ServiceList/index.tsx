@@ -233,7 +233,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                 'xpack.apm.servicesTable.tooltip.metricsExplanation',
                 {
                   defaultMessage:
-                    'The service metrics are aggregated on transaction type "request", "page-load" or top transaction type',
+                    'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
                 }
               )}
             >
