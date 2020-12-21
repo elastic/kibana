@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
+        'discover:searchFieldsFromSource': true,
       });
     });
 
@@ -46,8 +47,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.unload('date_nanos');
     });
 
-    // skipping this until https://github.com/elastic/elasticsearch/issues/66693 is fixed
-    xit('displays predessors - anchor - successors in right order ', async function () {
+    it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
@@ -58,8 +58,7 @@ export default function ({ getService, getPageObjects }) {
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    // skipping this until https://github.com/elastic/elasticsearch/issues/66693 is fixed
-    xit('displays correctly when predecessors and successors are loaded', async function () {
+    it('displays correctly when predecessors and successors are loaded', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
