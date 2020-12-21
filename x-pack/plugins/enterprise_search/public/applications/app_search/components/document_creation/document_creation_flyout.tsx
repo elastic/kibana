@@ -19,6 +19,7 @@ import {
   PasteJsonText,
   UploadJsonFile,
 } from './creation_mode_components';
+import { Summary } from './creation_response_components';
 
 export const DocumentCreationFlyout: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
@@ -48,11 +49,7 @@ export const FlyoutContent: React.FC = () => {
         case 'file':
           return <UploadJsonFile />;
       }
-    case DocumentCreationStep.ShowError:
-      return <>DocumentCreationError</>;
-    case DocumentCreationStep.ShowErrorSummary:
-      return <>DocumentCreationSummary</>;
-    case DocumentCreationStep.ShowSuccessSummary:
-      return <>DocumentCreationSummary</>;
+    case DocumentCreationStep.ShowSummary:
+      return <Summary />;
   }
 };

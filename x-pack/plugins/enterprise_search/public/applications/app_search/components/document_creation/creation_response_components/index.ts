@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type DocumentCreationMode = 'text' | 'file' | 'api';
-
-export enum DocumentCreationStep {
-  ShowCreationModes,
-  AddDocuments,
-  ShowSummary,
-}
+export { Summary } from './summary';

@@ -126,11 +126,11 @@ describe('DocumentCreationLogic', () => {
       describe('creationStep', () => {
         it('should be set to the provided value', () => {
           mount();
-          DocumentCreationLogic.actions.setCreationStep(DocumentCreationStep.ShowSuccessSummary);
+          DocumentCreationLogic.actions.setCreationStep(DocumentCreationStep.ShowSummary);
 
           expect(DocumentCreationLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            creationStep: 3,
+            creationStep: 2,
           });
         });
       });

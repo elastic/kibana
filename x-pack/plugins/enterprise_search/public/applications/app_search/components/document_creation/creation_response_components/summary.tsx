@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type DocumentCreationMode = 'text' | 'file' | 'api';
+import React from 'react';
 
-export enum DocumentCreationStep {
-  ShowCreationModes,
-  AddDocuments,
-  ShowSummary,
-}
+export const Summary: React.FC = () => {
+  return <>TODO</>;
+};
