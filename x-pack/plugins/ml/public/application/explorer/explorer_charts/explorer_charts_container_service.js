@@ -694,7 +694,10 @@ function calculateChartRange(
     chartRange.min = chartRange.min + maxBucketSpanMs;
   }
 
-  if (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) {
+  if (
+    (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) &&
+    chartRange.max - chartRange.min < selectedLatestMs - selectedEarliestMs
+  ) {
     tooManyBuckets = true;
   }
 
