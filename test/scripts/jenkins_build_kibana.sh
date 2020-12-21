@@ -10,7 +10,7 @@ fi
 export KBN_NP_PLUGINS_BUILT=true
 
 echo " -> Ensuring all functional tests are in a ciGroup"
-node scripts/ensure_all_tests_in_ci_group.js;
+node scripts/ensure_all_tests_in_ci_group;
 
 # Do not build kibana for code coverage run
 if [[ -z "$CODE_COVERAGE" ]] ; then
