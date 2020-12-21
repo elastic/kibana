@@ -27,7 +27,7 @@ function createIdToFlagMap(ids: string[]) {
   }, {} as any);
 }
 
-async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: LegacyAPICaller) {
+async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: ElasticsearchClient) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -46,7 +46,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: Legacy
     },
   };
 
-  const esResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search(searchParams);
 
   return get(esResponse, 'hits.hits', []).map((indexPattern: any) => {
     const { _id: savedObjectId } = indexPattern;
@@ -212,7 +212,7 @@ export function registerRollupUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
+      const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, esClient);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 
       const rollupSavedSearches = await fetchRollupSavedSearches(
