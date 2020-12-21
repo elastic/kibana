@@ -113,13 +113,11 @@ export const checkIdToggleField = () => {
 };
 
 export const closeTimeline = () => {
-  cy.wait(1000);
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.wait(1000);
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
