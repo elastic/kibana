@@ -13,6 +13,21 @@ if [[ ! -d "target" ]]; then
 fi
 cd -
 
-./test/scripts/test/plugin_functional.sh
-./test/scripts/test/example_functional.sh
-./test/scripts/test/interpreter_functional.sh
+checks-reporter-with-killswitch "Plugin Functional Tests" \
+  node scripts/functional_tests \
+    --config test/plugin_functional/config.ts \
+    --bail \
+    --debug
+
+checks-reporter-with-killswitch "Example Functional Tests" \
+  node scripts/functional_tests \
+    --config test/examples/config.js \
+    --bail \
+    --debug
+
+checks-reporter-with-killswitch "Interpreter Functional Tests" \
+  node scripts/functional_tests \
+    --config test/interpreter_functional/config.ts \
+    --bail \
+    --debug \
+    --kibana-install-dir "$KIBANA_INSTALL_DIR"

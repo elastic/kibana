@@ -7,7 +7,7 @@ source "$(dirname "${0}")/util.sh"
 tc_start_block "Bootstrap"
 
 tc_start_block "yarn install and kbn bootstrap"
-verify_no_git_changes yarn kbn bootstrap --prefer-offline
+verify_no_git_changes yarn kbn bootstrap
 tc_end_block "yarn install and kbn bootstrap"
 
 tc_start_block "build kbn-pm"
