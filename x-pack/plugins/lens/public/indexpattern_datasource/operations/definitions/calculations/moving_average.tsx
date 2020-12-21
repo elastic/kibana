@@ -111,10 +111,10 @@ export const movingAverageOperation: OperationDefinition<
 };
 
 function MovingAverageParamEditor({
-  state,
-  setState,
+  layer,
+  updateLayer,
   currentColumn,
-  layerId,
+  columnId,
 }: ParamEditorProps<MovingAverageIndexPatternColumn>) {
   const [inputValue, setInputValue] = useState(String(currentColumn.params.window));
 
@@ -124,11 +124,10 @@ function MovingAverageParamEditor({
         return;
       }
       const inputNumber = Number(inputValue);
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName: 'window',
           value: inputNumber,
         })

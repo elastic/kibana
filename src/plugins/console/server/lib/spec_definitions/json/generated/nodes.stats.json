@@ -33,6 +33,7 @@
         "discovery",
         "fs",
         "http",
+        "indexing_pressure",
         "indices",
         "jvm",
         "os",

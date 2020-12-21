@@ -454,6 +454,9 @@ of buckets to try to represent.
 ==== Visualization
 
 [horizontal]
+[[visualization-visualize-chartslibrary]]`visualization:visualize:chartsLibrary`::
+Enables the new charts library for area, line, and bar charts in visualization panels. Does *not* support the split chart aggregation.
+
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
