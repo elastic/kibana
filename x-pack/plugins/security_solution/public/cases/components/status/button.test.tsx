@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
 
 import { CaseStatuses } from '../../../../../case/common/api';
 import { StatusActionButton } from './button';
