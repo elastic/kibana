@@ -107,6 +107,7 @@ export class BaseAlert {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
         this.execute(options),
       producer: 'monitoring',
@@ -344,7 +345,7 @@ export class BaseAlert {
 
       const firingNodeUuids = nodes
         .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId)
+        .map((node) => node.meta.nodeId || node.meta.instanceId)
         .join(',');
       const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
@@ -354,13 +355,16 @@ export class BaseAlert {
         if (!node.shouldFire) {
           continue;
         }
-        const stat = node.meta as AlertNodeState;
+        const { meta } = node;
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
         if (key) {
-          nodeState[key] = stat[key];
+          nodeState[key] = meta[key];
         }
-        nodeState.nodeId = stat.nodeId || node.nodeId!;
-        nodeState.nodeName = stat.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
+        // TODO: make these functions more generic, so it's node/item agnostic
+        nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.itemLabel = meta.itemLabel;
+        nodeState.meta = meta;
         nodeState.ui.triggeredMS = currentUTC;
         nodeState.ui.isFiring = true;
         nodeState.ui.severity = node.severity;

@@ -81,7 +81,9 @@ export async function registerLogThresholdAlertType(
 
   alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-    name: 'Log threshold',
+    name: i18n.translate('xpack.infra.logs.alertName', {
+      defaultMessage: 'Log threshold',
+    }),
     validate: {
       params: {
         validate: (params) => decodeOrThrow(AlertParamsRT)(params),
@@ -89,6 +91,7 @@ export async function registerLogThresholdAlertType(
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
+    minimumLicenseRequired: 'basic',
     executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [

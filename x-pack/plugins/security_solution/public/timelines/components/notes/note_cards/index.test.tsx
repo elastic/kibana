@@ -11,6 +11,7 @@ import '../../../../common/mock/formatted_relative';
 import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
+import { TimelineResultNote } from '../../open_timeline/types';
 
 const getNotesByIds = () => ({
   abc: {
@@ -38,32 +39,42 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
 }));
 
 describe('NoteCards', () => {
-  const noteIds = ['abc', 'def'];
+  const notes: TimelineResultNote[] = Object.entries(getNotesByIds()).map(
+    ([_, { created, id, note, saveObjectId, user }]) => ({
+      saveObjectId,
+      note,
+      noteId: id,
+      updated: created.getTime(),
+      updatedBy: user,
+    })
+  );
 
   const props = {
     associateNote: jest.fn(),
-    noteIds,
+    ariaRowindex: 2,
+    getNotesByIds,
+    getNewNoteId: jest.fn(),
+    notes: [],
     showAddNote: true,
     status: TimelineStatus.active,
     toggleShowAddNote: jest.fn(),
     updateNote: jest.fn(),
   };
 
-  test('it renders the notes column when noteIds are specified', () => {
+  test('it renders the notes column when notes are specified', () => {
     const wrapper = mount(
       <TestProviders>
-        <NoteCards {...props} />
+        <NoteCards {...props} notes={notes} />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="notes"]').exists()).toEqual(true);
   });
 
-  test('it does NOT render the notes column when noteIds are NOT specified', () => {
-    const testProps = { ...props, noteIds: [] };
+  test('it does NOT render the notes column when notes are NOT specified', () => {
     const wrapper = mount(
       <TestProviders>
-        <NoteCards {...testProps} />
+        <NoteCards {...props} />
       </TestProviders>
     );
 
@@ -73,12 +84,24 @@ describe('NoteCards', () => {
   test('renders note cards', () => {
     const wrapper = mount(
       <TestProviders>
-        <NoteCards {...props} />
+        <NoteCards {...props} notes={notes} />
       </TestProviders>
     );
 
     expect(wrapper.find('.euiCommentEvent__body .euiMarkdownFormat').first().text()).toEqual(
       getNotesByIds().abc.note
+    );
+  });
+
+  test('renders the expected screenreader only text', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <NoteCards {...props} notes={notes} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="screenReaderOnly"]').first().text()).toEqual(
+      'You are viewing notes for the event in row 2. Press the up arrow key when finished to return to the event.'
     );
   });
 

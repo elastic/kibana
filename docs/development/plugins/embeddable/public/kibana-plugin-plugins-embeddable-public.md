@@ -17,7 +17,7 @@
 |  [EmbeddableFactoryNotFoundError](./kibana-plugin-plugins-embeddable-public.embeddablefactorynotfounderror.md) |  |
 |  [EmbeddablePanel](./kibana-plugin-plugins-embeddable-public.embeddablepanel.md) |  |
 |  [EmbeddableRoot](./kibana-plugin-plugins-embeddable-public.embeddableroot.md) |  |
-|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the state object in  which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
+|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the session storage which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
 |  [ErrorEmbeddable](./kibana-plugin-plugins-embeddable-public.errorembeddable.md) |  |
 |  [PanelNotFoundError](./kibana-plugin-plugins-embeddable-public.panelnotfounderror.md) |  |
 
@@ -86,6 +86,8 @@
 |  [PANEL\_NOTIFICATION\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_notification_trigger.md) |  |
 |  [panelBadgeTrigger](./kibana-plugin-plugins-embeddable-public.panelbadgetrigger.md) |  |
 |  [panelNotificationTrigger](./kibana-plugin-plugins-embeddable-public.panelnotificationtrigger.md) |  |
+|  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.select_range_trigger.md) |  |
+|  [VALUE\_CLICK\_TRIGGER](./kibana-plugin-plugins-embeddable-public.value_click_trigger.md) |  |
 |  [withEmbeddableSubscription](./kibana-plugin-plugins-embeddable-public.withembeddablesubscription.md) |  |
 
 ## Type Aliases

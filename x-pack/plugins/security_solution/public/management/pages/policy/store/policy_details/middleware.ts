@@ -26,7 +26,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   coreStart
 ) => {
   const http = coreStart.http;
-
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();

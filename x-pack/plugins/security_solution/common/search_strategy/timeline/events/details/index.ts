@@ -9,6 +9,7 @@ import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEventsDetailsItem {
+  ariaRowindex?: Maybe<number>;
   category?: string;
   field: string;
   values?: Maybe<string[]>;

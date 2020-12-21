@@ -27,7 +27,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 const TYPES = [
   'dashboard',
@@ -48,7 +48,7 @@ export interface KibanaSavedObjectCounts {
 }
 
 export async function getSavedObjectsCounts(
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   kibanaIndex: string // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
 ): Promise<KibanaSavedObjectCounts> {
   const savedObjectCountSearchParams = {
@@ -67,9 +67,9 @@ export async function getSavedObjectsCounts(
       },
     },
   };
-  const resp = await callCluster('search', savedObjectCountSearchParams);
+  const { body } = await esClient.search(savedObjectCountSearchParams);
   const buckets: Array<{ key: string; doc_count: number }> =
-    resp.aggregations?.types?.buckets || [];
+    body.aggregations?.types?.buckets || [];
 
   // Initialise the object with all zeros for all the types
   const allZeros: KibanaSavedObjectCounts = TYPES.reduce(

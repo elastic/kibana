@@ -14,6 +14,7 @@ import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   getProcessorEventForAggregatedTransactions,
@@ -26,6 +27,7 @@ import {
 } from '../../helpers/latency_aggregation_type';
 
 export type ServiceOverviewTransactionGroupSortField =
+  | 'name'
   | 'latency'
   | 'throughput'
   | 'errorRate'
@@ -46,6 +48,7 @@ export async function getTransactionGroupsForPage({
   sortDirection,
   pageIndex,
   size,
+  transactionType,
   latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
@@ -58,6 +61,7 @@ export async function getTransactionGroupsForPage({
   sortDirection: 'asc' | 'desc';
   pageIndex: number;
   size: number;
+  transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
   const field = getTransactionDurationFieldForAggregatedTransactions(
@@ -78,6 +82,7 @@ export async function getTransactionGroupsForPage({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
             ...esFilter,
           ],

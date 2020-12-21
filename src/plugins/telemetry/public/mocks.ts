@@ -76,6 +76,7 @@ export function mockTelemetryNotifications({
   telemetryService: TelemetryService;
 }) {
   return new TelemetryNotifications({
+    http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
     telemetryService,
   });

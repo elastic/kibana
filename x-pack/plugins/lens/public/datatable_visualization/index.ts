@@ -27,17 +27,18 @@ export class DatatableVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const {
-        datatable,
+        getDatatable,
         datatableColumns,
         getDatatableRenderer,
         datatableVisualization,
       } = await import('../async_services');
+      const resolvedFormatFactory = await formatFactory;
 
       expressions.registerFunction(() => datatableColumns);
-      expressions.registerFunction(() => datatable);
+      expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
-          formatFactory,
+          formatFactory: resolvedFormatFactory,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),

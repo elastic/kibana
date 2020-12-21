@@ -23,6 +23,9 @@ import querystring from 'querystring';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -32,6 +35,7 @@ describe('GET /api/saved_objects/_find', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
   const clientResponse = {
     total: 0,
@@ -47,7 +51,10 @@ describe('GET /api/saved_objects/_find', () => {
     savedObjectsClient.find.mockResolvedValue(clientResponse);
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerFindRoute(router);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsFind.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerFindRoute(router, { coreUsageData });
 
     await server.start();
   });
@@ -66,7 +73,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const findResponse = {
       total: 2,
       per_page: 2,
@@ -103,6 +110,9 @@ describe('GET /api/saved_objects/_find', () => {
       .expect(200);
 
     expect(result.body).toEqual(findResponse);
+    expect(coreUsageStatsClient.incrementSavedObjectsFind).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {
