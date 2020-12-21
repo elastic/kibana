@@ -77,6 +77,7 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     }
 
     const url = linkToken.partialUrl
+      .replace('{basePath}', Legacy.shims.getBasePath())
       .replace('{elasticWebsiteUrl}', Legacy.shims.docLinks.ELASTIC_WEBSITE_URL)
       .replace('{docLinkVersion}', Legacy.shims.docLinks.DOC_LINK_VERSION);
     const index = text.indexOf(linkPart[0]);

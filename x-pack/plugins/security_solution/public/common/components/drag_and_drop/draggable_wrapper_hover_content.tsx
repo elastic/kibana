@@ -324,6 +324,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
               color="text"
               data-test-subj="add-to-timeline"
               iconType="timeline"
+              onClick={handleStartDragToTimeline}
             />
           </EuiToolTip>
         )}
