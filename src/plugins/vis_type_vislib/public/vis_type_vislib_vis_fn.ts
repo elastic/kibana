@@ -23,18 +23,18 @@ import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressio
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
-import { BasicVislibParams } from './types';
+import { BasicVislibParams, VislibChartType } from './types';
 
 export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
-  type: string;
+  type: Exclude<VislibChartType, 'pie'>;
   visConfig: string;
 }
 
 export interface VislibRenderValue {
-  visData: any;
-  visType: string;
+  visType: Exclude<VislibChartType, 'pie'>;
+  visData: unknown;
   visConfig: BasicVislibParams;
 }
 
@@ -64,10 +64,14 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
       help: 'vislib vis config',
     },
   },
-  fn(context, args) {
-    const visType = args.type;
+  fn(context, args, handlers) {
+    const visType = args.type as Exclude<VislibChartType, 'pie'>;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
     const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
 
     return {
       type: 'render',
