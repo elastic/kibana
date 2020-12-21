@@ -6,6 +6,9 @@
  * Public License, v 1.
  */
 
-import { VegaBaseView } from './vega_base_view';
-
-export class VegaMapView extends VegaBaseView {}
+export enum TmsTileLayers {
+  bright = 'road_map',
+  desaturated = 'road_map_desaturated',
+  dark = 'dark_map',
+  userConfigured = 'user_configured',
+}

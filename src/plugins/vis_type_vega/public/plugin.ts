@@ -17,8 +17,8 @@ import {
   setData,
   setInjectedVars,
   setUISettings,
-  setMapsLegacyConfig,
   setInjectedMetadata,
+  setMapServiceSettings,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -28,6 +28,7 @@ import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
+import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -69,7 +70,10 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
-    setMapsLegacyConfig(mapsLegacy.config);
+
+    setMapServiceSettings(
+      new MapServiceSettings(mapsLegacy.config, this.initializerContext.env.packageInfo.version)
+    );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
