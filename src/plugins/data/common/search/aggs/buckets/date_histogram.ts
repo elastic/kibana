@@ -149,7 +149,7 @@ export const getDateHistogramBucketAgg = ({
         type: 'field',
         filterFieldTypes: KBN_FIELD_TYPES.DATE,
         default(agg: IBucketDateHistogramAggConfig) {
-          return agg.getIndexPattern().timeFieldName;
+          return agg.getIndexPattern().getTimeField?.()?.name;
         },
         onChange(agg: IBucketDateHistogramAggConfig) {
           if (isAutoInterval(get(agg, 'params.interval')) && !agg.fieldIsTimeField()) {

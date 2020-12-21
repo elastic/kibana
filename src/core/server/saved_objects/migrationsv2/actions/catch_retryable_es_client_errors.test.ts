@@ -22,14 +22,14 @@ import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 describe('catchRetryableEsClientErrors', () => {
-  it('rejects non-retryable response errors', () => {
+  it('rejects non-retryable response errors', async () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
         body: { error: { type: 'cluster_block_exception' } },
         statusCode: 400,
       })
     );
-    return expect(Promise.reject(error).catch(catchRetryableEsClientErrors)).rejects.toBe(error);
+    await expect(Promise.reject(error).catch(catchRetryableEsClientErrors)).rejects.toBe(error);
   });
   describe('returns left retryable_es_client_error for', () => {
     it('NoLivingConnectionsError', async () => {

@@ -153,7 +153,7 @@ export const EngineNav: React.FC = () => {
           </EuiFlexGroup>
         </SideNavLink>
       )}
-      {canViewEngineCrawler && !isMetaEngine && !isSampleEngine && (
+      {canViewEngineCrawler && !isMetaEngine && (
         <SideNavLink
           isExternal
           to={getAppSearchUrl(engineRoute + ENGINE_CRAWLER_PATH)}

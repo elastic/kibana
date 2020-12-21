@@ -14,15 +14,15 @@ import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
-import {
-  APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,
+} from '../../../../../src/plugins/embeddable/public';
+import {
   ActionExecutionContext,
   TriggerContextMapping,
 } from '../../../../../src/plugins/ui_actions/public';
 import {
+  ACTION_GLOBAL_APPLY_FILTER,
+  APPLY_FILTER_TRIGGER,
   esFilters,
   TimeRange,
   Filter,

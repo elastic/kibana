@@ -29,6 +29,9 @@ export class DataRecognizer extends Component {
     // once the mount is complete, call the recognize endpoint to see if the index format is known to us,
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
       .then((resp) => {
+        // Sort results by title prior to display
+        resp.sort((res1, res2) => res1.title.localeCompare(res2.title));
+
         const results = resp.map((r) => (
           <RecognizedResult
             key={r.id}
