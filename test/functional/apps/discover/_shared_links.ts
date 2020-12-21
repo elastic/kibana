@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'discover:searchFieldsFromSource': true,
       });
 
       log.debug('load kibana index with default index pattern');
@@ -89,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '/app/discover?_t=1453775307251#' +
             '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
             ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
-            "-23T18:31:44.000Z'))&_a=(columns:!(_source),filters:!(),index:'logstash-" +
+            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
             "*',interval:auto,query:(language:kuery,query:'')" +
             ",sort:!(!('@timestamp',desc)))";
           const actualUrl = await PageObjects.share.getSharedUrl();
