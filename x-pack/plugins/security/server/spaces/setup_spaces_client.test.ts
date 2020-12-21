@@ -77,4 +77,22 @@ describe('setupSpacesClient', () => {
     expect(savedObjects.createScopedRepository).toHaveBeenCalledTimes(1);
     expect(savedObjects.createScopedRepository).toHaveBeenCalledWith(request, ['space']);
   });
+
+  it('registers a spaces client wrapper with scoped audit logger', () => {
+    const authz = authorizationMock.create();
+    const audit = auditServiceMock.create();
+    const spaces = spacesMock.createSetup();
+
+    setupSpacesClient({ authz, audit, spaces });
+
+    expect(spaces.spacesClient.registerClientWrapper).toHaveBeenCalledTimes(1);
+    const [wrapper] = spaces.spacesClient.registerClientWrapper.mock.calls[0];
+
+    const request = httpServerMock.createKibanaRequest();
+
+    wrapper(request, {} as any);
+
+    expect(audit.asScoped).toHaveBeenCalledTimes(1);
+    expect(audit.asScoped).toHaveBeenCalledWith(request);
+  });
 });
