@@ -21,8 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const objectRemover = new ObjectRemover(supertest);
 
-  async function createAlert(objectRemover: ObjectRemover, overwrites: Record<string, any> = {}) {
+  async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
       .post(`/api/alerts/alert`)
       .set('kbn-xsrf', 'foo')
@@ -39,15 +40,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ...overwrites,
       })
       .expect(200);
-    objectRemover.add(createdAlert.id, 'alert', 'alerts');
     return createdAlert;
   }
 
-  async function createFailingAlert(objectRemover: ObjectRemover) {
-    return createAlert(objectRemover, {
+  async function createFailingAlert() {
+    return await createAlert({
       alertTypeId: 'test.failing',
       schedule: { interval: '30s' },
     });
+  }
+
+  async function createAlert(overwrites: Record<string, any> = {}) {
+    const createdAlert = await createAlertManualCleanup(overwrites);
+    objectRemover.add(createdAlert.id, 'alert', 'alerts');
+    return createdAlert;
   }
 
   async function refreshAlertsList() {
@@ -55,22 +61,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('alerts list', function () {
-    const objectRemover = new ObjectRemover(supertest);
-
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
     it('should display alerts in alphabetical order', async () => {
       const uniqueKey = generateUniqueKey();
-      await createAlert(objectRemover, { name: 'b', tags: [uniqueKey] });
-      await createAlert(objectRemover, { name: 'c', tags: [uniqueKey] });
-      await createAlert(objectRemover, { name: 'a', tags: [uniqueKey] });
+      await createAlert({ name: 'b', tags: [uniqueKey] });
+      await createAlert({ name: 'c', tags: [uniqueKey] });
+      await createAlert({ name: 'a', tags: [uniqueKey] });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
 
@@ -82,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should search for alert', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -98,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should search for tags', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
 
@@ -114,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
-      await createAlert(objectRemover);
+      await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
 
@@ -122,7 +126,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should disable single alert', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -140,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should re-enable single alert', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -164,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should mute single alert', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -182,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should unmute single alert', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -206,8 +210,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
-      await createAlert(objectRemover);
-      const secondAlert = await createAlert(objectRemover);
+      await createAlert();
+      const secondAlert = await createAlertManualCleanup();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
 
@@ -229,7 +233,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should mute all selection', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -252,7 +256,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should unmute all selection', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -277,7 +281,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should disable all selection', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -300,7 +304,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should enable all selection', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -328,7 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const namePrefix = generateUniqueKey();
       let count = 0;
       const createdAlertsFirstPage = await Promise.all(
-        times(2, () => createAlert(objectRemover, { name: `${namePrefix}-0${count++}` }))
+        times(2, () => createAlertManualCleanup({ name: `${namePrefix}-0${count++}` }))
       );
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -355,8 +359,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the status', async () => {
-      await createAlert(objectRemover);
-      const failinfAlert = await createFailingAlert(objectRemover);
+      await createAlert();
+      const failingAlert = await createFailingAlert();
       // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
       await retry.try(async () => {
         await refreshAlertsList();
@@ -369,7 +373,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(filterErrorOnlyResults).to.eql([
           {
-            name: failinfAlert.name,
+            name: failingAlert.name,
             tagsText: 'foo, bar',
             alertType: 'Test: Failing',
             interval: '30s',
@@ -380,7 +384,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
-      const createdAlert = await createAlert(objectRemover);
+      const createdAlert = await createAlert();
       await retry.try(async () => {
         await refreshAlertsList();
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -400,7 +404,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       expect(alertsErrorBannerWhenNoErrors).to.have.length(0);
 
-      await createFailingAlert(objectRemover);
+      await createFailingAlert();
       await retry.try(async () => {
         await refreshAlertsList();
         const alertsErrorBannerExistErrors = await find.allByCssSelector(
@@ -425,8 +429,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the alert type', async () => {
-      await createAlert(objectRemover);
-      const failingAlert = await createFailingAlert(objectRemover);
+      await createAlert();
+      const failingAlert = await createFailingAlert();
       await refreshAlertsList();
       await testSubjects.click('alertTypeFilterButton');
       expect(await (await testSubjects.find('alertType0Group')).getVisibleText()).to.eql('Alerts');
@@ -446,7 +450,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the action type', async () => {
-      await createAlert(objectRemover);
+      await createAlert();
       const action = await alerting.actions.createAction({
         name: `slack-${Date.now()}`,
         actionTypeId: '.slack',
@@ -455,7 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           webhookUrl: 'https://test',
         },
       });
-      const noopAlertWithAction = await createAlert(objectRemover, {
+      const noopAlertWithAction = await createAlert({
         actions: [
           {
             id: action.id,
