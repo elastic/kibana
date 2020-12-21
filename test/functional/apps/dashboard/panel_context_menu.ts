@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchName = 'my search';
 
       before(async () => {
-        await PageObjects.header.clickDiscover();
+        await PageObjects.header.clickDiscover(true);
         await PageObjects.discover.clickNewSearchButton();
         await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
         await PageObjects.header.waitUntilLoadingHasFinished();

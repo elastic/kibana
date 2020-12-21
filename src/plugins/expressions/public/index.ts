@@ -117,4 +117,5 @@ export {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
+  TablesAdapter,
 } from '../common';

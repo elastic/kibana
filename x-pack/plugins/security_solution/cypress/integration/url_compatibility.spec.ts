@@ -12,6 +12,7 @@ import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../screens/date_picker';
+import { cleanKibana } from '../tasks/common';
 
 const ABSOLUTE_DATE = {
   endTime: '2019-08-01T20:33:29.186Z',
@@ -19,6 +20,10 @@ const ABSOLUTE_DATE = {
 };
 
 describe('URL compatibility', () => {
+  before(() => {
+    cleanKibana();
+  });
+
   it('Redirects to Detection alerts from old Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
 
