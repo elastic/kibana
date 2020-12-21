@@ -86,14 +86,14 @@ describe('state action machine', () => {
     });
   });
 
-  test('rejects if an exception is throw from inside an action', () => {
-    return expect(
+  test('rejects if an exception is throw from inside an action', async () => {
+    await expect(
       stateActionMachine({ ...state, controlState: 'THROW' }, next, countUntilThree)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid control state"`);
   });
 
-  test('resolve with the final state once all steps are completed', () => {
-    return expect(finalStateP).resolves.toMatchInlineSnapshot(`
+  test('resolve with the final state once all steps are completed', async () => {
+    await expect(finalStateP).resolves.toMatchInlineSnapshot(`
       Object {
         "controlState": "DONE",
         "count": 3,
@@ -101,8 +101,8 @@ describe('state action machine', () => {
     `);
   });
 
-  test("rejects if control state doesn't change after 50 steps", () => {
-    return expect(
+  test("rejects if control state doesn't change after 50 steps", async () => {
+    await expect(
       stateActionMachine(state, next, countUntilModel(51))
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Control state didn't change after 50 steps aborting."`

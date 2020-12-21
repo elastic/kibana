@@ -25,6 +25,7 @@ import type { SearchUsage } from '../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../collectors/usage';
+import { KbnServerError } from '../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -35,7 +36,7 @@ export const esSearchStrategyProvider = (
     // Only default index pattern type is supported here.
     // See data_enhanced for other type support.
     if (request.indexType) {
-      throw new Error(`Unsupported index pattern type ${request.indexType}`);
+      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const search = async () => {
