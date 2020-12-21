@@ -28,14 +28,9 @@ export interface AuditEvent {
     category?: EventCategory;
     type?: EventType;
     outcome?: EventOutcome;
-    module?: string;
-    dataset?: string;
   };
   user?: {
     name: string;
-    email?: string;
-    full_name?: string;
-    hash?: string;
     roles?: readonly string[];
   };
   kibana?: {
@@ -87,17 +82,10 @@ export interface AuditEvent {
   http?: {
     request?: {
       method?: string;
-      body?: {
-        content: string;
-      };
-    };
-    response?: {
-      status_code?: number;
     };
   };
   url?: {
     domain?: string;
-    full?: string;
     path?: string;
     port?: number;
     query?: string;
@@ -108,14 +96,10 @@ export interface AuditEvent {
 export enum EventCategory {
   DATABASE = 'database',
   WEB = 'web',
-  IAM = 'iam',
   AUTHENTICATION = 'authentication',
-  PROCESS = 'process',
 }
 
 export enum EventType {
-  USER = 'user',
-  GROUP = 'group',
   CREATION = 'creation',
   ACCESS = 'access',
   CHANGE = 'change',
@@ -152,7 +136,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       path: url.pathname,
       port: url.port ? parseInt(url.port, 10) : undefined,
       query: url.search ? url.search.slice(1) : undefined,
-      scheme: url.protocol,
+      scheme: url.protocol ? url.protocol.substr(0, url.protocol.length - 1) : undefined,
     },
   };
 }

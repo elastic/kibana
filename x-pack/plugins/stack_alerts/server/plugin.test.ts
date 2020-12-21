@@ -63,7 +63,7 @@ describe('AlertingBuiltins Plugin', () => {
             },
           ],
           "id": ".geo-threshold",
-          "name": "Geo tracking threshold",
+          "name": "Tracking threshold",
         }
       `);
 
