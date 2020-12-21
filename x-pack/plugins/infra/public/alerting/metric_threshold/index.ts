@@ -14,9 +14,6 @@ import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/alerting/met
 export function createMetricThresholdAlertType(): AlertTypeModel {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.metrics.alertFlyout.alertName', {
-      defaultMessage: 'Metric threshold',
-    }),
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the metrics aggregation exceeds the threshold.',
     }),

@@ -255,7 +255,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
         onCellsSelection({
           lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000),
+          times: e.x.map((v) => (v as number) / 1000) as [number, number],
           type: swimlaneType,
           viewByFieldName: swimlaneData.fieldName,
         });
@@ -326,7 +326,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + swimlaneData.interval],
+        times: [startTime, startTime + swimlaneData.interval] as [number, number],
         type: swimlaneType,
         viewByFieldName: swimlaneData.fieldName,
       };
