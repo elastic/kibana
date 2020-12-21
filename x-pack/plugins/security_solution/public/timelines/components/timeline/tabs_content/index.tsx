@@ -199,7 +199,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           disabled={!graphEventId}
           key={TimelineTabs.graph}
         >
-          {i18n.GRAPH_TAB}
+          {i18n.ANALYZER_TAB}
         </EuiTab>
         <StyledEuiTab
           data-test-subj={`timelineTabs-${TimelineTabs.notes}`}

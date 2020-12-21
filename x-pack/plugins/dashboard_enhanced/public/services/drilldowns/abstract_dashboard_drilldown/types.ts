@@ -5,7 +5,7 @@
  */
 
 import { UiActionsEnhancedBaseActionFactoryContext } from '../../../../../ui_actions_enhanced/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
 import { DrilldownConfig } from '../../../../common';
 
 export type Config = DrilldownConfig;

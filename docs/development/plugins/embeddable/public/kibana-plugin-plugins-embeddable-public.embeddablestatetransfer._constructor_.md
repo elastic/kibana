@@ -9,7 +9,7 @@ Constructs a new instance of the `EmbeddableStateTransfer` class
 <b>Signature:</b>
 
 ```typescript
-constructor(navigateToApp: ApplicationStart['navigateToApp'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
+constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ constructor(navigateToApp: ApplicationStart['navigateToApp'], appList?: Readonly
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  navigateToApp | <code>ApplicationStart['navigateToApp']</code> |  |
+|  currentAppId$ | <code>ApplicationStart['currentAppId$']</code> |  |
 |  appList | <code>ReadonlyMap&lt;string, PublicAppInfo&gt; &#124; undefined</code> |  |
 |  customStorage | <code>Storage</code> |  |
 
