@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    it('displays correctly when predecessors and successors are loaded', async function () {
+    xit('displays correctly when predecessors and successors are loaded', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
