@@ -76,7 +76,7 @@ function ExplorerChartContainer({
     return () => {
       isCancelled = true;
     };
-  }, [mlUrlGenerator]);
+  }, [mlUrlGenerator, series]);
 
   const addToRecentlyAccessed = useCallback(() => {
     addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
@@ -130,20 +130,22 @@ function ExplorerChartContainer({
                 />
               </span>
             )}
-            <EuiToolTip position="top" content={textViewButton}>
-              {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
-              {/* disabling because we need button to behave as link and to have a callback */}
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButtonEmpty
-                iconSide="right"
-                iconType="visLine"
-                size="xs"
-                href={`${basePath}/app/ml${explorerSeriesLink}`}
-                onClick={addToRecentlyAccessed}
-              >
-                <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
-              </EuiButtonEmpty>
-            </EuiToolTip>
+            {explorerSeriesLink && (
+              <EuiToolTip position="top" content={textViewButton}>
+                {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
+                {/* disabling because we need button to behave as link and to have a callback */}
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  iconSide="right"
+                  iconType="visLine"
+                  size="xs"
+                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  onClick={addToRecentlyAccessed}
+                >
+                  <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
