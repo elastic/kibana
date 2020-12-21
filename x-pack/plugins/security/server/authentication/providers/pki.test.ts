@@ -42,6 +42,13 @@ function getMockPeerCertificate(chain: string[] | string) {
       // Imitate self-signed certificate that is issuer for itself.
       certificate.issuerCertificate = index === fingerprintChain.length - 1 ? certificate : {};
 
+      // Imitate other fields for logging assertions
+      certificate.subject = 'mock subject';
+      certificate.issuer = 'mock issuer';
+      certificate.subjectaltname = 'mock subjectaltname';
+      certificate.valid_from = 'mock valid_from';
+      certificate.valid_to = 'mock valid_to';
+
       return certificate.issuerCertificate;
     },
     mockPeerCertificate as Record<string, any>
@@ -59,6 +66,9 @@ function getMockSocket({
 } = {}) {
   const socket = new TLSSocket(new Socket());
   socket.authorized = authorized;
+  if (!authorized) {
+    socket.authorizationError = new Error('mock authorization error');
+  }
   socket.getPeerCertificate = jest.fn().mockReturnValue(peerCertificate);
   return socket;
 }
@@ -88,26 +98,58 @@ describe('PKIAuthenticationProvider', () => {
   function defineCommonLoginAndAuthenticateTests(
     operation: (request: KibanaRequest) => Promise<AuthenticationResult>
   ) {
-    it('does not handle requests without certificate.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ authorized: true }),
-      });
-
-      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
-
-      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-    });
-
     it('does not handle unauthorized requests.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
+        socket: getMockSocket({
+          authorized: false,
+          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
+        }),
       });
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]'
+      );
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+        'Authentication is not possible since peer certificate was not authorized: Error: mock authorization error.'
+      );
+    });
+
+    it('does not handle requests with a missing certificate chain.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({ authorized: true, peerCertificate: null }),
+      });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith('Peer certificate chain: []');
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+        'Authentication is not possible due to missing peer certificate chain.'
+      );
+    });
+
+    it('does not handle requests with an incomplete certificate chain.', async () => {
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      (peerCertificate as any).issuerCertificate = undefined; // This behavior has been observed, even though it's not valid according to the type definition
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({ authorized: true, peerCertificate }),
+      });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]'
+      );
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+        'Authentication is not possible due to incomplete peer certificate chain.'
+      );
     });
 
     it('gets an access token in exchange to peer certificate chain and stores it in the state.', async () => {

@@ -204,6 +204,10 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateViaPeerCertificate(request: KibanaRequest) {
     this.logger.debug('Trying to authenticate request via peer certificate chain.');
 
+    // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
+    const peerCertificate = request.socket.getPeerCertificate(true);
+    const { certificateChain, isChainIncomplete } = this.getCertificateChain(peerCertificate);
+
     if (!request.socket.authorized) {
       this.logger.debug(
         `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
@@ -211,14 +215,16 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    const peerCertificate = request.socket.getPeerCertificate(true);
     if (peerCertificate === null) {
       this.logger.debug('Authentication is not possible due to missing peer certificate chain.');
       return AuthenticationResult.notHandled();
     }
 
-    // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
-    const certificateChain = this.getCertificateChain(peerCertificate);
+    if (isChainIncomplete) {
+      this.logger.debug('Authentication is not possible due to incomplete peer certificate chain.');
+      return AuthenticationResult.notHandled();
+    }
+
     let result: { access_token: string; authentication: AuthenticationInfo };
     try {
       result = await this.options.client.callAsInternalUser('shield.delegatePKI', {
@@ -255,23 +261,53 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private getCertificateChain(peerCertificate: DetailedPeerCertificate | null) {
     const certificateChain = [];
+    const certificateStrings = [];
+    let isChainIncomplete = false;
     let certificate: DetailedPeerCertificate | null = peerCertificate;
-    while (certificate !== null && Object.keys(certificate).length > 0) {
+
+    while (certificate && Object.keys(certificate).length > 0) {
       certificateChain.push(certificate.raw.toString('base64'));
+      certificateStrings.push(this.stringifyCertificate(certificate));
 
       // For self-signed certificates, `issuerCertificate` may be a circular reference.
       if (certificate === certificate.issuerCertificate) {
         this.logger.debug('Self-signed certificate is detected in certificate chain');
-        certificate = null;
+        break;
+      } else if (certificate.issuerCertificate === undefined) {
+        // The chain is only considered to be incomplete if one or more issuerCertificate values is undefined;
+        // this is not an expected return value from Node, but it can happen in some edge cases
+        isChainIncomplete = true;
+        break;
       } else {
+        // Repeat the loop
         certificate = certificate.issuerCertificate;
       }
     }
 
-    this.logger.debug(
-      `Peer certificate chain consists of ${certificateChain.length} certificates.`
-    );
+    this.logger.debug(`Peer certificate chain: [${certificateStrings.join(', ')}]`);
 
-    return certificateChain;
+    return { certificateChain, isChainIncomplete };
+  }
+
+  private stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
+    const {
+      subject,
+      issuer,
+      issuerCertificate,
+      subjectaltname,
+      valid_from: validFrom,
+      valid_to: validTo,
+    } = peerCertificate;
+
+    let issuerCertType: string;
+    if (issuerCertificate === undefined) {
+      issuerCertType = 'undefined';
+    } else if (issuerCertificate === null) {
+      issuerCertType = 'null';
+    } else {
+      issuerCertType = 'object';
+    }
+
+    return JSON.stringify({ subject, issuer, issuerCertType, subjectaltname, validFrom, validTo });
   }
 }
