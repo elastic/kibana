@@ -214,6 +214,17 @@ export class MapsPlugin implements Plugin {
   // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
     setInternalRepository(core.savedObjects.createInternalRepository);
+    console.log('START START START');
+    core.elasticsearch.client.asInternalUser
+      .fieldCaps({
+        index: 'kibana_sample_data_ecommerce',
+        fields: '*',
+        ignore_unavailable: true,
+      })
+      .then((resp) => {
+        console.log('TEST REQ', resp);
+      });
+    console.log('END END END');
     setIndexPatternsService(
       plugins.data.indexPatterns.indexPatternsServiceFactory,
       core.elasticsearch.client.asInternalUser

@@ -102,13 +102,11 @@ async function hasGeoShapeFields(indexPattern: SavedObject<IndexPatternAttribute
 
 async function hasGeoPointFields(indexPattern: SavedObject<IndexPatternAttributes>) {
   const fields = await getIndexPatternsService().getFieldsForIndexPattern(indexPattern);
-  const someFields = fields.some(
-    (field) => {
-      const types = field.esTypes && field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_POINT)
-      console.log(field);
-      return types;
-    }
-  );
+  const someFields = fields.some((field) => {
+    const types = field.esTypes && field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_POINT);
+    console.log(field);
+    return types;
+  });
   console.log(someFields);
   return someFields;
 }
@@ -221,19 +219,29 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
 export async function buildMapsIndexPatternsTelemetry(
   layerLists: LayerDescriptor[][]
 ): Promise<GeoIndexPatternsUsage> {
-  console.log('########################');
+  console.log('######################## BEFORE GET');
   const indexPatternsService = await getIndexPatternsService();
+  // console.log('typeof', indexPatternsService);
   const indexPattern = await indexPatternsService.get('ff959d40-b880-11e8-a6d9-e546fe2bba5f');
-  console.log('*************************');
+  console.log('************************* AFTER GET');
   console.log(indexPattern.fields.length);
-  console.log('*************************');
+  // console.log('*************************');
   // const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
   // console.log(fieldsForIndexPattern);
   console.log('########################');
 
-  const indexPatternsWithGeoField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_POINT, ['esTypes']);
-  const indexPatternsWithGeoPointField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_POINT, ['esTypes']);
-  const indexPatternsWithGeoShapeField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_SHAPE, ['esTypes']);
+  const indexPatternsWithGeoField = await getIndexPatternsService().filter(
+    ES_GEO_FIELD_TYPE.GEO_POINT,
+    ['esTypes']
+  );
+  const indexPatternsWithGeoPointField = await getIndexPatternsService().filter(
+    ES_GEO_FIELD_TYPE.GEO_POINT,
+    ['esTypes']
+  );
+  const indexPatternsWithGeoShapeField = await getIndexPatternsService().filter(
+    ES_GEO_FIELD_TYPE.GEO_SHAPE,
+    ['esTypes']
+  );
 
   // Tracks whether user uses Gold+ only functionality
   const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists);

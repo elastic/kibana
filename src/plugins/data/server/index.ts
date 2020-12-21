@@ -157,6 +157,7 @@ export {
   UI_SETTINGS,
   IndexPattern,
   IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternsService,
 } from '../common';
 
 /**
@@ -319,4 +320,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider } from './index_patterns';
