@@ -25,8 +25,10 @@ import {
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
-import { ValueClickContext } from '../../../../embeddable/public';
+import {
+  createFiltersFromValueClickAction,
+  ValueClickDataContext,
+} from './create_filters_from_value_click';
 
 const mockField = {
   name: 'bytes',
@@ -34,7 +36,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickContext['data']['data'];
+  let dataPoints: ValueClickDataContext['data'];
 
   beforeEach(() => {
     dataPoints = [

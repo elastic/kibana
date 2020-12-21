@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect, Suspense, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,7 +23,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiListGroupItem,
   EuiListGroup,
@@ -71,6 +70,7 @@ import { AlertNotifyWhen } from './alert_notify_when';
 import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { SectionLoading } from '../../components/section_loading';
 
 const ENTER_KEY = 13;
 
@@ -289,10 +289,7 @@ export const AlertForm = ({
         )
         .filter((alertTypeItem) =>
           searchValue
-            ? alertTypeItem.alertTypeModel.name
-                .toString()
-                .toLocaleLowerCase()
-                .includes(searchValue) ||
+            ? alertTypeItem.alertType.name.toString().toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertTypeModel.description.toLocaleLowerCase().includes(searchValue)
             : alertTypeItem
@@ -378,10 +375,7 @@ export const AlertForm = ({
           hasDisabledByLicenseAlertTypes = true;
         }
         (result[producer] = result[producer] || []).push({
-          name:
-            typeof alertTypeValue.alertTypeModel.name === 'string'
-              ? alertTypeValue.alertTypeModel.name
-              : alertTypeValue.alertTypeModel.name.props.defaultMessage,
+          name: alertTypeValue.alertType.name,
           id: alertTypeValue.alertTypeModel.id,
           checkEnabledResult,
           alertTypeItem: alertTypeValue.alertTypeModel,
@@ -475,11 +469,9 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              <FormattedMessage
-                defaultMessage="{alertType}"
-                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
-                values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
-              />
+              {alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
+                ? alertTypesIndex.get(alert.alertTypeId)!.name
+                : ''}
             </h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -535,7 +527,16 @@ export const AlertForm = ({
       alert.alertTypeId &&
       selectedAlertType ? (
         <EuiErrorBoundary>
-          <Suspense fallback={<CenterJustifiedSpinner />}>
+          <Suspense
+            fallback={
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypeParamsDescription"
+                  defaultMessage="Loading alert type params…"
+                />
+              </SectionLoading>
+            }
+          >
             <AlertParamsExpressionComponent
               alertParams={alert.params}
               alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
@@ -805,19 +806,16 @@ export const AlertForm = ({
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
-        <CenterJustifiedSpinner />
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypesDescription"
+            defaultMessage="Loading alert types…"
+          />
+        </SectionLoading>
       )}
     </EuiForm>
   );
 };
-
-const CenterJustifiedSpinner = () => (
-  <EuiFlexGroup justifyContent="center">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="m" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
   <EuiEmptyPrompt

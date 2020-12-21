@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-embeddable: IEmbeddable;
+embeddable: T;
 ```
