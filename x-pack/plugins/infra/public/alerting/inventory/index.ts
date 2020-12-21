@@ -22,9 +22,6 @@ interface InventoryMetricAlertTypeParams extends AlertTypeParams {
 export function createInventoryMetricAlertType(): AlertTypeModel<InventoryMetricAlertTypeParams> {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertName', {
-      defaultMessage: 'Inventory',
-    }),
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the inventory exceeds a defined threshold.',
     }),

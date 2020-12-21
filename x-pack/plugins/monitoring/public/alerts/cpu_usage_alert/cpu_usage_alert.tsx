@@ -13,7 +13,6 @@ import { Expression, Props } from '../components/duration/expression';
 export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
     id: ALERT_CPU_USAGE,
-    name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
     description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {

@@ -15,7 +15,6 @@ import { ALERT_DISK_USAGE, ALERT_DETAILS } from '../../../common/constants';
 export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
     id: ALERT_DISK_USAGE,
-    name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
     description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {

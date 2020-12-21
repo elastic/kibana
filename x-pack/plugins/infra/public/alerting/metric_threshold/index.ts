@@ -22,9 +22,6 @@ interface MetricThresholdAlertTypeParams extends AlertTypeParams {
 export function createMetricThresholdAlertType(): AlertTypeModel<MetricThresholdAlertTypeParams> {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.metrics.alertFlyout.alertName', {
-      defaultMessage: 'Metric threshold',
-    }),
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the metrics aggregation exceeds the threshold.',
     }),

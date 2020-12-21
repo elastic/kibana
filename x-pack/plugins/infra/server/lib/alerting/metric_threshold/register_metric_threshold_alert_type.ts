@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import {
   AlertType,
   AlertInstanceState,
@@ -60,7 +61,9 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
 
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: 'Metric threshold',
+    name: i18n.translate('xpack.infra.metrics.alertName', {
+      defaultMessage: 'Metric threshold',
+    }),
     validate: {
       params: schema.object(
         {

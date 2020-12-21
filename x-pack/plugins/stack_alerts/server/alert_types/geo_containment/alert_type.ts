@@ -146,7 +146,7 @@ export type GeoContainmentAlertType = AlertType<
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
-    defaultMessage: 'Geo tracking containment',
+    defaultMessage: 'Tracking containment',
   });
 
   const actionGroupName = i18n.translate(

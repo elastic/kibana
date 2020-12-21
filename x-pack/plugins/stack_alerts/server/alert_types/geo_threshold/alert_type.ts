@@ -213,7 +213,7 @@ export type GeoThresholdAlertType = AlertType<
 >;
 export function getAlertType(logger: Logger): GeoThresholdAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoThreshold.alertTypeTitle', {
-    defaultMessage: 'Geo tracking threshold',
+    defaultMessage: 'Tracking threshold',
   });
 
   const actionGroupName = i18n.translate(

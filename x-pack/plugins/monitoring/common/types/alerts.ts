@@ -22,6 +22,7 @@ export interface CommonAlertState {
 
 export interface CommonAlertFilter {
   nodeUuid?: string;
+  shardId?: string;
 }
 
 export interface CommonAlertParamDetail {
@@ -103,6 +104,7 @@ export interface AlertUiState {
 
 export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
+  code?: string;
   nextSteps?: AlertMessage[];
   tokens?: AlertMessageToken[];
 }
@@ -164,6 +166,20 @@ export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
 
 export interface AlertMissingData extends AlertNodeStats {
   gapDuration: number;
+}
+export interface CCRReadExceptionsStats {
+  remoteCluster: string;
+  followerIndex: string;
+  shardId: number;
+  leaderIndex: string;
+  lastReadException: { type: string; reason: string };
+  clusterUuid: string;
+  ccs: string;
+}
+
+export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
+  instanceId: string;
+  itemLabel: string;
 }
 
 export interface AlertData {

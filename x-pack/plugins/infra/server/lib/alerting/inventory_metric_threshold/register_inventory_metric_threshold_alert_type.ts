@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../../alerts/server';
 import {
   createInventoryMetricThresholdExecutor,
@@ -48,7 +49,9 @@ export const registerMetricInventoryThresholdAlertType = (
   AlertInstanceContext
 > => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  name: 'Inventory',
+  name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
+    defaultMessage: 'Inventory',
+  }),
   validate: {
     params: schema.object(
       {
