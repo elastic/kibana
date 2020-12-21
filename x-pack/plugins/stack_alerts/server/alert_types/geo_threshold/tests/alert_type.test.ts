@@ -14,7 +14,7 @@ describe('alertType', () => {
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.geo-threshold');
-    expect(alertType.name).toBe('Geo tracking threshold');
+    expect(alertType.name).toBe('Tracking threshold');
     expect(alertType.actionGroups).toEqual([
       { id: 'tracking threshold met', name: 'Tracking threshold met' },
     ]);

@@ -19,11 +19,11 @@ describe('node data model', () => {
     const original: Map<string, NodeData> = new Map();
 
     it('creates a copy when using setRequestedNodes', () => {
-      expect(setRequestedNodes(original, new Set(), 0) === original).toBeFalsy();
+      expect(setRequestedNodes(original, new Set()) === original).toBeFalsy();
     });
 
     it('creates a copy when using setErrorNodes', () => {
-      expect(setErrorNodes(original, new Set(), 0) === original).toBeFalsy();
+      expect(setErrorNodes(original, new Set()) === original).toBeFalsy();
     });
 
     it('creates a copy when using setReloadedNodes', () => {
@@ -37,7 +37,6 @@ describe('node data model', () => {
           receivedEvents: [],
           requestedNodes: new Set(),
           numberOfRequestedEvents: 1,
-          dataRequestID: 0,
         }) === original
       ).toBeFalsy();
     });
@@ -50,15 +49,14 @@ describe('node data model', () => {
         {
           events: [generator.generateEvent({ eventType: ['start'] })],
           status: 'running',
-          dataRequestID: 0,
         },
       ],
     ]);
 
-    expect(setRequestedNodes(state, new Set(['1', '2']), 0)).toEqual(
+    expect(setRequestedNodes(state, new Set(['1', '2']))).toEqual(
       new Map<string, NodeData>([
-        ['1', { events: [], status: 'loading', dataRequestID: 0 }],
-        ['2', { events: [], status: 'loading', dataRequestID: 0 }],
+        ['1', { events: [], status: 'loading' }],
+        ['2', { events: [], status: 'loading' }],
       ])
     );
   });
@@ -70,24 +68,21 @@ describe('node data model', () => {
         {
           events: [generator.generateEvent({ eventType: ['start'] })],
           status: 'running',
-          dataRequestID: 0,
         },
       ],
     ]);
 
-    expect(setErrorNodes(state, new Set(['1', '2']), 0)).toEqual(
+    expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
       new Map<string, NodeData>([
-        ['1', { events: [], status: 'error', dataRequestID: 0 }],
-        ['2', { events: [], status: 'error', dataRequestID: 0 }],
+        ['1', { events: [], status: 'error' }],
+        ['2', { events: [], status: 'error' }],
       ])
     );
   });
 
   describe('setReloadedNodes', () => {
     it('removes the id from the map', () => {
-      const state = new Map<string, NodeData>([
-        ['1', { events: [], status: 'error', dataRequestID: 0 }],
-      ]);
+      const state = new Map<string, NodeData>([['1', { events: [], status: 'error' }]]);
       expect(setReloadedNodes(state, '1')).toEqual(new Map());
     });
   });
@@ -96,8 +91,8 @@ describe('node data model', () => {
     const node1Events = [generator.generateEvent({ entityID: '1', eventType: ['start'] })];
     const node2Events = [generator.generateEvent({ entityID: '2', eventType: ['start'] })];
     const state = new Map<string, NodeData>([
-      ['1', { events: node1Events, status: 'error', dataRequestID: 0 }],
-      ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
+      ['1', { events: node1Events, status: 'error' }],
+      ['2', { events: node2Events, status: 'error' }],
     ]);
     describe('reachedLimit is false', () => {
       it('overwrites entries with the received data', () => {
@@ -110,12 +105,11 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             // a number greater than the amount received so the reached limit flag with be false
             numberOfRequestedEvents: 10,
-            dataRequestID: 0,
           })
         ).toEqual(
           new Map<string, NodeData>([
-            ['1', { events: [genNodeEvent], status: 'running', dataRequestID: 0 }],
-            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
+            ['1', { events: [genNodeEvent], status: 'running' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });
@@ -127,12 +121,11 @@ describe('node data model', () => {
             receivedEvents: [],
             requestedNodes: new Set(['1', '2']),
             numberOfRequestedEvents: 1,
-            dataRequestID: 0,
           })
         ).toEqual(
           new Map<string, NodeData>([
-            ['1', { events: [], status: 'running', dataRequestID: 0 }],
-            ['2', { events: [], status: 'running', dataRequestID: 0 }],
+            ['1', { events: [], status: 'running' }],
+            ['2', { events: [], status: 'running' }],
           ])
         );
       });
@@ -146,12 +139,9 @@ describe('node data model', () => {
             receivedEvents: [],
             requestedNodes: new Set(['1']),
             numberOfRequestedEvents: 0,
-            dataRequestID: 0,
           })
         ).toEqual(
-          new Map<string, NodeData>([
-            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
-          ])
+          new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]])
         );
       });
 
@@ -162,12 +152,11 @@ describe('node data model', () => {
             receivedEvents: [],
             requestedNodes: new Set(['10']),
             numberOfRequestedEvents: 0,
-            dataRequestID: 0,
           })
         ).toEqual(
           new Map<string, NodeData>([
-            ['1', { events: node1Events, status: 'error', dataRequestID: 0 }],
-            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
+            ['1', { events: node1Events, status: 'error' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });
@@ -181,12 +170,11 @@ describe('node data model', () => {
             receivedEvents: [genNodeEvent],
             requestedNodes: new Set(['1']),
             numberOfRequestedEvents: 1,
-            dataRequestID: 0,
           })
         ).toEqual(
           new Map<string, NodeData>([
-            ['1', { events: [genNodeEvent], status: 'running', dataRequestID: 0 }],
-            ['2', { events: node2Events, status: 'error', dataRequestID: 0 }],
+            ['1', { events: [genNodeEvent], status: 'running' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });

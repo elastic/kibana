@@ -15,11 +15,11 @@ const SearchBarFlexGroup = styled(EuiFlexGroup)`
     `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
 `;
 
-export function SearchBar() {
+export function SearchBar(props: { prepend?: React.ReactNode | string }) {
   return (
     <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem grow={3}>
-        <KueryBar />
+        <KueryBar prepend={props.prepend} />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <DatePicker />
