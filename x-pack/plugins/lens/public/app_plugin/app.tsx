@@ -184,6 +184,17 @@ export function App({
       },
     });
 
+    const autoRefreshSubscription = data.query.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe({
+        next: () => {
+          setState((s) => ({
+            ...s,
+            searchSessionId: data.search.session.start(),
+          }));
+        },
+      });
+
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: uiSettings.get('state:storeInSessionStorage'),
@@ -198,6 +209,7 @@ export function App({
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
+      autoRefreshSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
@@ -212,8 +224,6 @@ export function App({
 
   useEffect(() => {
     onAppLeave((actions) => {
-      // Clear the session when leaving Lens
-      data.search.session.clear();
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
@@ -240,7 +250,6 @@ export function App({
     state.persistedDoc,
     getLastKnownDocWithoutPinnedFilters,
     application.capabilities.visualize.save,
-    data.search.session,
   ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
@@ -438,7 +447,6 @@ export function App({
       if (saveProps.returnToOrigin && redirectToOrigin) {
         // disabling the validation on app leave because the document has been saved.
         onAppLeave((actions) => {
-          data.search.session.clear();
           return actions.default();
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
@@ -446,7 +454,6 @@ export function App({
       } else if (saveProps.dashboardId && redirectToDashboard) {
         // disabling the validation on app leave because the document has been saved.
         onAppLeave((actions) => {
-          data.search.session.clear();
           return actions.default();
         });
         redirectToDashboard(newInput, saveProps.dashboardId);
@@ -553,7 +560,6 @@ export function App({
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
-            data.search.session.clear();
             return actions.default();
           });
           runSave(

@@ -271,17 +271,15 @@ export function SuggestionPanel({
   );
 
   const AutoRefreshExpressionRenderer = useMemo(() => {
-    const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent
         {...props}
         searchContext={context}
-        reload$={autoRefreshFetch$}
         searchSessionId={frame.searchSessionId}
       />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plugins.data.query.timefilter.timefilter, context, frame.searchSessionId]);
+  }, [context, frame.searchSessionId]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 

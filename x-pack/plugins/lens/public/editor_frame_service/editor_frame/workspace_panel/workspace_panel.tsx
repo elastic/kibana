@@ -362,8 +362,6 @@ export const InnerVisualizationWrapper = ({
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
 }) => {
-  const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
-
   const context: ExecutionContextSearch = useMemo(
     () => ({
       query: framePublicAPI.query,
@@ -478,7 +476,6 @@ export const InnerVisualizationWrapper = ({
         expression={expression!}
         searchContext={context}
         searchSessionId={framePublicAPI.searchSessionId}
-        reload$={autoRefreshFetch$}
         onEvent={onEvent}
         onData$={onData$}
         renderMode="edit"
