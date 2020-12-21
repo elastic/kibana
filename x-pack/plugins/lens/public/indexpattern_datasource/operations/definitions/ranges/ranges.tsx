@@ -16,7 +16,6 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
-import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
@@ -173,8 +172,15 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       extended_bounds: JSON.stringify({ min: '', max: '' }),
     }).toAst();
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
-    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: ({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+    indexPattern,
+    uiSettings,
+    data,
+  }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =
@@ -198,11 +204,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
 
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName,
           value,
         })
@@ -217,29 +222,24 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         newMode === MODES.Range
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
-      setState(
-        mergeLayer({
-          state,
-          layerId,
-          newLayer: {
-            columns: {
-              ...state.layers[layerId].columns,
-              [columnId]: {
-                ...currentColumn,
-                scale,
-                dataType,
-                params: {
-                  type: newMode,
-                  ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-                  maxBars: maxBarsDefaultValue,
-                  format: currentColumn.params.format,
-                  parentFormat,
-                },
-              },
+      updateLayer({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [columnId]: {
+            ...currentColumn,
+            scale,
+            dataType,
+            params: {
+              type: newMode,
+              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+              maxBars: maxBarsDefaultValue,
+              format: currentColumn.params.format,
+              parentFormat,
             },
           },
-        })
-      );
+        },
+      });
     };
     return (
       <RangeEditor

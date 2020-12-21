@@ -50,6 +50,7 @@ const indexPatternSpecSchema = schema.object({
       })
     )
   ),
+  allowNoIndex: schema.maybe(schema.boolean()),
 });
 
 export const registerCreateIndexPatternRoute = (

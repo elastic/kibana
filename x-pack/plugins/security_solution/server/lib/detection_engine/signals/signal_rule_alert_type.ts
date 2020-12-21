@@ -323,7 +323,7 @@ export const signalRulesAlertType = ({
 
           const esFilter = await getFilter({
             type,
-            filters: filters?.concat(bucketFilters),
+            filters: filters ? filters.concat(bucketFilters) : bucketFilters,
             language,
             query,
             savedId,
