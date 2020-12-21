@@ -11,13 +11,12 @@ import { ActionWizard } from './action_wizard';
 import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
+import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
 import {
-  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
-  Trigger,
-  TriggerId,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },

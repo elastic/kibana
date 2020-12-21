@@ -26,6 +26,8 @@ describe('Columns', () => {
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
         ecsData={mockTimelineData[0].ecs}
+        hasRowRenderers={false}
+        notesCount={0}
         timelineId="test"
       />
     );

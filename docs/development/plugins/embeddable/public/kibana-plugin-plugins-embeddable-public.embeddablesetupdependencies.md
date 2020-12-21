@@ -14,6 +14,5 @@ export interface EmbeddableSetupDependencies
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-embeddable-public.embeddablesetupdependencies.data.md) | <code>DataPublicPluginSetup</code> |  |
 |  [uiActions](./kibana-plugin-plugins-embeddable-public.embeddablesetupdependencies.uiactions.md) | <code>UiActionsSetup</code> |  |
 
