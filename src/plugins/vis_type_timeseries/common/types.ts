@@ -54,3 +54,9 @@ export type TimeseriesVisData = SeriesData & {
    */
   series?: unknown[];
 };
+
+export interface SanitizedFieldType {
+  name: string;
+  label: string;
+  type: string;
+}

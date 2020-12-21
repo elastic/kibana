@@ -23,6 +23,7 @@ import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { Framework } from '../plugin';
 import { indexPatterns, IndexPatternsFetcher } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { SanitizedFieldType } from '../../common/types';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -83,11 +84,14 @@ export async function getFields(
     await searchStrategy.getFieldsForWildcard(reqFacade, indexPatternString, capabilities)
   )
     .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
-    .map((field) => ({
-      name: field.name,
-      label: field.customLabel ?? field.name,
-      type: field.type,
-    }));
+    .map(
+      (field) =>
+        ({
+          name: field.name,
+          label: field.customLabel ?? field.name,
+          type: field.type,
+        } as SanitizedFieldType)
+    );
 
   return uniqBy(fields, (field) => field.name);
 }

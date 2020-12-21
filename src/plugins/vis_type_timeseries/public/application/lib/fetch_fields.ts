@@ -20,12 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
 import { indexPatterns } from '../../../../data/public';
-
-interface SanitizedFieldType {
-  name: string;
-  label: string;
-  type: string;
-}
+import { SanitizedFieldType } from '../../../common/types';
 
 export async function fetchFields(
   indexes: string[] = [],
