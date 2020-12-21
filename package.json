@@ -54,7 +54,7 @@
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
-    "lint": "yarn run lint:es && yarn run lint:sass",
+    "lint": "yarn run lint:es && yarn run lint:style",
     "lint:es": "node scripts/eslint",
     "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
