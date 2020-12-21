@@ -191,11 +191,6 @@ Object {
               "service.environment": "test",
             },
           },
-          Object {
-            "exists": Object {
-              "field": "service.node.name",
-            },
-          },
         ],
       },
     },

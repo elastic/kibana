@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getServiceNodesProjection } from '../../projections/service_nodes';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import {
-  METRIC_PROCESS_CPU_PERCENT,
-  METRIC_JAVA_THREAD_COUNT,
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
-  SERVICE_NODE_NAME,
+  METRIC_JAVA_THREAD_COUNT,
+  METRIC_PROCESS_CPU_PERCENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const getServiceNodes = async ({
   setup,
@@ -29,14 +28,6 @@ const getServiceNodes = async ({
 
   const params = mergeProjection(projection, {
     body: {
-      query: {
-        bool: {
-          filter: [
-            ...projection.body.query.bool.filter,
-            { exists: { field: SERVICE_NODE_NAME } },
-          ],
-        },
-      },
       aggs: {
         nodes: {
           terms: {
@@ -77,15 +68,18 @@ const getServiceNodes = async ({
     return [];
   }
 
-  return response.aggregations.nodes.buckets.map((bucket) => {
-    return {
+  return response.aggregations.nodes.buckets
+    .map((bucket) => ({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
       nonHeapMemory: bucket.nonHeapMemory.value,
       threadCount: bucket.threadCount.value,
-    };
-  });
+    }))
+    .filter(
+      (item) =>
+        item.cpu || item.heapMemory || item.nonHeapMemory || item.threadCount
+    );
 };
 
 export { getServiceNodes };
