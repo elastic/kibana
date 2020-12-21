@@ -17,7 +17,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
       message: boom,
       ...(statusCode !== 500 && error.body ? { attributes: { body: error.body } } : {}),
     },
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode,
   };
 }

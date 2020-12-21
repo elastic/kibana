@@ -14,7 +14,6 @@ export interface EmbeddableStartDependencies
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-embeddable-public.embeddablestartdependencies.data.md) | <code>DataPublicPluginStart</code> |  |
 |  [inspector](./kibana-plugin-plugins-embeddable-public.embeddablestartdependencies.inspector.md) | <code>InspectorStart</code> |  |
 |  [uiActions](./kibana-plugin-plugins-embeddable-public.embeddablestartdependencies.uiactions.md) | <code>UiActionsStart</code> |  |
 

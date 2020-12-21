@@ -90,7 +90,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   buildColumn({ layer, field, indexPattern }) {
     const existingMetricColumn = Object.entries(layer.columns)
       .filter(
-        ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
+        ([columnId, column]) =>
+          column && !isReferenced(layer, columnId) && isSortableByColumn(column)
       )
       .map(([id]) => id)[0];
 
