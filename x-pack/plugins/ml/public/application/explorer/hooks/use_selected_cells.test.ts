@@ -15,7 +15,7 @@ import { useTimefilter } from '../../contexts/kibana';
 jest.mock('../../contexts/kibana');
 
 describe('useSelectedCells', () => {
-  test('should no set state when the cell selection is correct', () => {
+  test('should not set state when the cell selection is correct', () => {
     (useTimefilter() as jest.Mocked<TimefilterContract>).getBounds.mockReturnValue({
       min: moment(1498824778 * 1000),
       max: moment(1502366798 * 1000),
