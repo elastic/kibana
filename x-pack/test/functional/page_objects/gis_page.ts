@@ -85,9 +85,30 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     async waitForMapPanAndZoom(origView?: { lon: number; lat: number; zoom: number }) {
       await retry.try(async () => {
         log.debug('Waiting for map pan and zoom to complete');
-        const prevView = await this.getView();
-        await PageObjects.common.sleep(1000);
-        const currentView = await this.getView();
+        let prevView = await this.getView();
+        let currentView;
+
+        if (origView) {
+          for (let i = 0; i < 1000 / 20; i++) {
+            if (!_.isEqual(origView, prevView)) {
+              break;
+            }
+            await PageObjects.common.sleep(20);
+            prevView = await this.getView();
+          }
+        }
+
+        for (let i = 0; i < 1000 / 200; i++) {
+          await PageObjects.common.sleep(200);
+          currentView = await this.getView();
+
+          if (_.isEqual(prevView, currentView)) {
+            break;
+          }
+
+          prevView = currentView;
+        }
+
         if (origView && _.isEqual(origView, currentView)) {
           throw new Error('Map pan and zoom has not started yet');
         }
@@ -245,6 +266,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await this.waitForMapPanAndZoom();
     }
 
+    // TODO speed this one up
     async getView() {
       log.debug('Get view');
       await setViewPopoverToggle.open();

@@ -56,7 +56,7 @@ export function MenuToggleProvider({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // if the menu is clearly in the expected state already, bail out quickly if so
-        const isOpen = await testSubjects.exists(this.menuTestSubject, { timeout: 1000 });
+        const isOpen = await testSubjects.exists(this.menuTestSubject, { timeout: 10 });
         if (isOpen === expectedState) {
           return;
         }

@@ -31,10 +31,10 @@ export function FlyoutProvider({ getService }: FtrProviderContext) {
       const flyoutElement = await testSubjects.find(dataTestSubj);
       const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
       await closeBtn.click();
-      await retry.waitFor(
-        'flyout closed',
-        async () => !(await testSubjects.exists(dataTestSubj, { timeout: 1000 }))
-      );
+      await testSubjects.missingOrFail(dataTestSubj, { timeout: 1000 });
+      // await retry.waitFor('flyout closed', async () => {
+      //   return testSubjects.missingOrFail(dataTestSubj, { timeout: 1000 });
+      // });
     }
 
     public async ensureClosed(dataTestSubj: string): Promise<void> {
