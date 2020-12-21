@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
@@ -26,6 +27,7 @@ export const renderApp = (
   { element, history, setHeaderActionMenu }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
+  const storage = new Storage(window.localStorage);
 
   prepareMountElement(element);
 
@@ -33,6 +35,7 @@ export const renderApp = (
     <LogsApp
       apolloClient={apolloClient}
       core={core}
+      storage={storage}
       history={history}
       plugins={plugins}
       setHeaderActionMenu={setHeaderActionMenu}
@@ -51,15 +54,18 @@ const LogsApp: React.FC<{
   history: History<unknown>;
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}> = ({ apolloClient, core, history, plugins, setHeaderActionMenu }) => {
+  storage: Storage;
+}> = ({ apolloClient, core, history, plugins, setHeaderActionMenu, storage }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
     <CoreProviders core={core} plugins={plugins}>
       <CommonInfraProviders
         apolloClient={apolloClient}
-        triggersActionsUI={plugins.triggersActionsUi}
+        appName="Logs UI"
         setHeaderActionMenu={setHeaderActionMenu}
+        storage={storage}
+        triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
           <Switch>

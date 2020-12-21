@@ -87,11 +87,11 @@ export async function createTestUserService(
         });
 
         if (browser && testSubjects && shouldRefreshBrowser) {
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          await alert?.accept();
           if (await testSubjects.exists('kibanaChrome', { allowHidden: true })) {
             await browser.refresh();
+            // accept alert if it pops up
+            const alert = await browser.getAlert();
+            await alert?.accept();
             await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
           }
         }

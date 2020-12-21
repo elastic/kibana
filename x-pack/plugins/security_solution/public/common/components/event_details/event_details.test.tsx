@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -16,6 +16,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -36,18 +37,21 @@ describe('EventDetails', () => {
     isAlert: true,
   };
 
-  const wrapper = mount(
-    <TestProviders>
-      <EventDetails {...defaultProps} />
-    </TestProviders>
-  );
-
-  const alertsWrapper = mount(
-    <TestProviders>
-      <EventDetails {...alertsProps} />
-    </TestProviders>
-  );
-
+  let wrapper: ReactWrapper;
+  let alertsWrapper: ReactWrapper;
+  beforeAll(async () => {
+    wrapper = mount(
+      <TestProviders>
+        <EventDetails {...defaultProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    alertsWrapper = mount(
+      <TestProviders>
+        <EventDetails {...alertsProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    await waitFor(() => wrapper.update());
+  });
   describe('rendering', () => {
     test('should match snapshot', () => {
       const shallowWrap = shallow(<EventDetails {...defaultProps} />);

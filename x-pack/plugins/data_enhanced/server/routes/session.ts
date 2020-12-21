@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export function registerSessionRoutes(router: IRouter): void {
   router.post(
@@ -48,15 +49,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );
@@ -78,16 +71,9 @@ export function registerSessionRoutes(router: IRouter): void {
         return res.ok({
           body: response,
         });
-      } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+      } catch (e) {
+        const err = e.output?.payload || e;
+        return reportServerError(res, err);
       }
     }
   );
@@ -120,15 +106,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );
@@ -148,16 +126,9 @@ export function registerSessionRoutes(router: IRouter): void {
         await context.search!.session.delete(id);
 
         return res.ok();
-      } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+      } catch (e) {
+        const err = e.output?.payload || e;
+        return reportServerError(res, err);
       }
     }
   );
@@ -185,15 +156,7 @@ export function registerSessionRoutes(router: IRouter): void {
           body: response,
         });
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );
