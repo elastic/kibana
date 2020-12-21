@@ -8,15 +8,16 @@ import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices, AlertTypeState } from '../../../../alerts/server';
-import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
+import { AlertServices } from '../../../../alerts/server';
+import {
+  ActionGroupId,
+  GEO_CONTAINMENT_ID,
+  GeoContainmentInstanceState,
+  GeoContainmentAlertType,
+  GeoContainmentInstanceContext,
+} from './alert_type';
 
-export interface LatestEntityLocation {
-  location: number[];
-  shapeLocationId: string;
-  dateInShape: string | null;
-  docId: string;
-}
+export type LatestEntityLocation = GeoContainmentInstanceState;
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
@@ -97,9 +98,10 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
 export function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Record<string, LatestEntityLocation>,
   currLocationMap: Map<string, LatestEntityLocation>,
-  alertInstanceFactory: (
-    x: string
-  ) => { scheduleActions: (x: string, y: Record<string, unknown>) => void },
+  alertInstanceFactory: AlertServices<
+    GeoContainmentInstanceState,
+    GeoContainmentInstanceContext
+  >['alertInstanceFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
   currIntervalEndTime: Date
 ) {
@@ -127,23 +129,8 @@ export function getActiveEntriesAndGenerateAlerts(
   });
   return allActiveEntriesMap;
 }
-
-export const getGeoContainmentExecutor = (log: Logger) =>
-  async function ({
-    previousStartedAt,
-    startedAt,
-    services,
-    params,
-    alertId,
-    state,
-  }: {
-    previousStartedAt: Date | null;
-    startedAt: Date;
-    services: AlertServices;
-    params: GeoContainmentParams;
-    alertId: string;
-    state: AlertTypeState;
-  }): Promise<AlertTypeState> {
+export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
+  async function ({ previousStartedAt, startedAt, services, params, alertId, state }) {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(

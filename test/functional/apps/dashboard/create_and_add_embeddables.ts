@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saves the saved visualization url to the app link', async () => {
-        await PageObjects.header.clickVisualize();
+        await PageObjects.header.clickVisualize(true);
         const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });

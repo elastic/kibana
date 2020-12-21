@@ -12,7 +12,6 @@ import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
@@ -924,8 +923,7 @@ export interface IInterpreterRenderHandlers {
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }

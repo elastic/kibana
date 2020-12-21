@@ -65,6 +65,8 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
   SavedObjectEmbeddableInput,
