@@ -19,7 +19,7 @@
 
 import { IRouter, KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { validateObject } from '@kbn/std';
+import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
@@ -42,7 +42,7 @@ export const visDataRoutes = (
     },
     async (requestContext, request, response) => {
       try {
-        validateObject(request.body);
+        ensureNoUnsafeProperties(request.body);
       } catch (error) {
         return response.badRequest({
           body: error.message,
