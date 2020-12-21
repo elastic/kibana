@@ -24,8 +24,10 @@ import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { FilterableEmbeddable } from '../test_samples/embeddables/filterable_embeddable';
-import type { Filter } from '../../../../data/public';
+import {
+  MockFilter,
+  FilterableEmbeddable,
+} from '../test_samples/embeddables/filterable_embeddable';
 
 class TestClass {
   constructor() {}
@@ -83,7 +85,7 @@ test('Embeddable reload is called if lastReloadRequest input time changes', asyn
 test('Embeddable reload is called if lastReloadRequest input time changed and new input is used', async () => {
   const hello = new FilterableEmbeddable({ id: '123', filters: [], lastReloadRequestTime: 0 });
 
-  const aFilter = ({} as unknown) as Filter;
+  const aFilter = ({} as unknown) as MockFilter;
   hello.reload = jest.fn(() => {
     // when reload is called embeddable already has new input
     expect(hello.getInput().filters).toEqual([aFilter]);

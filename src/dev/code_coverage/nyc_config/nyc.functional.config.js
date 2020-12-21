@@ -18,7 +18,7 @@
  */
 
 const defaultExclude = require('@istanbuljs/schema/default-exclude');
-const extraExclude = ['data/optimize/**', 'src/core/server/**', '**/test/**'];
+const extraExclude = ['data/optimize/**', 'src/core/server/**', '**/{test, types}/**/*'];
 const path = require('path');
 
 module.exports = {
