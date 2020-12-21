@@ -78,7 +78,7 @@ describe('Body', () => {
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
-    activeTab: TimelineTabs.query,
+    tabType: TimelineTabs.query,
     totalPages: 1,
   };
 
