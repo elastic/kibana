@@ -8,8 +8,6 @@ import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
-
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
@@ -81,31 +79,29 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route>
-        <EuiPage>
-          <EuiPageBody restrictWidth>
-            {errorConnecting ? (
-              <ErrorConnecting />
-            ) : (
-              <Switch>
-                <Route exact path={ROOT_PATH}>
-                  <Redirect to={ENGINES_PATH} />
-                </Route>
-                <Route exact path={ENGINES_PATH}>
-                  <EnginesOverview />
-                </Route>
-                <Route exact path={SETTINGS_PATH}>
-                  <Settings />
-                </Route>
-                <Route exact path={CREDENTIALS_PATH}>
-                  <Credentials />
-                </Route>
-                <Route>
-                  <NotFound product={APP_SEARCH_PLUGIN} />
-                </Route>
-              </Switch>
-            )}
-          </EuiPageBody>
-        </EuiPage>
+        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
+          {errorConnecting ? (
+            <ErrorConnecting />
+          ) : (
+            <Switch>
+              <Route exact path={ROOT_PATH}>
+                <Redirect to={ENGINES_PATH} />
+              </Route>
+              <Route exact path={ENGINES_PATH}>
+                <EnginesOverview />
+              </Route>
+              <Route exact path={SETTINGS_PATH}>
+                <Settings />
+              </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
+              <Route>
+                <NotFound product={APP_SEARCH_PLUGIN} />
+              </Route>
+            </Switch>
+          )}
+        </Layout>
       </Route>
     </Switch>
   );

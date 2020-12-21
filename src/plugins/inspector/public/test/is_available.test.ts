@@ -18,19 +18,12 @@
  */
 
 import { inspectorPluginMock } from '../mocks';
-import { DataAdapter, RequestAdapter } from '../../common/adapters';
+import { RequestAdapter } from '../../common/adapters';
 
-const adapter1 = new DataAdapter();
 const adapter2 = new RequestAdapter();
 
 describe('inspector', () => {
   describe('isAvailable()', () => {
-    it('should return false if no view would be available', async () => {
-      const { doStart } = await inspectorPluginMock.createPlugin();
-      const start = await doStart();
-      expect(start.isAvailable({ adapter1 })).toBe(false);
-    });
-
     it('should return true if views would be available, false otherwise', async () => {
       const { setup, doStart } = await inspectorPluginMock.createPlugin();
 
@@ -44,7 +37,6 @@ describe('inspector', () => {
 
       const start = await doStart();
 
-      expect(start.isAvailable({ adapter1 })).toBe(true);
       expect(start.isAvailable({ adapter2 })).toBe(false);
     });
   });
