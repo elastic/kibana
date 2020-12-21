@@ -7,10 +7,11 @@
 import React from 'react';
 import { useValues, useActions } from 'kea';
 
-import { EuiOverlayMask, EuiModal } from '@elastic/eui';
+import { EuiPortal, EuiFlyout } from '@elastic/eui';
 
 import { DocumentCreationLogic } from './';
 import { DocumentCreationStep } from './types';
+import { FLYOUT_ARIA_LABEL_ID } from './constants';
 
 import {
   ShowCreationModes,
@@ -19,20 +20,20 @@ import {
   UploadJsonFile,
 } from './creation_mode_components';
 
-export const DocumentCreationModal: React.FC = () => {
+export const DocumentCreationFlyout: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
   const { isDocumentCreationOpen } = useValues(DocumentCreationLogic);
 
   return isDocumentCreationOpen ? (
-    <EuiOverlayMask>
-      <EuiModal onClose={closeDocumentCreation}>
-        <ModalContent />
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiPortal>
+      <EuiFlyout ownFocus aria-labelledby={FLYOUT_ARIA_LABEL_ID} onClose={closeDocumentCreation}>
+        <FlyoutContent />
+      </EuiFlyout>
+    </EuiPortal>
   ) : null;
 };
 
-export const ModalContent: React.FC = () => {
+export const FlyoutContent: React.FC = () => {
   const { creationStep, creationMode } = useValues(DocumentCreationLogic);
 
   switch (creationStep) {

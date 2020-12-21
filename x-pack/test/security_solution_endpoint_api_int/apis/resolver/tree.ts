@@ -281,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
-            indexPatterns: ['metrics-*'],
+            indexPatterns: ['doesnotexist-*'],
           })
           .expect(200);
         expect(body).to.be.empty();

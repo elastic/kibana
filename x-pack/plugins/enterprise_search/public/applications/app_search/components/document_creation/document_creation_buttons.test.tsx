@@ -16,8 +16,6 @@ import { DocumentCreationButtons } from './';
 describe('DocumentCreationButtons', () => {
   const values = {
     engineName: 'test-engine',
-    isSampleEngine: false,
-    myRole: { canViewEngineCrawler: true },
   };
   const actions = {
     openDocumentCreation: jest.fn(),
@@ -43,7 +41,7 @@ describe('DocumentCreationButtons', () => {
     expect(wrapper.find(EuiCardTo).prop('isDisabled')).toEqual(true);
   });
 
-  it('opens the DocumentCreationModal on click', () => {
+  it('opens the DocumentCreationFlyout on click', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     wrapper.find(EuiCard).at(0).simulate('click');
@@ -56,25 +54,9 @@ describe('DocumentCreationButtons', () => {
     expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
   });
 
-  describe('crawler card', () => {
-    it('renders the crawler button with a link to the crawler page', () => {
-      const wrapper = shallow(<DocumentCreationButtons />);
+  it('renders the crawler button with a link to the crawler page', () => {
+    const wrapper = shallow(<DocumentCreationButtons />);
 
-      expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/test-engine/crawler');
-    });
-
-    it('does not render the crawler button if the user does not have access', () => {
-      setMockValues({ ...values, myRole: { canViewEngineCrawler: false } });
-      const wrapper = shallow(<DocumentCreationButtons />);
-
-      expect(wrapper.find(EuiCardTo)).toHaveLength(0);
-    });
-
-    it('does not render the crawler button for the sample engine', () => {
-      setMockValues({ ...values, isSampleEngine: true });
-      const wrapper = shallow(<DocumentCreationButtons />);
-
-      expect(wrapper.find(EuiCardTo)).toHaveLength(0);
-    });
+    expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/test-engine/crawler');
   });
 });
