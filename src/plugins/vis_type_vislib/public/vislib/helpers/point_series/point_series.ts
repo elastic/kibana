@@ -18,6 +18,14 @@
  */
 
 import { Duration } from 'moment';
+
+import type {
+  Dimension,
+  Dimensions,
+  DateHistogramParams,
+  HistogramParams,
+} from '../../../../../vis_type_xy/public';
+
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';
 import { initYAxis } from './_init_y_axis';
@@ -26,41 +34,6 @@ import { orderedDateAxis } from './_ordered_date_axis';
 import { Serie } from './_add_to_siri';
 import { Column, Table } from '../../types';
 
-export interface DateHistogramParams {
-  date: boolean;
-  interval: number | string;
-  intervalESValue: number;
-  intervalESUnit: string;
-  format: string;
-  bounds?: {
-    min: string | number;
-    max: string | number;
-  };
-}
-export interface HistogramParams {
-  interval: number;
-}
-export interface FakeParams {
-  defaultValue: string;
-}
-export interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: { pattern?: string; [key: string]: any };
-  };
-  params: DateHistogramParams | HistogramParams | FakeParams | {};
-}
-
-export interface Dimensions {
-  x: Dimension | null;
-  y: Dimension[];
-  z?: Dimension[];
-  series?: Dimension | Dimension[];
-  width?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
-}
 export interface Aspect {
   accessor: Column['id'];
   column?: Dimension['accessor'];
