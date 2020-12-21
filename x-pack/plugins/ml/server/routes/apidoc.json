@@ -151,7 +151,7 @@
     "RemoveJobsFromSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
-    "DeleteJobCheck",
+    "CanDeleteJob",
 
     "TrainedModels",
     "GetTrainedModel",
