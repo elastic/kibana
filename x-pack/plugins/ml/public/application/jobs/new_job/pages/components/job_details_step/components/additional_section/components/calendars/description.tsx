@@ -14,7 +14,7 @@ export const Description: FC = memo(({ children }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const docsUrl = docLinks.links.ml.customUrls;
+  const docsUrl = docLinks.links.ml.calendars;
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.title',
     {
