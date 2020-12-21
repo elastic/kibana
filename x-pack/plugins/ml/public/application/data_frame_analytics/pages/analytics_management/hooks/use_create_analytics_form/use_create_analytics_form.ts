@@ -56,7 +56,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, jobId } = form;
+  const { jobId } = form;
   let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
@@ -110,9 +110,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobCreated(true);
-      if (createIndexPattern) {
-        createKibanaIndexPattern();
-      }
       refresh();
     } catch (e) {
       addRequestMessage({
@@ -298,6 +295,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
+    createKibanaIndexPattern,
     initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,

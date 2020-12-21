@@ -66,6 +66,7 @@ export type Action =
 export interface ActionDispatchers {
   closeModal: () => void;
   createAnalyticsJob: () => void;
+  createKibanaIndexPattern: () => Promise<void>;
   initiateWizard: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;

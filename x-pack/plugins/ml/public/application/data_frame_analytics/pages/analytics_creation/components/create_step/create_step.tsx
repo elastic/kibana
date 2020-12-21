@@ -25,9 +25,9 @@ interface Props extends CreateAnalyticsFormProps {
 }
 
 export const CreateStep: FC<Props> = ({ actions, state, step }) => {
-  const { createAnalyticsJob, startAnalyticsJob } = actions;
+  const { createAnalyticsJob, createKibanaIndexPattern, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
-  const { jobId, jobType } = state.form;
+  const { createIndexPattern, jobId, jobType } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
   const [showProgress, setShowProgress] = useState<boolean>(false);
@@ -86,7 +86,13 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
       {isJobCreated === true && (
-        <CreateStepFooter jobId={jobId} jobType={jobType!} showProgress={showProgress} />
+        <CreateStepFooter
+          jobId={jobId}
+          jobType={jobType!}
+          showProgress={showProgress}
+          createIndexPattern={createIndexPattern}
+          createKibanaIndexPattern={createKibanaIndexPattern}
+        />
       )}
     </div>
   );

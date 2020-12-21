@@ -23,6 +23,8 @@ import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/d
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 interface Props {
+  createIndexPattern: boolean;
+  createKibanaIndexPattern: () => Promise<void>;
   jobId: string;
   jobType: DataFrameAnalysisConfigType;
   showProgress: boolean;
@@ -34,7 +36,13 @@ export interface AnalyticsProgressStats {
   totalPhases: number;
 }
 
-export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
+export const CreateStepFooter: FC<Props> = ({
+  createIndexPattern,
+  createKibanaIndexPattern,
+  jobId,
+  jobType,
+  showProgress,
+}) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);
@@ -51,6 +59,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   }, []);
 
   useEffect(() => {
+    let indexPatternCreated = false;
     const interval = setInterval(async () => {
       try {
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
@@ -73,6 +82,16 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
                   }
                 )
             );
+          }
+
+          // Only create index pattern once there is data in the destination index
+          if (
+            indexPatternCreated === false &&
+            createIndexPattern === true &&
+            progressStats.currentPhase > 1
+          ) {
+            indexPatternCreated = true;
+            createKibanaIndexPattern();
           }
 
           setCurrentProgress(progressStats);
