@@ -20,6 +20,7 @@
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
 import {
+  MockFilter,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
@@ -28,7 +29,6 @@ import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddable
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
-import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
 import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';
@@ -51,8 +51,8 @@ beforeEach(async () => {
     () => null
   );
 
-  const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

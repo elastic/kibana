@@ -11,7 +11,7 @@ import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
-  error?: EsErrorBody | Boom;
+  error?: EsErrorBody | Boom.Boom;
 }
 
 export type IndexName = string;

@@ -18,17 +18,17 @@ export const DataStreamsBadges: React.FunctionComponent<Props> = ({ dataStream }
   const badges = [];
   if (isFleetManaged(dataStream)) {
     badges.push(
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" key={'managed'}>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
-          defaultMessage="Managed"
+          defaultMessage="Fleet-managed"
         />
       </EuiBadge>
     );
   }
   if (dataStream.hidden) {
     badges.push(
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" key={'hidden'}>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.table.hiddenDataStreamBadge"
           defaultMessage="Hidden"

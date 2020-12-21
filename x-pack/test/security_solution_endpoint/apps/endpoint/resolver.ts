@@ -13,19 +13,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Event Resolver', function () {
+  /**
+   * Navigating to the hosts page must be done after data is loaded into ES otherwise
+   * the hosts page will display the empty default page and if we load data after that
+   * we'd have to set the source filter on the page.
+   */
+  const navigateToHostsAndSetDate = async () => {
+    await pageObjects.hosts.navigateToSecurityHostsPage();
+    await pageObjects.common.dismissBanner();
+    const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+    const toTime = 'now';
+    await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+  };
+
+  describe.skip('Endpoint Event Resolver', function () {
     before(async () => {
-      await pageObjects.hosts.navigateToSecurityHostsPage();
-      await pageObjects.common.dismissBanner();
-      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
-      const toTime = 'now';
-      await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await browser.setWindowSize(1800, 1200);
     });
+    after(async () => {
+      await pageObjects.hosts.deleteDataStreams();
+    });
+
     describe('Endpoint Resolver Tree', function () {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
+        await navigateToHostsAndSetDate();
         await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.events.file');
       });
       after(async () => {
@@ -213,6 +226,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
+        await navigateToHostsAndSetDate();
       });
       after(async () => {
         await pageObjects.hosts.deleteDataStreams();

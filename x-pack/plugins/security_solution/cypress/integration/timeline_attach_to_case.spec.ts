@@ -16,12 +16,14 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { TIMELINE_CASE_ID } from '../objects/case';
 import { caseTimeline, timeline } from '../objects/timeline';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 describe('attach timeline to case', () => {
   const myTimeline = { ...timeline };
 
   context('without cases created', () => {
     before(() => {
+      cleanKibana();
       createTimeline(timeline).then((response) => {
         myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
       });
@@ -61,11 +63,8 @@ describe('attach timeline to case', () => {
 
   context('with cases created', () => {
     before(() => {
+      cleanKibana();
       esArchiverLoad('case_and_timeline');
-    });
-
-    after(() => {
-      esArchiverUnload('case_and_timeline');
     });
 
     it('attach timeline to an existing case', () => {
@@ -81,6 +80,7 @@ describe('attach timeline to case', () => {
           }](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id!}%27,isOpen:!t))`
         );
       });
+      esArchiverUnload('case_and_timeline');
     });
   });
 });

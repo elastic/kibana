@@ -23,6 +23,7 @@ import classNames from 'classnames';
 
 import { CoreStart } from 'kibana/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import type { PersistedState } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { TableVisConfig } from '../types';
 import { TableContext } from '../table_vis_response_handler';
@@ -47,7 +48,7 @@ const TableVisualizationComponent = ({
     handlers.done();
   }, [handlers]);
 
-  const uiStateProps = useUiState(handlers.uiState);
+  const uiStateProps = useUiState(handlers.uiState as PersistedState);
 
   const className = classNames('tbvChart', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
