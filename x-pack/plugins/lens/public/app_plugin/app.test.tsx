@@ -146,6 +146,11 @@ function createMockTimefilter() {
     }),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
+    getAutoRefreshFetch$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        return next;
+      },
+    }),
   };
 }
 
@@ -1439,14 +1444,6 @@ describe('Lens App', () => {
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
-    });
-
-    it('should clear the session when leaving the app', () => {
-      const { props, services } = mountWith({});
-      const { clear } = services.data.search.session;
-      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave });
-      expect(clear).toHaveBeenCalled();
     });
   });
 });
