@@ -890,20 +890,15 @@ export const getRule = async (
 export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string,
-  status?: 'succeeded' | 'failed' | 'partial failure'
+  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
 ): Promise<void> => {
-  // wait for Task Manager to finish executing the rule
-  let statusToWaitFor = status;
-  if (statusToWaitFor == null) {
-    statusToWaitFor = 'succeeded';
-  }
   await waitFor(async () => {
     const { body } = await supertest
       .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
-    return body[id]?.current_status?.status === statusToWaitFor;
+    return body[id]?.current_status?.status === status;
   }, 'waitForRuleSuccess');
 };
 
