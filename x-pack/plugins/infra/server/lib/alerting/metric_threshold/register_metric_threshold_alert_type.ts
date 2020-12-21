@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { AlertType } from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
@@ -42,7 +43,9 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): AlertT
 
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: 'Metric threshold',
+    name: i18n.translate('xpack.infra.metrics.alertName', {
+      defaultMessage: 'Metric threshold',
+    }),
     validate: {
       params: schema.object(
         {
