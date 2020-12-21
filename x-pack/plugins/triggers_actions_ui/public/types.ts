@@ -38,15 +38,16 @@ export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;
-export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
-  TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
->;
+export type ActionTypeRegistryContract<
+  ActionConnector = unknown,
+  ActionParams = unknown
+> = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
-  editActionConfig: (property: string, value: any) => void;
-  editActionSecrets: (property: string, value: any) => void;
+  editActionConfig: (property: string, value: unknown) => void;
+  editActionSecrets: (property: string, value: unknown) => void;
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
@@ -67,7 +68,11 @@ export interface Pagination {
   size: number;
 }
 
-export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
+export interface ActionTypeModel<
+  ActionConfig = unknown,
+  ActionSecrets = unknown,
+  ActionParams = unknown
+> {
   id: string;
   iconClass: string;
   selectMessage: string;
@@ -75,7 +80,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
   ) => ValidationResult;
-  validateParams: (actionParams: any) => ValidationResult;
+  validateParams: (actionParams: ActionParams) => ValidationResult;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
@@ -87,7 +92,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
 }
 
 export interface ValidationResult {
-  errors: Record<string, any>;
+  errors: Record<string, unknown>;
 }
 
 interface ActionConnectorProps<Config, Secrets> {
@@ -114,13 +119,13 @@ export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProp
   isPreconfigured: false;
 };
 
-export type ActionConnector<Config = Record<string, any>, Secrets = Record<string, any>> =
+export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
   | PreConfiguredActionConnector
   | UserConfiguredActionConnector<Config, Secrets>;
 
 export type ActionConnectorWithoutId<
-  Config = Record<string, any>,
-  Secrets = Record<string, any>
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -170,12 +175,12 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   AlertParamsType = unknown,
-  MetaData = Record<string, any>
+  MetaData = Record<string, unknown>
 > {
   alertParams: AlertParamsType;
   alertInterval: string;
   alertThrottle: string;
-  setAlertParams: (property: string, value: any) => void;
+  setAlertParams: (property: string, value: unknown) => void;
   setAlertProperty: <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
@@ -185,7 +190,7 @@ export interface AlertTypeParamsExpressionProps<
   data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<AlertParamsType = any> {
+export interface AlertTypeModel<AlertParamsType = unknown> {
   id: string;
   name: string | JSX.Element;
   description: string;
@@ -193,7 +198,7 @@ export interface AlertTypeModel<AlertParamsType = any> {
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
-    | React.FunctionComponent<any>
+    | React.FunctionComponent<unknown>
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;

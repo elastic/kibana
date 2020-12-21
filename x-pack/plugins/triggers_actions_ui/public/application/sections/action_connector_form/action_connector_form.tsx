@@ -54,7 +54,6 @@ interface ActionConnectorProps<
   ConnectorSecrets = Record<string, any>
 > {
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>;
-  dispatch: React.Dispatch<ReducerAction>;
   actionTypeName: string;
   serverError?: {
     body: { message: string; error: string };

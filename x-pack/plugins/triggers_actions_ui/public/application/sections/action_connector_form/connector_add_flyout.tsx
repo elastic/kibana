@@ -29,12 +29,14 @@ import {
   ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
 } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { createConnectorReducer } from './connector_reducer_gen';
 
 export interface ConnectorAddFlyoutProps {
   onClose: () => void;
@@ -68,12 +70,15 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     config: {},
     secrets: {},
   } as ActionConnector;
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
-  const setActionProperty = (key: string, value: any) => {
-    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  // const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
+  const reducer = createConnectorReducer<Record<string, any>, Record<string, any>>();
+  const [{ connector }, dispatch] = useReducer(reducer, { connector: initialConnector });
+
+  const setActionProperty = (value: ActionConnector) => {
+    dispatch({ type: 'setProperty', payload: value });
   };
-  const setConnector = (value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
+  const setConnector = (value: ActionConnector) => {
+    dispatch({ type: 'setConnector', connector: value });
   };
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -86,7 +91,8 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
 
   function onActionTypeChange(newActionType: ActionType) {
     setActionType(newActionType);
-    setActionProperty('actionTypeId', newActionType.id);
+    connector.actionTypeId = newActionType.id;
+    setActionProperty(connector);
   }
 
   let currentForm;
@@ -112,8 +118,12 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     currentForm = (
       <ActionConnectorForm
         actionTypeName={actionType.name}
-        connector={connector}
-        dispatch={dispatch}
+        connector={
+          connector as UserConfiguredActionConnector<
+            Record<string, unknown>,
+            Record<string, unknown>
+          >
+        }
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
         consumer={consumer}
