@@ -106,10 +106,8 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContain
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
-export const TIMELINE_FILTER = (filter: TimelineFilter) => {
-  // The space at the end of the line is required. We want to keep it until it is updated.
-  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned "]`;
-};
+export const TIMELINE_FILTER = (filter: TimelineFilter) =>
+  `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 
