@@ -20,6 +20,7 @@
 import { skip } from 'rxjs/operators';
 import { testPlugin } from './test_plugin';
 import {
+  MockFilter,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddableInput,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
@@ -34,7 +35,6 @@ import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import { coreMock } from '../../../../core/public/mocks';
-import { esFilters, Filter } from '../../../../plugins/data/public';
 import { createEmbeddablePanelMock } from '../mocks';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
@@ -56,8 +56,8 @@ setup.registerEmbeddableFactory(
 const start = doStart();
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

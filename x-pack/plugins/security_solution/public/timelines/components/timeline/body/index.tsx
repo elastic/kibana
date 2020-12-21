@@ -21,7 +21,7 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
 import { useManageTimeline } from '../../manage_timeline';
-import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel, TimelineTabs } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
@@ -43,6 +43,7 @@ interface OwnProps {
   isEventViewer?: boolean;
   sort: Sort[];
   refetch: inputsModel.Refetch;
+  tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
 }
@@ -60,7 +61,6 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
-    activeTab,
     activePage,
     browserFields,
     columnHeaders,
@@ -79,6 +79,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     showCheckboxes,
     refetch,
     sort,
+    tabType,
     totalPages,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -200,7 +201,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             <Events
               containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
-              activeTab={activeTab}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
@@ -217,6 +217,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              tabType={tabType}
             />
           </EventsTable>
         </TimelineBody>
@@ -225,7 +226,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
   },
   (prevProps, nextProps) =>
-    prevProps.activeTab === nextProps.activeTab &&
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
@@ -238,7 +238,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.showCheckboxes === nextProps.showCheckboxes
+    prevProps.showCheckboxes === nextProps.showCheckboxes &&
+    prevProps.tabType === nextProps.tabType
 );
 
 BodyComponent.displayName = 'BodyComponent';
@@ -253,7 +254,6 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const {
-      activeTab,
       columns,
       eventIdToNoteIds,
       excludedRowRendererIds,
@@ -265,7 +265,6 @@ const makeMapStateToProps = () => {
     } = timeline;
 
     return {
-      activeTab: id === TimelineId.active ? activeTab : undefined,
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
       excludedRowRendererIds,

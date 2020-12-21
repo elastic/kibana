@@ -7,7 +7,7 @@
 import './suggestion_panel.scss';
 
 import _, { camelCase } from 'lodash';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiIcon,
@@ -270,16 +270,18 @@ export function SuggestionPanel({
     [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
   );
 
+  const contextRef = useRef<ExecutionContextSearch>(context);
+  contextRef.current = context;
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent
         {...props}
-        searchContext={context}
+        searchContext={contextRef.current}
         searchSessionId={frame.searchSessionId}
       />
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context, frame.searchSessionId]);
+  }, [frame.searchSessionId, ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
