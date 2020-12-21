@@ -20,6 +20,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
@@ -31,11 +32,10 @@ import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
+import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_ink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
-import { TableLinkFlexItem } from '../table_link_flex_item';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
@@ -45,7 +45,7 @@ interface Props {
   serviceName: string;
 }
 
-type SortField = 'latency' | 'throughput' | 'errorRate' | 'impact';
+type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
 
 const PAGE_SIZE = 5;
@@ -85,7 +85,9 @@ function getLatencyAggregationTypeLabel(
   }
 }
 
-export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+export function ServiceOverviewTransactionsTable(props: Props) {
+  const { serviceName } = props;
+  const { transactionType } = useApmServiceContext();
   const latencyAggregationType = useLatencyAggregationType();
   const {
     uiFilters,
@@ -114,7 +116,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end || !latencyAggregationType) {
+    if (!start || !end || !latencyAggregationType || !transactionType) {
       return;
     }
 
@@ -132,6 +134,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
           latencyAggregationType,
         },
       },
@@ -156,6 +159,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
     latencyAggregationType,
   ]);
 
@@ -174,7 +178,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           defaultMessage: 'Name',
         }
       ),
-      render: (_, { name, transactionType }) => {
+      render: (_, { name, transactionType: type }) => {
         return (
           <TruncateWithTooltip
             text={name}
@@ -182,7 +186,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               <TransactionDetailLink
                 serviceName={serviceName}
                 transactionName={name}
-                transactionType={transactionType}
+                transactionType={type}
               >
                 {name}
               </TransactionDetailLink>
@@ -227,7 +231,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       },
     },
     {
-      field: 'error_rate',
+      field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         {
@@ -265,7 +269,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate(
@@ -277,7 +281,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <TransactionOverviewLink serviceName={serviceName}>
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
@@ -286,7 +290,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
                 }
               )}
             </TransactionOverviewLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

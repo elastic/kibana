@@ -186,12 +186,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     );
   },
 
-  paramEditor: ({ state, setState, currentColumn, layerId }) => {
-    const currentIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const dateFields = getDateFields(currentIndexPattern);
+  paramEditor: ({ layer, updateLayer, columnId, currentColumn, indexPattern }) => {
+    const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
-      currentIndexPattern
+      indexPattern
     );
     return (
       <>
@@ -228,11 +227,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               if (choices.length === 0) {
                 return;
               }
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'sortField',
                   value: choices[0].value,
                 })
@@ -243,8 +241,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 ? [
                     {
                       label:
-                        currentIndexPattern.getFieldByName(currentColumn.params.sortField)
-                          ?.displayName || currentColumn.params.sortField,
+                        indexPattern.getFieldByName(currentColumn.params.sortField)?.displayName ||
+                        currentColumn.params.sortField,
                       value: currentColumn.params.sortField,
                     },
                   ]

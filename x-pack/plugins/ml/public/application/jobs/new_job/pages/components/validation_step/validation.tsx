@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import React, { Fragment, FC, useContext, useEffect } from 'react';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -21,7 +21,6 @@ const idFilterList = [
 
 export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
-  const [nextActive, setNextActive] = useState(false);
 
   if (jobCreator.type === JOB_TYPE.ADVANCED) {
     // for advanced jobs, ignore time range warning as the
@@ -50,13 +49,8 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   }, []);
 
   // keep a record of the advanced validation in the jobValidator
-  // and disable the next button if any advanced checks have failed.
-  // note, it is not currently possible to get to a state where any of the
-  // advanced validation checks return an error because they are all
-  // caught in previous basic checks
   function setIsValid(valid: boolean) {
     jobValidator.advancedValid = valid;
-    setNextActive(valid);
   }
 
   return (
@@ -74,7 +68,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
-            nextActive={nextActive}
+            nextActive={true}
           />
         </Fragment>
       )}

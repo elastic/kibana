@@ -13,7 +13,7 @@ import {
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
-import { TransactionOverviewLink } from '../../../../../shared/Links/apm/TransactionOverviewLink';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
 
 interface Props {
   transaction?: Transaction;
@@ -31,9 +31,11 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <TransactionOverviewLink serviceName={transaction.service.name}>
+        <ServiceOrTransactionsOverviewLink
+          serviceName={transaction.service.name}
+        >
           {transaction.service.name}
-        </TransactionOverviewLink>
+        </ServiceOrTransactionsOverviewLink>
       ),
       width: '25%',
     },

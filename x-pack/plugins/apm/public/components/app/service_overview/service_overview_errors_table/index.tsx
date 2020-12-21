@@ -13,6 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
@@ -24,7 +25,6 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
-import { TableLinkFlexItem } from '../table_link_flex_item';
 
 interface Props {
   serviceName: string;
@@ -54,7 +54,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
-
+  const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -141,7 +141,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !transactionType) {
       return;
     }
 
@@ -158,6 +158,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
         },
       },
     }).then((response) => {
@@ -181,6 +182,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
   ]);
 
   const {
@@ -192,8 +194,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
@@ -202,13 +204,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <ErrorOverviewLink serviceName={serviceName}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
             </ErrorOverviewLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

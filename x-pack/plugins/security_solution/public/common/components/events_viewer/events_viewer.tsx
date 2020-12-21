@@ -16,7 +16,11 @@ import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  KqlMode,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -334,6 +338,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onRuleChange={onRuleChange}
                     refetch={refetch}
                     sort={sort}
+                    tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,

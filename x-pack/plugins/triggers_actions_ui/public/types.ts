@@ -8,12 +8,12 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionGroup, AlertActionParam } from '../../alerts/common';
+import { ActionGroup, AlertActionParam, AlertTypeParams } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
-  SanitizedAlert as Alert,
+  SanitizedAlert,
   AlertAction,
   AlertAggregations,
   AlertTaskState,
@@ -23,6 +23,11 @@ import {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
 } from '../../alerts/common';
+
+// In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
+// so the `Params` is a black-box of Record<string, unknown>
+type Alert = SanitizedAlert<AlertTypeParams>;
+
 export {
   Alert,
   AlertAction,
@@ -169,14 +174,17 @@ export interface AlertTableItem extends Alert {
 }
 
 export interface AlertTypeParamsExpressionProps<
-  AlertParamsType = unknown,
+  Params extends AlertTypeParams = AlertTypeParams,
   MetaData = Record<string, any>
 > {
-  alertParams: AlertParamsType;
+  alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
-  setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => void;
+  setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
+  setAlertProperty: <Prop extends keyof Alert>(
+    key: Prop,
+    value: SanitizedAlert<Params>[Prop] | null
+  ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
@@ -185,16 +193,15 @@ export interface AlertTypeParamsExpressionProps<
   data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<AlertParamsType = any> {
+export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams> {
   id: string;
-  name: string | JSX.Element;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (alertParams: AlertParamsType) => ValidationResult;
+  validate: (alertParams: Params) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;
+    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
 }
