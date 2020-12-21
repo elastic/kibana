@@ -289,10 +289,7 @@ export const AlertForm = ({
         )
         .filter((alertTypeItem) =>
           searchValue
-            ? alertTypeItem.alertTypeModel.name
-                .toString()
-                .toLocaleLowerCase()
-                .includes(searchValue) ||
+            ? alertTypeItem.alertType.name.toString().toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertTypeModel.description.toLocaleLowerCase().includes(searchValue)
             : alertTypeItem
@@ -378,10 +375,7 @@ export const AlertForm = ({
           hasDisabledByLicenseAlertTypes = true;
         }
         (result[producer] = result[producer] || []).push({
-          name:
-            typeof alertTypeValue.alertTypeModel.name === 'string'
-              ? alertTypeValue.alertTypeModel.name
-              : alertTypeValue.alertTypeModel.name.props.defaultMessage,
+          name: alertTypeValue.alertType.name,
           id: alertTypeValue.alertTypeModel.id,
           checkEnabledResult,
           alertTypeItem: alertTypeValue.alertTypeModel,
@@ -475,11 +469,9 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              <FormattedMessage
-                defaultMessage="{alertType}"
-                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
-                values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
-              />
+              {alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
+                ? alertTypesIndex.get(alert.alertTypeId)!.name
+                : ''}
             </h5>
           </EuiTitle>
         </EuiFlexItem>
