@@ -22,6 +22,7 @@ import { UsageCollectionPlugin } from './plugin';
 
 export { METRIC_TYPE } from '@kbn/analytics';
 export { UsageCollectionSetup, UsageCollectionStart } from './plugin';
+export { TrackApplicationView } from './components';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UsageCollectionPlugin(initializerContext);
