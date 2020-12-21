@@ -25,7 +25,6 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
-import { TableLinkFlexItem } from '../table_link_flex_item';
 
 interface Props {
   serviceName: string;
@@ -195,8 +194,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
@@ -205,13 +204,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <ErrorOverviewLink serviceName={serviceName}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
             </ErrorOverviewLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

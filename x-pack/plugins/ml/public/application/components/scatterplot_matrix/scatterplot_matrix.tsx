@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
 
-import { ml } from '../../services/ml_api_service';
+import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
@@ -72,6 +72,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   color,
   legendType,
 }) => {
+  const { esSearch } = useMlApiContext();
+
   // dynamicSize is optionally used for outlier charts where the scatterplot marks
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
@@ -147,7 +149,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : { match_all: {} };
 
-        const resp: SearchResponse7 = await ml.esSearch({
+        const resp: SearchResponse7 = await esSearch({
           index,
           body: {
             fields: queryFields,
