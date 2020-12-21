@@ -231,12 +231,6 @@ export const getQuerySignalsId = (ids: string[]) => ({
   },
 });
 
-export const getQuerySignalsAll = () => ({
-  query: {
-    match_all: {},
-  },
-});
-
 export const setSignalStatus = ({
   signalIds,
   status,
@@ -889,7 +883,8 @@ export const getRule = async (
 };
 
 /**
- * Waits for the rule in find status to be succeeded before continuing
+ * Waits for the rule in find status to be 'succeeded'
+ * or the provided status, before continuing
  * @param supertest Deps
  */
 export const waitForRuleSuccessOrStatus = async (
@@ -968,7 +963,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(ids.length > 0 ? getQuerySignalsId(ids) : getQuerySignalsAll())
+    .send(getQuerySignalsId(ids))
     .expect(200);
   return signalsOpen;
 };

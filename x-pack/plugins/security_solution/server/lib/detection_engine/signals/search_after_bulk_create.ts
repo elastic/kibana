@@ -102,7 +102,6 @@ export const searchAfterAndBulkCreate = async ({
           timestampOverride: ruleParams.timestampOverride,
           excludeDocsWithTimestampOverride: false,
         });
-        // console.error(`SEARCH RESULT: ${JSON.stringify(searchResult)}`);
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({
@@ -126,7 +125,6 @@ export const searchAfterAndBulkCreate = async ({
           (!isEmpty(searchErrors) || isEmpty(searchResult.hits.hits)) &&
           ruleParams.timestampOverride != null
         ) {
-          // console.error(`SEARCH ERRORS: ${JSON.stringify(searchErrors)}`);
           const {
             searchResult: searchResultB,
             searchDuration: searchDurationB,
@@ -144,15 +142,20 @@ export const searchAfterAndBulkCreate = async ({
             timestampOverride: ruleParams.timestampOverride,
             excludeDocsWithTimestampOverride: true,
           });
+
+          // call this function setSortIdOrExit()
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
             backupSortId = lastSortId[0];
-          } else {
-            logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
+          } else if (lastSortId == null && isEmpty(searchResult.hits.hits)) {
+            // if no sort id on backup search and the initial search result was also empty; break
+            logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
             break;
           }
-          // console.error(`SEARCHRESULTB: ${JSON.stringify(searchResultB)}`);
           searchResult.hits.hits.push(...searchResultB.hits.hits);
+
+          // we have to update the hits.total to include these newfound values.
+          // sometimes hits.total is a value (number) or sometimes its an object
           const totalTypeGuard = (num: number | TotalValue): num is number =>
             typeof num === 'number';
           if (totalTypeGuard(searchResult.hits.total)) {
@@ -168,6 +171,8 @@ export const searchAfterAndBulkCreate = async ({
               searchResult.hits.total.value += searchResultB.hits.total.value;
             }
           }
+
+          // merge the search result from the secondary search with the first
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnTypeFromResponse({
@@ -285,6 +290,7 @@ export const searchAfterAndBulkCreate = async ({
         // we are guaranteed to have searchResult hits at this point
         // because we check before if the totalHits or
         // searchResult.hits.hits.length is 0
+        // call this function setSortIdOrExit()
         const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1].sort;
         if (lastSortId != null && lastSortId.length !== 0) {
           sortId = lastSortId[0];

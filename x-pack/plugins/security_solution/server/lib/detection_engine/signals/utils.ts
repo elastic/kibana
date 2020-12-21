@@ -663,7 +663,6 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
-      // errors: [...existingErrors, ...newErrors],
     };
   });
 };

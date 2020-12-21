@@ -71,7 +71,6 @@ export const singleSearchAfter = async ({
       'search',
       searchAfterQuery
     );
-    // console.error(`SHARD FAILURES: ${JSON.stringify(nextSearchAfterResult._shards)}`);
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

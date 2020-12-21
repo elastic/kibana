@@ -42,7 +42,6 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  // idea is to iterate over the timestamps and create distinct queries that can be used to search across simultaneous timestamps
   const sortField =
     timestampOverride != null && !excludeDocsWithTimestampOverride
       ? timestampOverride
@@ -120,8 +119,6 @@ export const buildEventsSearchQuery = ({
       ],
     },
   };
-
-  // console.error(`SEARCH QUERY: ${JSON.stringify(searchQuery.body)}`);
 
   if (searchAfterSortId) {
     return {
