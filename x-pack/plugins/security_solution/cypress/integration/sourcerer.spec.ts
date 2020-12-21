@@ -70,10 +70,12 @@ describe('Sourcerer', () => {
       isNotSourcererSelection(`metrics-*`);
     });
   });
+
   describe('Timeline scope', () => {
     const alertPatterns = ['.siem-signals-default'];
     const rawPatterns = ['auditbeat-*'];
     const allPatterns = [...alertPatterns, ...rawPatterns];
+
     it('Radio buttons select correct sourcerer patterns', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -85,6 +87,7 @@ describe('Sourcerer', () => {
       alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
       rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
     });
+
     it('Adding an option results in the custom radio becoming active', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -95,12 +98,13 @@ describe('Sourcerer', () => {
       openSourcerer('timeline');
       isCustomRadio();
     });
+
     it('Selected index patterns are properly queried', () => {
       openTimelineUsingToggle();
       populateTimeline();
       openSourcerer('timeline');
       deselectSourcererOptions(rawPatterns, 'timeline');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text).to.eql(0));
+      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.eql(0));
     });
   });
 });
