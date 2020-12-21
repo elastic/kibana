@@ -1677,48 +1677,6 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.12.0 update vislib pie defaults', () => {
-    const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.12.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-    const generateDoc = (type = 'pie') => ({
-      attributes: {
-        type,
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState: JSON.stringify({
-          type,
-          title: 'My pie vis',
-          params: {
-            type,
-            addLegend: true,
-            addTooltip: true,
-            isDonut: true,
-            labels: {
-              show: true,
-              truncate: 100,
-            },
-          },
-        }),
-      },
-    });
-
-    it('should return original doc if is not a pie chart', () => {
-      const doc = generateDoc('area');
-      const migratedTestDoc = migrate(doc);
-      expect(migratedTestDoc).toEqual(doc);
-    });
-
-    it('should decorate existing docs with the kibana legacy palette', () => {
-      const migratedTestDoc = migrate(generateDoc());
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(palette.name).toEqual('kibana_palette');
-    });
-  });
-
   describe('7.12.0 update vislib visualization defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.12.0'](
@@ -1749,10 +1707,11 @@ describe('migration visualization', () => {
       },
     });
 
-    it('should return original doc if not area, line or histogram chart', () => {
-      const doc = getTestDoc('pie');
-      const migratedTestDoc = migrate(doc);
-      expect(migratedTestDoc).toEqual(doc);
+    it('should decorate existing docs with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc('pie'));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
     });
 
     it('should decorate existing docs with isVislibVis flag', () => {

@@ -760,39 +760,6 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
-// [Pie Chart] Migrate vislib pie chart to use the new plugin vis_type_pie
-const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
-  const visStateJSON = get(doc, 'attributes.visState');
-  let visState;
-
-  if (visStateJSON) {
-    try {
-      visState = JSON.parse(visStateJSON);
-    } catch (e) {
-      // Let it go, the data is invalid and we'll leave it as is
-    }
-    if (visState && visState.type === 'pie') {
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify({
-            ...visState,
-            params: {
-              ...visState.params,
-              palette: {
-                type: 'palette',
-                name: 'kibana_palette',
-              },
-            },
-          }),
-        },
-      };
-    }
-  }
-  return doc;
-};
-
 // [Data table visualization] Enable toolbar by default
 const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
   let visState;
@@ -876,6 +843,39 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               ...(isLineOrArea && {
                 fittingFunction: 'zero',
               }),
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// [Pie Chart] Migrate vislib pie chart to use the new plugin vis_type_pie
+const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'pie') {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
             },
           }),
         },

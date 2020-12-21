@@ -19,8 +19,8 @@
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable } from '../../../expressions/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import { ClickTriggerEvent } from '../../../charts/public';
 import { ValueClickContext } from '../../../embeddable/public';
-import { ClickTriggerEvent } from './get_legend_actions';
 import { BucketColumns } from '../types';
 
 export const canFilter = async (
