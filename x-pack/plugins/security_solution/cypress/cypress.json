@@ -1,6 +1,7 @@
 {
   "baseUrl": "http://localhost:5601",
   "defaultCommandTimeout": 60000,
+  "nodeVersion": "system",
   "retries": {
     "runMode": 2
   },

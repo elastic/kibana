@@ -51,9 +51,12 @@ export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
+export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
+
 export const NOTES = '[data-test-subj="note-card-body"]';
 
-const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+const NOTE_BY_NOTE_ID = (noteId: string) =>
+  `[data-test-subj="note-preview-${noteId}"] .euiMarkdownFormat`;
 
 export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 

@@ -20,14 +20,14 @@ import { cleanKibana } from '../tasks/common';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       createTimeline(timeline).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
     });
 
-    after(function () {
+    afterEach(function () {
       deleteTimeline(this.myTimeline.savedObjectId);
     });
 

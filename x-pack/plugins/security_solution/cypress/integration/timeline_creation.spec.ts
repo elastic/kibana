@@ -8,6 +8,7 @@ import { timeline } from '../objects/timeline';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
+  UNLOCKED_ICON,
   NOTES_TAB_BUTTON,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
@@ -95,7 +96,7 @@ describe('Timelines', () => {
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
-      cy.get(LOCKED_ICON).should('be.visible');
+      cy.get(UNLOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 
