@@ -27,6 +27,7 @@ export async function fetchLicenseType(
         {
           timestamp: {
             order: 'desc',
+            unmapped_type: 'long',
           },
         },
       ],
