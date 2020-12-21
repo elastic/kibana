@@ -73,7 +73,7 @@ export const getColumns = (
       width: '20%',
       render: (name: UISession['name'], { appId, url, id }) => {
         return (
-          <EuiLink href={url} data-test-subj="session-mgmt-table-col-name" data-test-id={id}>
+          <EuiLink href={url} data-test-subj="session-mgmt-table-col-name">
             <TableText>{name}</TableText>
           </EuiLink>
         );
@@ -103,11 +103,7 @@ export const getColumns = (
         try {
           const startedOn = dateString(created, uiSettings);
           return (
-            <TableText
-              color="subdued"
-              data-test-subj="session-mgmt-table-col-created"
-              data-test-id={id}
-            >
+            <TableText color="subdued" data-test-subj="session-mgmt-table-col-created">
               {startedOn}
             </TableText>
           );
@@ -133,11 +129,7 @@ export const getColumns = (
 
             // return
             return (
-              <TableText
-                color="subdued"
-                data-test-subj="session-mgmt-table-col-expires"
-                data-test-id={id}
-              >
+              <TableText color="subdued" data-test-subj="session-mgmt-table-col-expires">
                 {expiresOn}
               </TableText>
             );
@@ -148,11 +140,7 @@ export const getColumns = (
           }
         }
         return (
-          <TableText
-            color="subdued"
-            data-test-subj="session-mgmt-table-col-expires"
-            data-test-id={id}
-          >
+          <TableText color="subdued" data-test-subj="session-mgmt-table-col-expires">
             --
           </TableText>
         );
@@ -185,7 +173,6 @@ export const getColumns = (
                   id="xpack.data.mgmt.searchSessions.status.expiresSoonTooltip"
                   defaultMessage="{numDays} days"
                   data-test-subj="session-mgmt-table-col-expires"
-                  data-test-id={id}
                   values={{ numDays }}
                 />
               </EuiBadge>

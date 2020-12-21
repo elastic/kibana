@@ -104,7 +104,6 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
               textColor={textColor}
               iconType={iconType}
               data-test-subj={`session-mgmt-popover-action-${actionType}`}
-              data-test-id={session.id}
             >
               {label}
             </PopoverAction>

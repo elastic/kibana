@@ -25,7 +25,6 @@ export const InlineActions = ({ url, session }: InlineActionProps) => {
       <EuiFlexItem
         key="inline-action-view"
         data-test-subj="session-mgmt-view-action"
-        data-test-id={session.id}
         grow={false}
         component="span"
       >
