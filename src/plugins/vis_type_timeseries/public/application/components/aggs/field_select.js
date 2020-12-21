@@ -79,6 +79,10 @@ export function FieldSelect({
     }, {})
   );
 
+  if (value && !selectedOptions.length) {
+    onChange([]);
+  }
+
   return (
     <EuiComboBox
       placeholder={placeholder}
