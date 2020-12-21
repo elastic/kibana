@@ -215,12 +215,14 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
     [setAlertParams]
   );
 
+  const defaultCountAlertParams = useMemo(() => createDefaultCountAlertParams(supportedFields), [
+    supportedFields,
+  ]);
+
   const updateType = useCallback(
     (type: ThresholdType) => {
       const defaults =
-        type === 'count'
-          ? createDefaultCountAlertParams(supportedFields)
-          : createDefaultRatioAlertParams(supportedFields);
+        type === 'count' ? defaultCountAlertParams : createDefaultRatioAlertParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
       for (const [key, value] of Object.entries({
         criteria: defaults.criteria,
@@ -229,11 +231,11 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
         setAlertParams(key, value);
       }
     },
-    [setAlertParams, supportedFields]
+    [defaultCountAlertParams, setAlertParams, supportedFields]
   );
 
   useMount(() => {
-    const defaultAlertParams = createDefaultCountAlertParams(supportedFields);
+    const defaultAlertParams = defaultCountAlertParams;
     for (const [key, value] of Object.entries({ ...defaultAlertParams, ...alertParams })) {
       setAlertParams(key, value);
     }
@@ -247,6 +249,7 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
     <Criteria
       fields={supportedFields}
       criteria={alertParams.criteria}
+      defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
       alertParams={alertParams}
       sourceId={sourceId}

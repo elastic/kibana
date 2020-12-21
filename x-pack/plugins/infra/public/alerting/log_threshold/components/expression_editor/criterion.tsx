@@ -162,7 +162,7 @@ export const Criterion: React.FC<Props> = ({
                     idx === 0 ? firstCriterionFieldPrefix : successiveCriterionFieldPrefix
                   }
                   uppercase={true}
-                  value={criterion.field}
+                  value={criterion.field ?? 'a chosen field'}
                   isActive={isFieldPopoverOpen}
                   color={errors.field.length === 0 ? 'secondary' : 'danger'}
                   onClick={(e) => {
