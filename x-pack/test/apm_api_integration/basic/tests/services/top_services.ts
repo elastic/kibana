@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.0219138056975895,
+                  "value": 45.6333333333333,
                 },
               },
               Object {
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": null,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 5,
+                  "value": 0.2,
                 },
               },
               Object {
@@ -127,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.0229885057471264,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.344827586206897,
+                  "value": 2.9,
                 },
               },
               Object {
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.015625,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.234375,
+                  "value": 4.26666666666667,
                 },
               },
               Object {
@@ -149,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.16,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.4,
+                  "value": 2.5,
                 },
               },
               Object {
@@ -160,7 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.0210526315789474,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.315789473684211,
+                  "value": 3.16666666666667,
                 },
               },
               Object {
@@ -171,7 +171,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.0357142857142857,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.535714285714286,
+                  "value": 1.86666666666667,
                 },
               },
               Object {
@@ -182,7 +182,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": 0.0373134328358209,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 0.223880597014925,
+                  "value": 4.46666666666667,
                 },
               },
               Object {
@@ -193,7 +193,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   "value": null,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 1.875,
+                  "value": 0.533333333333333,
                 },
               },
             ]

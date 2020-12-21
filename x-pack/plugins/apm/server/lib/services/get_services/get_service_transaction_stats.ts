@@ -175,7 +175,7 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionsPerMinute: {
-          value: deltaAsMinutes / topTransactionTypeBucket.count.value,
+          value: topTransactionTypeBucket.count.value / deltaAsMinutes,
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
