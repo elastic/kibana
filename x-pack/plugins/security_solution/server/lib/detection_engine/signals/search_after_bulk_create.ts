@@ -58,10 +58,6 @@ export const searchAfterAndBulkCreate = async ({
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
 
-  // const timestamps = ruleParams.timestampOverride
-  //   ? [ruleParams.timestampOverride, '@timestamp']
-  //   : ['@timestamp'];
-
   const totalToFromTuples = getSignalTimeTuples({
     logger,
     ruleParamsFrom: ruleParams.from,
