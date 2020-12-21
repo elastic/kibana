@@ -60,7 +60,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
         size="s"
         fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-        onClick={onOpen}
+        onClick={isOpen ? onClose : onOpen}
         minWidth="auto"
       >
         <EuiIcon type="boxesHorizontal" />
