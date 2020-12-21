@@ -36,6 +36,7 @@ import { getLabelPositions, getValuesFormats } from '../collections';
 
 interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
   palettes: PaletteRegistry | undefined;
+  showElasticChartsOptions: boolean;
 }
 
 const PieOptions = (props: PieOptionsProps) => {
@@ -66,15 +67,17 @@ const PieOptions = (props: PieOptionsProps) => {
           setValue={setValue}
         />
         <BasicOptions {...props} />
-        <SwitchOption
-          label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
-            defaultMessage: 'Nested legend',
-          })}
-          paramName="nestedLegend"
-          value={stateParams.nestedLegend}
-          setValue={setValue}
-        />
-        {props.palettes && (
+        {props.showElasticChartsOptions && (
+          <SwitchOption
+            label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
+              defaultMessage: 'Nested legend',
+            })}
+            paramName="nestedLegend"
+            value={stateParams.nestedLegend}
+            setValue={setValue}
+          />
+        )}
+        {props.showElasticChartsOptions && props.palettes && (
           <PalettePicker
             palettes={props.palettes}
             activePalette={stateParams.palette}
@@ -104,16 +107,28 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.labels.show}
           setValue={setLabels}
         />
-        <SelectOption
-          label={i18n.translate('visTypePie.editors.pie.labelPositionLabel', {
-            defaultMessage: 'Label position',
-          })}
-          disabled={!stateParams.labels.show}
-          options={getLabelPositions()}
-          paramName="position"
-          value={stateParams.labels.position || LabelPositions.DEFAULT}
-          setValue={setLabels}
-        />
+        {props.showElasticChartsOptions && (
+          <SelectOption
+            label={i18n.translate('visTypePie.editors.pie.labelPositionLabel', {
+              defaultMessage: 'Label position',
+            })}
+            disabled={!stateParams.labels.show}
+            options={getLabelPositions()}
+            paramName="position"
+            value={stateParams.labels.position || LabelPositions.DEFAULT}
+            setValue={setLabels}
+          />
+        )}
+        {!props.showElasticChartsOptions && (
+          <SwitchOption
+            label={i18n.translate('visTypePie.editors.pie.showTopLevelOnlyLabel', {
+              defaultMessage: 'Show top level only',
+            })}
+            paramName="last_level"
+            value={stateParams.labels.last_level}
+            setValue={setLabels}
+          />
+        )}
         <SwitchOption
           label={i18n.translate('visTypePie.editors.pie.showValuesLabel', {
             defaultMessage: 'Show values',
@@ -122,16 +137,18 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.labels.values}
           setValue={setLabels}
         />
-        <SelectOption
-          label={i18n.translate('visTypePie.editors.pie.valueFormatsLabel', {
-            defaultMessage: 'Values',
-          })}
-          disabled={!stateParams.labels.values}
-          options={getValuesFormats()}
-          paramName="valuesFormat"
-          value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
-          setValue={setLabels}
-        />
+        {props.showElasticChartsOptions && (
+          <SelectOption
+            label={i18n.translate('visTypePie.editors.pie.valueFormatsLabel', {
+              defaultMessage: 'Values',
+            })}
+            disabled={!stateParams.labels.values}
+            options={getValuesFormats()}
+            paramName="valuesFormat"
+            value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
+            setValue={setLabels}
+          />
+        )}
         <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />
       </EuiPanel>
     </>

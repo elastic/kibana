@@ -21,6 +21,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { LEGACY_CHARTS_LIBRARY } from '../common';
 import { createPieVisFn } from './pie_fn';
 import { getPieVisRenderer } from './pie_renderer';
 import { pieVisType } from './vis_type';
@@ -49,18 +50,21 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { expressions, visualizations, charts }: VisTypePieSetupDependencies
   ) {
-    const getStartDeps = async () => {
-      const [, deps] = await core.getStartServices();
-      return deps.data;
-    };
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+      const getStartDeps = async () => {
+        const [, deps] = await core.getStartServices();
+        return deps.data;
+      };
 
-    [createPieVisFn].forEach(expressions.registerFunction);
-    charts.palettes.getPalettes().then((palettes) => {
-      expressions.registerRenderer(
-        getPieVisRenderer({ theme: charts.theme, palettes, getStartDeps })
-      );
-      visualizations.createBaseVisualization(pieVisType(true, palettes));
-    });
+      [createPieVisFn].forEach(expressions.registerFunction);
+      charts.palettes.getPalettes().then((palettes) => {
+        expressions.registerRenderer(
+          getPieVisRenderer({ theme: charts.theme, palettes, getStartDeps })
+        );
+        visualizations.createBaseVisualization(pieVisType(true, palettes));
+      });
+    }
+    return {};
   }
 
   start(core: CoreStart, { data }: VisTypePiePluginStartDependencies) {}

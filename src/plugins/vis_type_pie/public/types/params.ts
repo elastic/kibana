@@ -46,6 +46,7 @@ export interface PieVisParams {
   palette: PaletteOutput;
   labels: {
     show: boolean;
+    last_level: boolean;
     position: LabelPositions;
     values: boolean;
     truncate: number | null;

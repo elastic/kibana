@@ -24,6 +24,13 @@ import { PieVisParams } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 
-export const getPieOptions = (palettes: PaletteRegistry | undefined) => (
-  props: VisOptionsProps<PieVisParams>
-) => <PieOptionsLazy {...props} palettes={palettes} />;
+export const getPieOptions = (
+  palettes: PaletteRegistry | undefined,
+  showElasticChartsOptions: boolean
+) => (props: VisOptionsProps<PieVisParams>) => (
+  <PieOptionsLazy
+    {...props}
+    palettes={palettes}
+    showElasticChartsOptions={showElasticChartsOptions}
+  />
+);

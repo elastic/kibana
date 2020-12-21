@@ -58,6 +58,7 @@ export const getPieVisTypeDefinition = (
       },
       labels: {
         show: true,
+        last_level: true,
         values: true,
         valuesFormat: ValueFormats.PERCENT,
         truncate: 100,
@@ -69,7 +70,7 @@ export const getPieVisTypeDefinition = (
     collections: {
       legendPositions: getLegendPositions(),
     },
-    optionsTemplate: getPieOptions(palettes),
+    optionsTemplate: getPieOptions(palettes, showElasticChartsOptions),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
