@@ -22,6 +22,7 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { TileMapVisualizationDependencies } from './plugin';
 import { TileMapVisConfig, TileMapVisData } from './types';
 // @ts-expect-error
@@ -51,6 +52,7 @@ const TileMapVisualization = ({
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<TileMapVisController | null>(null);
   const isFirstRender = useRef(true);
+  const uiState = handlers.uiState as PersistedState;
 
   useEffect(() => {
     if (chartDiv.current && isFirstRender.current) {
@@ -69,12 +71,12 @@ const TileMapVisualization = ({
       visController.current?.render().then(handlers.done);
     };
 
-    handlers.uiState?.on('change', onUiStateChange);
+    uiState.on('change', onUiStateChange);
 
     return () => {
-      handlers.uiState?.off('change', onUiStateChange);
+      uiState.off('change', onUiStateChange);
     };
-  }, [handlers]);
+  }, [uiState, handlers.done]);
 
   useEffect(() => {
     return () => {

@@ -22,6 +22,7 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
 import { IInterpreterRenderHandlers, Datatable } from 'src/plugins/expressions';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { RegionMapVisualizationDependencies } from './plugin';
 import { RegionMapVisConfig } from './region_map_types';
 // @ts-expect-error
@@ -51,6 +52,7 @@ const RegionMapVisualization = ({
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<RegionMapVisController | null>(null);
   const isFirstRender = useRef(true);
+  const uiState = handlers.uiState as PersistedState;
 
   useEffect(() => {
     if (chartDiv.current && isFirstRender.current) {
@@ -69,12 +71,12 @@ const RegionMapVisualization = ({
       visController.current?.render().then(handlers.done);
     };
 
-    handlers.uiState?.on('change', onUiStateChange);
+    uiState.on('change', onUiStateChange);
 
     return () => {
-      handlers.uiState?.off('change', onUiStateChange);
+      uiState.off('change', onUiStateChange);
     };
-  }, [handlers]);
+  }, [uiState, handlers.done]);
 
   useEffect(() => {
     return () => {
