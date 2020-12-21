@@ -135,6 +135,20 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
   /**
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
@@ -208,6 +222,7 @@ export class IndexPatternsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
+      allowNoIndex: options.allowNoIndex,
     });
   };
 
@@ -267,10 +282,21 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
+    const fieldsAsArr = Object.values(fields);
+    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
+      let updatedFieldList: FieldSpec[];
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
-      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
+
+      // If allowNoIndex, only update field list if field caps finds fields. To support
+      // beats creating index pattern and dashboard before docs
+      if (!options.allowNoIndex || (newFields && newFields.length > 5)) {
+        updatedFieldList = [...newFields, ...scriptedFields];
+      } else {
+        updatedFieldList = fieldsAsArr;
+      }
+
+      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -320,6 +346,7 @@ export class IndexPatternsService {
         typeMeta,
         type,
         fieldAttrs,
+        allowNoIndex,
       },
     } = savedObject;
 
@@ -341,6 +368,7 @@ export class IndexPatternsService {
       type,
       fieldFormats: parsedFieldFormatMap,
       fieldAttrs: parsedFieldAttrs,
+      allowNoIndex,
     };
   };
 
@@ -370,6 +398,7 @@ export class IndexPatternsService {
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,
           rollupIndex: typeMeta?.params?.rollup_index,
+          allowNoIndex: spec.allowNoIndex,
         },
         spec.fieldAttrs
       );
@@ -442,14 +471,14 @@ export class IndexPatternsService {
   /**
    * Create a new index pattern and save it right away
    * @param spec
-   * @param override Overwrite if existing index pattern exists
-   * @param skipFetchFields
+   * @param override Overwrite if existing index pattern exists.
+   * @param skipFetchFields Whether to skip field refresh step.
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id as string);
+    await this.setDefault(indexPattern.id!);
     return indexPattern;
   }
 

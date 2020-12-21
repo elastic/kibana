@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
   const log = getService('log');
+  const deployment = getService('deployment');
 
   describe('TODO app', () => {
     describe("TODO app with browser history (platform's ScopedHistory)", async () => {
@@ -36,7 +37,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       let base: string;
 
       before(async () => {
-        base = await PageObjects.common.getHostPort();
+        base = await deployment.getHostPort();
         await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
       });
 

@@ -24,7 +24,7 @@ import {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
   PLUGIN_ID,
@@ -44,14 +44,20 @@ import {
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
-  registerAgentRoutes,
+  registerAgentAPIRoutes,
+  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { EsAssetReference, FleetConfigType, NewPackagePolicy } from '../common';
+import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
 import {
   appContextService,
   licenseService,
@@ -71,8 +77,9 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
-import { registerIngestManagerUsageCollector } from './collectors/register';
+import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
+import { makeRouterEnforcingSuperuser } from './routes/security';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -83,12 +90,15 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export type FleetStartDeps = object;
+export interface FleetStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
+}
 
 export interface FleetAppContext {
   encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  security?: SecurityPluginSetup;
+  security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
@@ -114,14 +124,23 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Fleet plugin
  */
-export type ExternalCallback = [
-  'packagePolicyCreate',
-  (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
-];
+export type ExternalCallback =
+  | [
+      'packagePolicyCreate',
+      (
+        newPackagePolicy: NewPackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'packagePolicyUpdate',
+      (
+        newPackagePolicy: UpdatePackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<UpdatePackagePolicy>
+    ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
@@ -148,7 +167,6 @@ export class FleetPlugin
   implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
-  private security: SecurityPluginSetup | undefined;
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
@@ -169,9 +187,6 @@ export class FleetPlugin
   public async setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
-    if (deps.security) {
-      this.security = deps.security;
-    }
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
@@ -213,23 +228,25 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
+
     const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
-    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+    registerFleetUsageCollector(core, config, deps.usageCollection);
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
-
+    // For all the routes we enforce the user to have role superuser
+    const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
-    if (this.security) {
-      registerSetupRoutes(router, config);
-      registerAgentPolicyRoutes(router);
-      registerPackagePolicyRoutes(router);
-      registerOutputRoutes(router);
-      registerSettingsRoutes(router);
-      registerDataStreamRoutes(router);
-      registerEPMRoutes(router);
+    if (deps.security) {
+      registerSetupRoutes(routerSuperuserOnly, config);
+      registerAgentPolicyRoutes(routerSuperuserOnly);
+      registerPackagePolicyRoutes(routerSuperuserOnly);
+      registerOutputRoutes(routerSuperuserOnly);
+      registerSettingsRoutes(routerSuperuserOnly);
+      registerDataStreamRoutes(routerSuperuserOnly);
+      registerEPMRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -245,27 +262,24 @@ export class FleetPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router, config);
-          registerEnrollmentApiKeyRoutes(router);
+          registerAgentAPIRoutes(routerSuperuserOnly, config);
+          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
-            router,
+            router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
+          // Do not enforce superuser role for Elastic Agent routes
+          registerElasticAgentRoutes(router, config);
         }
       }
     }
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: {
-      encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-    }
-  ): Promise<FleetStartContract> {
+  public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      security: this.security,
+      security: plugins.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
@@ -302,8 +316,8 @@ export class FleetPlugin
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
-      registerExternalCallback: (...args: ExternalCallback) => {
-        return appContextService.addExternalCallback(...args);
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
+        return appContextService.addExternalCallback(type, callback);
       },
     };
   }

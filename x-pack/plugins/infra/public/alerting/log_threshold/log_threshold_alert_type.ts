@@ -12,9 +12,6 @@ import { validateExpression } from './validation';
 export function getAlertType(): AlertTypeModel {
   return {
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.logs.alertFlyout.alertName', {
-      defaultMessage: 'Log threshold',
-    }),
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the log aggregation exceeds the threshold.',
     }),

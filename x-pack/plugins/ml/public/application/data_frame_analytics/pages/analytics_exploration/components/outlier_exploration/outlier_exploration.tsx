@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useCallback } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -20,11 +20,17 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
-import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expandable_section';
+import {
+  ExpandableSectionSplom,
+  ExpandableSectionAnalytics,
+  ExpandableSectionResults,
+} from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
 export type TableItem = Record<string, any>;
 
@@ -39,8 +45,26 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     jobConfig,
     needsDestIndexPattern,
   } = useResultsViewConfig(jobId);
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
+
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
+  );
+
+  const query: ExplorationQueryBarProps['query'] = {
+    query: pageUrlState.queryText,
+    language: pageUrlState.queryLanguage,
+  };
 
   const { columnsWithCharts, tableItems } = outlierData;
 
@@ -93,11 +117,22 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+            <ExplorationQueryBar
+              indexPattern={indexPattern}
+              setSearchQuery={searchQueryUpdateHandler}
+              query={query}
+            />
             <EuiSpacer size="m" />
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {typeof jobConfig?.id === 'string' && jobConfig?.analyzed_fields.includes.length > 1 && (
+        <ExpandableSectionSplom
+          fields={jobConfig?.analyzed_fields.includes}
+          index={jobConfig?.dest.index}
+          resultsField={jobConfig?.dest.results_field}
+        />
+      )}
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
           <EuiCallOut

@@ -19,11 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '../../../../expressions';
-import { Trigger } from '../../../../ui_actions/public';
+import { Trigger, RowClickContext } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
-export interface EmbeddableContext {
-  embeddable: IEmbeddable;
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
 }
 
 export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
@@ -52,7 +52,8 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
-  | RangeSelectContext<T>;
+  | RangeSelectContext<T>
+  | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
@@ -87,6 +88,28 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
   }),
 };
 
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+  id: SELECT_RANGE_TRIGGER,
+  title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
+    defaultMessage: 'Range selection',
+  }),
+  description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
+    defaultMessage: 'A range of values on the visualization',
+  }),
+};
+
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+  id: VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.valueClickTrigger.title', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('embeddableApi.valueClickTrigger.description', {
+    defaultMessage: 'A data point click on the visualization',
+  }),
+};
+
 export const isValueClickTriggerContext = (
   context: ChartActionContext
 ): context is ValueClickContext => context.data && 'data' in context.data;
@@ -94,6 +117,11 @@ export const isValueClickTriggerContext = (
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext
 ): context is RangeSelectContext => context.data && 'range' in context.data;
+
+export const isRowClickTriggerContext = (context: ChartActionContext): context is RowClickContext =>
+  !!context.data &&
+  typeof context.data === 'object' &&
+  typeof (context as RowClickContext).data.rowIndex === 'number';
 
 export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
   !!context &&

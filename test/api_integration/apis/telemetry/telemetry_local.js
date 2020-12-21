@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
-
+import { basicUiCounters } from './__fixtures__/ui_counters';
 /*
  * Create a single-level array with strings for all the paths to values in the
  * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
@@ -45,11 +45,11 @@ export default function ({ getService }) {
     after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
 
     before('create some telemetry-data tracked indices', async () => {
-      return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
+      await es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
     });
 
-    after('cleanup telemetry-data tracked indices', () => {
-      return es.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
+    after('cleanup telemetry-data tracked indices', async () => {
+      await es.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -62,6 +62,8 @@ export default function ({ getService }) {
       expect(body.length).to.be(1);
       const stats = body[0];
       expect(stats.collection).to.be('local');
+      expect(stats.collectionSource).to.be('local');
+      expect(stats.license).to.be.undefined; // OSS cannot get the license
       expect(stats.stack_stats.kibana.count).to.be.a('number');
       expect(stats.stack_stats.kibana.indices).to.be.a('number');
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
@@ -72,6 +74,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.telemetry.usage_fetcher).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins.stack_management).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.ui_metric).to.be.an('object');
+      expect(stats.stack_stats.kibana.plugins.ui_counters).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.application_usage).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins['tsvb-validation']).to.be.an('object');
@@ -90,6 +93,22 @@ export default function ({ getService }) {
       expect(stats.stack_stats.data[0].doc_count).to.be(0);
       expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
       expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
+    });
+
+    describe('UI Counters telemetry', () => {
+      before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
+      after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
+      it('returns ui counters aggregated by day', async () => {
+        const { body } = await supertest
+          .post('/api/telemetry/v2/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .send({ unencrypted: true })
+          .expect(200);
+
+        expect(body.length).to.be(1);
+        const stats = body[0];
+        expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
+      });
     });
 
     it('should pull local stats and validate fields', async () => {
@@ -146,13 +165,14 @@ export default function ({ getService }) {
     });
 
     describe('application usage limits', () => {
-      function createSavedObject() {
+      function createSavedObject(viewId) {
         return supertest
           .post('/api/saved_objects/application_usage_transactional')
           .send({
             attributes: {
               appId: 'test-app',
-              minutesOnScreen: 10.99,
+              viewId,
+              minutesOnScreen: 10.33,
               numberOfClicks: 10,
               timestamp: new Date().toISOString(),
             },
@@ -162,14 +182,22 @@ export default function ({ getService }) {
       }
 
       describe('basic behaviour', () => {
-        let savedObjectId;
-        before('create 1 entry', async () => {
-          return createSavedObject().then((id) => (savedObjectId = id));
+        let savedObjectIds = [];
+        before('create application usage entries', async () => {
+          savedObjectIds = await Promise.all([
+            createSavedObject(),
+            createSavedObject('appView1'),
+            createSavedObject(),
+          ]);
         });
-        after('cleanup', () => {
-          return supertest
-            .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
-            .expect(200);
+        after('cleanup', async () => {
+          await Promise.all(
+            savedObjectIds.map((savedObjectId) => {
+              return supertest
+                .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
+                .expect(200);
+            })
+          );
         });
 
         it('should return application_usage data', async () => {
@@ -183,14 +211,30 @@ export default function ({ getService }) {
           const stats = body[0];
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
-              clicks_total: 10,
-              clicks_7_days: 10,
-              clicks_30_days: 10,
-              clicks_90_days: 10,
-              minutes_on_screen_total: 10.99,
-              minutes_on_screen_7_days: 10.99,
-              minutes_on_screen_30_days: 10.99,
-              minutes_on_screen_90_days: 10.99,
+              appId: 'test-app',
+              viewId: 'main',
+              clicks_total: 20,
+              clicks_7_days: 20,
+              clicks_30_days: 20,
+              clicks_90_days: 20,
+              minutes_on_screen_total: 20.66,
+              minutes_on_screen_7_days: 20.66,
+              minutes_on_screen_30_days: 20.66,
+              minutes_on_screen_90_days: 20.66,
+              views: [
+                {
+                  appId: 'test-app',
+                  viewId: 'appView1',
+                  clicks_total: 10,
+                  clicks_7_days: 10,
+                  clicks_30_days: 10,
+                  clicks_90_days: 10,
+                  minutes_on_screen_total: 10.33,
+                  minutes_on_screen_7_days: 10.33,
+                  minutes_on_screen_30_days: 10.33,
+                  minutes_on_screen_90_days: 10.33,
+                },
+              ],
             },
           });
         });
@@ -234,6 +278,8 @@ export default function ({ getService }) {
           const stats = body[0];
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
+              appId: 'test-app',
+              viewId: 'main',
               clicks_total: 10000,
               clicks_7_days: 10000,
               clicks_30_days: 10000,
@@ -242,6 +288,7 @@ export default function ({ getService }) {
               minutes_on_screen_7_days: 10000,
               minutes_on_screen_30_days: 10000,
               minutes_on_screen_90_days: 10000,
+              views: [],
             },
           });
         });

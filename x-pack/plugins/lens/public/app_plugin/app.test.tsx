@@ -37,9 +37,13 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
+import {
+  mockAttributeService,
+  createEmbeddableStateTransferMock,
+} from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -181,6 +185,7 @@ describe('Lens App', () => {
       attributeService: makeAttributeService(),
       savedObjectsClient: core.savedObjects.client,
       dashboardFeatureFlag: { allowByValueEmbeddables: false },
+      stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
       getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
       application: {
         ...core.application,
@@ -308,6 +313,9 @@ describe('Lens App', () => {
     const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [];
+    });
+    services.data.query.filterManager.getGlobalFilters = jest.fn().mockImplementation(() => {
       return [pinnedFilter];
     });
     const { component, frame } = mountWith({ services });
@@ -322,6 +330,7 @@ describe('Lens App', () => {
         filters: [pinnedFilter],
       })
     );
+    expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
   it('displays errors from the frame in a toast', () => {
@@ -626,7 +635,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in create by value mode', async () => {
+      it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServices();
         services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
@@ -892,6 +901,71 @@ describe('Lens App', () => {
         component.update();
         expect(component.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
       });
+    });
+  });
+
+  describe('download button', () => {
+    function getButton(inst: ReactWrapper): TopNavMenuData {
+      return (inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config') as TopNavMenuData[]).find(
+        (button) => button.testId === 'lnsApp_downloadCSVButton'
+      )!;
+    }
+
+    it('should be disabled when no data is available', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should disable download when not saveable', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: false,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should still be enabled even if the user is missing save permissions', async () => {
+      const services = makeDefaultServices();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      const { component, frame } = mountWith({ services });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(false);
     });
   });
 

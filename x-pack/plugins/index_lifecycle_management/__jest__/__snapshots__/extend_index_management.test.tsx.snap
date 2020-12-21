@@ -349,7 +349,6 @@ exports[`extend index management ilm summary extension should return extension w
             panelPaddingSize="m"
           >
             <EuiOutsideClickDetector
-              isDisabled={true}
               onOutsideClick={[Function]}
             >
               <div
@@ -369,6 +368,7 @@ exports[`extend index management ilm summary extension should return extension w
                   >
                     <button
                       className="euiButtonEmpty euiButtonEmpty--primary"
+                      disabled={false}
                       onClick={[Function]}
                       type="button"
                     >
@@ -598,7 +598,6 @@ exports[`extend index management ilm summary extension should return extension w
                     panelPaddingSize="m"
                   >
                     <EuiOutsideClickDetector
-                      isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
@@ -618,6 +617,7 @@ exports[`extend index management ilm summary extension should return extension w
                           >
                             <button
                               className="euiLink euiLink--primary"
+                              disabled={false}
                               onClick={[Function]}
                               type="button"
                             >

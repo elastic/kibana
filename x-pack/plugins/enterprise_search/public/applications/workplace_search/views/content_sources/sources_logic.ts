@@ -14,7 +14,7 @@ import { HttpLogic } from '../../../shared/http';
 
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  setQueuedSuccessMessage,
   FlashMessagesLogic,
 } from '../../../shared/flash_messages';
 
@@ -23,9 +23,6 @@ import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } 
 import { staticSourceData } from './source_data';
 
 import { AppLogic } from '../../app_logic';
-
-const ORG_SOURCES_PATH = '/api/workplace_search/org/sources';
-const ACCOUNT_SOURCES_PATH = '/api/workplace_search/account/sources';
 
 interface ServerStatuses {
   [key: string]: string;
@@ -81,6 +78,7 @@ interface ISourcesServerResponse {
 }
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
+  path: ['enterprise_search', 'workplace_search', 'sources_logic'],
   actions: {
     setServerSourceStatuses: (statuses: ContentSourceStatus[]) => statuses,
     onInitializeSources: (serverResponse: ISourcesServerResponse) => serverResponse,
@@ -165,7 +163,9 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   listeners: ({ actions, values }) => ({
     initializeSources: async () => {
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
+      const route = isOrganization
+        ? '/api/workplace_search/org/sources'
+        : '/api/workplace_search/account/sources';
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -225,7 +225,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setSuccessMessage(
+      setQueuedSuccessMessage(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',
@@ -239,7 +239,9 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 });
 
 const fetchSourceStatuses = async (isOrganization: boolean) => {
-  const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
+  const route = isOrganization
+    ? '/api/workplace_search/org/sources/status'
+    : '/api/workplace_search/account/sources/status';
   let response;
 
   try {
@@ -280,8 +282,8 @@ const updateSourcesOnToggle = (
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
  */
-const mergeServerAndStaticData = (
-  serverData: ContentSourceDetails[],
+export const mergeServerAndStaticData = (
+  serverData: Connector[],
   staticData: SourceDataItem[],
   contentSources: ContentSourceDetails[]
 ) => {

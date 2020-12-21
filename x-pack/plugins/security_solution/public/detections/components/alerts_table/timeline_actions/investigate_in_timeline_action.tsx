@@ -23,11 +23,13 @@ import {
 } from '../translations';
 
 interface InvestigateInTimelineActionProps {
+  ariaLabel?: string;
   ecsRowData: Ecs;
   nonEcsRowData: TimelineNonEcsData[];
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
+  ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   ecsRowData,
   nonEcsRowData,
 }) => {
@@ -85,11 +87,10 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
 
   return (
     <ActionIconItem
-      ariaLabel={ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL}
+      ariaLabel={ariaLabel}
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
-      id="sendAlertToTimeline"
       onClick={investigateInTimelineAlertClick}
       isDisabled={false}
     />

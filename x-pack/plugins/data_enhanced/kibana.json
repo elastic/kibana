@@ -6,6 +6,7 @@
     "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
+    "bfetch",
     "data",
     "features"
   ],

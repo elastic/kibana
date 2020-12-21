@@ -24,7 +24,7 @@ import { createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadCSV } from './types';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
 const puid = new Puid();
 const getRandomScrollId = () => {

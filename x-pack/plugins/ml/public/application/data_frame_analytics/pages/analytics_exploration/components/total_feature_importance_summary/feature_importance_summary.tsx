@@ -237,11 +237,11 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         }
       }
     }
-    return undefined;
   }, [totalFeatureImportance, jobConfig]);
   return (
     <>
       <ExpandableSection
+        urlStateKey={'feature_importance'}
         isExpanded={noDataCallOut === undefined}
         dataTestId="FeatureImportanceSummary"
         title={

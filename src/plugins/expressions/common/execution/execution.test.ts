@@ -195,6 +195,18 @@ describe('Execution', () => {
       expect(typeof result).toBe('object');
     });
 
+    test('context.getKibanaRequest is a function if provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+        kibanaRequest: {},
+      })) as any;
+      expect(typeof result).toBe('function');
+    });
+
+    test('context.getKibanaRequest is undefined if not provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      expect(typeof result).toBe('undefined');
+    });
+
     test('unknown context key is undefined', async () => {
       const { result } = (await run('introspectContext key="foo"')) as any;
       expect(typeof result).toBe('undefined');
@@ -208,10 +220,10 @@ describe('Execution', () => {
   });
 
   describe('inspector adapters', () => {
-    test('by default, "data" and "requests" inspector adapters are available', async () => {
+    test('by default, "tables" and "requests" inspector adapters are available', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
       expect(result).toMatchObject({
-        data: expect.any(Object),
+        tables: expect.any(Object),
         requests: expect.any(Object),
       });
     });

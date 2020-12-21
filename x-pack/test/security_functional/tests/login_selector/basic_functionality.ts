@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const security = getService('security');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
   describe('Basic functionality', function () {
@@ -33,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await browser.get(`${PageObjects.common.getHostPort()}/login`);
+      await browser.get(`${deployment.getHostPort()}/login`);
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
     });
 

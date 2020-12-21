@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';
@@ -26,6 +27,8 @@ import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
+import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 /**
  * Given a path, redirect to that location, preserving the search and maintaining
@@ -142,6 +145,17 @@ function SettingsCustomizeUI(props: RouteComponentProps<{}>) {
   );
 }
 
+function DefaultServicePageRouteHandler(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  const { uiSettings } = useApmPluginContext().core;
+  const { serviceName } = props.match.params;
+  if (uiSettings.get(enableServiceOverview)) {
+    return renderAsRedirectTo(`/services/${serviceName}/overview`)(props);
+  }
+  return renderAsRedirectTo(`/services/${serviceName}/transactions`)(props);
+}
+
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
@@ -216,10 +230,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
-    render: (props: RouteComponentProps<{ serviceName: string }>) =>
-      renderAsRedirectTo(
-        `/services/${props.match.params.serviceName}/transactions`
-      )(props),
+    component: DefaultServicePageRouteHandler,
   } as APMRouteDefinition<{ serviceName: string }>,
   {
     exact: true,
@@ -227,19 +238,19 @@ export const routes: APMRouteDefinition[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.overviewTitle', {
       defaultMessage: 'Overview',
     }),
-    component: ServiceDetailsOverview,
+    component: withApmServiceContext(ServiceDetailsOverview),
   } as APMRouteDefinition<{ serviceName: string }>,
   // errors
   {
     exact: true,
     path: '/services/:serviceName/errors/:groupId',
-    component: ErrorGroupDetails,
+    component: withApmServiceContext(ErrorGroupDetails),
     breadcrumb: ({ match }) => match.params.groupId,
   } as APMRouteDefinition<{ groupId: string; serviceName: string }>,
   {
     exact: true,
     path: '/services/:serviceName/errors',
-    component: ServiceDetailsErrors,
+    component: withApmServiceContext(ServiceDetailsErrors),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors',
     }),
@@ -248,7 +259,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/transactions',
-    component: ServiceDetailsTransactions,
+    component: withApmServiceContext(ServiceDetailsTransactions),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions',
     }),
@@ -257,7 +268,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/metrics',
-    component: ServiceDetailsMetrics,
+    component: withApmServiceContext(ServiceDetailsMetrics),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
       defaultMessage: 'Metrics',
     }),
@@ -266,7 +277,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/nodes',
-    component: ServiceDetailsNodes,
+    component: withApmServiceContext(ServiceDetailsNodes),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
       defaultMessage: 'JVMs',
     }),
@@ -275,7 +286,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
-    component: ServiceNodeMetrics,
+    component: withApmServiceContext(ServiceNodeMetrics),
     breadcrumb: ({ match }) => {
       const { serviceNodeName } = match.params;
 
@@ -289,11 +300,19 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/transactions/view',
-    component: TransactionDetails,
+    component: withApmServiceContext(TransactionDetails),
     breadcrumb: ({ location }) => {
       const query = toQuery(location.search);
       return query.transactionName as string;
     },
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/service-map',
+    component: withApmServiceContext(ServiceDetailsServiceMap),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+      defaultMessage: 'Service Map',
+    }),
   },
   {
     exact: true,
@@ -305,14 +324,6 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/service-map',
     component: HomeServiceMap,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-      defaultMessage: 'Service Map',
-    }),
-  },
-  {
-    exact: true,
-    path: '/services/:serviceName/service-map',
-    component: ServiceDetailsServiceMap,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
       defaultMessage: 'Service Map',
     }),
@@ -337,3 +348,13 @@ export const routes: APMRouteDefinition[] = [
     ),
   },
 ];
+
+function withApmServiceContext(WrappedComponent: React.ComponentType<any>) {
+  return (props: any) => {
+    return (
+      <ApmServiceContextProvider>
+        <WrappedComponent {...props} />
+      </ApmServiceContextProvider>
+    );
+  };
+}

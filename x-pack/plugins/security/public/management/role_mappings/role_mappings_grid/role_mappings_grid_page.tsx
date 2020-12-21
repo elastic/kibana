@@ -413,7 +413,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                                 'xpack.security.management.roleMappings.actionDeleteAriaLabel',
                                 {
                                   defaultMessage: `Delete '{name}'`,
-                                  values: { name },
+                                  values: { name: record.name },
                                 }
                               )}
                               iconType="trash"

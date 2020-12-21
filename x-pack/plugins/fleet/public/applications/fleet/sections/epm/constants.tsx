@@ -27,10 +27,10 @@ export const AssetTitleMap: Record<AssetType, string> = {
   visualization: 'Visualization',
   input: 'Agent input',
   map: 'Map',
+  data_stream_ilm_policy: 'Data Stream ILM Policy',
 };
 
-export const ServiceTitleMap: Record<ServiceName, string> = {
-  elasticsearch: 'Elasticsearch',
+export const ServiceTitleMap: Record<Extract<ServiceName, 'kibana'>, string> = {
   kibana: 'Kibana',
 };
 

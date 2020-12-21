@@ -85,9 +85,9 @@ describe('test agent checkin new action services', () => {
     it('should not fetch actions concurrently', async () => {
       const observable = createNewActionsSharedObservable();
 
-      const resolves: Array<() => void> = [];
+      const resolves: Array<(value?: any) => void> = [];
       getMockedNewActionSince().mockImplementation(() => {
-        return new Promise((resolve) => {
+        return new Promise<any>((resolve) => {
           resolves.push(resolve);
         });
       });

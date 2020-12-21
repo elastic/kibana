@@ -145,11 +145,13 @@
 
     "JobSavedObjects",
     "SavedObjectsStatus",
-    "RepairJobSavedObjects",
+    "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
+    "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
+    "CanDeleteJob",
 
     "TrainedModels",
     "GetTrainedModel",

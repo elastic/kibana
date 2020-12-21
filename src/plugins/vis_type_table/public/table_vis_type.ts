@@ -29,11 +29,11 @@ import { TableVisParams } from './types';
 export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   name: 'table',
   title: i18n.translate('visTypeTable.tableVisTitle', {
-    defaultMessage: 'Data Table',
+    defaultMessage: 'Data table',
   }),
   icon: 'visTable',
   description: i18n.translate('visTypeTable.tableVisDescription', {
-    defaultMessage: 'Display values in a table',
+    defaultMessage: 'Display data in rows and columns.',
   }),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
@@ -43,11 +43,8 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
       perPage: 10,
       showPartialRows: false,
       showMetricsAtAllLevels: false,
-      sort: {
-        columnIndex: null,
-        direction: null,
-      },
       showTotal: false,
+      showToolbar: false,
       totalFunc: 'sum',
       percentageCol: '',
     },
@@ -91,7 +88,5 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
     ]),
   },
   toExpressionAst,
-  hierarchicalData: (vis) => {
-    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-  },
+  hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
 };

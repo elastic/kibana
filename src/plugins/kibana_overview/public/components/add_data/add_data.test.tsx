@@ -55,6 +55,10 @@ const mockFeatures = [
   },
 ];
 
+jest.mock('../../lib/ui_metric', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 describe('AddData', () => {

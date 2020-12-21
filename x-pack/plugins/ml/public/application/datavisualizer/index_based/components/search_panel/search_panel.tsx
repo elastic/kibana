@@ -6,22 +6,17 @@
 
 import React, { FC, useState } from 'react';
 
-import {
-  EuiCode,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIconTip,
-  EuiInputPopover,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../../common/constants/search';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  ErrorMessage,
+  SearchQueryLanguage,
+} from '../../../../../../common/constants/search';
 
 import {
   esKuery,
@@ -29,54 +24,50 @@ import {
   Query,
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
+import { ShardSizeFilter } from './shard_size_select';
+import { DataVisualizerFieldNamesFilter } from './field_name_filter';
+import { DatavisualizerFieldTypeFilter } from './field_type_filter';
+import { MlJobFieldType } from '../../../../../../common/types/field_types';
 
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
-  setSearchString(s: Query['query']): void;
   searchQuery: Query['query'];
-  setSearchQuery(q: Query['query']): void;
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
-  setSearchQueryLanguage(q: any): void;
+  searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
-  totalCount: number;
+  overallStats: any;
+  indexedFieldTypes: MlJobFieldType[];
+  setVisibleFieldTypes(q: string[]): void;
+  visibleFieldTypes: string[];
+  setVisibleFieldNames(q: string[]): void;
+  visibleFieldNames: string[];
+  setSearchParams({
+    searchQuery,
+    searchString,
+    queryLanguage,
+  }: {
+    searchQuery: Query['query'];
+    searchString: Query['query'];
+    queryLanguage: SearchQueryLanguage;
+  }): void;
+  showEmptyFields: boolean;
 }
-
-const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
-  return {
-    value: String(v),
-    inputDisplay:
-      v > 0 ? (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.sampleSizeOptionLabel"
-            defaultMessage="Sample size (per shard): {wrappedValue}"
-            values={{ wrappedValue: <b>{v}</b> }}
-          />
-        </span>
-      ) : (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.allOptionLabel"
-            defaultMessage="Search all"
-          />
-        </span>
-      ),
-  };
-});
 
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
-  setSearchString,
-  searchQuery,
-  setSearchQuery,
   searchQueryLanguage,
-  setSearchQueryLanguage,
   samplerShardSize,
   setSamplerShardSize,
-  totalCount,
+  overallStats,
+  indexedFieldTypes,
+  setVisibleFieldTypes,
+  visibleFieldTypes,
+  setVisibleFieldNames,
+  visibleFieldNames,
+  setSearchParams,
+  showEmptyFields,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -98,10 +89,11 @@ export const SearchPanel: FC<Props> = ({
       } else {
         filterQuery = {};
       }
-
-      setSearchQuery(filterQuery);
-      setSearchString(query.query);
-      setSearchQueryLanguage(query.language);
+      setSearchParams({
+        searchQuery: filterQuery,
+        searchString: query.query,
+        queryLanguage: query.language as SearchQueryLanguage,
+      });
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
       setErrorMessage({ query: query.query as string, message: e.message });
@@ -129,7 +121,7 @@ export const SearchPanel: FC<Props> = ({
                 }
               )}
               disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
+              dataTestSubj="mlDataVisualizerQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
             />
           }
@@ -149,51 +141,23 @@ export const SearchPanel: FC<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 270 }}>
-            <EuiSuperSelect
-              options={searchSizeOptions}
-              valueOfSelected={String(samplerShardSize)}
-              onChange={(value) => setSamplerShardSize(+value)}
-              aria-label={i18n.translate(
-                'xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel',
-                {
-                  defaultMessage: 'Select number of documents to sample',
-                }
-              )}
-              data-test-subj="mlDataVisualizerShardSizeSelect"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={i18n.translate('xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder', {
-                defaultMessage:
-                  'Selecting a smaller sample size will reduce query run times and the load on the cluster.',
-              })}
-              position="right"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ShardSizeFilter
+          samplerShardSize={samplerShardSize}
+          setSamplerShardSize={setSamplerShardSize}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
-            defaultMessage="Total documents: {strongTotalCount}"
-            values={{
-              strongTotalCount: (
-                <strong data-test-subj="mlDataVisualizerTotalDocCount">
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.searchPanel.totalDocCountNumber"
-                    defaultMessage="{totalCount, plural, one {#} other {#}}"
-                    values={{ totalCount }}
-                  />
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
+      <DataVisualizerFieldNamesFilter
+        overallStats={overallStats}
+        setVisibleFieldNames={setVisibleFieldNames}
+        visibleFieldNames={visibleFieldNames}
+        showEmptyFields={showEmptyFields}
+      />
+      <DatavisualizerFieldTypeFilter
+        indexedFieldTypes={indexedFieldTypes}
+        setVisibleFieldTypes={setVisibleFieldTypes}
+        visibleFieldTypes={visibleFieldTypes}
+      />
+
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>
   );

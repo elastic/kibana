@@ -17,6 +17,7 @@ import {
   timestamp_override,
   threshold,
   type,
+  threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   listArray,
@@ -70,6 +71,14 @@ const MetaRule = t.intersection([
   }),
 ]);
 
+const StatusTypes = t.union([
+  t.literal('succeeded'),
+  t.literal('failed'),
+  t.literal('going to run'),
+  t.literal('partial failure'),
+]);
+
+// TODO: make a ticket
 export const RuleSchema = t.intersection([
   t.type({
     author,
@@ -93,7 +102,7 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     type,
     to: t.string,
-    threat: t.array(t.unknown),
+    threat: threats,
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
@@ -108,13 +117,15 @@ export const RuleSchema = t.intersection([
     license,
     last_failure_at: t.string,
     last_failure_message: t.string,
+    last_success_message: t.string,
+    last_success_at: t.string,
     meta: MetaRule,
     machine_learning_job_id: t.string,
     output_index: t.string,
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: t.string,
+    status: StatusTypes,
     status_date: t.string,
     threshold,
     threat_query,

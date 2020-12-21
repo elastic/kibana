@@ -19,12 +19,18 @@
 
 import { IContainer } from '../../containers';
 import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
-import { Filter } from '../../../../../data/public';
+
+/** @internal */
+export interface MockFilter {
+  $state?: any;
+  meta: any;
+  query?: any;
+}
 
 export const FILTERABLE_EMBEDDABLE = 'FILTERABLE_EMBEDDABLE';
 
 export interface FilterableEmbeddableInput extends EmbeddableInput {
-  filters: Filter[];
+  filters: MockFilter[];
 }
 
 export class FilterableEmbeddable extends Embeddable<FilterableEmbeddableInput, EmbeddableOutput> {

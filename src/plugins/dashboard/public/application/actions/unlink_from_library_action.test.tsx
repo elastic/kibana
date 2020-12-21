@@ -16,25 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
-import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
-import { UnlinkFromLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
 import {
   ViewMode,
-  SavedObjectEmbeddableInput,
+  IContainer,
   ErrorEmbeddable,
-} from '../../../../embeddable/public';
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  SavedObjectEmbeddableInput,
+} from '../../services/embeddable';
+import { UnlinkFromLibraryAction } from '.';
+import { DashboardContainer } from '../embeddable';
+import { getSampleDashboardInput } from '../test_helpers';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -59,6 +63,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -135,11 +141,16 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
 test('Unlink replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
 });
 
@@ -159,10 +170,15 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
     mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
   });
+  const dashboard = embeddable.getRoot() as IContainer;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
   expect(newPanel.explicitInput.attributes).toEqual(complicatedAttributes);
 });

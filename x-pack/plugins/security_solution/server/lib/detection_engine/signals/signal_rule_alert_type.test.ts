@@ -49,7 +49,10 @@ jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
 jest.mock('../../../../common/detection_engine/parse_schedule_dates');
 
-const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
+const getPayload = (
+  ruleAlert: RuleAlertType,
+  services: AlertServicesMock
+): RuleExecutorOptions => ({
   alertId: ruleAlert.id,
   services,
   params: {
@@ -518,6 +521,7 @@ describe('rules_notification_alert_type', () => {
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: ['Error that bubbled up.'],
       };
       (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);

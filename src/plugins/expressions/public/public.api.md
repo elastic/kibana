@@ -9,9 +9,9 @@ import { CoreStart } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
+import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
@@ -136,6 +136,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
+    getKibanaRequest?: () => KibanaRequest;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
@@ -530,7 +531,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError }?: Partial<ExpressionRenderHandlerParams>);
+    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -542,7 +543,7 @@ export class ExpressionRenderHandler {
     // (undocumented)
     render$: Observable<number>;
     // (undocumented)
-    render: (data: any, uiState?: any) => Promise<void>;
+    render: (value: any, uiState?: any) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UpdateValue" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -886,11 +887,17 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
+    hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+    // (undocumented)
     inspectorAdapters?: Adapters;
     // Warning: (ae-forgotten-export) The symbol "RenderErrorHandlerFnType" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
+    // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    renderMode?: RenderMode;
     // (undocumented)
     searchContext?: SerializableState_2;
     // (undocumented)
@@ -909,11 +916,14 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     event: (event: any) => void;
     // (undocumented)
+    getRenderMode: () => RenderMode;
+    // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -1083,6 +1093,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 //
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
+
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
 
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

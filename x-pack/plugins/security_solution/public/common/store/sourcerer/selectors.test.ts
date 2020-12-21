@@ -61,9 +61,9 @@ describe('Sourcerer selectors', () => {
         'auditbeat-*',
         'endgame-*',
         'filebeat-*',
+        'logs-endpoint.event-*',
         'packetbeat-*',
         'winlogbeat-*',
-        'logs-endpoint.event-*',
       ]);
     });
   });

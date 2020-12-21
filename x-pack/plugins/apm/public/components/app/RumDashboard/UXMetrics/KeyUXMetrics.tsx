@@ -20,7 +20,7 @@ import {
   TBT_LABEL,
   TBT_TOOLTIP,
 } from './translations';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { UXMetrics } from '../../../../../../observability/public';
 

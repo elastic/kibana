@@ -9,12 +9,15 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
+import { licensingMock } from '../../../../licensing/public/mocks';
+
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 
 import { Phases as PolicyPhases } from '../../../common/types';
 
 import { KibanaContextProvider } from '../../../public/shared_imports';
+import { AppServicesContext } from '../../../public/types';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
 type Phases = keyof PolicyPhases;
@@ -53,10 +56,16 @@ const testBedConfig: TestBedConfig = {
 
 const breadcrumbService = createBreadcrumbsMock();
 
-const MyComponent = (props: any) => {
+const MyComponent = ({ appServicesContext, ...rest }: any) => {
   return (
-    <KibanaContextProvider services={{ breadcrumbService }}>
-      <EditPolicy {...props} />
+    <KibanaContextProvider
+      services={{
+        breadcrumbService,
+        license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        ...appServicesContext,
+      }}
+    >
+      <EditPolicy {...rest} />
     </KibanaContextProvider>
   );
 };
@@ -67,10 +76,10 @@ type SetupReturn = ReturnType<typeof setup>;
 
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setup = async () => {
-  const testBed = await initTestBed();
+export const setup = async (arg?: { appServicesContext: Partial<AppServicesContext> }) => {
+  const testBed = await initTestBed(arg);
 
-  const { find, component, form } = testBed;
+  const { find, component, form, exists } = testBed;
 
   const createFormToggleAction = (dataTestSubject: string) => async (checked: boolean) => {
     await act(async () => {
@@ -102,6 +111,8 @@ export const setup = async () => {
     component.update();
   };
 
+  const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
+
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
   const setMaxSize = async (value: string, units?: string) => {
@@ -128,12 +139,15 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleForceMerge = (phase: Phases) => createFormToggleAction(`${phase}-forceMergeSwitch`);
-
-  const setForcemergeSegmentsCount = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
-
-  const setBestCompression = (phase: Phases) => createFormToggleAction(`${phase}-bestCompression`);
+  const createForceMergeActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-forceMergeSwitch`;
+    return {
+      forceMergeFieldExists: () => exists(toggleSelector),
+      toggleForceMerge: createFormToggleAction(toggleSelector),
+      setForcemergeSegmentsCount: createFormSetValueAction(`${phase}-selectedForceMergeSegments`),
+      setBestCompression: createFormToggleAction(`${phase}-bestCompression`),
+    };
+  };
 
   const setIndexPriority = (phase: Phases) =>
     createFormSetValueAction(`${phase}-phaseIndexPriority`);
@@ -175,12 +189,47 @@ export const setup = async () => {
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
-  const setShrink = async (value: string) => {
-    await createFormToggleAction('shrinkSwitch')(true);
-    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
+  const setShrink = (phase: Phases) => async (value: string) => {
+    await createFormToggleAction(`${phase}-shrinkSwitch`)(true);
+    await createFormSetValueAction(`${phase}-selectedPrimaryShardCount`)(value);
   };
 
+  const shrinkExists = (phase: Phases) => () => exists(`${phase}-shrinkSwitch`);
+
   const setFreeze = createFormToggleAction('freezeSwitch');
+  const freezeExists = () => exists('freezeSwitch');
+
+  const setReadonly = (phase: Phases) => async (value: boolean) => {
+    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  };
+
+  const createSearchableSnapshotActions = (phase: Phases) => {
+    const fieldSelector = `searchableSnapshotField-${phase}`;
+    const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
+    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
+    const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
+
+    const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
+    return {
+      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
+      searchableSnapshotDisabled: () =>
+        exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
+      searchableSnapshotsExists: () => exists(fieldSelector),
+      findSearchableSnapshotToggle: () => find(toggleSelector),
+      searchableSnapshotDisabledDueToLicense: () =>
+        exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
+      toggleSearchableSnapshot,
+      setSearchableSnapshot: async (value: string) => {
+        await toggleSearchableSnapshot(true);
+        act(() => {
+          find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
+            { label: value },
+          ]);
+        });
+        component.update();
+      },
+    };
+  };
 
   return {
     ...testBed,
@@ -192,10 +241,13 @@ export const setup = async () => {
         setMaxDocs,
         setMaxAge,
         toggleRollover,
-        toggleForceMerge: toggleForceMerge('hot'),
-        setForcemergeSegments: setForcemergeSegmentsCount('hot'),
-        setBestCompression: setBestCompression('hot'),
+        toggleDefaultRollover,
+        ...createForceMergeActions('hot'),
         setIndexPriority: setIndexPriority('hot'),
+        setShrink: setShrink('hot'),
+        shrinkExists: shrinkExists('hot'),
+        setReadonly: setReadonly('hot'),
+        ...createSearchableSnapshotActions('hot'),
       },
       warm: {
         enable: enable('warm'),
@@ -205,10 +257,10 @@ export const setup = async () => {
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
-        setShrink,
-        toggleForceMerge: toggleForceMerge('warm'),
-        setForcemergeSegments: setForcemergeSegmentsCount('warm'),
-        setBestCompression: setBestCompression('warm'),
+        setShrink: setShrink('warm'),
+        shrinkExists: shrinkExists('warm'),
+        ...createForceMergeActions('warm'),
+        setReadonly: setReadonly('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
@@ -219,7 +271,9 @@ export const setup = async () => {
         setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,
+        freezeExists,
         setIndexPriority: setIndexPriority('cold'),
+        ...createSearchableSnapshotActions('cold'),
       },
       delete: {
         enable: enable('delete'),

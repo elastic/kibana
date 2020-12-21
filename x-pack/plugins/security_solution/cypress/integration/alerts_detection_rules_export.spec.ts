@@ -4,44 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { expectedExportedRule, newRule } from '../objects/rule';
 import {
   goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
-
-// FLAKY: https://github.com/elastic/kibana/issues/69849
 describe.skip('Export rules', () => {
+  let ruleResponse: Cypress.Response;
   before(() => {
-    esArchiverLoad('export_rule');
-    cy.server();
-    cy.route(
+    cleanKibana();
+    removeSignalsIndex();
+    cy.intercept(
       'POST',
-      '**api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson*'
+      '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
-  });
-
-  after(() => {
-    esArchiverUnload('export_rule');
-  });
-
-  it('Exports a custom rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
+    createCustomRule(newRule).then((response) => {
+      ruleResponse = response;
+    });
+  });
+
+  it('Exports a custom rule', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
-    cy.wait('@export').then((xhr) => {
-      cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {
-        cy.wrap(xhr.responseBody).should('eql', $expectedExportedJson);
-      });
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response!.body).should('eql', expectedExportedRule(ruleResponse));
     });
   });
 });

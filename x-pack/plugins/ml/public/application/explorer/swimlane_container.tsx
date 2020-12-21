@@ -184,6 +184,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       return [];
     }
 
+    const sortedLaneValues = swimlaneData.laneLabels;
+
     return swimlaneData.points
       .map((v) => {
         const formatted = { ...v, time: v.time * 1000 };
@@ -195,8 +197,15 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         }
         return formatted;
       })
+      .sort((a, b) => {
+        let aIndex = sortedLaneValues.indexOf(a.laneLabel);
+        let bIndex = sortedLaneValues.indexOf(b.laneLabel);
+        aIndex = aIndex > -1 ? aIndex : sortedLaneValues.length;
+        bIndex = bIndex > -1 ? bIndex : sortedLaneValues.length;
+        return aIndex - bIndex;
+      })
       .filter((v) => v.value > 0);
-  }, [swimlaneData?.points, filterActive, swimlaneType]);
+  }, [swimlaneData?.points, filterActive, swimlaneType, swimlaneData?.laneLabels]);
 
   const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
 
@@ -246,7 +255,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
         onCellsSelection({
           lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000),
+          times: e.x.map((v) => (v as number) / 1000) as [number, number],
           type: swimlaneType,
           viewByFieldName: swimlaneData.fieldName,
         });
@@ -317,7 +326,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + swimlaneData.interval],
+        times: [startTime, startTime + swimlaneData.interval] as [number, number],
         type: swimlaneType,
         viewByFieldName: swimlaneData.fieldName,
       };

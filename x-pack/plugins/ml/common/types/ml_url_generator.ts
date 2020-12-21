@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
-import { JobId } from './anomaly_detection_jobs/job';
+import type {
+  Query,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../src/plugins/data/common/query';
+import type { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
-import { DataFrameAnalysisConfigType } from './data_frame_analytics';
+import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
+import type { SearchQueryLanguage } from '../constants/search';
+import type { ListingPageUrlState } from './common';
 
 type OptionalPageState = object | undefined;
 
@@ -36,11 +42,27 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
+export interface DataVisualizerIndexBasedAppState {
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: string;
+  searchString?: Query['query'];
+  searchQuery?: Query['query'];
+  searchQueryLanguage?: SearchQueryLanguage;
+  visibleFieldTypes?: string[];
+  visibleFieldNames?: string[];
+  samplerShardSize?: number;
+  showDistributions?: boolean;
+  showAllFields?: boolean;
+  showEmptyFields?: boolean;
+}
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
   | typeof ML_PAGES.CALENDARS_NEW
@@ -66,9 +88,9 @@ export type AnomalyDetectionUrlState = MLPageState<
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
-    selectedType?: string;
+    selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: number[];
+    selectedTimes?: [number, number];
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;
@@ -81,6 +103,7 @@ export interface ExplorerAppState {
     queryString?: string;
   };
   query?: any;
+  mlShowCharts?: boolean;
 }
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
@@ -124,21 +147,21 @@ export interface TimeSeriesExplorerGlobalState {
 }
 
 export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
   mlTimeSeriesExplorer?: {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    zoom?: {
+      from?: string;
+      to?: string;
+    };
     functionDescription?: string;
   };
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
@@ -155,6 +178,7 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 >;
 
 export interface DataFrameAnalyticsQueryState {
+  analysisType?: DataFrameAnalysisConfigType;
   jobId?: JobId | JobId[];
   modelId?: string;
   groupIds?: string[];
@@ -162,7 +186,9 @@ export interface DataFrameAnalyticsQueryState {
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
-  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP
+  | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
   DataFrameAnalyticsQueryState | undefined
 >;
 
@@ -181,7 +207,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
-    defaultIsTraining?: boolean;
+    queryText?: string;
     modelId?: string;
   }
 >;
@@ -201,6 +227,19 @@ export type FilterEditUrlState = MLPageState<
     globalState?: MlCommonGlobalState;
   }
 >;
+
+export type ExpandablePanels =
+  | 'analysis'
+  | 'evaluation'
+  | 'feature_importance'
+  | 'results'
+  | 'splom';
+
+export type ExplorationPageUrlState = {
+  queryText: string;
+  queryLanguage: SearchQueryLanguage;
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
+  { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page

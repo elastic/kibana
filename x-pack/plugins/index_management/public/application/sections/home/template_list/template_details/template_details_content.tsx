@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiCallOut,
   EuiFlyoutHeader,
@@ -203,7 +204,7 @@ export const TemplateDetailsContent = ({
             }).map((tab) => (
               <EuiTab
                 onClick={() => {
-                  uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
+                  uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
                   setActiveTab(tab.id);
                 }}
                 isSelected={tab.id === activeTab}

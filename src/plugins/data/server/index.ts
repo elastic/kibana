@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -146,7 +156,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
-  IEsRawSearchResponse,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '../common';
 
 /**
@@ -179,13 +189,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  // search
-  toSnakeCase,
-  shimAbortSignal,
-  doSearch,
-  includeTotalLoaded,
-  toKibanaSearchResponse,
-  getTotalLoaded,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -193,6 +197,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
@@ -232,27 +237,19 @@ export {
   SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
+  getTotalLoaded,
+  toKibanaSearchResponse,
   shimHitsTotal,
   usageProvider,
+  searchUsageObserver,
+  shimAbortSignal,
   SearchUsage,
+  SessionService,
+  ISessionService,
 } from './search';
-
-import { trackSearchStatus } from './search';
 
 // Search namespace
 export const search = {
-  esSearch: {
-    utils: {
-      doSearch,
-      shimAbortSignal,
-      trackSearchStatus,
-      includeTotalLoaded,
-      toKibanaSearchResponse,
-      // utils:
-      getTotalLoaded,
-      toSnakeCase,
-    },
-  },
   aggs: {
     CidrMask,
     dateHistogramInterval,
@@ -272,6 +269,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -321,4 +319,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';

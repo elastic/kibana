@@ -9,7 +9,7 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ErrorMetadata } from '..';
 import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

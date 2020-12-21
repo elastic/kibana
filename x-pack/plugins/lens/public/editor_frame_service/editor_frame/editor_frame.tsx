@@ -126,7 +126,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: layerIds.reduce(
+          updater: layerIds.reduce(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state
@@ -187,7 +187,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: initialVisualizationState,
+          updater: initialVisualizationState,
         });
       }
     },
@@ -244,6 +244,7 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
+      state.activeData,
       props.query,
       props.dateRange,
       props.filters,

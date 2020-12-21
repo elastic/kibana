@@ -312,7 +312,10 @@ export default ({ getService }: FtrProviderContext) => {
         result
           // @ts-expect-error destIndex exists only on MigrationResult status: 'migrated';
           .map(({ status, destIndex }) => ({ status, destIndex }))
-          .sort((a) => (a.destIndex ? 0 : 1))
+          .sort(({ destIndex: a }, { destIndex: b }) =>
+            // sort by destIndex in ascending order, keeping falsy values at the end
+            (a && !b) || a < b ? -1 : (!a && b) || a > b ? 1 : 0
+          )
       ).to.eql([
         { status: 'migrated', destIndex: '.migration-c_2' },
         { status: 'skipped', destIndex: undefined },

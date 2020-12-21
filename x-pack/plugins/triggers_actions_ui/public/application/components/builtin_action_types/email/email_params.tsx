@@ -11,7 +11,6 @@ import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
-import { resolvedActionGroupMessage } from '../../../constants';
 
 export const EmailParamsFields = ({
   actionParams,
@@ -28,17 +27,19 @@ export const EmailParamsFields = ({
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+    [boolean, string | undefined]
+  >([false, defaultMessage]);
   useEffect(() => {
-    if (defaultMessage === resolvedActionGroupMessage) {
-      editAction('message', defaultMessage, index);
-    } else if (
-      (!message || message === resolvedActionGroupMessage) &&
-      defaultMessage &&
-      defaultMessage.length > 0
+    if (
+      !actionParams?.message ||
+      (isUsingDefault &&
+        actionParams?.message === defaultMessageUsed &&
+        defaultMessageUsed !== defaultMessage)
     ) {
+      setDefaultMessageUsage([true, defaultMessage]);
       editAction('message', defaultMessage, index);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
 

@@ -14,14 +14,14 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   asPercent,
-  asDecimal,
   asMillisecondDuration,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
+import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
@@ -35,21 +35,11 @@ interface Props {
 }
 type ServiceListItem = ValuesType<Items>;
 
-function formatNumber(value: number) {
-  if (value === 0) {
-    return '0';
-  } else if (value <= 0.1) {
-    return '< 0.1';
-  } else {
-    return asDecimal(value);
-  }
-}
-
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(TransactionOverviewLink)`
+const AppLink = styled(ServiceOrTransactionsOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -154,14 +144,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
       <ServiceListMetric
         series={transactionsPerMinute?.timeseries}
         color="euiColorVis0"
-        valueLabel={`${formatNumber(
-          transactionsPerMinute?.value || 0
-        )} ${i18n.translate(
-          'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
-          {
-            defaultMessage: 'tpm',
-          }
-        )}`}
+        valueLabel={asTransactionRate(transactionsPerMinute?.value)}
       />
     ),
     align: 'left',

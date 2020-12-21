@@ -20,56 +20,64 @@
 import { metricBuckets } from './metric_buckets';
 
 describe('metricBuckets(req, panel, series)', () => {
-  let panel;
-  let series;
-  let req;
+  let metricBucketsProcessor;
+
   beforeEach(() => {
-    panel = {
-      time_field: 'timestamp',
-    };
-    series = {
-      id: 'test',
-      split_mode: 'terms',
-      terms_size: 10,
-      terms_field: 'host',
-      metrics: [
-        {
-          id: 'metric-1',
-          type: 'max',
-          field: 'io',
-        },
-        {
-          id: 'metric-2',
-          type: 'derivative',
-          field: 'metric-1',
-          unit: '1s',
-        },
-        {
-          id: 'metric-3',
-          type: 'avg_bucket',
-          field: 'metric-2',
-        },
-      ],
-    };
-    req = {
-      payload: {
-        timerange: {
-          min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z',
+    metricBucketsProcessor = metricBuckets(
+      {
+        payload: {
+          timerange: {
+            min: '2017-01-01T00:00:00Z',
+            max: '2017-01-01T01:00:00Z',
+          },
         },
       },
-    };
+      {
+        time_field: 'timestamp',
+      },
+      {
+        id: 'test',
+        split_mode: 'terms',
+        terms_size: 10,
+        terms_field: 'host',
+        metrics: [
+          {
+            id: 'metric-1',
+            type: 'max',
+            field: 'io',
+          },
+          {
+            id: 'metric-2',
+            type: 'derivative',
+            field: 'metric-1',
+            unit: '1s',
+          },
+          {
+            id: 'metric-3',
+            type: 'avg_bucket',
+            field: 'metric-2',
+          },
+        ],
+      },
+      {},
+      {},
+      undefined,
+      {
+        barTargetUiSettings: 50,
+      }
+    );
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    metricBuckets(req, panel, series)(next)({});
+    metricBucketsProcessor(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns metric aggs', () => {
     const next = (doc) => doc;
-    const doc = metricBuckets(req, panel, series)(next)({});
+    const doc = metricBucketsProcessor(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {

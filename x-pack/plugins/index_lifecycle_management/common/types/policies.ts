@@ -48,27 +48,44 @@ export interface SerializedActionWithAllocation {
   migrate?: MigrateAction;
 }
 
+export interface SearchableSnapshotAction {
+  snapshot_repository: string;
+  /**
+   * We do not configure this value in the UI as it is an advanced setting that will
+   * not suit the vast majority of cases.
+   */
+  force_merge_index?: boolean;
+}
+
+export interface RolloverAction {
+  max_size?: string;
+  max_age?: string;
+  max_docs?: number;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
-    rollover?: {
-      max_size?: string;
-      max_age?: string;
-      max_docs?: number;
-    };
+    rollover?: RolloverAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
+    shrink?: ShrinkAction;
+
     set_priority?: {
       priority: number | null;
     };
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
 export interface SerializedWarmPhase extends SerializedPhase {
   actions: {
     allocate?: AllocateAction;
-    shrink?: {
-      number_of_shards: number;
-    };
+    shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };
@@ -84,6 +101,10 @@ export interface SerializedColdPhase extends SerializedPhase {
       priority: number | null;
     };
     migrate?: MigrateAction;
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
@@ -93,7 +114,7 @@ export interface SerializedDeletePhase extends SerializedPhase {
       policy: string;
     };
     delete?: {
-      delete_searchable_snapshot: boolean;
+      delete_searchable_snapshot?: boolean;
     };
   };
 }
@@ -105,6 +126,10 @@ export interface AllocateAction {
   require?: {
     [attribute: string]: string;
   };
+}
+
+export interface ShrinkAction {
+  number_of_shards: number;
 }
 
 export interface ForcemergeAction {

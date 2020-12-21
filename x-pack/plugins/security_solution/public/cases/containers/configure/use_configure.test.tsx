@@ -11,7 +11,7 @@ import {
   ReturnUseCaseConfigure,
   ConnectorConfiguration,
 } from './use_configure';
-import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
+import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
@@ -46,7 +46,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -66,15 +66,16 @@ describe('useConfigure', () => {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
         },
-        version: caseConfigurationCamelCaseResponseMock.version,
+        mappings: [],
         firstLoad: true,
         loading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
+        refetchCaseConfigure: result.current.refetchCaseConfigure,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
+        version: caseConfigurationCamelCaseResponseMock.version,
       });
     });
   });
@@ -100,9 +101,9 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(result.current.mapping).toEqual(null);
-      result.current.setMapping(mapping);
-      expect(result.current.mapping).toEqual(mapping);
+      expect(result.current.mappings).toEqual([]);
+      result.current.setMappings(mappings);
+      expect(result.current.mappings).toEqual(mappings);
     });
   });
 
@@ -205,13 +206,13 @@ describe('useConfigure', () => {
       expect(result.current).toEqual({
         ...initialState,
         loading: false,
+        persistCaseConfigure: result.current.persistCaseConfigure,
         persistLoading: false,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -249,12 +250,13 @@ describe('useConfigure', () => {
         },
         firstLoad: true,
         loading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
+        mappings: [],
         persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
+        refetchCaseConfigure: result.current.refetchCaseConfigure,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
       });
     });
   });

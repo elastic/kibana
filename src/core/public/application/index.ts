@@ -31,6 +31,8 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppMeta,
+  AppSearchDeepLink,
   ApplicationSetup,
   ApplicationStart,
   AppLeaveHandler,
@@ -40,6 +42,8 @@ export {
   AppLeaveConfirmAction,
   NavigateToAppOptions,
   PublicAppInfo,
+  PublicAppMetaInfo,
+  PublicAppSearchDeepLinkInfo,
   // Internal types
   InternalApplicationSetup,
   InternalApplicationStart,

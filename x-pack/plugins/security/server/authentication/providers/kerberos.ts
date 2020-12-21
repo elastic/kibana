@@ -124,7 +124,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -333,7 +333,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param error Error to extract challenges from.
    */
   private getNegotiateChallenge(error: LegacyElasticsearchError) {
-    const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
+    const challenges = ([] as string[]).concat(
+      (error.output.headers as { [key: string]: string })[WWWAuthenticateHeaderName]
+    );
 
     const negotiateChallenge = challenges.find((challenge) =>
       challenge.toLowerCase().startsWith('negotiate')

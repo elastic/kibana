@@ -19,7 +19,7 @@
 
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { defer, of } from '../../../kibana_utils/public';
+import { AbortError, defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
@@ -30,7 +30,7 @@ const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejec
         () => resolve('rejected')
       )
     ),
-    new Promise<'pending'>((resolve) => resolve()).then(() => 'pending'),
+    new Promise<'pending'>((resolve) => resolve('pending')).then(() => 'pending'),
   ]);
 
 const isPending = (promise: Promise<unknown>): Promise<boolean> =>
@@ -166,6 +166,28 @@ describe('createStreamingBatchedFunction()', () => {
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
       fn({ full: 'yep' });
       expect(fetchStreaming).toHaveBeenCalledTimes(1);
+    });
+
+    test('ignores a request with an aborted signal', async () => {
+      const { fetchStreaming } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+      });
+
+      const abortController = new AbortController();
+      abortController.abort();
+
+      of(fn({ foo: 'bar' }, abortController.signal));
+      fn({ baz: 'quix' });
+
+      await new Promise((r) => setTimeout(r, 6));
+      const { body } = fetchStreaming.mock.calls[0][0];
+      expect(JSON.parse(body)).toEqual({
+        batch: [{ baz: 'quix' }],
+      });
     });
 
     test('sends POST request to correct endpoint with items in array batched sorted in call order', async () => {
@@ -423,6 +445,73 @@ describe('createStreamingBatchedFunction()', () => {
       expect(result3).toEqual({ b: '3' });
     });
 
+    describe('when requests are aborted', () => {
+      test('aborts stream when all are aborted', async () => {
+        const { fetchStreaming } = setup();
+        const fn = createStreamingBatchedFunction({
+          url: '/test',
+          fetchStreaming,
+          maxItemAge: 5,
+          flushOnMaxItems: 3,
+        });
+
+        const abortController = new AbortController();
+        const promise = fn({ a: '1' }, abortController.signal);
+        const promise2 = fn({ a: '2' }, abortController.signal);
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(true);
+        expect(await isPending(promise2)).toBe(true);
+
+        abortController.abort();
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(false);
+        expect(await isPending(promise2)).toBe(false);
+        const [, error] = await of(promise);
+        const [, error2] = await of(promise2);
+        expect(error).toBeInstanceOf(AbortError);
+        expect(error2).toBeInstanceOf(AbortError);
+        expect(fetchStreaming.mock.calls[0][0].signal.aborted).toBeTruthy();
+      });
+
+      test('rejects promise on abort and lets others continue', async () => {
+        const { fetchStreaming, stream } = setup();
+        const fn = createStreamingBatchedFunction({
+          url: '/test',
+          fetchStreaming,
+          maxItemAge: 5,
+          flushOnMaxItems: 3,
+        });
+
+        const abortController = new AbortController();
+        const promise = fn({ a: '1' }, abortController.signal);
+        const promise2 = fn({ a: '2' });
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(true);
+
+        abortController.abort();
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(false);
+        const [, error] = await of(promise);
+        expect(error).toBeInstanceOf(AbortError);
+
+        stream.next(
+          JSON.stringify({
+            id: 1,
+            result: { b: '2' },
+          }) + '\n'
+        );
+
+        await new Promise((r) => setTimeout(r, 1));
+
+        const [result2] = await of(promise2);
+        expect(result2).toEqual({ b: '2' });
+      });
+    });
+
     describe('when stream closes prematurely', () => {
       test('rejects pending promises with CONNECTION error code', async () => {
         const { fetchStreaming, stream } = setup();
@@ -556,6 +645,42 @@ describe('createStreamingBatchedFunction()', () => {
         expect(result1).toMatchObject({
           b: '1',
         });
+      });
+    });
+
+    test('rejects with STREAM error on JSON parse error only pending promises', async () => {
+      const { fetchStreaming, stream } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+      });
+
+      const promise1 = of(fn({ a: '1' }));
+      const promise2 = of(fn({ a: '2' }));
+
+      await new Promise((r) => setTimeout(r, 6));
+
+      stream.next(
+        JSON.stringify({
+          id: 1,
+          result: { b: '1' },
+        }) + '\n'
+      );
+
+      stream.next('Not a JSON\n');
+
+      await new Promise((r) => setTimeout(r, 1));
+
+      const [, error1] = await promise1;
+      const [result1] = await promise2;
+      expect(error1).toMatchObject({
+        message: 'Unexpected token N in JSON at position 0',
+        code: 'STREAM',
+      });
+      expect(result1).toMatchObject({
+        b: '1',
       });
     });
   });

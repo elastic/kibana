@@ -10,12 +10,10 @@ import React, { FC } from 'react';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 
 import { FieldVisConfig } from '../../common';
-// @ts-ignore
 import { FieldTitleBar } from '../../../../components/field_title_bar/index';
 import {
   BooleanContent,
   DateContent,
-  DocumentCountContent,
   GeoPointContent,
   IpContent,
   KeywordContent,
@@ -43,7 +41,7 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
         if (fieldName !== undefined) {
           return <NumberContent config={config} />;
         } else {
-          return <DocumentCountContent config={config} />;
+          return null;
         }
 
       case ML_JOB_FIELD_TYPES.BOOLEAN:

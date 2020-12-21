@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -25,6 +26,7 @@ import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  exporters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -32,7 +34,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
-import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
+import { SaveModal } from './save_modal';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
@@ -46,6 +48,7 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
+  redirectToDashboard,
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
@@ -56,6 +59,7 @@ export function App({
     navigation,
     uiSettings,
     application,
+    stateTransfer,
     notifications,
     attributeService,
     savedObjectsClient,
@@ -70,7 +74,11 @@ export function App({
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       dateRange: {
@@ -349,6 +357,7 @@ export function App({
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      dashboardId?: string | null;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
       newTags?: string[];
@@ -423,6 +432,13 @@ export function App({
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
         return;
+      } else if (saveProps.dashboardId && redirectToDashboard) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToDashboard(newInput, saveProps.dashboardId);
+        return;
       }
 
       notifications.toasts.addSuccess(
@@ -448,6 +464,9 @@ export function App({
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+        // remove editor state so the connection is still broken after reload
+        stateTransfer.clearEditorState();
+
         redirectTo(newInput.savedObjectId);
         return;
       }
@@ -474,16 +493,50 @@ export function App({
   const { TopNavMenu } = navigation.ui;
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
+    defaultMessage: 'unsaved',
+  });
   const topNavConfig = getLensTopNavConfig({
     showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    enableExportToCSV: Boolean(
+      state.isSaveable && state.activeData && Object.keys(state.activeData).length
+    ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
+      exportToCSV: () => {
+        if (!state.activeData) {
+          return;
+        }
+        const datatables = Object.values(state.activeData);
+        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+          (memo, datatable, i) => {
+            // skip empty datatables
+            if (datatable) {
+              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                content: exporters.datatableToCSV(datatable, {
+                  csvSeparator: uiSettings.get('csv:separator', ','),
+                  quoteValues: uiSettings.get('csv:quoteValues', true),
+                  formatFactory: data.fieldFormats.deserialize,
+                }),
+                type: exporters.CSV_MIME_TYPE,
+              };
+            }
+            return memo;
+          },
+          {}
+        );
+        if (content) {
+          downloadMultipleAs(content);
+        }
+      },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
@@ -605,12 +658,15 @@ export function App({
               onError,
               showNoDataPopover,
               initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
                 if (!_.isEqual(state.persistedDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
+                if (!_.isEqual(state.activeData, activeData)) {
+                  setState((s) => ({ ...s, activeData }));
                 }
 
                 // Update the cached index patterns if the user made a change to any of them
@@ -636,35 +692,28 @@ export function App({
           />
         )}
       </div>
-      {lastKnownDoc && state.isSaveModalVisible && (
-        <TagEnhancedSavedObjectSaveModalOrigin
-          savedObjectsTagging={savedObjectsTagging}
-          initialTags={tagsIds}
-          originatingApp={incomingState?.originatingApp}
-          onSave={(props) => runSave(props, { saveToLibrary: true })}
-          onClose={() => {
-            setState((s) => ({ ...s, isSaveModalVisible: false }));
-          }}
-          getAppNameFromId={() => getOriginatingAppName()}
-          documentInfo={{
-            id: lastKnownDoc.savedObjectId,
-            title: lastKnownDoc.title || '',
-            description: lastKnownDoc.description || '',
-          }}
-          returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
-              ? i18n.translate('xpack.lens.app.updatePanel', {
-                  defaultMessage: 'Update panel on {originatingAppName}',
-                  values: { originatingAppName: getOriginatingAppName() },
-                })
-              : undefined
-          }
-          objectType={i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          })}
-          data-test-subj="lnsApp_saveModalOrigin"
-        />
-      )}
+      <SaveModal
+        isVisible={state.isSaveModalVisible}
+        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
+        savedObjectsClient={savedObjectsClient}
+        savedObjectsTagging={savedObjectsTagging}
+        tagsIds={tagsIds}
+        onSave={runSave}
+        onClose={() => {
+          setState((s) => ({ ...s, isSaveModalVisible: false }));
+        }}
+        getAppNameFromId={() => getOriginatingAppName()}
+        lastKnownDoc={lastKnownDoc}
+        returnToOriginSwitchLabel={
+          getIsByValueMode() && initialInput
+            ? i18n.translate('xpack.lens.app.updatePanel', {
+                defaultMessage: 'Update panel on {originatingAppName}',
+                values: { originatingAppName: getOriginatingAppName() },
+              })
+            : undefined
+        }
+      />
     </>
   );
 }

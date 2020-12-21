@@ -11,6 +11,8 @@ import {
   savedObjectEvent,
   userLoginEvent,
   httpRequestEvent,
+  spaceAuditEvent,
+  SpaceAuditAction,
 } from './audit_events';
 import { AuthenticationResult } from '../authentication';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -282,7 +284,7 @@ describe('#httpRequestEvent', () => {
           "path": "/path",
           "port": undefined,
           "query": undefined,
-          "scheme": "http:",
+          "scheme": "http",
         },
       }
     `);
@@ -319,8 +321,93 @@ describe('#httpRequestEvent', () => {
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",
-          "scheme": "http:",
+          "scheme": "http",
         },
+      }
+    `);
+  });
+});
+
+describe('#spaceAuditEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "space_create",
+          "category": "database",
+          "outcome": "unknown",
+          "type": "creation",
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "User is creating space [id=SPACE_ID]",
+      }
+    `);
+  });
+
+  test('creates event with `success` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "space_create",
+          "category": "database",
+          "outcome": "success",
+          "type": "creation",
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "User has created space [id=SPACE_ID]",
+      }
+    `);
+  });
+
+  test('creates event with `failure` outcome', () => {
+    expect(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        savedObject: { type: 'space', id: 'SPACE_ID' },
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "space_create",
+          "category": "database",
+          "outcome": "failure",
+          "type": "creation",
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SPACE_ID",
+            "type": "space",
+          },
+        },
+        "message": "Failed attempt to create space [id=SPACE_ID]",
       }
     `);
   });

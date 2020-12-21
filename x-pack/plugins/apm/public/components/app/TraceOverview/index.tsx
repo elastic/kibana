@@ -8,12 +8,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './TraceList';
+import { Correlations } from '../Correlations';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -61,6 +62,7 @@ export function TraceOverview() {
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>

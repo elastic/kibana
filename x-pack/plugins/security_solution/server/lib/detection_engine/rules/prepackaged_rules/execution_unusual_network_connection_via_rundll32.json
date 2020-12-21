@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies unusual instances of rundll32.exe making outbound network connections. This may indicate adversarial activity and may identify malicious DLLs.",
+  "description": "Identifies unusual instances of rundll32.exe making outbound network connections. This may indicate adversarial Command and Control activity.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -11,10 +11,11 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Unusual Network Connection via RunDLL32",
-  "query": "sequence by process.entity_id\n  [process where process.name : \"rundll32.exe\" and event.type == \"start\"]\n  [network where process.name : \"rundll32.exe\" and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\",  \"172.16.0.0/12\", \"192.168.0.0/16\", \"127.0.0.0/8\")]\n",
-  "risk_score": 21,
+  "query": "sequence by host.id, process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\", \"info\") and process.name : \"rundll32.exe\" and process.args_count == 1]\n  [network where process.name : \"rundll32.exe\" and network.protocol != \"dns\" and network.direction == \"outgoing\" and\n   not cidrmatch(destination.ip, \"10.0.0.0/8\",  \"172.16.0.0/12\", \"192.168.0.0/16\", \"127.0.0.0/8\")]\n",
+  "risk_score": 47,
+
   "rule_id": "52aaab7b-b51c-441a-89ce-4387b3aea886",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
     "Elastic",
     "Host",
@@ -40,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

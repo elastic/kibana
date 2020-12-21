@@ -6,7 +6,7 @@
 
 import { SanitizedAlert, AlertInstanceSummary } from '../types';
 import { IValidatedEvent } from '../../../event_log/server';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertInstanceSummaryFromEventLog } from './alert_instance_summary_from_event_log';
 
 const ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
@@ -105,12 +105,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -189,7 +191,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addResolvedInstance('instance-1')
+      .addRecoveredInstance('instance-1')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -205,6 +207,44 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
+            "activeStartDate": undefined,
+            "muted": false,
+            "status": "OK",
+          },
+        },
+        "lastRun": "2020-06-18T00:00:10.000Z",
+        "status": "OK",
+      }
+    `);
+  });
+
+  test('legacy alert with currently inactive instance', async () => {
+    const alert = createAlert({});
+    const eventsFactory = new EventsFactory();
+    const events = eventsFactory
+      .addExecute()
+      .addNewInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
+      .advanceTime(10000)
+      .addExecute()
+      .addLegacyResolvedInstance('instance-1')
+      .getEvents();
+
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
+
+    const { lastRun, status, instances } = summary;
+    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+      Object {
+        "instances": Object {
+          "instance-1": Object {
+            "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -224,7 +264,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addResolvedInstance('instance-1')
+      .addRecoveredInstance('instance-1')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -240,6 +280,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -276,6 +317,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -312,6 +354,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -348,6 +391,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group B",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -383,6 +427,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "Active",
@@ -406,7 +451,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .advanceTime(10000)
       .addExecute()
       .addActiveInstance('instance-1', 'action group A')
-      .addResolvedInstance('instance-2')
+      .addRecoveredInstance('instance-2')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -422,12 +467,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": true,
             "status": "Active",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -451,7 +498,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .advanceTime(10000)
       .addExecute()
       .addActiveInstance('instance-1', 'action group A')
-      .addResolvedInstance('instance-2')
+      .addRecoveredInstance('instance-2')
       .advanceTime(10000)
       .addExecute()
       .addActiveInstance('instance-1', 'action group B')
@@ -473,12 +520,14 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "instances": Object {
           "instance-1": Object {
             "actionGroupId": "action group B",
+            "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
           },
           "instance-2": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -561,12 +610,24 @@ export class EventsFactory {
     return this;
   }
 
-  addResolvedInstance(instanceId: string): EventsFactory {
+  addRecoveredInstance(instanceId: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
-        action: EVENT_LOG_ACTIONS.resolvedInstance,
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
+      },
+      kibana: { alerting: { instance_id: instanceId } },
+    });
+    return this;
+  }
+
+  addLegacyResolvedInstance(instanceId: string): EventsFactory {
+    this.events.push({
+      '@timestamp': this.date,
+      event: {
+        provider: EVENT_LOG_PROVIDER,
+        action: LEGACY_EVENT_LOG_ACTIONS.resolvedInstance,
       },
       kibana: { alerting: { instance_id: instanceId } },
     });
@@ -574,11 +635,11 @@ export class EventsFactory {
   }
 }
 
-function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert {
+function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
   return { ...BaseAlert, ...overrides };
 }
 
-const BaseAlert: SanitizedAlert = {
+const BaseAlert: SanitizedAlert<{ bar: boolean }> = {
   id: 'alert-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },
@@ -587,6 +648,7 @@ const BaseAlert: SanitizedAlert = {
   tags: [],
   consumer: 'alert-consumer',
   throttle: null,
+  notifyWhen: null,
   muteAll: false,
   mutedInstanceIds: [],
   params: { bar: true },

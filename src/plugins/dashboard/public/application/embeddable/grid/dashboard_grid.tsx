@@ -30,10 +30,10 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
+import { ViewMode, EmbeddableChildPanel } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
-import { withKibana } from '../../../../../kibana_react/public';
+import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
@@ -115,7 +115,6 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
 }
 
@@ -277,7 +276,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
-            PanelComponent={this.props.PanelComponent}
+            PanelComponent={this.props.kibana.services.embeddable.EmbeddablePanel}
           />
         </div>
       );

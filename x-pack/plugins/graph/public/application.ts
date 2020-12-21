@@ -32,7 +32,7 @@ import {
 // @ts-ignore
 import { initGraphApp } from './app';
 import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -60,7 +60,7 @@ export interface GraphDependencies {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
   navigation: NavigationStart;
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;

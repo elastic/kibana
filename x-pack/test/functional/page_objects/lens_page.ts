@@ -118,7 +118,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        this.closeDimensionEditor();
+        await this.closeDimensionEditor();
       }
     },
 
@@ -204,7 +204,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     // closes the dimension editor flyout
     async closeDimensionEditor() {
-      await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+      });
     },
 
     /**
@@ -267,7 +270,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('indexPattern-label-edit', label);
+      await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
       const formatInput = await testSubjects.find('indexPattern-dimension-format');

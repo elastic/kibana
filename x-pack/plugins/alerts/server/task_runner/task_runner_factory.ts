@@ -13,10 +13,11 @@ import {
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
-import { AlertType, GetServicesFunction, SpaceIdToNamespaceFunction } from '../types';
+import { AlertTypeRegistry, GetServicesFunction, SpaceIdToNamespaceFunction } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { AlertsClient } from '../alerts_client';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -28,6 +29,7 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
+  alertTypeRegistry: AlertTypeRegistry;
 }
 
 export class TaskRunnerFactory {
@@ -42,7 +44,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create(alertType: AlertType, { taskInstance }: RunContext) {
+  public create(alertType: UntypedNormalizedAlertType, { taskInstance }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }

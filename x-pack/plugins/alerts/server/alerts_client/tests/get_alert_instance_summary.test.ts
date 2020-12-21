@@ -80,6 +80,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     apiKey: null,
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {
@@ -122,7 +123,7 @@ describe('getAlertInstanceSummary()', () => {
       .addActiveInstance('instance-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addResolvedInstance('instance-previously-active')
+      .addRecoveredInstance('instance-previously-active')
       .addActiveInstance('instance-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {
@@ -145,18 +146,21 @@ describe('getAlertInstanceSummary()', () => {
         "instances": Object {
           "instance-currently-active": Object {
             "actionGroupId": "action group A",
+            "actionSubgroup": undefined,
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
           "instance-muted-no-activity": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-previously-active": Object {
             "actionGroupId": undefined,
+            "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",

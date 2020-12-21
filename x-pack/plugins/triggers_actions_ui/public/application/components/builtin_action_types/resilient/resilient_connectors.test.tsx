@@ -5,9 +5,9 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DocLinksStart } from 'kibana/public';
 import ResilientConnectorFields from './resilient_connectors';
 import { ResilientActionConnector } from './types';
+jest.mock('../../../../common/lib/kibana');
 
 describe('ResilientActionConnectorFields renders', () => {
   test('alerting Resilient connector fields is rendered', () => {
@@ -25,16 +25,12 @@ describe('ResilientActionConnectorFields renders', () => {
         orgId: '201',
       },
     } as ResilientActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ResilientConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -68,22 +64,17 @@ describe('ResilientActionConnectorFields renders', () => {
         orgId: '201',
       },
     } as ResilientActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ResilientConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
         consumer={'case'}
       />
     );
 
-    expect(wrapper.find('[data-test-subj="case-resilient-mappings"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-resilient-orgId-form-input"]').length > 0
@@ -105,16 +96,12 @@ describe('ResilientActionConnectorFields renders', () => {
       config: {},
       secrets: {},
     } as ResilientActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ResilientConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -137,16 +124,12 @@ describe('ResilientActionConnectorFields renders', () => {
         orgId: '201',
       },
     } as ResilientActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ResilientConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );

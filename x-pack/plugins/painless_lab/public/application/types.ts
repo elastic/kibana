@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PainlessContext } from '@kbn/monaco';
+
 export interface Store {
   payload: Payload;
   validation: Validation;
 }
 
 export interface Payload {
-  context: string;
+  context: PainlessContext;
   code: string;
   parameters: string;
   index: string;

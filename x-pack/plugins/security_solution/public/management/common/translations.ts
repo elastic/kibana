@@ -25,13 +25,13 @@ export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administr
 });
 
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
-  windows: i18n.translate('xpack.securitySolution.administration.os.windows', {
+  [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
   }),
-  macos: i18n.translate('xpack.securitySolution.administration.os.macos', {
+  [OperatingSystem.MAC]: i18n.translate('xpack.securitySolution.administration.os.macos', {
     defaultMessage: 'Mac',
   }),
-  linux: i18n.translate('xpack.securitySolution.administration.os.linux', {
+  [OperatingSystem.LINUX]: i18n.translate('xpack.securitySolution.administration.os.linux', {
     defaultMessage: 'Linux',
   }),
 };

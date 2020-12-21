@@ -20,6 +20,9 @@ import { getSnapshotCount } from './get_snapshot_counts';
 import { getIndexStatus } from './get_index_status';
 import { getJourneySteps } from './get_journey_steps';
 import { getJourneyScreenshot } from './get_journey_screenshot';
+import { getJourneyDetails } from './get_journey_details';
+import { getNetworkEvents } from './get_network_events';
+import { getJourneyFailedSteps } from './get_journey_failed_steps';
 
 export const requests = {
   getCerts,
@@ -37,7 +40,10 @@ export const requests = {
   getSnapshotCount,
   getIndexStatus,
   getJourneySteps,
+  getJourneyFailedSteps,
   getJourneyScreenshot,
+  getJourneyDetails,
+  getNetworkEvents,
 };
 
 export type UptimeRequests = typeof requests;

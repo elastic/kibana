@@ -212,6 +212,16 @@ export {
   FieldFormat,
 } from '../common';
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * Index patterns:
  */
@@ -225,7 +235,6 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 } from './index_patterns';
@@ -242,7 +251,6 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 };
@@ -265,6 +273,7 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
+  IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
 } from '../common';
 
@@ -323,6 +332,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
@@ -375,6 +385,7 @@ export {
   SearchRequest,
   SearchSourceFields,
   SortDirection,
+  SessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
@@ -385,7 +396,12 @@ export {
   PainlessError,
 } from './search';
 
-export type { SearchSource, ISessionService } from './search';
+export type {
+  SearchSource,
+  ISessionService,
+  SearchSessionInfoProvider,
+  ISessionsClient,
+} from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
@@ -467,6 +483,7 @@ export {
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup
