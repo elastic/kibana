@@ -22,6 +22,7 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { IInterpreterRenderHandlers } from '../../expressions/public';
+import type { PersistedState } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
@@ -66,10 +67,12 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
 
   useEffect(() => {
     if (handlers.uiState) {
-      handlers.uiState.on('change', updateChart);
+      const uiState = handlers.uiState as PersistedState;
+
+      uiState.on('change', updateChart);
 
       return () => {
-        handlers.uiState?.off('change', updateChart);
+        uiState?.off('change', updateChart);
       };
     }
   }, [handlers.uiState, updateChart]);

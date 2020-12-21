@@ -140,7 +140,7 @@ export function createApi() {
 }
 
 function convertBoomToKibanaResponse(
-  error: Boom,
+  error: Boom.Boom,
   response: KibanaResponseFactory
 ) {
   const opts = { body: error.message };
