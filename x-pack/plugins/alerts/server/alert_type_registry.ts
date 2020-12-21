@@ -103,10 +103,10 @@ export class AlertTypeRegistry {
   }
 
   public register<
-    Params extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
-    InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    Params extends AlertTypeParams,
+    State extends AlertTypeState,
+    InstanceState extends AlertInstanceState,
+    InstanceContext extends AlertInstanceContext
   >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(

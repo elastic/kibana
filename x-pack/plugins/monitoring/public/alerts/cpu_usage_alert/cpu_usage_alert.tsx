@@ -7,10 +7,10 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { ALERT_CPU_USAGE, ALERT_DETAILS } from '../../../common/constants';
-import { validate } from '../components/duration/validation';
+import { validate, MonitoringAlertTypeParams } from '../components/duration/validation';
 import { Expression, Props } from '../components/duration/expression';
 
-export function createCpuUsageAlertType(): AlertTypeModel {
+export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
     id: ALERT_CPU_USAGE,
     name: ALERT_DETAILS[ALERT_CPU_USAGE].label,

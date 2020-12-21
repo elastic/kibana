@@ -13,7 +13,7 @@ import {
   AlertsClient,
   AlertServices,
 } from '../../../alerts/server';
-import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -135,7 +135,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert> {
+  ): Promise<Alert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -170,7 +170,7 @@ export class BaseAlert {
       throttle = '1d',
       interval = '1m',
     } = this.alertOptions;
-    return await alertsClient.create({
+    return await alertsClient.create<AlertTypeParams>({
       data: {
         enabled: true,
         tags: [],

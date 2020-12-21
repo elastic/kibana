@@ -6,10 +6,9 @@
 import { schema } from '@kbn/config-schema';
 import {
   AlertType,
-  AlertTypeParams,
-  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  AlertExecutorOptions,
 } from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
@@ -26,9 +25,20 @@ import {
   thresholdActionVariableDescription,
 } from '../common/messages';
 
-export function registerMetricThresholdAlertType(
-  libs: InfraBackendLibs
-): AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> {
+export type MetricThresholdAlertType = AlertType<
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
+export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
+
+export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),

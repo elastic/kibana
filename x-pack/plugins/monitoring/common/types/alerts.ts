@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
-export type CommonAlert = Alert | SanitizedAlert;
+export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert | SanitizedAlert;
+  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {

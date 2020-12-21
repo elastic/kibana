@@ -10,7 +10,6 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   AlertType,
-  AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -131,24 +130,27 @@ export type BaseSignalHit = BaseHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
-export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleTypeParams;
-};
+export type RuleExecutorOptions = AlertExecutorOptions<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
+): obj is AlertType<RuleTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = Omit<
-  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>,
-  'executor'
-> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
-};
+export type SignalRuleAlertTypeDefinition = AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface Ancestor {
   rule?: string;

@@ -7,37 +7,44 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import {
   AlertExecutorOptions,
-  AlertType,
-  AlertTypeParams,
-  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../../../../alerts/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { createUptimeESClient, UptimeESClient } from '../lib';
+import { UptimeAlertTypeFactory, UptimeAlertTypeParam, UptimeAlertTypeState } from './types';
 
 export interface UptimeAlertType
-  extends Omit<
-    AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>,
-    'executor' | 'producer'
-  > {
+  extends Omit<ReturnType<UptimeAlertTypeFactory>, 'executor' | 'producer'> {
   executor: ({
     options,
     uptimeEsClient,
     dynamicSettings,
   }: {
-    options: AlertExecutorOptions;
+    options: AlertExecutorOptions<
+      UptimeAlertTypeParam,
+      UptimeAlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext
+    >;
     uptimeEsClient: UptimeESClient;
     dynamicSettings: DynamicSettings;
     savedObjectsClient: SavedObjectsClientContract;
-  }) => Promise<AlertTypeState | void>;
+  }) => Promise<UptimeAlertTypeState | void>;
 }
 
 export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
   ...uptimeAlert,
   producer: 'uptime',
-  executor: async (options: AlertExecutorOptions) => {
+  executor: async (
+    options: AlertExecutorOptions<
+      UptimeAlertTypeParam,
+      UptimeAlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext
+    >
+  ) => {
     const {
       services: { scopedClusterClient: esClient, savedObjectsClient },
     } = options;

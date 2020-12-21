@@ -16,6 +16,12 @@ import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import {
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -42,7 +48,14 @@ const actionsClient = actionsClientMock.create();
 
 const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
-const createExecutionHandlerParams: jest.Mocked<CreateExecutionHandlerOptions> = {
+const createExecutionHandlerParams: jest.Mocked<
+  CreateExecutionHandlerOptions<
+    AlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext
+  >
+> = {
   actionsPlugin: mockActionsPlugin,
   spaceId: 'default',
   alertId: '1',
