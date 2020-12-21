@@ -45,6 +45,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     total: 0,
     other: 0,
   },
+  license: undefined,
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
@@ -90,6 +91,13 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
       ...state,
       isLoading: true,
       updateApiError: undefined,
+    };
+  }
+
+  if (action.type === 'licenseChanged') {
+    return {
+      ...state,
+      license: action.payload,
     };
   }
 

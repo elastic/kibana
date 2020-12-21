@@ -19,25 +19,28 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
-import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { BaseVisTypeOptions, VisualizationsSetup } from '../../visualizations/public';
-import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
-import { createPieVisFn } from './pie_fn';
-import { visLibVisTypeDefinitions, pieVisTypeDefinition } from './vis_type_vislib_vis_types';
+import { VisualizationsSetup } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { LEGACY_CHARTS_LIBRARY } from '../../vis_type_xy/public';
+
+import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
+import { createPieVisFn } from './pie_fn';
+import {
+  convertedTypeDefinitions,
+  pieVisTypeDefinition,
+  visLibVisTypeDefinitions,
+} from './vis_type_vislib_vis_types';
 import { setFormatService, setDataActions } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
-import { BasicVislibParams } from './types';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
-  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 /** @internal */
@@ -56,24 +59,20 @@ export class VisTypeVislibPlugin
 
   public async setup(
     core: VisTypeVislibCoreSetup,
-    { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
+    { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    // if visTypeXy plugin is disabled it's config will be undefined
-    if (!visTypeXy) {
-      const convertedTypes: Array<BaseVisTypeOptions<BasicVislibParams>> = [];
-      const convertedFns: any[] = [];
-
-      // Register legacy vislib types that have been converted
-      convertedFns.forEach(expressions.registerFunction);
-      convertedTypes.forEach(visualizations.createBaseVisualization);
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+      // Register only non-replaced vis types
+      convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
+      [createVisTypeVislibVisFn()].forEach(expressions.registerFunction);
+    } else {
+      // Register all vis types
+      visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
+      visualizations.createBaseVisualization(pieVisTypeDefinition);
+      expressions.registerRenderer(getVislibVisRenderer(core, charts));
+      [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     }
-    // Register non-converted types
-    visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
-    // visualizations.createBaseVisualization(pieVisTypeDefinition);
-    expressions.registerRenderer(getVislibVisRenderer(core, charts));
-    // [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
-    [createVisTypeVislibVisFn()].forEach(expressions.registerFunction);
   }
 
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {

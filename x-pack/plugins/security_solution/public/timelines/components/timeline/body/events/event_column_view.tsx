@@ -35,7 +35,6 @@ import * as i18n from '../translations';
 interface Props {
   id: string;
   actionsColumnWidth: number;
-  activeTab?: TimelineTabs;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
@@ -46,15 +45,18 @@ interface Props {
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
+  notesCount: number;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
+  hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   showNotes: boolean;
+  tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes: () => void;
 }
@@ -65,7 +67,6 @@ export const EventColumnView = React.memo<Props>(
   ({
     id,
     actionsColumnWidth,
-    activeTab,
     ariaRowindex,
     columnHeaders,
     columnRenderers,
@@ -76,15 +77,18 @@ export const EventColumnView = React.memo<Props>(
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
+    notesCount,
     onEventToggled,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
     refetch,
+    hasRowRenderers,
     onRuleChange,
     selectedEventIds,
     showCheckboxes,
     showNotes,
+    tabType,
     timelineId,
     toggleShowNotes,
   }) => {
@@ -225,12 +229,14 @@ export const EventColumnView = React.memo<Props>(
 
         <DataDrivenColumns
           _id={id}
-          activeTab={activeTab}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
+          hasRowRenderers={hasRowRenderers}
+          notesCount={notesCount}
+          tabType={tabType}
           timelineId={timelineId}
         />
       </EventsTrData>

@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+
+import { SavedObjectMigrationFn } from 'kibana/server';
+
+import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -819,6 +822,69 @@ const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+/**
+ * Decorate axes with default label filter value
+ */
+const decorateAxes = <T extends { labels: { filter?: boolean } }>(
+  axes: T[],
+  fallback: boolean
+): T[] =>
+  axes.map((axis) => ({
+    ...axis,
+    labels: {
+      ...axis.labels,
+      filter: axis.labels.filter ?? fallback,
+    },
+  }));
+
+/**
+ * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
+ */
+const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (
+      visState &&
+      [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
+    ) {
+      const isHorizontalBar = visState.type === 'horizontal_bar';
+      const isLineOrArea =
+        visState?.params?.type === ChartType.Area || visState?.params?.type === ChartType.Line;
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              categoryAxes:
+                visState.params.categoryAxes &&
+                decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
+              valueAxes:
+                visState.params.valueAxes &&
+                decorateAxes(visState.params.valueAxes, isHorizontalBar),
+              isVislibVis: true,
+              detailedTooltip: true,
+              ...(isLineOrArea && {
+                fittingFunction: 'zero',
+              }),
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -853,5 +919,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibPie),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateVislibPie),
 };

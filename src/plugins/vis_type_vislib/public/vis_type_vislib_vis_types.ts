@@ -36,3 +36,9 @@ export const visLibVisTypeDefinitions = [
   gaugeVisTypeDefinition,
   goalVisTypeDefinition,
 ];
+
+export const convertedTypeDefinitions = [
+  heatmapVisTypeDefinition,
+  gaugeVisTypeDefinition,
+  goalVisTypeDefinition,
+];
