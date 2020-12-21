@@ -43,6 +43,9 @@ const condition = schema.object({
 export const registerMetricInventoryThresholdAlertType = (
   libs: InfraBackendLibs
 ): AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,

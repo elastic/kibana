@@ -88,7 +88,11 @@ export const signalRulesAlertType = ({
     defaultActionGroupId: 'default',
     validate: {
       /**
-       * TODO: Add support for Schema
+       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
+       * Once that's done, you should be able to do:
+       * ```
+       * params: signalParamsSchema(),
+       * ```
        */
       params: (signalParamsSchema() as unknown) as {
         validate: (object: unknown) => RuleTypeParams;

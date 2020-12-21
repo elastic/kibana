@@ -40,6 +40,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   services,
   params,
 }: AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,

@@ -51,6 +51,9 @@ describe('The metric threshold alert type', () => {
             },
           ],
         },
+        /**
+         * TODO: Remove this use of `as` by utilizing a proper type
+         */
       } as unknown) as MetricThresholdAlertExecutorOptions);
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);

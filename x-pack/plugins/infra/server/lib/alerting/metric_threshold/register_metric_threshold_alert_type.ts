@@ -27,12 +27,18 @@ import {
 } from '../common/messages';
 
 export type MetricThresholdAlertType = AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
   AlertInstanceContext
 >;
 export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
