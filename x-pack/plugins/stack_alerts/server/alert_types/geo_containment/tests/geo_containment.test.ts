@@ -10,6 +10,8 @@ import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.jso
 import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
 import { SearchResponse } from 'elasticsearch';
 import { OTHER_CATEGORY } from '../es_query_builder';
+import { alertsMock } from '../../../../../alerts/server/mocks';
+import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -191,8 +193,12 @@ describe('geo_containment', () => {
     const emptyShapesIdsNamesMap = {};
 
     const alertInstanceFactory = (instanceId: string) => {
-      return {
-        scheduleActions: (actionGroupId: string, context: Record<string, unknown>) => {
+      const alertInstance = alertsMock.createAlertInstanceFactory<
+        GeoContainmentInstanceState,
+        GeoContainmentInstanceContext
+      >();
+      alertInstance.scheduleActions.mockImplementation(
+        (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
           const contextKeys = Object.keys(expectedContext[0].context);
           const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
           testAlertActionArr.push({
@@ -200,9 +206,12 @@ describe('geo_containment', () => {
             instanceId,
             context: contextSubset,
           });
-        },
-      };
+          return alertInstance;
+        }
+      );
+      return alertInstance;
     };
+
     const currentDateTime = new Date();
 
     it('should use currently active entities if no older entity entries', () => {

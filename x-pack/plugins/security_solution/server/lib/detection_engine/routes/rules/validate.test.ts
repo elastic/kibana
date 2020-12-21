@@ -15,6 +15,7 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { getResult, getFindResultStatus } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { RuleTypeParams } from '../../types';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -88,7 +89,7 @@ describe('validate', () => {
 
   describe('transformValidateFindAlerts', () => {
     test('it should do a validation correctly of a find alert', () => {
-      const findResult: FindResult = {
+      const findResult: FindResult<RuleTypeParams> = {
         data: [getResult()],
         page: 1,
         perPage: 0,
@@ -111,7 +112,7 @@ describe('validate', () => {
     });
 
     test('it should do an in-validation correctly of a partial alert', () => {
-      const findResult: FindResult = {
+      const findResult: FindResult<RuleTypeParams> = {
         data: [getResult()],
         page: 1,
         perPage: 0,
