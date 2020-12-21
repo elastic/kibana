@@ -132,7 +132,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const docLink = docLinks.links.ml.outlierDetectionRoc;
+  const classAucRocDocLink = docLinks.links.ml.classificationAucRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated, estimatedModelMemoryLimit } = state;
@@ -418,7 +418,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               helpText={getTopClassesHelpText(selectedNumTopClasses)}
               isInvalid={selectedNumTopClasses === 0 || selectedNumTopClassesIsInvalid}
               error={[
-                ...(selectedNumTopClasses === 0 ? [getZeroClassesMessage(docLink)] : []),
+                ...(selectedNumTopClasses === 0 ? [getZeroClassesMessage(classAucRocDocLink)] : []),
                 ...(selectedNumTopClassesIsInvalid ? [numClassesTypeMessage] : []),
               ]}
             >
