@@ -294,7 +294,7 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('could not find nodeID for process');
         }
         const cameraAction: ResolverAction = {
-          type: 'userBroughtNodeIntoView',
+          type: 'userSelectedResolverNode',
           payload: {
             time: simulator.controls.time,
             nodeID,

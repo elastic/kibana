@@ -6,9 +6,11 @@
 
 import { useContext, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import * as selectors from '../store/selectors';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverAction } from '../store/actions';
+import { panelViewAndParameters } from '../store/panel_view_and_parameters';
 
 /**
  * This custom hook, will maintain the state of the active/selected node with the what the selected nodeID is in url state.
@@ -18,24 +20,40 @@ import { ResolverAction } from '../store/actions';
  */
 export function useSyncSelectedNode() {
   const dispatch: (action: ResolverAction) => void = useDispatch();
-  const { timestamp } = useContext(SideEffectContext);
-  const currentPanelParameters = useSelector(selectors.panelViewAndParameters);
+  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+  const locationSearch = useLocation().search;
+  const sideEffectors = useContext(SideEffectContext);
   const selectedNode = useSelector(selectors.selectedNode);
   const idToNodeMap = useSelector(selectors.graphNodeForID);
 
+  const currentPanelParameters = panelViewAndParameters({
+    locationSearch,
+    resolverComponentInstanceID,
+  });
+
+  let urlNodeID: string | undefined;
+
+  if (currentPanelParameters.panelView !== 'nodes') {
+    urlNodeID = currentPanelParameters.panelParameters.nodeID;
+  }
+
   useEffect(() => {
-    // Only run when actively analyzing a node (every panel view besides 'nodes'(nodeList))
-    if (currentPanelParameters && currentPanelParameters.panelView !== 'nodes') {
-      const { nodeID } = currentPanelParameters.panelParameters;
-      if (nodeID && idToNodeMap(nodeID) && nodeID !== selectedNode) {
-        dispatch({
-          type: 'userBroughtNodeIntoView',
-          payload: {
-            nodeID,
-            time: timestamp(),
-          },
-        });
-      }
+    // use this for the entire render in order to keep things in sync
+    if (urlNodeID && idToNodeMap(urlNodeID) && urlNodeID !== selectedNode) {
+      dispatch({
+        type: 'userSelectedResolverNode',
+        payload: {
+          nodeID: urlNodeID,
+          time: sideEffectors.timestamp(),
+        },
+      });
     }
-  }, [currentPanelParameters, dispatch, idToNodeMap, selectedNode, timestamp]);
+  }, [
+    currentPanelParameters.panelView,
+    urlNodeID,
+    dispatch,
+    idToNodeMap,
+    selectedNode,
+    sideEffectors,
+  ]);
 }

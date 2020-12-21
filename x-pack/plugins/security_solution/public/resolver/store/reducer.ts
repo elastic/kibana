@@ -30,22 +30,14 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   } else if (action.type === 'userFocusedOnResolverNode') {
     const next: ResolverUIState = {
       ...state,
-      ariaActiveDescendant: action.payload,
+      ariaActiveDescendant: action.payload.nodeID,
     };
     return next;
   } else if (action.type === 'userSelectedResolverNode') {
     const next: ResolverUIState = {
       ...state,
-      selectedNode: action.payload,
-    };
-    return next;
-  } else if (action.type === 'userBroughtNodeIntoView') {
-    const { nodeID } = action.payload;
-    const next: ResolverUIState = {
-      ...state,
-      // Select the node. NB: Animation is handled in the reducer as well.
-      ariaActiveDescendant: nodeID,
-      selectedNode: nodeID,
+      selectedNode: action.payload.nodeID,
+      ariaActiveDescendant: action.payload.nodeID,
     };
     return next;
   } else if (action.type === 'appReceivedNewExternalProperties') {
@@ -69,7 +61,7 @@ const animationDuration = 1000;
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'userBroughtNodeIntoView') {
+  if (action.type === 'userSelectedResolverNode' || action.type === 'userFocusedOnResolverNode') {
     const position = nodePosition(layout(nextState), action.payload.nodeID);
     if (position) {
       const withAnimation: ResolverState = {
