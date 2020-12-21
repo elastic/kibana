@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
@@ -31,6 +30,7 @@ import { PieVisParams, LabelPositions, ValueFormats } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getLegendPositions } from '../editor';
 import { getPieOptions } from '../editor/components';
+import { SplitTooltip } from './split_tooltip';
 
 export const getPieVisTypeDefinition = (
   showElasticChartsOptions = false,
@@ -103,6 +103,11 @@ export const getPieVisTypeDefinition = (
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        // TODO: Remove when split chart aggs are supported
+        ...(showElasticChartsOptions && {
+          disabled: true,
+          tooltip: <SplitTooltip />,
+        }),
       },
     ]),
   },

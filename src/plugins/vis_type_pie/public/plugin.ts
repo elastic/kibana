@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup, CoreStart, DocLinksStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
@@ -42,7 +42,7 @@ export interface VisTypePiePluginStartDependencies {
 export interface VisTypePieDependencies {
   theme: ChartsPluginSetup['theme'];
   palettes: PaletteRegistry;
-  getStartDeps: () => Promise<DataPublicPluginStart>;
+  getStartDeps: () => Promise<{ data: DataPublicPluginStart; docLinks: DocLinksStart }>;
 }
 
 export class VisTypePiePlugin {
@@ -52,8 +52,12 @@ export class VisTypePiePlugin {
   ) {
     if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
       const getStartDeps = async () => {
-        const [, deps] = await core.getStartServices();
-        return deps.data;
+        const [coreStart, deps] = await core.getStartServices();
+        // return deps.data;
+        return {
+          data: deps.data,
+          docLinks: coreStart.docLinks,
+        };
       };
 
       [createPieVisFn].forEach(expressions.registerFunction);

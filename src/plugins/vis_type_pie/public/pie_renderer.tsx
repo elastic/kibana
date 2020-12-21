@@ -22,8 +22,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
+import type { PersistedState } from '../../visualizations/public';
 import { VisTypePieDependencies } from './plugin';
-// import { SplitChartWarning } from './components';
+import { SplitChartWarning } from './components/split_chart_warning';
 
 import { RenderValue, vislibPieName } from './pie_fn';
 
@@ -54,7 +55,7 @@ export const getPieVisRenderer: (
 
     render(
       <>
-        {/* {isSplitChart && <SplitChartWarning />} */}
+        {isSplitChart && <SplitChartWarning docLinks={services.docLinks} />}
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
           <PieComponent
             chartsThemeService={theme}
@@ -63,8 +64,8 @@ export const getPieVisRenderer: (
             visData={visData}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
-            uiState={handlers.uiState}
-            services={services}
+            uiState={handlers.uiState as PersistedState}
+            services={services.data}
           />
         </VisualizationContainer>
       </>,
