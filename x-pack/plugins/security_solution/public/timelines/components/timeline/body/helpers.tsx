@@ -160,3 +160,9 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
 
 export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);
+
+export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
+
+export const NOTES_CONTAINER_CLASS_NAME = 'notes-container';
+
+export const NOTE_CONTENT_CLASS_NAME = 'note-content';
