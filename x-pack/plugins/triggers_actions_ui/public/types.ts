@@ -187,7 +187,6 @@ export interface AlertTypeParamsExpressionProps<
 
 export interface AlertTypeModel<AlertParamsType = any> {
   id: string;
-  name: string | JSX.Element;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;

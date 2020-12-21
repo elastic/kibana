@@ -27,6 +27,7 @@ import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
   EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
@@ -55,6 +56,7 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
+import { PanelToolbar } from './panel_toolbar';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -134,10 +136,7 @@ export function DashboardTopNav({
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
-    const explicitInput = await factory.getExplicitInput();
-    if (dashboardContainer) {
-      await dashboardContainer.addNewEmbeddable(type, explicitInput);
-    }
+    await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const onChangeViewMode = useCallback(
@@ -442,5 +441,12 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
-  return <TopNavMenu {...getNavBarProps()} />;
+  return (
+    <>
+      <TopNavMenu {...getNavBarProps()} />
+      {!dashboardStateManager.getIsViewMode() ? (
+        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+      ) : null}
+    </>
+  );
 }
