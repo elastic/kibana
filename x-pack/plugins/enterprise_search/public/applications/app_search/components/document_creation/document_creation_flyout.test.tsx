@@ -8,7 +8,7 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiModal } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 
 import {
   ShowCreationModes,
@@ -18,9 +18,9 @@ import {
 } from './creation_mode_components';
 import { DocumentCreationStep } from './types';
 
-import { DocumentCreationModal, ModalContent } from './document_creation_modal';
+import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';
 
-describe('DocumentCreationModal', () => {
+describe('DocumentCreationFlyout', () => {
   const values = {
     isDocumentCreationOpen: true,
     creationMode: 'text',
@@ -36,25 +36,25 @@ describe('DocumentCreationModal', () => {
     setMockActions(actions);
   });
 
-  it('renders a closeable modal', () => {
-    const wrapper = shallow(<DocumentCreationModal />);
-    expect(wrapper.find(EuiModal)).toHaveLength(1);
+  it('renders a closeable flyout', () => {
+    const wrapper = shallow(<DocumentCreationFlyout />);
+    expect(wrapper.find(EuiFlyout)).toHaveLength(1);
 
-    wrapper.find(EuiModal).prop('onClose')();
+    wrapper.find(EuiFlyout).prop('onClose')();
     expect(actions.closeDocumentCreation).toHaveBeenCalled();
   });
 
   it('does not render if isDocumentCreationOpen is false', () => {
     setMockValues({ ...values, isDocumentCreationOpen: false });
-    const wrapper = shallow(<DocumentCreationModal />);
+    const wrapper = shallow(<DocumentCreationFlyout />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
-  describe('ModalContent', () => {
+  describe('FlyoutContent', () => {
     it('renders ShowCreationModes', () => {
       setMockValues({ ...values, creationStep: DocumentCreationStep.ShowCreationModes });
-      const wrapper = shallow(<ModalContent />);
+      const wrapper = shallow(<FlyoutContent />);
 
       expect(wrapper.find(ShowCreationModes)).toHaveLength(1);
     });
@@ -62,21 +62,21 @@ describe('DocumentCreationModal', () => {
     describe('creation modes', () => {
       it('renders ApiCodeExample', () => {
         setMockValues({ ...values, creationMode: 'api' });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         expect(wrapper.find(ApiCodeExample)).toHaveLength(1);
       });
 
       it('renders PasteJsonText', () => {
         setMockValues({ ...values, creationMode: 'text' });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         expect(wrapper.find(PasteJsonText)).toHaveLength(1);
       });
 
       it('renders UploadJsonFile', () => {
         setMockValues({ ...values, creationMode: 'file' });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         expect(wrapper.find(UploadJsonFile)).toHaveLength(1);
       });
@@ -85,21 +85,21 @@ describe('DocumentCreationModal', () => {
     describe('creation steps', () => {
       it('renders an error page', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowError });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         expect(wrapper.text()).toBe('DocumentCreationError'); // TODO: actual component
       });
 
       it('renders an error summary', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowErrorSummary });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component
       });
 
       it('renders a success summary', () => {
         setMockValues({ ...values, creationStep: DocumentCreationStep.ShowSuccessSummary });
-        const wrapper = shallow(<ModalContent />);
+        const wrapper = shallow(<FlyoutContent />);
 
         // TODO: Figure out if the error and success summary should remain the same vs different components
         expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component

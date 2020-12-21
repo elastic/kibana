@@ -7,12 +7,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableContext 
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [embeddable](./kibana-plugin-plugins-embeddable-public.embeddablecontext.embeddable.md) | <code>IEmbeddable</code> |  |
+|  [embeddable](./kibana-plugin-plugins-embeddable-public.embeddablecontext.embeddable.md) | <code>T</code> |  |
 

@@ -657,7 +657,6 @@ describe('edit button', () => {
   const alertTypeR: AlertTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: () => {

@@ -18,7 +18,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useTransactionOverviewHref(serviceName: string) {
+export function useServiceOrTransactionsOverviewHref(serviceName: string) {
   return useAPMHref(`/services/${serviceName}/transactions`, persistedFilters);
 }
 
@@ -26,7 +26,10 @@ interface Props extends APMLinkExtendProps {
   serviceName: string;
 }
 
-export function TransactionOverviewLink({ serviceName, ...rest }: Props) {
+export function ServiceOrTransactionsOverviewLink({
+  serviceName,
+  ...rest
+}: Props) {
   const { urlParams } = useUrlParams();
 
   return (
