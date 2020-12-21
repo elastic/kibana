@@ -107,7 +107,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
     layerId,
     currentIndexPattern,
     hideGrouping,
+    dateRange,
   } = props;
+  const services = {
+    data: props.data,
+    uiSettings: props.uiSettings,
+    savedObjectsClient: props.savedObjectsClient,
+    http: props.http,
+    storage: props.storage,
+  };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
   const setStateWrapper = (layer: IndexPatternLayer) => {
@@ -346,17 +354,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && ParamEditor && (
           <>
             <ParamEditor
-              state={state}
-              setState={setState}
+              layer={state.layers[layerId]}
+              updateLayer={setStateWrapper}
               columnId={columnId}
               currentColumn={state.layers[layerId].columns[columnId]}
-              storage={props.storage}
-              uiSettings={props.uiSettings}
-              savedObjectsClient={props.savedObjectsClient}
-              layerId={layerId}
-              http={props.http}
-              dateRange={props.dateRange}
-              data={props.data}
+              dateRange={dateRange}
+              indexPattern={currentIndexPattern}
+              {...services}
             />
           </>
         )}
@@ -407,12 +411,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               selectedColumn={selectedColumn}
               onChange={(newFormat) => {
                 setState(
-                  updateColumnParam({
+                  mergeLayer({
                     state,
                     layerId,
-                    currentColumn: selectedColumn,
-                    paramName: 'format',
-                    value: newFormat,
+                    newLayer: updateColumnParam({
+                      layer: state.layers[layerId],
+                      columnId,
+                      paramName: 'format',
+                      value: newFormat,
+                    }),
                   })
                 );
               }}

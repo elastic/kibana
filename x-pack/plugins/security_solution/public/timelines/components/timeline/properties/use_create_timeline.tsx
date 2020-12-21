@@ -123,13 +123,13 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
-
+      const { fill: noThanks, ...propsWithoutFill } = buttonProps;
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...buttonProps}>
+        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...propsWithoutFill}>
           {title}
         </EuiButtonEmpty>
       );

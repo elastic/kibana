@@ -29,6 +29,9 @@ export const ENGINE_ANALYTICS_PATH = '/analytics';
 
 export const ENGINE_DOCUMENTS_PATH = '/documents';
 export const ENGINE_DOCUMENT_DETAIL_PATH = `${ENGINE_DOCUMENTS_PATH}/:documentId`;
+export const getDocumentDetailRoute = (engineName: string, documentId: string) => {
+  return generatePath(ENGINE_PATH + ENGINE_DOCUMENT_DETAIL_PATH, { engineName, documentId });
+};
 
 export const ENGINE_SCHEMA_PATH = '/schema/edit';
 export const ENGINE_REINDEX_JOB_PATH = '/reindex-job/:activeReindexJobId';
