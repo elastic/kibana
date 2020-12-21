@@ -21,7 +21,7 @@ import {
   LayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { getInternalRepository } from '../kibana_server_services';
+import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
 
 interface Settings {
@@ -93,35 +93,35 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(
-  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
-) {
-  const fieldLists = indexPatterns.map((indexPattern) =>
-    indexPattern.attributes && indexPattern.attributes.fields
-      ? JSON.parse(indexPattern.attributes.fields)
-      : []
+async function hasGeoShapeFields(indexPattern: SavedObject<IndexPatternAttributes>) {
+  const fields = await getIndexPatternsService().getFieldsForIndexPattern(indexPattern);
+  return fields.some(
+    (field) => field.esTypes && field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_SHAPE)
   );
+}
 
-  const fieldListsWithGeoFields = fieldLists.filter((fields) =>
-    fields.some(
-      (field: IFieldType) =>
-        field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-    )
+async function hasGeoPointFields(indexPattern: SavedObject<IndexPatternAttributes>) {
+  const fields = await getIndexPatternsService().getFieldsForIndexPattern(indexPattern);
+  const someFields = fields.some(
+    (field) => {
+      const types = field.esTypes && field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_POINT)
+      console.log(field);
+      return types;
+    }
   );
+  console.log(someFields);
+  return someFields;
+}
 
-  const fieldListsWithGeoPointFields = fieldLists.filter((fields) =>
-    fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_POINT)
+async function hasGeoFields(indexPattern: SavedObject<IndexPatternAttributes>) {
+  const fields = await getIndexPatternsService().getFieldsForIndexPattern(indexPattern);
+  const hasFields = fields.some(
+    (field) =>
+      field.esTypes &&
+      (field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_POINT) ||
+        field.esTypes.includes(ES_GEO_FIELD_TYPE.GEO_SHAPE))
   );
-
-  const fieldListsWithGeoShapeFields = fieldLists.filter((fields) =>
-    fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
-  );
-
-  return {
-    indexPatternsWithGeoFieldCount: fieldListsWithGeoFields.length,
-    indexPatternsWithGeoPointFieldCount: fieldListsWithGeoPointFields.length,
-    indexPatternsWithGeoShapeFieldCount: fieldListsWithGeoShapeFields.length,
-  };
+  return hasFields;
 }
 
 function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
@@ -142,21 +142,13 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
   }) as ILayerTypeCount[];
 }
 
-function isFieldGeoShape(
-  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
-  indexPatternId: string,
-  geoField: string | undefined
-): boolean {
+function isFieldGeoShape(indexPatternId: string, geoField: string | undefined): boolean {
   if (!geoField) {
     return false;
   }
 
-  const matchIndexPattern = indexPatterns.find(
-    (indexPattern: SavedObject<IndexPatternAttributes>) => {
-      return indexPattern.id === indexPatternId;
-    }
-  );
-
+  // const matchIndexPattern = getIndexPatternsService().get(indexPatternId);
+  const matchIndexPattern = false;
   if (!matchIndexPattern) {
     return false;
   }
@@ -173,10 +165,7 @@ function isFieldGeoShape(
   return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
 }
 
-function isGeoShapeAggLayer(
-  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
-  layer: LayerDescriptor
-): boolean {
+function isGeoShapeAggLayer(layer: LayerDescriptor): boolean {
   if (layer.sourceDescriptor === null) {
     return false;
   }
@@ -192,7 +181,6 @@ function isGeoShapeAggLayer(
   const sourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
     return isFieldGeoShape(
-      indexPatterns,
       (sourceDescriptor as ESGeoGridSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESGeoGridSourceDescriptor).geoField
     );
@@ -201,7 +189,6 @@ function isGeoShapeAggLayer(
     (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
   ) {
     return isFieldGeoShape(
-      indexPatterns,
       (sourceDescriptor as ESSearchSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESSearchSourceDescriptor).geoField
     );
@@ -210,13 +197,10 @@ function isGeoShapeAggLayer(
   }
 }
 
-function getGeoShapeAggCount(
-  layerLists: LayerDescriptor[][],
-  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
-): number {
+function getGeoShapeAggCount(layerLists: LayerDescriptor[][]): number {
   const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
     const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
-      return isGeoShapeAggLayer(indexPatterns, layerDescriptor);
+      return isGeoShapeAggLayer(layerDescriptor);
     });
     return geoShapeAggLayers.length;
   });
@@ -234,23 +218,30 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
   });
 }
 
-export function buildMapsIndexPatternsTelemetry(
-  indexPatternSavedObjects: Array<SavedObject<IndexPatternAttributes>>,
+export async function buildMapsIndexPatternsTelemetry(
   layerLists: LayerDescriptor[][]
-): GeoIndexPatternsUsage {
-  const {
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
-  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
+): Promise<GeoIndexPatternsUsage> {
+  console.log('########################');
+  const indexPatternsService = await getIndexPatternsService();
+  const indexPattern = await indexPatternsService.get('ff959d40-b880-11e8-a6d9-e546fe2bba5f');
+  console.log('*************************');
+  console.log(indexPattern.fields.length);
+  console.log('*************************');
+  // const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
+  // console.log(fieldsForIndexPattern);
+  console.log('########################');
+
+  const indexPatternsWithGeoField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_POINT, ['esTypes']);
+  const indexPatternsWithGeoPointField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_POINT, ['esTypes']);
+  const indexPatternsWithGeoShapeField = await getIndexPatternsService().filter(ES_GEO_FIELD_TYPE.GEO_SHAPE, ['esTypes']);
 
   // Tracks whether user uses Gold+ only functionality
-  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
+  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists);
 
   return {
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
+    indexPatternsWithGeoFieldCount: indexPatternsWithGeoField.length,
+    indexPatternsWithGeoPointFieldCount: indexPatternsWithGeoPointField.length,
+    indexPatternsWithGeoShapeFieldCount: indexPatternsWithGeoShapeField.length,
     geoShapeAggLayersCount,
   };
 }
@@ -339,16 +330,7 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
 
   // Incrementally harvest index pattern saved objects telemetry
-  const indexPatternsTelemetry = {};
-  await execTransformOverMultipleSavedObjectPages<IndexPatternAttributes>(
-    'index-pattern',
-    (savedObjects) =>
-      _.mergeWith(
-        indexPatternsTelemetry,
-        buildMapsIndexPatternsTelemetry(savedObjects, layerLists),
-        (prevVal, currVal) => prevVal || 0 + currVal || 0 // Additive merge
-      )
-  );
+  const indexPatternsTelemetry = await buildMapsIndexPatternsTelemetry(layerLists);
 
   return {
     settings: {

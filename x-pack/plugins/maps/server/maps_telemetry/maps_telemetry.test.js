@@ -87,7 +87,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
 
   test('returns expected telemetry data from index patterns', async () => {
     const layerLists = getLayerLists(mapSavedObjects);
-    const result = buildMapsIndexPatternsTelemetry(indexPatternSavedObjects, layerLists);
+    const result = await buildMapsIndexPatternsTelemetry(layerLists);
 
     expect(result).toMatchObject({
       indexPatternsWithGeoFieldCount: 3,
