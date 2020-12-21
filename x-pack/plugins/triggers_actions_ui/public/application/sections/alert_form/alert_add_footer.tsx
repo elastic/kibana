@@ -42,7 +42,7 @@ export const AlertAddFooter = ({ isSaving, hasErrors, onSave, onCancel }: AlertA
             data-test-subj="saveAlertButton"
             type="submit"
             iconType="check"
-            isDisabled={hasErrors || loadingHealthCheck}
+            isDisabled={loadingHealthCheck}
             isLoading={isSaving}
             onClick={onSave}
           >

@@ -181,7 +181,6 @@ export const AlertEdit = ({
                     data-test-subj="saveEditedAlertButton"
                     type="submit"
                     iconType="check"
-                    isDisabled={hasErrors || hasActionErrors || hasActionsWithBrokenConnector}
                     isLoading={isSaving}
                     onClick={async () => {
                       setIsSaving(true);

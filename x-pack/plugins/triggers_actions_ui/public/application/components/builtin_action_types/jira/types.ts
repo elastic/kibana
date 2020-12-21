@@ -9,7 +9,6 @@ import { UserConfiguredActionConnector } from '../../../../types';
 import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
 
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
-
 export interface JiraActionParams {
   subAction: string;
   subActionParams: ExecutorSubActionPushParams;

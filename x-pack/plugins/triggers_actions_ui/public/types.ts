@@ -74,8 +74,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ValidationResult;
-  validateParams: (actionParams: any) => ValidationResult;
+  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  validateParams: (actionParams: ActionParams) => ValidationResult<Partial<ActionParams>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
@@ -86,8 +86,13 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   > | null;
 }
 
-export interface ValidationResult {
-  errors: Record<string, any>;
+export interface ValidationResult<T> {
+  errors: Record<Extract<keyof T, string>, string[] | unknown>;
+}
+
+export interface ConnectorValidationResult<Config, Secrets> {
+  config?: ValidationResult<Config>;
+  secrets?: ValidationResult<Secrets>;
 }
 
 interface ActionConnectorProps<Config, Secrets> {
@@ -187,11 +192,10 @@ export interface AlertTypeParamsExpressionProps<
 
 export interface AlertTypeModel<AlertParamsType = any> {
   id: string;
-  name: string | JSX.Element;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (alertParams: AlertParamsType) => ValidationResult;
+  validate: (alertParams: AlertParamsType) => ValidationResult<AlertParamsType>;
   alertParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;

@@ -80,9 +80,18 @@ export const ConnectorAddModal = ({
   }, [initialConnector, onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
+  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const configErrors = (connectorValidationResult.config
+    ? connectorValidationResult.config.errors
+    : {}) as IErrorObject;
+  const secretsErrors = (connectorValidationResult.secrets
+    ? connectorValidationResult.secrets.errors
+    : {}) as IErrorObject;
+  const baseValidationResult = validateBaseProperties(connector);
   const errors = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
+    ...configErrors,
+    ...secretsErrors,
+    ...baseValidationResult.errors,
   } as IErrorObject;
   hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
@@ -164,9 +173,27 @@ export const ConnectorAddModal = ({
               data-test-subj="saveActionButtonModal"
               type="submit"
               iconType="check"
-              isDisabled={hasErrors}
               isLoading={isSaving}
               onClick={async () => {
+                if (hasErrors) {
+                  Object.keys(configErrors).forEach((errorKey) => {
+                    if (errors[errorKey].length >= 1) {
+                      connector.config[errorKey] = null;
+                    }
+                  });
+                  Object.keys(secretsErrors).forEach((errorKey) => {
+                    if (errors[errorKey].length >= 1) {
+                      connector.secrets[errorKey] = null;
+                    }
+                  });
+                  Object.keys(baseValidationResult.errors).forEach((errorKey) => {
+                    if (errors[errorKey].length >= 1) {
+                      connector[errorKey] = null;
+                    }
+                  });
+                  setConnector(connector);
+                  return;
+                }
                 setIsSaving(true);
                 const savedAction = await onActionConnectorSave();
                 setIsSaving(false);

@@ -6,7 +6,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import teamsSvg from './teams.svg';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
 import { TeamsActionParams, TeamsSecrets, TeamsActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -26,14 +26,15 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
         defaultMessage: 'Send a message to a Microsoft Teams channel.',
       }
     ),
-    validateConnector: (action: TeamsActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: TeamsActionConnector
+    ): ConnectorValidationResult<unknown, TeamsSecrets> => {
+      const secretsErrors = {
         webhookUrl: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
       if (!action.secrets.webhookUrl) {
-        errors.webhookUrl.push(
+        secretsErrors.webhookUrl.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredWebhookUrlText',
             {
@@ -43,7 +44,7 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
         );
       } else if (action.secrets.webhookUrl) {
         if (!isValidUrl(action.secrets.webhookUrl)) {
-          errors.webhookUrl.push(
+          secretsErrors.webhookUrl.push(
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.invalidWebhookUrlText',
               {
@@ -52,7 +53,7 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
             )
           );
         } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          errors.webhookUrl.push(
+          secretsErrors.webhookUrl.push(
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requireHttpsWebhookUrlText',
               {
@@ -64,12 +65,11 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
       }
       return validationResult;
     },
-    validateParams: (actionParams: TeamsActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (actionParams: TeamsActionParams): ValidationResult<TeamsActionParams> => {
       const errors = {
         message: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(

@@ -29,6 +29,8 @@ import {
   ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
+  ConnectorValidationResult,
+  ValidationResult,
 } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -91,6 +93,10 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
 
   let currentForm;
   let actionTypeModel;
+  let errors: IErrorObject;
+  let configErrors: IErrorObject;
+  let secretsErrors: IErrorObject;
+  let baseValidationResult: ValidationResult<unknown>;
   if (!actionType) {
     currentForm = (
       <ActionTypeMenu
@@ -103,10 +109,19 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
-    const errors = {
-      ...actionTypeModel?.validateConnector(connector).errors,
-      ...validateBaseProperties(connector).errors,
-    } as IErrorObject;
+    const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+    configErrors = (connectorValidationResult.config
+      ? connectorValidationResult.config.errors
+      : {}) as IErrorObject;
+    secretsErrors = (connectorValidationResult.secrets
+      ? connectorValidationResult.secrets.errors
+      : {}) as IErrorObject;
+    baseValidationResult = validateBaseProperties(connector);
+    errors = {
+      ...configErrors,
+      ...secretsErrors,
+      ...baseValidationResult.errors,
+    };
     hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
@@ -150,6 +165,25 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
       });
 
   const onSaveClicked = async () => {
+    if (hasErrors) {
+      Object.keys(configErrors).forEach((errorKey) => {
+        if (errors[errorKey].length >= 1) {
+          connector.config[errorKey] = null;
+        }
+      });
+      Object.keys(secretsErrors).forEach((errorKey) => {
+        if (errors[errorKey].length >= 1) {
+          connector.secrets[errorKey] = null;
+        }
+      });
+      Object.keys(baseValidationResult.errors).forEach((errorKey) => {
+        if (errors[errorKey].length >= 1) {
+          connector[errorKey] = null;
+        }
+      });
+      setConnector(connector);
+      return;
+    }
     setIsSaving(true);
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
@@ -253,7 +287,6 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
                         color="secondary"
                         data-test-subj="saveAndTestNewActionButton"
                         type="submit"
-                        isDisabled={hasErrors}
                         isLoading={isSaving}
                         onClick={async () => {
                           const savedConnector = await onSaveClicked();
@@ -275,7 +308,6 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
                       color="secondary"
                       data-test-subj="saveNewActionButton"
                       type="submit"
-                      isDisabled={hasErrors}
                       isLoading={isSaving}
                       onClick={onSaveClicked}
                     >
