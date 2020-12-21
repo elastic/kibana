@@ -78,7 +78,6 @@ export const IndexPattern = ({
   allowLevelofDetail,
 }) => {
   const config = getUISettings();
-
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
@@ -192,7 +191,7 @@ export const IndexPattern = ({
               data-test-subj="metricsIndexPatternInput"
               disabled={disabled}
               placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName, '*')}
+              onChange={handleTextChange(indexPatternName)}
               value={model[indexPatternName]}
             />
           </EuiFormRow>

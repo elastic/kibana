@@ -21,12 +21,22 @@ import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
 import { indexPatterns } from '../../../../data/public';
 
-export async function fetchFields(indexes: string[] = [], signal?: AbortSignal) {
+interface SanitizedFieldType {
+  name: string;
+  label: string;
+  type: string;
+}
+
+export async function fetchFields(
+  indexes: string[] = [],
+  signal?: AbortSignal
+): Promise<Record<string, SanitizedFieldType[]>> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
   const dataStart = getDataStart();
 
   try {
+    const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
         const kibanaIndexPattern = await dataStart.indexPatterns.find(pattern, 2);
@@ -52,13 +62,19 @@ export async function fetchFields(indexes: string[] = [], signal?: AbortSignal) 
       })
     );
 
-    return patterns.reduce(
+    const fields: Record<string, SanitizedFieldType[]> = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
         [currentPattern]: indexFields[index],
       }),
       {}
     );
+
+    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
+      fields[''] = fields[defaultIndexPattern?.title];
+    }
+
+    return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {
       getCoreStart().notifications.toasts.addDanger({
@@ -69,5 +85,5 @@ export async function fetchFields(indexes: string[] = [], signal?: AbortSignal) 
       });
     }
   }
-  return [];
+  return {};
 }

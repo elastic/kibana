@@ -25,7 +25,7 @@ export function extractIndexPatterns(
 ) {
   const patterns: string[] = [];
 
-  if (!excludedFields[panel.index_pattern]) {
+  if (panel.index_pattern && !excludedFields[panel.index_pattern]) {
     patterns.push(panel.index_pattern);
   }
 
