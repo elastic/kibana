@@ -17,7 +17,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Export rules', () => {
+describe.skip('Export rules', () => {
   let ruleResponse: Cypress.Response;
   before(() => {
     cleanKibana();

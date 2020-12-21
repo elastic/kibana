@@ -99,7 +99,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
     }
 
-    private async inputValue(dataTestSubj: string, value: string) {
+    public async inputValue(dataTestSubj: string, value: string) {
       if (browser.isFirefox) {
         const input = await testSubjects.find(dataTestSubj);
         await input.clearValue();

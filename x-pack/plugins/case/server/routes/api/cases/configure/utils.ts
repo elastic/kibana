@@ -25,9 +25,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from '../../../../../common/api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionsClient } from '../../../../../../actions/server/actions_client';
-
+import { ActionsClient } from '../../../../../../actions/server';
 export const mapIncident = async (
   actionsClient: ActionsClient,
   connectorId: string,
@@ -59,13 +57,11 @@ export const mapIncident = async (
       );
     }
   }
-
   const fields = prepareFieldsForTransformation({
     defaultPipes,
     mappings,
     params,
   });
-
   const transformedFields = transformFields<
     ServiceConnectorCaseParams,
     ExternalServiceParams,

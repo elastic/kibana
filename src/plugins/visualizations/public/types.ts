@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
   AggConfigOptions,
   SearchSourceFields,
   TimefilterContract,
 } from '../../../plugins/data/public';
+import { ExpressionAstExpression } from '../../expressions/public';
+
 import { SerializedVis, Vis, VisParams } from './vis';
 import { ExprVis } from './expressions/vis';
 
