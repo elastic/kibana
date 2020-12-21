@@ -20,6 +20,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
@@ -28,13 +29,11 @@ import {
   callApmApi,
 } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TableLinkFlexItem } from '../table_link_flex_item';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_ink';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -270,7 +269,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate(
@@ -282,7 +281,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <TransactionOverviewLink serviceName={serviceName}>
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
@@ -291,7 +290,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
                 }
               )}
             </TransactionOverviewLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
