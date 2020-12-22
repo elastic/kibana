@@ -32,11 +32,19 @@ describe('Discover grid view button ', function () {
       rows: esHits,
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
+      isDarkMode: false,
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ExpandButton rowIndex={0} />
+        <ExpandButton
+          rowIndex={0}
+          setCellProps={jest.fn()}
+          columnId="test"
+          isExpanded={false}
+          isDetails={false}
+          isExpandable={false}
+        />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
@@ -50,11 +58,19 @@ describe('Discover grid view button ', function () {
       rows: esHits,
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
+      isDarkMode: false,
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ExpandButton rowIndex={0} />
+        <ExpandButton
+          rowIndex={0}
+          setCellProps={jest.fn()}
+          columnId="test"
+          isExpanded={false}
+          isDetails={false}
+          isExpandable={false}
+        />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
@@ -68,11 +84,19 @@ describe('Discover grid view button ', function () {
       rows: esHits,
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
+      isDarkMode: false,
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
-        <ExpandButton rowIndex={1} />
+        <ExpandButton
+          rowIndex={1}
+          setCellProps={jest.fn()}
+          columnId="test"
+          isExpanded={false}
+          isDetails={false}
+          isExpandable={false}
+        />
       </DiscoverGridContext.Provider>
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');

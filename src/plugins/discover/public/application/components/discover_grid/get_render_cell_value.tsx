@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
+import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+
 import {
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,
@@ -25,13 +28,29 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverGridContext } from './discover_grid_context';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined
-) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
   const field = indexPattern.fields.getByName(columnId);
+  const ctx = useContext(DiscoverGridContext);
+
+  useEffect(() => {
+    if (ctx.expanded && row && ctx.expanded._id === row._id) {
+      setCellProps({
+        style: {
+          backgroundColor: ctx.isDarkMode
+            ? themeDark.euiColorHighlight
+            : themeLight.euiColorHighlight,
+        },
+      });
+    } else {
+      setCellProps({ style: undefined });
+    }
+  }, [ctx, row, setCellProps]);
 
   if (typeof row === 'undefined') {
     return <span>-</span>;

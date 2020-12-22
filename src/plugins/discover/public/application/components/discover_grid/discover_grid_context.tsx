@@ -26,6 +26,7 @@ export interface GridContext {
   rows: ElasticSearchHit[];
   onFilter: DocViewFilterFn;
   indexPattern: IndexPattern;
+  isDarkMode: boolean;
 }
 
 const defaultContext = ({} as unknown) as GridContext;

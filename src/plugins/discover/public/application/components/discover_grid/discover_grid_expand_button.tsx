@@ -16,18 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useContext } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useContext, useEffect } from 'react';
+import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
+import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-
 /**
  * Button to expand a given row
  */
-export const ExpandButton = ({ rowIndex }: { rowIndex: number }) => {
-  const { expanded, setExpanded, rows } = useContext(DiscoverGridContext);
-
+export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+  const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
+  useEffect(() => {
+    if (expanded && current && expanded._id === current._id) {
+      setCellProps({
+        style: {
+          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
+        },
+      });
+    } else {
+      setCellProps({ style: undefined });
+    }
+  }, [expanded, current, setCellProps, isDarkMode]);
+
   const isCurrentRowExpanded = current === expanded;
   const buttonLabel = i18n.translate('discover.grid.viewDoc', {
     defaultMessage: 'Toggle dialog with details',
@@ -43,7 +55,7 @@ export const ExpandButton = ({ rowIndex }: { rowIndex: number }) => {
         onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
         color={isCurrentRowExpanded ? 'primary' : 'subdued'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
-        isSelected={isCurrentRowExpanded ? true : false}
+        isSelected={isCurrentRowExpanded}
       />
     </EuiToolTip>
   );

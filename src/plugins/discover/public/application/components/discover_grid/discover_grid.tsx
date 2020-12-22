@@ -249,6 +249,7 @@ export const DiscoverGrid = ({
         rows: rows || [],
         onFilter,
         indexPattern,
+        isDarkMode: services.uiSettings.get('theme:darkMode'),
       }}
     >
       <>
