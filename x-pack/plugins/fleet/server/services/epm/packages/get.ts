@@ -5,7 +5,13 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-import { isPackageLimited, installationStatuses, PackageUsageSummary } from '../../../../common';
+import {
+  isPackageLimited,
+  installationStatuses,
+  PackageUsageSummary,
+  PackagePolicySOAttributes,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   ArchivePackage,
@@ -17,6 +23,7 @@ import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getArchivePackage } from '../archive';
+import { normalizeKuery } from '../../saved_object';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -130,9 +137,31 @@ export const getPackageUsageSummary = async ({
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
 }): Promise<PackageUsageSummary> => {
-  // FIXME:pt finish service method
+  const filter = normalizeKuery(
+    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+  );
+  const agentPolicyCount = new Set<string>();
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      page: page++,
+      filter,
+    });
+
+    for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
+      agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
+    }
+
+    hasMore = packagePolicies.saved_objects.length > 0;
+  }
+
   return {
-    agent_policy_count: 10,
+    agent_policy_count: agentPolicyCount.size,
   };
 };
 
