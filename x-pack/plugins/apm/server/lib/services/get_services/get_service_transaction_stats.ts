@@ -33,6 +33,26 @@ interface AggregationParams {
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
+function calculateErrorRate({
+  success,
+  failure,
+}: {
+  success: number;
+  failure: number;
+}) {
+  return failure / (failure + success);
+}
+
+function calculateAvgDuration({
+  value,
+  deltaAsMinutes,
+}: {
+  value: number;
+  deltaAsMinutes: number;
+}) {
+  return value / deltaAsMinutes;
+}
+
 export async function getServiceTransactionStats({
   setup,
   searchAggregatedTransactions,
@@ -95,7 +115,10 @@ export async function getServiceTransactionStats({
           },
           aggs: {
             transactionType: {
-              terms: { field: TRANSACTION_TYPE },
+              terms: {
+                field: TRANSACTION_TYPE,
+                order: { count: 'desc' },
+              },
               aggs: {
                 ...metrics,
                 environments: {
@@ -160,26 +183,32 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionErrorRate: {
-          value:
-            topTransactionTypeBucket.failure.count.value /
-            (topTransactionTypeBucket.failure.count.value +
-              topTransactionTypeBucket.successful.count.value),
+          value: calculateErrorRate({
+            success: topTransactionTypeBucket.successful.count.value,
+            failure: topTransactionTypeBucket.failure.count.value,
+          }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y:
-                dateBucket.failure.count.value /
-                (dateBucket.failure.count.value +
-                  dateBucket.successful.count.value),
+              y: calculateErrorRate({
+                success: dateBucket.successful.count.value,
+                failure: dateBucket.failure.count.value,
+              }),
             })
           ),
         },
         transactionsPerMinute: {
-          value: topTransactionTypeBucket.count.value / deltaAsMinutes,
+          value: calculateAvgDuration({
+            value: topTransactionTypeBucket.count.value,
+            deltaAsMinutes,
+          }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.avg_duration.value,
+              y: calculateAvgDuration({
+                value: dateBucket.count.value,
+                deltaAsMinutes,
+              }),
             })
           ),
         },

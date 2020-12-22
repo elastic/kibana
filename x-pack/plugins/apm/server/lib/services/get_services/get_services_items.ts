@@ -9,7 +9,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getServicesProjection } from '../../../projections/services';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getHealthStatuses } from './get_services_items_stats';
+import { getHealthStatuses } from './get_health_statuses';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export type ServicesItemsSetup = Setup & SetupTimeRange;

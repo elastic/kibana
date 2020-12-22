@@ -208,6 +208,9 @@ Array [
               },
               "terms": Object {
                 "field": "transaction.type",
+                "order": Object {
+                  "count": "desc",
+                },
               },
             },
           },
