@@ -89,7 +89,14 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
         break;
       }
 
-      const searchAfter = getEsQuerySearchAfter(type, documents, timeField, anchor, nanos);
+      const searchAfter = getEsQuerySearchAfter(
+        type,
+        documents,
+        timeField,
+        anchor,
+        nanos,
+        useNewFieldsApi
+      );
 
       const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
 

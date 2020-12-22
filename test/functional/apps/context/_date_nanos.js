@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'discover:searchFieldsFromSource': true,
       });
     });
 
