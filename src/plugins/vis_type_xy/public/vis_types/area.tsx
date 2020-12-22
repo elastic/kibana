@@ -42,7 +42,6 @@ import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
-import { SplitTooltip } from './split_tooltip';
 
 export const getAreaVisTypeDefinition = (
   showElasticChartsOptions = false
@@ -189,12 +188,6 @@ export const getAreaVisTypeDefinition = (
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        // TODO: Remove when split chart aggs are supported
-        // https://github.com/elastic/kibana/issues/82496
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
       },
     ]),
   },

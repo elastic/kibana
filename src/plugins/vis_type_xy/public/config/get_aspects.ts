@@ -40,7 +40,10 @@ export function getEmptyAspect(): Aspect {
     },
   };
 }
-export function getAspects(columns: DatatableColumn[], { x, y, z, series }: Dimensions): Aspects {
+export function getAspects(
+  columns: DatatableColumn[],
+  { x, y, z, series, splitColumn, splitRow }: Dimensions
+): Aspects {
   const seriesDimensions = Array.isArray(series) || series === undefined ? series : [series];
 
   return {
@@ -48,6 +51,12 @@ export function getAspects(columns: DatatableColumn[], { x, y, z, series }: Dime
     y: getAspectsFromDimension(columns, y) ?? [],
     z: z && z?.length > 0 ? getAspectsFromDimension(columns, z[0]) : undefined,
     series: getAspectsFromDimension(columns, seriesDimensions),
+    splitColumn:
+      splitColumn && splitColumn?.length > 0
+        ? getAspectsFromDimension(columns, splitColumn[0])
+        : undefined,
+    splitRow:
+      splitRow && splitRow?.length > 0 ? getAspectsFromDimension(columns, splitRow[0]) : undefined,
   };
 }
 

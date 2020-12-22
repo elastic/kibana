@@ -74,6 +74,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
+import { ChartSplitter } from './chart_splitter';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -265,6 +266,12 @@ const VisComponent = (props: VisComponentProps) => {
   const splitSeriesAccessors = config.aspects.series
     ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
     : [];
+  const splitChartColumnAccessor = config.aspects.splitColumn
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitColumn, 0)
+    : undefined;
+  const splitChartRowAccessor = config.aspects.splitRow
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitRow, 0)
+    : undefined;
 
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
@@ -274,6 +281,12 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%">
+        {(splitChartColumnAccessor || splitChartRowAccessor) && (
+          <ChartSplitter
+            splitColumnAccessor={splitChartColumnAccessor}
+            splitRowAccessor={splitChartRowAccessor}
+          />
+        )}
         <XYSettings
           {...config}
           showLegend={showLegend}

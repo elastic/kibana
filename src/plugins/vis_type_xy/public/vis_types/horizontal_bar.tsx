@@ -42,7 +42,6 @@ import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
-import { SplitTooltip } from './split_tooltip';
 
 export const getHorizontalBarVisTypeDefinition = (
   showElasticChartsOptions = false
@@ -191,12 +190,6 @@ export const getHorizontalBarVisTypeDefinition = (
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        // TODO: Remove when split chart aggs are supported
-        // https://github.com/elastic/kibana/issues/82496
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
       },
     ]),
   },

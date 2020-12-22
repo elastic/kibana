@@ -54,6 +54,8 @@ export interface Aspects {
   y: Aspect[];
   z?: Aspect;
   series?: Aspect[];
+  splitColumn?: Aspect;
+  splitRow?: Aspect;
 }
 
 export interface AxisGrid {
