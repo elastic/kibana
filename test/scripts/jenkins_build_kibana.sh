@@ -10,7 +10,7 @@ fi
 export KBN_NP_PLUGINS_BUILT=true
 
 echo " -> Ensuring all functional tests are in a ciGroup"
-yarn run grunt functionalTests:ensureAllTestsInCiGroup;
+node scripts/ensure_all_tests_in_ci_group;
 
 echo " -> building and extracting OSS Kibana distributable for use in functional tests"
 node scripts/build --debug --oss
