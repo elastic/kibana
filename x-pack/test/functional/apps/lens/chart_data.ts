@@ -58,21 +58,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       assertMatchesExpectedData(data!);
     });
 
-    it('should render pie chart', async () => {
+    it.skip('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
-    it('should render donut chart', async () => {
+    it.skip('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
-    it('should render treemap chart', async () => {
+    it.skip('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.lens.getCurrentChartDebugState();
