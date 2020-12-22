@@ -49,6 +49,7 @@ import {
   TIMELINE_EDIT_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
+  QUERY_TAB_EVENTS_FOOTER,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -118,6 +119,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible');
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
@@ -165,7 +167,8 @@ export const pinFirstEvent = () => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT)
+  cy.get(QUERY_TAB_EVENTS_FOOTER)
+    .find(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
     .then((strCount) => {
       const intCount = +strCount;

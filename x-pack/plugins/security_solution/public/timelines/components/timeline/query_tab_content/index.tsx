@@ -322,7 +322,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </HideShowContainer>
 
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
@@ -339,7 +342,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutBody>
 
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               {!isBlankTimeline && (

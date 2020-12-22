@@ -84,6 +84,18 @@ export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
+export const QUERY_TAB_EVENTS_TABLE = '[data-test-subj="query-events-table"]';
+
+export const QUERY_TAB_EVENTS_BODY = '[data-test-subj="query-tab-flyout-body"]';
+
+export const QUERY_TAB_EVENTS_FOOTER = '[data-test-subj="query-tab-flyout-footer"]';
+
+export const PINNED_TAB_EVENTS_TABLE = '[data-test-subj="pinned-events-table"]';
+
+export const PINNED_TAB_EVENTS_BODY = '[data-test-subj="pinned-tab-flyout-body"]';
+
+export const PINNED_TAB_EVENTS_FOOTER = '[data-test-subj="pinned-tab-flyout-footer"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';

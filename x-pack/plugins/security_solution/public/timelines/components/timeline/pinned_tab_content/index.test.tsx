@@ -21,6 +21,7 @@ import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -117,7 +118,9 @@ describe('PinnedTabContent', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.pinned}-events-table"]`).exists()
+      ).toEqual(true);
     });
 
     it('it shows the timeline footer', () => {

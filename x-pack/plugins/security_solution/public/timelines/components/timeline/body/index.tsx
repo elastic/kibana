@@ -179,7 +179,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           <EventsTable
             $activePage={activePage}
             $columnCount={columnHeaders.length + 1}
-            data-test-subj="events-table"
+            data-test-subj={`${tabType}-events-table`}
             columnWidths={columnWidths}
             onKeyDown={onKeyDown}
             $rowCount={data.length}
