@@ -54,5 +54,6 @@ export const FieldNameField: FunctionComponent<Props> = ({ helpText, additionalV
     }}
     component={Field}
     path="fields.field"
+    data-test-subj="fieldNameField"
   />
 );

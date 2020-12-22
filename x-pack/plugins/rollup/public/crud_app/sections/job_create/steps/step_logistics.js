@@ -45,8 +45,10 @@ export class StepLogistics extends Component {
     hasMatchingIndices: PropTypes.bool.isRequired,
     indexPatternAsyncErrors: PropTypes.array,
   };
+  state = { cronFocus: false };
 
   showAdvancedCron = () => {
+    this.setState({ cronFocus: true });
     const { onFieldsChange } = this.props;
 
     onFieldsChange({
@@ -55,6 +57,7 @@ export class StepLogistics extends Component {
   };
 
   hideAdvancedCron = () => {
+    this.setState({ cronFocus: true });
     const { onFieldsChange, fields } = this.props;
     const { simpleRollupCron } = fields;
 
@@ -156,6 +159,7 @@ export class StepLogistics extends Component {
             fullWidth
           >
             <EuiFieldText
+              autoFocus={this.state.cronFocus}
               value={rollupCron}
               onChange={(e) => onFieldsChange({ rollupCron: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
@@ -181,6 +185,7 @@ export class StepLogistics extends Component {
     return (
       <Fragment>
         <CronEditor
+          autoFocus={this.state.cronFocus}
           fieldToPreferredValueMap={fieldToPreferredValueMap}
           cronExpression={rollupCron}
           frequency={cronFrequency}

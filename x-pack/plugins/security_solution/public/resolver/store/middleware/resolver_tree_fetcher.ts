@@ -15,7 +15,6 @@ import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
-import { createRange } from './../../models/time_range';
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -35,6 +34,7 @@ export function ResolverTreeFetcher(
   return async () => {
     const state = api.getState();
     const databaseParameters = selectors.treeParametersToFetch(state);
+    const currentPanelParameters = selectors.panelViewAndParameters(state);
 
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
@@ -45,6 +45,8 @@ export function ResolverTreeFetcher(
       let dataSource: string | undefined;
       let dataSourceSchema: ResolverSchema | undefined;
       let result: ResolverNode[] | undefined;
+      const timeRangeFilters = selectors.timeRangeFilters(state);
+
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch({
@@ -70,7 +72,7 @@ export function ResolverTreeFetcher(
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
-          timeRange: createRange(),
+          timeRange: timeRangeFilters,
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
@@ -90,6 +92,26 @@ export function ResolverTreeFetcher(
             parameters: databaseParameters,
           },
         });
+
+        /*
+         * Necessary to handle refresh states where another node besides the origin was selected
+         * If the user has selected another node, but is back to viewing the nodeList, nodeID won't be set in the url
+         * So after a refresh the focused node will be the originID.
+         * This is okay for now, but can be updated if we decide to track selectedNode in panelParameters.
+         */
+        // no nodeID on the 'nodes' (nodeList) view.
+        if (currentPanelParameters && currentPanelParameters.panelView !== 'nodes') {
+          const { nodeID } = currentPanelParameters.panelParameters;
+          const urlHasDefinedNode = result.find((node) => node.id === nodeID);
+          api.dispatch({
+            type: 'userBroughtNodeIntoView',
+            payload: {
+              // In the event the origin is the url selectedNode, the animation has logic to prevent an unnecessary transition taking place
+              nodeID: urlHasDefinedNode ? nodeID : entityIDToFetch,
+              time: Date.now(),
+            },
+          });
+        }
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {

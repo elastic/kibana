@@ -8,7 +8,6 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import { Filter } from 'src/plugins/data/common';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -29,8 +28,7 @@ import {
   SignalRuleAlertTypeDefinition,
   RuleAlertAttributes,
   EqlSignalSearchResponse,
-  BaseSignalHit,
-  ThresholdQueryBucket,
+  WrappedSignalHit,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -48,9 +46,9 @@ import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
-import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
+import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -66,7 +64,9 @@ import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
-import { filterEventsAgainstList } from './filter_events_with_list';
+import { filterEventsAgainstList } from './filters/filter_events_against_list';
+import { isOutdated } from '../migrations/helpers';
+import { RuleTypeParams } from '../types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -87,9 +87,19 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
-      params: signalParamsSchema(),
+      /**
+       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
+       * Once that's done, you should be able to do:
+       * ```
+       * params: signalParamsSchema(),
+       * ```
+       */
+      params: (signalParamsSchema() as unknown) as {
+        validate: (object: unknown) => RuleTypeParams;
+      },
     },
     producer: SERVER_APP_ID,
+    minimumLicenseRequired: 'basic',
     async executor({
       previousStartedAt,
       startedAt,
@@ -264,6 +274,7 @@ export const signalRulesAlertType = ({
             errors,
             bulkCreateDuration,
             createdItemsCount,
+            createdItems,
           } = await bulkCreateMlSignals({
             actions,
             throttle,
@@ -298,26 +309,17 @@ export const signalRulesAlertType = ({
               success: success && filteredAnomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
-          const esFilter = await getFilter({
-            type,
-            filters,
-            language,
-            query,
-            savedId,
-            services,
-            index: inputIndex,
-            lists: exceptionItems ?? [],
-          });
 
           const {
-            searchResult: previousSignals,
+            filters: bucketFilters,
             searchErrors: previousSearchErrors,
-          } = await findPreviousThresholdSignals({
+          } = await getThresholdBucketFilters({
             indexPattern: [outputIndex],
             from,
             to,
@@ -329,29 +331,15 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
-          previousSignals.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
-            esFilter.bool.filter.push(({
-              bool: {
-                must_not: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
-                        },
-                      },
-                      {
-                        range: {
-                          [timestampOverride ?? '@timestamp']: {
-                            lte: bucket.lastSignalTimestamp.value_as_string,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            } as unknown) as Filter);
+          const esFilter = await getFilter({
+            type,
+            filters: filters ? filters.concat(bucketFilters) : bucketFilters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+            lists: exceptionItems ?? [],
           });
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
@@ -370,6 +358,7 @@ export const signalRulesAlertType = ({
             success,
             bulkCreateDuration,
             createdItemsCount,
+            createdItems,
             errors,
           } = await bulkCreateThresholdSignals({
             actions,
@@ -395,6 +384,7 @@ export const signalRulesAlertType = ({
             tags,
             buildRuleMessage,
           });
+
           result = mergeReturns([
             result,
             createSearchAfterReturnTypeFromResponse({
@@ -405,6 +395,7 @@ export const signalRulesAlertType = ({
               success,
               errors: [...errors, ...previousSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
+              createdSignals: createdItems,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
@@ -509,10 +500,7 @@ export const signalRulesAlertType = ({
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
-            if (
-              signalIndexVersion === undefined ||
-              signalIndexVersion < MIN_EQL_RULE_INDEX_VERSION
-            ) {
+            if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
               throw new Error(
                 `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
               );
@@ -541,10 +529,10 @@ export const signalRulesAlertType = ({
             'transport.request',
             request
           );
-          let newSignals: BaseSignalHit[] | undefined;
+          let newSignals: WrappedSignalHit[] | undefined;
           if (response.hits.sequences !== undefined) {
             newSignals = response.hits.sequences.reduce(
-              (acc: BaseSignalHit[], sequence) =>
+              (acc: WrappedSignalHit[], sequence) =>
                 acc.concat(buildSignalGroupFromSequence(sequence, savedObject, outputIndex)),
               []
             );
@@ -564,6 +552,7 @@ export const signalRulesAlertType = ({
             const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
             result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
             result.createdSignalsCount += insertResult.createdItemsCount;
+            result.createdSignals = insertResult.createdItems;
           }
           result.success = true;
         } else {
@@ -598,6 +587,7 @@ export const signalRulesAlertType = ({
               scheduleNotificationActions({
                 alertInstance,
                 signalsCount: result.createdSignalsCount,
+                signals: result.createdSignals,
                 resultsLink,
                 ruleParams: notificationRuleParams,
               });

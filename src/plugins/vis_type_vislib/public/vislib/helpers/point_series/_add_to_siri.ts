@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { getAggId } from '../../../../../vis_type_xy/public';
+import type { Dimension } from '../../../../../vis_type_xy/public';
+
 import { Point } from './_get_point';
-import { Dimension } from './point_series';
 
 export interface Serie {
   id: string;
@@ -48,7 +50,7 @@ export function addToSiri(
   }
 
   series.set(id, {
-    id: id.split('-').pop() as string,
+    id: getAggId(id),
     rawId: id,
     label: yLabel == null ? id : yLabel,
     count: 0,

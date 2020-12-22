@@ -25,11 +25,16 @@ import { useCreateCaseModal } from '../use_create_case_modal';
 import { useAllCasesModal } from '../use_all_cases_modal';
 
 interface AddToCaseActionProps {
+  ariaLabel?: string;
   ecsRowData: Ecs;
   disabled: boolean;
 }
 
-const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, disabled }) => {
+const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
+  ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
+  ecsRowData,
+  disabled,
+}) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
 
@@ -120,7 +125,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
         content={i18n.ACTION_ADD_TO_CASE_TOOLTIP}
       >
         <EuiButtonIcon
-          aria-label={i18n.ACTION_ADD_TO_CASE_ARIA_LABEL}
+          aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
           size="s"
           iconType="folderClosed"
@@ -129,12 +134,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
         />
       </EuiToolTip>
     ),
-    [disabled, openPopover]
+    [ariaLabel, disabled, openPopover]
   );
 
   return (
     <>
-      <ActionIconItem id="attachAlertToCase">
+      <ActionIconItem>
         <EuiPopover
           id="attachAlertToCasePanel"
           button={button}

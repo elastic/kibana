@@ -9,7 +9,7 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
-import { useFullScreen } from '../../../../common/containers/use_full_screen';
+import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import {
   TimelineId,
   TimelineType,
@@ -19,6 +19,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { appActions } from '../../../../common/store/app';
 
 interface Props {
   timelineId?: string;
@@ -33,7 +34,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
     []
   );
   const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
-  const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
@@ -57,6 +58,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
       dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+      dispatch(appActions.addNotes({ notes: [] }));
       if (globalTimeRange.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
@@ -121,13 +123,13 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
-
+      const { fill: noThanks, ...propsWithoutFill } = buttonProps;
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...buttonProps}>
+        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...propsWithoutFill}>
           {title}
         </EuiButtonEmpty>
       );

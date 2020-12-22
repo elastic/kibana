@@ -58,8 +58,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       fields?: string[];
     }) {
       log.debug(`createSavedSearch(${name})`);
-      await PageObjects.header.clickDiscover();
-
+      await PageObjects.header.clickDiscover(true);
       await PageObjects.timePicker.setHistoricalDataRange();
 
       if (query) {

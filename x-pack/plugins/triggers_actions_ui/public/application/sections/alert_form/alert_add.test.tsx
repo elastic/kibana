@@ -56,6 +56,7 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers: {
@@ -93,7 +94,6 @@ describe('alert_add', () => {
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
       description: 'test',
       documentationUrl: null,
       validate: (): ValidationResult => {
@@ -128,8 +128,7 @@ describe('alert_add', () => {
     wrapper = mountWithIntl(
       <AlertAdd
         consumer={ALERTS_FEATURE_ID}
-        addFlyoutVisible={true}
-        setAddFlyoutVisibility={() => {}}
+        onClose={() => {}}
         initialValues={initialValues}
         reloadAlerts={() => {
           return new Promise<void>(() => {});

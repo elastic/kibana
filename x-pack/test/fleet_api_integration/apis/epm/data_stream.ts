@@ -88,14 +88,8 @@ export default function (providerContext: FtrProviderContext) {
       });
       expect(resLogsDatastream.body.data_streams.length).equal(1);
       expect(resLogsDatastream.body.data_streams[0].indices.length).equal(1);
-      expect(resLogsDatastream.body.data_streams[0].indices[0].index_name).equal(
-        `.ds-${logsTemplateName}-default-000001`
-      );
       expect(resMetricsDatastream.body.data_streams.length).equal(1);
       expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
-      expect(resMetricsDatastream.body.data_streams[0].indices[0].index_name).equal(
-        `.ds-${metricsTemplateName}-default-000001`
-      );
     });
 
     it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
@@ -109,9 +103,6 @@ export default function (providerContext: FtrProviderContext) {
         path: `/_data_stream/${metricsTemplateName}-default`,
       });
       expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
-      expect(resLogsDatastream.body.data_streams[0].indices[1].index_name).equal(
-        `.ds-${logsTemplateName}-default-000002`
-      );
       expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
     });
     it('should be able to upgrade a package after a rollover', async function () {

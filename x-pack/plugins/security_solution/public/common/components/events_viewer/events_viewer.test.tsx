@@ -30,6 +30,13 @@ jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useDataGridColumnSorting: jest.fn(),
+  };
+});
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -65,6 +72,7 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
+  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -78,11 +86,14 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
+  handleCloseExpandedEvent: jest.fn(),
   start: from,
-  sort: {
-    columnId: 'foo',
-    sortDirection: 'none' as SortDirection,
-  },
+  sort: [
+    {
+      columnId: 'foo',
+      sortDirection: 'asc' as SortDirection,
+    },
+  ],
   scopeId: SourcererScopeName.timeline,
   utilityBar,
 };

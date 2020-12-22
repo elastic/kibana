@@ -52,6 +52,7 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [AggFunctionsMapping](./kibana-plugin-plugins-data-public.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [ApplyGlobalFilterActionContext](./kibana-plugin-plugins-data-public.applyglobalfilteractioncontext.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) | Data plugin public Setup contract |
@@ -101,6 +102,7 @@
 |  [ACTION\_GLOBAL\_APPLY\_FILTER](./kibana-plugin-plugins-data-public.action_global_apply_filter.md) |  |
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
+|  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
@@ -162,6 +164,7 @@
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
+|  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |

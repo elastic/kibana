@@ -28,7 +28,7 @@ import {
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
@@ -93,7 +93,7 @@ export interface UpdateProperties {
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { timeline } from '../objects/timeline';
 import {
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
   TIMESTAMP_HEADER_FIELD,
   TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
@@ -28,12 +30,11 @@ import { HOSTS_URL } from '../urls/navigation';
 
 describe('toggle column in timeline', () => {
   before(() => {
-    esArchiverLoad('timeline');
-    loginAndWaitForPage(HOSTS_URL);
-  });
-
-  after(() => {
-    esArchiverUnload('timeline');
+    cleanKibana();
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    createTimeline(timeline).then((response) => {
+      loginAndWaitForPage(HOSTS_URL);
+    });
   });
 
   beforeEach(() => {
@@ -70,7 +71,7 @@ describe('toggle column in timeline', () => {
     cy.get(ID_HEADER_FIELD).should('exist');
   });
 
-  it('adds the _id field to the timeline via drag and drop', () => {
+  it.skip('adds the _id field to the timeline via drag and drop', () => {
     expandFirstTimelineEventDetails();
     dragAndDropIdToggleFieldToTimeline();
 

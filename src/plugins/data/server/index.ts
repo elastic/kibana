@@ -156,6 +156,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '../common';
 
 /**
@@ -196,6 +197,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -19,23 +20,29 @@ import {
   AlertInstanceContext,
 } from './types';
 import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
+import { ILicenseState } from './lib/license_state';
+import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
+  licenseState: ILicenseState;
+  licensing: LicensingPluginSetup;
 }
 
 export interface RegistryAlertType
   extends Pick<
-    NormalizedAlertType,
+    UntypedNormalizedAlertType,
     | 'name'
     | 'actionGroups'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
     | 'actionVariables'
     | 'producer'
+    | 'minimumLicenseRequired'
   > {
   id: string;
+  enabledInLicense: boolean;
 }
 
 /**
@@ -59,32 +66,47 @@ const alertIdSchema = schema.string({
 });
 
 export type NormalizedAlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
 > = Omit<AlertType<Params, State, InstanceState, InstanceContext>, 'recoveryActionGroup'> &
   Pick<Required<AlertType<Params, State, InstanceState, InstanceContext>>, 'recoveryActionGroup'>;
 
+export type UntypedNormalizedAlertType = NormalizedAlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
+
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly alertTypes: Map<string, NormalizedAlertType> = new Map();
+  private readonly alertTypes: Map<string, UntypedNormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly licenseState: ILicenseState;
+  private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.licenseState = licenseState;
+    this.licensing = licensing;
   }
 
   public has(id: string) {
     return this.alertTypes.has(id);
   }
 
+  public ensureAlertTypeEnabled(id: string) {
+    this.licenseState.ensureLicenseForAlertType(this.get(id));
+  }
+
   public register<
-    Params extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
-    InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    Params extends AlertTypeParams,
+    State extends AlertTypeState,
+    InstanceState extends AlertInstanceState,
+    InstanceContext extends AlertInstanceContext
   >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
@@ -98,16 +120,31 @@ export class AlertTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
-    const normalizedAlertType = augmentActionGroupsWithReserved(alertType as AlertType);
+    const normalizedAlertType = augmentActionGroupsWithReserved<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext
+    >(alertType);
 
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), normalizedAlertType);
+    this.alertTypes.set(
+      alertIdSchema.validate(alertType.id),
+      normalizedAlertType as UntypedNormalizedAlertType
+    );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(normalizedAlertType, context),
+          this.taskRunnerFactory.create(normalizedAlertType as UntypedNormalizedAlertType, context),
       },
     });
+    // No need to notify usage on basic alert types
+    if (alertType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getAlertTypeFeatureUsageName(alertType.name),
+        alertType.minimumLicenseRequired
+      );
+    }
   }
 
   public get<
@@ -146,8 +183,9 @@ export class AlertTypeRegistry {
             defaultActionGroupId,
             actionVariables,
             producer,
+            minimumLicenseRequired,
           },
-        ]: [string, NormalizedAlertType]) => ({
+        ]: [string, UntypedNormalizedAlertType]) => ({
           id,
           name,
           actionGroups,
@@ -155,6 +193,12 @@ export class AlertTypeRegistry {
           defaultActionGroupId,
           actionVariables,
           producer,
+          minimumLicenseRequired,
+          enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
+            id,
+            name,
+            minimumLicenseRequired
+          ).isValid,
         })
       )
     );

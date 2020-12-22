@@ -55,7 +55,9 @@ export const DescribedFormRow: FunctionComponent<Props> = ({
   const [uncontrolledIsContentVisible, setUncontrolledIsContentVisible] = useState<boolean>(
     () => switchProps?.initialValue ?? false
   );
-  const isContentVisible = Boolean(switchProps?.checked ?? uncontrolledIsContentVisible);
+  const isContentVisible = Boolean(
+    switchProps === undefined || (switchProps?.checked ?? uncontrolledIsContentVisible)
+  );
 
   const renderToggle = () => {
     if (!switchProps) {

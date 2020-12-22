@@ -24,14 +24,18 @@ import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { HttpSetup } from '../../../../core/public';
 
 interface Props {
+  http: HttpSetup;
   onSeenBanner: () => any;
 }
 
 export class OptedInNoticeBanner extends React.PureComponent<Props> {
   render() {
-    const { onSeenBanner } = this.props;
+    const { onSeenBanner, http } = this.props;
+    const basePath = http.basePath.get();
+
     const bannerTitle = i18n.translate('telemetry.telemetryOptedInNoticeTitle', {
       defaultMessage: 'Help us improve the Elastic Stack',
     });
@@ -56,7 +60,7 @@ export class OptedInNoticeBanner extends React.PureComponent<Props> {
               </EuiLink>
             ),
             disableLink: (
-              <EuiLink href={PATH_TO_ADVANCED_SETTINGS} onClick={onSeenBanner}>
+              <EuiLink href={`${basePath}${PATH_TO_ADVANCED_SETTINGS}`} onClick={onSeenBanner}>
                 <FormattedMessage
                   id="telemetry.telemetryOptedInDisableUsage"
                   defaultMessage="disable usage data here"
