@@ -13,12 +13,14 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
     defaultMessage: 'Last value of {name}',
-    values: { name },
+    values: {
+      name,
+    },
   });
 }
 
@@ -87,8 +89,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -186,12 +187,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     );
   },
 
-  paramEditor: ({ state, setState, currentColumn, layerId }) => {
-    const currentIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const dateFields = getDateFields(currentIndexPattern);
+  paramEditor: ({ layer, updateLayer, columnId, currentColumn, indexPattern }) => {
+    const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
-      currentIndexPattern
+      indexPattern
     );
     return (
       <>
@@ -228,11 +228,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               if (choices.length === 0) {
                 return;
               }
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'sortField',
                   value: choices[0].value,
                 })
@@ -243,8 +242,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 ? [
                     {
                       label:
-                        currentIndexPattern.getFieldByName(currentColumn.params.sortField)
-                          ?.displayName || currentColumn.params.sortField,
+                        indexPattern.getFieldByName(currentColumn.params.sortField)?.displayName ||
+                        currentColumn.params.sortField,
                       value: currentColumn.params.sortField,
                     },
                   ]

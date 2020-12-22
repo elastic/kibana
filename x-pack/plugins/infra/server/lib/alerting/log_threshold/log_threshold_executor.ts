@@ -9,7 +9,10 @@ import {
   AlertExecutorOptions,
   AlertServices,
   AlertInstance,
+  AlertTypeParams,
+  AlertTypeState,
   AlertInstanceContext,
+  AlertInstanceState,
 } from '../../../../../alerts/server';
 import {
   AlertStates,
@@ -34,6 +37,14 @@ import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
+type LogThresholdAlertServices = AlertServices<AlertInstanceState, AlertInstanceContext>;
+type LogThresholdAlertExecutorOptions = AlertExecutorOptions<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
+
 const COMPOSITE_GROUP_SIZE = 40;
 
 const checkValueAgainstComparatorMap: {
@@ -46,7 +57,7 @@ const checkValueAgainstComparatorMap: {
 };
 
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function ({ services, params }: AlertExecutorOptions) {
+  async function ({ services, params }: LogThresholdAlertExecutorOptions) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
 
@@ -88,8 +99,8 @@ async function executeAlert(
   alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
-  callCluster: AlertServices['callCluster'],
-  alertInstanceFactory: AlertServices['alertInstanceFactory']
+  callCluster: LogThresholdAlertServices['callCluster'],
+  alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
   const query = getESQuery(alertParams, timestampField, indexPattern);
 
@@ -118,8 +129,8 @@ async function executeRatioAlert(
   alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
-  callCluster: AlertServices['callCluster'],
-  alertInstanceFactory: AlertServices['alertInstanceFactory']
+  callCluster: LogThresholdAlertServices['callCluster'],
+  alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: AlertParams = {
@@ -175,7 +186,7 @@ const getESQuery = (
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -204,7 +215,7 @@ export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -259,7 +270,7 @@ const getReducedGroupByResults = (
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -292,7 +303,7 @@ export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -599,11 +610,17 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
 };
 
-const getUngroupedResults = async (query: object, callCluster: AlertServices['callCluster']) => {
+const getUngroupedResults = async (
+  query: object,
+  callCluster: LogThresholdAlertServices['callCluster']
+) => {
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
 };
 
-const getGroupedResults = async (query: object, callCluster: AlertServices['callCluster']) => {
+const getGroupedResults = async (
+  query: object,
+  callCluster: LogThresholdAlertServices['callCluster']
+) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
 
