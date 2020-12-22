@@ -12,8 +12,12 @@ import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  pluginInitializerContextConfigMock,
+} from 'src/core/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -111,11 +115,10 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-const getMockFetchContext = (mockedEsClient: jest.Mock) => {
+const getMockFetchContext = (mockedEsClient: any) => {
   return {
-    ...createCollectorFetchContextMock(),
     esClient: mockedEsClient,
-  };
+  } as CollectorFetchContext;
 };
 
 describe('error handling', () => {
@@ -129,8 +132,10 @@ describe('error handling', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search.mockRejectedValue({ statusCode: 404 });
 
-    await collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
+    await collector.fetch(getMockFetchContext(esClient));
   });
 
   it('throws error for a non-404', async () => {
@@ -144,12 +149,13 @@ describe('error handling', () => {
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
 
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     const statusCodes = [401, 402, 403, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
-      await expect(
-        collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue(error)))
-      ).rejects.toBe(error);
+      esClient.search.mockRejectedValue({ statusCode });
+      await expect(collector.fetch(getMockFetchContext(esClient))).rejects.toBe(error);
     }
   });
 });
