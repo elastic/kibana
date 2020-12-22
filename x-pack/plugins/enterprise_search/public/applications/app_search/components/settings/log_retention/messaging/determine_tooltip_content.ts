@@ -26,21 +26,12 @@ export const determineTooltipContent = (
   if (!logRetentionSettings.enabled) {
     return renderOrReturnMessage(messages.noLogging);
   }
-  if (logRetentionSettings.enabled && !ilmEnabled) {
+  if (!ilmEnabled) {
     return renderOrReturnMessage(messages.ilmDisabled);
   }
-  if (
-    logRetentionSettings.enabled &&
-    ilmEnabled &&
-    !logRetentionSettings.retentionPolicy?.isDefault
-  ) {
+  if (!logRetentionSettings.retentionPolicy?.isDefault) {
     return renderOrReturnMessage(messages.customPolicy);
-  }
-  if (
-    logRetentionSettings.enabled &&
-    ilmEnabled &&
-    logRetentionSettings.retentionPolicy?.isDefault
-  ) {
+  } else {
     return renderOrReturnMessage(messages.defaultPolicy);
   }
 };
