@@ -16,7 +16,11 @@ import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  KqlMode,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -43,6 +47,7 @@ import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -74,7 +79,9 @@ const TitleFlexGroup = styled(EuiFlexGroup)`
   margin-top: 8px;
 `;
 
-const EventsContainerLoading = styled.div`
+const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -213,6 +220,12 @@ const EventsViewerComponent: React.FC<Props> = ({
     queryFields,
   ]);
 
+  const prevSortField = useRef<
+    Array<{
+      field: string;
+      direction: Direction;
+    }>
+  >([]);
   const sortField = useMemo(
     () =>
       sort.map(({ columnId, sortDirection }) => ({
@@ -243,7 +256,11 @@ const EventsViewerComponent: React.FC<Props> = ({
       prevCombinedQueries.current = combinedQueries;
       dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
     }
-  }, [combinedQueries, dispatch, id]);
+    if (!deepEqual(prevSortField.current, sortField)) {
+      prevSortField.current = sortField;
+      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
+    }
+  }, [combinedQueries, dispatch, id, sortField]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -297,7 +314,10 @@ const EventsViewerComponent: React.FC<Props> = ({
             {utilityBar && !resolverIsShowing(graphEventId) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
             )}
-            <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+            <EventsContainerLoading
+              data-timeline-id={id}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
               <TimelineRefetch
                 id={id}
                 inputId="global"
@@ -318,6 +338,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onRuleChange={onRuleChange}
                     refetch={refetch}
                     sort={sort}
+                    tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,

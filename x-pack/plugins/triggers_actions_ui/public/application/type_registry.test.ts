@@ -11,10 +11,9 @@ export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
 };
 
-const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
+const getTestAlertType = (id?: string, iconClass?: string) => {
   return {
     id: id || 'test-alet-type',
-    name: name || 'Test alert type',
     description: 'Test description',
     iconClass: iconClass || 'icon',
     documentationUrl: null,

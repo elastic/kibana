@@ -35,12 +35,12 @@ import { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;

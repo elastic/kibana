@@ -180,6 +180,8 @@ export const PostPushRequestRt = rt.type({
   params: ServiceConnectorCaseParamsRt,
 });
 
+export type PostPushRequest = rt.TypeOf<typeof PostPushRequestRt>;
+
 export interface SimpleComment {
   comment: string;
   commentId: string;
