@@ -23,7 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { Vis } from '../../../../../../visualizations/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../../../../charts/public';
+import {
+  NumberInputOption,
+  SelectOption,
+  SwitchOption,
+} from '../../../../../../vis_default_editor/public';
 
 import { SeriesParam } from '../../../../types';
 import { SetChart } from './chart_options';

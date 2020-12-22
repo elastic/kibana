@@ -7,7 +7,6 @@ import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { RecoveredActionGroup } from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
@@ -18,10 +17,16 @@ import {
 } from '../common/messages';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
+import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
+import {
+  MetricThresholdAlertExecutorOptions,
+  MetricThresholdAlertType,
+} from './register_metric_threshold_alert_type';
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function (options: AlertExecutorOptions) {
+export const createMetricThresholdExecutor = (
+  libs: InfraBackendLibs
+): MetricThresholdAlertType['executor'] =>
+  async function (options: MetricThresholdAlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -36,7 +41,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
-    const alertResults = await evaluateAlert(services.callCluster, params, config);
+    const alertResults = await evaluateAlert(
+      services.callCluster,
+      params as EvaluatedAlertParams,
+      config
+    );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults)!);
