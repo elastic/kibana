@@ -5,23 +5,27 @@
  */
 import { LicenseExpirationAlert } from './license_expiration_alert';
 import { ALERT_LICENSE_EXPIRATION } from '../../common/constants';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
-  fetchLegacyAlerts: jest.fn(),
+jest.mock('../lib/alerts/fetch_licenses', () => ({
+  fetchLicenses: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 jest.mock('moment', () => {
-  return function () {
+  const moment = function () {
     return {
       format: () => 'THE_DATE',
     };
   };
+  moment.utc = () => ({
+    format: () => 'THE_DATE',
+  });
+  return moment;
 });
 
 jest.mock('../static_globals', () => ({
@@ -72,15 +76,11 @@ describe('LicenseExpirationAlert', () => {
 
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const legacyAlert = {
-      prefix:
-        'The license for this cluster expires in {{#relativeTime}}metadata.time{{/relativeTime}} at {{#absoluteTime}}metadata.time{{/absoluteTime}}.',
-      message: 'Update your license.',
-      metadata: {
-        severity: 1000,
-        cluster_uuid: clusterUuid,
-        time: 1,
-      },
+    const license = {
+      status: 'expired',
+      type: 'gold',
+      expiryDateMS: 1,
+      clusterUuid,
     };
 
     const replaceState = jest.fn();
@@ -103,8 +103,8 @@ describe('LicenseExpirationAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [legacyAlert];
+      (fetchLicenses as jest.Mock).mockImplementation(() => {
+        return [license];
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
@@ -130,7 +130,15 @@ describe('LicenseExpirationAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
-            nodeName: 'Elasticsearch cluster alert',
+            itemLabel: undefined,
+            meta: {
+              clusterUuid: 'abc123',
+              expiryDateMS: 1,
+              status: 'expired',
+              type: 'gold',
+            },
+            nodeId: undefined,
+            nodeName: undefined,
             ui: {
               isFiring: true,
               message: {
@@ -159,7 +167,7 @@ describe('LicenseExpirationAlert', () => {
                   },
                 ],
               },
-              severity: 'warning',
+              severity: 'danger',
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -180,7 +188,7 @@ describe('LicenseExpirationAlert', () => {
     });
 
     it('should not fire actions if there is no legacy alert', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
+      (fetchLicenses as jest.Mock).mockImplementation(() => {
         return [];
       });
       const alert = new LicenseExpirationAlert();

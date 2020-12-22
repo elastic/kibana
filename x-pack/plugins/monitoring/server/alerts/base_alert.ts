@@ -30,21 +30,15 @@ import {
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { INDEX_PATTERN_ELASTICSEARCH, INDEX_ALERTS } from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { Globals } from '../static_globals';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
-
-interface LegacyOptions {
-  watchName: string;
-  nodeNameLabel: string;
-  changeDataValues?: Partial<AlertData>;
-}
+// import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+// import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 type ExecutedState =
   | {
@@ -59,7 +53,7 @@ interface AlertOptions {
   name: string;
   throttle?: string | null;
   interval?: string;
-  legacy?: LegacyOptions;
+  // legacy?: LegacyOptions;
   defaultParams?: CommonAlertParams;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
@@ -118,12 +112,12 @@ export class BaseAlert {
   }
 
   public isEnabled(licenseService: MonitoringLicenseService) {
-    if (this.alertOptions.legacy) {
-      const watcherFeature = licenseService.getWatcherFeature();
-      if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
-        return false;
-      }
-    }
+    // if (this.alertOptions.legacy) {
+    //   const watcherFeature = licenseService.getWatcherFeature();
+    //   if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
+    //     return false;
+    //   }
+    // }
     return true;
   }
 
@@ -260,10 +254,10 @@ export class BaseAlert {
       params as CommonAlertParams,
       availableCcs
     );
-    if (this.alertOptions.legacy) {
-      const data = await this.fetchLegacyData(callCluster, clusters, availableCcs);
-      return await this.processLegacyData(data, clusters, services, state);
-    }
+    // if (this.alertOptions.legacy) {
+    //   const data = await this.fetchLegacyData(callCluster, clusters, availableCcs);
+    //   return await this.processLegacyData(data, clusters, services, state);
+    // }
     const data = await this.fetchData(params, callCluster, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
   }
@@ -298,37 +292,38 @@ export class BaseAlert {
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<Array<AlertData & unknown>> {
-    throw new Error('Child classes must implement `fetchData`');
+    return [];
+    // throw new Error('Child classes must implement `fetchData`');
   }
 
-  protected async fetchLegacyData(
-    callCluster: CallCluster,
-    clusters: AlertCluster[],
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      this.alertOptions.legacy!.watchName,
-      Globals.app.config.ui.max_bucket_size
-    );
+  // protected async fetchLegacyData(
+  //   callCluster: CallCluster,
+  //   clusters: AlertCluster[],
+  //   availableCcs: string[]
+  // ): Promise<AlertData[]> {
+  //   let alertIndexPattern = INDEX_ALERTS;
+  //   if (availableCcs) {
+  //     alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
+  //   }
+  //   const legacyAlerts = await fetchLegacyAlerts(
+  //     callCluster,
+  //     clusters,
+  //     alertIndexPattern,
+  //     this.alertOptions.legacy!.watchName,
+  //     Globals.app.config.ui.max_bucket_size
+  //   );
 
-    return legacyAlerts.map((legacyAlert) => {
-      return {
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: !legacyAlert.resolved_timestamp,
-        severity: mapLegacySeverity(legacyAlert.metadata.severity),
-        meta: legacyAlert,
-        nodeName: this.alertOptions.legacy!.nodeNameLabel,
-        ...this.alertOptions.legacy!.changeDataValues,
-      };
-    });
-  }
+  //   return legacyAlerts.map((legacyAlert) => {
+  //     return {
+  //       clusterUuid: legacyAlert.metadata.cluster_uuid,
+  //       shouldFire: !legacyAlert.resolved_timestamp,
+  //       severity: mapLegacySeverity(legacyAlert.metadata.severity),
+  //       meta: legacyAlert,
+  //       nodeName: this.alertOptions.legacy!.nodeNameLabel,
+  //       ...this.alertOptions.legacy!.changeDataValues,
+  //     };
+  //   });
+  // }
 
   protected async processData(
     data: AlertData[],

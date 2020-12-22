@@ -57,6 +57,7 @@ export interface AlertInstanceState {
     | AlertDiskUsageState
     | AlertThreadPoolRejectionsState
     | AlertNodeState
+    | AlertLicenseState
   >;
   [x: string]: unknown;
 }
@@ -91,6 +92,10 @@ export interface AlertThreadPoolRejectionsState extends AlertState {
   type: string;
   nodeId: string;
   nodeName?: string;
+}
+
+export interface AlertLicenseState extends AlertState {
+  expiryDateMS: number;
 }
 
 export interface AlertUiState {
@@ -212,4 +217,12 @@ export interface LegacyAlertNodesChangedList {
   removed: { [nodeName: string]: string };
   added: { [nodeName: string]: string };
   restarted: { [nodeName: string]: string };
+}
+
+export interface AlertLicense {
+  status: string;
+  type: string;
+  expiryDateMS: number;
+  clusterUuid: string;
+  ccs: string;
 }
