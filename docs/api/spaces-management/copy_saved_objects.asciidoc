@@ -129,7 +129,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
   }],
   "spaces": ["marketing"],
   "includeReferences": true,
-  "createNewcopies": true
+  "createNewCopies": true
 }
 ----
 // KIBANA
