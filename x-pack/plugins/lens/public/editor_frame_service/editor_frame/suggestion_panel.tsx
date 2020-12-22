@@ -273,15 +273,18 @@ export function SuggestionPanel({
   const contextRef = useRef<ExecutionContextSearch>(context);
   contextRef.current = context;
 
+  const sessionIdRef = useRef<string>(frame.searchSessionId);
+  sessionIdRef.current = frame.searchSessionId;
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent
         {...props}
         searchContext={contextRef.current}
-        searchSessionId={frame.searchSessionId}
+        searchSessionId={sessionIdRef.current}
       />
     );
-  }, [frame.searchSessionId, ExpressionRendererComponent]);
+  }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
