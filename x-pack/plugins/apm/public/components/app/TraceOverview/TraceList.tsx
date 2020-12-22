@@ -44,8 +44,9 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
       _: string,
       { serviceName, transactionName, transactionType }: TraceGroup
     ) => (
-      <EuiToolTip content={transactionName}>
+      <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
         <StyledTransactionLink
+          className="eui-textTruncate"
           serviceName={serviceName}
           transactionName={transactionName}
           transactionType={transactionType}
