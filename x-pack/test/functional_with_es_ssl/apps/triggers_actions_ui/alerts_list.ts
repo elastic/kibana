@@ -228,7 +228,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      expect(searchResultsAfterDelete.length).to.eql(1);
     });
 
     it('should mute all selection', async () => {
