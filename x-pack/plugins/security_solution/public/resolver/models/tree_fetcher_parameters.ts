@@ -19,7 +19,6 @@ export function equal(param1: TreeFetcherParameters, param2?: TreeFetcherParamet
   }
   if (
     param1.databaseDocumentID !== param2.databaseDocumentID ||
-    param1.dataRequestID !== param2.dataRequestID ||
     param1.filters.from !== param2.filters.from ||
     param1.filters.to !== param2.filters.to
   ) {

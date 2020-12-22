@@ -47,6 +47,7 @@ import {
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_MISSING_MONITORING_DATA,
+  ALERT_CCR_READ_EXCEPTIONS,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -159,7 +160,11 @@ function renderLog(log) {
   );
 }
 
-const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
+const OVERVIEW_PANEL_ALERTS = [
+  ALERT_CLUSTER_HEALTH,
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CCR_READ_EXCEPTIONS,
+];
 
 const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,

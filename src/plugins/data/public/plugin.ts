@@ -49,11 +49,6 @@ import {
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
-import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
   createFiltersFromValueClickAction,
@@ -66,13 +61,18 @@ import {
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-
+import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
+import { TriggerId } from '../../ui_actions/public';
 
 declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
+  }
+
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
@@ -118,19 +118,21 @@ export class DataPublicPlugin
       storage: this.storage,
     });
 
+    uiActions.registerTrigger(applyFilterTrigger);
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
+      'SELECT_RANGE_TRIGGER' as TriggerId,
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
+      'VALUE_CLICK_TRIGGER' as TriggerId,
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))

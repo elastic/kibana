@@ -12,13 +12,13 @@ import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
   IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
-import {
-  ROW_CLICK_TRIGGER,
+  EmbeddableInput,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
+import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -31,6 +31,15 @@ import {
 import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
+interface EmbeddableQueryInput extends EmbeddableInput {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+/** @internal */
+export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
+
 interface UrlDrilldownDeps {
   externalUrl: IExternalUrl;
   getGlobalScope: () => UrlDrilldownGlobalScope;
@@ -39,7 +48,7 @@ interface UrlDrilldownDeps {
   getVariablesHelpDocsLink: () => string;
 }
 
-export type ActionContext = ChartActionContext;
+export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
@@ -48,7 +57,7 @@ export type UrlTrigger =
   | typeof CONTEXT_MENU_TRIGGER;
 
 export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
-  embeddable?: IEmbeddable;
+  embeddable?: EmbeddableWithQueryInput;
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
