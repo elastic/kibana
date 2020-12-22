@@ -15,6 +15,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import classNames from 'classnames';
 import { getOriginalRequestErrorMessage } from '../error_helper';
 
 export interface ExpressionWrapperProps {
@@ -49,52 +50,50 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
-      <div className={className} style={style}>
-        {expression === null || expression === '' ? (
-          <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-            <EuiFlexItem>
-              <EuiIcon type="alert" color="danger" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.lens.embeddable.failure"
-                  defaultMessage="Visualization couldn't be displayed"
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <div className="lnsExpressionRenderer">
-            <ExpressionRendererComponent
-              className="lnsExpressionRenderer__component"
-              padding="s"
-              variables={variables}
-              expression={expression}
-              searchContext={searchContext}
-              searchSessionId={searchSessionId}
-              onData$={onData$}
-              renderMode={renderMode}
-              renderError={(errorMessage, error) => (
-                <div data-test-subj="expression-renderer-error">
-                  <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-                    <EuiFlexItem>
-                      <EuiIcon type="alert" color="danger" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        {getOriginalRequestErrorMessage(error) || errorMessage}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              )}
-              onEvent={handleEvent}
-              hasCompatibleActions={hasCompatibleActions}
-            />
-          </div>
-        )}
-      </div>
+      {expression === null || expression === '' ? (
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+          <EuiFlexItem>
+            <EuiIcon type="alert" color="danger" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.lens.embeddable.failure"
+                defaultMessage="Visualization couldn't be displayed"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <div className={classNames('lnsExpressionRenderer', className)} style={style}>
+          <ExpressionRendererComponent
+            className="lnsExpressionRenderer__component"
+            padding="s"
+            variables={variables}
+            expression={expression}
+            searchContext={searchContext}
+            searchSessionId={searchSessionId}
+            onData$={onData$}
+            renderMode={renderMode}
+            renderError={(errorMessage, error) => (
+              <div data-test-subj="expression-renderer-error">
+                <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+                  <EuiFlexItem>
+                    <EuiIcon type="alert" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {getOriginalRequestErrorMessage(error) || errorMessage}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            )}
+            onEvent={handleEvent}
+            hasCompatibleActions={hasCompatibleActions}
+          />
+        </div>
+      )}
     </I18nProvider>
   );
 }
