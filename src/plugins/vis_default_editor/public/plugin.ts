@@ -17,9 +17,24 @@
  * under the License.
  */
 
-export { ColorMode, LabelRotation, defaultCountLabel } from './collections';
-export { ColorSchemaParams, Labels, Style } from './types';
-export { LegendToggle } from './legend_toggle';
-export { ColorPicker } from './color_picker';
-export { CurrentTime } from './current_time';
-export * from './endzones';
+import { CoreSetup, Plugin } from 'kibana/public';
+
+import { VisualizePluginSetup } from '../../visualize/public';
+import { DefaultEditorController } from './default_editor_controller';
+
+export interface VisDefaultEditorSetupDependencies {
+  visualize: VisualizePluginSetup;
+}
+
+export class VisDefaultEditorPlugin
+  implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}> {
+  public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
+    if (visualize) {
+      visualize.setDefaultEditor(DefaultEditorController);
+    }
+  }
+
+  public start() {}
+
+  stop() {}
+}

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { Vis } from '../../../../../../visualizations/public';
-import { SelectOption } from '../../../../../../charts/public';
+import { SelectOption } from '../../../../../../vis_default_editor/public';
 
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';

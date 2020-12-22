@@ -17,7 +17,6 @@ export interface FieldValue {
 
 export interface ResultMeta {
   id: string;
-  scopedId: string;
   score?: number;
   engine: string;
 }

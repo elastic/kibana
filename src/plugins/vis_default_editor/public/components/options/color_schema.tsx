@@ -22,11 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { ColorSchemaParams, ColorSchema } from 'src/plugins/charts/public';
+import { VisOptionsProps } from '../../vis_options_props';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
-import { ColorSchemaParams } from './types';
-import { ColorSchema } from '../color_maps';
 
 export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaParams>(
   paramName: T,
@@ -67,7 +66,7 @@ function ColorSchemaOptions({
         }}
       >
         <FormattedMessage
-          id="charts.controls.colorSchema.resetColorsButtonLabel"
+          id="visDefaultEditor.options.colorSchema.resetColorsButtonLabel"
           defaultMessage="Reset colors"
         />
       </EuiLink>
@@ -80,11 +79,11 @@ function ColorSchemaOptions({
         disabled={disabled}
         helpText={
           showHelpText &&
-          i18n.translate('charts.controls.colorSchema.howToChangeColorsDescription', {
+          i18n.translate('visDefaultEditor.options.colorSchema.howToChangeColorsDescription', {
             defaultMessage: 'Individual colors can be changed in the legend.',
           })
         }
-        label={i18n.translate('charts.controls.colorSchema.colorSchemaLabel', {
+        label={i18n.translate('visDefaultEditor.options.colorSchema.colorSchemaLabel', {
           defaultMessage: 'Color schema',
         })}
         labelAppend={isCustomColors && resetColorsButton}
@@ -96,7 +95,7 @@ function ColorSchemaOptions({
 
       <SwitchOption
         disabled={disabled}
-        label={i18n.translate('charts.controls.colorSchema.reverseColorSchemaLabel', {
+        label={i18n.translate('visDefaultEditor.options.colorSchema.reverseColorSchemaLabel', {
           defaultMessage: 'Reverse schema',
         })}
         paramName="invertColors"
