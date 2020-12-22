@@ -17,18 +17,24 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { VisualizePlugin, VisualizePluginSetup } from './plugin';
+import { CoreSetup, Plugin } from 'kibana/public';
 
-export type {
-  EditorRenderProps,
-  IEditorController,
-  VisEditorConstructor,
-} from './application/types';
-export { VisualizeConstants } from './application/visualize_constants';
+import { VisualizePluginSetup } from '../../visualize/public';
+import { DefaultEditorController } from './default_editor_controller';
 
-export { VisualizePluginSetup };
+export interface VisDefaultEditorSetupDependencies {
+  visualize: VisualizePluginSetup;
+}
 
-export const plugin = (context: PluginInitializerContext) => {
-  return new VisualizePlugin(context);
-};
+export class VisDefaultEditorPlugin
+  implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}> {
+  public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
+    if (visualize) {
+      visualize.setDefaultEditor(DefaultEditorController);
+    }
+  }
+
+  public start() {}
+
+  stop() {}
+}
