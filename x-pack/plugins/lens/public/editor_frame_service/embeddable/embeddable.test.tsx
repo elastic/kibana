@@ -214,8 +214,6 @@ describe('embeddable', () => {
       searchSessionId: 'searchSessionId',
     });
 
-    expect(expressionRenderer).toHaveBeenCalledTimes(1);
-
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
