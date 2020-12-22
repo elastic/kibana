@@ -38,7 +38,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
@@ -47,6 +47,10 @@ import { getSearchProvider } from './search_provider';
 
 import { LensAttributeService } from './lens_attribute_service';
 import { LensEmbeddableInput } from './editor_frame_service/embeddable';
+import {
+  EmbeddableComponentProps,
+  getEmbeddableComponent,
+} from './editor_frame_service/embeddable/embeddable_component';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -68,6 +72,27 @@ export interface LensPluginStartDependencies {
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+}
+
+export interface LensPublicStart {
+  /**
+   * React component which can be used to embed a Lens visualization into another application.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  /**
+   * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
 }
 
 export class LensPlugin {
@@ -176,7 +201,7 @@ export class LensPlugin {
     urlForwarding.forwardApp('lens', 'lens');
   }
 
-  start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
+  start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
     const frameStart = this.editorFrameService.start(core, startDependencies);
     this.createEditorFrame = frameStart.createInstance;
     // unregisters the OSS alias
@@ -191,13 +216,17 @@ export class LensPlugin {
     );
 
     return {
-      EmbeddableComponent: frameStart.EmbeddableComponent,
+      EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
       navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
         if (input.timeRange) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
-        const transfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+        const transfer = new EmbeddableStateTransfer(
+          core.application.navigateToApp,
+          core.application.currentAppId$
+        );
         transfer.navigateToEditor('lens', {
+          path: getEditPath(undefined),
           state: {
             originatingApp: '',
             valueInput: input,

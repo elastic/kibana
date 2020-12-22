@@ -57,6 +57,10 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  palette?: PaletteOutput;
+  renderMode?: RenderMode;
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 export type LensByValueInput = {
@@ -64,10 +68,7 @@ export type LensByValueInput = {
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
-export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
-  palette?: PaletteOutput;
-  renderMode?: RenderMode;
-};
+export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -158,6 +159,37 @@ export class Embeddable
       )
       .subscribe((input) => {
         this.reload();
+      });
+
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        await this.initializeSavedVis(input);
+        this.reload();
+      });
+
+    // Update search context and reload on changes related to search
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            [a.filters, a.query, a.timeRange, a.searchSessionId],
+            [b.filters, b.query, b.timeRange, b.searchSessionId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        this.onContainerStateChanged(input);
       });
   }
 
@@ -261,6 +293,8 @@ export class Embeddable
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
         hasCompatibleActions={this.hasCompatibleActions}
+        className={input.className}
+        style={input.style}
       />,
       domNode
     );

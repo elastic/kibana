@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useRef, MutableRefObject, useEffect } from 'react';
-import { RenderMode } from 'src/plugins/expressions';
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { LensEmbeddableDeps, LensEmbeddableInput } from './embeddable';
-import { Embeddable } from './embeddable';
+import React from 'react';
+import {
+  EmbeddableRenderer,
+  EmbeddableStart,
+} from '../../../../../../src/plugins/embeddable/public';
+import { LensByReferenceInput, LensByValueInput } from './embeddable';
 import { Document } from '../../persistence';
 import { IndexPatternPersistedState } from '../../indexpattern_datasource/types';
 import { XYState } from '../../xy_visualization/types';
@@ -29,11 +29,11 @@ type LensAttributes<TVisType, TVisState> = Omit<
   };
 };
 
-export type LensProps = Omit<LensEmbeddableInput, 'attributes'> & {
-  palette?: PaletteOutput;
-  renderMode?: RenderMode;
-  timeRange?: TimeRange;
-  height: number;
+/**
+ * Type-safe variant of by value embeddable input for Lens.
+ * This can be used to hardcode certain Lens chart configurations within another app.
+ */
+export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
   attributes:
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
@@ -41,49 +41,11 @@ export type LensProps = Omit<LensEmbeddableInput, 'attributes'> & {
     | LensAttributes<'lnsMetric', MetricState>;
 };
 
-function LensComponent({
-  props: { timeRange, height, ...props },
-  deps,
-}: {
-  props: LensProps;
-  deps: LensEmbeddableDeps;
-}) {
-  const elementRef: MutableRefObject<HTMLDivElement | null> = useRef(null);
-  const embeddableRef: MutableRefObject<Embeddable | null> = useRef(null);
+export type EmbeddableComponentProps = TypedLensByValueInput | LensByReferenceInput;
 
-  useEffect(() => {
-    (async () => {
-      if (elementRef.current && embeddableRef.current) {
-        if (timeRange) {
-          embeddableRef.current.onContainerStateChanged({ ...props, timeRange });
-        }
-        await embeddableRef.current.initializeSavedVis(props);
-        embeddableRef.current.render(elementRef.current);
-      }
-    })();
-    // TODO do not re-render too often
-  }, [props, timeRange]);
-
-  return (
-    <div
-      style={{ height }}
-      ref={(newElement) => {
-        if (newElement) {
-          if (!embeddableRef.current) {
-            embeddableRef.current = new Embeddable(deps, props);
-          }
-          if (timeRange) {
-            embeddableRef.current.onContainerStateChanged({ ...props, timeRange });
-          }
-          if (elementRef.current !== newElement) {
-            embeddableRef.current!.render(newElement);
-          }
-          elementRef.current = newElement;
-        }
-      }}
-    />
-  );
+export function getEmbeddableComponent(embeddableStart: EmbeddableStart) {
+  return (props: EmbeddableComponentProps) => {
+    const factory = embeddableStart.getEmbeddableFactory('lens')!;
+    return <EmbeddableRenderer factory={factory} input={props} />;
+  };
 }
-
-// eslint-disable-next-line import/no-default-export
-export { LensComponent as default };

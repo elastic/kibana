@@ -16,10 +16,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
-import { LensProps } from '../../../plugins/lens/public';
+import { TypedLensByValueInput } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
-function getLensAttributes(defaultIndex: string, color: string): LensProps['attributes'] {
+// Generate a Lens state based on some app-specific input parameters.
+// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
+function getLensAttributes(
+  defaultIndex: string,
+  color: string
+): TypedLensByValueInput['attributes'] {
   return {
     visualizationType: 'lnsXY',
     title: '',
@@ -131,7 +136,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             </EuiButton>
             <LensComponent
               id=""
-              height={500}
+              style={{ height: 500 }}
               timeRange={{
                 from: 'now-5d',
                 to: 'now',

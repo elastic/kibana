@@ -30,6 +30,8 @@ export interface ExpressionWrapperProps {
   ) => void;
   renderMode?: RenderMode;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 export function ExpressionWrapper({
@@ -42,53 +44,57 @@ export function ExpressionWrapper({
   onData$,
   renderMode,
   hasCompatibleActions,
+  style,
+  className,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
-      {expression === null || expression === '' ? (
-        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-          <EuiFlexItem>
-            <EuiIcon type="alert" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.lens.embeddable.failure"
-                defaultMessage="Visualization couldn't be displayed"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <div className="lnsExpressionRenderer">
-          <ExpressionRendererComponent
-            className="lnsExpressionRenderer__component"
-            padding="s"
-            variables={variables}
-            expression={expression}
-            searchContext={searchContext}
-            searchSessionId={searchSessionId}
-            onData$={onData$}
-            renderMode={renderMode}
-            renderError={(errorMessage, error) => (
-              <div data-test-subj="expression-renderer-error">
-                <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-                  <EuiFlexItem>
-                    <EuiIcon type="alert" color="danger" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      {getOriginalRequestErrorMessage(error) || errorMessage}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            )}
-            onEvent={handleEvent}
-            hasCompatibleActions={hasCompatibleActions}
-          />
-        </div>
-      )}
+      <div className={className} style={style}>
+        {expression === null || expression === '' ? (
+          <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+            <EuiFlexItem>
+              <EuiIcon type="alert" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.lens.embeddable.failure"
+                  defaultMessage="Visualization couldn't be displayed"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <div className="lnsExpressionRenderer">
+            <ExpressionRendererComponent
+              className="lnsExpressionRenderer__component"
+              padding="s"
+              variables={variables}
+              expression={expression}
+              searchContext={searchContext}
+              searchSessionId={searchSessionId}
+              onData$={onData$}
+              renderMode={renderMode}
+              renderError={(errorMessage, error) => (
+                <div data-test-subj="expression-renderer-error">
+                  <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+                    <EuiFlexItem>
+                      <EuiIcon type="alert" color="danger" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        {getOriginalRequestErrorMessage(error) || errorMessage}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              )}
+              onEvent={handleEvent}
+              hasCompatibleActions={hasCompatibleActions}
+            />
+          </div>
+        )}
+      </div>
     </I18nProvider>
   );
 }

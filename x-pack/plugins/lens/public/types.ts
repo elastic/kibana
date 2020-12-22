@@ -20,7 +20,6 @@ import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import type { LensProps } from './editor_frame_service/embeddable/embeddable_component';
 import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   SELECT_RANGE_TRIGGER,
@@ -76,7 +75,6 @@ export interface EditorFrameSetup {
 
 export interface EditorFrameStart {
   createInstance: () => Promise<EditorFrameInstance>;
-  EmbeddableComponent: React.ComponentType<LensProps>;
 }
 
 export interface TableSuggestionColumn {
