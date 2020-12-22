@@ -32,6 +32,7 @@ import {
   setTimefilter,
   setUISettings,
   setDocLinks,
+  setPalettesService,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
@@ -75,7 +76,9 @@ export class VisTypeXyPlugin
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setColorsService(charts.legacyColors);
-
+      charts.palettes.getPalettes().then((palettes) => {
+        setPalettesService(palettes);
+      });
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);

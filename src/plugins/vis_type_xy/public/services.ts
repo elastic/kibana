@@ -20,7 +20,7 @@
 import { CoreSetup, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
   'xy core.uiSettings'
@@ -45,5 +45,9 @@ export const [getThemeService, setThemeService] = createGetterSetter<ChartsPlugi
 export const [getColorsService, setColorsService] = createGetterSetter<
   ChartsPluginSetup['legacyColors']
 >('xy charts.color');
+
+export const [getPalettesService, setPalettesService] = createGetterSetter<PaletteRegistry>(
+  'xy charts.palette'
+);
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');

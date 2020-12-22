@@ -65,7 +65,7 @@ import {
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getColorsService, getDataActions } from './services';
+import { getThemeService, getColorsService, getDataActions, getPalettesService } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -226,6 +226,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const { visData, visParams } = props;
+
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
   const xDomain =
@@ -256,10 +257,26 @@ const VisComponent = (props: VisComponentProps) => {
         ? props.uiState.get('vis.colors', {})
         : {};
 
-      allSeries.push(seriesName);
+      if (allSeries.indexOf(seriesName) === -1) {
+        allSeries.push(seriesName);
+      }
+
+      const outputColor = getPalettesService()
+        .get(visParams.palette.name)
+        .getColor(
+          [
+            {
+              name: seriesName as string,
+              rankAtDepth: allSeries.findIndex((name) => name === seriesName),
+              totalSeriesAtDepth: visData.rows.length,
+            },
+          ],
+          { maxDepth: 1, totalSeries: visData.rows.length }
+        );
       return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
+      // return outputColor || undefined;
     },
-    [allSeries, getSeriesName, props.uiState]
+    [allSeries, getSeriesName, props.uiState, visData.rows.length, visParams.palette.name]
   );
   const xAccessor = getXAccessor(config.aspects.x);
   const splitSeriesAccessors = config.aspects.series

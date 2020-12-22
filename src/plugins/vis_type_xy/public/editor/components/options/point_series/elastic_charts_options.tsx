@@ -21,11 +21,16 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
+import {
+  SelectOption,
+  SwitchOption,
+  PalettePicker,
+} from '../../../../../../vis_default_editor/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
+import { getPalettesService } from '../../../../services';
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
   const { stateParams, setValue, vis, aggs } = props;
@@ -64,6 +69,13 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           setValue={setValue}
         />
       )}
+
+      <PalettePicker
+        palettes={getPalettesService()}
+        activePalette={stateParams.palette}
+        paramName="palette"
+        setPalette={setValue}
+      />
     </>
   );
 }

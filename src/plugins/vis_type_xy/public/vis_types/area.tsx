@@ -120,6 +120,10 @@ export const getAreaVisTypeDefinition = (
       ],
       addTooltip: true,
       detailedTooltip: true,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
       addLegend: true,
       legendPosition: Position.Right,
       fittingFunction: Fit.Linear,

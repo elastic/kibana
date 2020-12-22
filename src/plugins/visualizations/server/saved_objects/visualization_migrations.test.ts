@@ -1720,6 +1720,13 @@ describe('migration visualization', () => {
       expect(isVislibVis).toEqual(true);
     });
 
+    it('should decorate existing docs with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
     describe('labels.filter', () => {
       it('should keep existing categoryAxes labels.filter value', () => {
         const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
