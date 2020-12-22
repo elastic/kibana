@@ -8,7 +8,7 @@ import { PluginSetupContract } from '../../../../../alerts/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-  AlertParamsRT,
+  alertParamsRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -84,7 +84,7 @@ export async function registerLogThresholdAlertType(
     name: 'Log threshold',
     validate: {
       params: {
-        validate: (params) => decodeOrThrow(AlertParamsRT)(params),
+        validate: (params) => decodeOrThrow(alertParamsRT)(params),
       },
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
